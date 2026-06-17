@@ -163,7 +163,13 @@ export default function Register(): React.JSX.Element {
 
   return (
     <div className={styles.registerPageRoot}>
-      <MForm className={styles.form} initialValues={initialValues} onSubmit={submit} validate={validator}>
+      <MForm
+        className={styles.form}
+        initialValues={initialValues}
+        onInput={pow.warmup}
+        onSubmit={submit}
+        validate={validator}
+      >
         <div className={styles.logo}>
           <MLogo />
         </div>

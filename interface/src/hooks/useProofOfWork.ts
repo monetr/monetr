@@ -5,6 +5,7 @@ import { fetchChallenge, type PowPurpose, type PowSolution, solveChallenge } fro
 export interface UseProofOfWork {
   getSolution: () => Promise<PowSolution | null>;
   reset: () => void;
+  warmup: () => void;
 }
 
 // Treat a challenge as stale a few seconds before its ttl to cover the request round trips. Absolute clock skew is
@@ -12,14 +13,18 @@ export interface UseProofOfWork {
 const STALE_MARGIN_MS = 5_000;
 
 /**
- * useProofOfWork pre-solves a challenge on mount so the solution is ready by the time the user submits (getSolution
- * returns it, or null when disabled). It solves once, never in the background; if the user idles past the ttl,
- * getSolution fetches and solves a fresh one then. A challenge is single use and is consumed even on a failed submit,
- * so call reset() after a failure.
+ * useProofOfWork fetches and solves a proof of work challenge on demand, it never solves on mount. The first call to
+ * warmup (which the page ties to the user actually typing) or getSolution kicks off the fetch and solve, and the result
+ * is reused while it is still fresh; if the user idles past the ttl getSolution grabs a fresh one then. We deliberately
+ * do NOT pre-solve when the hook mounts. The login page can remount for a few milliseconds during the post-login
+ * navigation (the router briefly bounces back to /login before the new auth state settles), and pre-solving on that
+ * remount would burn a challenge we never send. warmup is the latency hider and getSolution is the guarantee, so a user
+ * who pastes or autofills without typing still gets a solution, just solved at submit time instead. A challenge is
+ * single use and is consumed even on a failed submit, so call reset() after a failure to line up a fresh one.
  *
  * @param {PowPurpose} purpose Which endpoint this challenge is for.
  * @param {boolean} enabled Whether proof of work is turned on for this server.
- * @returns {UseProofOfWork} getSolution and reset.
+ * @returns {UseProofOfWork} getSolution, reset and warmup.
  */
 export function useProofOfWork(purpose: PowPurpose, enabled: boolean): UseProofOfWork {
   const solutionRef = useRef<Promise<PowSolution> | null>(null);
@@ -47,27 +52,38 @@ export function useProofOfWork(purpose: PowPurpose, enabled: boolean): UseProofO
     solutionRef.current = solution;
   }, [enabled, purpose]);
 
-  // Pre-fetch on mount, abort any in-flight work on unmount.
+  // warmup kicks off a fetch and solve if we do not already have a fresh one in hand. It is idempotent and cheap, so a
+  // page can call it on every keystroke. This is the only thing that pre-solves now, and it is tied to the user
+  // actually typing rather than to mount so a transient remount never triggers it.
+  const warmup = useCallback(() => {
+    if (!enabled) {
+      return;
+    }
+
+    if (!solutionRef.current || Date.now() >= staleAtRef.current) {
+      start();
+    }
+  }, [enabled, start]);
+
+  // We do not solve on mount anymore, all this does is abort an in-flight solve when the page goes away. See warmup for
+  // why mount is the wrong trigger.
   useEffect(() => {
-    start();
     return () => {
       abortRef.current?.abort();
     };
-  }, [start]);
+  }, []);
 
   const getSolution = useCallback((): Promise<PowSolution | null> => {
     if (!enabled) {
       return Promise.resolve(null);
     }
 
-    // Fetch fresh if we have none or the pre-solved one went stale while idle. This and reset are the only places we
-    // start solving (never in background).
-    if (!solutionRef.current || Date.now() >= staleAtRef.current) {
-      start();
-    }
+    // warmup may never have run (the user pasted, autofilled, or never typed) so make sure something is in flight, then
+    // hand back whatever we have. This and reset are the only places we are guaranteed to line up a solution.
+    warmup();
 
     return solutionRef.current ?? Promise.resolve(null);
-  }, [enabled, start]);
+  }, [enabled, warmup]);
 
   const reset = useCallback(() => {
     start();
@@ -76,5 +92,6 @@ export function useProofOfWork(purpose: PowPurpose, enabled: boolean): UseProofO
   return {
     getSolution,
     reset,
+    warmup,
   };
 }

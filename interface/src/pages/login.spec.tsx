@@ -176,5 +176,12 @@ describe('login page', () => {
     // The login request should carry the challenge and the nonce we solved.
     const loginPost = mockFetch.history.post?.find(entry => entry.url === '/api/authentication/login');
     expect(loginPost?.data).toMatchObject({ challenge: 'x', nonce: 0 });
+
+    // We should have only ever asked for a single challenge: warmed up on the first keystroke and reused at submit.
+    // The bug this guards against is a second challenge being requested after the login already succeeded.
+    const challengeRequests = (mockFetch.history.post ?? []).filter(
+      entry => entry.url === '/api/authentication/challenge',
+    );
+    expect(challengeRequests).toHaveLength(1);
   });
 });

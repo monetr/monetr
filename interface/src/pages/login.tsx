@@ -80,7 +80,13 @@ export default function Login(): React.JSX.Element {
   }
 
   return (
-    <MForm className={styles.loginPageRoot} initialValues={initialValues} onSubmit={submit} validate={validator}>
+    <MForm
+      className={styles.loginPageRoot}
+      initialValues={initialValues}
+      onInput={pow.warmup}
+      onSubmit={submit}
+      validate={validator}
+    >
       <UnauthenticatedLogo />
       <Typography align='center' component='p'>
         Sign into your monetr account

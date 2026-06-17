@@ -95,7 +95,13 @@ export default function ForgotPasswordNew(): React.JSX.Element {
   }
 
   return (
-    <MForm className={styles.root} initialValues={initialValues} onSubmit={submit} validate={validate}>
+    <MForm
+      className={styles.root}
+      initialValues={initialValues}
+      onInput={pow.warmup}
+      onSubmit={submit}
+      validate={validate}
+    >
       <div className={styles.logo}>
         <MLogo />
       </div>

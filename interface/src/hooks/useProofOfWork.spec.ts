@@ -35,7 +35,37 @@ describe('use proof of work', () => {
     expect(challengeRequests()).toBe(0);
   });
 
-  it('will pre-solve a challenge and reuse it while it is still fresh', async () => {
+  it('will not fetch a challenge on mount', async () => {
+    // The whole point of the lazy hook. Nothing is requested until we warm up or actually ask for a solution. The login
+    // page can remount for a few milliseconds during the post-login navigation and we must not burn a challenge on that.
+    mockFetch.onPost('/api/authentication/challenge').reply(200, { challenge: 'x', difficulty: 0, ttl: 60 });
+
+    const world = testRenderHook(() => useProofOfWork('login', true), { initialRoute: '/login' });
+
+    expect(challengeRequests()).toBe(0);
+
+    // But it still works the moment we actually ask for one.
+    await world.result.current.getSolution();
+    expect(challengeRequests()).toBe(1);
+  });
+
+  it('will warm up and solve only once for repeated warmups', async () => {
+    // warmup is wired to the form's onInput so it fires on every keystroke. It must only ever line up one challenge
+    // while the current one is still fresh.
+    mockFetch.onPost('/api/authentication/challenge').reply(200, { challenge: 'x', difficulty: 0, ttl: 60 });
+
+    const world = testRenderHook(() => useProofOfWork('login', true), { initialRoute: '/login' });
+
+    world.result.current.warmup();
+    world.result.current.warmup();
+    world.result.current.warmup();
+
+    const solution = await world.result.current.getSolution();
+    expect(solution).toMatchObject({ challenge: 'x', nonce: 0 });
+    expect(challengeRequests()).toBe(1);
+  });
+
+  it('will fetch and solve on first use and reuse it while it is still fresh', async () => {
     // Difficulty 0 means the solver returns immediately.
     mockFetch.onPost('/api/authentication/challenge').reply(200, { challenge: 'x', difficulty: 0, ttl: 60 });
 
@@ -45,13 +75,13 @@ describe('use proof of work', () => {
     expect(solution).toMatchObject({ challenge: 'x', nonce: 0 });
     expect(challengeRequests()).toBe(1);
 
-    // Still well within the 60 second ttl, so a second call must reuse the
-    // pre-solved challenge rather than fetching another.
+    // Still well within the 60 second ttl, so a second call must reuse the already
+    // solved challenge rather than fetching another.
     await world.result.current.getSolution();
     expect(challengeRequests()).toBe(1);
   });
 
-  it('will fetch a fresh challenge once the pre-solved one goes stale', async () => {
+  it('will fetch a fresh challenge once the solved one goes stale', async () => {
     mockFetch.onPost('/api/authentication/challenge').reply(200, { challenge: 'x', difficulty: 0, ttl: 60 });
 
     const world = testRenderHook(() => useProofOfWork('login', true), { initialRoute: '/login' });

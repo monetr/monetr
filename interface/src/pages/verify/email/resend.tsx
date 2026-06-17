@@ -91,7 +91,13 @@ export default function ResendVerificationPage(): React.JSX.Element {
   }
 
   return (
-    <MForm className={styles.form} initialValues={initialValues} onSubmit={submit} validate={validateInput}>
+    <MForm
+      className={styles.form}
+      initialValues={initialValues}
+      onInput={pow.warmup}
+      onSubmit={submit}
+      validate={validateInput}
+    >
       <div className={styles.panel}>
         <MLogo className={styles.logo} />
         <RouteStateMessage hasEmail={Boolean(emailFromQuery)} />
