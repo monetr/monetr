@@ -287,11 +287,11 @@ importers:
         specifier: 1.5.3
         version: 1.5.3(@rsbuild/core@2.0.11(core-js@3.47.0))
       '@rspack/binding-linux-arm64-gnu':
-        specifier: 2.0.6
-        version: 2.0.6
+        specifier: 2.0.7
+        version: 2.0.7
       '@rspack/binding-linux-x64-gnu':
-        specifier: 2.0.6
-        version: 2.0.6
+        specifier: 2.0.7
+        version: 2.0.7
       '@rstest/adapter-rsbuild':
         specifier: 0.10.3
         version: 0.10.3(@rsbuild/core@2.0.11(core-js@3.47.0))(@rstest/core@0.10.3(core-js@3.47.0)(jsdom@26.1.0))
@@ -1267,6 +1267,12 @@ packages:
     os: [linux]
     libc: [glibc]
 
+  '@rspack/binding-linux-arm64-gnu@2.0.7':
+    resolution: {integrity: sha512-bBVJtZsh/eRF8Qt12JHjw46hvyJ3rT2pLmjS81qnA4gni0U7zD64QnR6C7Sg4++hhBgzYqbGeDkt5wcZa8qfMQ==}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
   '@rspack/binding-linux-arm64-musl@2.0.6':
     resolution: {integrity: sha512-QTFmBg0n+L397Wi8CIjbd5pe/hxpHnqCDaG1A7e2NWX8Fj9zulAoKLiKflQa1ELEhAY4Foq88aX75+Ilt2tHcw==}
     cpu: [arm64]
@@ -1275,6 +1281,12 @@ packages:
 
   '@rspack/binding-linux-x64-gnu@2.0.6':
     resolution: {integrity: sha512-rerCAz022zf0ewxI+7n3SrqLEaxCL+MXRxKjK5FLUGFa8UkIrivq+VUP/1OB6JLh2Bucebc7Y9WoWHvtk22mLA==}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@rspack/binding-linux-x64-gnu@2.0.7':
+    resolution: {integrity: sha512-rjIcfGfJ7/oVClJCmG6W54mIBgBBxsPodnIlrGz0bPKEZDP4NV2MCdSlujlDyeirMxvV9XL/WIuNSq9qAi2Syg==}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
@@ -4654,12 +4666,18 @@ snapshots:
   '@rspack/binding-darwin-x64@2.0.6':
     optional: true
 
-  '@rspack/binding-linux-arm64-gnu@2.0.6': {}
+  '@rspack/binding-linux-arm64-gnu@2.0.6':
+    optional: true
+
+  '@rspack/binding-linux-arm64-gnu@2.0.7': {}
 
   '@rspack/binding-linux-arm64-musl@2.0.6':
     optional: true
 
-  '@rspack/binding-linux-x64-gnu@2.0.6': {}
+  '@rspack/binding-linux-x64-gnu@2.0.6':
+    optional: true
+
+  '@rspack/binding-linux-x64-gnu@2.0.7': {}
 
   '@rspack/binding-linux-x64-musl@2.0.6':
     optional: true
