@@ -1,5 +1,55 @@
 # Changelog
 
+## [1.15.0](https://github.com/monetr/monetr/compare/v1.14.3...v1.15.0) (2026-06-17)
+
+### Breaking Changes
+
+**This release finally removes ReCAPTCHA support within monetr**, as noted in [#2979](https://github.com/monetr/monetr/issues/2979). However in order to still help reduce spam on public facing endpoints within monetr, a [Proof of Work](https://monetr.app/documentation/configure/proof_of_work) feature has been added. This proof of work implementation is similar to what you would get out of mCaptcha or Anubis in terms of bot deterrence, however it is built into monetr directly and has no other dependencies that need to be run alongside it.
+
+The new proof of work feature though does change how authentication works, if you are using monetr's login endpoint to get a token to make API calls through some other software; then the proof of work feature will likely break these workflows entirely.
+
+That is why the proof of work feature is disabled by default in this initial release, however it will be enabled by default in a future release. But I will be sure to add first class API Key support to monetr _before_ it is enabled by default for self hosted instances.
+
+Read up on the documentation for proof of work provided before enabling it for yourself as there are some gotchas if you are not running monetr over https. If you are primarily using monetr from much older or underpowered devices you may also need to reduce the proof of work difficulty or disable it entirely if you encounter problems.
+
+This release also contains some other spam mitigation features, though this one is aimed more at the hosted version of monetr; you can now block domains from being able to register for a new account in monetr. Any existing logins for that domain are still able to sign in and use their account, or reset their password etc. But new users will not be able to be created with that domain while it is on the configured block list. This is to help reduce spam being observed in the hosted version of monetr.
+
+### Features
+
+* **api:** Allow email domains to be blocked by config ([#3320](https://github.com/monetr/monetr/issues/3320)) ([774a0cf](https://github.com/monetr/monetr/commit/774a0cf321d028bf1cd33ac701652ed60c352278))
+* **api:** Spam protection for authentication APIs ([#3318](https://github.com/monetr/monetr/issues/3318)) ([927b74b](https://github.com/monetr/monetr/commit/927b74b1d6458c7b5c99375589f452cef116d7b1))
+
+
+### Dependencies
+
+* **api:** update golang.org/x ([#3316](https://github.com/monetr/monetr/issues/3316)) ([596e087](https://github.com/monetr/monetr/commit/596e087d96cdf89f16d43355fa17cb57d1f213a5))
+* **api:** update golang.org/x to v0.56.0 ([#3319](https://github.com/monetr/monetr/issues/3319)) ([e843288](https://github.com/monetr/monetr/commit/e843288b39e71ca876d706647d166b1ca64321fa))
+* **ui:** update dependency react-qr-code to v2.2.0 ([#3317](https://github.com/monetr/monetr/issues/3317)) ([a40e929](https://github.com/monetr/monetr/commit/a40e9295d9b8f45e1b1874df0b64c67976f0bb3c))
+* **ui:** update pnpm to v10.34.2 ([#3322](https://github.com/monetr/monetr/issues/3322)) ([550df8d](https://github.com/monetr/monetr/commit/550df8dccea173b9250297f6afb43b28297a18c6))
+* **ui:** update rsbuild to v2.0.7 ([#3321](https://github.com/monetr/monetr/issues/3321)) ([afe2cf5](https://github.com/monetr/monetr/commit/afe2cf502bb5810ca6bcc25789282a38e63fea19))
+* **ui:** update rsbuild to v2.0.8 ([#3323](https://github.com/monetr/monetr/issues/3323)) ([dfa1dad](https://github.com/monetr/monetr/commit/dfa1dadefc75fa21acf8bee2a0e5a3be7e9a200f))
+* **ui:** update rspress to v2.0.14 ([#3313](https://github.com/monetr/monetr/issues/3313)) ([e462524](https://github.com/monetr/monetr/commit/e462524e1e096eb17c2d45997e2d0594df749c46))
+
+
+### Bug Fixes
+
+* Improving proof of work API calls ([e62bfa6](https://github.com/monetr/monetr/commit/e62bfa66adceaec914ac09c78b5ab9504b0f6baf))
+
+
+### Miscellaneous
+
+* **deps:** Bump ws from 8.18.0 to 8.21.0 ([#3315](https://github.com/monetr/monetr/issues/3315)) ([d72a190](https://github.com/monetr/monetr/commit/d72a19071b098ea5d5b886a2c7d565ed6c83e246))
+
+
+### Refactor
+
+* **api:** Deprecate ReCAPTCHA ([#3198](https://github.com/monetr/monetr/issues/3198)) ([c9b8e6b](https://github.com/monetr/monetr/commit/c9b8e6b6ec2e6720f0ba13fcbfc3e626056a708c))
+
+
+### Documentation
+
+* Fixing ReCAPTCHA documentation page formatting ([eca7880](https://github.com/monetr/monetr/commit/eca78806a9549a2df290361ceee2890fab7eec54))
+
 ## [1.14.3](https://github.com/monetr/monetr/compare/v1.14.2...v1.14.3) (2026-06-15)
 
 
