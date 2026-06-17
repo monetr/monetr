@@ -18,11 +18,11 @@ CORS
 CSI
 CSP
 CSV
-Crypto
 Chatwoot
 Chisago
 CloudNativePG
 ConfigMap
+Crypto
 DBSCAN
 DNS
 DNT
@@ -107,6 +107,7 @@ YAML
 anonymized?
 automations
 backend
+blocklist
 build-time
 captcha
 centroid

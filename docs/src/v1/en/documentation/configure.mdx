@@ -61,6 +61,10 @@ allowSignUp: true
 email:
   enabled: false
   domain: "" # Does not need to match your `externalUrl` domain.
+  # # Email domains that are not allowed to sign up for a new account. Only affects
+  # # sign up, not sign in. See the Email configuration guide for more detail.
+  # blockedDomains:
+  #   - mailinator.com
   verification:
     enabled: false
     tokenLifetime: 10m

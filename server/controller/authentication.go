@@ -379,14 +379,22 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 	}
 
 	// Before the captcha, it is the cheap fail-fast. No-op when disabled.
-	if err := c.validateProofOfWork(ctx, powchallenge.PurposeRegister, registerRequest.Challenge, registerRequest.Nonce); err != nil {
+	if err := c.validateProofOfWork(
+		ctx,
+		powchallenge.PurposeRegister,
+		registerRequest.Challenge,
+		registerRequest.Nonce,
+	); err != nil {
 		return err // validateProofOfWork returns a valid http error.
 	}
 
 	// This will take the captcha from the request and validate it if the API is
 	// configured to do so. If it is enabled and the captcha fails then an error
 	// is returned to the client.
-	if err := c.validateRegistrationCaptcha(c.getContext(ctx), registerRequest.Captcha); err != nil {
+	if err := c.validateRegistrationCaptcha(
+		c.getContext(ctx),
+		registerRequest.Captcha,
+	); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "valid ReCAPTCHA is required")
 	}
 
@@ -408,7 +416,12 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 	}
 
 	if _, err := locale.GetLConv(registerRequest.Locale); err != nil {
-		log.WarnContext(c.getContext(ctx), "invalid locale in register request, falling back to global default", "locale", registerRequest.Locale, "err", err)
+		log.WarnContext(
+			c.getContext(ctx),
+			"invalid locale in register request, falling back to global default",
+			"locale", registerRequest.Locale,
+			"err", err,
+		)
 		registerRequest.Locale = consts.DefaultLocale
 	}
 
@@ -419,6 +432,23 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 		registerRequest.FirstName,
 	); err != nil {
 		return err // validateRegistration also returns a valid http error that can just be passed through.
+	}
+
+	// If the email's domain is on the sign up blocklist we reject it, but we
+	// deliberately return the SAME error a client gets for an email that is
+	// already taken so we do not advertise to a would be abuser that their domain
+	// is specifically blocked. From the outside a blocked domain is
+	// indistinguishable from an address that already exists. The real reason, and
+	// which domain it was, is only ever visible to us here in the logs.
+	if domain, blocked := c.Configuration.Email.BlockedEmailDomain(
+		registerRequest.Email,
+	); blocked {
+		log.WarnContext(
+			c.getContext(ctx),
+			"registration blocked, email domain is not allowed",
+			"emailDomain", domain,
+		)
+		return c.failure(ctx, http.StatusBadRequest, EmailAlreadyExists{})
 	}
 
 	timezone, err := zoneinfo.Timezone(registerRequest.Timezone)

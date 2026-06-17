@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"strings"
 	"time"
 
 	"github.com/monetr/monetr/server/util"
@@ -136,6 +137,13 @@ type Email struct {
 	// Email is sent via SMTP. If you want to send emails it is required to
 	// include an SMTP configuration.
 	SMTP SMTPClient `yaml:"smtp"`
+	// BlockedDomains is the set of email domains that are NOT allowed to sign up
+	// for a new account on this server. This only restricts sign up. Existing
+	// users on one of these domains can still sign in, reset their password and
+	// verify their email. An empty list turns the feature off. This applies even
+	// when email sending (`enabled`) is turned off, it has nothing to do with
+	// SMTP being configured.
+	BlockedDomains []string `yaml:"blockedDomains"`
 }
 
 type EmailVerification struct {
@@ -169,6 +177,51 @@ func (s Email) ShouldVerifyEmails() bool {
 
 func (s Email) AllowPasswordReset() bool {
 	return s.Enabled && s.ForgotPassword.Enabled
+}
+
+// BlockedEmailDomain returns the normalized domain portion of the email address
+// along with true when that domain is on the sign up blocklist. When it is not
+// blocked (no blocklist, no domain, or just not a match) it returns "", false.
+// We hand the domain back so the caller can log which domain got blocked
+// without having to parse the address a second time. We only call this during
+// sign up so an operator can keep throwaway/disposable email providers from
+// creating accounts. The comparison is case insensitive and matches the domain
+// exactly, blocking `example.com` does NOT block `mail.example.com`.
+// TODO Should we match subdomains too? For a disposable email blocklist an
+// exact match is usually what you want, revisit this if someone needs the
+// allow-list style behavior instead.
+func (s Email) BlockedEmailDomain(emailAddress string) (string, bool) {
+	if len(s.BlockedDomains) == 0 {
+		return "", false
+	}
+
+	// The register controller only trims the email, it does not lowercase it
+	// until the login is actually created, so normalize it ourselves here.
+	emailAddress = strings.ToLower(strings.TrimSpace(emailAddress))
+	at := strings.LastIndex(emailAddress, "@")
+	if at < 0 {
+		return "", false
+	}
+	domain := emailAddress[at+1:]
+	if domain == "" {
+		return "", false
+	}
+
+	for i := range s.BlockedDomains {
+		// Be forgiving about how the operator wrote the entry, they might have
+		// included an @ or some stray whitespace or casing.
+		blocked := strings.TrimPrefix(
+			strings.ToLower(
+				strings.TrimSpace(s.BlockedDomains[i]),
+			),
+			"@",
+		)
+		if blocked != "" && domain == blocked {
+			return domain, true
+		}
+	}
+
+	return "", false
 }
 
 // ProofOfWork gates the unauthenticated auth endpoints (register, login, forgot
@@ -436,6 +489,7 @@ func setupEnv(v *viper.Viper) {
 	v.MustBindEnv("Email.SMTP.Password", "MONETR_EMAIL_SMTP_PASSWORD")
 	v.MustBindEnv("Email.SMTP.Host", "MONETR_EMAIL_SMTP_HOST")
 	v.MustBindEnv("Email.SMTP.Port", "MONETR_EMAIL_SMTP_PORT")
+	v.MustBindEnv("Email.BlockedDomains", "MONETR_EMAIL_BLOCKED_DOMAINS")
 	v.MustBindEnv("Logging.Level", "MONETR_LOG_LEVEL")
 	v.MustBindEnv("Logging.Format", "MONETR_LOG_FORMAT")
 	v.MustBindEnv("KeyManagement.Provider", "MONETR_KMS_PROVIDER")

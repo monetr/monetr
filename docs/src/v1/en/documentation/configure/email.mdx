@@ -18,22 +18,49 @@ Below is an example of the email/SMTP configuration block:
 email:
   enabled: true
   domain: "example.com"
+  blockedDomains: [ ... ] # Email domains not allowed to sign up (sign up only)
   verification: { ... }   # Email verification configuration
   forgotPassword: { ... } # Password reset via email link
   smtp: { ... }           # SMTP configuration
 ```
 
-| **Name**  | **Type** | **Default** | **Description**                                                                                                                   |
-| ---       | ---      | ---         | ---                                                                                                                               |
-| `enabled` | Boolean  | `false`     | Are email notifications enabled on this server?                                                                                   |
-| `domain`  | String   |             | Email domain used to send emails, emails will always be sent from `no-reply@{DOMAIN}`. Do not provide a full URL with a protocol. |
+| **Name**         | **Type** | **Default** | **Description**                                                                                                                                              |
+| ---              | ---      | ---         | ---                                                                                                                                                          |
+| `enabled`        | Boolean  | `false`     | Are email notifications enabled on this server?                                                                                                              |
+| `domain`         | String   |             | Email domain used to send emails, emails will always be sent from `no-reply@{DOMAIN}`. Do not provide a full URL with a protocol.                            |
+| `blockedDomains` | List     |             | Email domains that are not allowed to sign up for a new account. Only affects sign up, not sign in. See [Blocked Sign Up Domains](#blocked-sign-up-domains). |
 
 The following environment variables map to the following configuration file fields. Each field is documented below.
 
-| Variable               | Config File Field |
-| ---                    | ---               |
-| `MONETR_EMAIL_ENABLED` | `email.enabled`   |
-| `MONETR_EMAIL_DOMAIN`  | `email.domain`    |
+| Variable                       | Config File Field      |
+| ---                            | ---                    |
+| `MONETR_EMAIL_ENABLED`         | `email.enabled`        |
+| `MONETR_EMAIL_DOMAIN`          | `email.domain`         |
+| `MONETR_EMAIL_BLOCKED_DOMAINS` | `email.blockedDomains` |
+
+## Blocked Sign Up Domains
+
+If you want to keep certain email domains (such as disposable or throwaway email providers) from being used to create
+new accounts, add them to `blockedDomains`. This only restricts **sign up**, an account that already exists on one of
+these domains can still sign in, reset its password, and verify its email. It works regardless of whether email sending
+is `enabled`, it does not require SMTP to be configured.
+
+The match is case insensitive and matches the domain exactly, so blocking `example.com` does not block
+`mail.example.com`. An empty list (the default) disables the feature.
+
+When someone tries to sign up with a blocked domain monetr intentionally returns the same "email already in use" error
+that it returns for an address that is already registered. This is so the blocklist is not disclosed to people signing
+up. The actual reason, including which domain was blocked, is recorded in the server logs.
+
+```yaml title="config.yaml"
+email:
+  blockedDomains:
+    - mailinator.com
+    - guerrillamail.com
+```
+
+When set via the environment variable the domains are comma separated, for example
+`MONETR_EMAIL_BLOCKED_DOMAINS=mailinator.com,guerrillamail.com`.
 
 ## Email Verification Configuration
 
