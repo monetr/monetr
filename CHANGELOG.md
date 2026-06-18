@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.15.1](https://github.com/monetr/monetr/compare/v1.15.0...v1.15.1) (2026-06-18)
+
+
+### Dependencies
+
+* **api:** update module github.com/go-viper/mapstructure/v2 to v2.5.0 ([#3326](https://github.com/monetr/monetr/issues/3326)) ([7ce5478](https://github.com/monetr/monetr/commit/7ce5478c1f814bb4fd60f50c446142c52e56f00e))
+
+
+### Bug Fixes
+
+* **api:** Improved how blocked email domains are handled ([62a38b1](https://github.com/monetr/monetr/commit/62a38b1eaa7804c60dcea77304e0222324b5d79e))
+* Log number of blocked domains on startup ([7c1d1be](https://github.com/monetr/monetr/commit/7c1d1be39328e26582fbd4cb86c6443252b7057f))
+
 ## [1.15.0](https://github.com/monetr/monetr/compare/v1.14.3...v1.15.0) (2026-06-17)
 
 ### Breaking Changes
