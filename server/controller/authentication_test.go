@@ -15,6 +15,7 @@ import (
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mock_stripe"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/security"
 	"github.com/stretchr/testify/assert"
@@ -1115,7 +1116,7 @@ func TestRegister(t *testing.T) {
 		conf := NewTestApplicationConfig(t)
 		// Every generated email in the tests uses the monetr.mini domain, so by
 		// blocking it we can prove that sign up gets rejected.
-		conf.Email.BlockedDomains = []string{"monetr.mini"}
+		conf.Email.BlockedDomains = myownsanity.NewSet("monetr.mini")
 		_, e := NewTestApplicationWithConfig(t, conf)
 
 		// The email from validRegisterBody is unique, so it definitely does not
@@ -1133,7 +1134,7 @@ func TestRegister(t *testing.T) {
 
 	t.Run("can still sign up with a domain that is not blocked", func(t *testing.T) {
 		conf := NewTestApplicationConfig(t)
-		conf.Email.BlockedDomains = []string{"mailinator.com"}
+		conf.Email.BlockedDomains = myownsanity.NewSet("mailinator.com")
 		_, e := NewTestApplicationWithConfig(t, conf)
 
 		// validRegisterBody uses a monetr.mini email which is not on the blocklist,
@@ -1153,7 +1154,7 @@ func TestRegister(t *testing.T) {
 		// domain was blocked. GivenIHaveABasicAccount creates the login on the
 		// monetr.mini domain.
 		conf := NewTestApplicationConfig(t)
-		conf.Email.BlockedDomains = []string{"monetr.mini"}
+		conf.Email.BlockedDomains = myownsanity.NewSet("monetr.mini")
 		app, e := NewTestApplicationWithConfig(t, conf)
 
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)

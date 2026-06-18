@@ -6,9 +6,12 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"reflect"
 	"strings"
 	"time"
 
+	"github.com/go-viper/mapstructure/v2"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/util"
 	"github.com/plaid/plaid-go/v42/plaid"
 	"github.com/spf13/viper"
@@ -117,110 +120,6 @@ type PostgreSQL struct {
 	KeyPath            string `yaml:"keyPath"`
 	CertificatePath    string `yaml:"certificatePath"`
 	Migrate            bool   `yaml:"migrate"`
-}
-
-func (c Configuration) GetEmail() Email {
-	return c.Email
-}
-
-type Email struct {
-	// Enabled controls whether the API can send emails at all. In order to
-	// support things like forgot password links or email verification this must
-	// be enabled.
-	Enabled        bool              `yaml:"enabled"`
-	Verification   EmailVerification `yaml:"verification"`
-	ForgotPassword ForgotPassword    `yaml:"forgotPassword"`
-	// Domain specifies the actual domain name used to send emails. Emails will
-	// always be sent from `no-reply@{domain}`.
-	Domain string `yaml:"domain"`
-	// Email is sent via SMTP. If you want to send emails it is required to
-	// include an SMTP configuration.
-	SMTP SMTPClient `yaml:"smtp"`
-	// BlockedDomains is the set of email domains that are NOT allowed to sign up
-	// for a new account on this server. This only restricts sign up. Existing
-	// users on one of these domains can still sign in, reset their password and
-	// verify their email. An empty list turns the feature off. This applies even
-	// when email sending (`enabled`) is turned off, it has nothing to do with
-	// SMTP being configured.
-	BlockedDomains []string `yaml:"blockedDomains"`
-}
-
-type EmailVerification struct {
-	// If you want to verify email addresses when a new user signs up then this
-	// should be enabled. This will require a user to verify that they own (or at
-	// least have proper access to) the email address that they used when they
-	// signed up.
-	Enabled bool `yaml:"enabled"`
-	// Specify the amount of time that an email verification link is valid.
-	TokenLifetime time.Duration `yaml:"tokenLifetime"`
-}
-
-type ForgotPassword struct {
-	// If you want to allow people to reset their passwords then we need to be
-	// able to send them a password reset link.
-	Enabled bool `yaml:"enabled"`
-	// Specify the amount of time that a password reset link will be valid.
-	TokenLifetime time.Duration `yaml:"tokenLifetime"`
-}
-
-type SMTPClient struct {
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
-	Host     string `yaml:"host"`
-	Port     int    `yaml:"port"`
-}
-
-func (s Email) ShouldVerifyEmails() bool {
-	return s.Enabled && s.Verification.Enabled
-}
-
-func (s Email) AllowPasswordReset() bool {
-	return s.Enabled && s.ForgotPassword.Enabled
-}
-
-// BlockedEmailDomain returns the normalized domain portion of the email address
-// along with true when that domain is on the sign up blocklist. When it is not
-// blocked (no blocklist, no domain, or just not a match) it returns "", false.
-// We hand the domain back so the caller can log which domain got blocked
-// without having to parse the address a second time. We only call this during
-// sign up so an operator can keep throwaway/disposable email providers from
-// creating accounts. The comparison is case insensitive and matches the domain
-// exactly, blocking `example.com` does NOT block `mail.example.com`.
-// TODO Should we match subdomains too? For a disposable email blocklist an
-// exact match is usually what you want, revisit this if someone needs the
-// allow-list style behavior instead.
-func (s Email) BlockedEmailDomain(emailAddress string) (string, bool) {
-	if len(s.BlockedDomains) == 0 {
-		return "", false
-	}
-
-	// The register controller only trims the email, it does not lowercase it
-	// until the login is actually created, so normalize it ourselves here.
-	emailAddress = strings.ToLower(strings.TrimSpace(emailAddress))
-	at := strings.LastIndex(emailAddress, "@")
-	if at < 0 {
-		return "", false
-	}
-	domain := emailAddress[at+1:]
-	if domain == "" {
-		return "", false
-	}
-
-	for i := range s.BlockedDomains {
-		// Be forgiving about how the operator wrote the entry, they might have
-		// included an @ or some stray whitespace or casing.
-		blocked := strings.TrimPrefix(
-			strings.ToLower(
-				strings.TrimSpace(s.BlockedDomains[i]),
-			),
-			"@",
-		)
-		if blocked != "" && domain == blocked {
-			return domain, true
-		}
-	}
-
-	return "", false
 }
 
 // ProofOfWork gates the unauthenticated auth endpoints (register, login, forgot
@@ -387,8 +286,62 @@ func LoadConfigurationFromFile(configFilePath []string) Configuration {
 	return LoadConfigurationEx(v)
 }
 
+// stringSliceToSetHookFunc lets mapstructure (and therefore viper) decode a
+// yaml list, or a comma separated env var, into a myownsanity.Set. Without this
+// viper has no idea how to put a list into our map based Set type and the whole
+// config load panics. The Set has a json unmarshaler but viper uses
+// mapstructure not encoding/json, so that does us no good here.
+func stringSliceToSetHookFunc() mapstructure.DecodeHookFunc {
+	setType := reflect.TypeOf(myownsanity.Set[string]{})
+	return func(from reflect.Type, to reflect.Type, data any) (any, error) {
+		if to != setType {
+			return data, nil
+		}
+
+		// Depending on where the value came from mapstructure hands us different
+		// shapes. A yaml list comes through as a []any, the env var comes through
+		// as a single comma separated string.
+		set := myownsanity.NewSet[string]()
+		switch value := data.(type) {
+		case []any:
+			for _, item := range value {
+				if s, ok := item.(string); ok {
+					set.Add(s)
+				}
+			}
+		case []string:
+			for _, item := range value {
+				set.Add(item)
+			}
+		case string:
+			for _, item := range strings.Split(value, ",") {
+				if item = strings.TrimSpace(item); item != "" {
+					set.Add(item)
+				}
+			}
+		default:
+			// Not a shape we know how to turn into a set, hand it back untouched
+			// so mapstructure can take its normal path and surface a real error
+			// instead of us hiding a misconfiguration.
+			return data, nil
+		}
+
+		return set, nil
+	}
+}
+
 func LoadConfigurationEx(v *viper.Viper) (config Configuration) {
-	if err := v.Unmarshal(&config); err != nil {
+	// We have to spell out the decode hooks ourselves because passing
+	// viper.DecodeHook completely replaces viper's defaults, so the first two
+	// here are just the defaults (duration parsing and comma separated slices)
+	// and the last one is ours that knows how to turn a list into our Set type.
+	if err := v.Unmarshal(&config, viper.DecodeHook(
+		mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToSliceHookFunc(","),
+			stringSliceToSetHookFunc(),
+		),
+	)); err != nil {
 		panic(err)
 	}
 
