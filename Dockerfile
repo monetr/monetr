@@ -37,7 +37,6 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       tzdata \
       ca-certificates \
-      locales-all \
     && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
