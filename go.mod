@@ -21,7 +21,7 @@ require (
 	github.com/gavv/httpexpect/v2 v2.17.0
 	github.com/getsentry/sentry-go v0.46.2
 	github.com/go-pg/pg/v10 v10.15.1
-	github.com/go-viper/mapstructure/v2 v2.4.0
+	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/gomodule/redigo v1.9.3
 	github.com/hashicorp/vault/api v1.23.0
