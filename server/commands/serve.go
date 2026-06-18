@@ -62,6 +62,10 @@ func ServeCommand(parent *cobra.Command) {
 				log.Info("config file loaded", "config", configFileName)
 			}
 
+			if configuration.Email.Enabled && len(configuration.Email.BlockedDomains) > 0 {
+				log.Info("blocked email domains loaded", "count", len(configuration.Email.BlockedDomains))
+			}
+
 			// As soon as we load the config try to validate it. In the future, other
 			// validation functions can be added here in order to prevent
 			// misconfiguration. This is done AFTER the logger is loaded so that if
