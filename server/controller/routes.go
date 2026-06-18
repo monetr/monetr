@@ -320,6 +320,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 		billed.POST("/bank_accounts/:bankAccountId/transactions/import", c.postTransactionImport)
 		billed.GET("/bank_accounts/:bankAccountId/transactions/import/:transactionImportId", c.getTransactionImportById)
 		billed.PATCH("/bank_accounts/:bankAccountId/transactions/import/:transactionImportId", c.patchTransactionImport)
+		billed.GET("/bank_accounts/:bankAccountId/transactions/import/:transactionImportId/preview", c.getTransactionImportPreviewByTransactionImportId)
 	}
 
 	// Uploads

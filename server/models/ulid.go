@@ -40,6 +40,11 @@ type Identifier interface {
 	String() string
 }
 
+// ID is monetr's object identifier that also preserves type specificity, that
+// is an ID for a [Transaction] cannot be used as an ID for a [BankAccount],
+// this is a hack mostly to make auto generating IDs on the server side easier
+// but has the massive benefit of making sure that the wrong ID is not passed to
+// the wrong function parameter anywhere.
 type ID[T Identifiable] string
 
 func (i ID[T]) String() string {
