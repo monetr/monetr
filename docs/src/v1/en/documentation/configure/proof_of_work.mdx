@@ -11,9 +11,6 @@ before one of those requests is accepted. The work is done in the background in 
 form, so real users effectively never wait on it, but an automated attacker is forced to pay that CPU cost on every
 single attempt.
 
-Proof of work is independent of [ReCAPTCHA](./recaptcha) and the two can be used together. When both are enabled the
-proof of work check runs first because it is the cheaper fail-fast.
-
 :::info
 Proof of work is **disabled by default** at this time so that existing self-hosted installations do not change behavior
 unexpectedly. If your monetr instance is reachable from the public internet it is recommended that you enable it. The
