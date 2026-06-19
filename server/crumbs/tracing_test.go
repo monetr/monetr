@@ -11,7 +11,7 @@ import (
 type structTest struct {
 }
 
-func (_ *structTest) Foo(ctx context.Context) *sentry.Span {
+func (*structTest) Foo(ctx context.Context) *sentry.Span {
 	span := StartFnTrace(ctx)
 	defer span.Finish()
 	return span

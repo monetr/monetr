@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (_ *Controller) deleteAccount(_ echo.Context) error {
+func (*Controller) deleteAccount(_ echo.Context) error {
 	// TODO Implement a way to delete account data.
 	return echo.NewHTTPError(http.StatusNotImplemented, "account deletion not yet implemented")
 }

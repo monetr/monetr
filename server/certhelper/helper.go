@@ -194,7 +194,7 @@ func (f *manualCertificateWatcher) hashItem(stat os.FileInfo) (uint64, error) {
 	return f.hashFile(stat)
 }
 
-func (_ *manualCertificateWatcher) hashDirectory(stat os.FileInfo) (uint64, error) {
+func (*manualCertificateWatcher) hashDirectory(stat os.FileInfo) (uint64, error) {
 	hash := fnv.New64()
 	entries, err := os.ReadDir(stat.Name())
 	if err != nil {
@@ -210,7 +210,7 @@ func (_ *manualCertificateWatcher) hashDirectory(stat os.FileInfo) (uint64, erro
 	return hash.Sum64(), nil
 }
 
-func (_ *manualCertificateWatcher) hashFile(stat os.FileInfo) (uint64, error) {
+func (*manualCertificateWatcher) hashFile(stat os.FileInfo) (uint64, error) {
 	hash := fnv.New64()
 
 	file, err := os.Open(stat.Name())

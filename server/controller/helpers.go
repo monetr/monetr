@@ -34,7 +34,7 @@ func (c *Controller) cleanString(ctx echo.Context, name, input string) (string, 
 // able to decode the JSON body, or returns an error if it was not. All JSON
 // bodies are decoded using `json.Decoder.UseNumber()` to make validation
 // easier.
-func (_ *Controller) readJsonMap(ctx echo.Context) (map[string]any, error) {
+func (*Controller) readJsonMap(ctx echo.Context) (map[string]any, error) {
 	rawData := map[string]any{}
 	decoder := json.NewDecoder(ctx.Request().Body)
 	decoder.UseNumber()
@@ -75,7 +75,7 @@ func (c *Controller) midnightInLocal(
 	return util.Midnight(input, timezone), nil
 }
 
-func (_ *Controller) getClaims(ctx echo.Context) (security.Claims, error) {
+func (*Controller) getClaims(ctx echo.Context) (security.Claims, error) {
 	claims, ok := ctx.Get(authenticationKey).(security.Claims)
 	if !ok {
 		return claims, errors.New("unauthorized: claims not present on request")
@@ -174,7 +174,7 @@ func (c *Controller) mustGetAccountId(ctx echo.Context) ID[Account] {
 	return accountId
 }
 
-func (_ *Controller) mustGetDatabase(ctx echo.Context) pg.DBI {
+func (*Controller) mustGetDatabase(ctx echo.Context) pg.DBI {
 	txn, ok := ctx.Get(databaseContextKey).(*pg.Tx)
 	if !ok {
 		panic("no database on context")

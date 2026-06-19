@@ -27,7 +27,7 @@ func (g *GenericMatcher[T]) Matches(x any) bool {
 }
 
 // String implements gomock.Matcher
-func (_ *GenericMatcher[T]) String() string {
+func (*GenericMatcher[T]) String() string {
 	return "Input that matches provided predicate!"
 }
 

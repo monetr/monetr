@@ -22,7 +22,7 @@ type TestLogHook struct {
 	entries []slog.Record
 }
 
-func (_ *TestLogHook) Enabled(_ context.Context, _ slog.Level) bool { return true }
+func (*TestLogHook) Enabled(_ context.Context, _ slog.Level) bool { return true }
 
 func (h *TestLogHook) Handle(_ context.Context, r slog.Record) error {
 	h.mu.Lock()

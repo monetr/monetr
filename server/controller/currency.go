@@ -7,6 +7,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (_ *Controller) listCurrencies(ctx echo.Context) error {
+func (*Controller) listCurrencies(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, locale.GetInstalledCurrencies())
 }

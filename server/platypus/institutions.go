@@ -106,6 +106,6 @@ func (p *plaidInstitutionsBase) GetInstitution(ctx context.Context, institutionI
 	return institution, nil
 }
 
-func (_ *plaidInstitutionsBase) cacheKey(institutionId string) string {
+func (*plaidInstitutionsBase) cacheKey(institutionId string) string {
 	return fmt.Sprintf("plaid:institutions:%s", institutionId)
 }

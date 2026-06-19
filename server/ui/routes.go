@@ -25,7 +25,7 @@ const (
 	indexFile  = "/index.html"
 )
 
-func (_ *UIController) fixFilesystemError(err error) error {
+func (*UIController) fixFilesystemError(err error) error {
 	unwrappedError := errors.Unwrap(err)
 	switch unwrappedError {
 	case fs.ErrNotExist, fs.ErrInvalid:

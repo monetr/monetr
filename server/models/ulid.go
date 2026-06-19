@@ -50,7 +50,7 @@ func (i ID[T]) IsZero() bool {
 	return string(i) == "" || strings.TrimPrefix(string(i), string(i.Kind())+"_") == ""
 }
 
-func (_ ID[T]) Kind() Kind {
+func (ID[T]) Kind() Kind {
 	inst := *new(T)
 	prefix := inst.IdentityPrefix()
 	return Kind(prefix)

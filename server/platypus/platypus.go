@@ -404,6 +404,6 @@ func (p *Plaid) newClient(ctx context.Context, link *models.Link) (Client, error
 	return p.NewClient(span.Context(), link, secret.Value, link.PlaidLink.PlaidId)
 }
 
-func (_ *Plaid) Close() error {
+func (*Plaid) Close() error {
 	panic("implement me")
 }

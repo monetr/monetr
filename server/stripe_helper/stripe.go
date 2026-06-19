@@ -117,7 +117,7 @@ func NewStripeHelperWithCache(log *slog.Logger, apiKey string, cacheClient cache
 	return base
 }
 
-func (_ *stripeBase) stripeRoundTripper(
+func (*stripeBase) stripeRoundTripper(
 	ctx context.Context,
 	request *http.Request,
 	response *http.Response,

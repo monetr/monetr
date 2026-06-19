@@ -43,7 +43,7 @@ func (e *emailCommunicationBase) fromAddress(msg *mail.Msg) error {
 	return msg.FromFormat("monetr", fmt.Sprintf("no-reply@%s", e.config.Email.Domain))
 }
 
-func (_ *emailCommunicationBase) toAddress(msg *mail.Msg, firstName, lastName, emailAddress string) error {
+func (*emailCommunicationBase) toAddress(msg *mail.Msg, firstName, lastName, emailAddress string) error {
 	// Clean up the things that I **know** will cause problems with SMTP.
 	firstName = strings.ReplaceAll(firstName, "\n", "")
 	firstName = strings.ReplaceAll(firstName, "\r", "")
@@ -73,7 +73,7 @@ func (e *emailCommunicationBase) SendEmail(ctx context.Context, params Email) er
 	return e.sendMessage(span.Context(), m)
 }
 
-func (_ *emailCommunicationBase) getTemplates(name string) (html *htmlTemplate.Template, text *textTemplate.Template) {
+func (*emailCommunicationBase) getTemplates(name string) (html *htmlTemplate.Template, text *textTemplate.Template) {
 	{ // HTML template
 		data, err := templates.ReadFile(fmt.Sprintf("email_templates/%s.html", name))
 		if err != nil {

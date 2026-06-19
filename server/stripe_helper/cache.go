@@ -24,15 +24,15 @@ var (
 
 type noopStripeCache struct{}
 
-func (_ *noopStripeCache) GetPriceById(_ context.Context, _ string) (*stripe.Price, bool) {
+func (*noopStripeCache) GetPriceById(_ context.Context, _ string) (*stripe.Price, bool) {
 	return nil, false
 }
 
-func (_ *noopStripeCache) CachePrice(_ context.Context, _ stripe.Price) bool {
+func (*noopStripeCache) CachePrice(_ context.Context, _ stripe.Price) bool {
 	return false
 }
 
-func (_ *noopStripeCache) Close() error {
+func (*noopStripeCache) Close() error {
 	return nil
 }
 
@@ -85,6 +85,6 @@ func (r *redisStripeCache) CachePrice(ctx context.Context, price stripe.Price) b
 	return true
 }
 
-func (_ *redisStripeCache) cacheKey(id string) string {
+func (*redisStripeCache) cacheKey(id string) string {
 	return fmt.Sprintf("stripe:prices:%s", id)
 }
