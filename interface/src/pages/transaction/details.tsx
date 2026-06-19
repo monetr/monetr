@@ -22,13 +22,12 @@ import RemoveTransactionButton from '@monetr/interface/components/transactions/R
 import SimilarTransactions from '@monetr/interface/components/transactions/SimilarTransactions';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import { usePatchTransaction } from '@monetr/interface/hooks/usePatchTransaction';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { useTransaction } from '@monetr/interface/hooks/useTransaction';
-import { useUpdateTransaction } from '@monetr/interface/hooks/useUpdateTransaction';
 import type { ID } from '@monetr/interface/models/ID';
 import type Spending from '@monetr/interface/models/Spending';
-import Transaction from '@monetr/interface/models/Transaction';
 import type { APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
 
@@ -50,7 +49,7 @@ export default function TransactionDetails(): React.JSX.Element {
   const { data: link, isLoading: linkIsLoading } = useCurrentLink();
   const { enqueueSnackbar } = useSnackbar();
   const { transactionId: id } = useParams<{ transactionId: string }>();
-  const updateTransaction = useUpdateTransaction();
+  const patchTransaction = usePatchTransaction();
   const transactionId = id || undefined;
   const { data: transaction, isLoading, isError } = useTransaction(transactionId);
   const submit = useCallback(
@@ -62,21 +61,20 @@ export default function TransactionDetails(): React.JSX.Element {
         return;
       }
 
-      const updatedTransaction = new Transaction({
-        ...transaction,
-        name: values.name,
-        // spendingId can be null when the transaction is being moved back to free-to-use, we need to send null to the
-        // server to actually clear it.
-        spendingId: values.spendingId,
-        amount: locale.friendlyToAmount(values.amount),
-        date: startOfDay(values.date, {
-          in: inTimezone,
-        }),
-        isPending: values.isPending,
-      });
-
       helpers.setSubmitting(true);
-      return await updateTransaction(updatedTransaction)
+      return await patchTransaction({
+        transactionId: transaction.transactionId,
+        bankAccountId: transaction.bankAccountId,
+        name: values.name,
+        spendingId: values.spendingId,
+        ...(link?.getIsManual() && {
+          amount: locale.friendlyToAmount(values.amount),
+          date: startOfDay(values.date, {
+            in: inTimezone,
+          }),
+          isPending: values.isPending,
+        }),
+      })
         .then(() =>
           enqueueSnackbar('Updated transaction successfully', {
             variant: 'success',
@@ -91,7 +89,7 @@ export default function TransactionDetails(): React.JSX.Element {
         )
         .finally(() => helpers.setSubmitting(false));
     },
-    [enqueueSnackbar, locale, transaction, updateTransaction, inTimezone],
+    [enqueueSnackbar, locale, transaction, patchTransaction, inTimezone, link?.getIsManual],
   );
 
   if (isLoading || linkIsLoading) {

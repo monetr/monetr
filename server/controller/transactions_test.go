@@ -1652,6 +1652,74 @@ func TestPatchTransaction(t *testing.T) {
 		response.JSON().Path("$.problems.date").String().IsEqual("Date must be in a valid format")
 	})
 
+	t.Run("manual link accepts a date with milliseconds", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		// The frontend sends dates by serializing a JavaScript Date, which always
+		// comes out as an ISO string with milliseconds and a Z suffix. The schema
+		// parses with time.RFC3339 which does not spell out fractional seconds, so
+		// this is here to prove that exact format still gets accepted now that the
+		// frontend talks to PATCH instead of PUT.
+		newDate := time.Date(2023, 7, 28, 5, 0, 0, 0, time.UTC)
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"date": "2023-07-28T05:00:00.000Z",
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transaction.date").String().AsDateTime(time.RFC3339).IsEqual(newDate)
+	})
+
+	t.Run("manual link rejects adjusts balance", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		// adjustsBalance is intentionally left out of the patch schema. monetr does
+		// not recalculate balances when a manual transaction's amount changes yet,
+		// so rather than silently swallow the field we reject it outright. If that
+		// ever changes this test should fail and make us think about it.
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"amount":         5000,
+				"adjustsBalance": true,
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.adjustsBalance").String().IsEqual("key not expected")
+	})
+
 	t.Run("non manual link cannot change the amount", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		var token string
