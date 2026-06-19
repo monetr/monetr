@@ -1822,6 +1822,78 @@ func TestPutBankAccount(t *testing.T) {
 		}
 	})
 
+	t.Run("update balances for manual bank account", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{ // Update all three balance fields along with the name.
+			response := e.PUT("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":             "My Checking",
+					"currency":         "USD",
+					"availableBalance": 5000,
+					"currentBalance":   4800,
+					"limitBalance":     0,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.availableBalance").Number().IsEqual(5000)
+			response.JSON().Path("$.currentBalance").Number().IsEqual(4800)
+			response.JSON().Path("$.limitBalance").Number().IsEqual(0)
+			response.JSON().Path("$.name").String().IsEqual("My Checking")
+		}
+
+		{ // Read it back to confirm persistence.
+			response := e.GET("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.availableBalance").Number().IsEqual(5000)
+			response.JSON().Path("$.currentBalance").Number().IsEqual(4800)
+			response.JSON().Path("$.limitBalance").Number().IsEqual(0)
+		}
+	})
+
+	t.Run("negative limit balance rejected for manual bank account", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{
+			response := e.PUT("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":         "My Checking",
+					"currency":     "USD",
+					"limitBalance": -1,
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.limitBalance").String().IsEqual("Limit balance cannot be negative")
+		}
+	})
+
 	t.Run("cant put someone elses bank account", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		var token string

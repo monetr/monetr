@@ -8,6 +8,9 @@ export interface UpdateBankAccountRequest {
   bankAccountId: string;
   name: string;
   currency: string;
+  availableBalance?: number;
+  currentBalance?: number;
+  limitBalance?: number;
 }
 
 export function useUpdateBankAccount(): (_bankAccount: UpdateBankAccountRequest) => Promise<BankAccount> {
