@@ -1330,7 +1330,7 @@ func TestPatchBankAccount(t *testing.T) {
 
 			response.Status(http.StatusBadRequest)
 			response.JSON().Path("$.error").String().IsEqual("Invalid request")
-			response.JSON().Path("$.problems.availableBalance").String().IsEqual("is required")
+			response.JSON().Path("$.problems.availableBalance").String().IsEqual("must not be nil")
 		}
 	})
 
