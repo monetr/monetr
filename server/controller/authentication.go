@@ -73,7 +73,7 @@ func (c *Controller) postChallenge(ctx echo.Context) error {
 	request, err := parse(
 		c,
 		ctx,
-		&schemas.ChallengeRequest{},
+		new(schemas.ChallengeRequest),
 		schemas.ChallengeSchema,
 	)
 	if err != nil {
@@ -119,7 +119,7 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 	loginRequest, err := parse(
 		c,
 		ctx,
-		&schemas.LoginRequest{},
+		new(schemas.LoginRequest),
 		loginSchema,
 	)
 	if err != nil {

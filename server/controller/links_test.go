@@ -36,6 +36,61 @@ func TestPostLink(t *testing.T) {
 		response.JSON().Path("$.description").String().IsEqual("My personal link")
 	})
 
+	t.Run("trims whitespace", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/links").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"institutionName": "  U.S. Bank  ",
+				"description":     "  My personal link  ",
+			}).
+			Expect()
+
+		// The schema parsing trims string fields before they are validated or
+		// stored, so the surrounding whitespace should be gone in the response.
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.institutionName").String().IsEqual("U.S. Bank")
+		response.JSON().Path("$.description").String().IsEqual("My personal link")
+	})
+
+	t.Run("description can be explicitly null", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/links").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"institutionName": "U.S. Bank",
+				"description":     nil,
+			}).
+			Expect()
+
+		// A null description is a valid branch of the description validation, it
+		// should just leave the link without a description.
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.linkId").String().IsASCII()
+		response.JSON().Path("$.description").IsNull()
+	})
+
+	t.Run("cannot set fields that are not part of the schema", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		// The handler forces the link type to manual and the schema does not allow
+		// a linkType key at all, so trying to sneak one in should be rejected
+		// outright rather than silently ignored.
+		response := e.POST("/api/links").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"institutionName": "U.S. Bank",
+				"linkType":        models.PlaidLinkType,
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.linkType").String().IsEqual("key not expected")
+	})
+
 	t.Run("institution name is too long", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
@@ -49,7 +104,7 @@ func TestPostLink(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.institutionName").String().IsEqual("Institution name must be between 1 and 300 characters")
+		response.JSON().Path("$.problems.institutionName").String().IsEqual("Name must be between 1 and 300 characters")
 	})
 
 	t.Run("name not provided", func(t *testing.T) {
@@ -65,7 +120,7 @@ func TestPostLink(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.institutionName").String().IsEqual("Institution name is required")
+		response.JSON().Path("$.problems.institutionName").String().IsEqual("Name is required")
 	})
 
 	t.Run("description is too long", func(t *testing.T) {
@@ -82,7 +137,13 @@ func TestPostLink(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.description").String().IsEqual("Description must be between 1 and 300 characters")
+		// The description is now validated as one of a nil value or a valid text
+		// field, so a too long description fails both branches and the problem
+		// comes back as a oneOf envelope rather than a flat string.
+		response.JSON().Path("$.problems.description.oneOf").Array().ConsistsOf(
+			"must be nil",
+			"Must be between 1 and 300 characters",
+		)
 	})
 
 	t.Run("malformed json", func(t *testing.T) {
@@ -95,7 +156,7 @@ func TestPostLink(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("Failed to parse post request")
+		response.JSON().Path("$.error").IsEqual("failed to parse request")
 	})
 
 	t.Run("unauthenticated", func(t *testing.T) {
@@ -116,7 +177,7 @@ func TestPostLink(t *testing.T) {
 		response.JSON().Path("$.error").String().IsEqual("unauthorized")
 	})
 
-	t.Run("lunch flow link, invalid ID", func(t *testing.T) {
+	t.Run("lunch flow link id is malformed", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 		response := e.POST("/api/links").
@@ -125,6 +186,30 @@ func TestPostLink(t *testing.T) {
 				"institutionName": "U.S. Bank",
 				"description":     "My personal link",
 				"lunchFlowLinkId": "lfx_bogus",
+			}).
+			Expect()
+
+		// A malformed lunch flow link Id is now caught by the schema before we ever
+		// try to look it up, so we get a validation error instead of a not found.
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.lunchFlowLinkId.oneOf").Array().ConsistsOf(
+			"must be nil",
+			"id should be between 28 and 32 characters",
+		)
+	})
+
+	t.Run("lunch flow link does not exist", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		// This is a well formed Id so it passes validation, but it does not point
+		// at any real lunch flow link so the lookup should come back empty.
+		response := e.POST("/api/links").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"institutionName": "U.S. Bank",
+				"description":     "My personal link",
+				"lunchFlowLinkId": models.NewID[models.LunchFlowLink](),
 			}).
 			Expect()
 
@@ -143,7 +228,7 @@ func TestPostLink(t *testing.T) {
 			WithJSON(map[string]any{
 				"institutionName": "U.S. Bank",
 				"description":     "My personal link",
-				"lunchFlowLinkId": "lfx_bogus",
+				"lunchFlowLinkId": models.NewID[models.LunchFlowLink](),
 			}).
 			Expect()
 

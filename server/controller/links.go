@@ -9,7 +9,6 @@ import (
 	"github.com/monetr/monetr/server/links/link_jobs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/schemas"
-	"github.com/monetr/validation"
 )
 
 func (c *Controller) getLinks(ctx echo.Context) error {
@@ -40,25 +39,19 @@ func (c *Controller) getLink(ctx echo.Context) error {
 }
 
 func (c *Controller) postLinks(ctx echo.Context) error {
-	link := Link{
-		// Since we can only create manual links via the API directly like this,
-		// then set this field initially. It cannot be overwritten by the unmarshall
-		// anyway.
-		LinkType: ManualLinkType,
-	}
-	switch err := link.UnmarshalRequest(
-		c.getContext(ctx),
-		ctx.Request().Body,
-		link.CreateValidators()...,
-	).(type) {
-	case validation.Errors:
-		return ctx.JSON(http.StatusBadRequest, map[string]any{
-			"error":    "Invalid request",
-			"problems": err,
-		})
-	case nil:
-	default:
-		return c.badRequestError(ctx, err, "Failed to parse post request")
+	link, err := parse(
+		c,
+		ctx,
+		&Link{
+			// Since we can only create manual links via the API directly like this,
+			// then set this field initially. It cannot be overwritten by the unmarshall
+			// anyway.
+			LinkType: ManualLinkType,
+		},
+		schemas.CreateLink,
+	)
+	if err != nil {
+		return err
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
@@ -93,7 +86,7 @@ func (c *Controller) postLinks(ctx echo.Context) error {
 		}
 	}
 
-	if err := repo.CreateLink(c.getContext(ctx), &link); err != nil {
+	if err := repo.CreateLink(c.getContext(ctx), link); err != nil {
 		return c.wrapPgError(ctx, err, "Could not create a manual link")
 	}
 

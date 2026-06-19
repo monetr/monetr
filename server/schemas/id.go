@@ -13,7 +13,7 @@ import (
 func ValidID[T models.Identifiable]() validation.Rule {
 	prefix := (*new(T)).IdentityPrefix()
 	return validation.AllOf(
-		validation.IsString,
+		is.String,
 		validators.By(func(_ context.Context, value *any) error {
 			if value == nil {
 				return errors.Errorf("id does not match format %s_...", prefix)

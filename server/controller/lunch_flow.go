@@ -47,7 +47,7 @@ func (c *Controller) postLunchFlowLink(ctx echo.Context) error {
 	request, err := parse(
 		c,
 		ctx,
-		&schemas.PostLunchFlowLinkRequest{},
+		new(schemas.PostLunchFlowLinkRequest),
 		schemas.PostLunchFlowLink,
 	)
 	if err != nil {
@@ -260,7 +260,7 @@ func (c *Controller) postLunchFlowLinkSync(ctx echo.Context) error {
 	request, err := parse(
 		c,
 		ctx,
-		&schemas.PostLunchFlowLinkSyncRequest{},
+		new(schemas.PostLunchFlowLinkSyncRequest),
 		schemas.PostLunchFlowLinkSync,
 	)
 	if err != nil {

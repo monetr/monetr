@@ -27,9 +27,15 @@ describe('links', () => {
       linkType: LinkType.Manual,
     });
     expect(link.getIsManual()).toBeTruthy();
+    expect(link.getIsPlaid()).toBeFalsy();
+  });
 
-    link.linkType = LinkType.Plaid;
+  it('will detect plaid', () => {
+    const link = fixture({
+      linkType: LinkType.Plaid,
+    });
     expect(link.getIsManual()).toBeFalsy();
+    expect(link.getIsPlaid()).toBeTruthy();
   });
 
   it('will handle custom names', () => {
