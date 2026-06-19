@@ -167,7 +167,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 		}
 
 		forecaster := NewForecaster(log, spending, fundingSchedules)
-		//ctx := context.Background()
+		// ctx := context.Background()
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		result, err := forecaster.GetForecast(ctx, now, end, timezone)

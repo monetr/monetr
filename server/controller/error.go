@@ -73,8 +73,8 @@ func (e EmailNotVerifiedError) MarshalJSON() ([]byte, error) {
 	})
 }
 
-// EmailNotVerifiedError is returned to the client when they attempt to authenticate using a login with an email that
-// has not yet been verified.
+// EmailAlreadyExists is returned to the client when they attempt to use an email
+// address that is already associated with another login.
 type EmailAlreadyExists struct{}
 
 func (e EmailAlreadyExists) Cause() error {

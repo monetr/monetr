@@ -45,7 +45,8 @@ func (TransactionUpload) FileKind() string {
 	return "transactions/uploads"
 }
 
-// TransactionUpload files expire after 1 hour be default.
+// FileExpiration will return when a TransactionUpload's uploaded file should
+// expire, this is one hour by default.
 func (TransactionUpload) FileExpiration(clock clock.Clock) *time.Time {
 	expiration := clock.Now().Add(1 * time.Hour)
 	return &expiration

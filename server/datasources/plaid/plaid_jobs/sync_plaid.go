@@ -833,7 +833,13 @@ func SyncPlaid(ctx queue.Context, args SyncPlaidArguments) error {
 			// Update the cursor incase we need to iterate again.
 			cursor = &syncData.NextCursor
 
-			plaidTransactions := append(syncData.New, syncData.Updated...)
+			// Combine the new and updated transactions into a single slice. We do not
+			// want to append directly onto syncData.New here, if it has spare capacity
+			// then the append would scribble into the backing array that syncData still
+			// points at, and we use syncData again below when we hydrate transactions.
+			plaidTransactions := make([]platypus.Transaction, 0, len(syncData.New)+len(syncData.Updated))
+			plaidTransactions = append(plaidTransactions, syncData.New...)
+			plaidTransactions = append(plaidTransactions, syncData.Updated...)
 
 			s.log.DebugContext(ctx, "retrieved transactions from plaid", "count", len(plaidTransactions))
 			crumbs.Debug(ctx, "Retrieved transactions from plaid.", map[string]any{

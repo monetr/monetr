@@ -79,7 +79,7 @@ func (f *fundingScheduleBase) GetNextFundingEventAfter(
 	// Force the start of the rule to be the next contribution date. This fixes a bug where the rule would increment
 	// properly, but would include the current timestamp in that increment causing incorrect comparisons below. This
 	// makes sure that the rule will increment in the user's timezone as intended.
-	//nextContributionRule.DTStart(nextContributionDate)
+	// nextContributionRule.DTStart(nextContributionDate)
 
 	// Keep track of an un-adjusted next contribution date. Because we might subtract days to account for early
 	// funding, we need to make sure we are still incrementing relative to the _real_ contribution dates. Not the

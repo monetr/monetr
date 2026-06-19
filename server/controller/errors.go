@@ -35,7 +35,7 @@ func (c *Controller) wrapPgError(ctx echo.Context, err error, msg string, args .
 	default:
 		switch actualErr := errors.Cause(err).(type) {
 		case pg.Error:
-			cleanedErr, status := c.sanitizePgError(actualErr)
+			status, cleanedErr := c.sanitizePgError(actualErr)
 			switch status {
 			case http.StatusInternalServerError:
 				// This will make the cleaned error not visible to the client.
@@ -53,13 +53,13 @@ func (c *Controller) wrapPgError(ctx echo.Context, err error, msg string, args .
 	}
 }
 
-func (c *Controller) sanitizePgError(err pg.Error) (error, int) {
+func (c *Controller) sanitizePgError(err pg.Error) (int, error) {
 	switch err.Field(67) {
 	case "23505": // Duplicate
 		// TODO Return actual duplicate information in this error.
-		return errors.New("a similar object already exists"), http.StatusBadRequest
+		return http.StatusBadRequest, errors.New("a similar object already exists")
 	default:
-		return err, http.StatusInternalServerError
+		return http.StatusInternalServerError, err
 	}
 }
 

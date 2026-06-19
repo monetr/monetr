@@ -584,6 +584,7 @@ func (v *VaultTransit) Encrypt(
 	return &v.config.KeyID, nil, secret.Data["ciphertext"].(string), nil
 }
 
+// Close will release the resources held by this VaultTransit client.
 // TODO Add a timeout to closing this, and test it
 func (v *VaultTransit) Close() error {
 	var err error

@@ -603,6 +603,7 @@ func (o *OpenBaoTransit) Encrypt(
 	return &o.config.KeyID, nil, secret.Data["ciphertext"].(string), nil
 }
 
+// Close will release the resources held by this OpenBaoTransit client.
 // TODO Add a timeout to closing this, and test it
 func (o *OpenBaoTransit) Close() error {
 	var err error

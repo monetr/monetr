@@ -181,6 +181,12 @@ func TestRepositoryBase_GetTransactionImportMappings(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, page2, 1, "second page must return remaining mappings")
 
+		assert.ElementsMatch(t, created, []models.ID[models.TransactionImportMapping]{
+			page1[0].TransactionImportMappingId,
+			page1[1].TransactionImportMappingId,
+			page2[0].TransactionImportMappingId,
+		}, "every created mapping must appear exactly once across the two pages")
+
 		assert.NotContains(t, []models.ID[models.TransactionImportMapping]{
 			page1[0].TransactionImportMappingId,
 			page1[1].TransactionImportMappingId,

@@ -41,7 +41,7 @@ func TestParseID(t *testing.T) {
 	t.Run("bad ID", func(t *testing.T) {
 		input := "123abc"
 		output, err := ParseID[BankAccount](input)
-		assert.EqualError(t, err, "failed to parse ID for BankAccount, expected prefix: bac ID: 123abc")
+		assert.EqualError(t, err, "failed to parse ID for models.BankAccount, expected prefix: bac ID: 123abc")
 		assert.Empty(t, output, "output should be empty when there is an error")
 		assert.True(t, output.IsZero(), "output should be zero with an error")
 	})
@@ -49,7 +49,7 @@ func TestParseID(t *testing.T) {
 	t.Run("mismatched data type", func(t *testing.T) {
 		input := "user_abc123"
 		output, err := ParseID[Account](input)
-		assert.EqualError(t, err, "failed to parse ID for Account, expected prefix: acct ID: user_abc123")
+		assert.EqualError(t, err, "failed to parse ID for models.Account, expected prefix: acct ID: user_abc123")
 		assert.Empty(t, output, "output should be empty when there is an error")
 		assert.True(t, output.IsZero(), "output should be zero with an error")
 	})

@@ -7,7 +7,7 @@ import (
 
 const FourierSize = 4096
 
-// FFT function (recursive implementation)
+// FastFourierTransform is a recursive implementation of the fast Fourier transform.
 func FastFourierTransform(a []complex128) []complex128 {
 	n := len(a)
 	if n <= 1 {
@@ -67,7 +67,7 @@ func FastFourierTransform(a []complex128) []complex128 {
 	return result
 }
 
-// IFFT function (recursive implementation)
+// InverseFastFourierTransform is a recursive implementation of the inverse fast Fourier transform.
 func InverseFastFourierTransform(a []complex128) []complex128 {
 	n := len(a)
 

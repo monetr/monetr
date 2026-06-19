@@ -21,6 +21,9 @@ var (
 	cspPolicyFunc      sync.Once
 )
 
+// ApplyContentSecurityPolicy writes monetr's Content-Security-Policy and related
+// security headers onto the response.
+//
 // At the time of writing this, it seems that Chrome is the only browser engine
 // that has implemented a majority of the content security policy items. See
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP Because of this, it is
@@ -93,7 +96,7 @@ func (c *UIController) ApplyContentSecurityPolicy(ctx echo.Context) {
 // without having to reset the package level sync.Once cache. The returned
 // strings depend only on configuration, which does not change at runtime, so
 // caching them once per process via cspPolicyFunc remains safe.
-func (c *UIController) buildPolicies() (csp string, trustedTypes string) {
+func (c *UIController) buildPolicies() (csp, trustedTypes string) {
 	policies := map[string]map[string]struct{}{
 		"default-src": {
 			Self: noop,
