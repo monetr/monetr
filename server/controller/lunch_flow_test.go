@@ -9,7 +9,6 @@ import (
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mock_lunch_flow"
 	"github.com/monetr/monetr/server/internal/testutils"
-	"github.com/monetr/monetr/server/models"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
 )
@@ -474,8 +473,8 @@ func TestGetLunchFlowLinks(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 
-		var firstLink models.ID[models.LunchFlowLink]
-		var secondLink models.ID[models.LunchFlowLink]
+		var firstLink ID[LunchFlowLink]
+		var secondLink ID[LunchFlowLink]
 
 		{ // Create two lunch flow links to test listing!
 			{
@@ -489,7 +488,7 @@ func TestGetLunchFlowLinks(t *testing.T) {
 					Expect()
 
 				response.Status(http.StatusOK)
-				firstLink = models.ID[models.LunchFlowLink](response.JSON().Path("$.lunchFlowLinkId").String().Raw())
+				firstLink = ID[LunchFlowLink](response.JSON().Path("$.lunchFlowLinkId").String().Raw())
 			}
 
 			{
@@ -503,7 +502,7 @@ func TestGetLunchFlowLinks(t *testing.T) {
 					Expect()
 
 				response.Status(http.StatusOK)
-				secondLink = models.ID[models.LunchFlowLink](response.JSON().Path("$.lunchFlowLinkId").String().Raw())
+				secondLink = ID[LunchFlowLink](response.JSON().Path("$.lunchFlowLinkId").String().Raw())
 			}
 		}
 

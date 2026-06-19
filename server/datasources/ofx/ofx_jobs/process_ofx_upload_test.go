@@ -11,7 +11,6 @@ import (
 	"github.com/monetr/monetr/server/internal/mockgen"
 	"github.com/monetr/monetr/server/internal/mockqueue"
 	"github.com/monetr/monetr/server/internal/testutils"
-	"github.com/monetr/monetr/server/models"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/similar/similar_jobs"
@@ -65,7 +64,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				AccountId:   bankAccount.AccountId,
 				Name:        "sample-part-one.ofx",
 				Kind:        "transactions/uploads",
-				ContentType: models.IntuitQFXContentType,
+				ContentType: IntuitQFXContentType,
 				Size:        uint64(len(sampleFileData)),
 				CreatedBy:   user.UserId,
 				CreatedAt:   clock.Now().UTC(),
@@ -150,7 +149,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				AccountId:   bankAccount.AccountId,
 				Name:        "sample-part-two.ofx",
 				Kind:        "transactions/uploads",
-				ContentType: models.IntuitQFXContentType,
+				ContentType: IntuitQFXContentType,
 				Size:        uint64(len(sampleFileData)),
 				CreatedBy:   user.UserId,
 				CreatedAt:   clock.Now().UTC(),
@@ -256,7 +255,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				AccountId:   bankAccount.AccountId,
 				Name:        "sample-part-one.ofx",
 				Kind:        "transactions/uploads",
-				ContentType: models.IntuitQFXContentType,
+				ContentType: IntuitQFXContentType,
 				Size:        uint64(len(sampleFileData)),
 				CreatedBy:   user.UserId,
 				CreatedAt:   clock.Now().UTC(),
@@ -360,7 +359,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				AccountId:   bankAccount.AccountId,
 				Name:        "sample-no-amount.ofx",
 				Kind:        "transactions/uploads",
-				ContentType: models.IntuitQFXContentType,
+				ContentType: IntuitQFXContentType,
 				Size:        uint64(len(sampleFileData)),
 				CreatedBy:   user.UserId,
 				CreatedAt:   clock.Now().UTC(),
@@ -479,7 +478,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				AccountId:   bankAccount.AccountId,
 				Name:        "no-curdef-mxn.ofx",
 				Kind:        "transactions/uploads",
-				ContentType: models.IntuitQFXContentType,
+				ContentType: IntuitQFXContentType,
 				Size:        uint64(len(sampleFileData)),
 				CreatedBy:   user.UserId,
 				CreatedAt:   clock.Now().UTC(),

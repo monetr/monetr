@@ -7,7 +7,7 @@ import (
 )
 
 func TestStringP(t *testing.T) {
-	var input string = "12345"
+	input := "12345"
 	result := StringP(input)
 	assert.NotNil(t, result, "resulting pointer should never be nil")
 	assert.Equal(t, input, *result, "and the underlying value should match the input")
@@ -41,12 +41,12 @@ func TestSliceContains(t *testing.T) {
 
 func TestStringPEqual(t *testing.T) {
 	{
-		var a, b string = "a", "b"
+		a, b := "a", "b"
 		assert.False(t, StringPEqual(&a, &b), "should not be equal")
 	}
 
 	{
-		var a, b string = "a", "a"
+		a, b := "a", "a"
 		assert.True(t, StringPEqual(&a, &b), "should be equal")
 	}
 

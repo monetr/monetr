@@ -10,7 +10,6 @@ import (
 	"github.com/monetr/monetr/server/internal/mockqueue"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
-	"github.com/monetr/monetr/server/models"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
@@ -33,12 +32,12 @@ func TestPostTransactionUpload(t *testing.T) {
 			Store(
 				gomock.Any(),
 				gomock.Any(),
-				testutils.NewGenericMatcher(func(file models.File) bool {
+				testutils.NewGenericMatcher(func(file File) bool {
 					return myownsanity.Every(
 						assert.Equal(t, "transactions.ofx", file.Name),
 						assert.Equal(t, "transactions/uploads", file.Kind),
 						assert.Equal(t, bank.AccountId, file.AccountId),
-						assert.Equal(t, models.IntuitQFXContentType, file.ContentType),
+						assert.Equal(t, IntuitQFXContentType, file.ContentType),
 					)
 				}),
 			).
@@ -223,12 +222,12 @@ func TestPostTransactionUpload(t *testing.T) {
 			Store(
 				gomock.Any(),
 				gomock.Any(),
-				testutils.NewGenericMatcher(func(file models.File) bool {
+				testutils.NewGenericMatcher(func(file File) bool {
 					return myownsanity.Every(
 						assert.Equal(t, "transactions.ofx", file.Name),
 						assert.Equal(t, "transactions/uploads", file.Kind),
 						assert.Equal(t, bank.AccountId, file.AccountId),
-						assert.Equal(t, models.IntuitQFXContentType, file.ContentType),
+						assert.Equal(t, IntuitQFXContentType, file.ContentType),
 					)
 				}),
 			).

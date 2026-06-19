@@ -78,7 +78,7 @@ func TestApplyContentSecurityPolicy(t *testing.T) {
 			},
 		}
 
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 		rec := httptest.NewRecorder()
 		ctx := echo.New().NewContext(req, rec)
 
@@ -124,7 +124,7 @@ func TestApplyContentSecurityPolicy(t *testing.T) {
 			},
 		}
 
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 		rec := httptest.NewRecorder()
 		ctx := echo.New().NewContext(req, rec)
 

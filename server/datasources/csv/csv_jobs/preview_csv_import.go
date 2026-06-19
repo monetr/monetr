@@ -145,10 +145,6 @@ func PreviewCSVImport(
 		}
 
 		// Load the file and its data into memory.
-		if err := j.loadFile(ctx); err != nil {
-			return err
-		}
-
-		return nil
+		return j.loadFile(ctx)
 	})
 }

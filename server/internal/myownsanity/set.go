@@ -35,7 +35,7 @@ func (s Set[T]) Remove(item T) Set[T] {
 // MarshalJSON implements [json.Marshaler].
 func (s Set[T]) MarshalJSON() ([]byte, error) {
 	data := make([]T, 0, len(s))
-	for item, _ := range s {
+	for item := range s {
 		data = append(data, item)
 	}
 	return json.Marshal(data)

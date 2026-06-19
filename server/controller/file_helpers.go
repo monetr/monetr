@@ -7,7 +7,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/models"
 	. "github.com/monetr/monetr/server/models"
 )
 
@@ -40,12 +39,12 @@ func (c *Controller) consumeFileUpload(
 		// TODO Make this based on [models.contentTypeExtensions]!
 		case ".qfx", ".ofx", ".qbo":
 			log.DebugContext(c.getContext(ctx), "detected OFX file format")
-			contentType = string(models.IntuitQFXContentType)
+			contentType = string(IntuitQFXContentType)
 		default:
 			log.WarnContext(c.getContext(ctx), "could not determine file format by file extension")
 		}
 	}
-	valid := models.GetContentTypeIsValid(contentType)
+	valid := GetContentTypeIsValid(contentType)
 	if !valid {
 		crumbs.Debug(c.getContext(ctx),
 			"Unsupported file type was provided!",
