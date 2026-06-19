@@ -70,11 +70,14 @@ func (c *Controller) postChallenge(ctx echo.Context) error {
 		return c.notFound(ctx, "proof of work is not enabled")
 	}
 
-	var request struct {
-		Purpose string `json:"purpose"`
-	}
-	if err := ctx.Bind(&request); err != nil {
-		return c.invalidJson(ctx)
+	request, err := parse(
+		c,
+		ctx,
+		&schemas.ChallengeRequest{},
+		schemas.ChallengeSchema,
+	)
+	if err != nil {
+		return err
 	}
 
 	var purpose powchallenge.Purpose
@@ -93,7 +96,12 @@ func (c *Controller) postChallenge(ctx echo.Context) error {
 
 	challenge, err := c.Challenger.Issue(c.getContext(ctx), purpose)
 	if err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to issue proof of work challenge")
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
+			"failed to issue proof of work challenge",
+		)
 	}
 
 	return ctx.JSON(http.StatusOK, challenge)

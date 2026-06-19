@@ -2070,12 +2070,63 @@ func TestPostProofOfWorkChallenge(t *testing.T) {
 		conf := powEnabledConfig(t)
 		_, e := NewTestApplicationWithConfig(t, conf)
 
+		// An unknown purpose is now caught by the schema's In rule before we ever
+		// reach the controller's switch, so it comes back as a validation problem.
 		response := e.POST("/api/authentication/challenge").
 			WithJSON(map[string]any{
 				"purpose": "something-made-up",
 			}).
 			Expect()
 		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.purpose").String().IsEqual("must be a valid value")
+	})
+
+	t.Run("rejects a missing purpose", func(t *testing.T) {
+		conf := powEnabledConfig(t)
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		// The schema requires the purpose key to be present at all.
+		response := e.POST("/api/authentication/challenge").
+			WithJSON(map[string]any{}).
+			Expect()
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.purpose").String().IsEqual("required key is missing")
+	})
+
+	t.Run("rejects a blank purpose", func(t *testing.T) {
+		conf := powEnabledConfig(t)
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		// The key is present but empty, so Required fires rather than the In rule.
+		response := e.POST("/api/authentication/challenge").
+			WithJSON(map[string]any{
+				"purpose": "",
+			}).
+			Expect()
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.purpose").String().IsEqual("cannot be blank")
+	})
+
+	t.Run("rejects a purpose with the wrong casing", func(t *testing.T) {
+		conf := powEnabledConfig(t)
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		// The controller lower cases the purpose before its switch, but the schema
+		// runs first and is case sensitive. So an upper case purpose never even
+		// makes it to the controller, it gets rejected by the In rule. This is
+		// mostly here to document that the schema is the thing doing the gate
+		// keeping now.
+		response := e.POST("/api/authentication/challenge").
+			WithJSON(map[string]any{
+				"purpose": "Register",
+			}).
+			Expect()
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.purpose").String().IsEqual("must be a valid value")
 	})
 
 	t.Run("returns not found when proof of work is disabled", func(t *testing.T) {

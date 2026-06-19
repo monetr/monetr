@@ -42,8 +42,8 @@ func (p Purpose) valid() bool {
 	}
 }
 
-// Returned by Verify so the HTTP layer can map each failure to a specific
-// (and not too revealing) client message.
+// Returned by Verify so the HTTP layer can map each failure to a specific (and
+// not too revealing) client message.
 var (
 	ErrInvalidChallenge = errors.New("proof of work challenge is not valid")
 	ErrChallengeExpired = errors.New("proof of work challenge has expired")
@@ -53,9 +53,11 @@ var (
 
 const (
 	tokenVersion byte = 0x01
-	// Versioned so a bot operator has to run our javascript, not a generic solver.
+	// Versioned so a bot operator has to run our javascript, not a generic
+	// solver.
 	proofPrefix = "monetr-pow-v1:"
-	// HKDF info string; HKDF is one way so this stays independent of the signing key.
+	// HKDF info string; HKDF is one way so this stays independent of the signing
+	// key.
 	secretInfo = "monetr-pow-secret-v1"
 	// Clock skew tolerated on expiry, also padded onto the marker TTL.
 	skewLeeway = 30 * time.Second
@@ -82,17 +84,18 @@ const (
 // base32 keeps the token on a copy-paste safe alphabet (no +/ or -_).
 var tokenEncoding = base32.StdEncoding.WithPadding(base32.NoPadding)
 
-// EncodedTokenLength is how many characters a challenge token is once it has been
-// base32 encoded for the wire. The token is a fixed size so every challenge we
-// issue is exactly this long. This is exported so the request validation can
-// cheaply reject anything that is obviously not one of our tokens before we do
-// the real (and authoritative) verification in Verify.
+// EncodedTokenLength is how many characters a challenge token is once it has
+// been base32 encoded for the wire. The token is a fixed size so every
+// challenge we issue is exactly this long. This is exported so the request
+// validation can cheaply reject anything that is obviously not one of our
+// tokens before we do the real (and authoritative) verification in Verify.
 var EncodedTokenLength = tokenEncoding.EncodedLen(tokenLength)
 
 type Challenge struct {
 	Token      string `json:"challenge"`
 	Difficulty int    `json:"difficulty"`
-	// TTL in seconds, lets the client refetch a challenge that went stale while idle.
+	// TTL in seconds, lets the client refetch a challenge that went stale while
+	// idle.
 	TTL int `json:"ttl"`
 }
 
@@ -145,13 +148,17 @@ func NewChallenger(
 func DeriveSecret(seed []byte) []byte {
 	secret, err := hkdf.Key(sha256.New, seed, nil, secretInfo, 32)
 	if err != nil {
-		// Only fails if the length is too large for the hash, which 32 bytes is not.
+		// Only fails if the length is too large for the hash, which 32 bytes is
+		// not.
 		panic(errors.Wrap(err, "failed to derive proof of work secret"))
 	}
 	return secret
 }
 
-func (c *challengerBase) Issue(ctx context.Context, purpose Purpose) (*Challenge, error) {
+func (c *challengerBase) Issue(
+	ctx context.Context,
+	purpose Purpose,
+) (*Challenge, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -207,7 +214,12 @@ func (c *challengerBase) Issue(ctx context.Context, purpose Purpose) (*Challenge
 	}, nil
 }
 
-func (c *challengerBase) Verify(ctx context.Context, expectedPurpose Purpose, token string, nonce uint64) (returnErr error) {
+func (c *challengerBase) Verify(
+	ctx context.Context,
+	expectedPurpose Purpose,
+	token string,
+	nonce uint64,
+) (returnErr error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
