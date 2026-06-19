@@ -1,7 +1,6 @@
 package recurring
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -22,7 +21,7 @@ func TestRecurringDetection(t *testing.T) {
 		clock.Set(time.Date(2023, 12, 1, 9, 0, 0, 0, time.UTC))
 		data := GetFixtures(t, "amazon_sample_data_1.json")
 
-		result, err := DetectRecurringTransactions(context.Background(), clock, data)
+		result, err := DetectRecurringTransactions(t.Context(), clock, data)
 		assert.NoError(t, err)
 
 		j, err := json.MarshalIndent(result, "", "    ")
@@ -36,7 +35,7 @@ func TestRecurringDetection(t *testing.T) {
 		clock.Set(time.Date(2022, 3, 1, 9, 0, 0, 0, time.UTC))
 		data := GetFixtures(t, "monetr_freshbooks_data_1.json")
 
-		result, err := DetectRecurringTransactions(context.Background(), clock, data)
+		result, err := DetectRecurringTransactions(t.Context(), clock, data)
 		assert.NoError(t, err)
 
 		j, err := json.MarshalIndent(result, "", "    ")
@@ -59,7 +58,7 @@ func TestRecurringDetection(t *testing.T) {
 			detector.AddTransaction(&data[i])
 		}
 
-		groups := detector.DetectSimilarTransactions(context.Background())
+		groups := detector.DetectSimilarTransactions(t.Context())
 		assert.NotEmpty(t, groups, "must return an array of groups of similar transactions")
 		for _, group := range groups {
 			if len(group.Members) < 3 {
@@ -82,7 +81,7 @@ func TestRecurringDetection(t *testing.T) {
 				}
 			}
 
-			recurringResult, err := DetectRecurringTransactions(context.Background(), clock, transactions)
+			recurringResult, err := DetectRecurringTransactions(t.Context(), clock, transactions)
 			assert.NoError(t, err)
 
 			if recurringResult.Best == nil || recurringResult.Best.StartDate.IsZero() {

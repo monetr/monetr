@@ -1,7 +1,6 @@
 package stripe_helper
 
 import (
-	"context"
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
@@ -22,7 +21,7 @@ func TestStripeBase_GetProductsById(t *testing.T) {
 
 		client := NewStripeHelper(testutils.GetLog(t), gofakeit.UUID())
 
-		products, err := client.GetProductsById(context.Background(), []string{
+		products, err := client.GetProductsById(t.Context(), []string{
 			mock_stripe.FakeStripeProductId(t),
 			mock_stripe.FakeStripeProductId(t),
 			mock_stripe.FakeStripeProductId(t),
@@ -40,7 +39,7 @@ func TestStripeBase_GetProductsById(t *testing.T) {
 
 		client := NewStripeHelper(testutils.GetLog(t), gofakeit.UUID())
 
-		products, err := client.GetProductsById(context.Background(), []string{
+		products, err := client.GetProductsById(t.Context(), []string{
 			mock_stripe.FakeStripeProductId(t),
 			mock_stripe.FakeStripeProductId(t),
 			mock_stripe.FakeStripeProductId(t),
@@ -52,7 +51,7 @@ func TestStripeBase_GetProductsById(t *testing.T) {
 	t.Run("integration", func(t *testing.T) {
 		client := NewStripeHelper(testutils.GetLog(t), GetStripeAPIKeyForTest(t))
 
-		products, err := client.GetProductsById(context.Background(), []string{
+		products, err := client.GetProductsById(t.Context(), []string{
 			IntegrationTestProductID,
 		})
 		assert.NoError(t, err, "should return an error")
@@ -78,7 +77,7 @@ func TestStripeBase_GetCheckoutSession(t *testing.T) {
 
 		client := NewStripeHelper(testutils.GetLog(t), gofakeit.UUID())
 
-		checkoutSession, err := client.GetCheckoutSession(context.Background(), checkoutSessionId)
+		checkoutSession, err := client.GetCheckoutSession(t.Context(), checkoutSessionId)
 		assert.NoError(t, err, "should retrieve checkout session by id")
 		assert.NotNil(t, checkoutSession, "should not be nil")
 		assert.Equal(t, checkoutSessionId, checkoutSession.ID, "ID must match")
@@ -93,7 +92,7 @@ func TestStripeBase_GetCheckoutSession(t *testing.T) {
 
 		client := NewStripeHelper(testutils.GetLog(t), gofakeit.UUID())
 
-		checkoutSession, err := client.GetCheckoutSession(context.Background(), "")
+		checkoutSession, err := client.GetCheckoutSession(t.Context(), "")
 		assert.IsType(t, &stripe.Error{}, errors.Cause(err), "should be a stripe error")
 		assert.Nil(t, checkoutSession, "checkout session should be nil")
 	})

@@ -22,7 +22,7 @@ func TestBaseSecurityRepository_Login(t *testing.T) {
 		login, password := fixtures.GivenIHaveLogin(t, clock)
 		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock)
 
-		result, _, err := repo.Login(context.Background(), login.Email, password)
+		result, _, err := repo.Login(t.Context(), login.Email, password)
 		assert.NoError(t, err, "must not return an error for valid credentials")
 		assert.NotNil(t, result, "must return a login object for valid credentials")
 		assert.Equal(t, login.LoginId, result.LoginId, "must return the same login as the fixture")
@@ -35,7 +35,7 @@ func TestBaseSecurityRepository_Login(t *testing.T) {
 
 		email := strings.ToUpper(login.Email)
 
-		result, _, err := repo.Login(context.Background(), email, password)
+		result, _, err := repo.Login(t.Context(), email, password)
 		assert.NoError(t, err, "must not return an error for valid credentials")
 		assert.NotNil(t, result, "must return a login object for valid credentials")
 		assert.Equal(t, login.LoginId, result.LoginId, "must return the same login as the fixture")
@@ -47,7 +47,7 @@ func TestBaseSecurityRepository_Login(t *testing.T) {
 		email := testutils.GetUniqueEmail(t)
 		password := gofakeit.Generate("????????")
 
-		result, _, err := repo.Login(context.Background(), email, password)
+		result, _, err := repo.Login(t.Context(), email, password)
 		assert.EqualError(t, err, "invalid credentials provided")
 		assert.Equal(t, repository.ErrInvalidCredentials, errors.Cause(err), "must be caused by invalid credentials")
 		assert.Nil(t, result, "must not return a login object when the credentials are invalid")
@@ -58,7 +58,7 @@ func TestBaseSecurityRepository_Login(t *testing.T) {
 		login, password := fixtures.GivenIHaveLogin(t, clock)
 		repo := repository.NewSecurityRepository(testutils.GetBadPgDatabase(t), clock)
 
-		result, _, err := repo.Login(context.Background(), login.Email, password)
+		result, _, err := repo.Login(t.Context(), login.Email, password)
 		assert.EqualError(t, err, "failed to verify credentials: forcing a bad connection")
 		assert.Nil(t, result, "must not return a result if the connection is bad")
 	})
@@ -75,26 +75,26 @@ func TestBaseSecurityRepository_ChangePassword(t *testing.T) {
 		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock)
 
 		{ // Make sure that we can authenticate with the initial hashed password.
-			result, _, err := repo.Login(context.Background(), login.Email, password)
+			result, _, err := repo.Login(t.Context(), login.Email, password)
 			assert.NoError(t, err, "must not return an error for valid credentials")
 			assert.NotNil(t, result, "must return a login object for valid credentials")
 			assert.Equal(t, login.LoginId, result.LoginId, "must return the same login as the fixture")
 		}
 
 		{ // Update the login's password.
-			err := repo.ChangePassword(context.Background(), login.LoginId, password, newPassword)
+			err := repo.ChangePassword(t.Context(), login.LoginId, password, newPassword)
 			assert.NoError(t, err, "must not return an error when changing the password")
 		}
 
 		{ // Make sure that we can no longer authenticate using the old credentials.
-			result, _, err := repo.Login(context.Background(), login.Email, password)
+			result, _, err := repo.Login(t.Context(), login.Email, password)
 			assert.EqualError(t, err, "invalid credentials provided")
 			assert.Equal(t, repository.ErrInvalidCredentials, errors.Cause(err), "must be caused by invalid credentials")
 			assert.Nil(t, result, "must not return a login object when the credentials are invalid")
 		}
 
 		{ // Make sure that we can authenticate with the new credentials.
-			result, _, err := repo.Login(context.Background(), login.Email, newPassword)
+			result, _, err := repo.Login(t.Context(), login.Email, newPassword)
 			assert.NoError(t, err, "must not return an error for valid credentials")
 			assert.NotNil(t, result, "must return a login object for valid credentials")
 			assert.Equal(t, login.LoginId, result.LoginId, "must return the same login as the fixture")
@@ -112,27 +112,27 @@ func TestBaseSecurityRepository_ChangePassword(t *testing.T) {
 		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock)
 
 		{ // Make sure that we can authenticate with the initial hashed password.
-			result, _, err := repo.Login(context.Background(), login.Email, password)
+			result, _, err := repo.Login(t.Context(), login.Email, password)
 			assert.NoError(t, err, "must not return an error for valid credentials")
 			assert.NotNil(t, result, "must return a login object for valid credentials")
 			assert.Equal(t, login.LoginId, result.LoginId, "must return the same login as the fixture")
 		}
 
 		{ // Try to update the login's password with a bogus old password. This will fail.
-			err := repo.ChangePassword(context.Background(), login.LoginId, bogusPassword, newPassword)
+			err := repo.ChangePassword(t.Context(), login.LoginId, bogusPassword, newPassword)
 			assert.EqualError(t, err, "invalid credentials provided")
 			assert.Equal(t, repository.ErrInvalidCredentials, errors.Cause(err), "must be caused by invalid credentials")
 		}
 
 		{ // Make sure that we cannot authenticate using the new password we tried to change it to.
-			result, _, err := repo.Login(context.Background(), login.Email, newPassword)
+			result, _, err := repo.Login(t.Context(), login.Email, newPassword)
 			assert.EqualError(t, err, "invalid credentials provided")
 			assert.Equal(t, repository.ErrInvalidCredentials, errors.Cause(err), "must be caused by invalid credentials")
 			assert.Nil(t, result, "must not return a login object when the credentials are invalid")
 		}
 
 		{ // Make sure that we can still authenticate using the real old password.
-			result, _, err := repo.Login(context.Background(), login.Email, password)
+			result, _, err := repo.Login(t.Context(), login.Email, password)
 			assert.NoError(t, err, "must not return an error for valid credentials")
 			assert.NotNil(t, result, "must return a login object for valid credentials")
 			assert.Equal(t, login.LoginId, result.LoginId, "must return the same login as the fixture")
@@ -145,7 +145,7 @@ func TestBaseSecurityRepository_ChangePassword(t *testing.T) {
 		bogusPassword := gofakeit.Generate("?????????????")
 		newPassword := gofakeit.Generate("?????????????")
 
-		err := repo.ChangePassword(context.Background(), "user_bogus", bogusPassword, newPassword)
+		err := repo.ChangePassword(t.Context(), "user_bogus", bogusPassword, newPassword)
 		assert.EqualError(t, err, "failed to find login record to change password: forcing a bad connection")
 	})
 }
@@ -160,7 +160,7 @@ func TestBaseSecurityRepository_SetupTOTP(t *testing.T) {
 
 		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+		ctx, cancel := context.WithTimeout(t.Context(), 1*time.Second)
 		defer cancel()
 		uri, recoveryCodes, err := repo.SetupTOTP(ctx, login.LoginId)
 		assert.NoError(t, err, "should setup TOTP without an error")
@@ -178,7 +178,7 @@ func TestBaseSecurityRepository_SetupTOTP(t *testing.T) {
 		login, _ := fixtures.GivenIHaveLogin(t, clock)
 		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock)
 
-		ctx1, cancel1 := context.WithTimeout(context.Background(), 1*time.Second)
+		ctx1, cancel1 := context.WithTimeout(t.Context(), 1*time.Second)
 		defer cancel1()
 		initialUri, initialRecovery, err := repo.SetupTOTP(ctx1, login.LoginId)
 		assert.NoError(t, err, "should setup TOTP without an error")
@@ -186,7 +186,7 @@ func TestBaseSecurityRepository_SetupTOTP(t *testing.T) {
 		assert.NotEmpty(t, initialUri, "should return a TOTP uri")
 
 		// Now try to setup TOTP again, we should get an error.
-		ctx2, cancel2 := context.WithTimeout(context.Background(), 1*time.Second)
+		ctx2, cancel2 := context.WithTimeout(t.Context(), 1*time.Second)
 		defer cancel2()
 		secondUri, secondRecovery, err := repo.SetupTOTP(ctx2, login.LoginId)
 		assert.NoError(t, err, "should setup TOTP without an error")
@@ -203,7 +203,7 @@ func TestBaseSecurityRepository_SetupTOTP(t *testing.T) {
 		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock)
 
 		{ // Initially setup the TOTP stuff.
-			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+			ctx, cancel := context.WithTimeout(t.Context(), 1*time.Second)
 			defer cancel()
 			_, _, err := repo.SetupTOTP(ctx, login.LoginId)
 			assert.NoError(t, err, "should setup TOTP without an error")
@@ -215,7 +215,7 @@ func TestBaseSecurityRepository_SetupTOTP(t *testing.T) {
 		}
 
 		// Now try to setup TOTP again, we should get an error.
-		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+		ctx, cancel := context.WithTimeout(t.Context(), 1*time.Second)
 		defer cancel()
 		uri, recoveryCodes, err := repo.SetupTOTP(ctx, login.LoginId)
 		assert.EqualError(t, err, "login already has TOTP enabled")

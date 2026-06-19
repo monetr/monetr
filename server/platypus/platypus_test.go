@@ -1,7 +1,6 @@
 package platypus
 
 import (
-	"context"
 	"testing"
 
 	"github.com/benbjohnson/clock"
@@ -35,7 +34,7 @@ func TestPlaid_CreateLinkToken(t *testing.T) {
 			OAuthDomain:  "localhost",
 		})
 
-		linkToken, err := platypus.CreateLinkToken(context.Background(), LinkTokenOptions{
+		linkToken, err := platypus.CreateLinkToken(t.Context(), LinkTokenOptions{
 			ClientUserID:             "1234",
 			LegalName:                gofakeit.Name(),
 			PhoneNumber:              nil,
@@ -72,7 +71,7 @@ func TestPlaid_CreateLinkToken(t *testing.T) {
 			WebhooksDomain:  "monetr.mini",
 		})
 
-		linkToken, err := platypus.CreateLinkToken(context.Background(), LinkTokenOptions{
+		linkToken, err := platypus.CreateLinkToken(t.Context(), LinkTokenOptions{
 			ClientUserID:             "1234",
 			LegalName:                gofakeit.Name(),
 			PhoneNumber:              nil,
@@ -107,7 +106,7 @@ func TestPlaid_CreateLinkToken(t *testing.T) {
 			OAuthDomain:  "localhost",
 		})
 
-		linkToken, err := platypus.CreateLinkToken(context.Background(), LinkTokenOptions{
+		linkToken, err := platypus.CreateLinkToken(t.Context(), LinkTokenOptions{
 			ClientUserID:             "1234",
 			LegalName:                gofakeit.Name(),
 			PhoneNumber:              nil,

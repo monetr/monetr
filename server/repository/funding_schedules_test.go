@@ -1,7 +1,6 @@
 package repository_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/benbjohnson/clock"
@@ -31,7 +30,7 @@ func TestRepositoryBase_UpdateFundingSchedule(t *testing.T) {
 
 		fundingSchedule.Name = "Updated name"
 
-		err := repo.UpdateFundingSchedule(context.Background(), fundingSchedule)
+		err := repo.UpdateFundingSchedule(t.Context(), fundingSchedule)
 		assert.NoError(t, err, "must be able to update funding schedule")
 		updatedSchedule := testutils.MustDBRead(t, *fundingSchedule)
 		assert.Equal(t, "Updated name", updatedSchedule.Name, "name should match the new one")

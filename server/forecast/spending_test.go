@@ -41,7 +41,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 			fundingInstructions,
 		)
 
-		events, err := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 3, now, timezone)
+		events, err := spendingInstructions.GetNextNSpendingEventsAfter(t.Context(), 3, now, timezone)
 		assert.NoError(t, err, "should not return an error")
 		for i, item := range events {
 			if !assert.GreaterOrEqual(t, item.RollingAllocation, int64(0), "rolling allocation must be greater than zero: [%d] %s", i, item.Date) {
@@ -113,7 +113,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 
 		{ // If we do the forecase before the expenses due date, then we will get an event showing it was spent.
 			now := time.Date(2024, 3, 1, 0, 0, 1, 0, timezone).UTC()
-			events, err := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 4, now, timezone)
+			events, err := spendingInstructions.GetNextNSpendingEventsAfter(t.Context(), 4, now, timezone)
 			assert.NoError(t, err, "should not return an error")
 			for i, item := range events {
 				if !assert.GreaterOrEqual(t, item.RollingAllocation, int64(0), "rolling allocation must be greater than zero: [%d] %s", i, item.Date) {
@@ -168,7 +168,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 
 		{ // But if it hasn't been spent after its due date then we want the same contributions.
 			now := time.Date(2024, 3, 4, 0, 0, 1, 0, timezone).UTC()
-			events, err := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 3, now, timezone)
+			events, err := spendingInstructions.GetNextNSpendingEventsAfter(t.Context(), 3, now, timezone)
 			assert.NoError(t, err, "should not return an error")
 			for i, item := range events {
 				if !assert.GreaterOrEqual(t, item.RollingAllocation, int64(0), "rolling allocation must be greater than zero: [%d] %s", i, item.Date) {
@@ -240,7 +240,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 			fundingInstructions,
 		)
 
-		events, err := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 7, now, timezone)
+		events, err := spendingInstructions.GetNextNSpendingEventsAfter(t.Context(), 7, now, timezone)
 		assert.NoError(t, err, "should not return an error")
 		for i, item := range events {
 			if !assert.GreaterOrEqual(t, item.RollingAllocation, int64(0), "rolling allocation must be greater than zero: [%d] %s", i, item.Date) {
@@ -345,7 +345,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 			fundingInstructions,
 		)
 
-		events, err := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 8, now, timezone)
+		events, err := spendingInstructions.GetNextNSpendingEventsAfter(t.Context(), 8, now, timezone)
 		assert.NoError(t, err, "should not return an error")
 		for i, item := range events {
 			if !assert.GreaterOrEqual(t, item.RollingAllocation, int64(0), "rolling allocation must be greater than zero: [%d] %s", i, item.Date) {
@@ -459,7 +459,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 			fundingInstructions,
 		)
 
-		events, err := spendingInstructions.GetSpendingEventsBetween(context.Background(), now, now.AddDate(1, 0, 0), timezone)
+		events, err := spendingInstructions.GetSpendingEventsBetween(t.Context(), now, now.AddDate(1, 0, 0), timezone)
 		assert.NoError(t, err, "should not return an error")
 		// Should have 36 events, 12 spending events and 24 funding events.
 		assert.Len(t, events, 12+24, "should have 36 events")
@@ -497,7 +497,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 			fundingInstructions,
 		)
 
-		events, err := spendingInstructions.GetSpendingEventsBetween(context.Background(), now, now.AddDate(1, 0, 0), timezone)
+		events, err := spendingInstructions.GetSpendingEventsBetween(t.Context(), now, now.AddDate(1, 0, 0), timezone)
 		assert.NoError(t, err, "should not return an error")
 		assert.Len(t, events, 45, "should have 45 events")
 		for i, item := range events {
@@ -533,7 +533,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 			fundingInstructions,
 		)
 
-		events, err := spendingInstructions.GetSpendingEventsBetween(context.Background(), now, now.AddDate(1, 0, 0), timezone)
+		events, err := spendingInstructions.GetSpendingEventsBetween(t.Context(), now, now.AddDate(1, 0, 0), timezone)
 		assert.NoError(t, err, "should not return an error")
 		assert.Empty(t, events, "there should be no spending events for paused spending")
 	})
@@ -567,7 +567,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 			fundingInstructions,
 		).(*spendingInstructionBase)
 
-		result, err := spendingInstructions.getNextSpendingEventAfter(context.Background(), start, timezone, 0)
+		result, err := spendingInstructions.getNextSpendingEventAfter(t.Context(), start, timezone, 0)
 		assert.NoError(t, err, "should not return an error")
 		assert.Nil(t, result, "result should be nil because the goal is completed as of the start timestamp")
 	})
@@ -606,7 +606,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 			fundingInstructions,
 		).(*spendingInstructionBase)
 
-		events, err := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 8, now, timezone)
+		events, err := spendingInstructions.GetNextNSpendingEventsAfter(t.Context(), 8, now, timezone)
 		assert.NoError(t, err, "should not return an error")
 		assert.Equal(t, []SpendingEvent{
 			{
@@ -700,7 +700,7 @@ func TestSpendingInstructionBase_GetNextInflowEventAfter(t *testing.T) {
 		spendingInstructions := NewSpendingInstructions(log, spending, fundingInstructions)
 
 		event, err := spendingInstructions.GetNextInflowEventAfter(
-			context.Background(),
+			t.Context(),
 			time.Now(),
 			time.UTC,
 		)
@@ -732,7 +732,7 @@ func TestSpendingInstructionBase_GetNextInflowEventAfter(t *testing.T) {
 		})
 		spendingInstructions := NewSpendingInstructions(log, spending, fundingInstructions)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Hour)
+		ctx, cancel := context.WithTimeout(t.Context(), 1*time.Hour)
 		defer cancel()
 		event, err := spendingInstructions.GetNextInflowEventAfter(
 			ctx,
@@ -779,7 +779,7 @@ func TestSpendingInstructionBase_GetNextInflowEventAfter(t *testing.T) {
 		spendingInstructions := NewSpendingInstructions(log, spending, fundingInstructions)
 
 		event, err := spendingInstructions.GetNextInflowEventAfter(
-			context.Background(),
+			t.Context(),
 			now,
 			centralTimezone,
 		)

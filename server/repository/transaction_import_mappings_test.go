@@ -1,7 +1,6 @@
 package repository_test
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -58,7 +57,7 @@ func TestRepositoryBase_CreateTransactionImportMapping(t *testing.T) {
 			Mapping: validMapping(headers),
 		}
 
-		err := repo.CreateTransactionImportMapping(context.Background(), &mapping)
+		err := repo.CreateTransactionImportMapping(t.Context(), &mapping)
 		require.NoError(t, err, "must be able to create transaction import mapping")
 
 		assert.False(t, mapping.TransactionImportMappingId.IsZero(), "id must be assigned")
@@ -91,9 +90,9 @@ func TestRepositoryBase_GetTransactionImportMapping(t *testing.T) {
 		mapping := models.TransactionImportMapping{
 			Mapping: validMapping([]string{"Date", "Description", "Amount", "Id"}),
 		}
-		require.NoError(t, repo.CreateTransactionImportMapping(context.Background(), &mapping))
+		require.NoError(t, repo.CreateTransactionImportMapping(t.Context(), &mapping))
 
-		got, err := repo.GetTransactionImportMapping(context.Background(), mapping.TransactionImportMappingId)
+		got, err := repo.GetTransactionImportMapping(t.Context(), mapping.TransactionImportMappingId)
 		require.NoError(t, err, "must be able to retrieve mapping by id")
 		assert.Equal(t, mapping.TransactionImportMappingId, got.TransactionImportMappingId)
 		assert.Equal(t, mapping.Signature, got.Signature)
@@ -116,9 +115,9 @@ func TestRepositoryBase_GetTransactionImportMapping(t *testing.T) {
 		mapping := models.TransactionImportMapping{
 			Mapping: validMapping([]string{"Date", "Description", "Amount", "Id"}),
 		}
-		require.NoError(t, repoA.CreateTransactionImportMapping(context.Background(), &mapping))
+		require.NoError(t, repoA.CreateTransactionImportMapping(t.Context(), &mapping))
 
-		got, err := repoB.GetTransactionImportMapping(context.Background(), mapping.TransactionImportMappingId)
+		got, err := repoB.GetTransactionImportMapping(t.Context(), mapping.TransactionImportMappingId)
 		require.Error(t, err, "must not return another account's mapping")
 		assert.True(t, errors.Is(err, pg.ErrNoRows), "must surface a not-found error")
 		assert.Nil(t, got, "must not return a record across accounts")
@@ -138,16 +137,16 @@ func TestRepositoryBase_GetTransactionImportMappings(t *testing.T) {
 		first := models.TransactionImportMapping{
 			Mapping: validMapping([]string{"Date", "Description", "Amount", "Id"}),
 		}
-		require.NoError(t, repo.CreateTransactionImportMapping(context.Background(), &first))
+		require.NoError(t, repo.CreateTransactionImportMapping(t.Context(), &first))
 
 		mock.Add(1 * time.Minute)
 
 		second := models.TransactionImportMapping{
 			Mapping: validMapping([]string{"Posted", "Memo", "Value", "Reference"}),
 		}
-		require.NoError(t, repo.CreateTransactionImportMapping(context.Background(), &second))
+		require.NoError(t, repo.CreateTransactionImportMapping(t.Context(), &second))
 
-		got, err := repo.GetTransactionImportMappings(context.Background(), 10, 0)
+		got, err := repo.GetTransactionImportMappings(t.Context(), 10, 0)
 		require.NoError(t, err, "must be able to list mappings")
 		require.Len(t, got, 2, "must return both mappings")
 		assert.Equal(t, second.TransactionImportMappingId, got[0].TransactionImportMappingId, "most recent must be first")
@@ -168,16 +167,16 @@ func TestRepositoryBase_GetTransactionImportMappings(t *testing.T) {
 			mapping := models.TransactionImportMapping{
 				Mapping: validMapping([]string{"Date", "Description", "Amount", "Id"}),
 			}
-			require.NoError(t, repo.CreateTransactionImportMapping(context.Background(), &mapping))
+			require.NoError(t, repo.CreateTransactionImportMapping(t.Context(), &mapping))
 			created = append(created, mapping.TransactionImportMappingId)
 			mock.Add(1 * time.Minute)
 		}
 
-		page1, err := repo.GetTransactionImportMappings(context.Background(), 2, 0)
+		page1, err := repo.GetTransactionImportMappings(t.Context(), 2, 0)
 		require.NoError(t, err)
 		require.Len(t, page1, 2, "first page must return limit-many mappings")
 
-		page2, err := repo.GetTransactionImportMappings(context.Background(), 2, 2)
+		page2, err := repo.GetTransactionImportMappings(t.Context(), 2, 2)
 		require.NoError(t, err)
 		require.Len(t, page2, 1, "second page must return remaining mappings")
 
@@ -209,14 +208,14 @@ func TestRepositoryBase_GetTransactionImportMappings(t *testing.T) {
 		mappingA := models.TransactionImportMapping{
 			Mapping: validMapping([]string{"Date", "Description", "Amount", "Id"}),
 		}
-		require.NoError(t, repoA.CreateTransactionImportMapping(context.Background(), &mappingA))
+		require.NoError(t, repoA.CreateTransactionImportMapping(t.Context(), &mappingA))
 
 		mappingB := models.TransactionImportMapping{
 			Mapping: validMapping([]string{"Posted", "Memo", "Value", "Reference"}),
 		}
-		require.NoError(t, repoB.CreateTransactionImportMapping(context.Background(), &mappingB))
+		require.NoError(t, repoB.CreateTransactionImportMapping(t.Context(), &mappingB))
 
-		got, err := repoA.GetTransactionImportMappings(context.Background(), 10, 0)
+		got, err := repoA.GetTransactionImportMappings(t.Context(), 10, 0)
 		require.NoError(t, err)
 		require.Len(t, got, 1, "account A must only see its own mapping")
 		assert.Equal(t, mappingA.TransactionImportMappingId, got[0].TransactionImportMappingId)
@@ -236,24 +235,24 @@ func TestRepositoryBase_GetTransactionImportMappingsBySignature(t *testing.T) {
 		matching1 := models.TransactionImportMapping{
 			Mapping: validMapping([]string{"Date", "Description", "Amount", "Id"}),
 		}
-		require.NoError(t, repo.CreateTransactionImportMapping(context.Background(), &matching1))
+		require.NoError(t, repo.CreateTransactionImportMapping(t.Context(), &matching1))
 
 		mock.Add(1 * time.Minute)
 
 		matching2 := models.TransactionImportMapping{
 			Mapping: validMapping([]string{"Date", "Description", "Amount", "Id"}),
 		}
-		require.NoError(t, repo.CreateTransactionImportMapping(context.Background(), &matching2))
+		require.NoError(t, repo.CreateTransactionImportMapping(t.Context(), &matching2))
 
 		other := models.TransactionImportMapping{
 			Mapping: validMapping([]string{"Posted", "Memo", "Value", "Reference"}),
 		}
-		require.NoError(t, repo.CreateTransactionImportMapping(context.Background(), &other))
+		require.NoError(t, repo.CreateTransactionImportMapping(t.Context(), &other))
 
 		assert.Equal(t, matching1.Signature, matching2.Signature, "same headers must produce same signature")
 		assert.NotEqual(t, matching1.Signature, other.Signature, "different headers must produce different signatures")
 
-		got, err := repo.GetTransactionImportMappingsBySignature(context.Background(), matching1.Signature, 10, 0)
+		got, err := repo.GetTransactionImportMappingsBySignature(t.Context(), matching1.Signature, 10, 0)
 		require.NoError(t, err)
 		require.Len(t, got, 2, "must return only the two matching mappings")
 		assert.Equal(t, matching2.TransactionImportMappingId, got[0].TransactionImportMappingId, "most recent must be first")
@@ -272,12 +271,12 @@ func TestRepositoryBase_GetTransactionImportMappingsBySignature(t *testing.T) {
 		mixedCase := models.TransactionImportMapping{
 			Mapping: validMapping([]string{"Date", "Description", "Amount", "Id"}),
 		}
-		require.NoError(t, repo.CreateTransactionImportMapping(context.Background(), &mixedCase))
+		require.NoError(t, repo.CreateTransactionImportMapping(t.Context(), &mixedCase))
 
 		variant := models.TransactionImportMapping{
 			Mapping: validMapping([]string{"DATE", "description", "Amount", "id"}),
 		}
-		require.NoError(t, repo.CreateTransactionImportMapping(context.Background(), &variant))
+		require.NoError(t, repo.CreateTransactionImportMapping(t.Context(), &variant))
 
 		assert.Equal(t, mixedCase.Signature, variant.Signature, "signature must ignore case differences in headers")
 	})
@@ -299,16 +298,16 @@ func TestRepositoryBase_GetTransactionImportMappingsBySignature(t *testing.T) {
 		mappingA := models.TransactionImportMapping{
 			Mapping: validMapping(headers),
 		}
-		require.NoError(t, repoA.CreateTransactionImportMapping(context.Background(), &mappingA))
+		require.NoError(t, repoA.CreateTransactionImportMapping(t.Context(), &mappingA))
 
 		mappingB := models.TransactionImportMapping{
 			Mapping: validMapping(headers),
 		}
-		require.NoError(t, repoB.CreateTransactionImportMapping(context.Background(), &mappingB))
+		require.NoError(t, repoB.CreateTransactionImportMapping(t.Context(), &mappingB))
 
 		require.Equal(t, mappingA.Signature, mappingB.Signature, "same headers across accounts must share signature")
 
-		got, err := repoA.GetTransactionImportMappingsBySignature(context.Background(), mappingA.Signature, 10, 0)
+		got, err := repoA.GetTransactionImportMappingsBySignature(t.Context(), mappingA.Signature, 10, 0)
 		require.NoError(t, err)
 		require.Len(t, got, 1, "account A must only see its own matching mapping")
 		assert.Equal(t, mappingA.TransactionImportMappingId, got[0].TransactionImportMappingId)

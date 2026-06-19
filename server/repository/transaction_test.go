@@ -1,7 +1,6 @@
 package repository_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/benbjohnson/clock"
@@ -55,7 +54,7 @@ func TestRepositoryBase_GetTransactionsByPlaidTransactionId(t *testing.T) {
 			CreatedAt:      clock.Now(),
 			DeletedAt:      nil,
 		}
-		assert.NoError(t, repo.CreatePlaidTransactions(context.Background(), &plaidTransaction))
+		assert.NoError(t, repo.CreatePlaidTransactions(t.Context(), &plaidTransaction))
 
 		transaction := models.Transaction{
 			AccountId:          repo.AccountId(),
@@ -75,9 +74,9 @@ func TestRepositoryBase_GetTransactionsByPlaidTransactionId(t *testing.T) {
 			CreatedAt:            clock.Now(),
 		}
 
-		require.NoError(t, repo.CreateTransaction(context.Background(), transaction.BankAccountId, &transaction), "must create transaction")
+		require.NoError(t, repo.CreateTransaction(t.Context(), transaction.BankAccountId, &transaction), "must create transaction")
 
-		byPlaidTransaction, err := repo.GetTransactionsByPlaidTransactionId(context.Background(),
+		byPlaidTransaction, err := repo.GetTransactionsByPlaidTransactionId(t.Context(),
 			checkingAccount.LinkId,
 			[]string{
 				plaidTransaction.PlaidId,
@@ -128,7 +127,7 @@ func TestRepositoryBase_GetTransactionsByPlaidTransactionId(t *testing.T) {
 			CreatedAt:      clock.Now(),
 			DeletedAt:      nil,
 		}
-		assert.NoError(t, repo.CreatePlaidTransactions(context.Background(), &pendingPlaidTransaction))
+		assert.NoError(t, repo.CreatePlaidTransactions(t.Context(), &pendingPlaidTransaction))
 
 		plaidTransaction := models.PlaidTransaction{
 			AccountId:          repo.AccountId(),
@@ -148,7 +147,7 @@ func TestRepositoryBase_GetTransactionsByPlaidTransactionId(t *testing.T) {
 			CreatedAt:      clock.Now(),
 			DeletedAt:      nil,
 		}
-		assert.NoError(t, repo.CreatePlaidTransactions(context.Background(), &plaidTransaction))
+		assert.NoError(t, repo.CreatePlaidTransactions(t.Context(), &plaidTransaction))
 
 		transaction := models.Transaction{
 			AccountId:                 repo.AccountId(),
@@ -169,10 +168,10 @@ func TestRepositoryBase_GetTransactionsByPlaidTransactionId(t *testing.T) {
 			CreatedAt:            clock.Now(),
 		}
 
-		require.NoError(t, repo.CreateTransaction(context.Background(), transaction.BankAccountId, &transaction), "must create transaction")
+		require.NoError(t, repo.CreateTransaction(t.Context(), transaction.BankAccountId, &transaction), "must create transaction")
 
 		{ // Query by the non pending ID
-			byPlaidTransaction, err := repo.GetTransactionsByPlaidTransactionId(context.Background(),
+			byPlaidTransaction, err := repo.GetTransactionsByPlaidTransactionId(t.Context(),
 				checkingAccount.LinkId,
 				[]string{
 					plaidTransaction.PlaidId,
@@ -185,7 +184,7 @@ func TestRepositoryBase_GetTransactionsByPlaidTransactionId(t *testing.T) {
 		}
 
 		{ // And query by the pending transaction ID.
-			byPlaidTransaction, err := repo.GetTransactionsByPlaidTransactionId(context.Background(),
+			byPlaidTransaction, err := repo.GetTransactionsByPlaidTransactionId(t.Context(),
 				checkingAccount.LinkId,
 				[]string{
 					pendingPlaidTransaction.PlaidId,
@@ -198,7 +197,7 @@ func TestRepositoryBase_GetTransactionsByPlaidTransactionId(t *testing.T) {
 		}
 
 		{ // And query by both!
-			byPlaidTransaction, err := repo.GetTransactionsByPlaidTransactionId(context.Background(),
+			byPlaidTransaction, err := repo.GetTransactionsByPlaidTransactionId(t.Context(),
 				checkingAccount.LinkId,
 				[]string{
 					plaidTransaction.PlaidId,
@@ -247,7 +246,7 @@ func TestRepositoryBase_GetTransactionsByLunchFlowId(t *testing.T) {
 				CreatedAt:              clock.Now(),
 			},
 		}
-		require.NoError(t, repo.CreateLunchFlowTransactions(context.Background(), lunchFlowTransactions))
+		require.NoError(t, repo.CreateLunchFlowTransactions(t.Context(), lunchFlowTransactions))
 
 		transaction := models.Transaction{
 			AccountId:              repo.AccountId(),
@@ -266,10 +265,10 @@ func TestRepositoryBase_GetTransactionsByLunchFlowId(t *testing.T) {
 			Source:               models.TransactionSourceLunchFlow,
 			CreatedAt:            clock.Now(),
 		}
-		require.NoError(t, repo.CreateTransaction(context.Background(), transaction.BankAccountId, &transaction), "must create transaction")
+		require.NoError(t, repo.CreateTransaction(t.Context(), transaction.BankAccountId, &transaction), "must create transaction")
 
 		byLunchFlowId, err := repo.GetTransactionsByLunchFlowId(
-			context.Background(),
+			t.Context(),
 			secondBankAccount.BankAccountId,
 			[]string{
 				lunchFlowId,

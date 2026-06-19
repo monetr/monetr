@@ -1,7 +1,6 @@
 package repository_test
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -54,7 +53,7 @@ func TestJobRepository_GetBankAccountsWithStaleSpending(t *testing.T) {
 			CreatedAt:         clock.Now(),
 		})
 
-		result, err := jobRepo.GetBankAccountsWithStaleSpending(context.Background())
+		result, err := jobRepo.GetBankAccountsWithStaleSpending(t.Context())
 		assert.NoError(t, err, "must not return an error")
 		assert.NotEmpty(t, result, "should return at least one expense")
 		assert.Equal(t, spending.BankAccountId, result[0].BankAccountId)
@@ -71,7 +70,7 @@ func TestJobRepository_GetLinksForExpiredAccounts(t *testing.T) {
 		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
 
 		{ // Before updating the subscription
-			result, err := jobRepo.GetLinksForExpiredAccounts(context.Background())
+			result, err := jobRepo.GetLinksForExpiredAccounts(t.Context())
 			assert.NoError(t, err, "should not have an error retrieving links for expired accounts")
 			assert.Empty(t, result, "there should not be any expired links at the moment")
 		}
@@ -81,7 +80,7 @@ func TestJobRepository_GetLinksForExpiredAccounts(t *testing.T) {
 		testutils.MustDBUpdate(t, account)
 
 		{ // After gaining a subscription, we should still not remove the account.
-			result, err := jobRepo.GetLinksForExpiredAccounts(context.Background())
+			result, err := jobRepo.GetLinksForExpiredAccounts(t.Context())
 			assert.NoError(t, err, "should not have an error retrieving links for expired accounts")
 			assert.Empty(t, result, "there should not be any expired links at the moment")
 		}
@@ -90,7 +89,7 @@ func TestJobRepository_GetLinksForExpiredAccounts(t *testing.T) {
 		clock.Add(100 * 24 * time.Hour)
 
 		{ // After updating the subscription
-			result, err := jobRepo.GetLinksForExpiredAccounts(context.Background())
+			result, err := jobRepo.GetLinksForExpiredAccounts(t.Context())
 			assert.NoError(t, err, "should not have an error retrieving links for expired accounts")
 			assert.Len(t, result, 1, "should have one link that is expired")
 			assert.EqualValues(t, link.LinkId, result[0].LinkId, "expired link should be the one created for this test")
@@ -115,7 +114,7 @@ func TestJobRepository_GetLinksForExpiredAccounts(t *testing.T) {
 		testutils.MustDBUpdate(t, account)
 
 		{ // Then check to make sure that we don't consider this an expired account.
-			result, err := jobRepo.GetLinksForExpiredAccounts(context.Background())
+			result, err := jobRepo.GetLinksForExpiredAccounts(t.Context())
 			assert.NoError(t, err, "should not have an error retrieving links for expired accounts")
 			assert.Empty(t, result, "there should not be any expired links at the moment")
 		}
@@ -123,7 +122,7 @@ func TestJobRepository_GetLinksForExpiredAccounts(t *testing.T) {
 		// Move the clock forward 31 days. The trial has now expired.
 		clock.Add(31 * 24 * time.Hour)
 		{ // But the account is not yet eligible for removal.
-			result, err := jobRepo.GetLinksForExpiredAccounts(context.Background())
+			result, err := jobRepo.GetLinksForExpiredAccounts(t.Context())
 			assert.NoError(t, err, "should not have an error retrieving links for expired accounts")
 			assert.Empty(t, result, "there should not be any expired links at the moment")
 		}
@@ -132,7 +131,7 @@ func TestJobRepository_GetLinksForExpiredAccounts(t *testing.T) {
 		clock.Add(100 * 24 * time.Hour)
 
 		{ // 131 days after signup the account is now eligible for removal.
-			result, err := jobRepo.GetLinksForExpiredAccounts(context.Background())
+			result, err := jobRepo.GetLinksForExpiredAccounts(t.Context())
 			assert.NoError(t, err, "should not have an error retrieving links for expired accounts")
 			assert.Len(t, result, 1, "should have one link that is expired")
 			assert.EqualValues(t, link.LinkId, result[0].LinkId, "expired link should be the one created for this test")
@@ -159,7 +158,7 @@ func TestJobRepository_GetLinksForExpiredAccounts(t *testing.T) {
 		// When the account is first created and still trialing, we don't want to
 		// delete the data.
 		{ // Then check to make sure that we don't consider this an expired account.
-			result, err := jobRepo.GetLinksForExpiredAccounts(context.Background())
+			result, err := jobRepo.GetLinksForExpiredAccounts(t.Context())
 			assert.NoError(t, err, "should not have an error retrieving links for expired accounts")
 			assert.Empty(t, result, "there should not be any expired links at the moment")
 		}
@@ -167,7 +166,7 @@ func TestJobRepository_GetLinksForExpiredAccounts(t *testing.T) {
 		// Move the clock forward 31 days. The trial has now expired.
 		clock.Add(31 * 24 * time.Hour)
 		{ // But the account is not yet eligible for removal.
-			result, err := jobRepo.GetLinksForExpiredAccounts(context.Background())
+			result, err := jobRepo.GetLinksForExpiredAccounts(t.Context())
 			assert.NoError(t, err, "should not have an error retrieving links for expired accounts")
 			assert.Empty(t, result, "there should not be any expired links at the moment")
 		}
@@ -181,7 +180,7 @@ func TestJobRepository_GetLinksForExpiredAccounts(t *testing.T) {
 		// yesterday.
 		clock.Add(31 * 24 * time.Hour)
 		{ // But the account is not yet eligible for removal.
-			result, err := jobRepo.GetLinksForExpiredAccounts(context.Background())
+			result, err := jobRepo.GetLinksForExpiredAccounts(t.Context())
 			assert.NoError(t, err, "should not have an error retrieving links for expired accounts")
 			assert.Empty(t, result, "there should not be any expired links at the moment")
 		}
@@ -190,7 +189,7 @@ func TestJobRepository_GetLinksForExpiredAccounts(t *testing.T) {
 		// account was originally created; it is now safe to remove the link data.
 		clock.Add(100 * 24 * time.Hour)
 		{
-			result, err := jobRepo.GetLinksForExpiredAccounts(context.Background())
+			result, err := jobRepo.GetLinksForExpiredAccounts(t.Context())
 			assert.NoError(t, err, "should not have an error retrieving links for expired accounts")
 			assert.Len(t, result, 1, "should have one link that is expired")
 			assert.EqualValues(t, link.LinkId, result[0].LinkId, "expired link should be the one created for this test")
@@ -211,7 +210,7 @@ func TestJobRepository_GetAccountsWithTooManyFiles(t *testing.T) {
 		{
 			// Check before we create the files, there shouldn't be any accounts right
 			// now.
-			tooMany, err := jobRepo.GetAccountsWithTooManyFiles(context.Background())
+			tooMany, err := jobRepo.GetAccountsWithTooManyFiles(t.Context())
 			assert.NoError(t, err, "should not return an error looking for too many files")
 			assert.Empty(t, tooMany, "there should not be any accounts with too many files")
 		}
@@ -231,7 +230,7 @@ func TestJobRepository_GetAccountsWithTooManyFiles(t *testing.T) {
 
 		{
 			// Now that some files exist we check again.
-			tooMany, err := jobRepo.GetAccountsWithTooManyFiles(context.Background())
+			tooMany, err := jobRepo.GetAccountsWithTooManyFiles(t.Context())
 			assert.NoError(t, err, "should not return an error looking for too many files")
 			assert.EqualValues(t, []repository.AccountWithTooManyFiles{
 				{

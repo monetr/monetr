@@ -1,7 +1,6 @@
 package platypus
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -38,7 +37,7 @@ func TestPlaidSync(t *testing.T) {
 			db,
 			kms,
 			plaidLink.AccountId,
-		).Read(context.Background(), plaidLink.PlaidLink.SecretId)
+		).Read(t.Context(), plaidLink.PlaidLink.SecretId)
 		assert.NoError(t, err, "must be able to read the secret")
 
 		end := clock.Now().UTC().Truncate(time.Hour)
@@ -63,7 +62,7 @@ func TestPlaidSync(t *testing.T) {
 		}
 
 		client, err := platypus.NewClient(
-			context.Background(),
+			t.Context(),
 			link,
 			secret.Value,
 			gofakeit.UUID(),
@@ -93,7 +92,7 @@ func TestPlaidSync(t *testing.T) {
 			db,
 			kms,
 			plaidLink.AccountId,
-		).Read(context.Background(), plaidLink.PlaidLink.SecretId)
+		).Read(t.Context(), plaidLink.PlaidLink.SecretId)
 		assert.NoError(t, err, "must be able to read the secret")
 
 		mock_plaid.MockSyncError(t, plaid.PlaidError{
@@ -115,7 +114,7 @@ func TestPlaidSync(t *testing.T) {
 		}
 
 		client, err := platypus.NewClient(
-			context.Background(),
+			t.Context(),
 			link,
 			secret.Value,
 			gofakeit.UUID(),

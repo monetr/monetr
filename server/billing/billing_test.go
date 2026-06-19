@@ -1,7 +1,6 @@
 package billing
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -32,7 +31,7 @@ func TestBilling_GetHasSubscription(t *testing.T) {
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 
-		hasSubscription, err := paywall.GetHasSubscription(context.Background(), user.AccountId)
+		hasSubscription, err := paywall.GetHasSubscription(t.Context(), user.AccountId)
 		assert.NoError(t, err, "must not return an error checking for subscription")
 		assert.True(t, hasSubscription, "fixture account should have a subscription by default")
 
@@ -41,10 +40,10 @@ func TestBilling_GetHasSubscription(t *testing.T) {
 		account.SubscriptionActiveUntil = myownsanity.TimeP(clock.Now().Add(-1 * time.Hour))
 		account.SubscriptionStatus = &canceledStatus
 
-		err = accountRepo.UpdateAccount(context.Background(), account)
+		err = accountRepo.UpdateAccount(t.Context(), account)
 		assert.NoError(t, err, "failed to update account with new status")
 
-		hasSubscription, err = paywall.GetHasSubscription(context.Background(), user.AccountId)
+		hasSubscription, err = paywall.GetHasSubscription(t.Context(), user.AccountId)
 		assert.NoError(t, err, "must not return an error checking for subscription")
 		assert.False(t, hasSubscription, "account should no longer have a subscription")
 	})
@@ -67,10 +66,10 @@ func TestBilling_GetHasSubscription(t *testing.T) {
 		account.SubscriptionActiveUntil = myownsanity.TimeP(clock.Now().Add(7 * 24 * time.Hour))
 		account.SubscriptionStatus = &subscriptionStatus
 
-		err := accountRepo.UpdateAccount(context.Background(), account)
+		err := accountRepo.UpdateAccount(t.Context(), account)
 		assert.NoError(t, err, "failed to update account with new status")
 
-		hasSubscription, err := paywall.GetHasSubscription(context.Background(), user.AccountId)
+		hasSubscription, err := paywall.GetHasSubscription(t.Context(), user.AccountId)
 		assert.NoError(t, err, "must not return an error checking for subscription")
 		assert.True(t, hasSubscription, "the subscription should be present for past due")
 	})
@@ -93,10 +92,10 @@ func TestBilling_GetHasSubscription(t *testing.T) {
 		account.SubscriptionActiveUntil = myownsanity.TimeP(clock.Now().Add(-7 * 24 * time.Hour))
 		account.SubscriptionStatus = &subscriptionStatus
 
-		err := accountRepo.UpdateAccount(context.Background(), account)
+		err := accountRepo.UpdateAccount(t.Context(), account)
 		assert.NoError(t, err, "failed to update account with new status")
 
-		hasSubscription, err := paywall.GetHasSubscription(context.Background(), user.AccountId)
+		hasSubscription, err := paywall.GetHasSubscription(t.Context(), user.AccountId)
 		assert.NoError(t, err, "must not return an error checking for subscription")
 		assert.False(t, hasSubscription, "the subscription is not present when canceled")
 	})
@@ -115,17 +114,17 @@ func TestBilling_GetHasSubscription(t *testing.T) {
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 
-		hasSubscription, err := paywall.GetHasSubscription(context.Background(), user.AccountId)
+		hasSubscription, err := paywall.GetHasSubscription(t.Context(), user.AccountId)
 		assert.NoError(t, err, "must not return an error checking for subscription")
 		assert.True(t, hasSubscription, "fixture account should have a subscription by default")
 
 		account := user.Account
 		account.SubscriptionStatus = nil
 
-		err = accountRepo.UpdateAccount(context.Background(), account)
+		err = accountRepo.UpdateAccount(t.Context(), account)
 		assert.NoError(t, err, "failed to update account with new status")
 
-		hasSubscription, err = paywall.GetHasSubscription(context.Background(), user.AccountId)
+		hasSubscription, err = paywall.GetHasSubscription(t.Context(), user.AccountId)
 		assert.NoError(t, err, "must not return an error checking for subscription")
 		assert.False(t, hasSubscription, "the subscription is not present when there is no status")
 	})
@@ -142,7 +141,7 @@ func TestBilling_GetHasSubscription(t *testing.T) {
 		conf := testutils.GetConfig(t)
 		paywall := NewBilling(log, clock, conf, accountRepo, stripeHelper, pubSub)
 
-		hasSubscription, err := paywall.GetHasSubscription(context.Background(), "acct_bogus")
+		hasSubscription, err := paywall.GetHasSubscription(t.Context(), "acct_bogus")
 		assert.EqualError(t, err, "could not determine whether subscription was present: failed to retrieve account by Id: pg: no rows in result set")
 		assert.False(t, hasSubscription, "account that does not exist should return false")
 	})

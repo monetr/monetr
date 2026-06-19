@@ -2,7 +2,6 @@ package storage
 
 import (
 	"bytes"
-	"context"
 	"io"
 	"os"
 	"path"
@@ -43,10 +42,10 @@ func TestFilesystemStorage(t *testing.T) {
 			Kind:        "transactions/uploads",
 			Size:        100,
 		}
-		err = fs.Store(context.Background(), buf, file)
+		err = fs.Store(t.Context(), buf, file)
 		assert.NoError(t, err, "should not have an error storing a file")
 
-		content, err := fs.Read(context.Background(), file)
+		content, err := fs.Read(t.Context(), file)
 		require.NoError(t, err, "should read file back")
 		require.NotNil(t, content, "content buffer should not be nil")
 		defer content.Close()
@@ -122,7 +121,7 @@ func TestFilesystemStoragePermissions(t *testing.T) {
 	}
 	input := []byte("sensitive financial data")
 	buf := &bufferWrapper{bytes.NewReader(input)}
-	require.NoError(t, fs.Store(context.Background(), buf, file), "must store file")
+	require.NoError(t, fs.Store(t.Context(), buf, file), "must store file")
 
 	storedPath, err := file.GetStorePath()
 	require.NoError(t, err, "must derive store path")
@@ -139,7 +138,7 @@ func TestFilesystemStoragePermissions(t *testing.T) {
 	assert.Equal(t, os.FileMode(0700), parentInfo.Mode().Perm(), "parent directory must be drwx------")
 
 	// Confirm the server can still read what it wrote under the tightened mode.
-	rdr, err := fs.Read(context.Background(), file)
+	rdr, err := fs.Read(t.Context(), file)
 	require.NoError(t, err, "must read file back")
 	defer rdr.Close()
 	got, err := io.ReadAll(rdr)
@@ -165,7 +164,7 @@ func TestFilesystemStorageStore(t *testing.T) {
 			ContentType: models.IntuitQFXContentType,
 			Size:        100,
 		}
-		err = fs.Store(context.Background(), buf, file)
+		err = fs.Store(t.Context(), buf, file)
 		assert.NoError(t, err, "should be able to store file successfully")
 	})
 }

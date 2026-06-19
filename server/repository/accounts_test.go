@@ -1,7 +1,6 @@
 package repository_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/benbjohnson/clock"
@@ -25,7 +24,7 @@ func TestRepositoryBase_GetAccount(t *testing.T) {
 			db,
 			log,
 		)
-		account, err := repo.GetAccount(context.Background())
+		account, err := repo.GetAccount(t.Context())
 		assert.EqualError(t, err, "failed to retrieve account: pg: no rows in result set")
 		assert.Nil(t, account, "should not return an account")
 	})
@@ -44,7 +43,7 @@ func TestRepositoryBase_GetAccount(t *testing.T) {
 			db,
 			log,
 		)
-		account, err := repo.GetAccount(context.Background())
+		account, err := repo.GetAccount(t.Context())
 		assert.NoError(t, err, "must not return an error if the account exists")
 		assert.NotNil(t, account, "should return a valid account")
 		assert.Equal(t, user.AccountId, account.AccountId, "retrieved account must match the fixture")
@@ -64,14 +63,14 @@ func TestRepositoryBase_GetAccount(t *testing.T) {
 			db,
 			log,
 		)
-		account, err := repo.GetAccount(context.Background())
+		account, err := repo.GetAccount(t.Context())
 		assert.NoError(t, err, "must not return an error if the account exists")
 		assert.NotNil(t, account, "should return a valid account")
 		assert.Equal(t, user.AccountId, account.AccountId, "retrieved account must match the fixture")
 
 		// Then delete the account from the database.
 		{
-			result, err := db.ModelContext(context.Background(), &models.User{
+			result, err := db.ModelContext(t.Context(), &models.User{
 				UserId:    user.UserId,
 				AccountId: user.AccountId,
 			}).
@@ -80,7 +79,7 @@ func TestRepositoryBase_GetAccount(t *testing.T) {
 			assert.NoError(t, err, "must successfully delete the account to test the cache")
 			assert.Equal(t, 1, result.RowsAffected(), "should only delete the one account")
 
-			result, err = db.ModelContext(context.Background(), &models.Account{AccountId: user.AccountId}).
+			result, err = db.ModelContext(t.Context(), &models.Account{AccountId: user.AccountId}).
 				WherePK().
 				Delete()
 			assert.NoError(t, err, "must successfully delete the account to test the cache")
@@ -88,7 +87,7 @@ func TestRepositoryBase_GetAccount(t *testing.T) {
 		}
 
 		// Calling get account again should still return the account as it is cached.
-		account, err = repo.GetAccount(context.Background())
+		account, err = repo.GetAccount(t.Context())
 		assert.NoError(t, err, "must not return an error if the account exists")
 		assert.NotNil(t, account, "should return a valid account")
 		assert.Equal(t, user.AccountId, account.AccountId, "retrieved account must match the fixture")

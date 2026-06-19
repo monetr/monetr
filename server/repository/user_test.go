@@ -1,7 +1,6 @@
 package repository_test
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -29,7 +28,7 @@ func TestRepositoryBase_GetMe(t *testing.T) {
 		log,
 	)
 
-	me, err := repo.GetMe(context.Background())
+	me, err := repo.GetMe(t.Context())
 	assert.NoError(t, err, "should not return an error for retrieving me")
 	assert.Equal(t, user.UserId, me.UserId, "should be for the same user")
 	assert.NotNil(t, me.Login, "login cannot be nil, it is used")
@@ -50,7 +49,7 @@ func TestRepositoryBase_GetAccountOwner(t *testing.T) {
 			StripeSubscriptionId:    nil,
 			SubscriptionActiveUntil: nil,
 		}
-		err := unauthenticatedRepo.CreateAccountV2(context.Background(), &account)
+		err := unauthenticatedRepo.CreateAccountV2(t.Context(), &account)
 		assert.NoError(t, err, "should successfully create account")
 		assert.NotEmpty(t, account, "new account should not be empty")
 		assert.NotEmpty(t, account.AccountId, "account Id should have been generated")
@@ -58,7 +57,7 @@ func TestRepositoryBase_GetAccountOwner(t *testing.T) {
 		var ownerUser, memberUser models.User
 		{ // Create the owner
 			email, password := gofakeit.Email(), gofakeit.Password(true, true, true, true, false, 32)
-			login, err := unauthenticatedRepo.CreateLogin(context.Background(), email, password, gofakeit.FirstName(), gofakeit.LastName())
+			login, err := unauthenticatedRepo.CreateLogin(t.Context(), email, password, gofakeit.FirstName(), gofakeit.LastName())
 			assert.NoError(t, err, "should successfully create login")
 			assert.NotEmpty(t, login, "new login should not be empty")
 			assert.NotEmpty(t, login.LoginId, "login Id should have been generated")
@@ -67,13 +66,13 @@ func TestRepositoryBase_GetAccountOwner(t *testing.T) {
 				AccountId: account.AccountId,
 				Role:      models.UserRoleOwner,
 			}
-			err = unauthenticatedRepo.CreateUser(context.Background(), &ownerUser)
+			err = unauthenticatedRepo.CreateUser(t.Context(), &ownerUser)
 			assert.NoError(t, err, "should successfully create user")
 		}
 
 		{ // Create the member
 			email, password := gofakeit.Email(), gofakeit.Password(true, true, true, true, false, 32)
-			login, err := unauthenticatedRepo.CreateLogin(context.Background(), email, password, gofakeit.FirstName(), gofakeit.LastName())
+			login, err := unauthenticatedRepo.CreateLogin(t.Context(), email, password, gofakeit.FirstName(), gofakeit.LastName())
 			assert.NoError(t, err, "should successfully create login")
 			assert.NotEmpty(t, login, "new login should not be empty")
 			assert.NotEmpty(t, login.LoginId, "login Id should have been generated")
@@ -82,7 +81,7 @@ func TestRepositoryBase_GetAccountOwner(t *testing.T) {
 				AccountId: account.AccountId,
 				Role:      models.UserRoleMember,
 			}
-			err = unauthenticatedRepo.CreateUser(context.Background(), &memberUser)
+			err = unauthenticatedRepo.CreateUser(t.Context(), &memberUser)
 			assert.NoError(t, err, "should successfully create user")
 		}
 
@@ -94,7 +93,7 @@ func TestRepositoryBase_GetAccountOwner(t *testing.T) {
 				db,
 				log,
 			)
-			owner, err := ownerRepo.GetAccountOwner(context.Background())
+			owner, err := ownerRepo.GetAccountOwner(t.Context())
 			assert.NoError(t, err, "must be able to retrieve the owner")
 			assert.NotNil(t, owner.Account, "account sub object should be included")
 			assert.NotNil(t, owner.Login, "account sub object should be included")
@@ -111,7 +110,7 @@ func TestRepositoryBase_GetAccountOwner(t *testing.T) {
 			)
 			// Even if we are the member, we should still retrieve the owner who is
 			// not us. Makes sure the current user ID doesn't change the query.
-			owner, err := memberRepo.GetAccountOwner(context.Background())
+			owner, err := memberRepo.GetAccountOwner(t.Context())
 			assert.NoError(t, err, "must be able to retrieve the owner")
 			assert.NotNil(t, owner.Account, "account sub object should be included")
 			assert.NotNil(t, owner.Login, "account sub object should be included")
@@ -132,7 +131,7 @@ func TestRepositoryBase_GetAccountOwner(t *testing.T) {
 			StripeSubscriptionId:    nil,
 			SubscriptionActiveUntil: nil,
 		}
-		err := unauthenticatedRepo.CreateAccountV2(context.Background(), &account)
+		err := unauthenticatedRepo.CreateAccountV2(t.Context(), &account)
 		assert.NoError(t, err, "should successfully create account")
 		assert.NotEmpty(t, account, "new account should not be empty")
 		assert.NotEmpty(t, account.AccountId, "account Id should have been generated")
@@ -141,7 +140,7 @@ func TestRepositoryBase_GetAccountOwner(t *testing.T) {
 
 		{ // Create the member
 			email, password := gofakeit.Email(), gofakeit.Password(true, true, true, true, false, 32)
-			login, err := unauthenticatedRepo.CreateLogin(context.Background(), email, password, gofakeit.FirstName(), gofakeit.LastName())
+			login, err := unauthenticatedRepo.CreateLogin(t.Context(), email, password, gofakeit.FirstName(), gofakeit.LastName())
 			assert.NoError(t, err, "should successfully create login")
 			assert.NotEmpty(t, login, "new login should not be empty")
 			assert.NotEmpty(t, login.LoginId, "login Id should have been generated")
@@ -150,7 +149,7 @@ func TestRepositoryBase_GetAccountOwner(t *testing.T) {
 				AccountId: account.AccountId,
 				Role:      models.UserRoleMember,
 			}
-			err = unauthenticatedRepo.CreateUser(context.Background(), &memberUser)
+			err = unauthenticatedRepo.CreateUser(t.Context(), &memberUser)
 			assert.NoError(t, err, "should successfully create user")
 		}
 
@@ -162,7 +161,7 @@ func TestRepositoryBase_GetAccountOwner(t *testing.T) {
 				db,
 				log,
 			)
-			owner, err := memberRepo.GetAccountOwner(context.Background())
+			owner, err := memberRepo.GetAccountOwner(t.Context())
 			assert.Error(t, err, "must return an error when there is no owner")
 			assert.Nil(t, owner, "owner object should be nil when there is no owner")
 		}

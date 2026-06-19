@@ -1,7 +1,6 @@
 package repository_test
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -32,7 +31,7 @@ func TestRepositoryBaseGetLastPlaidSync(t *testing.T) {
 			db,
 			log,
 		)
-		result, err := repo.GetLastPlaidSync(context.Background(), plaidLink.PlaidLinkId)
+		result, err := repo.GetLastPlaidSync(t.Context(), plaidLink.PlaidLinkId)
 		assert.NoError(t, err, "should not receive an error when there is no previous plaid sync")
 		assert.Nil(t, result, "should receive nil, because there has not been a plaid sync before this")
 	})
@@ -122,7 +121,7 @@ func TestRepositoryBaseGetLastPlaidSync(t *testing.T) {
 			db,
 			log,
 		)
-		result, err := repo.GetLastPlaidSync(context.Background(), plaidLink.PlaidLinkId)
+		result, err := repo.GetLastPlaidSync(t.Context(), plaidLink.PlaidLinkId)
 		assert.NoError(t, err, "should not receive an error when there is no previous plaid sync")
 		assert.Equal(t, plaidSync.PlaidSyncId, result.PlaidSyncId, "should have received the last inserted plaid sync")
 	})

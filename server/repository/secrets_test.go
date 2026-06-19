@@ -1,7 +1,6 @@
 package repository_test
 
 import (
-	"context"
 	"encoding/base64"
 	"testing"
 
@@ -38,7 +37,7 @@ func TestSecretsRepository_Store(t *testing.T) {
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		kms := secrets.NewPlaintextKMS()
-		ctx := context.Background()
+		ctx := t.Context()
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		accessToken := gofakeit.UUID()
 
@@ -63,7 +62,7 @@ func TestSecretsRepository_Store(t *testing.T) {
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
-		ctx := context.Background()
+		ctx := t.Context()
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		accessToken := gofakeit.UUID()
 
@@ -118,7 +117,7 @@ func TestSecretsRepository_Store(t *testing.T) {
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		kms := secrets.NewPlaintextKMS()
-		ctx := context.Background()
+		ctx := t.Context()
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		accessToken := gofakeit.UUID()
 

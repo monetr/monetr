@@ -10,7 +10,7 @@ import (
 
 func TestSlogAttrsFromContext(t *testing.T) {
 	t.Run("extracts known keys from context", func(t *testing.T) {
-		ctx := context.WithValue(context.Background(), AccountID, uint64(5678))
+		ctx := context.WithValue(t.Context(), AccountID, uint64(5678))
 
 		attrs := SlogAttrsFromContext(ctx)
 		assert.Len(t, attrs, 1, "should produce one attr")
@@ -18,7 +18,7 @@ func TestSlogAttrsFromContext(t *testing.T) {
 	})
 
 	t.Run("extracts multiple keys", func(t *testing.T) {
-		ctx := context.WithValue(context.Background(), AccountID, uint64(5678))
+		ctx := context.WithValue(t.Context(), AccountID, uint64(5678))
 		ctx = context.WithValue(ctx, UserID, uint64(9876))
 
 		attrs := SlogAttrsFromContext(ctx)
@@ -33,7 +33,7 @@ func TestSlogAttrsFromContext(t *testing.T) {
 	})
 
 	t.Run("empty context produces no attrs", func(t *testing.T) {
-		attrs := SlogAttrsFromContext(context.Background())
+		attrs := SlogAttrsFromContext(t.Context())
 		assert.Empty(t, attrs)
 	})
 }

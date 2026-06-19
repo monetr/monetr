@@ -1,7 +1,6 @@
 package billing_jobs_test
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -39,7 +38,7 @@ func TestReconcileSubscriptionCron(t *testing.T) {
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 
-		hasSubscription, err := bill.GetHasSubscription(context.Background(), user.AccountId)
+		hasSubscription, err := bill.GetHasSubscription(t.Context(), user.AccountId)
 		assert.NoError(t, err, "must not return an error checking for subscription")
 		assert.True(t, hasSubscription, "fixture account should have a subscription by default")
 
@@ -126,7 +125,7 @@ func TestReconcileSubscriptionCron(t *testing.T) {
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 
-		hasSubscription, err := bill.GetHasSubscription(context.Background(), user.AccountId)
+		hasSubscription, err := bill.GetHasSubscription(t.Context(), user.AccountId)
 		assert.NoError(t, err, "must not return an error checking for subscription")
 		assert.True(t, hasSubscription, "fixture account should have a subscription by default")
 

@@ -1,7 +1,6 @@
 package models_test
 
 import (
-	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -107,7 +106,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		}
 
 		spending.CalculateNextContribution(
-			context.Background(),
+			t.Context(),
 			time.UTC,
 			GiveMeAFundingSchedule(dayAfterTomorrow, ruleset),
 			time.Now(),
@@ -133,7 +132,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		}
 
 		spending.CalculateNextContribution(
-			context.Background(),
+			t.Context(),
 			time.UTC,
 			GiveMeAFundingSchedule(dayAfterTomorrow.Add(25*time.Hour), ruleset),
 			time.Now(),
@@ -167,7 +166,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		}
 
 		spending.CalculateNextContribution(
-			context.Background(),
+			t.Context(),
 			central,
 			GiveMeAFundingSchedule(nextFunding.UTC(), fundingRule),
 			now,
@@ -203,7 +202,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		}
 
 		spending.CalculateNextContribution(
-			context.Background(),
+			t.Context(),
 			time.UTC,
 			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
 			now,

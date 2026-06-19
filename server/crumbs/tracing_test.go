@@ -18,6 +18,6 @@ func (s *structTest) Foo(ctx context.Context) *sentry.Span {
 }
 
 func TestStartFnTrace(t *testing.T) {
-	span := (&structTest{}).Foo(context.Background())
+	span := (&structTest{}).Foo(t.Context())
 	assert.NotEmpty(t, span.Description)
 }

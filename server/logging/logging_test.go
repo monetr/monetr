@@ -63,7 +63,7 @@ func TestContextHandler(t *testing.T) {
 		inner := slog.NewJSONHandler(&buf, &slog.HandlerOptions{Level: LevelTrace})
 		logger := slog.New(NewContextHandler(inner))
 
-		logger.InfoContext(context.Background(), "test message")
+		logger.InfoContext(t.Context(), "test message")
 
 		assert.True(t, json.Valid(buf.Bytes()), "output must be valid JSON")
 

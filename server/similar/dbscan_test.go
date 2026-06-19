@@ -63,12 +63,12 @@ func TestPreProcessor(t *testing.T) {
 		processor.AddTransaction(&data[i])
 	}
 
-	datums := processor.GetDocuments(context.Background())
+	datums := processor.GetDocuments(t.Context())
 
 	// First test with 0.4 and 3 was excellent!
 	// 1.25 is also very good
 	dbscan := NewDBSCAN(datums, 0.98, 1)
-	result := dbscan.Calculate(context.Background())
+	result := dbscan.Calculate(t.Context())
 	assert.NotEmpty(t, result)
 	type Presentation struct {
 		ID        models.ID[models.Transaction] `json:"id"`

@@ -1,7 +1,6 @@
 package repository_test
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -32,7 +31,7 @@ func TestUnauthenticatedRepo_CreateAccount(t *testing.T) {
 		StripeSubscriptionId:    nil,
 		SubscriptionActiveUntil: nil,
 	}
-	err := repo.CreateAccountV2(context.Background(), &account)
+	err := repo.CreateAccountV2(t.Context(), &account)
 	assert.NoError(t, err, "should successfully create account")
 	assert.NotEmpty(t, account, "new account should not be empty")
 	assert.NotEmpty(t, account.AccountId, "account Id should have been generated")
@@ -43,7 +42,7 @@ func TestUnauthenticatedRepo_CreateLogin(t *testing.T) {
 		clock := clock.NewMock()
 		repo := GetTestUnauthenticatedRepository(t, clock)
 		email, password := gofakeit.Email(), gofakeit.Password(true, true, true, true, false, 32)
-		login, err := repo.CreateLogin(context.Background(), email, password, gofakeit.FirstName(), gofakeit.LastName())
+		login, err := repo.CreateLogin(t.Context(), email, password, gofakeit.FirstName(), gofakeit.LastName())
 		assert.NoError(t, err, "should successfully create login")
 		assert.NotEmpty(t, login, "new login should not be empty")
 		assert.NotEmpty(t, login.LoginId, "login Id should have been generated")
@@ -57,7 +56,7 @@ func TestUnauthenticatedRepo_CreateLogin(t *testing.T) {
 		passwordOne := gofakeit.Password(true, true, true, true, false, 32)
 
 		// Creating the first login should succeed.
-		loginOne, err := repo.CreateLogin(context.Background(), email, passwordOne, gofakeit.FirstName(), gofakeit.LastName())
+		loginOne, err := repo.CreateLogin(t.Context(), email, passwordOne, gofakeit.FirstName(), gofakeit.LastName())
 		assert.NoError(t, err, "should successfully create login")
 		assert.NotEmpty(t, loginOne, "new login should not be empty")
 		assert.NotEmpty(t, loginOne.LoginId, "login Id should have been generated")
@@ -65,7 +64,7 @@ func TestUnauthenticatedRepo_CreateLogin(t *testing.T) {
 		passwordTwo := gofakeit.Password(true, true, true, true, false, 32)
 
 		// Creating the first login should succeed.
-		loginTwo, err := repo.CreateLogin(context.Background(), email, passwordTwo, gofakeit.FirstName(), gofakeit.LastName())
+		loginTwo, err := repo.CreateLogin(t.Context(), email, passwordTwo, gofakeit.FirstName(), gofakeit.LastName())
 		assert.Error(t, err, "should fail to create another login with the same email")
 		assert.EqualError(t, err, "a login with the same email already exists")
 		assert.Nil(t, loginTwo, "should return nil for login")
@@ -78,7 +77,7 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 		repo := GetTestUnauthenticatedRepository(t, clock)
 		email, password := gofakeit.Email(), gofakeit.Password(true, true, true, true, false, 32)
 
-		login, err := repo.CreateLogin(context.Background(), email, password, gofakeit.FirstName(), gofakeit.LastName())
+		login, err := repo.CreateLogin(t.Context(), email, password, gofakeit.FirstName(), gofakeit.LastName())
 		assert.NoError(t, err, "should successfully create login")
 		assert.NotEmpty(t, login, "new login should not be empty")
 		assert.NotEmpty(t, login.LoginId, "login Id should have been generated")
@@ -90,7 +89,7 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 			StripeSubscriptionId:    nil,
 			SubscriptionActiveUntil: nil,
 		}
-		err = repo.CreateAccountV2(context.Background(), &account)
+		err = repo.CreateAccountV2(t.Context(), &account)
 		assert.NoError(t, err, "should successfully create account")
 		assert.NotEmpty(t, account, "new account should not be empty")
 		assert.NotEmpty(t, account.AccountId, "account Id should have been generated")
@@ -100,7 +99,7 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 			AccountId: account.AccountId,
 			Role:      models.UserRoleOwner,
 		}
-		err = repo.CreateUser(context.Background(), &user)
+		err = repo.CreateUser(t.Context(), &user)
 		assert.NoError(t, err, "should successfully create user")
 		assert.NotEmpty(t, user, "new user should not be empty")
 		assert.NotEmpty(t, user.UserId, "user Id should have been generated")
@@ -111,7 +110,7 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 		repo := GetTestUnauthenticatedRepository(t, clock)
 		email, password := gofakeit.Email(), gofakeit.Password(true, true, true, true, false, 32)
 
-		login, err := repo.CreateLogin(context.Background(), email, password, gofakeit.FirstName(), gofakeit.LastName())
+		login, err := repo.CreateLogin(t.Context(), email, password, gofakeit.FirstName(), gofakeit.LastName())
 		assert.NoError(t, err, "should successfully create login")
 		assert.NotEmpty(t, login, "new login should not be empty")
 		assert.NotEmpty(t, login.LoginId, "login Id should have been generated")
@@ -123,7 +122,7 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 			StripeSubscriptionId:    nil,
 			SubscriptionActiveUntil: nil,
 		}
-		err = repo.CreateAccountV2(context.Background(), &account)
+		err = repo.CreateAccountV2(t.Context(), &account)
 		assert.NoError(t, err, "should successfully create account")
 		assert.NotEmpty(t, account, "new account should not be empty")
 		assert.NotEmpty(t, account.AccountId, "account Id should have been generated")
@@ -133,7 +132,7 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 			AccountId: account.AccountId,
 			Role:      models.UserRoleOwner,
 		}
-		err = repo.CreateUser(context.Background(), &user)
+		err = repo.CreateUser(t.Context(), &user)
 		assert.NoError(t, err, "should successfully create user")
 		assert.NotEmpty(t, user, "new user should not be empty")
 		assert.NotEmpty(t, user.UserId, "user Id should have been generated")
@@ -141,7 +140,7 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 		// Try to create another user with the same login and account, this should fail.
 		userAgain := user
 		userAgain.UserId = ""
-		err = repo.CreateUser(context.Background(), &userAgain)
+		err = repo.CreateUser(t.Context(), &userAgain)
 		assert.Error(t, err, "should not create duplicate login for account")
 	})
 
@@ -156,14 +155,14 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 			StripeSubscriptionId:    nil,
 			SubscriptionActiveUntil: nil,
 		}
-		err := repo.CreateAccountV2(context.Background(), &account)
+		err := repo.CreateAccountV2(t.Context(), &account)
 		assert.NoError(t, err, "should successfully create account")
 		assert.NotEmpty(t, account, "new account should not be empty")
 		assert.NotEmpty(t, account.AccountId, "account Id should have been generated")
 
 		{ // Create the first user, and make it the owner.
 			email, password := gofakeit.Email(), gofakeit.Password(true, true, true, true, false, 32)
-			login, err := repo.CreateLogin(context.Background(), email, password, gofakeit.FirstName(), gofakeit.LastName())
+			login, err := repo.CreateLogin(t.Context(), email, password, gofakeit.FirstName(), gofakeit.LastName())
 			assert.NoError(t, err, "should successfully create login")
 			assert.NotEmpty(t, login, "new login should not be empty")
 			assert.NotEmpty(t, login.LoginId, "login Id should have been generated")
@@ -173,7 +172,7 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 				AccountId: account.AccountId,
 				Role:      models.UserRoleOwner,
 			}
-			err = repo.CreateUser(context.Background(), &user)
+			err = repo.CreateUser(t.Context(), &user)
 			assert.NoError(t, err, "should successfully create user")
 			assert.NotEmpty(t, user, "new user should not be empty")
 			assert.NotEmpty(t, user.UserId, "user Id should have been generated")
@@ -181,7 +180,7 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 
 		{ // Now create a different user and try to make it the owner as well.
 			email, password := gofakeit.Email(), gofakeit.Password(true, true, true, true, false, 32)
-			login, err := repo.CreateLogin(context.Background(), email, password, gofakeit.FirstName(), gofakeit.LastName())
+			login, err := repo.CreateLogin(t.Context(), email, password, gofakeit.FirstName(), gofakeit.LastName())
 			assert.NoError(t, err, "should successfully create login")
 			assert.NotEmpty(t, login, "new login should not be empty")
 			assert.NotEmpty(t, login.LoginId, "login Id should have been generated")
@@ -191,11 +190,11 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 				AccountId: account.AccountId,
 				Role:      models.UserRoleOwner,
 			}
-			err = repo.CreateUser(context.Background(), &user)
+			err = repo.CreateUser(t.Context(), &user)
 			assert.Error(t, err, "cannot create another user who is also an owner of the same account")
 
 			user.Role = models.UserRoleMember
-			err = repo.CreateUser(context.Background(), &user)
+			err = repo.CreateUser(t.Context(), &user)
 			assert.NoError(t, err, "but can create the user as a member of the account")
 		}
 	})
@@ -211,14 +210,14 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 			StripeSubscriptionId:    nil,
 			SubscriptionActiveUntil: nil,
 		}
-		err := repo.CreateAccountV2(context.Background(), &account)
+		err := repo.CreateAccountV2(t.Context(), &account)
 		assert.NoError(t, err, "should successfully create account")
 		assert.NotEmpty(t, account, "new account should not be empty")
 		assert.NotEmpty(t, account.AccountId, "account Id should have been generated")
 
 		{ // Create the first user, and make it the owner.
 			email, password := gofakeit.Email(), gofakeit.Password(true, true, true, true, false, 32)
-			login, err := repo.CreateLogin(context.Background(), email, password, gofakeit.FirstName(), gofakeit.LastName())
+			login, err := repo.CreateLogin(t.Context(), email, password, gofakeit.FirstName(), gofakeit.LastName())
 			assert.NoError(t, err, "should successfully create login")
 			assert.NotEmpty(t, login, "new login should not be empty")
 			assert.NotEmpty(t, login.LoginId, "login Id should have been generated")
@@ -228,7 +227,7 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 				AccountId: account.AccountId,
 				// Don't include a role
 			}
-			err = repo.CreateUser(context.Background(), &user)
+			err = repo.CreateUser(t.Context(), &user)
 			assert.Error(t, err, "should not be able to create a user without a role")
 		}
 	})
@@ -240,7 +239,7 @@ func TestUnauthenticatedRepo_ResetPassword(t *testing.T) {
 		repo := GetTestUnauthenticatedRepository(t, clock)
 		login, _ := fixtures.GivenIHaveLogin(t, clock)
 
-		err := repo.ResetPassword(context.Background(), login.LoginId, gofakeit.UUID())
+		err := repo.ResetPassword(t.Context(), login.LoginId, gofakeit.UUID())
 		assert.NoError(t, err, "must reset password without an error")
 	})
 
@@ -248,7 +247,7 @@ func TestUnauthenticatedRepo_ResetPassword(t *testing.T) {
 		clock := clock.NewMock()
 		repo := GetTestUnauthenticatedRepository(t, clock)
 
-		err := repo.ResetPassword(context.Background(), "lgn_bogus", gofakeit.UUID())
+		err := repo.ResetPassword(t.Context(), "lgn_bogus", gofakeit.UUID())
 		assert.EqualError(t, err, "no logins were updated", "should return an error for invalid login")
 	})
 }
@@ -301,7 +300,7 @@ func TestEmailRepositoryBase_SetEmailVerified(t *testing.T) {
 
 		assertEmailVerified(t, emailAddress, repository.EmailNotVerified)
 
-		err := repo.SetEmailVerified(context.Background(), emailAddress)
+		err := repo.SetEmailVerified(t.Context(), emailAddress)
 		assert.NoError(t, err, "email must successfully be verified")
 
 		assertEmailVerified(t, emailAddress, repository.EmailVerified)
@@ -313,7 +312,7 @@ func TestEmailRepositoryBase_SetEmailVerified(t *testing.T) {
 
 		repo := GetTestUnauthenticatedRepository(t, clock)
 
-		err := repo.SetEmailVerified(context.Background(), emailAddress)
+		err := repo.SetEmailVerified(t.Context(), emailAddress)
 		assert.EqualError(t, err, "email cannot be verified")
 	})
 
@@ -333,7 +332,7 @@ func TestEmailRepositoryBase_SetEmailVerified(t *testing.T) {
 
 		assertEmailVerified(t, emailAddress, repository.EmailVerified)
 
-		err := repo.SetEmailVerified(context.Background(), emailAddress)
+		err := repo.SetEmailVerified(t.Context(), emailAddress)
 		assert.EqualError(t, err, "email cannot be verified")
 
 		assertEmailVerified(t, emailAddress, repository.EmailVerified)
@@ -355,7 +354,7 @@ func TestEmailRepositoryBase_SetEmailVerified(t *testing.T) {
 
 		assertEmailVerified(t, emailAddress, repository.EmailNotVerified)
 
-		err := repo.SetEmailVerified(context.Background(), emailAddress)
+		err := repo.SetEmailVerified(t.Context(), emailAddress)
 		assert.EqualError(t, err, "email cannot be verified")
 
 		assertEmailVerified(t, emailAddress, repository.EmailNotVerified)
@@ -376,7 +375,7 @@ func TestEmailRepositoryBase_GetLoginForEmail(t *testing.T) {
 
 		repo := GetTestUnauthenticatedRepository(t, clock)
 
-		login, err := repo.GetLoginForEmail(context.Background(), emailAddress)
+		login, err := repo.GetLoginForEmail(t.Context(), emailAddress)
 		assert.NoError(t, err, "must retrieve login for email successfully")
 		assert.NotNil(t, login, "login result should not be nil")
 		assert.Equal(t, originalLogin.LoginId, login.LoginId, "login Id should match expected")
@@ -388,7 +387,7 @@ func TestEmailRepositoryBase_GetLoginForEmail(t *testing.T) {
 
 		repo := GetTestUnauthenticatedRepository(t, clock)
 
-		login, err := repo.GetLoginForEmail(context.Background(), emailAddress)
+		login, err := repo.GetLoginForEmail(t.Context(), emailAddress)
 		assert.EqualError(t, err, "failed to retrieve login by email: pg: no rows in result set")
 		assert.Nil(t, login, "login result should be nil")
 	})

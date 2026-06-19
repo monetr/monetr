@@ -1,7 +1,6 @@
 package platypus
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -38,7 +37,7 @@ func TestPlaidClient_GetAccount(t *testing.T) {
 			db,
 			kms,
 			plaidLink.AccountId,
-		).Read(context.Background(), plaidLink.PlaidLink.SecretId)
+		).Read(t.Context(), plaidLink.PlaidLink.SecretId)
 		assert.NoError(t, err, "must be able to read the secret")
 
 		account := mock_plaid.BankAccountFixture(t)
@@ -59,7 +58,7 @@ func TestPlaidClient_GetAccount(t *testing.T) {
 		}
 
 		platypus, err := client.NewClient(
-			context.Background(),
+			t.Context(),
 			link,
 			secret.Value,
 			gofakeit.UUID(),
@@ -67,7 +66,7 @@ func TestPlaidClient_GetAccount(t *testing.T) {
 		assert.NoError(t, err, "should create platypus")
 		assert.NotNil(t, platypus, "should not be nil")
 
-		accounts, err := platypus.GetAccounts(context.Background(), account.GetAccountId())
+		accounts, err := platypus.GetAccounts(t.Context(), account.GetAccountId())
 		assert.NoError(t, err, "should not return an error retrieving accounts")
 		assert.NotEmpty(t, accounts, "should return some accounts")
 	})
@@ -92,7 +91,7 @@ func TestPlaidClient_GetAllTransactions(t *testing.T) {
 			db,
 			kms,
 			plaidLink.AccountId,
-		).Read(context.Background(), plaidLink.PlaidLink.SecretId)
+		).Read(t.Context(), plaidLink.PlaidLink.SecretId)
 		assert.NoError(t, err, "must be able to read the secret")
 
 		account := mock_plaid.BankAccountFixture(t)
@@ -115,7 +114,7 @@ func TestPlaidClient_GetAllTransactions(t *testing.T) {
 		}
 
 		client, err := platypus.NewClient(
-			context.Background(),
+			t.Context(),
 			link,
 			secret.Value,
 			gofakeit.UUID(),
@@ -124,7 +123,7 @@ func TestPlaidClient_GetAllTransactions(t *testing.T) {
 		assert.NotNil(t, client, "should not be nil")
 
 		transactions, err := client.GetAllTransactions(
-			context.Background(),
+			t.Context(),
 			start,
 			end,
 			[]string{
@@ -158,7 +157,7 @@ func TestPlaidClient_UpdateItem(t *testing.T) {
 			db,
 			kms,
 			plaidLink.AccountId,
-		).Read(context.Background(), plaidLink.PlaidLink.SecretId)
+		).Read(t.Context(), plaidLink.PlaidLink.SecretId)
 		assert.NoError(t, err, "must be able to read the secret")
 
 		mock_plaid.MockCreateLinkToken(t)
@@ -176,7 +175,7 @@ func TestPlaidClient_UpdateItem(t *testing.T) {
 		}
 
 		client, err := platypus.NewClient(
-			context.Background(),
+			t.Context(),
 			link,
 			secret.Value,
 			gofakeit.UUID(),
@@ -184,7 +183,7 @@ func TestPlaidClient_UpdateItem(t *testing.T) {
 		assert.NoError(t, err, "should create client")
 		assert.NotNil(t, client, "should not be nil")
 
-		linkToken, err := client.UpdateItem(context.Background(), false)
+		linkToken, err := client.UpdateItem(t.Context(), false)
 		assert.NoError(t, err, "should not return an error creating an update link token")
 		assert.NotEmpty(t, linkToken.Token(), "must not be empty")
 	})

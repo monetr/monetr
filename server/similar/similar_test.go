@@ -1,7 +1,6 @@
 package similar
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"testing"
@@ -25,7 +24,7 @@ func TestSimilarTransactions_TFIDF_DBSCAN(t *testing.T) {
 			detector.AddTransaction(&data[i])
 		}
 
-		groups := detector.DetectSimilarTransactions(context.Background())
+		groups := detector.DetectSimilarTransactions(t.Context())
 		assert.NotEmpty(t, groups, "must return an array of groups of similar transactions")
 		for _, group := range groups {
 			assert.NotEmpty(t, group.Members, "a groups matches should not be empty!")
@@ -48,7 +47,7 @@ func TestSimilarTransactions_TFIDF_DBSCAN(t *testing.T) {
 			detector.AddTransaction(&data[i])
 		}
 
-		groups := detector.DetectSimilarTransactions(context.Background())
+		groups := detector.DetectSimilarTransactions(t.Context())
 		assert.NotEmpty(t, groups, "must return an array of groups of similar transactions")
 
 		j, _ := json.MarshalIndent(groups, "", "  ")

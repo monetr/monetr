@@ -1,7 +1,6 @@
 package models_test
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -30,7 +29,7 @@ func TestFundingSchedule_CalculateNextOccurrence(t *testing.T) {
 
 		assert.Nil(t, fundingSchedule.LastRecurrence, "last occurrence should still be nil")
 
-		ok := fundingSchedule.CalculateNextOccurrence(context.Background(), clock.Now(), time.Local)
+		ok := fundingSchedule.CalculateNextOccurrence(t.Context(), clock.Now(), time.Local)
 		assert.True(t, ok, "should calculate next occurrence")
 		assert.NotNil(t, fundingSchedule.LastRecurrence, "last occurrence should no longer be nil")
 		assert.Equal(t, originalOccurrence.Unix(), fundingSchedule.LastRecurrence.Unix(), "last occurrence should match original")
@@ -55,7 +54,7 @@ func TestFundingSchedule_CalculateNextOccurrence(t *testing.T) {
 
 		assert.Nil(t, fundingSchedule.LastRecurrence, "last occurrence should still be nil")
 
-		ok := fundingSchedule.CalculateNextOccurrence(context.Background(), clock.Now(), time.Local)
+		ok := fundingSchedule.CalculateNextOccurrence(t.Context(), clock.Now(), time.Local)
 		assert.False(t, ok, "next occurrence should not be calculated")
 		assert.Equal(t, originalOccurrence.Unix(), fundingSchedule.NextRecurrence.Unix(), "next occurrence should not have changed")
 	})
@@ -72,7 +71,7 @@ func TestFundingSchedule_CalculateNextOccurrence(t *testing.T) {
 			LastRecurrence:  nil,
 			NextRecurrence:  time.Time{},
 		}
-		fundingSchedule.CalculateNextOccurrence(context.Background(), clock.Now(), time.UTC)
+		fundingSchedule.CalculateNextOccurrence(t.Context(), clock.Now(), time.UTC)
 		assert.Greater(t, fundingSchedule.NextRecurrence, clock.Now())
 	})
 }

@@ -1,7 +1,6 @@
 package cache_test
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -64,21 +63,21 @@ func TestRedisCache_Set(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		memoryCache := NewTestCache(t)
 
-		err := memoryCache.Set(context.Background(), "test:data", TestValue)
+		err := memoryCache.Set(t.Context(), "test:data", TestValue)
 		assert.NoError(t, err, "should successfully set value")
 	})
 
 	t.Run("nil value", func(t *testing.T) {
 		memoryCache := NewTestCache(t)
 
-		err := memoryCache.Set(context.Background(), "test:data", nil)
+		err := memoryCache.Set(t.Context(), "test:data", nil)
 		assert.NoError(t, err, "should successfully set value")
 	})
 
 	t.Run("no key", func(t *testing.T) {
 		memoryCache := NewTestCache(t)
 
-		err := memoryCache.Set(context.Background(), "", TestValue)
+		err := memoryCache.Set(t.Context(), "", TestValue)
 		assert.Equal(t, cache.ErrBlankKey, errors.Cause(err), "should be blank key error")
 	})
 }

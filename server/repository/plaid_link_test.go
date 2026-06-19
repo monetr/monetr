@@ -1,7 +1,6 @@
 package repository_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/benbjohnson/clock"
@@ -22,7 +21,7 @@ func TestPlaidRepositoryBase_GetLink(t *testing.T) {
 	plaidRepo := repository.NewPlaidRepository(db)
 
 	t.Run("simple", func(t *testing.T) {
-		readLink, err := plaidRepo.GetLink(context.Background(), link.AccountId, link.LinkId)
+		readLink, err := plaidRepo.GetLink(t.Context(), link.AccountId, link.LinkId)
 		assert.NoError(t, err, "failed to retrieve link")
 		assert.NotNil(t, readLink.PlaidLink, "must include plaid link child")
 		assert.EqualValues(t, link.LinkId, readLink.LinkId, "link Id must match")
@@ -30,7 +29,7 @@ func TestPlaidRepositoryBase_GetLink(t *testing.T) {
 	})
 
 	t.Run("not found", func(t *testing.T) {
-		readLink, err := plaidRepo.GetLink(context.Background(), link.AccountId, "link_bogus")
+		readLink, err := plaidRepo.GetLink(t.Context(), link.AccountId, "link_bogus")
 		assert.EqualError(t, err, "failed to retrieve link: pg: no rows in result set")
 		assert.Nil(t, readLink, "link must be nil")
 	})
@@ -47,7 +46,7 @@ func TestPlaidRepositoryBase_GetLinkByItemId(t *testing.T) {
 	plaidRepo := repository.NewPlaidRepository(db)
 
 	t.Run("simple", func(t *testing.T) {
-		readLink, err := plaidRepo.GetLinkByItemId(context.Background(), plaidLink.PlaidId)
+		readLink, err := plaidRepo.GetLinkByItemId(t.Context(), plaidLink.PlaidId)
 		assert.NoError(t, err, "failed to retrieve link")
 		assert.NotNil(t, readLink.PlaidLink, "must include plaid link child")
 		assert.EqualValues(t, link.LinkId, readLink.LinkId, "link Id must match")
@@ -55,7 +54,7 @@ func TestPlaidRepositoryBase_GetLinkByItemId(t *testing.T) {
 	})
 
 	t.Run("not found", func(t *testing.T) {
-		readLink, err := plaidRepo.GetLinkByItemId(context.Background(), "not a real item id")
+		readLink, err := plaidRepo.GetLinkByItemId(t.Context(), "not a real item id")
 		assert.EqualError(t, err, "failed to retrieve link by item Id: pg: no rows in result set")
 		assert.Nil(t, readLink, "link must be nil")
 	})
