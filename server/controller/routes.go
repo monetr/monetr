@@ -284,7 +284,6 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.GET("/links", c.getLinks)
 	billed.GET("/links/:linkId", c.getLink)
 	billed.POST("/links", c.postLinks)
-	billed.PUT("/links/:linkId", c.putLink)
 	billed.PATCH("/links/:linkId", c.patchLink)
 	billed.DELETE("/links/:linkId", c.deleteLink)
 	// Institutions

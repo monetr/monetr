@@ -29,17 +29,17 @@ export default class Link {
    * Represents the global unique identifier for a group of bank accounts in monetr.
    * This value is generated automatically by the API upon creation, and cannot be changed.
    */
-  linkId: ID<Link>;
+  readonly linkId: ID<Link>;
   lunchFlowLinkId: ID<LunchFlowLink> | null;
-  linkType: LinkType;
+  readonly linkType: LinkType;
   institutionName: string;
   description: string | null;
-  updatedAt: Date;
-  createdAt: Date;
-  createdBy: ID<User>;
+  readonly updatedAt: Date;
+  readonly createdAt: Date;
+  readonly createdBy: ID<User>;
 
-  plaidLink: PlaidLink | null;
-  lunchFlowLink: LunchFlowLink | null;
+  readonly plaidLink: PlaidLink | null;
+  readonly lunchFlowLink: LunchFlowLink | null;
 
   constructor(data: WithJsonValues<Link>) {
     this.linkId = ID.from(data.linkId);

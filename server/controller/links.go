@@ -100,53 +100,6 @@ func (c *Controller) postLinks(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, link)
 }
 
-func (c *Controller) putLink(ctx echo.Context) error {
-	linkId, err := ParseID[Link](ctx.Param("linkId"))
-	if err != nil || linkId.IsZero() {
-		return c.badRequest(ctx, "must specify a valid link Id to update")
-	}
-
-	var request struct {
-		InstituionName string  `json:"instituionName"`
-		Description    *string `json:"description"`
-	}
-	if err := ctx.Bind(&request); err != nil {
-		return c.invalidJson(ctx)
-	}
-
-	// If a description is provided. Trim the space on the description.
-	if request.Description != nil {
-		desc, err := c.cleanString(ctx, "Description", *request.Description)
-		if err != nil {
-			return err
-		}
-		request.Description = &desc
-	}
-
-	repo := c.mustGetAuthenticatedRepository(ctx)
-	existingLink, err := repo.GetLink(c.getContext(ctx), linkId)
-	if err != nil {
-		return c.wrapPgError(ctx, err, "failed to retrieve existing link for update")
-	}
-
-	hasUpdate := false
-
-	if request.Description != nil {
-		existingLink.Description = request.Description
-		hasUpdate = true
-	}
-
-	if !hasUpdate {
-		return ctx.NoContent(http.StatusNotModified)
-	}
-
-	if err = repo.UpdateLink(c.getContext(ctx), existingLink); err != nil {
-		return c.wrapPgError(ctx, err, "could not update link")
-	}
-
-	return ctx.JSON(http.StatusOK, existingLink)
-}
-
 func (c *Controller) patchLink(ctx echo.Context) error {
 	linkId, err := ParseID[Link](ctx.Param("linkId"))
 	if err != nil || linkId.IsZero() {
