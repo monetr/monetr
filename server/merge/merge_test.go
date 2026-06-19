@@ -265,6 +265,54 @@ func TestMerge(t *testing.T) {
 		assert.EqualValues(t, 12345, *dst.Amount, "amount should be merged properly!")
 	})
 
+	t.Run("handle unsigned json numbers", func(t *testing.T) {
+		type Foo struct {
+			Amount uint64 `json:"amount"`
+		}
+
+		dst := Foo{}
+		src := map[string]any{
+			"amount": json.Number("12345"),
+		}
+
+		err := merge.Merge(&dst, src)
+		assert.NoError(t, err, "Must be able to merge a json number into an unsigned field")
+		assert.EqualValues(t, 12345, dst.Amount, "amount should be merged properly!")
+	})
+
+	t.Run("handle unsigned json pointer numbers", func(t *testing.T) {
+		type Foo struct {
+			Amount *uint64 `json:"amount"`
+		}
+
+		dst := Foo{}
+		src := map[string]any{
+			"amount": json.Number("12345"),
+		}
+
+		err := merge.Merge(&dst, src)
+		assert.NoError(t, err, "Must be able to merge a json number into an unsigned pointer field")
+		assert.EqualValues(t, 12345, *dst.Amount, "amount should be merged properly!")
+	})
+
+	t.Run("handle unsigned json numbers larger than the max int64", func(t *testing.T) {
+		// This is the whole reason we parse the string as a uint instead of going
+		// through Int64. A value like this fits just fine in a uint64 but Int64
+		// would choke on it, so make sure the full range actually works.
+		type Foo struct {
+			Amount uint64 `json:"amount"`
+		}
+
+		dst := Foo{}
+		src := map[string]any{
+			"amount": json.Number("18446744073709551615"), // math.MaxUint64
+		}
+
+		err := merge.Merge(&dst, src)
+		assert.NoError(t, err, "Must be able to merge a uint64 value that does not fit in an int64")
+		assert.EqualValues(t, uint64(18446744073709551615), dst.Amount, "the max uint64 should merge properly")
+	})
+
 	t.Run("handle timestamps", func(t *testing.T) {
 		type Foo struct {
 			Timestamp time.Time `json:"timestamp"`

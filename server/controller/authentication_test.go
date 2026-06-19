@@ -250,7 +250,8 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("Email address provided is not valid")
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.email").String().IsEqual("Email address is not valid")
 		response.JSON().Object().NotContainsKey("token")
 	})
 
@@ -265,7 +266,8 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("Email address provided is not valid")
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.email").String().IsEqual("Email address is not valid")
 		response.JSON().Object().NotContainsKey("token")
 	})
 
@@ -280,7 +282,8 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("Password must be at least 8 characters")
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.password").String().IsEqual("Password must be between 8 and 72 characters")
 		response.JSON().Object().NotContainsKey("token")
 	})
 
@@ -351,7 +354,7 @@ func TestLogin(t *testing.T) {
 		response.Status(http.StatusBadRequest)
 		response.JSON().
 			Path("$.error").
-			IsEqual("malformed json")
+			IsEqual("failed to parse request")
 		response.JSON().Object().NotContainsKey("token")
 	})
 
@@ -2237,7 +2240,12 @@ func TestPostLogin_ProofOfWork(t *testing.T) {
 			}).
 			Expect()
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("invalid proof of work")
+		// With proof of work enabled the challenge schema requires both fields, so a
+		// missing challenge now gets caught at validation before we even try to
+		// verify the solution.
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.challenge").String().IsEqual("required key is missing")
+		response.JSON().Path("$.problems.nonce").String().IsEqual("required key is missing")
 	})
 
 	t.Run("an insufficient solution is rejected", func(t *testing.T) {

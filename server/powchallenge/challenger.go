@@ -82,6 +82,13 @@ const (
 // base32 keeps the token on a copy-paste safe alphabet (no +/ or -_).
 var tokenEncoding = base32.StdEncoding.WithPadding(base32.NoPadding)
 
+// EncodedTokenLength is how many characters a challenge token is once it has been
+// base32 encoded for the wire. The token is a fixed size so every challenge we
+// issue is exactly this long. This is exported so the request validation can
+// cheaply reject anything that is obviously not one of our tokens before we do
+// the real (and authoritative) verification in Verify.
+var EncodedTokenLength = tokenEncoding.EncodedLen(tokenLength)
+
 type Challenge struct {
 	Token      string `json:"challenge"`
 	Difficulty int    `json:"difficulty"`

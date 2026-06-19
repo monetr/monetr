@@ -4,6 +4,7 @@ package merge
 import (
 	"encoding/json"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -162,6 +163,28 @@ func (m *mergeContext) merge() error {
 				// Otherwise just set the value directly.
 				dstField.SetInt(value)
 			}
+		case isUnsignedInteger(dstField.Type()) && srcValue.Type() == jsonNumberType:
+			// Same idea as the signed integer case above, but the json.Number Int64
+			// helper tops out at the max int64 so it cannot handle a value that fits
+			// in a uint64 but not an int64. So when the destination is unsigned we
+			// parse the raw text of the json number as a uint instead, that way the
+			// whole uint64 range is actually usable.
+			jsonNumber := srcValue.Interface().(json.Number)
+			value, err := strconv.ParseUint(jsonNumber.String(), 10, 64)
+			if err != nil {
+				return errors.WithStack(err)
+			}
+
+			// If the destination is a pointer then we need to set the inner value
+			// instead of the value of the pointer.
+			if dstField.Kind() == reflect.Pointer {
+				newValue := reflect.New(reflect.TypeFor[uint64]())
+				newValue.Elem().Set(reflect.ValueOf(value))
+				dstField.Set(newValue)
+			} else {
+				// Otherwise just set the value directly.
+				dstField.SetUint(value)
+			}
 		case dstField.Kind() == reflect.String && srcValue.Kind() == reflect.String:
 			// This is a weird very specific condition. But basically instead of using
 			// Set() we can use SetString instead which does not perform the same type
@@ -220,6 +243,17 @@ func isInteger(val reflect.Type) bool {
 		return true
 	case reflect.Pointer:
 		return isInteger(val.Elem())
+	default:
+		return false
+	}
+}
+
+func isUnsignedInteger(val reflect.Type) bool {
+	switch val.Kind() {
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return true
+	case reflect.Pointer:
+		return isUnsignedInteger(val.Elem())
 	default:
 		return false
 	}

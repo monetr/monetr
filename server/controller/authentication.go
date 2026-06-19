@@ -3,7 +3,6 @@ package controller
 import (
 	"fmt"
 	"net/http"
-	"net/mail"
 	"strings"
 	"time"
 
@@ -15,6 +14,7 @@ import (
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/powchallenge"
 	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/schemas"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/zoneinfo"
 	"github.com/pkg/errors"
@@ -101,30 +101,31 @@ func (c *Controller) postChallenge(ctx echo.Context) error {
 
 func (c *Controller) postLogin(ctx echo.Context) error {
 	c.scrubSentryBody(ctx)
-	var loginRequest struct {
-		Email     string `json:"email"`
-		Password  string `json:"password"`
-		Challenge string `json:"challenge"`
-		Nonce     uint64 `json:"nonce"`
+	// When proof of work is enabled the request must include a challenge and a
+	// nonce, so we validate against the schema that knows about those fields. When
+	// it is disabled the plain login schema is used which rejects them outright.
+	loginSchema := schemas.LoginSchema
+	if c.Configuration.ProofOfWork.Enabled {
+		loginSchema = schemas.LoginChallengeSchema
 	}
-	if err := ctx.Bind(&loginRequest); err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
+	loginRequest, err := parse(
+		c,
+		ctx,
+		&schemas.LoginRequest{},
+		loginSchema,
+	)
+	if err != nil {
+		return err
 	}
 
 	// The cheap fail-fast before we do any real work. No-op when disabled.
-	if err := c.validateProofOfWork(ctx, powchallenge.PurposeLogin, loginRequest.Challenge, loginRequest.Nonce); err != nil {
-		return err // validateProofOfWork returns a valid http error.
-	}
-
-	loginRequest.Email = strings.ToLower(strings.TrimSpace(loginRequest.Email))
-	loginRequest.Password = strings.TrimSpace(loginRequest.Password)
-
-	if err := c.validateLogin(
+	if err := c.validateProofOfWork(
 		ctx,
-		loginRequest.Email,
-		loginRequest.Password,
+		powchallenge.PurposeLogin,
+		loginRequest.Challenge,
+		loginRequest.Nonce,
 	); err != nil {
-		return err // Validate login errors are valid http errors.
+		return err // validateProofOfWork returns a valid http error.
 	}
 
 	secureRepo := c.mustGetSecurityRepository(ctx)
@@ -135,7 +136,11 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 	)
 	switch errors.Cause(err) {
 	case repository.ErrInvalidCredentials:
-		return c.returnError(ctx, http.StatusUnauthorized, "Invalid email and password")
+		return c.returnError(
+			ctx,
+			http.StatusUnauthorized,
+			"Invalid email and password",
+		)
 	case nil:
 		// If no error was returned then do nothing.
 	default:
@@ -143,21 +148,32 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 	}
 
 	// I want to track how many of these types of things we get.
-	crumbs.AddTag(c.getContext(ctx), "requiresPasswordChange", fmt.Sprint(requiresPasswordChange))
+	crumbs.AddTag(
+		c.getContext(ctx),
+		"requiresPasswordChange",
+		fmt.Sprint(requiresPasswordChange),
+	)
 
 	log := c.getLog(ctx).With("loginId", login.LoginId)
 
 	// If we want to verify emails and the login does not have a verified email address, then return an error to the
 	// user.
 	if c.Configuration.Email.ShouldVerifyEmails() && !login.IsEmailVerified {
-		log.DebugContext(c.getContext(ctx), "login email address is not verified, please verify before continuing")
+		log.DebugContext(
+			c.getContext(ctx),
+			"login email address is not verified, please verify before continuing",
+		)
 		return c.failure(ctx, http.StatusPreconditionRequired, EmailNotVerifiedError{})
 	}
 
 	if requiresPasswordChange {
 		// If the server is not configured to allow password resets return an error.
 		if !c.Configuration.Email.AllowPasswordReset() {
-			return c.returnError(ctx, http.StatusNotAcceptable, "Login requires password reset, but password reset is not allowed")
+			return c.returnError(
+				ctx,
+				http.StatusNotAcceptable,
+				"Login requires password reset, but password reset is not allowed",
+			)
 		}
 
 		passwordResetToken, err := c.ClientTokens.Create(
@@ -171,7 +187,12 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 			},
 		)
 		if err != nil {
-			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to generate a password reset token")
+			return c.wrapAndReturnError(
+				ctx,
+				err,
+				http.StatusInternalServerError,
+				"Failed to generate a password reset token",
+			)
 		}
 		ctx.Set(authenticationKey, security.Claims{
 			LoginId: login.LoginId.String(),
@@ -179,15 +200,23 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 		})
 
 		log.InfoContext(c.getContext(ctx), "login requires a password change")
-		return c.failure(ctx, http.StatusPreconditionRequired, PasswordResetRequiredError{
-			ResetToken: passwordResetToken,
-		})
+		return c.failure(
+			ctx,
+			http.StatusPreconditionRequired,
+			PasswordResetRequiredError{
+				ResetToken: passwordResetToken,
+			},
+		)
 	}
 
 	switch len(login.Users) {
 	case 0:
 		// TODO (elliotcourant) Should we allow them to create an account?
-		return c.returnError(ctx, http.StatusInternalServerError, "User has no accounts")
+		return c.returnError(
+			ctx,
+			http.StatusInternalServerError,
+			"User has no accounts",
+		)
 	case 1:
 		user := login.Users[0]
 
@@ -214,7 +243,12 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 				},
 			)
 			if err != nil {
-				return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Could not generate token")
+				return c.wrapAndReturnError(
+					ctx,
+					err,
+					http.StatusInternalServerError,
+					"Could not generate token",
+				)
 			}
 			c.updateAuthenticationCookie(ctx, token)
 
@@ -240,7 +274,12 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 			},
 		)
 		if err != nil {
-			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Could not generate token")
+			return c.wrapAndReturnError(
+				ctx,
+				err,
+				http.StatusInternalServerError,
+				"Could not generate token",
+			)
 		}
 
 		result := map[string]any{
@@ -254,9 +293,17 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 			return ctx.JSON(http.StatusOK, result)
 		}
 
-		subscriptionIsActive, err := c.Billing.GetSubscriptionIsActive(c.getContext(ctx), user.AccountId)
+		subscriptionIsActive, err := c.Billing.GetSubscriptionIsActive(
+			c.getContext(ctx),
+			user.AccountId,
+		)
 		if err != nil {
-			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to determine whether or not subscription is active")
+			return c.wrapAndReturnError(
+				ctx,
+				err,
+				http.StatusInternalServerError,
+				"Failed to determine whether or not subscription is active",
+			)
 		}
 
 		result["isActive"] = subscriptionIsActive
@@ -270,7 +317,10 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 		// If the login has more than one user then we want to generate a temp
 		// JWT that will only grant them access to API endpoints not specific to
 		// an account.
-		return c.badRequest(ctx, "Multiple accounts not implemented, please contact support")
+		return c.badRequest(
+			ctx,
+			"Multiple accounts not implemented, please contact support",
+		)
 	}
 }
 
@@ -904,25 +954,4 @@ func (c *Controller) validateProofOfWork(ctx echo.Context, purpose powchallenge.
 	default:
 		return c.badRequestError(ctx, err, "invalid proof of work")
 	}
-}
-
-// validateLogin takes the current request context and the provided email and password, it then validates thats the
-// credentials are valid based on some basic constraints. The password must be so long and the email address provided
-// must be at least a valid email formated string. If the credentials are not valid in this regard then an http error is
-// returned and can be passed immediately back up through the controller.
-func (c *Controller) validateLogin(ctx echo.Context, email, password string) error {
-	if len(password) < 8 {
-		return c.badRequest(ctx, "Password must be at least 8 characters")
-	}
-
-	address, err := mail.ParseAddress(email)
-	if err != nil {
-		return c.badRequest(ctx, "Email address provided is not valid")
-	}
-
-	if !strings.EqualFold(address.Address, email) {
-		return c.badRequest(ctx, "Email address provided is not valid")
-	}
-
-	return nil
 }
