@@ -1539,12 +1539,13 @@ func TestPatchBankAccount(t *testing.T) {
 		}
 	})
 
-	t.Run("lunch flow bank account can only patch the name", func(t *testing.T) {
-		// A lunch flow link is also a non-manual link, so it routes through the
-		// same restrictive patch schema as Plaid. This guards against the isManual
-		// check ever accidentally treating a lunch flow account as manual, which
-		// would let a client change balances on an account that is synced
-		// externally.
+	t.Run("happy path patch a lunch flow bank account", func(t *testing.T) {
+		// A lunch flow account is synced externally so monetr owns the balances,
+		// but the user still picks the name, mask, and currency for it. It gets its
+		// own patch schema (not the manual one and not the bare Plaid one) so it
+		// can change those three things and nothing else. We route to it off of the
+		// LunchFlowBankAccountId rather than the isManual check, which is what
+		// these tests are really guarding.
 		app, e := NewTestApplication(t)
 		var token string
 		var bank BankAccount
@@ -1555,20 +1556,56 @@ func TestPatchBankAccount(t *testing.T) {
 
 		token = GivenILogin(t, e, user.Login.Email, password)
 
-		{ // The name can be changed.
+		{ // The name, mask, and currency can all be changed.
 			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"name": "My New Name",
+					"name":     "My New Name",
+					"mask":     "4321",
+					"currency": "EUR",
 				}).
 				Expect()
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.name").String().IsEqual("My New Name")
+			response.JSON().Path("$.mask").String().IsEqual("4321")
+			response.JSON().Path("$.currency").String().IsEqual("EUR")
 		}
 
-		{ // But a balance is not part of the non-manual schema.
+		{ // Read it back to make sure the patched values were actually persisted
+			// and not just echoed back from the handler.
+			response := e.GET("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.name").String().IsEqual("My New Name")
+			response.JSON().Path("$.mask").String().IsEqual("4321")
+			response.JSON().Path("$.currency").String().IsEqual("EUR")
+		}
+	})
+
+	t.Run("lunch flow bank account cannot patch balances or classification", func(t *testing.T) {
+		// The whole point of the dedicated lunch flow schema is that balances and
+		// the account classification are synced externally, so the client must not
+		// be able to touch them. These keys are not part of the schema so they
+		// should come back as unexpected. This also guards against the routing ever
+		// accidentally treating a lunch flow account as manual, which would let a
+		// client change balances on an account that monetr keeps in sync.
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveALunchFlowLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveALunchFlowBankAccount(t, app.Clock, &link)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{ // The available balance is allowed on a manual account but NOT on a lunch
+			// flow one.
 			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
@@ -1580,6 +1617,156 @@ func TestPatchBankAccount(t *testing.T) {
 			response.Status(http.StatusBadRequest)
 			response.JSON().Path("$.error").String().IsEqual("Invalid request")
 			response.JSON().Path("$.problems.availableBalance").String().IsEqual("key not expected")
+		}
+
+		{ // Same for the limit balance.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"limitBalance": 5000,
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.limitBalance").String().IsEqual("key not expected")
+		}
+
+		{ // And the account type, monetr owns the classification for a synced
+			// account.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"accountType": CreditBankAccountType,
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.accountType").String().IsEqual("key not expected")
+		}
+	})
+
+	t.Run("lunch flow bank account can clear the mask", func(t *testing.T) {
+		// The mask field on the lunch flow patch schema is a one of null or a real
+		// mask, just like the manual schema, so a client should be able to
+		// explicitly null it out and actually have it cleared.
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveALunchFlowLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveALunchFlowBankAccount(t, app.Clock, &link)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{ // Make sure the mask starts off set.
+			response := e.GET("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.mask").String().IsEqual(*bank.Mask)
+		}
+
+		{ // Then null it out.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"mask": nil,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.mask").IsNull()
+		}
+
+		{ // And make sure it actually persisted as null.
+			response := e.GET("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.mask").IsNull()
+		}
+	})
+
+	t.Run("lunch flow bank account rejects an invalid currency", func(t *testing.T) {
+		// The currency goes through the same CurrencyCode rule as the manual
+		// schema, so a lower case value trips the upper case rule and an
+		// unsupported value trips the supported list rule.
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveALunchFlowLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveALunchFlowBankAccount(t, app.Clock, &link)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{ // A lower case currency passes the length and alpha rules but trips the
+			// upper case rule.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"currency": "usd",
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.currency").String().IsEqual("Currency must be all upper case")
+		}
+
+		{ // A correctly shaped but unsupported currency trips the supported list
+			// rule.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"currency": "ZZZ",
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.currency").String().IsEqual("Currency must be one supported by the server")
+		}
+	})
+
+	t.Run("lunch flow bank account rejects a null name", func(t *testing.T) {
+		// Name is not nullable on the lunch flow schema either, so even though the
+		// key is optional an explicit null should be rejected by the Required rule.
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveALunchFlowLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveALunchFlowBankAccount(t, app.Clock, &link)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name": nil,
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.name").String().IsEqual("Name is required")
 		}
 	})
 

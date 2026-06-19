@@ -114,6 +114,7 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
           /* These top properties might be overwritten by the ...otherProps below, this is intended. */
           disabled={formikContext?.isSubmitting}
           onBlur={formikContext?.handleBlur}
+          placeholder={intlNumberFormatter(locale, currency)('0')}
           value={value}
           {...otherProps}
           /* Properties below this point cannot be overwritten by the caller! */
@@ -123,7 +124,6 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
           decimalSeparator={getDecimalSeparator(locale)}
           fixedDecimalScale
           onValueChange={onChange}
-          placeholder={intlNumberFormatter(locale, currency)('0')}
           prefix={getCurrencySymbolPrefixed(locale, currency)}
           renderText={intlNumberFormatter(locale, currency)}
           thousandSeparator={getNumberGroupSeparator(locale)}

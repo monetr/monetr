@@ -79,7 +79,7 @@ func NameOld(required OptionalOrRequire) *validation.KeyRules[string] {
 	return validation.Key(
 		"name",
 		validation.Required.When(required).Error("Name is required"),
-		validation.IsString,
+		is.String,
 		is.PrintableUnicode,
 		validation.Length(1, 300).Error("Name must be between 1 and 300 characters"),
 	).Required(required)
@@ -89,7 +89,7 @@ func Name() validation.Rule {
 	return validation.AllOf(
 		// All names cannot be set to an empty string or nil, so they are soft
 		// required if the key is present!
-		validation.IsString,
+		is.String,
 		is.PrintableUnicode,
 		validation.Length(1, 300).Error("Name must be between 1 and 300 characters"),
 		validation.Required.Error("Name is required"),
@@ -98,7 +98,7 @@ func Name() validation.Rule {
 
 func TextField() validation.Rule {
 	return validation.AllOf(
-		validation.IsString,
+		is.String,
 		is.PrintableUnicode,
 		validation.Length(1, 300).Error("Must be between 1 and 300 characters"),
 	)
@@ -106,7 +106,7 @@ func TextField() validation.Rule {
 
 func Mask() validation.Rule {
 	return validation.AllOf(
-		validation.IsString,
+		is.String,
 		validation.Length(4, 4).Error("Mask must be exactly 4 digits"),
 		validation.Match(regexp.MustCompile(`\d{4}`)).Error("Mask must be a 4 digit string"),
 	)
@@ -114,7 +114,7 @@ func Mask() validation.Rule {
 
 func CurrencyCode() validation.Rule {
 	return validation.AllOf(
-		validation.IsString,
+		is.String,
 		validation.Length(3, 3).Error("Currency must be exactly 3 characters long"),
 		is.Alpha.Error("Currency must be alphabetical characters only"),
 		is.UpperCase.Error("Currency must be all upper case"),

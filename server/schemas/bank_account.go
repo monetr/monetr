@@ -23,7 +23,7 @@ var (
 		).Required(Optional),
 		validation.Key(
 			"originalName",
-			validation.IsString,
+			is.String,
 			is.PrintableUnicode,
 			validation.Length(1, 300).Error("Original name must be between 1 and 300 characters"),
 		).Required(validators.Optional),
@@ -54,7 +54,7 @@ var (
 			validation.OneOf(
 				validation.Nil,
 				validation.AllOf(
-					validation.IsInteger,
+					is.Integer,
 					// Limit balance cannot be negative!
 					validation.Min(float64(0)).Error("Limit balance cannot be negative"),
 				),
@@ -64,11 +64,11 @@ var (
 		// negative and positive values.
 		validation.Key(
 			"currentBalance",
-			validation.IsInteger,
+			is.Integer,
 		).Required(Optional),
 		validation.Key(
 			"availableBalance",
-			validation.IsInteger,
+			is.Integer,
 		).Required(Optional),
 
 		// Enums
@@ -84,6 +84,28 @@ var (
 			"accountSubType",
 			BankAccountAccountSubType(),
 		).Required(validators.Optional),
+	)
+
+	PatchLunchFlowBankAccount = validation.Map(
+		validation.Key(
+			"name",
+			validation.Required.Error("Name is required"),
+			Name(),
+		).Required(Optional),
+		validation.Key(
+			"mask",
+			validation.OneOf(
+				validation.Nil,
+				Mask(),
+			),
+		).Required(Optional),
+		validation.Key(
+			"currency",
+			validation.Required.Error("Currency is required"),
+			// This one doesn't handle nil because IF the field is specified then it
+			// needs to be valid.
+			CurrencyCode(),
+		).Required(Optional), // Optional because we default to USD.
 	)
 
 	PatchManualBankAccount = validation.Map(
@@ -126,7 +148,7 @@ var (
 			validation.OneOf(
 				validation.Nil,
 				validation.AllOf(
-					validation.IsInteger,
+					is.Integer,
 					validation.Min(float64(0)).Error("Limit balance cannot be negative"),
 				),
 			),
@@ -134,12 +156,12 @@ var (
 		validation.Key(
 			"currentBalance",
 			validation.NotNil,
-			validation.IsInteger,
+			is.Integer,
 		).Required(Optional),
 		validation.Key(
 			"availableBalance",
 			validation.NotNil,
-			validation.IsInteger,
+			is.Integer,
 		).Required(Optional),
 
 		// The account type and sub type can be reclassified on a manual account,

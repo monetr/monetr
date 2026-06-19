@@ -208,7 +208,9 @@ func (c *Controller) patchBankAccount(ctx echo.Context) error {
 	}
 
 	schema := schemas.PatchBankAccount
-	if isManual {
+	if existingBankAccount.LunchFlowBankAccountId != nil {
+		schema = schemas.PatchLunchFlowBankAccount
+	} else if isManual {
 		schema = schemas.PatchManualBankAccount
 	}
 

@@ -1,39 +1,39 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useCallback } from 'react';
+import { useMutation } from '@tanstack/react-query';
 
 import BankAccount from '@monetr/interface/models/BankAccount';
+import type { ID } from '@monetr/interface/models/ID';
 import type { WithJsonValues } from '@monetr/interface/util/json';
+import type { Writable } from '@monetr/interface/util/readonly';
 import request from '@monetr/interface/util/request';
 
-export interface UpdateBankAccountRequest {
-  bankAccountId: string;
-  name: string;
-  currency: string;
-  availableBalance?: number;
-  currentBalance?: number;
-  limitBalance?: number;
-}
+export type PatchBankAccountRequest = Partial<Writable<Omit<BankAccount, 'accountType' | 'accountSubType'>>> & {
+  bankAccountId: ID<BankAccount>;
+};
 
-export function useUpdateBankAccount(): (_bankAccount: UpdateBankAccountRequest) => Promise<BankAccount> {
-  const queryClient = useQueryClient();
+export function useUpdateBankAccount(): (_bankAccount: PatchBankAccountRequest) => Promise<BankAccount> {
+  const updateBankAccount = useCallback(
+    async ({ bankAccountId, ...bankAccount }: PatchBankAccountRequest): Promise<BankAccount> => {
+      return request<WithJsonValues<BankAccount>>({
+        method: 'PATCH',
+        url: `/api/bank_accounts/${bankAccountId}`,
+        data: bankAccount,
+      }).then(result => new BankAccount(result.data));
+    },
+    [],
+  );
 
-  async function updateBankAccount({ bankAccountId, ...updates }: UpdateBankAccountRequest): Promise<BankAccount> {
-    return request<WithJsonValues<BankAccount>>({
-      method: 'PUT',
-      url: `/api/bank_accounts/${bankAccountId}`,
-      data: updates,
-    }).then(result => new BankAccount(result?.data));
-  }
-
-  const mutate = useMutation({
+  const { mutateAsync } = useMutation({
     mutationFn: updateBankAccount,
-    onSuccess: (updatedBankAccount: BankAccount) =>
+    onSuccess: (updatedBankAccount: BankAccount, _var, _result, ctx) =>
       Promise.all([
-        queryClient.setQueryData(['/api/bank_accounts'], (previous: Array<WithJsonValues<BankAccount>>) =>
+        ctx.client.setQueryData(['/api/bank_accounts'], (previous: Array<WithJsonValues<BankAccount>>) =>
           previous.map(item => (item.bankAccountId === updatedBankAccount.bankAccountId ? updatedBankAccount : item)),
         ),
-        queryClient.setQueryData([`/api/bank_accounts/${updatedBankAccount.bankAccountId}`], updatedBankAccount),
+        ctx.client.setQueryData([`/api/bank_accounts/${updatedBankAccount.bankAccountId}`], updatedBankAccount),
+        ctx.client.invalidateQueries({ queryKey: [`/api/bank_accounts/${updatedBankAccount.bankAccountId}/balances`] }),
       ]),
   });
 
-  return mutate.mutateAsync;
+  return mutateAsync;
 }

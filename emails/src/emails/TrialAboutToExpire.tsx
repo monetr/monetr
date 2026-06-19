@@ -31,9 +31,9 @@ export const TrialAboutToExpire = ({
       </Heading>
       <Typography>Hello {firstName},</Typography>
       <Typography>
-        We are just letting you know that your trial is about to expire. Don&apos;t worry, if you don&apos;t want to continue
-        using monetr then no action is required on your part. If you would like to continue using monetr though, you
-        will need to setup a subscription after your trial expires.
+        We are just letting you know that your trial is about to expire. Don&apos;t worry, if you don&apos;t want to
+        continue using monetr then no action is required on your part. If you would like to continue using monetr
+        though, you will need to setup a subscription after your trial expires.
       </Typography>
       <Typography>
         Your trial will expire in about <strong>{trialExpirationWindow}</strong> on{' '}

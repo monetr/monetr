@@ -74,8 +74,8 @@ function EmptyState(): React.JSX.Element {
           You don&apos;t have any goals yet...
         </Typography>
         <Typography align='center' color='subtle' size='lg'>
-          Goals are longer budgets that don&apos;t recur. They are meant to be used to put money aside for something like
-          saving up for a vaction, or paying off a loan.
+          Goals are longer budgets that don&apos;t recur. They are meant to be used to put money aside for something
+          like saving up for a vaction, or paying off a loan.
         </Typography>
       </div>
     </div>
