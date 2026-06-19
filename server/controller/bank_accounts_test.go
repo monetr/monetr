@@ -1650,8 +1650,14 @@ func TestPutBankAccount(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"name":     "My New Name",
-					"currency": "USD",
+					// PUT now expects every modifiable field on the bank account, so
+					// we need to send the balances back as they were even though we
+					// are really only trying to change the name here.
+					"availableBalance": bank.AvailableBalance,
+					"currentBalance":   bank.CurrentBalance,
+					"limitBalance":     bank.LimitBalance,
+					"name":             "My New Name",
+					"currency":         "USD",
 				}).
 				Expect()
 
@@ -1694,8 +1700,13 @@ func TestPutBankAccount(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"name":     "My New Name",
-					"currency": "EUR",
+					// PUT wants all of the modifiable fields so send the balances
+					// back unchanged, we only care about the currency change here.
+					"availableBalance": bank.AvailableBalance,
+					"currentBalance":   bank.CurrentBalance,
+					"limitBalance":     bank.LimitBalance,
+					"name":             "My New Name",
+					"currency":         "EUR",
 				}).
 				Expect()
 
@@ -1819,6 +1830,78 @@ func TestPutBankAccount(t *testing.T) {
 			response.JSON().Path("$.accountSubType").String().IsEqual(string(bank.AccountSubType))
 
 			response.JSON().Path("$.name").String().IsEqual("My New Name")
+		}
+	})
+
+	t.Run("update balances for manual bank account", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{ // Update all three balance fields along with the name.
+			response := e.PUT("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":             "My Checking",
+					"currency":         "USD",
+					"availableBalance": 5000,
+					"currentBalance":   4800,
+					"limitBalance":     0,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.availableBalance").Number().IsEqual(5000)
+			response.JSON().Path("$.currentBalance").Number().IsEqual(4800)
+			response.JSON().Path("$.limitBalance").Number().IsEqual(0)
+			response.JSON().Path("$.name").String().IsEqual("My Checking")
+		}
+
+		{ // Read it back to confirm persistence.
+			response := e.GET("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.availableBalance").Number().IsEqual(5000)
+			response.JSON().Path("$.currentBalance").Number().IsEqual(4800)
+			response.JSON().Path("$.limitBalance").Number().IsEqual(0)
+		}
+	})
+
+	t.Run("negative limit balance rejected for manual bank account", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{
+			response := e.PUT("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":         "My Checking",
+					"currency":     "USD",
+					"limitBalance": -1,
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.limitBalance").String().IsEqual("Limit balance cannot be negative")
 		}
 	})
 

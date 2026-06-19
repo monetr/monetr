@@ -6,6 +6,7 @@ import { useLocation } from 'wouter';
 import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
 import Card from '@monetr/interface/components/Card';
+import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import MForm from '@monetr/interface/components/MForm';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
@@ -23,6 +24,9 @@ import styles from './settings.module.scss';
 interface BankAccountValues {
   name: string;
   currency: string;
+  availableBalance: number;
+  currentBalance: number;
+  limitBalance: number;
 }
 
 export default function BankAccountSettingsPage(): React.JSX.Element | null {
@@ -80,6 +84,11 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
       bankAccountId: bankAccount.bankAccountId,
       name: values.name,
       currency: values.currency,
+      ...(link?.getIsManual() && {
+        availableBalance: values.availableBalance,
+        currentBalance: values.currentBalance,
+        limitBalance: values.limitBalance,
+      }),
     })
       .then(() =>
         enqueueSnackbar('Updated bank account successfully', {
@@ -99,6 +108,9 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
   const initialValues: BankAccountValues = {
     name: bankAccount.name,
     currency: bankAccount.currency,
+    availableBalance: bankAccount.availableBalance,
+    currentBalance: bankAccount.currentBalance,
+    limitBalance: bankAccount.limitBalance ?? 0,
   };
 
   return (
@@ -139,6 +151,28 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
               placeholder='Bank account name...'
             />
             <SelectCurrency className={styles.input} disabled={link?.getIsPlaid()} name='currency' />
+            {link?.getIsManual() && (
+              <>
+                <FormAmountField
+                  className={styles.input}
+                  currency={bankAccount.currency}
+                  label='Available Balance'
+                  name='availableBalance'
+                />
+                <FormAmountField
+                  className={styles.input}
+                  currency={bankAccount.currency}
+                  label='Current Balance'
+                  name='currentBalance'
+                />
+                <FormAmountField
+                  className={styles.input}
+                  currency={bankAccount.currency}
+                  label='Limit Balance'
+                  name='limitBalance'
+                />
+              </>
+            )}
           </div>
         </div>
       </div>
