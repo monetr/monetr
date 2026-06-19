@@ -292,7 +292,6 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	// Bank Accounts
 	billed.GET("/bank_accounts", c.getBankAccounts)
 	billed.GET("/bank_accounts/:bankAccountId", c.getBankAccount)
-	billed.PUT("/bank_accounts/:bankAccountId", c.putBankAccount)
 	billed.DELETE("/bank_accounts/:bankAccountId", c.deleteBankAccount)
 	billed.PATCH("/bank_accounts/:bankAccountId", c.patchBankAccount)
 	billed.GET("/bank_accounts/:bankAccountId/balances", c.getBalances)

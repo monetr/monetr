@@ -11,7 +11,6 @@ import (
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/schemas"
-	"github.com/monetr/validation"
 	"github.com/pkg/errors"
 )
 
@@ -232,97 +231,6 @@ func (c *Controller) patchBankAccount(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, bankAccount)
-}
-
-func (c *Controller) putBankAccount(ctx echo.Context) error {
-	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
-	if err != nil || bankAccountId.IsZero() {
-		return c.badRequest(ctx, "must specify a valid bank account Id")
-	}
-
-	repo := c.mustGetAuthenticatedRepository(ctx)
-	existingBankAccount, err := repo.GetBankAccount(c.getContext(ctx), bankAccountId)
-	if err != nil {
-		return c.wrapPgError(ctx, err, "failed to retrieve bank account")
-	}
-
-	// TODO Eventually we should just query the link to see if its a manual link.
-	// But for now if the bank account has a plaid account ID then its probably
-	// safe to assume that it is a Plaid managed bank account.
-	if existingBankAccount.PlaidBankAccountId == nil {
-		var request struct {
-			AvailableBalance int64   `json:"availableBalance"`
-			CurrentBalance   int64   `json:"currentBalance"`
-			LimitBalance     int64   `json:"limitBalance"`
-			Name             string  `json:"name"`
-			Currency         *string `json:"currency"`
-		}
-		if err = ctx.Bind(&request); err != nil {
-			return c.invalidJson(ctx)
-		}
-
-		err = validation.ValidateStructWithContext(c.getContext(ctx), &request,
-			validation.Field(
-				&request.Name,
-				validation.Length(1, 300).Error("Name must be between 1 and 300 characters"),
-			),
-			validation.Field(
-				&request.Currency,
-				validation.In(
-					locale.GetInstalledCurrencies()...,
-				).Error("Currency must be one supported by the server"),
-			),
-			validation.Field(
-				&request.LimitBalance,
-				validation.Min(int64(0)).Error("Limit balance cannot be negative"),
-			),
-		)
-		if err != nil {
-			return ctx.JSON(http.StatusBadRequest, map[string]any{
-				"error":    "Invalid request",
-				"problems": err,
-			})
-		}
-
-		existingBankAccount.AvailableBalance = request.AvailableBalance
-		existingBankAccount.CurrentBalance = request.CurrentBalance
-		existingBankAccount.LimitBalance = request.LimitBalance
-		existingBankAccount.Name = request.Name
-		if request.Currency != nil {
-			existingBankAccount.Currency = *request.Currency
-		}
-	} else {
-		var request struct {
-			Name string `json:"name"`
-		}
-		if err = ctx.Bind(&request); err != nil {
-			return c.invalidJson(ctx)
-		}
-
-		err = validation.ValidateStructWithContext(c.getContext(ctx), &request,
-			validation.Field(
-				&request.Name,
-				validation.Length(1, 300).Error("Name must be between 1 and 300 characters"),
-			),
-		)
-		if err != nil {
-			return ctx.JSON(http.StatusBadRequest, map[string]any{
-				"error":    "Invalid request",
-				"problems": err,
-			})
-		}
-
-		existingBankAccount.Name = request.Name
-	}
-
-	if err = repo.UpdateBankAccount(
-		c.getContext(ctx),
-		existingBankAccount,
-	); err != nil {
-		return c.wrapPgError(ctx, err, "failed to update bank account")
-	}
-
-	return ctx.JSON(http.StatusOK, *existingBankAccount)
 }
 
 func (c *Controller) deleteBankAccount(ctx echo.Context) error {
