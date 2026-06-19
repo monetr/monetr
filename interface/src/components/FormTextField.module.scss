@@ -26,7 +26,10 @@
   --ring-size: 1px;
   @include mixins.inset-ring;
 
-  ::placeholder {
+  // This needs the & otherwise it compiles to a descendant selector and never
+  // actually targets the input's own placeholder. Without it the placeholder
+  // falls back to the browser default color.
+  &::placeholder {
     color: var(--content-placeholder);
   }
 
@@ -55,5 +58,12 @@
     background-color: var(--background-subtle);
     --ring-color: var(--background-emphasis);
     --ring-size: 1px;
+
+    // When the field is disabled the value text drops to content-disabled, so
+    // the placeholder needs to drop even lower otherwise it ends up brighter
+    // than the actual value which looks backwards.
+    &::placeholder {
+      color: var(--content-muted);
+    }
   }
 }
