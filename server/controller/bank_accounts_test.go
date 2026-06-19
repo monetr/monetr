@@ -1650,8 +1650,14 @@ func TestPutBankAccount(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"name":     "My New Name",
-					"currency": "USD",
+					// PUT now expects every modifiable field on the bank account, so
+					// we need to send the balances back as they were even though we
+					// are really only trying to change the name here.
+					"availableBalance": bank.AvailableBalance,
+					"currentBalance":   bank.CurrentBalance,
+					"limitBalance":     bank.LimitBalance,
+					"name":             "My New Name",
+					"currency":         "USD",
 				}).
 				Expect()
 
@@ -1694,8 +1700,13 @@ func TestPutBankAccount(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"name":     "My New Name",
-					"currency": "EUR",
+					// PUT wants all of the modifiable fields so send the balances
+					// back unchanged, we only care about the currency change here.
+					"availableBalance": bank.AvailableBalance,
+					"currentBalance":   bank.CurrentBalance,
+					"limitBalance":     bank.LimitBalance,
+					"name":             "My New Name",
+					"currency":         "EUR",
 				}).
 				Expect()
 
