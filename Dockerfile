@@ -16,7 +16,8 @@ RUN apt-get update && \
       libc6-dev-arm64-cross=2.41-11cross1 \
       # renovate: datasource=deb depName=git versioning=deb
       git=1:2.47.3-0+deb13u1 \
-      nodejs=20.* \
+      # renovate: datasource=deb depName=nodejs versioning=deb
+      nodejs=20.19.2+dfsg-1+deb13u2 \
       # renovate: datasource=deb depName=npm versioning=deb
       npm=9.2.0~ds1-3 \
       # renovate: datasource=deb depName=wget versioning=deb
