@@ -362,3 +362,69 @@ func TestDateSpec_GetTimeFormat(t *testing.T) {
 		})
 	}
 }
+
+// TestDateSpec_Validate_TokenCounts nails down exactly how many year, month and
+// day tokens a format string may contain. This is the contract those three
+// regexes in date.go encode: the year must be a single run of Y that is two or
+// four long (YY or YYYY), and the month and day must each be a single run that
+// is one or two long. Zero tokens, an odd-length run like YYY, or more than one
+// run of the same token must all be rejected. We drive the real
+// DateSpec.Validate here, not a copy of the regex, so this proves the behavior
+// of the code that actually ships. In every reject case below the field under
+// test is the first rule to fail, so the validators for the other fields and
+// the length and character whitelist rules never get a chance to mask it.
+func TestDateSpec_Validate_TokenCounts(t *testing.T) {
+	ctx := table.WithColumns(t.Context(), []string{"Date"})
+
+	const (
+		yearErr  = "failed to validate *table.DateSpec: format: Date format does not include the year."
+		monthErr = "failed to validate *table.DateSpec: format: Date format does not include the month."
+		dayErr   = "failed to validate *table.DateSpec: format: Date format does not include the day of the month."
+	)
+
+	assertFormat := func(t *testing.T, format, wantErr string) {
+		t.Helper()
+		spec := table.DateSpec{
+			Fields: []table.FieldRef{
+				{
+					Name: "Date",
+				},
+			},
+			Format: format,
+		}
+		err := spec.Validate(ctx)
+		if wantErr == "" {
+			assert.NoErrorf(t, err, "format %q must be accepted", format)
+		} else {
+			assert.EqualErrorf(t, err, wantErr, "format %q must be rejected for the right reason", format)
+		}
+	}
+
+	t.Run("year must be a single run of two or four", func(t *testing.T) {
+		// Hold the month and day tokens valid and vary only the year run.
+		assertFormat(t, "-MM-DD", yearErr)      // zero year tokens
+		assertFormat(t, "Y-MM-DD", yearErr)     // one Y, too short
+		assertFormat(t, "YY-MM-DD", "")         // exactly two, accepted
+		assertFormat(t, "YYY-MM-DD", yearErr)   // three, not allowed
+		assertFormat(t, "YYYY-MM-DD", "")       // exactly four, accepted
+		assertFormat(t, "YYYYY-MM-DD", yearErr) // five, not allowed
+		assertFormat(t, "YY-YY-MM-DD", yearErr) // two separate year runs
+	})
+
+	t.Run("month must be a single run of one or two", func(t *testing.T) {
+		// Year is the longer YYYY here so the month run is the only thing changing.
+		assertFormat(t, "YYYY--DD", monthErr)    // zero month tokens
+		assertFormat(t, "YYYY-M-DD", "")         // one, accepted
+		assertFormat(t, "YYYY-MM-DD", "")        // two, accepted
+		assertFormat(t, "YYYY-MMM-DD", monthErr) // three, not allowed
+		assertFormat(t, "YYYY-M-M-DD", monthErr) // two separate month runs
+	})
+
+	t.Run("day must be a single run of one or two", func(t *testing.T) {
+		assertFormat(t, "YYYY-MM-", dayErr)    // zero day tokens
+		assertFormat(t, "YYYY-MM-D", "")       // one, accepted
+		assertFormat(t, "YYYY-MM-DD", "")      // two, accepted
+		assertFormat(t, "YYYY-MM-DDD", dayErr) // three, not allowed
+		assertFormat(t, "YYYY-MM-D-D", dayErr) // two separate day runs
+	})
+}

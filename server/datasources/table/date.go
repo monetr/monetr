@@ -41,15 +41,15 @@ func (s *DateSpec) Validate(ctx context.Context) error {
 				// `YYYY-MM-DD` into golangs date format such as `2006-01-02`.
 				// Validate that the year format, YY or YYYY can only happen once in the
 				// string.
-				validation.Match(regexp.MustCompile(`^[^Y]*(?:YYYY|YY){1}[^Y]*$`)).
+				validation.Match(regexp.MustCompile(`^[^Y]*(?:YYYY|YY)[^Y]*$`)).
 					Error("Date format does not include the year"),
 				// Validate that they month format, M or MM can only happen once in the
 				// string.
-				validation.Match(regexp.MustCompile(`^[^M]*(?:MM|M){1}[^M]*$`)).
+				validation.Match(regexp.MustCompile(`^[^M]*(?:MM|M)[^M]*$`)).
 					Error("Date format does not include the month"),
 				// Validate that the day format, D or DD can only happen once in the
 				// string.
-				validation.Match(regexp.MustCompile(`^[^D]*(?:DD|D){1}[^D]*$`)).
+				validation.Match(regexp.MustCompile(`^[^D]*(?:DD|D)[^D]*$`)).
 					Error("Date format does not include the day of the month"),
 				// Validate that only these characters are allowed in the string at all.
 				validation.Match(regexp.MustCompile(`^(Y|M|D|\.| |-|/)+$`)).

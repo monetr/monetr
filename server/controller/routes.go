@@ -174,12 +174,9 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 			err := next(ctx)
 			if err != nil { // Log the error for the request.
 				level := slog.LevelError
-				switch raw := err.(type) {
-				case *echo.HTTPError:
-					// If this is an error for the user, then don't log at an error level.
-					if raw.Code < 500 {
-						level = slog.LevelWarn
-					}
+				// If this is an HTTPError for the user, then don't log at an error level.
+				if raw, ok := err.(*echo.HTTPError); ok && raw.Code < 500 {
+					level = slog.LevelWarn
 				}
 
 				// Don't log an error level if we are logging for a context canceled
