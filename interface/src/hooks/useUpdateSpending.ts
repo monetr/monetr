@@ -7,7 +7,7 @@ import request from '@monetr/interface/util/request';
 export function useUpdateSpending(): (_spending: Spending) => Promise<Spending> {
   const { mutateAsync } = useMutation({
     mutationFn: async (spending: Spending): Promise<Spending> =>
-      request<WithJsonValues<Spending>>({
+      await request<WithJsonValues<Spending>>({
         method: 'PUT',
         url: `/api/bank_accounts/${spending.bankAccountId}/spending/${spending.spendingId}`,
         data: spending,

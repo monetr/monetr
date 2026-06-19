@@ -20,7 +20,7 @@ export function useCreateBankAccount(): (_bankAccount: CreateBankAccountRequest)
   const queryClient = useQueryClient();
 
   async function createBankAccount(newBankAccount: CreateBankAccountRequest): Promise<BankAccount> {
-    return request<WithJsonValues<BankAccount>>({
+    return await request<WithJsonValues<BankAccount>>({
       method: 'POST',
       url: '/api/bank_accounts',
       data: newBankAccount,

@@ -11,7 +11,7 @@ export interface SendForgotPasswordArguments {
 export default function useSendForgotPassword(): (args: SendForgotPasswordArguments) => Promise<void> {
   const { enqueueSnackbar } = useSnackbar();
   return async ({ email, challenge, nonce }: SendForgotPasswordArguments) => {
-    return request({
+    return await request({
       method: 'POST',
       url: '/api/authentication/forgot',
       data: {

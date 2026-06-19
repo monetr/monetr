@@ -40,7 +40,7 @@ export function useCreateTransaction(): (
     bankAccountId,
     ...transaction
   }: CreateTransactionRequest): Promise<CreateTransactionResponse> {
-    return request<CreateTransactionResponse>({
+    return await request<CreateTransactionResponse>({
       method: 'POST',
       url: `/api/bank_accounts/${bankAccountId}/transactions`,
       data: transaction,

@@ -10,7 +10,7 @@ export function usePatchLink(): (_: PatchLinkRequest) => Promise<Link> {
   const queryClient = useQueryClient();
 
   async function patchLink({ linkId, ...patch }: PatchLinkRequest): Promise<Link> {
-    return request<WithJsonValues<Link>>({ method: 'PATCH', url: `/api/links/${linkId}`, data: patch }).then(
+    return await request<WithJsonValues<Link>>({ method: 'PATCH', url: `/api/links/${linkId}`, data: patch }).then(
       result => new Link(result.data),
     );
   }

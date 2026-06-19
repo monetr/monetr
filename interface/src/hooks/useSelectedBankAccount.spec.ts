@@ -45,7 +45,7 @@ describe('useSelectedBankAccount', () => {
     }
   });
 
-  it('non-bank url selected bank account basic', async () => {
+  it('non-bank url selected bank account basic', () => {
     const { result } = testRenderHook(useSelectedBankAccount, {
       initialRoute: '/settings',
     });

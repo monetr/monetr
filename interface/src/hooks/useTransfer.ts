@@ -29,7 +29,7 @@ export function useTransfer(): (transferParameters: TransferParameters) => Promi
   const selectedBankAccountId = useSelectedBankAccountId();
 
   async function transfer(transferRequest: BalanceTransferRequest): Promise<BalanceTransferResponse> {
-    return request<BalanceTransferResponse>({
+    return await request<BalanceTransferResponse>({
       method: 'POST',
       url: `/api/bank_accounts/${selectedBankAccountId}/spending/transfer`,
       data: transferRequest,

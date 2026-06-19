@@ -68,7 +68,7 @@ export default function ForgotPasswordNew(): React.JSX.Element {
 
     // sendForgotPassword does the work and shows its own errors; we just clear
     // submitting. getSolution is null when disabled.
-    return pow
+    return await pow
       .getSolution()
       .then(solution =>
         sendForgotPassword({

@@ -66,7 +66,7 @@ describe('use installed currencies', () => {
     expect(world.result.current.data).toStrictEqual(['EUR', 'USD']);
   });
 
-  it('will not fetch currencies if we are not authenticated', async () => {
+  it('will not fetch currencies if we are not authenticated', () => {
     mockFetch.onGet('/api/users/me').reply(403, {
       error: 'unauthenticated',
     });

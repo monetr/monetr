@@ -80,7 +80,7 @@ export default function PullToRefresh(): React.JSX.Element {
     };
 
     // Tracks how far we have pulled down the refresh icon
-    const pullDown = async (e: TouchEvent) => {
+    const pullDown = (e: TouchEvent) => {
       // If there is a dialog open, then do nothing.
       if (document.querySelectorAll('[role="dialog"]').length > 0) {
         return;

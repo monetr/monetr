@@ -13,7 +13,7 @@ export interface CreateLinkRequest {
 export function useCreateLink(): (_link: CreateLinkRequest) => Promise<Link> {
   const mutate = useMutation({
     mutationFn: async (newLink: CreateLinkRequest): Promise<Link> => {
-      return request<WithJsonValues<Link>>({ method: 'POST', url: '/api/links', data: newLink }).then(
+      return await request<WithJsonValues<Link>>({ method: 'POST', url: '/api/links', data: newLink }).then(
         result => new Link(result?.data),
       );
     },

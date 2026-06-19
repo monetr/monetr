@@ -87,21 +87,19 @@ function NewTransactionModal(): React.JSX.Element {
 
     helper.setSubmitting(true);
 
-    return (
-      createTransaction(newTransactionRequest)
-        // TODO Show toast that the transaction was created, include button to "view transaction".
-        .then(() => modal.remove())
-        .catch((result: CreateTransactionError) => {
-          if (result.problems) {
-            helper.setErrors(result.problems);
-          }
-          enqueueSnackbar(result.error, {
-            variant: 'error',
-            disableWindowBlurListener: true,
-          });
-        })
-        .finally(() => helper.setSubmitting(false))
-    );
+    return await createTransaction(newTransactionRequest)
+      // TODO Show toast that the transaction was created, include button to "view transaction".
+      .then(() => modal.remove())
+      .catch((result: CreateTransactionError) => {
+        if (result.problems) {
+          helper.setErrors(result.problems);
+        }
+        enqueueSnackbar(result.error, {
+          variant: 'error',
+          disableWindowBlurListener: true,
+        });
+      })
+      .finally(() => helper.setSubmitting(false));
   }
 
   return (

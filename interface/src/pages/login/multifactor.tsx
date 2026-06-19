@@ -28,7 +28,7 @@ export default function MultifactorAuthenticationPage(): React.JSX.Element {
   async function submit(values: MultifactorValues, helpers: FormikHelpers<MultifactorValues>) {
     helpers.setSubmitting(true);
 
-    return request({
+    return await request({
       method: 'POST',
       url: '/api/authentication/multifactor',
       data: {

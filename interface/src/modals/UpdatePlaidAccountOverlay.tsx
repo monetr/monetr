@@ -72,7 +72,7 @@ function UpdatePlaidAccountOverlay({
         loading: true,
       });
 
-      return request({
+      return await request({
         method: 'POST',
         url: '/api/plaid/link/update/callback',
         data: {

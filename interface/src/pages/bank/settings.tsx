@@ -46,7 +46,7 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
     }
 
     if (window.confirm(`Are you sure you want to archive bank account: ${bankAccount.name}`)) {
-      return archiveBankAccount(bankAccount.bankAccountId).then(() => navigate('/'));
+      return await archiveBankAccount(bankAccount.bankAccountId).then(() => navigate('/'));
     }
 
     return Promise.resolve();

@@ -7,7 +7,7 @@ export function useRemoveFundingSchedule(): (_fundingSchedule: FundingSchedule) 
   const queryClient = useQueryClient();
 
   async function removeFundingSchedule(fundingSchedule: FundingSchedule): Promise<FundingSchedule> {
-    return request({
+    return await request({
       method: 'DELETE',
       url: `/api/bank_accounts/${fundingSchedule.bankAccountId}/funding_schedules/${fundingSchedule.fundingScheduleId}`,
     }).then(() => fundingSchedule);

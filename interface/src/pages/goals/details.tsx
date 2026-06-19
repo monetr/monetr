@@ -105,7 +105,7 @@ export default function GoalDetails(): React.JSX.Element | null {
     }
 
     if (window.confirm(`Are you sure you want to delete goal: ${spending.name}`)) {
-      return removeSpending(spending.spendingId).then(() => backToGoals());
+      return await removeSpending(spending.spendingId).then(() => backToGoals());
     }
 
     return Promise.resolve();
@@ -130,7 +130,7 @@ export default function GoalDetails(): React.JSX.Element | null {
       isPaused: values.isPaused,
     });
 
-    return updateSpending(updatedSpending)
+    return await updateSpending(updatedSpending)
       .then(
         () =>
           void enqueueSnackbar('Updated goal successfully', {

@@ -18,7 +18,7 @@ export default function useLogin(): (loginArgs: LoginArguments) => Promise<void>
   const queryClient = useQueryClient();
 
   return async (loginArgs: LoginArguments): Promise<void> => {
-    return request<{ nextUrl?: string }>({
+    return await request<{ nextUrl?: string }>({
       method: 'POST',
       url: '/api/authentication/login',
       data: {
@@ -31,7 +31,7 @@ export default function useLogin(): (loginArgs: LoginArguments) => Promise<void>
         // Then bootstrap the authentication, once it's bootstrapped we want to consider the `nextUrl` field from the
         // login response above. If the nextUrl is present, then we want to navigate the user to that path. If it is not
         // present then we can direct the user to the root path.
-        return queryClient
+        return await queryClient
           .invalidateQueries({ queryKey: ['/api/users/me'] })
           .then(() => navigate(result?.data?.nextUrl || '/'));
       })
@@ -49,7 +49,7 @@ export default function useLogin(): (loginArgs: LoginArguments) => Promise<void>
               case 'MFA_REQUIRED':
                 // If we are required to provide multifactor authentication then we should be able to retrieve our user
                 // details at least.
-                return queryClient
+                return await queryClient
                   .invalidateQueries({ queryKey: ['/api/users/me'] })
                   .then(() => navigate('/login/multifactor'));
               case 'EMAIL_NOT_VERIFIED':

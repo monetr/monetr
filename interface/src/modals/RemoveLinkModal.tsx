@@ -26,7 +26,7 @@ function RemoveLinkModal(props: RemoveLinkModalProps): React.JSX.Element {
 
   async function submit() {
     setSubmitting(true);
-    return removeLink(props.link.linkId)
+    return await removeLink(props.link.linkId)
       .then(() => {
         navigate('/');
         modal.remove();

@@ -69,7 +69,7 @@ export default function LunchFlowSetupAccounts(): React.JSX.Element {
       helpers.setSubmitting(true);
       // Create the link from the lunch flow link, this will move the lunch flow link's status from pending to
       // active.
-      return createLink({
+      return await createLink({
         institutionName: lunchFlowLink.name,
         description: `Created via Lunch Flow`,
         lunchFlowLinkId: lunchFlowLink.lunchFlowLinkId,

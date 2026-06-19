@@ -25,7 +25,7 @@ export function usePatchFundingSchedule(): (_: PatchFundingScheduleRequest) => P
     bankAccountId,
     ...patch
   }: PatchFundingScheduleRequest): Promise<PatchFundingScheduleResponse> {
-    return request<PatchFundingScheduleResponse>({
+    return await request<PatchFundingScheduleResponse>({
       method: 'PATCH',
       url: `/api/bank_accounts/${bankAccountId}/funding_schedules/${fundingScheduleId}`,
       // We only want to send the fields the caller actually specified. We dont have to filter anything ourselves though,

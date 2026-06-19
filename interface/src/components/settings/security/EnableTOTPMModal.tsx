@@ -53,7 +53,7 @@ function EnableTOTPModal(): React.JSX.Element {
   async function submit(values: EnableTOTPValues, helpers: FormikHelpers<EnableTOTPValues>) {
     helpers.setSubmitting(true);
 
-    return request({
+    return await request({
       method: 'POST',
       url: '/api/users/security/totp/confirm',
       data: {

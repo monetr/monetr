@@ -34,7 +34,7 @@ function ChangePasswordModal(): React.JSX.Element {
 
   async function updatePassword(values: ChangePasswordValues, helpers: FormikHelpers<ChangePasswordValues>) {
     helpers.setSubmitting(true);
-    return request({
+    return await request({
       method: 'PUT',
       url: '/api/users/security/password',
       data: {

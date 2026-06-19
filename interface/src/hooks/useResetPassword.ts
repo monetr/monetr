@@ -8,7 +8,7 @@ export default function useResetPassword(): (newPassword: string, token: string)
   const { enqueueSnackbar } = useSnackbar();
   const [, navigate] = useLocation();
   return async (newPassword: string, token: string) => {
-    return request({
+    return await request({
       method: 'POST',
       url: '/api/authentication/reset',
       data: {

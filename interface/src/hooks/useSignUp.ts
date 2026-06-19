@@ -20,7 +20,7 @@ export interface SignUpResponse {
 
 export default function useSignUp(): (args: SignUpArguments) => Promise<SignUpResponse> {
   return async (args: SignUpArguments) => {
-    return request({ method: 'POST', url: '/api/authentication/register', data: args }).then(
+    return await request({ method: 'POST', url: '/api/authentication/register', data: args }).then(
       result => result.data as SignUpResponse,
     );
   };

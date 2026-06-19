@@ -54,7 +54,7 @@ export default function OauthReturn(): React.JSX.Element {
       return Promise.resolve();
     }
 
-    return request({ method: 'GET', url: `/api/plaid/link/setup/wait/${linkId}` })
+    return await request({ method: 'GET', url: `/api/plaid/link/setup/wait/${linkId}` })
       .then(() => Promise.resolve())
       .catch(error => {
         if (error.response.status === 408) {

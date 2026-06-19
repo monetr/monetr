@@ -14,7 +14,7 @@ export type PatchBankAccountRequest = Partial<Writable<Omit<BankAccount, 'accoun
 export function useUpdateBankAccount(): (_bankAccount: PatchBankAccountRequest) => Promise<BankAccount> {
   const updateBankAccount = useCallback(
     async ({ bankAccountId, ...bankAccount }: PatchBankAccountRequest): Promise<BankAccount> => {
-      return request<WithJsonValues<BankAccount>>({
+      return await request<WithJsonValues<BankAccount>>({
         method: 'PATCH',
         url: `/api/bank_accounts/${bankAccountId}`,
         data: bankAccount,

@@ -9,7 +9,7 @@ export function useRemoveSpending(): (_spendingId: string) => Promise<unknown> {
   const selectedBankAccountId = useSelectedBankAccountId();
 
   async function removeSpending(spendingId: string): Promise<string> {
-    return request({
+    return await request({
       method: 'DELETE',
       url: `/api/bank_accounts/${selectedBankAccountId}/spending/${spendingId}`,
     }).then(() => spendingId);

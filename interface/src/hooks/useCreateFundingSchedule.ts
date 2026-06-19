@@ -15,7 +15,7 @@ export type CreateFundingScheduleRequest = Writable<FundingSchedule> & { bankAcc
 export function useCreateFundingSchedule(): (_funding: CreateFundingScheduleRequest) => Promise<FundingSchedule> {
   const createFundingSchedule = useCallback(
     async ({ bankAccountId, ...fundingSchedule }: CreateFundingScheduleRequest): Promise<FundingSchedule> => {
-      return request<WithJsonValues<FundingSchedule>>({
+      return await request<WithJsonValues<FundingSchedule>>({
         method: 'POST',
         url: `/api/bank_accounts/${bankAccountId}/funding_schedules`,
         data: fundingSchedule,

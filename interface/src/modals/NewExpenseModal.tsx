@@ -75,7 +75,7 @@ function NewExpenseModal(): React.JSX.Element {
     }
 
     helper.setSubmitting(true);
-    return createSpending({
+    return await createSpending({
       bankAccountId: selectedBankAccount.bankAccountId,
       name: values.name.trim(),
       nextRecurrence: startOfDay(new Date(values.nextOccurrence), {

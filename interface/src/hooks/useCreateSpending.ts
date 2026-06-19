@@ -19,7 +19,7 @@ export type CreateSpendingRequest = Partial<Writable<Spending>> & {
 export function useCreateSpending(): (_spending: CreateSpendingRequest) => Promise<Spending> {
   const createSpending = useCallback(
     async ({ bankAccountId, ...spending }: CreateSpendingRequest): Promise<Spending> => {
-      return request<WithJsonValues<Spending>>({
+      return await request<WithJsonValues<Spending>>({
         method: 'POST',
         url: `/api/bank_accounts/${bankAccountId}/spending`,
         data: spending,

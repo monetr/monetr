@@ -62,7 +62,7 @@ export default function ManualLinkSetupIncome(): React.JSX.Element {
       ...viewContext.formData,
       ...values,
     };
-    return createLink({
+    return await createLink({
       institutionName: data.budgetName,
     })
       .then(link =>

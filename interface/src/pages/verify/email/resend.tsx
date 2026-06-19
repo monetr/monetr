@@ -32,7 +32,7 @@ export default function ResendVerificationPage(): React.JSX.Element {
     async (values: ResendValues): Promise<void> => {
       // getSolution is null when proof of work is disabled (challenge/nonce drop
       // off). Kept in the chain so a fetch/solve failure also hits the catch.
-      return pow
+      return await pow
         .getSolution()
         .then(solution =>
           request({

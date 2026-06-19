@@ -29,7 +29,7 @@ export function useUpdateTransaction(): (_transaction: UpdateTransactionRequest)
       bankAccountId,
       ...transaction
     }: UpdateTransactionRequest): Promise<TransactionUpdateResponse> {
-      return request<TransactionUpdateResponse>({
+      return await request<TransactionUpdateResponse>({
         method: 'PUT',
         url: `/api/bank_accounts/${bankAccountId}/transactions/${transactionId}`,
         data: transaction,

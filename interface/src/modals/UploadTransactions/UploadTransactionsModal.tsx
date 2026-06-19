@@ -109,7 +109,7 @@ function UploadFileStage(props: StageProps) {
 
     setUploadProgress(0);
 
-    return request<TransactionUpload>({
+    return await request<TransactionUpload>({
       method: 'POST',
       url: `/api/bank_accounts/${selectedBankAccountId}/transactions/upload`,
       data: formData,

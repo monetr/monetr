@@ -57,7 +57,7 @@ function NewGoalModal(): React.JSX.Element {
     }
 
     helper.setSubmitting(true);
-    return createSpending({
+    return await createSpending({
       bankAccountId: selectedBankAccountId,
       name: values.name.trim(),
       nextRecurrence: startOfDay(new Date(values.nextOccurrence), {

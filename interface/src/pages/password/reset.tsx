@@ -62,13 +62,11 @@ export default function PasswordResetNew(): React.JSX.Element {
 
     helpers.setSubmitting(true);
 
-    return (
-      resetPassword(values.password, token)
-        // If the reset password fails, then set submitting to false and do nothing. The error will already have been
-        // displayed by the reset password function. We only do this if there is an error because if this succeeds then
-        // the user is automatically redirected to the login page.
-        .catch(() => helpers.setSubmitting(false))
-    );
+    return await resetPassword(values.password, token)
+      // If the reset password fails, then set submitting to false and do nothing. The error will already have been
+      // displayed by the reset password function. We only do this if there is an error because if this succeeds then
+      // the user is automatically redirected to the login page.
+      .catch(() => helpers.setSubmitting(false));
   }
 
   function validate(values: ResetPasswordValues): FormikErrors<ResetPasswordValues> {

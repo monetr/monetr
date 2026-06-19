@@ -109,7 +109,7 @@ export default function FundingDetails(): React.JSX.Element | null {
     }
 
     helpers.setSubmitting(true);
-    return patchFundingSchedule({
+    return await patchFundingSchedule({
       fundingScheduleId: funding.fundingScheduleId,
       bankAccountId: funding.bankAccountId,
       name: values.name,
@@ -150,7 +150,7 @@ export default function FundingDetails(): React.JSX.Element | null {
     }
 
     if (window.confirm(`Are you sure you want to delete funding schedule: ${funding.name}`)) {
-      return removeFundingSchedule(funding)
+      return await removeFundingSchedule(funding)
         .then(() => backToFunding())
         .catch(
           (error: ApiError<APIError>) =>

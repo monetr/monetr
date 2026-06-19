@@ -111,7 +111,7 @@ export default function ExpenseDetails(): React.JSX.Element | null {
     }
 
     if (window.confirm(`Are you sure you want to delete expense: ${spending.name}`)) {
-      return removeSpending(spending.spendingId).then(() => backToExpenses());
+      return await removeSpending(spending.spendingId).then(() => backToExpenses());
     }
 
     return Promise.resolve();
@@ -138,7 +138,7 @@ export default function ExpenseDetails(): React.JSX.Element | null {
       autoCreateTransaction: isManual && values.autoCreateTransaction,
     });
 
-    return updateSpending(updatedSpending)
+    return await updateSpending(updatedSpending)
       .then(
         () =>
           void enqueueSnackbar('Updated expense successfully', {
