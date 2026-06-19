@@ -676,6 +676,108 @@ func TestPatchLink(t *testing.T) {
 			response.JSON().Path("$.error").String().IsEqual("failed to retrieve link: record does not exist")
 		}
 	})
+
+	t.Run("update the description", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var linkId models.ID[models.Link]
+		{ // Create the manual link via the API
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").String().IsASCII()
+			linkId = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
+		}
+
+		{ // Patch the description with whitespace on either side to make sure it
+			// gets trimmed
+			response := e.PATCH("/api/links/{linkId}").
+				WithPath("linkId", linkId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"description": "  My bank login  ",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").IsEqual(linkId)
+			// The surrounding whitespace should have been stripped before we stored
+			// it.
+			response.JSON().Path("$.description").String().IsEqual("My bank login")
+		}
+	})
+
+	t.Run("clear the description", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var linkId models.ID[models.Link]
+		{ // Create the manual link with a description already set
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+					"description":     "Something I want to remove later",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.description").String().IsEqual("Something I want to remove later")
+			linkId = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
+		}
+
+		{ // Now send null for the description to clear it out entirely
+			response := e.PATCH("/api/links/{linkId}").
+				WithPath("linkId", linkId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"description": nil,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").IsEqual(linkId)
+			// Passing null should null out the description and not leave the old
+			// value in place.
+			response.JSON().Path("$.description").IsNull()
+		}
+	})
+
+	t.Run("unauthenticated", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var linkId models.ID[models.Link]
+		{ // Create a link so that we have something real to try to patch later
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			linkId = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
+		}
+
+		{ // Try to patch the link without providing a token at all
+			response := e.PATCH("/api/links/{linkId}").
+				WithPath("linkId", linkId).
+				WithJSON(map[string]any{
+					"description": "I should not be allowed to do this",
+				}).
+				Expect()
+
+			response.Status(http.StatusUnauthorized)
+			response.JSON().Path("$.error").String().IsEqual("unauthorized")
+		}
+	})
 }
 
 func TestDeleteLink(t *testing.T) {

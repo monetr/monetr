@@ -85,7 +85,7 @@ func NameOld(required OptionalOrRequire) *validation.KeyRules[string] {
 	).Required(required)
 }
 
-func Name() validation.Rule {
+func Name() validation.AllOfRule {
 	return validation.AllOf(
 		// All names cannot be set to an empty string or nil, so they are soft
 		// required if the key is present!
@@ -96,7 +96,7 @@ func Name() validation.Rule {
 	)
 }
 
-func TextField() validation.Rule {
+func TextField() validation.AllOfRule {
 	return validation.AllOf(
 		is.String,
 		is.PrintableUnicode,
@@ -104,7 +104,7 @@ func TextField() validation.Rule {
 	)
 }
 
-func Mask() validation.Rule {
+func Mask() validation.AllOfRule {
 	return validation.AllOf(
 		is.String,
 		validation.Length(4, 4).Error("Mask must be exactly 4 digits"),

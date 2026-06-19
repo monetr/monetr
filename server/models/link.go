@@ -75,22 +75,6 @@ func (Link) CreateValidators() []*validation.KeyRules[string] {
 	}
 }
 
-// UpdateValidator returns an array of validation rules that should be applied
-// when updating this specific link object via an API call. Only the validated
-// fields should be updated as well.
-func (Link) UpdateValidator() []*validation.KeyRules[string] {
-	return []*validation.KeyRules[string]{
-		validation.Key(
-			"institutionName",
-			validation.Length(1, 300).Error("Institution name must be between 1 and 300 characters"),
-		).Required(validators.Optional),
-		validation.Key(
-			"description",
-			validation.Length(1, 300).Error("Description must be between 1 and 300 characters"),
-		).Required(validators.Optional),
-	}
-}
-
 // UnmarshalRequest consumes a request body and an array of validation rules in
 // order to create an object that can be persisted to the database. For updates,
 // this function should be called on the existing object that is already stored
@@ -98,6 +82,7 @@ func (Link) UpdateValidator() []*validation.KeyRules[string] {
 // fields from being overwritten by the client's request body. For creates, the
 // initial object can be left blank; or default values can be specified ahead of
 // calling this function in case some fields are omitted in the intial request.
+// Deprecated: Use [controller.parse] instead!
 func (o *Link) UnmarshalRequest(
 	ctx context.Context,
 	reader io.Reader,

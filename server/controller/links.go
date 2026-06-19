@@ -8,6 +8,7 @@ import (
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/links/link_jobs"
 	. "github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/schemas"
 	"github.com/monetr/validation"
 )
 
@@ -153,31 +154,26 @@ func (c *Controller) patchLink(ctx echo.Context) error {
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
-	existingLink, err := repo.GetLink(c.getContext(ctx), linkId)
+	link, err := repo.GetLink(c.getContext(ctx), linkId)
 	if err != nil {
 		return c.wrapPgError(ctx, err, "failed to retrieve link")
 	}
 
-	switch err := existingLink.UnmarshalRequest(
-		c.getContext(ctx),
-		ctx.Request().Body,
-		existingLink.UpdateValidator()...,
-	).(type) {
-	case validation.Errors:
-		return ctx.JSON(http.StatusBadRequest, map[string]any{
-			"error":    "Invalid request",
-			"problems": err,
-		})
-	case nil:
-	default:
-		return c.badRequestError(ctx, err, "Failed to parse patch request")
+	link, err = parse(
+		c,
+		ctx,
+		link,
+		schemas.PatchLink,
+	)
+	if err != nil {
+		return err
 	}
 
-	if err = repo.UpdateLink(c.getContext(ctx), existingLink); err != nil {
+	if err = repo.UpdateLink(c.getContext(ctx), link); err != nil {
 		return c.wrapPgError(ctx, err, "failed to update link")
 	}
 
-	return ctx.JSON(http.StatusOK, *existingLink)
+	return ctx.JSON(http.StatusOK, *link)
 }
 
 func (c *Controller) deleteLink(ctx echo.Context) error {
