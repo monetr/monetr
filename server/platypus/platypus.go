@@ -42,7 +42,7 @@ type (
 // after is a wrapper around some of the basic operations we would want to perform after each request. Mainly that we
 // want to keep track of things like the request Id and some information about the request itself. It also handles error
 // wrapping.
-func after(span *sentry.Span, response *http.Response, err error, message, errorMessage string) error {
+func after(span *sentry.Span, _ *http.Response, err error, _, errorMessage string) error {
 	switch e := err.(type) {
 	case nil:
 		span.Status = sentry.SpanStatusOK
@@ -83,7 +83,7 @@ func NewPlaid(
 				ctx context.Context,
 				request *http.Request,
 				response *http.Response,
-				err error,
+				_ error,
 			) {
 				requestLog := log.With(
 					"plaid_method", request.Method,
@@ -349,7 +349,7 @@ func (p *Plaid) NewClientFromLink(ctx context.Context, accountId models.ID[model
 	return p.newClient(span.Context(), link)
 }
 
-func (p *Plaid) NewClient(ctx context.Context, link *models.Link, accessToken, itemId string) (Client, error) {
+func (p *Plaid) NewClient(_ context.Context, link *models.Link, accessToken, itemId string) (Client, error) {
 	if accessToken == "" {
 		return nil, errors.New("plaid access token is required to create a client")
 	}
@@ -404,6 +404,6 @@ func (p *Plaid) newClient(ctx context.Context, link *models.Link) (Client, error
 	return p.NewClient(span.Context(), link, secret.Value, link.PlaidLink.PlaidId)
 }
 
-func (p *Plaid) Close() error {
+func (_ *Plaid) Close() error {
 	panic("implement me")
 }

@@ -18,7 +18,7 @@ type bufferWrapper struct {
 	*bytes.Reader
 }
 
-func (b *bufferWrapper) Close() error {
+func (_ *bufferWrapper) Close() error {
 	return nil
 }
 

@@ -117,11 +117,11 @@ func NewStripeHelperWithCache(log *slog.Logger, apiKey string, cacheClient cache
 	return base
 }
 
-func (s *stripeBase) stripeRoundTripper(
+func (_ *stripeBase) stripeRoundTripper(
 	ctx context.Context,
 	request *http.Request,
 	response *http.Response,
-	err error,
+	_ error,
 ) {
 	var statusCode int
 	var requestId string

@@ -86,7 +86,7 @@ func NewVaultTransit(
 
 	trip := round.NewObservabilityRoundTripper(&http.Transport{
 		IdleConnTimeout: config.IdleConnTimeout,
-	}, func(ctx context.Context, request *http.Request, response *http.Response, err error) {
+	}, func(ctx context.Context, request *http.Request, _ *http.Response, err error) {
 		logEntry := log.With(slog.Group("vault",
 			"method", request.Method,
 			"url", request.URL.String(),
@@ -147,7 +147,7 @@ func NewVaultTransit(
 // dialTLS is a middleware function that is added to allow monetr to easily
 // rotate the TLS certificates for the vault server without downtime.
 func (v *VaultTransit) dialTLS(
-	ctx context.Context,
+	_ context.Context,
 	network, addr string,
 ) (net.Conn, error) {
 	v.lock.RLock()
@@ -536,8 +536,8 @@ func (v *VaultTransit) Delete(ctx context.Context, key string) error {
 // Decrypt implements KeyManagement.
 func (v *VaultTransit) Decrypt(
 	ctx context.Context,
-	keyID *string,
-	version *string,
+	_ *string,
+	_ *string,
 	input string,
 ) (result string, _ error) {
 	span := crumbs.StartFnTrace(ctx)

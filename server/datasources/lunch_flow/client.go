@@ -109,7 +109,7 @@ func NewLunchFlowClient(
 				ctx context.Context,
 				request *http.Request,
 				response *http.Response,
-				err error,
+				_ error,
 			) {
 				requestLog := log.With(
 					"lunch_flow_method", request.Method,

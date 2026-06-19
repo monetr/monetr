@@ -13,7 +13,7 @@ const (
 	TestEmailDomain = "monetr.local"
 )
 
-func GetConfig(t *testing.T) config.Configuration {
+func GetConfig(_ *testing.T) config.Configuration {
 	return config.Configuration{
 		AllowSignUp: true,
 		Features: config.Features{

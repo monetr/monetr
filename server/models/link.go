@@ -33,7 +33,7 @@ type Link struct {
 	DeletedAt       *time.Time         `json:"deletedAt" pg:"deleted_at"`
 }
 
-func (o Link) IdentityPrefix() string {
+func (_ Link) IdentityPrefix() string {
 	return "link"
 }
 

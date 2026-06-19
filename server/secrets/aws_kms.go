@@ -94,7 +94,7 @@ func (a *AWSKMS) Encrypt(ctx context.Context, input string) (keyId, version *str
 	return response.KeyId, nil, encrypted, nil
 }
 
-func (a *AWSKMS) Decrypt(ctx context.Context, keyId, version *string, encrypted string) (result string, _ error) {
+func (a *AWSKMS) Decrypt(ctx context.Context, keyId, _ *string, encrypted string) (result string, _ error) {
 	span := sentry.StartSpan(ctx, "Decrypt KMS")
 	defer span.Finish()
 	span.SetTag("kms", "aws")

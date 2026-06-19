@@ -21,7 +21,7 @@ func adminKMSCheck(parent *cobra.Command) {
 	command := &cobra.Command{
 		Use:   "kms:check",
 		Short: "Tests the configured KMS provider to make sure data can be encrypted and decrypted",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			configuration := config.LoadConfiguration()
 			if arguments.KMS != "" {
 				configuration.KeyManagement.Provider = arguments.KMS

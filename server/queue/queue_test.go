@@ -8,12 +8,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func helloWorld(ctx Context, args map[string]any) error {
+func helloWorld(_ Context, _ map[string]any) error {
 	fmt.Println("Hello world!")
 	return nil
 }
 
-func cronHello(ctx Context) error {
+func cronHello(_ Context) error {
 	fmt.Println("Hello world!")
 	return nil
 }
@@ -56,7 +56,7 @@ func TestQueueNameFromJobFunction(t *testing.T) {
 		type Args struct {
 		}
 		queueName := QueueNameFromJobFunction[Args](
-			JobFunction[Args](func(ctx Context, args Args) error {
+			JobFunction[Args](func(_ Context, _ Args) error {
 				return nil
 			}),
 		)
@@ -66,7 +66,7 @@ func TestQueueNameFromJobFunction(t *testing.T) {
 	t.Run("variable function", func(t *testing.T) {
 		type Args struct {
 		}
-		jobFunction := JobFunction[Args](func(ctx Context, args Args) error {
+		jobFunction := JobFunction[Args](func(_ Context, _ Args) error {
 			return nil
 		})
 		queueName := QueueNameFromJobFunction[Args](jobFunction)

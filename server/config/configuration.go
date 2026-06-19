@@ -293,7 +293,7 @@ func LoadConfigurationFromFile(configFilePath []string) Configuration {
 // mapstructure not encoding/json, so that does us no good here.
 func stringSliceToSetHookFunc() mapstructure.DecodeHookFunc {
 	setType := reflect.TypeOf(myownsanity.Set[string]{})
-	return func(from reflect.Type, to reflect.Type, data any) (any, error) {
+	return func(_ reflect.Type, to reflect.Type, data any) (any, error) {
 		if to != setType {
 			return data, nil
 		}

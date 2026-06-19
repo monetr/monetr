@@ -87,7 +87,7 @@ func NewOpenBaoTransit(
 		func(
 			ctx context.Context,
 			request *http.Request,
-			response *http.Response,
+			_ *http.Response,
 			err error,
 		) {
 			logEntry := log.With(slog.Group("openbao",
@@ -151,7 +151,7 @@ func NewOpenBaoTransit(
 // dialTLS is a middleware function that is added to allow monetr to easily
 // rotate the TLS certificates for the OpenBao server without downtime.
 func (o *OpenBaoTransit) dialTLS(
-	ctx context.Context,
+	_ context.Context,
 	network, addr string,
 ) (net.Conn, error) {
 	o.lock.RLock()
@@ -555,8 +555,8 @@ func (o *OpenBaoTransit) Delete(ctx context.Context, key string) error {
 // Decrypt implements KeyManagement.
 func (o *OpenBaoTransit) Decrypt(
 	ctx context.Context,
-	keyID *string,
-	version *string,
+	_ *string,
+	_ *string,
 	input string,
 ) (result string, _ error) {
 	span := crumbs.StartFnTrace(ctx)

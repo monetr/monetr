@@ -15,7 +15,7 @@ func databaseMigrate(parent *cobra.Command) {
 		Use:   "migrate",
 		Short: "Run database migrations against your PostgreSQL.",
 		Long:  "Updates your PostgreSQL database to the latest schema version for monetr.",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			configuration := config.LoadConfiguration()
 			// Overwrite this value since we are managing the migration ourselves.
 			configuration.PostgreSQL.Migrate = false

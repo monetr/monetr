@@ -53,7 +53,7 @@ func (c *Controller) wrapPgError(ctx echo.Context, err error, msg string, args .
 	}
 }
 
-func (c *Controller) sanitizePgError(err pg.Error) (int, error) {
+func (_ *Controller) sanitizePgError(err pg.Error) (int, error) {
 	switch err.Field(67) {
 	case "23505": // Duplicate
 		// TODO Return actual duplicate information in this error.
@@ -158,6 +158,6 @@ func (c *Controller) notFound(ctx echo.Context, msg string, args ...any) error {
 // short-circuit cleanly: subsequent code in the handler does not run, which
 // avoids the double-body bug seen when ctx.JSON is called from a helper that
 // then returns nil.
-func (c *Controller) jsonError(ctx echo.Context, status int, body map[string]any) error {
+func (_ *Controller) jsonError(_ echo.Context, status int, body map[string]any) error {
 	return echo.NewHTTPError(status, body)
 }

@@ -28,7 +28,7 @@ func (i *inRule[T]) Validate(value any) error {
 // that a sibling [validation.Required] rule controls the "missing" path with
 // "cannot be blank"; this rule speaks up only when the caller supplied a value
 // that wasn't in the allowed set.
-func (i *inRule[T]) ValidateWithContext(ctx context.Context, value any) error {
+func (i *inRule[T]) ValidateWithContext(_ context.Context, value any) error {
 	value, isNil, _ := validation.Indirect(value)
 	if isNil || validation.IsEmpty(value) {
 		return nil

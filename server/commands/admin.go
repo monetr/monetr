@@ -6,7 +6,7 @@ func AdminCommand(parent *cobra.Command) {
 	adminCommand := &cobra.Command{
 		Use:   "admin",
 		Short: "General administrative tasks for hosting/maintaining monetr",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			return cmd.Help()
 		},
 	}

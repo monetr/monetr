@@ -435,9 +435,9 @@ func (s *syncPlaidJob) syncRemovedTransaction(
 
 func (s *syncPlaidJob) syncPlaidBankAccount(
 	ctx queue.Context,
-	link *models.Link,
+	_ *models.Link,
 	bankAccount *models.BankAccount,
-	plaidLink *models.PlaidLink,
+	_ *models.PlaidLink,
 	plaidBankAccount *models.PlaidBankAccount,
 	input platypus.BankAccount,
 ) error {

@@ -1134,15 +1134,15 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 		)
 	})
 
-	t.Run("initial setup", func(t *testing.T) {
+	t.Run("initial setup", func(_ *testing.T) {
 		// TODO!!
 	})
 
-	t.Run("remove with spending", func(t *testing.T) {
+	t.Run("remove with spending", func(_ *testing.T) {
 		// TODO!!
 	})
 
-	t.Run("no updates", func(t *testing.T) {
+	t.Run("no updates", func(_ *testing.T) {
 		// TODO!!
 	})
 }

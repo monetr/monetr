@@ -23,7 +23,7 @@ func (e *eqRule[T]) Validate(value any) error {
 }
 
 // ValidateWithContext implements [EqRule].
-func (e *eqRule[T]) ValidateWithContext(ctx context.Context, value any) error {
+func (e *eqRule[T]) ValidateWithContext(_ context.Context, value any) error {
 	if reflect.DeepEqual(value, e.value) {
 		return nil
 	}

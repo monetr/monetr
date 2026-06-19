@@ -44,7 +44,7 @@ type ContextifyFramesIntegration struct {
 	cachedLocations sync.Map
 }
 
-func (cfi *ContextifyFramesIntegration) Name() string {
+func (_ *ContextifyFramesIntegration) Name() string {
 	return "MonetrContextifyFrames"
 }
 
@@ -103,7 +103,7 @@ func (cfi *ContextifyFramesIntegration) contextify(frames []sentry.Frame) []sent
 	return contextifiedFrames
 }
 
-func (cfi *ContextifyFramesIntegration) addContextLinesToFrame(frame sentry.Frame, lines [][]byte, contextLine int) sentry.Frame {
+func (_ *ContextifyFramesIntegration) addContextLinesToFrame(frame sentry.Frame, lines [][]byte, contextLine int) sentry.Frame {
 	for i, line := range lines {
 		switch {
 		case i < contextLine:

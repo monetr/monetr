@@ -81,7 +81,7 @@ func GetDatabase(
 		}
 
 		pgOptions.TLSConfig = tlsConfiguration
-		pgOptions.OnConnect = func(ctx context.Context, cn *pg.Conn) error {
+		pgOptions.OnConnect = func(ctx context.Context, _ *pg.Conn) error {
 			if tlsConfiguration != nil {
 				log.Log(ctx, logging.LevelTrace, "new connection with cert")
 			}
@@ -108,7 +108,7 @@ func GetDatabase(
 		watchCertificate, err := certhelper.NewFileCertificateHelper(
 			log,
 			paths,
-			func(path string) error {
+			func(_ string) error {
 				log.InfoContext(context.Background(), "reloading TLS certificates")
 
 				tlsConfig := &tls.Config{

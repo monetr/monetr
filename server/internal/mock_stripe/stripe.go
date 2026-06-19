@@ -14,7 +14,7 @@ type MockStripeHelper struct {
 	subscriptions    map[string]stripe.Subscription
 }
 
-func NewMockStripeHelper(t *testing.T) *MockStripeHelper {
+func NewMockStripeHelper(_ *testing.T) *MockStripeHelper {
 	return &MockStripeHelper{
 		customers:        map[string]stripe.Customer{},
 		checkoutSessions: map[string]stripe.CheckoutSession{},
@@ -34,7 +34,7 @@ func (m *MockStripeHelper) AssertNSubscriptionsCreated(t *testing.T, n int) {
 	assert.Len(t, m.subscriptions, n, "should have X subscriptions created")
 }
 
-func StripeHeaders(t *testing.T, request *http.Request, response any, status int) map[string][]string {
+func StripeHeaders(t *testing.T, _ *http.Request, _ any, _ int) map[string][]string {
 	return map[string][]string{
 		"Request-Id": {
 			FakeStripeRequestId(t),

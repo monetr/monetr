@@ -119,7 +119,7 @@ func (p *postgresPubSub) Subscribe(
 // the channel name. But the hash of the channel is added to make sure that even
 // if the channel name is too long that we don't accidently subscribe to a
 // prefix.
-func (p *postgresPubSub) hashChannel(
+func (_ *postgresPubSub) hashChannel(
 	accountId models.ID[models.Account],
 	channel string,
 ) string {

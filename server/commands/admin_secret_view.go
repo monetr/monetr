@@ -20,7 +20,7 @@ func adminSecretView(parent *cobra.Command) {
 	command := &cobra.Command{
 		Use:   "secret:view",
 		Short: "Retrieve a secret's value from the data store, meant for debugging purposes only!",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			configuration := config.LoadConfiguration()
 			if arguments.KMS != "" {
 				configuration.KeyManagement.Provider = arguments.KMS

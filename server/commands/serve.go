@@ -53,7 +53,7 @@ func ServeCommand(parent *cobra.Command) {
 	command := &cobra.Command{
 		Use:   "serve",
 		Short: "Run the monetr HTTP server",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			clock := clock.New()
 			configuration := config.LoadConfiguration()
 

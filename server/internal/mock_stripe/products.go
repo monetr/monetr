@@ -77,7 +77,7 @@ func MockStripeListProductsSuccess(t *testing.T) {
 func MockStripeListProductsFailure(t *testing.T) {
 	mock_http_helper.NewHttpMockJsonResponder(t,
 		"GET", RegexPath(t, `/v1/products(?)*\z`),
-		func(t *testing.T, request *http.Request) (any, int) {
+		func(t *testing.T, _ *http.Request) (any, int) {
 			return NewInternalServerError(t, "product"), http.StatusInternalServerError
 		},
 		StripeHeaders,

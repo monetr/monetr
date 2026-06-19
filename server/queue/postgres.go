@@ -284,7 +284,7 @@ type postgresProcessor struct {
 //	  cronConsumer ×1  ──── only if cron jobs are registered
 //	  worker       ×4  ──── reads dispatch, writes availableWorkers
 func NewPostgresQueue(
-	ctx context.Context,
+	_ context.Context,
 	clock clock.Clock,
 	log *slog.Logger,
 	configuration config.Configuration,

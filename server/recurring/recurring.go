@@ -45,7 +45,7 @@ type RecurringTransactionResult struct {
 
 func DetectRecurringTransactions(
 	ctx context.Context,
-	now clock.Clock,
+	_ clock.Clock,
 	transactions []models.Transaction,
 ) (*RecurringTransactionResult, error) {
 	span := crumbs.StartFnTrace(ctx)

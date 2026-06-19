@@ -98,7 +98,7 @@ func init() {
 	}
 }
 
-func GetPgOptions(t *testing.T) *pg.Options {
+func GetPgOptions(_ *testing.T) *pg.Options {
 	port := myownsanity.CoalesceStrings(
 		os.Getenv("MONETR_PG_PORT"),
 		os.Getenv("POSTGRES_PORT"),
@@ -131,7 +131,7 @@ const (
 
 func GetBadPgDatabase(t *testing.T) *pg.DB {
 	options := GetPgOptions(t)
-	options.Dialer = func(ctx context.Context, network, addr string) (net.Conn, error) {
+	options.Dialer = func(_ context.Context, _, _ string) (net.Conn, error) {
 		return nil, errors.New("forcing a bad connection")
 	}
 	db := pg.Connect(options)

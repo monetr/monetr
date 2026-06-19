@@ -21,7 +21,7 @@ func VersionCommand(parent *cobra.Command) {
 	command := &cobra.Command{
 		Use:   "version",
 		Short: "Print the version of monetr.",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			if !arguments.detailed {
 				fmt.Println(build.Release)
 				return nil

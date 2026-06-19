@@ -48,7 +48,7 @@ func init() {
 	}
 }
 
-func (c *UIController) ApplyPermissionsPolicy(ctx echo.Context) {
+func (_ *UIController) ApplyPermissionsPolicy(ctx echo.Context) {
 	if permissionHeader != "" {
 		ctx.Response().Header().Set("Permissions-Policy", permissionHeader)
 	}

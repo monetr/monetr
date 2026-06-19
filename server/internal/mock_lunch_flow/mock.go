@@ -49,10 +49,10 @@ func ValidateLunchFlowAuthentication(
 }
 
 func LunchFlowHeaders(
-	t *testing.T,
-	request *http.Request,
-	response any,
-	status int,
+	_ *testing.T,
+	_ *http.Request,
+	_ any,
+	_ int,
 ) map[string][]string {
 	return map[string][]string{
 		"Content-Type": {

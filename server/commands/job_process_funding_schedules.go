@@ -15,7 +15,7 @@ func jobProcessFundingSchedules(parent *cobra.Command) {
 	command := &cobra.Command{
 		Use:   "process-funding-schedules",
 		Short: "Trigger processing of all pending funding schedules.",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			clock := clock.New()
 			configuration := config.LoadConfiguration()
 			log := logging.NewLoggerWithConfig(configuration.Logging)

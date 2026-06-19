@@ -35,7 +35,7 @@ func adminKMSMigrate(parent *cobra.Command) {
 			"and specify the new one as the provider in the config. Specify the old",
 			"one as an argument to this command `--from-provider=`.",
 		}, " "),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			configuration := config.LoadConfiguration()
 			fromConfiguration := configuration
 			toConfiguration := configuration

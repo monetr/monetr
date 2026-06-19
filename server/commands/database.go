@@ -8,7 +8,7 @@ func DatabaseCommand(parent *cobra.Command) {
 	databaseCommand := &cobra.Command{
 		Use:   "database",
 		Short: "Manages the PostgreSQL database used by monetr.",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			return cmd.Help()
 		},
 	}

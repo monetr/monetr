@@ -31,7 +31,7 @@ func jobSyncPlaid(parent *cobra.Command) {
 	command := &cobra.Command{
 		Use:   "sync-plaid",
 		Short: "Pull latest transactions for a specific link and account.",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			clock := clock.New()
 			if arguments.AccountID == "" && !arguments.All {
 				return errors.New("--account must be specified if you are not running against --all")

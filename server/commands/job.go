@@ -6,7 +6,7 @@ func JobCommand(parent *cobra.Command) {
 	jobCommand := &cobra.Command{
 		Use:   "jobs [command] [flags]",
 		Short: "Trigger jobs to be run by monetr instances or by this instance.",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			return cmd.Help()
 		},
 	}

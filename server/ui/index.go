@@ -29,7 +29,7 @@ type indexRenderer struct {
 	index *template.Template
 }
 
-func (i *indexRenderer) Render(w io.Writer, name string, data any, c echo.Context) error {
+func (i *indexRenderer) Render(w io.Writer, _ string, data any, _ echo.Context) error {
 	return i.index.Execute(w, data)
 }
 

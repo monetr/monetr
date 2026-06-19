@@ -18,7 +18,7 @@ func TestNewFileCertificateHelper(t *testing.T) {
 		require.NoError(t, err, "failed to create temp file")
 
 		var counter int32
-		var callback Callback = func(path string) error {
+		var callback Callback = func(_ string) error {
 			atomic.AddInt32(&counter, 1)
 			return nil
 		}

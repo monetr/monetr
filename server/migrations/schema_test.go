@@ -24,7 +24,7 @@ import (
 // log helpers do come from testutils/testlog, which sits in its own sub-
 // package precisely to keep itself cycle-free.
 
-func testPgOptions(t *testing.T) *pg.Options {
+func testPgOptions(_ *testing.T) *pg.Options {
 	// Precedence runs monetr's own vars first, then the POSTGRES_* names our
 	// compose files set, then the standard libpq PG* vars that psql itself
 	// honors (https://www.postgresql.org/docs/current/libpq-envars.html), then

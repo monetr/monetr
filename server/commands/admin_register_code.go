@@ -21,7 +21,7 @@ func adminRegisterCode(parent *cobra.Command) {
 		Use:   "register:code",
 		Short: "Generate a new registration code.",
 		Long:  "This is used to generate beta codes when they are enabled to restrict access to sign ups for the monetr application. This will generate a temporary code and return it to be used.",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			configuration := config.LoadConfiguration()
 			log := logging.NewLoggerWithConfig(configuration.Logging)
 			if configFileName := configuration.GetConfigFileName(); configFileName != "" {

@@ -44,7 +44,7 @@ func MockFetchBalanceError(
 	mock_http_helper.NewHttpMockJsonResponder(
 		t,
 		"GET", Path(t, fmt.Sprintf("/api/v1/accounts/%s/balance", accountId)),
-		func(t *testing.T, request *http.Request) (any, int) {
+		func(_ *testing.T, _ *http.Request) (any, int) {
 			return map[string]any{
 				"error":   "Forbidden",
 				"message": "Invalid API key.",

@@ -50,7 +50,7 @@ func (o *FundingSchedule) BeforeInsert(ctx context.Context) (context.Context, er
 // instead.
 func (o *FundingSchedule) GetNumberOfContributionsBetween(
 	start, end time.Time,
-	timezone *time.Location,
+	_ *time.Location,
 ) int64 {
 	rule := o.RuleSet.Set
 	// Make sure that the rule is using the timezone of the dates provided. This

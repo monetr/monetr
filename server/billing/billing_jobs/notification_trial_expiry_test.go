@@ -354,7 +354,7 @@ func TestNotificationTrialExpiry(t *testing.T) {
 			).
 			Return(nil).
 			Times(1).
-			Do(func(ctx context.Context, params communication.TrialAboutToExpireParams) error {
+			Do(func(_ context.Context, params communication.TrialAboutToExpireParams) error {
 				assert.Equal(t, user.Login.Email, params.Email)
 				assert.Equal(t, user.Login.FirstName, params.FirstName)
 				assert.Equal(t, user.Login.LastName, params.LastName)

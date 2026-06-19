@@ -117,7 +117,7 @@ func TestLunchFlowClient_Redirects(t *testing.T) {
 				assert.Equal(t, "bogus-token", request.Header.Get("x-api-key"))
 				return map[string]any{}, http.StatusFound
 			},
-			func(t *testing.T, request *http.Request, response any, status int) map[string][]string {
+			func(_ *testing.T, _ *http.Request, _ any, _ int) map[string][]string {
 				return map[string][]string{
 					"Location": {config.DefaultLunchFlowAPIURL + "/accounts/current"},
 				}
@@ -174,7 +174,7 @@ func TestLunchFlowClient_Redirects(t *testing.T) {
 				assert.Equal(t, "bogus-token", request.Header.Get("x-api-key"))
 				return map[string]any{}, http.StatusFound
 			},
-			func(t *testing.T, request *http.Request, response any, status int) map[string][]string {
+			func(_ *testing.T, _ *http.Request, _ any, _ int) map[string][]string {
 				return map[string][]string{
 					"Location": {redirectUrl},
 				}
@@ -228,7 +228,7 @@ func TestLunchFlowClient_Redirects(t *testing.T) {
 				assert.Equal(t, "bogus-token", request.Header.Get("x-api-key"))
 				return map[string]any{}, http.StatusFound
 			},
-			func(t *testing.T, request *http.Request, response any, status int) map[string][]string {
+			func(_ *testing.T, _ *http.Request, _ any, _ int) map[string][]string {
 				return map[string][]string{
 					"Location": {redirectUrl},
 				}
@@ -238,7 +238,7 @@ func TestLunchFlowClient_Redirects(t *testing.T) {
 			t,
 			http.MethodGet,
 			redirectUrl,
-			func(t *testing.T, request *http.Request) (any, int) {
+			func(_ *testing.T, _ *http.Request) (any, int) {
 				return map[string]any{}, http.StatusNoContent
 			},
 			nil,

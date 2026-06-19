@@ -22,7 +22,7 @@ type TestLogHook struct {
 	entries []slog.Record
 }
 
-func (h *TestLogHook) Enabled(_ context.Context, _ slog.Level) bool { return true }
+func (_ *TestLogHook) Enabled(_ context.Context, _ slog.Level) bool { return true }
 
 func (h *TestLogHook) Handle(_ context.Context, r slog.Record) error {
 	h.mu.Lock()
@@ -33,8 +33,8 @@ func (h *TestLogHook) Handle(_ context.Context, r slog.Record) error {
 	return nil
 }
 
-func (h *TestLogHook) WithAttrs(attrs []slog.Attr) slog.Handler { return h }
-func (h *TestLogHook) WithGroup(name string) slog.Handler       { return h }
+func (h *TestLogHook) WithAttrs(_ []slog.Attr) slog.Handler { return h }
+func (h *TestLogHook) WithGroup(_ string) slog.Handler      { return h }
 
 func (h *TestLogHook) AllEntries() []slog.Record {
 	h.mu.Lock()

@@ -73,7 +73,7 @@ func insufficientNonce(token string, difficulty int) uint64 {
 
 // getChallenge asks the API for a challenge for the purpose and returns its
 // token and difficulty.
-func getChallenge(t *testing.T, e *httpexpect.Expect, purpose string) (string, int) {
+func getChallenge(_ *testing.T, e *httpexpect.Expect, purpose string) (string, int) {
 	response := e.POST("/api/authentication/challenge").
 		WithJSON(map[string]any{
 			"purpose": purpose,

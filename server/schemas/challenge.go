@@ -47,7 +47,7 @@ func Nonce() validation.Rule {
 	return validation.AllOf(
 		is.Integer,
 		validation.Required,
-		validators.By(func(ctx context.Context, value *any) error {
+		validators.By(func(_ context.Context, value *any) error {
 			if value == nil || *value == nil {
 				return errors.New("nonce must be a non negative integer")
 			}

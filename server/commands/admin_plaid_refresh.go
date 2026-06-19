@@ -21,7 +21,7 @@ func adminPlaidRefresh(parent *cobra.Command) {
 	command := &cobra.Command{
 		Use:   "plaid:refresh",
 		Short: "Trigger a transaction refresh for a Plaid link",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			clock := clock.New()
 			configuration := config.LoadConfiguration()
 

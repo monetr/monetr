@@ -14,7 +14,7 @@ func databaseVersion(parent *cobra.Command) {
 	command := &cobra.Command{
 		Use:   "version",
 		Short: "Prints version information about your database.",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			configuration := config.LoadConfiguration()
 			log := logging.NewLoggerWithConfig(configuration.Logging)
 			configuration.PostgreSQL.Migrate = false

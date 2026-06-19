@@ -22,7 +22,7 @@ func adminPlaidUpdateWebhook(parent *cobra.Command) {
 	command := &cobra.Command{
 		Use:   "plaid:update-webhook",
 		Short: "Update the Plaid webhook URL for a Plaid link",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			clock := clock.New()
 			configuration := config.LoadConfiguration()
 

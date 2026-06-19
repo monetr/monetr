@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func GenerateTransactions(t *testing.T, start, end time.Time, numberOfTransactions int, bankAccountIds []string) []plaid.Transaction {
+func GenerateTransactions(_ *testing.T, start, end time.Time, numberOfTransactions int, bankAccountIds []string) []plaid.Transaction {
 	transactions := make([]plaid.Transaction, numberOfTransactions*len(bankAccountIds))
 	for i := 0; i < len(transactions); i++ {
 		bankAccountId := bankAccountIds[i%len(bankAccountIds)]

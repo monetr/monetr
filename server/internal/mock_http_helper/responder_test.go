@@ -15,11 +15,11 @@ func TestNewHttpMockJsonResponder(t *testing.T) {
 	defer httpmock.DeactivateAndReset()
 
 	url := "https://monetr.test/thing"
-	NewHttpMockJsonResponder(t, "GET", url, func(t *testing.T, request *http.Request) (any, int) {
+	NewHttpMockJsonResponder(t, "GET", url, func(_ *testing.T, _ *http.Request) (any, int) {
 		return map[string]any{
 			"value": 123,
 		}, http.StatusOK
-	}, func(t *testing.T, request *http.Request, response any, status int) map[string][]string {
+	}, func(_ *testing.T, _ *http.Request, _ any, _ int) map[string][]string {
 		return nil
 	})
 

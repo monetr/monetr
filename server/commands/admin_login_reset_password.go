@@ -38,7 +38,7 @@ func adminLoginResetPassword(parent *cobra.Command) {
 			"earlier link for the same login is invalidated as soon as the user",
 			"completes a reset (single-use).",
 		}, " "),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := cmd.Context()
 
 			configuration := config.LoadConfiguration()

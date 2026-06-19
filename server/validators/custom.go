@@ -38,7 +38,7 @@ func By[T any](callback func(ctx context.Context, value *T) error) validation.Ru
 }
 
 func Unique[T comparable]() validation.Rule {
-	return By(func(ctx context.Context, fields *[]T) error {
+	return By(func(_ context.Context, fields *[]T) error {
 		if fields == nil {
 			return nil
 		}

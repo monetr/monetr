@@ -195,7 +195,7 @@ func (s spendingInstructionBase) GetNextNSpendingEventsAfter(
 }
 
 func (s *spendingInstructionBase) GetRecurrencesBetween(
-	ctx context.Context,
+	_ context.Context,
 	start, end time.Time,
 	timezone *time.Location,
 ) ([]time.Time, error) {

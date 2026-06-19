@@ -10,7 +10,7 @@ import (
 )
 
 func Amount() validation.Rule {
-	return validators.By[any](func(ctx context.Context, value *any) error {
+	return validators.By[any](func(_ context.Context, value *any) error {
 		if value == nil {
 			return errors.New("Amount is not a valid integer")
 		}
@@ -35,7 +35,7 @@ func Amount() validation.Rule {
 }
 
 func PositiveAmount(prefix string) validation.Rule {
-	return validators.By[any](func(ctx context.Context, value *any) error {
+	return validators.By[any](func(_ context.Context, value *any) error {
 		if value == nil {
 			return errors.Errorf("%s is not a valid integer", prefix)
 		}

@@ -12,7 +12,7 @@ import (
 )
 
 func TestTokenize(t *testing.T) {
-	t.Run("tokenize long name no merchant", func(t *testing.T) {
+	t.Run("tokenize long name no merchant", func(_ *testing.T) {
 		txn := models.Transaction{
 			OriginalName:         "WHEN I WORK INC:1233303024 57:COURANT,ELLIOT; 798080132284EPJ. Merchant name: WHEN I WORK INC",
 			OriginalMerchantName: "",
@@ -23,7 +23,7 @@ func TestTokenize(t *testing.T) {
 		fmt.Println(string(j))
 	})
 
-	t.Run("debit card", func(t *testing.T) {
+	t.Run("debit card", func(_ *testing.T) {
 		txn := models.Transaction{
 			OriginalName: "POS Debit - 1234 - GOOGLE *YOUTUBEPRE G.CO/HELPPAY#CA",
 		}
@@ -33,7 +33,7 @@ func TestTokenize(t *testing.T) {
 		fmt.Println(string(j))
 	})
 
-	t.Run("from manual import", func(t *testing.T) {
+	t.Run("from manual import", func(_ *testing.T) {
 		txn := models.Transaction{
 			OriginalName: "ACH Debit - Pwp  Obsidian.md  Privacycom 2111508",
 		}
@@ -43,7 +43,7 @@ func TestTokenize(t *testing.T) {
 		fmt.Println(string(j))
 	})
 
-	t.Run("for blog post", func(t *testing.T) {
+	t.Run("for blog post", func(_ *testing.T) {
 		txn := models.Transaction{
 			OriginalName: "POS DEBIT-DC 5988 TST* CARIBOU COFFE NORTH BRANCH MN",
 		}

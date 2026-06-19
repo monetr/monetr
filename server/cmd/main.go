@@ -21,7 +21,7 @@ var (
 	rootCommand = &cobra.Command{
 		Use:   "monetr",
 		Short: "monetr's budgeting application",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			return cmd.Help()
 		},
 	}

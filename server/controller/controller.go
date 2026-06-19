@@ -61,7 +61,7 @@ func (c *Controller) Close() error {
 	return nil
 }
 
-func (c *Controller) getContext(ctx echo.Context) context.Context {
+func (_ *Controller) getContext(ctx echo.Context) context.Context {
 	if requestContext, ok := ctx.Get(spanContextKey).(context.Context); ok {
 		return requestContext
 	}
@@ -69,7 +69,7 @@ func (c *Controller) getContext(ctx echo.Context) context.Context {
 	return ctx.Request().Context()
 }
 
-func (c *Controller) getSpan(ctx echo.Context) *sentry.Span {
+func (_ *Controller) getSpan(ctx echo.Context) *sentry.Span {
 	return ctx.Get(spanKey).(*sentry.Span)
 }
 

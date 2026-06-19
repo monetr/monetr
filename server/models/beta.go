@@ -17,7 +17,7 @@ type Beta struct {
 	ExpiresAt    time.Time `json:"expiresAt" pg:"expires_at,notnull"`
 }
 
-func (o Beta) IdentityPrefix() string {
+func (_ Beta) IdentityPrefix() string {
 	return "beta"
 }
 

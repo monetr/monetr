@@ -18,15 +18,15 @@ type testJobArgs struct {
 	Value string `json:"value"`
 }
 
-func testNoopJob(ctx Context, args testJobArgs) error {
+func testNoopJob(_ Context, _ testJobArgs) error {
 	return nil
 }
 
-func testFailingJob(ctx Context, args testJobArgs) error {
+func testFailingJob(_ Context, _ testJobArgs) error {
 	return errors.New("this job always fails")
 }
 
-func testNoopCron(ctx Context) error {
+func testNoopCron(_ Context) error {
 	return nil
 }
 

@@ -30,7 +30,7 @@ var (
 // MFARequiredError is returned to the client after the initial login API call if the login requires MFA.
 type MFARequiredError struct{}
 
-func (e MFARequiredError) Cause() error {
+func (_ MFARequiredError) Cause() error {
 	return ErrMFARequired
 }
 
@@ -54,7 +54,7 @@ func (e MFARequiredError) MarshalJSON() ([]byte, error) {
 // has not yet been verified.
 type EmailNotVerifiedError struct{}
 
-func (e EmailNotVerifiedError) Cause() error {
+func (_ EmailNotVerifiedError) Cause() error {
 	return ErrEmailNotVerified
 }
 
@@ -77,7 +77,7 @@ func (e EmailNotVerifiedError) MarshalJSON() ([]byte, error) {
 // address that is already associated with another login.
 type EmailAlreadyExists struct{}
 
-func (e EmailAlreadyExists) Cause() error {
+func (_ EmailAlreadyExists) Cause() error {
 	return ErrEmailAlreadyExists
 }
 
@@ -103,7 +103,7 @@ type PasswordResetRequiredError struct {
 	ResetToken string `json:"resetToken"`
 }
 
-func (e PasswordResetRequiredError) Cause() error {
+func (_ PasswordResetRequiredError) Cause() error {
 	return ErrPasswordChangeRequired
 }
 
