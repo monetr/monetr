@@ -6,11 +6,11 @@ import { SelectSpendingOptionComponent } from '@monetr/interface/components/MSel
 import { defaultFilterImplementation, SelectIndicator, type SelectOption } from '@monetr/interface/components/Select';
 import { Skeleton } from '@monetr/interface/components/Skeleton';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
+import { usePatchTransaction } from '@monetr/interface/hooks/usePatchTransaction';
 import { useSpendings } from '@monetr/interface/hooks/useSpendings';
-import { useUpdateTransaction } from '@monetr/interface/hooks/useUpdateTransaction';
 import type Spending from '@monetr/interface/models/Spending';
 import { FREE_TO_USE, FreeToUse } from '@monetr/interface/models/Spending';
-import Transaction from '@monetr/interface/models/Transaction';
+import type Transaction from '@monetr/interface/models/Transaction';
 import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './TransactionItemSelectSpending.module.scss';
@@ -29,7 +29,7 @@ export default function TransactionItemSelectSpending(props: TransactionItemSele
   const id = useId();
   const { data: spending, isLoading: spendingIsLoading } = useSpendings();
   const { data: balances, isLoading: balancesIsLoading } = useCurrentBalance();
-  const updateTransaction = useUpdateTransaction();
+  const patchTransaction = usePatchTransaction();
 
   const options: Array<SelectOption<SpendingOption>> = useMemo(
     () => [
@@ -60,12 +60,11 @@ export default function TransactionItemSelectSpending(props: TransactionItemSele
       // actually clear it.
       const newSpendingId = newValue.value.spendingId === FREE_TO_USE ? null : newValue.value.spendingId;
 
-      const updatedTransaction = new Transaction({
-        ...props.transaction,
+      return await patchTransaction({
+        transactionId: props.transaction.transactionId,
+        bankAccountId: props.transaction.bankAccountId,
         spendingId: newSpendingId,
-      });
-
-      return await updateTransaction(updatedTransaction).finally(() => {
+      }).finally(() => {
         // Needs to be in a timeout for some reason. But basically re-focus the select after we have updated the
         // spending.
         setTimeout(() => {
@@ -73,7 +72,7 @@ export default function TransactionItemSelectSpending(props: TransactionItemSele
         }, 50);
       });
     },
-    [props, id, updateTransaction],
+    [props, id, patchTransaction],
   );
 
   if (spendingIsLoading || balancesIsLoading) {

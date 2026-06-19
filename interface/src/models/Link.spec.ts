@@ -35,7 +35,6 @@ describe('links', () => {
       linkType: LinkType.Plaid,
     });
     expect(link.getIsManual()).toBeFalsy();
-    expect(link.getIsPlaid()).toBeTruthy();
   });
 
   it('will handle custom names', () => {

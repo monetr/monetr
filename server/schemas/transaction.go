@@ -5,6 +5,7 @@ import (
 
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/validation"
+	"github.com/monetr/validation/is"
 )
 
 var (
@@ -35,10 +36,11 @@ var (
 				validation.In(true, false).Error("Adjusts balance must be a valid boolean if specified"),
 				validation.Never.Error("Validation must be not be specified or must be a valid boolean"),
 			),
-		).Required(false),
+		).Required(Optional),
 		validation.Key("isPending",
+			is.Boolean,
 			validation.In(true, false).Error("Is pending must be a valid boolean if provided"),
-		).Required(false),
+		).Required(Optional),
 	)
 
 	PatchTransaction = validation.Map(
@@ -67,7 +69,7 @@ var (
 			TextField(),
 		).Required(Optional),
 		validation.Key("date",
-			validation.IsString,
+			is.String,
 			validation.Date(time.RFC3339).Error("Date must be in a valid format"),
 			validation.Required.Error("Date is required"),
 		).Required(Optional),
@@ -85,9 +87,9 @@ var (
 			// Do NOT use validation.Required here. is pending is a boolean and false
 			// is its zero value, so Required would reject a perfectly valid attempt
 			// to set is pending back to false.
-			validation.IsBoolean,
+			is.Boolean,
 			validation.In(true, false).Error("Is pending must be a valid boolean if provided"),
-		).Required(false),
+		).Required(Optional),
 
 		// NOTE adjustsBalance is intentionally not accepted here. monetr does not
 		// yet recalculate balances when a manual transaction's amount changes (see
