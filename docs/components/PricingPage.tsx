@@ -47,9 +47,9 @@ export default function PricingPage(): React.JSX.Element {
             </p>
           </li>
           <li>
-            <h4 className={styles.faqQuestion}>What if I sign up and find monetr doesn't meet my needs?</h4>
+            <h4 className={styles.faqQuestion}>What if I sign up and find monetr doesn&apos;t meet my needs?</h4>
             <p>
-              If you have not subscribed yet then you don't need to do anything! Your account will become inactive
+              If you have not subscribed yet then you don&apos;t need to do anything! Your account will become inactive
               automatically at the end of your trial. If you have already subscribed then you can cancel your
               subscription at any time!
             </p>

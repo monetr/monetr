@@ -51,7 +51,7 @@ export default function SettingsSecurity(): React.JSX.Element {
             Email Address
           </Typography>
           <Typography component='p' size='inherit'>
-            Change your primary email address, this is what you'll use to login to monetr and can be used to recover
+            Change your primary email address, this is what you&apos;ll use to login to monetr and can be used to recover
             your acount.
           </Typography>
         </Card>

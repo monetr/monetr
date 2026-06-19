@@ -230,7 +230,7 @@ export default function Register(): React.JSX.Element {
         </FormButton>
         <div className={styles.footerRow}>
           <Typography className={styles.termsBlurb} color='subtle' component='p' size='sm'>
-            By signing up you agree to monetr's&nbsp;
+            By signing up you agree to monetr&apos;s&nbsp;
             <a
               className={styles.inlineLink}
               href='https://monetr.app/policy/terms'

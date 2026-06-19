@@ -65,7 +65,7 @@ export default function SubscribePage(): React.JSX.Element {
               Your subscription is no longer active
             </Typography>
             <Typography align='center' size='lg'>
-              Thank you for having subscribed to monetr before! If you'd like to continue using monetr you will have to
+              Thank you for having subscribed to monetr before! If you&apos;d like to continue using monetr you will have to
               resubscribe below. Click continue to proceed to our billing portal.
             </Typography>
             <Button disabled={loading} onClick={handleContinue} variant='primary'>
@@ -98,7 +98,7 @@ export default function SubscribePage(): React.JSX.Element {
           </Typography>
           <Typography align='center' size='lg'>
             Thank you for trying out monetr! We hope that you found our budgeting tools useful during your trial. If
-            you'd like to continue using monetr you can easily subscribe below.
+            you&apos;d like to continue using monetr you can easily subscribe below.
           </Typography>
           <Button disabled={loading} onClick={handleContinue} variant='primary'>
             Continue

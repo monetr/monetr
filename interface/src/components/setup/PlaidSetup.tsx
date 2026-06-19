@@ -218,7 +218,7 @@ export default function PlaidSetup(props: PlaidProps): React.JSX.Element {
     inner = (
       <div className={styles.inner}>
         <Typography size='2xl' weight='medium'>
-          Something isn't quite right
+          Something isn&apos;t quite right
         </Typography>
         <Typography color='subtle' size='lg'>
           We were not able to get Plaid ready for you at this time, please try again shortly.
@@ -238,7 +238,7 @@ export default function PlaidSetup(props: PlaidProps): React.JSX.Element {
     inner = (
       <div className={styles.inner}>
         <Typography size='2xl' weight='medium'>
-          Something isn't quite right
+          Something isn&apos;t quite right
         </Typography>
         <Typography color='subtle' size='lg'>
           Plaid exited, did you want to set it up later?

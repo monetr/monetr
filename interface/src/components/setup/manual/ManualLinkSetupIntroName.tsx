@@ -44,7 +44,7 @@ export default function ManualLinkSetupIntroName(): React.JSX.Element {
         Welcome to monetr!
       </Typography>
       <Typography align='center' color='subtle' size='lg'>
-        Let's create a new budget to get started. What do you want to call this budget?
+        Let&apos;s create a new budget to get started. What do you want to call this budget?
       </Typography>
       <FormTextField
         autoFocus

@@ -59,8 +59,8 @@ export default function FundingDetails(): React.JSX.Element | null {
     return (
       <div className={styles.centerState}>
         <HeartCrack className={styles.errorIcon} />
-        <Typography size='5xl'>Something isn't right...</Typography>
-        <Typography size='2xl'>There wasn't a funding schedule specified...</Typography>
+        <Typography size='5xl'>Something isn&apos;t right...</Typography>
+        <Typography size='2xl'>There wasn&apos;t a funding schedule specified...</Typography>
       </div>
     );
   }
@@ -79,8 +79,8 @@ export default function FundingDetails(): React.JSX.Element | null {
     return (
       <div className={styles.centerState}>
         <HeartCrack className={styles.errorIcon} />
-        <Typography size='5xl'>Something isn't right...</Typography>
-        <Typography size='2xl'>Couldn't find the funding schedule you specified...</Typography>
+        <Typography size='5xl'>Something isn&apos;t right...</Typography>
+        <Typography size='2xl'>Couldn&apos;t find the funding schedule you specified...</Typography>
       </div>
     );
   }

@@ -64,7 +64,7 @@ function EmptyState(): React.JSX.Element {
           <CalendarSync className={styles.emptyIcon} />
         </div>
         <Typography align='center' color='subtle' size='xl'>
-          You don't have any funding schedules yet...
+          You don&apos;t have any funding schedules yet...
         </Typography>
         <Typography align='center' color='subtle' size='lg'>
           Funding schedules tell monetr when to allocate funds towards your expenses and goals.

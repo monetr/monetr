@@ -61,8 +61,8 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
     return (
       <div className={styles.centerState}>
         <HeartCrack className={styles.errorIcon} />
-        <Typography size='5xl'>Something isn't right...</Typography>
-        <Typography size='2xl'>We weren't able to load details for the bank account specified...</Typography>
+        <Typography size='5xl'>Something isn&apos;t right...</Typography>
+        <Typography size='2xl'>We weren&apos;t able to load details for the bank account specified...</Typography>
       </div>
     );
   }

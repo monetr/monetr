@@ -63,8 +63,8 @@ export default function Transactions(): React.JSX.Element {
     return (
       <div className={styles.centerState}>
         <HeartCrack className={styles.errorIcon} />
-        <Typography size='5xl'>Something isn't right...</Typography>
-        <Typography size='2xl'>We weren't able to retrieve transactions at this time...</Typography>
+        <Typography size='5xl'>Something isn&apos;t right...</Typography>
+        <Typography size='2xl'>We weren&apos;t able to retrieve transactions at this time...</Typography>
       </div>
     );
   }
@@ -89,7 +89,7 @@ export default function Transactions(): React.JSX.Element {
               <ShoppingCart className={styles.emptyIcon} />
             </div>
             <Typography align='center' color='subtle' size='xl'>
-              You don't have any transactions yet...
+              You don&apos;t have any transactions yet...
             </Typography>
             <Typography align='center' color='subtle' size='lg'>
               Transactions will show up here once we receive them from Plaid. Or the current account might not support

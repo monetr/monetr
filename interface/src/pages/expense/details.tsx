@@ -61,8 +61,8 @@ export default function ExpenseDetails(): React.JSX.Element | null {
     return (
       <div className={styles.centerState}>
         <HeartCrack className={styles.errorIcon} />
-        <Typography size='5xl'>Something isn't right...</Typography>
-        <Typography size='2xl'>There wasn't an expense specified...</Typography>
+        <Typography size='5xl'>Something isn&apos;t right...</Typography>
+        <Typography size='2xl'>There wasn&apos;t an expense specified...</Typography>
       </div>
     );
   }
@@ -81,8 +81,8 @@ export default function ExpenseDetails(): React.JSX.Element | null {
     return (
       <div className={styles.centerState}>
         <HeartCrack className={styles.errorIcon} />
-        <Typography size='5xl'>Something isn't right...</Typography>
-        <Typography size='2xl'>Couldn't find the expense you specified...</Typography>
+        <Typography size='5xl'>Something isn&apos;t right...</Typography>
+        <Typography size='2xl'>Couldn&apos;t find the expense you specified...</Typography>
       </div>
     );
   }
@@ -95,7 +95,7 @@ export default function ExpenseDetails(): React.JSX.Element | null {
     return (
       <div className={styles.centerState}>
         <HeartCrack className={styles.errorIcon} />
-        <Typography size='5xl'>Something isn't right...</Typography>
+        <Typography size='5xl'>Something isn&apos;t right...</Typography>
         <Typography size='2xl'>This spending object is not an expense...</Typography>
       </div>
     );

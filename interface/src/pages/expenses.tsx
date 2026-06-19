@@ -26,8 +26,8 @@ export default function Expenses(): React.JSX.Element {
     return (
       <div className={styles.centerState}>
         <HeartCrack className={styles.errorIcon} />
-        <Typography size='5xl'>Something isn't right...</Typography>
-        <Typography size='2xl'>We weren't able to retrieve expenses at this time...</Typography>
+        <Typography size='5xl'>Something isn&apos;t right...</Typography>
+        <Typography size='2xl'>We weren&apos;t able to retrieve expenses at this time...</Typography>
       </div>
     );
   }
@@ -64,7 +64,7 @@ function EmptyState(): React.JSX.Element {
           <Receipt className={styles.emptyIcon} />
         </div>
         <Typography align='center' color='subtle' size='xl'>
-          You don't have any expenses yet...
+          You don&apos;t have any expenses yet...
         </Typography>
         <Typography align='center' color='subtle' size='lg'>
           Expenses are budgets for recurring spending. Things like your streaming subscription, rent, or car payments.

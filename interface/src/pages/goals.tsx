@@ -26,8 +26,8 @@ export default function Goals(): React.JSX.Element {
     return (
       <div className={styles.centerState}>
         <HeartCrack className={styles.errorIcon} />
-        <Typography size='5xl'>Something isn't right...</Typography>
-        <Typography size='2xl'>We weren't able to retrieve goals at this time...</Typography>
+        <Typography size='5xl'>Something isn&apos;t right...</Typography>
+        <Typography size='2xl'>We weren&apos;t able to retrieve goals at this time...</Typography>
       </div>
     );
   }
@@ -71,10 +71,10 @@ function EmptyState(): React.JSX.Element {
           <PiggyBank className={styles.emptyIcon} />
         </div>
         <Typography align='center' color='subtle' size='xl'>
-          You don't have any goals yet...
+          You don&apos;t have any goals yet...
         </Typography>
         <Typography align='center' color='subtle' size='lg'>
-          Goals are longer budgets that don't recur. They are meant to be used to put money aside for something like
+          Goals are longer budgets that don&apos;t recur. They are meant to be used to put money aside for something like
           saving up for a vaction, or paying off a loan.
         </Typography>
       </div>

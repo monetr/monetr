@@ -110,7 +110,7 @@ export default function ResendVerificationPage(): React.JSX.Element {
         </FormButton>
         <div className={styles.loginRow}>
           <Typography color='subtle' size='sm'>
-            Don't need to resend?
+            Don&apos;t need to resend?
           </Typography>
           <TextLink data-testid='login-signup' size='sm' to='/login'>
             Return to login

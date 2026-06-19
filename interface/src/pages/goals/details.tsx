@@ -55,8 +55,8 @@ export default function GoalDetails(): React.JSX.Element | null {
     return (
       <div className={styles.centerState}>
         <HeartCrack className={styles.errorIcon} />
-        <Typography size='5xl'>Something isn't right...</Typography>
-        <Typography size='2xl'>There wasn't a goal specified...</Typography>
+        <Typography size='5xl'>Something isn&apos;t right...</Typography>
+        <Typography size='2xl'>There wasn&apos;t a goal specified...</Typography>
       </div>
     );
   }
@@ -75,8 +75,8 @@ export default function GoalDetails(): React.JSX.Element | null {
     return (
       <div className={styles.centerState}>
         <HeartCrack className={styles.errorIcon} />
-        <Typography size='5xl'>Something isn't right...</Typography>
-        <Typography size='2xl'>Couldn't find the goal you specified...</Typography>
+        <Typography size='5xl'>Something isn&apos;t right...</Typography>
+        <Typography size='2xl'>Couldn&apos;t find the goal you specified...</Typography>
       </div>
     );
   }
@@ -89,7 +89,7 @@ export default function GoalDetails(): React.JSX.Element | null {
     return (
       <div className={styles.centerState}>
         <HeartCrack className={styles.errorIcon} />
-        <Typography size='5xl'>Something isn't right...</Typography>
+        <Typography size='5xl'>Something isn&apos;t right...</Typography>
         <Typography size='2xl'>This spending object is not a goal...</Typography>
       </div>
     );
