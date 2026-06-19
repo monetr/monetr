@@ -7,7 +7,6 @@ import { useSnackbar } from '@monetr/notify';
 export interface LoginArguments {
   email: string;
   password: string;
-  captcha?: string;
   totp?: string;
   challenge?: string;
   nonce?: number;
@@ -19,7 +18,15 @@ export default function useLogin(): (loginArgs: LoginArguments) => Promise<void>
   const queryClient = useQueryClient();
 
   return async (loginArgs: LoginArguments): Promise<void> => {
-    return request<{ nextUrl?: string }>({ method: 'POST', url: '/api/authentication/login', data: loginArgs })
+    return request<{ nextUrl?: string }>({
+      method: 'POST',
+      url: '/api/authentication/login',
+      data: {
+        ...loginArgs,
+        // Server requires emails to be lowercase so we just do it here.
+        email: loginArgs.email.toLowerCase(),
+      },
+    })
       .then(async result => {
         // Then bootstrap the authentication, once it's bootstrapped we want to consider the `nextUrl` field from the
         // login response above. If the nextUrl is present, then we want to navigate the user to that path. If it is not
