@@ -116,6 +116,19 @@
       "matchPackageNames": [
         "/sass/"
       ]
+    },
+    {
+      "groupName": "debian apt packages",
+      "groupSlug": "debian-apt",
+      "semanticCommitScope": "containers",
+      "matchDatasources": [
+        "deb"
+      ],
+      "registryUrls": [
+        "https://deb.debian.org/debian?suite=trixie&components=main&binaryArch=amd64",
+        "https://deb.debian.org/debian?suite=trixie-updates&components=main&binaryArch=amd64",
+        "https://deb.debian.org/debian-security?suite=trixie-security&components=main&binaryArch=amd64"
+      ]
     }
   ],
   "dockerfile": {
@@ -187,6 +200,13 @@
       "depNameTemplate": "@biomejs/biome",
       "packageNameTemplate": "@biomejs/biome",
       "datasourceTemplate": "npm"
+    },
+    {
+      "customType": "regex",
+      "description": "Update pinned Debian apt package versions in the Dockerfile",
+      "fileMatch": ["(^|/)Dockerfile$"],
+      "matchStrings": ["# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\s+\\S+=(?<currentValue>\\S+)"],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}deb{{/if}}"
     }
   ]
 }
