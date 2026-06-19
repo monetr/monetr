@@ -39,7 +39,7 @@
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "autoprefixer": "10.5.0",
-    "sass": "1.100.0",
+    "sass": "1.101.0",
     "satori": "0.26.0",
     "spellchecker-cli": "7.0.3",
     "typescript": "6.0.3"
