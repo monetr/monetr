@@ -1,0 +1,91 @@
+package schemas
+
+import (
+	"github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/validators"
+	"github.com/monetr/validation"
+)
+
+var (
+	CreateSpending = validation.OneOf(
+		// Expense schema
+		validation.Map(
+			validation.Key("fundingScheduleId",
+				ValidID[models.FundingSchedule](),
+				validation.Required,
+			).Required(Require),
+			validation.Key("spendingType",
+				validation.Eq("expense"),
+				validation.Required,
+			).Required(Require),
+			validation.Key("name",
+				Name(),
+			).Required(Require),
+			validation.Key("description",
+				validation.OneOf(
+					validation.Nil,
+					TextField(),
+				),
+			).Required(Optional),
+			validation.Key("targetAmount",
+				PositiveAmount("Target amount"),
+				validation.Required,
+			).Required(Require),
+			validation.Key("currentAmount",
+				PositiveAmount("Current amount"),
+				// Different from [validation.Required] since it rejects 0.
+				validation.NotNil,
+			).Required(Optional),
+			validation.Key("ruleset",
+				Ruleset(),
+				validation.Required,
+			).Required(Require),
+			validation.Key("nextRecurrence",
+				Timestamp().Error("Next recurrence must be a valid date"),
+				validation.Required,
+			).Required(Require),
+			validation.Key("autoCreateTransaction",
+				Boolean(),
+			).Required(validators.Optional),
+		),
+		// Goal schema
+		validation.Map(
+			validation.Key("fundingScheduleId",
+				ValidID[models.FundingSchedule](),
+				validation.Required,
+			).Required(Require),
+			validation.Key("spendingType",
+				validation.Eq("goal"),
+				validation.Required,
+			).Required(Require),
+			validation.Key("name",
+				Name(),
+			).Required(Require),
+			validation.Key("description",
+				validation.OneOf(
+					validation.Nil,
+					TextField(),
+				),
+			).Required(Optional),
+			validation.Key("targetAmount",
+				PositiveAmount("Target amount"),
+				validation.Required,
+			).Required(Require),
+			validation.Key("currentAmount",
+				PositiveAmount("Current amount"),
+				// Different from [validation.Required] since it rejects 0.
+				validation.NotNil,
+			).Required(Optional),
+			validation.Key("ruleset",
+				validation.Never,
+			).Required(Optional),
+			validation.Key("nextRecurrence",
+				Timestamp().Error("Next recurrence must be a valid date"),
+				validation.Required,
+			).Required(Require),
+			validation.Key("isPaused",
+				Boolean(),
+			).Required(validators.Optional),
+		),
+	)
+)

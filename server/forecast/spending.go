@@ -4,13 +4,14 @@ import (
 	"context"
 	"time"
 
+	"log/slog"
+
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
-	"log/slog"
 )
 
 type SpendingEvent struct {
@@ -242,8 +243,6 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(
 
 	nextRecurrence := util.Midnight(s.spending.NextRecurrence, timezone)
 	switch s.spending.SpendingType {
-	case SpendingTypeOverflow:
-		return nil, nil
 	case SpendingTypeGoal:
 		// If we are working with a goal and it has already "completed" then there
 		// is nothing more to do, no more events will come up for this spending

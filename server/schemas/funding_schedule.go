@@ -1,8 +1,6 @@
 package schemas
 
 import (
-	"time"
-
 	"github.com/monetr/monetr/server/validators"
 	"github.com/monetr/validation"
 	"github.com/monetr/validation/is"
@@ -10,89 +8,66 @@ import (
 
 var (
 	CreateFundingSchedule = validation.Map(
-		validation.Key(
-			"name",
+		validation.Key("name",
 			validation.Required.Error("Name is required"),
 			Name(),
 		).Required(Require),
-		validation.Key(
-			"description",
-			validation.IsString,
-			is.PrintableUnicode,
-			validation.Length(1, 300).Error("Description must be between 1 and 300 characters"),
+		validation.Key("description",
+			TextField(),
 		).Required(validators.Optional),
-		validation.Key(
-			"ruleset",
+		validation.Key("ruleset",
 			validation.Required.Error("Ruleset must be specified for funding schedules"),
-			validation.IsString,
 			Ruleset(),
 		).Required(validators.Require),
-		validation.Key(
-			"excludeWeekends",
-			validation.IsBoolean,
-			validation.In(true, false).Error("Exclude weekends must be a valid boolean"),
+		validation.Key("excludeWeekends",
+			Boolean().Error("Exclude weekends must be a valid boolean"),
 		).Required(validators.Optional),
-		validation.Key(
-			"autoCreateTransaction",
-			validation.IsBoolean,
-			validation.In(true, false).Error("Auto create transaction must be a valid boolean"),
+		validation.Key("autoCreateTransaction",
+			Boolean().Error("Auto create transaction must be a valid boolean"),
 		).Required(validators.Optional),
-		validation.Key(
-			"estimatedDeposit",
+		validation.Key("estimatedDeposit",
 			validation.OneOf(
 				validation.Nil,
 				validation.AllOf(
-					validation.IsInteger,
 					PositiveAmount("Estimated deposit"),
+					// TODO This might be redundant?
 					validation.Min(float64(0)).Error("Estimated deposit cannot be less than 0"),
 				),
 			),
 		).Required(validators.Optional),
-		validation.Key(
-			"nextRecurrence",
-			validation.IsString,
-			validation.Date(time.RFC3339).Error("Next recurrence must be in the future"),
+		validation.Key("nextRecurrence",
+			Timestamp().Error("Next recurrence must be a valid date"),
 		).Required(validators.Optional),
 	)
 
 	PatchFundingSchedule = validation.Map(
-		validation.Key(
-			"name",
+		validation.Key("name",
 			validation.Required.Error("Name is required"),
 			Name(),
 		).Required(Optional),
-		validation.Key(
-			"description",
-			is.PrintableUnicode,
-			validation.IsString,
-			validation.Length(1, 300).Error("Description must be between 1 and 300 characters"),
+		validation.Key("description",
+			TextField(),
 		).Required(validators.Optional),
-		validation.Key(
-			"ruleset",
+		validation.Key("ruleset",
 			validation.Required.Error("Ruleset cannot be blank when specified"),
-			validation.IsString,
+			is.String,
 			Ruleset(),
 		).Required(validators.Optional),
-		validation.Key(
-			"excludeWeekends",
-			validation.IsBoolean,
+		validation.Key("excludeWeekends",
+			is.Boolean,
 			validation.In(true, false).Error("Exclude weekends must be a valid boolean"),
 		).Required(validators.Optional),
-		validation.Key(
-			"autoCreateTransaction",
-			validation.IsBoolean,
+		validation.Key("autoCreateTransaction",
+			is.Boolean,
 			validation.In(true, false).Error("Auto create transaction must be a valid boolean"),
 		).Required(validators.Optional),
-		validation.Key(
-			"estimatedDeposit",
-			validation.IsInteger,
+		validation.Key("estimatedDeposit",
+			is.Integer,
+			// TODO [PositiveAmount] here instead?
 			validation.Min(float64(0)).Error("Estimated deposit cannot be less than 0"),
 		).Required(validators.Optional),
-		validation.Key(
-			"nextRecurrence",
-			validation.Required.Error("Next recurrence cannot be blank when specified"),
-			validation.IsString,
-			validation.Date(time.RFC3339).Error("Next recurrence must be a valid date"),
+		validation.Key("nextRecurrence",
+			Timestamp().Error("Next recurrence must be a valid date"),
 		).Required(validators.Optional),
 	)
 )
