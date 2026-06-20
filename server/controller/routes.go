@@ -303,7 +303,6 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.POST("/bank_accounts/:bankAccountId/transactions/upload", c.postTransactionUpload)
 	billed.GET("/bank_accounts/:bankAccountId/transactions/upload/:transactionUploadId", c.getTransactionUploadById)
 	billed.GET("/bank_accounts/:bankAccountId/transactions/upload/:transactionUploadId/progress", c.getTransactionUploadProgress)
-	billed.PUT("/bank_accounts/:bankAccountId/transactions/:transactionId", c.putTransactions)
 	billed.PATCH("/bank_accounts/:bankAccountId/transactions/:transactionId", c.patchTransaction)
 	billed.DELETE("/bank_accounts/:bankAccountId/transactions/:transactionId", c.deleteTransactions)
 

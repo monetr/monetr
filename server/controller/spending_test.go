@@ -1186,14 +1186,16 @@ func TestGetSpendingTransactions(t *testing.T) {
 			response.JSON().Array().IsEmpty()
 		}
 
-		// Now spend the transaction from the expense we just created.
-		transaction["spendingId"] = spendingId.String()
+		// Now spend the transaction from the expense we just created. The PUT
+		// endpoint is gone now so we just PATCH the spendingId onto it.
 		{
-			response := e.PUT("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithPath("transactionId", transaction["transactionId"]).
 				WithCookie(TestCookieName, token).
-				WithJSON(transaction).
+				WithJSON(map[string]any{
+					"spendingId": spendingId.String(),
+				}).
 				Expect()
 
 			response.Status(http.StatusOK)
