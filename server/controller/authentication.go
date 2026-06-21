@@ -26,7 +26,10 @@ const ClearAuthentication = ""
 // with the API. When this is called with a token that token will be returned to the client in the response as a
 // Set-Cookie header. If a blank token is provided then the cookie is updated to expire immediately and the value of the
 // cookie is set to blank.
-func (c *Controller) updateAuthenticationCookie(ctx echo.Context, token string) {
+func (c *Controller) updateAuthenticationCookie(
+	ctx echo.Context,
+	token string,
+) {
 	sameSite := http.SameSiteDefaultMode
 	if c.Configuration.Server.Cookies.SameSiteStrict {
 		sameSite = http.SameSiteStrictMode
@@ -57,7 +60,7 @@ func (c *Controller) updateAuthenticationCookie(ctx echo.Context, token string) 
 		Expires:  expiration,
 		MaxAge:   0,
 		Secure:   c.Configuration.Server.GetIsCookieSecure(),
-		HttpOnly: true,
+		HttpOnly: c.Configuration.Server.Cookies.HttpOnly,
 		SameSite: sameSite,
 	})
 }
