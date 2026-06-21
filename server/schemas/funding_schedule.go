@@ -68,6 +68,7 @@ var (
 		).Required(validators.Optional),
 		validation.Key("nextRecurrence",
 			Timestamp().Error("Next recurrence must be a valid date"),
+			validation.Required.Error("Next recurrence cannot be blank when specified"),
 		).Required(validators.Optional),
 	)
 )

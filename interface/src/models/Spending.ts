@@ -10,9 +10,9 @@ import parseDate from '@monetr/interface/util/parseDate';
 export const FREE_TO_USE = ID.from<Spending>('spnd_freeToUse');
 
 export enum SpendingType {
-  FreeToUse = -1, // Cannot be present on actual responses!
-  Expense = 0,
-  Goal = 1,
+  FreeToUse = 'free', // Cannot be present on actual responses!
+  Expense = 'expense',
+  Goal = 'goal',
 }
 
 export default class Spending {
