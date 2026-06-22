@@ -3,11 +3,11 @@ package util
 import (
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/id"
 )
 
-func GetRequestID(ctx echo.Context) string {
+func GetRequestID(ctx *echo.Context) string {
 	values := []string{
 		ctx.Request().Header.Get("X-Request-Id"),
 		ctx.Request().Header.Get("X-Cloud-Trace-Context"),

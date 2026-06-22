@@ -12,7 +12,7 @@ import (
 
 	"github.com/go-pg/pg/v10"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/datasources/plaid/plaid_jobs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
@@ -38,7 +38,7 @@ type PlaidClaims struct {
 	RequestBodySHA256 string `json:"request_body_sha256"`
 }
 
-func (c *Controller) postPlaidWebhook(ctx echo.Context) error {
+func (c *Controller) postPlaidWebhook(ctx *echo.Context) error {
 	if !c.Configuration.Plaid.Enabled || !c.Configuration.Plaid.WebhooksEnabled {
 		return c.notFound(ctx, "plaid webhooks are not enabled")
 	}
@@ -161,7 +161,7 @@ func (c *Controller) postPlaidWebhook(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusOK)
 }
 
-func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
+func (c *Controller) processWebhook(ctx *echo.Context, hook PlaidWebhook) error {
 	log := c.getLog(ctx).With("webhookType", hook.WebhookType, "webhookCode", hook.WebhookCode, "itemId", hook.ItemId)
 
 	crumbs.Debug(c.getContext(ctx), "Handling webhook from Plaid.", map[string]any{

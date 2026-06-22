@@ -7,7 +7,7 @@ import (
 	"time"
 
 	locale "github.com/elliotcourant/go-lclocale"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
@@ -26,7 +26,7 @@ const ClearAuthentication = ""
 // with the API. When this is called with a token that token will be returned to the client in the response as a
 // Set-Cookie header. If a blank token is provided then the cookie is updated to expire immediately and the value of the
 // cookie is set to blank.
-func (c *Controller) updateAuthenticationCookie(ctx echo.Context, token string) {
+func (c *Controller) updateAuthenticationCookie(ctx *echo.Context, token string) {
 	sameSite := http.SameSiteDefaultMode
 	if c.Configuration.Server.Cookies.SameSiteStrict {
 		sameSite = http.SameSiteStrictMode
@@ -64,7 +64,7 @@ func (c *Controller) updateAuthenticationCookie(ctx echo.Context, token string) 
 
 // postChallenge issues a challenge for an unauthenticated auth endpoint, or
 // 404s when proof of work is disabled.
-func (c *Controller) postChallenge(ctx echo.Context) error {
+func (c *Controller) postChallenge(ctx *echo.Context) error {
 	c.scrubSentryBody(ctx)
 	if !c.Configuration.ProofOfWork.Enabled {
 		return c.notFound(ctx, "proof of work is not enabled")
@@ -107,7 +107,7 @@ func (c *Controller) postChallenge(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, challenge)
 }
 
-func (c *Controller) postLogin(ctx echo.Context) error {
+func (c *Controller) postLogin(ctx *echo.Context) error {
 	c.scrubSentryBody(ctx)
 	// When proof of work is enabled the request must include a challenge and a
 	// nonce, so we validate against the schema that knows about those fields. When
@@ -332,7 +332,7 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 	}
 }
 
-func (c *Controller) postMultifactor(ctx echo.Context) error {
+func (c *Controller) postMultifactor(ctx *echo.Context) error {
 	c.scrubSentryBody(ctx)
 	var request struct {
 		TOTP string `json:"totp"`
@@ -395,7 +395,7 @@ func (c *Controller) postMultifactor(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, result)
 }
 
-func (c *Controller) logoutEndpoint(ctx echo.Context) error {
+func (c *Controller) logoutEndpoint(ctx *echo.Context) error {
 	if _, err := ctx.Cookie(c.Configuration.Server.Cookies.Name); err == http.ErrNoCookie {
 		return ctx.NoContent(http.StatusOK)
 	}
@@ -404,7 +404,7 @@ func (c *Controller) logoutEndpoint(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusOK)
 }
 
-func (c *Controller) postRegister(ctx echo.Context) error {
+func (c *Controller) postRegister(ctx *echo.Context) error {
 	c.scrubSentryBody(ctx)
 	if !c.Configuration.AllowSignUp {
 		return c.notFound(ctx, "sign up is not enabled on this server")
@@ -651,7 +651,7 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 	})
 }
 
-func (c *Controller) verifyEndpoint(ctx echo.Context) error {
+func (c *Controller) verifyEndpoint(ctx *echo.Context) error {
 	c.scrubSentryBody(ctx)
 	if !c.Configuration.Email.ShouldVerifyEmails() {
 		return c.notFound(ctx, "email verification is not enabled")
@@ -688,7 +688,7 @@ func (c *Controller) verifyEndpoint(ctx echo.Context) error {
 	})
 }
 
-func (c *Controller) resendVerification(ctx echo.Context) error {
+func (c *Controller) resendVerification(ctx *echo.Context) error {
 	c.scrubSentryBody(ctx)
 	log := c.getLog(ctx)
 	if !c.Configuration.Email.ShouldVerifyEmails() {
@@ -747,7 +747,7 @@ func (c *Controller) resendVerification(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusOK)
 }
 
-func (c *Controller) postForgotPassword(ctx echo.Context) error {
+func (c *Controller) postForgotPassword(ctx *echo.Context) error {
 	c.scrubSentryBody(ctx)
 	if !c.Configuration.Email.AllowPasswordReset() {
 		return c.notFound(ctx, "password reset not enabled")
@@ -833,7 +833,7 @@ func (c *Controller) postForgotPassword(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusOK)
 }
 
-func (c *Controller) resetPassword(ctx echo.Context) error {
+func (c *Controller) resetPassword(ctx *echo.Context) error {
 	c.scrubSentryBody(ctx)
 	// The reset endpoint is intentionally not gated on Email.AllowPasswordReset;
 	// the PASETO reset token is the security control here, and operators may mint
@@ -927,7 +927,7 @@ func (c *Controller) resetPassword(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusOK)
 }
 
-func (c *Controller) validateRegistration(ctx echo.Context, email, password, firstName string) error {
+func (c *Controller) validateRegistration(ctx *echo.Context, email, password, firstName string) error {
 	if email == "" {
 		return c.badRequest(ctx, "Email cannot be blank")
 	}
@@ -946,7 +946,7 @@ func (c *Controller) validateRegistration(ctx echo.Context, email, password, fir
 // validateProofOfWork verifies the challenge on an auth request, mapping typed
 // failures to 400s (no-op when disabled). Expired and already-used get their own
 // message so a real user can retry; everything else stays vague on purpose.
-func (c *Controller) validateProofOfWork(ctx echo.Context, purpose powchallenge.Purpose, challenge string, nonce uint64) error {
+func (c *Controller) validateProofOfWork(ctx *echo.Context, purpose powchallenge.Purpose, challenge string, nonce uint64) error {
 	if !c.Configuration.ProofOfWork.Enabled {
 		return nil
 	}

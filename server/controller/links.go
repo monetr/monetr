@@ -3,7 +3,7 @@ package controller
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/links/link_jobs"
@@ -11,7 +11,7 @@ import (
 	"github.com/monetr/monetr/server/schemas"
 )
 
-func (c *Controller) getLinks(ctx echo.Context) error {
+func (c *Controller) getLinks(ctx *echo.Context) error {
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	links, err := repo.GetLinks(c.getContext(ctx))
@@ -22,7 +22,7 @@ func (c *Controller) getLinks(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, links)
 }
 
-func (c *Controller) getLink(ctx echo.Context) error {
+func (c *Controller) getLink(ctx *echo.Context) error {
 	linkId, err := ParseID[Link](ctx.Param("linkId"))
 	if err != nil || linkId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid link Id to retrieve")
@@ -38,7 +38,7 @@ func (c *Controller) getLink(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, links)
 }
 
-func (c *Controller) postLinks(ctx echo.Context) error {
+func (c *Controller) postLinks(ctx *echo.Context) error {
 	link, err := parse(
 		c,
 		ctx,
@@ -93,7 +93,7 @@ func (c *Controller) postLinks(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, link)
 }
 
-func (c *Controller) patchLink(ctx echo.Context) error {
+func (c *Controller) patchLink(ctx *echo.Context) error {
 	linkId, err := ParseID[Link](ctx.Param("linkId"))
 	if err != nil || linkId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid link Id")
@@ -122,7 +122,7 @@ func (c *Controller) patchLink(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, *link)
 }
 
-func (c *Controller) deleteLink(ctx echo.Context) error {
+func (c *Controller) deleteLink(ctx *echo.Context) error {
 	linkId, err := ParseID[Link](ctx.Param("linkId"))
 	if err != nil || linkId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid link Id to delete")

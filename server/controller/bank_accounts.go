@@ -6,7 +6,7 @@ import (
 
 	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/go-pg/pg/v10"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
@@ -14,7 +14,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *Controller) getBankAccounts(ctx echo.Context) error {
+func (c *Controller) getBankAccounts(ctx *echo.Context) error {
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	var err error
 	var bankAccounts []BankAccount
@@ -38,7 +38,7 @@ func (c *Controller) getBankAccounts(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, bankAccounts)
 }
 
-func (c *Controller) getBankAccount(ctx echo.Context) error {
+func (c *Controller) getBankAccount(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
@@ -53,7 +53,7 @@ func (c *Controller) getBankAccount(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, bankAccount)
 }
 
-func (c *Controller) getBalances(ctx echo.Context) error {
+func (c *Controller) getBalances(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
@@ -69,7 +69,7 @@ func (c *Controller) getBalances(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, balances)
 }
 
-func (c *Controller) postBankAccounts(ctx echo.Context) error {
+func (c *Controller) postBankAccounts(ctx *echo.Context) error {
 	log := c.getLog(ctx)
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
@@ -182,7 +182,7 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, bankAccount)
 }
 
-func (c *Controller) patchBankAccount(ctx echo.Context) error {
+func (c *Controller) patchBankAccount(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
@@ -233,7 +233,7 @@ func (c *Controller) patchBankAccount(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, bankAccount)
 }
 
-func (c *Controller) deleteBankAccount(ctx echo.Context) error {
+func (c *Controller) deleteBankAccount(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "Must specify a valid bank account Id")

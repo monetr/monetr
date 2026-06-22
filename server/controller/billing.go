@@ -3,12 +3,12 @@ package controller
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/billing"
 	"github.com/pkg/errors"
 )
 
-func (c *Controller) handlePostCreateCheckout(ctx echo.Context) error {
+func (c *Controller) handlePostCreateCheckout(ctx *echo.Context) error {
 	if !c.Configuration.Stripe.IsBillingEnabled() {
 		return c.notFound(ctx, "billing is not enabled")
 	}
@@ -50,7 +50,7 @@ func (c *Controller) handlePostCreateCheckout(ctx echo.Context) error {
 	})
 }
 
-func (c *Controller) handleGetAfterCheckout(ctx echo.Context) error {
+func (c *Controller) handleGetAfterCheckout(ctx *echo.Context) error {
 	if !c.Configuration.Stripe.IsBillingEnabled() {
 		return c.notFound(ctx, "billing is not enabled")
 	}
@@ -83,7 +83,7 @@ func (c *Controller) handleGetAfterCheckout(ctx echo.Context) error {
 	})
 }
 
-func (c *Controller) getBillingPortal(ctx echo.Context) error {
+func (c *Controller) getBillingPortal(ctx *echo.Context) error {
 	if !c.Configuration.Stripe.IsBillingEnabled() {
 		return c.notFound(ctx, "billing is not enabled")
 	}

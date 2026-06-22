@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/currency"
@@ -18,7 +18,7 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-func (c *Controller) getLunchFlowLinks(ctx echo.Context) error {
+func (c *Controller) getLunchFlowLinks(ctx *echo.Context) error {
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	links, err := repo.GetLunchFlowLinks(c.getContext(ctx))
 	if err != nil {
@@ -28,7 +28,7 @@ func (c *Controller) getLunchFlowLinks(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, links)
 }
 
-func (c *Controller) getLunchFlowLink(ctx echo.Context) error {
+func (c *Controller) getLunchFlowLink(ctx *echo.Context) error {
 	id, err := ParseID[LunchFlowLink](ctx.Param("lunchFlowLinkId"))
 	if err != nil || id.IsZero() {
 		return c.badRequest(ctx, "Must specify a valid Lunch Flow Link Id to retrieve")
@@ -43,7 +43,7 @@ func (c *Controller) getLunchFlowLink(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, link)
 }
 
-func (c *Controller) postLunchFlowLink(ctx echo.Context) error {
+func (c *Controller) postLunchFlowLink(ctx *echo.Context) error {
 	request, err := parse(
 		c,
 		ctx,
@@ -97,7 +97,7 @@ func (c *Controller) postLunchFlowLink(ctx echo.Context) error {
 // add new ones if they become available. It does not return content but should
 // be called during the setup process to fetch accounts and validate that the
 // API is working properly.
-func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx echo.Context) error {
+func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx *echo.Context) error {
 	linkId, err := ParseID[LunchFlowLink](ctx.Param("lunchFlowLinkId"))
 	if err != nil || linkId.IsZero() {
 		return c.badRequest(ctx, "Must specify a valid Lunch Flow Link Id to retrieve")
@@ -233,7 +233,7 @@ func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx echo.Context) erro
 	return ctx.NoContent(http.StatusNoContent)
 }
 
-func (c *Controller) getLunchFlowLinkBankAccounts(ctx echo.Context) error {
+func (c *Controller) getLunchFlowLinkBankAccounts(ctx *echo.Context) error {
 	id, err := ParseID[LunchFlowLink](ctx.Param("lunchFlowLinkId"))
 	if err != nil || id.IsZero() {
 		return c.badRequest(ctx, "Must specify a valid Lunch Flow Link Id to retrieve")
@@ -256,7 +256,7 @@ func (c *Controller) getLunchFlowLinkBankAccounts(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, lunchFlowAccounts)
 }
 
-func (c *Controller) postLunchFlowLinkSync(ctx echo.Context) error {
+func (c *Controller) postLunchFlowLinkSync(ctx *echo.Context) error {
 	request, err := parse(
 		c,
 		ctx,
@@ -338,7 +338,7 @@ func (c *Controller) postLunchFlowLinkSync(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusAccepted)
 }
 
-func (c *Controller) getLunchFlowLinkSyncProgress(ctx echo.Context) error {
+func (c *Controller) getLunchFlowLinkSyncProgress(ctx *echo.Context) error {
 	linkId, err := ParseID[Link](ctx.Param("linkId"))
 	if err != nil || linkId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid link Id")

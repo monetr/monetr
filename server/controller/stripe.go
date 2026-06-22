@@ -5,12 +5,12 @@ import (
 	"math"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/stripe/stripe-go/v81/webhook"
 )
 
-func (c *Controller) handleStripeWebhook(ctx echo.Context) error {
+func (c *Controller) handleStripeWebhook(ctx *echo.Context) error {
 	if !c.Configuration.Stripe.Enabled || !c.Configuration.Stripe.WebhooksEnabled {
 		return c.notFound(ctx, "stripe webhooks not enabled on this server")
 	}

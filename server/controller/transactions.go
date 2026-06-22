@@ -6,12 +6,12 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/schemas"
 )
 
-func (c *Controller) getTransactions(ctx echo.Context) error {
+func (c *Controller) getTransactions(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
@@ -46,7 +46,7 @@ func (c *Controller) getTransactions(ctx echo.Context) error {
 // getTransactionById will simply return a single transaction for the given bank
 // and transaction specified. If the transaction does not exist then a 404 not
 // found will be returned via the wrapPgError.
-func (c *Controller) getTransactionById(ctx echo.Context) error {
+func (c *Controller) getTransactionById(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
@@ -71,7 +71,7 @@ func (c *Controller) getTransactionById(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, transaction)
 }
 
-func (c *Controller) getSimilarTransactionsById(ctx echo.Context) error {
+func (c *Controller) getSimilarTransactionsById(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
@@ -99,7 +99,7 @@ func (c *Controller) getSimilarTransactionsById(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, cluster)
 }
 
-func (c *Controller) postTransactions(ctx echo.Context) error {
+func (c *Controller) postTransactions(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
@@ -236,7 +236,7 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, returnedObject)
 }
 
-func (c *Controller) patchTransaction(ctx echo.Context) error {
+func (c *Controller) patchTransaction(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "Must specify a valid bank account Id")
@@ -329,7 +329,7 @@ func (c *Controller) patchTransaction(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, result)
 }
 
-func (c *Controller) deleteTransactions(ctx echo.Context) error {
+func (c *Controller) deleteTransactions(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "Must specify a valid bank account Id")

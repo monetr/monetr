@@ -9,7 +9,7 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/cache"
 	"github.com/monetr/monetr/server/communication"
@@ -61,7 +61,7 @@ func (c *Controller) Close() error {
 	return nil
 }
 
-func (*Controller) getContext(ctx echo.Context) context.Context {
+func (*Controller) getContext(ctx *echo.Context) context.Context {
 	if requestContext, ok := ctx.Get(spanContextKey).(context.Context); ok {
 		return requestContext
 	}
@@ -69,11 +69,11 @@ func (*Controller) getContext(ctx echo.Context) context.Context {
 	return ctx.Request().Context()
 }
 
-func (*Controller) getSpan(ctx echo.Context) *sentry.Span {
+func (*Controller) getSpan(ctx *echo.Context) *sentry.Span {
 	return ctx.Get(spanKey).(*sentry.Span)
 }
 
-func (c *Controller) getLog(ctx echo.Context) *slog.Logger {
+func (c *Controller) getLog(ctx *echo.Context) *slog.Logger {
 	log := c.Log.With("requestId", util.GetRequestID(ctx))
 
 	claims, ok := ctx.Get(authenticationKey).(security.Claims)
@@ -98,14 +98,14 @@ func (c *Controller) getLog(ctx echo.Context) *slog.Logger {
 
 // reportWrappedError just includes an errors.Wrapf around reportError. It does not modify the response body to include
 // the error.
-func (c *Controller) reportWrappedError(ctx echo.Context, err error, message string, args ...any) {
+func (c *Controller) reportWrappedError(ctx *echo.Context, err error, message string, args ...any) {
 	c.reportError(ctx, errors.Wrapf(err, message, args...))
 }
 
 // reportError is a simple wrapper to report errors to sentry.io. It is meant to
 // be used to keep track of errors that we encounter that we might not want to
 // return to the end user. But might still need in order to diagnose issues.
-func (c *Controller) reportError(ctx echo.Context, err error) {
+func (c *Controller) reportError(ctx *echo.Context, err error) {
 	level := sentry.LevelError
 	report := true
 	if errors.Is(err, context.Canceled) {
@@ -143,7 +143,7 @@ func (c *Controller) reportError(ctx echo.Context, err error) {
 	}
 }
 
-func urlParamIntDefault(ctx echo.Context, param string, defaultValue int) int {
+func urlParamIntDefault(ctx *echo.Context, param string, defaultValue int) int {
 	value := ctx.QueryParam(param)
 	if value == "" {
 		return defaultValue
@@ -156,7 +156,7 @@ func urlParamIntDefault(ctx echo.Context, param string, defaultValue int) int {
 	return int(parsed)
 }
 
-func urlParamBoolDefault(ctx echo.Context, param string, defaultValue bool) bool {
+func urlParamBoolDefault(ctx *echo.Context, param string, defaultValue bool) bool {
 	value := ctx.QueryParam(param)
 	if value == "" {
 		return defaultValue

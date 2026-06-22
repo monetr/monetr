@@ -3,7 +3,7 @@ package controller
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/datasources/table"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/validators"
@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *Controller) getTransactionImportMappings(ctx echo.Context) error {
+func (c *Controller) getTransactionImportMappings(ctx *echo.Context) error {
 	limit := urlParamIntDefault(ctx, "limit", 10)
 	offset := urlParamIntDefault(ctx, "offset", 0)
 
@@ -50,7 +50,7 @@ func (c *Controller) getTransactionImportMappings(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, mappings)
 }
 
-func (c *Controller) postTransactionImportMapping(ctx echo.Context) error {
+func (c *Controller) postTransactionImportMapping(ctx *echo.Context) error {
 	var data struct {
 		Mapping table.Mapping `json:"mapping"`
 	}

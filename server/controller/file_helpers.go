@@ -5,13 +5,13 @@ import (
 	"path"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 )
 
 func (c *Controller) consumeFileUpload(
-	ctx echo.Context,
+	ctx *echo.Context,
 	kind Uploadable,
 ) (*File, error) {
 	if !c.Configuration.Storage.Enabled {

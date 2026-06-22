@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	locale "github.com/elliotcourant/go-lclocale"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/models"
@@ -14,7 +14,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *Controller) getMe(ctx echo.Context) error {
+func (c *Controller) getMe(ctx *echo.Context) error {
 	repo, err := c.getAuthenticatedRepository(ctx)
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusUnauthorized, "cannot retrieve user details")
@@ -93,7 +93,7 @@ func (c *Controller) getMe(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, me)
 }
 
-func (c *Controller) changePassword(ctx echo.Context) error {
+func (c *Controller) changePassword(ctx *echo.Context) error {
 	var changePasswordRequest struct {
 		CurrentPassword string `json:"currentPassword"`
 		NewPassword     string `json:"newPassword"`
@@ -153,7 +153,7 @@ func (c *Controller) changePassword(ctx echo.Context) error {
 	}
 }
 
-func (c *Controller) postSetupTOTP(ctx echo.Context) error {
+func (c *Controller) postSetupTOTP(ctx *echo.Context) error {
 	secureRepo := c.mustGetSecurityRepository(ctx)
 	// Try to actually setup TOTP for the current login. This will return an error
 	// if they already have it setup.
@@ -171,7 +171,7 @@ func (c *Controller) postSetupTOTP(ctx echo.Context) error {
 	})
 }
 
-func (c *Controller) postConfirmTOTP(ctx echo.Context) error {
+func (c *Controller) postConfirmTOTP(ctx *echo.Context) error {
 	var request struct {
 		TOTP string `json:"totp"`
 	}

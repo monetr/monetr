@@ -3,12 +3,12 @@ package controller
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/build"
 	"github.com/monetr/monetr/server/icons"
 )
 
-func (c *Controller) configEndpoint(ctx echo.Context) error {
+func (c *Controller) configEndpoint(ctx *echo.Context) error {
 	type InitialPlan struct {
 		Price int64 `json:"price"`
 	}

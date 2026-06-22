@@ -5,14 +5,14 @@ import (
 	"path"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/datasources/csv"
 	"github.com/monetr/monetr/server/datasources/csv/csv_jobs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/schemas"
 )
 
-func (c *Controller) postTransactionImport(ctx echo.Context) error {
+func (c *Controller) postTransactionImport(ctx *echo.Context) error {
 	c.scrubSentryBody(ctx)
 
 	if !c.Configuration.Storage.Enabled {
@@ -111,7 +111,7 @@ func (c *Controller) postTransactionImport(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, transactionImport)
 }
 
-func (c *Controller) getTransactionImportById(ctx echo.Context) error {
+func (c *Controller) getTransactionImportById(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
@@ -136,7 +136,7 @@ func (c *Controller) getTransactionImportById(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, existing)
 }
 
-func (c *Controller) patchTransactionImport(ctx echo.Context) error {
+func (c *Controller) patchTransactionImport(ctx *echo.Context) error {
 	// After the user has created their transaction import, then theyll get the
 	// header info back and need to map it. The frontend can look up mappings
 	// based on the header signature

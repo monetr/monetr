@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -148,10 +148,16 @@ func (s *Stats) JobEnqueued(name string) {
 	}).Inc()
 }
 
-func (s *Stats) FinishedRequest(ctx echo.Context, responseTime time.Duration) {
+func (s *Stats) FinishedRequest(ctx *echo.Context, responseTime time.Duration) {
+	// In echo v5 ctx.Response() is just an http.ResponseWriter, the status code
+	// lives on the *echo.Response behind it which we have to unwrap to read.
+	var status int
+	if response, err := echo.UnwrapResponse(ctx.Response()); err == nil {
+		status = response.Status
+	}
 	s.HTTPResponseTime.With(prometheus.Labels{
 		"path":   ctx.Path(),
 		"method": ctx.Request().Method,
-		"status": strconv.FormatInt(int64(ctx.Response().Status), 10),
+		"status": strconv.FormatInt(int64(status), 10),
 	}).Observe(float64(responseTime.Milliseconds()))
 }
