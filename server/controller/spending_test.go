@@ -118,7 +118,10 @@ func TestPostSpending(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").IsEqual("Name must not be longer than 250 characters")
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			// The schema validates against both the expense and goal variants, so the
+			// failure comes back as a oneOf envelope. The expense variant is first.
+			response.JSON().Path("$.problems.oneOf[0].name").String().IsEqual("Name must be between 1 and 300 characters")
 		}
 
 		{ // Create an expense with a description thats too long
@@ -143,7 +146,14 @@ func TestPostSpending(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").IsEqual("Description must not be longer than 250 characters")
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			// Description is validated as one of a nil value or a valid text field,
+			// so a too long description fails both branches inside the expense
+			// variant.
+			response.JSON().Path("$.problems.oneOf[0].description.oneOf").Array().ConsistsOf(
+				"must be nil",
+				"Must be between 1 and 300 characters",
+			)
 		}
 	})
 
@@ -185,7 +195,7 @@ func TestPostSpending(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("invalid JSON body")
+			response.JSON().Path("$.error").String().IsEqual("failed to parse request")
 		}
 	})
 
@@ -236,7 +246,8 @@ func TestPostSpending(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("spending must have a name")
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.oneOf[0].name").String().IsEqual("required key is missing")
 		}
 	})
 
@@ -287,7 +298,8 @@ func TestPostSpending(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("target amount must be greater than 0")
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.oneOf[0].targetAmount").String().IsEqual("required key is missing")
 		}
 	})
 
@@ -339,7 +351,8 @@ func TestPostSpending(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("target amount must be greater than 0")
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.oneOf[0].targetAmount").String().IsEqual("Target amount must be greater than zero")
 		}
 	})
 
@@ -361,9 +374,12 @@ func TestPostSpending(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"name":              "Some Monthly Expense",
-					"ruleset":           ruleset,
-					"fundingScheduleId": "fund_bogus",
+					"name":    "Some Monthly Expense",
+					"ruleset": ruleset,
+					// A malformed funding schedule Id is now rejected by the schema
+					// before we ever look it up, so use a well formed but nonexistent Id
+					// to make sure we still exercise the not found path here.
+					"fundingScheduleId": NewID[FundingSchedule](),
 					"targetAmount":      1000,
 					"spendingType":      SpendingTypeExpense,
 					"nextRecurrence":    nextRecurrence,
@@ -408,7 +424,11 @@ func TestPostSpending(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"name":              "Some Monthly Expense",
+					"name": "Some Monthly Expense",
+					// A ruleset is required by the schema for expenses, so include one to
+					// make sure we actually get to the past due date check in the
+					// controller and not the schema validation.
+					"ruleset":           FirstDayOfEveryMonth,
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      1000,
 					"spendingType":      SpendingTypeExpense,
@@ -468,16 +488,18 @@ func TestPostSpending(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("recurrence rule must be specified for expenses")
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.oneOf[0].ruleset").String().IsEqual("required key is missing")
 		}
 	})
 
 	t.Run("missing rule for expense regression 1599", func(t *testing.T) {
-		// Pin the timestamp and timezone to a known-bad combo from issue 1599. With
-		// these locked, the buggy pattern from "missing rule for expense" can be
-		// observed deterministically: util.Midnight rewinds the next recurrence to
-		// before now, so the API returns the past-date error instead of the
-		// missing-rule error this test is actually checking.
+		// Pin the timestamp and timezone to a known-bad combo from issue 1599. The
+		// old buggy pattern was that util.Midnight would rewind the next recurrence
+		// to before now, so the API returned the past-date error instead of the
+		// missing-rule error this test is actually checking. The schema validation
+		// now runs before any of that date math, so the missing ruleset is caught
+		// first regardless of timezone, which is what keeps 1599 fixed.
 		t.Setenv("MONETR_TIMESTAMP", "2023-10-31 18:46:01.423737301 +0000 UTC")
 		t.Setenv("MONETR_TIMEZONE", "Pacific/Auckland")
 
@@ -527,7 +549,8 @@ func TestPostSpending(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("recurrence rule must be specified for expenses")
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.oneOf[0].ruleset").String().IsEqual("required key is missing")
 		}
 	})
 
@@ -579,7 +602,10 @@ func TestPostSpending(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("recurrence rule cannot be specified for goals")
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			// This is a goal with a ruleset, so it fails the goal variant (index 1)
+			// of the schema where a ruleset must not be provided.
+			response.JSON().Path("$.problems.oneOf[1].ruleset").String().IsEqual("must not be provided")
 		}
 	})
 
@@ -697,7 +723,10 @@ func TestPostSpending(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("auto create transaction is only supported for expenses")
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		// A goal cannot specify autoCreateTransaction at all, so the goal variant
+		// (index 1) of the schema rejects the key outright.
+		response.JSON().Path("$.problems.oneOf[1].autoCreateTransaction").String().IsEqual("key not expected")
 	})
 
 	t.Run("rejects auto create transaction on plaid link", func(t *testing.T) {
@@ -728,7 +757,7 @@ func TestPostSpending(t *testing.T) {
 		}
 
 		now := app.Clock.Now()
-		ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+		ruleset := testutils.RuleSetInTimezone(t, testutils.MustEz(t, user.Account.GetTimezone), FirstDayOfEveryMonth)
 		nextRecurrence := ruleset.After(now, false)
 
 		response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
@@ -777,7 +806,7 @@ func TestPostSpending(t *testing.T) {
 		}
 
 		now := app.Clock.Now()
-		ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+		ruleset := testutils.RuleSetInTimezone(t, testutils.MustEz(t, user.Account.GetTimezone), FirstDayOfEveryMonth)
 		nextRecurrence := ruleset.After(now, false)
 
 		response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
@@ -1074,7 +1103,12 @@ func TestGetSpendingByID(t *testing.T) {
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      5000,
 					"spendingType":      SpendingTypeExpense,
-					"nextRecurrence":    app.Clock.Now().AddDate(0, 1, 0),
+					"nextRecurrence": testutils.RuleSetInTimezone(
+						t,
+						testutils.MustEz(t, user.Account.GetTimezone),
+						FirstDayOfEveryMonth,
+					).
+						After(app.Clock.Now(), false),
 				}).
 				Expect().
 				Status(http.StatusOK).
@@ -1249,7 +1283,11 @@ func TestGetSpendingTransactions(t *testing.T) {
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      8000,
 					"spendingType":      SpendingTypeExpense,
-					"nextRecurrence":    app.Clock.Now().AddDate(0, 1, 0),
+					"nextRecurrence": testutils.RuleSetInTimezone(
+						t,
+						testutils.MustEz(t, user.Account.GetTimezone),
+						FirstDayOfEveryMonth,
+					).After(app.Clock.Now(), false),
 				}).
 				Expect().
 				Status(http.StatusOK).
@@ -2068,7 +2106,11 @@ func TestPutSpending(t *testing.T) {
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      100000,
 					"spendingType":      SpendingTypeExpense,
-					"nextRecurrence":    app.Clock.Now().AddDate(0, 1, 0),
+					"nextRecurrence": testutils.RuleSetInTimezone(
+						t,
+						testutils.MustEz(t, user.Account.GetTimezone),
+						FirstDayOfEveryMonth,
+					).After(app.Clock.Now(), false),
 				}).
 				Expect().
 				Status(http.StatusOK).
@@ -2120,7 +2162,11 @@ func TestPutSpending(t *testing.T) {
 			assert.False(t, fundingScheduleId.IsZero(), "must be able to extract the funding schedule ID")
 		}
 
-		nextRecurrence := app.Clock.Now().Add(30 * 24 * time.Hour)
+		nextRecurrence := testutils.RuleSetInTimezone(
+			t,
+			testutils.MustEz(t, user.Account.GetTimezone),
+			FirstDayOfEveryMonth,
+		).After(app.Clock.Now(), false)
 
 		var spendingId ID[Spending]
 		{ // Create a goal
@@ -2187,7 +2233,7 @@ func TestPutSpending(t *testing.T) {
 		}
 
 		now := app.Clock.Now()
-		ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+		ruleset := testutils.RuleSetInTimezone(t, testutils.MustEz(t, user.Account.GetTimezone), FirstDayOfEveryMonth)
 		nextRecurrence := ruleset.After(now, false)
 
 		var spendingId ID[Spending]
@@ -2257,7 +2303,7 @@ func TestPutSpending(t *testing.T) {
 		}
 
 		now := app.Clock.Now()
-		ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+		ruleset := testutils.RuleSetInTimezone(t, testutils.MustEz(t, user.Account.GetTimezone), FirstDayOfEveryMonth)
 		nextRecurrence := ruleset.After(now, false)
 
 		var spendingId ID[Spending]
@@ -2701,7 +2747,11 @@ func TestDeleteSpending(t *testing.T) {
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      5000,
 					"spendingType":      SpendingTypeExpense,
-					"nextRecurrence":    app.Clock.Now().AddDate(0, 1, 0),
+					"nextRecurrence": testutils.RuleSetInTimezone(
+						t,
+						testutils.MustEz(t, user.Account.GetTimezone),
+						FirstDayOfEveryMonth,
+					).After(app.Clock.Now(), false),
 				}).
 				Expect().
 				Status(http.StatusOK).

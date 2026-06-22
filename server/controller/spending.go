@@ -3,10 +3,13 @@ package controller
 import (
 	"net/http"
 
+	"log/slog"
+
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
-	"log/slog"
+	"github.com/monetr/monetr/server/schemas"
+	"github.com/monetr/monetr/server/util"
 )
 
 func (c *Controller) getSpending(ctx echo.Context) error {
@@ -57,32 +60,21 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	spending := &Spending{}
-	if err := ctx.Bind(spending); err != nil {
-		return c.invalidJson(ctx)
+	spending, err := parse(
+		c,
+		ctx,
+		&Spending{
+			BankAccountId: bankAccountId,
+		},
+		schemas.CreateSpending,
+	)
+	if err != nil {
+		return err
 	}
 
 	log := c.getLog(ctx)
-
-	spending.SpendingId = "" // Make sure we create a new spending.
-	spending.BankAccountId = bankAccountId
-	spending.Name, err = c.cleanString(ctx, "Name", spending.Name)
-	if err != nil {
-		return err
-	}
-	spending.Description, err = c.cleanString(ctx, "Description", spending.Description)
-	if err != nil {
-		return err
-	}
-	if spending.Name == "" {
-		return c.badRequest(ctx, "spending must have a name")
-	}
-
-	if spending.TargetAmount <= 0 {
-		return c.badRequest(ctx, "target amount must be greater than 0")
-	}
-
 	repo := c.mustGetAuthenticatedRepository(ctx)
+	timezone := c.mustGetTimezone(ctx)
 
 	// We need to calculate what the next contribution will be for this new
 	// spending. So we need to retrieve it's funding schedule. This also helps us
@@ -103,8 +95,11 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 	next := spending.NextRecurrence
 	if next.Before(c.Clock.Now()) {
 		return c.badRequest(ctx, "next due date cannot be in the past")
+	} else if !util.IsMidnight(next, timezone) {
+		return c.badRequest(ctx, "next due date must be midnight in your timezone")
 	}
 
+	// TODO This might not be needed with the schema validation
 	switch spending.SpendingType {
 	case SpendingTypeExpense:
 		if spending.RuleSet == nil {
@@ -120,7 +115,10 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 		if spending.SpendingType != SpendingTypeExpense {
 			return c.badRequest(ctx, "auto create transaction is only supported for expenses")
 		}
-		isManual, err := repo.GetLinkIsManualByBankAccountId(c.getContext(ctx), bankAccountId)
+		isManual, err := repo.GetLinkIsManualByBankAccountId(
+			c.getContext(ctx),
+			bankAccountId,
+		)
 		if err != nil {
 			return c.wrapPgError(ctx, err, "failed to validate if link is manual")
 		}
@@ -132,12 +130,18 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 	// Make sure that the next recurrence date is properly in the user's timezone.
 	nextRecurrence, err := c.midnightInLocal(ctx, next)
 	if err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not determine next recurrence")
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
+			"could not determine next recurrence",
+		)
 	}
 
 	spending.NextRecurrence = nextRecurrence
 
-	// Once we have all that data we can calculate the new expenses next contribution amount.
+	// Once we have all that data we can calculate the new expenses next
+	// contribution amount.
 	spending.CalculateNextContribution(
 		c.getContext(ctx),
 		c.mustGetTimezone(ctx),

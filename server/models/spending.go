@@ -11,12 +11,11 @@ import (
 	"github.com/monetr/monetr/server/util"
 )
 
-type SpendingType uint8
+type SpendingType string
 
 const (
-	SpendingTypeExpense SpendingType = iota
-	SpendingTypeGoal
-	SpendingTypeOverflow
+	SpendingTypeExpense SpendingType = "expense" // 0
+	SpendingTypeGoal    SpendingType = "goal"    // 1
 )
 
 type Spending struct {
@@ -177,11 +176,6 @@ func calculateNextContribution(
 	defer span.Finish()
 
 	span.SetTag("spendingId", spending.SpendingId.String())
-
-	if spending.SpendingType == SpendingTypeOverflow {
-		crumbs.Debug(ctx, "No need to calculate contribution for overflow spending", nil)
-		return spending
-	}
 
 	// Don't change the time by convert it to the account timezone. This will make
 	// debugging easier if there is a problem.

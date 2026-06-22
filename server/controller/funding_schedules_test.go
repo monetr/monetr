@@ -103,7 +103,7 @@ func TestPostFundingSchedules(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.description").String().IsEqual("Description must be between 1 and 300 characters")
+		response.JSON().Path("$.problems.description").String().IsEqual("Must be between 1 and 300 characters")
 	})
 
 	t.Run("create a funding schedule with excluded weekends", func(t *testing.T) {

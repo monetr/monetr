@@ -6,6 +6,7 @@ import (
 	"io"
 	"regexp"
 	"strings"
+	"time"
 
 	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/monetr/monetr/server/merge"
@@ -122,4 +123,20 @@ func CurrencyCode() validation.Rule {
 			locale.GetInstalledCurrencies()...,
 		).Error("Currency must be one supported by the server"),
 	)
+}
+
+// Boolean is a shorthand for any non-nilable boolean field.
+func Boolean() validation.AllOfRule {
+	return validation.AllOf(
+		is.Boolean,
+		validation.In(true, false),
+		validation.NotNil,
+	)
+}
+
+func Timestamp() validation.AllOfRule {
+	return validation.AllOf(
+		is.String,
+		validation.Date(time.RFC3339),
+	).Error("Must be a valid timestamp")
 }
