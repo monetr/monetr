@@ -9,6 +9,7 @@ import (
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/schemas"
+	"github.com/monetr/monetr/server/util"
 )
 
 func (c *Controller) getSpending(ctx echo.Context) error {
@@ -73,6 +74,7 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 
 	log := c.getLog(ctx)
 	repo := c.mustGetAuthenticatedRepository(ctx)
+	timezone := c.mustGetTimezone(ctx)
 
 	// We need to calculate what the next contribution will be for this new
 	// spending. So we need to retrieve it's funding schedule. This also helps us
@@ -93,6 +95,8 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 	next := spending.NextRecurrence
 	if next.Before(c.Clock.Now()) {
 		return c.badRequest(ctx, "next due date cannot be in the past")
+	} else if !util.IsMidnight(next, timezone) {
+		return c.badRequest(ctx, "next due date must be midnight in your timezone")
 	}
 
 	// TODO This might not be needed with the schema validation

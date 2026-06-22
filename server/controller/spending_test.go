@@ -757,7 +757,7 @@ func TestPostSpending(t *testing.T) {
 		}
 
 		now := app.Clock.Now()
-		ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+		ruleset := testutils.RuleSetInTimezone(t, testutils.MustEz(t, user.Account.GetTimezone), FirstDayOfEveryMonth)
 		nextRecurrence := ruleset.After(now, false)
 
 		response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
@@ -806,7 +806,7 @@ func TestPostSpending(t *testing.T) {
 		}
 
 		now := app.Clock.Now()
-		ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+		ruleset := testutils.RuleSetInTimezone(t, testutils.MustEz(t, user.Account.GetTimezone), FirstDayOfEveryMonth)
 		nextRecurrence := ruleset.After(now, false)
 
 		response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
@@ -1103,7 +1103,12 @@ func TestGetSpendingByID(t *testing.T) {
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      5000,
 					"spendingType":      SpendingTypeExpense,
-					"nextRecurrence":    app.Clock.Now().AddDate(0, 1, 0),
+					"nextRecurrence": testutils.RuleSetInTimezone(
+						t,
+						testutils.MustEz(t, user.Account.GetTimezone),
+						FirstDayOfEveryMonth,
+					).
+						After(app.Clock.Now(), false),
 				}).
 				Expect().
 				Status(http.StatusOK).
@@ -1278,7 +1283,11 @@ func TestGetSpendingTransactions(t *testing.T) {
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      8000,
 					"spendingType":      SpendingTypeExpense,
-					"nextRecurrence":    app.Clock.Now().AddDate(0, 1, 0),
+					"nextRecurrence": testutils.RuleSetInTimezone(
+						t,
+						testutils.MustEz(t, user.Account.GetTimezone),
+						FirstDayOfEveryMonth,
+					).After(app.Clock.Now(), false),
 				}).
 				Expect().
 				Status(http.StatusOK).
@@ -2097,7 +2106,11 @@ func TestPutSpending(t *testing.T) {
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      100000,
 					"spendingType":      SpendingTypeExpense,
-					"nextRecurrence":    app.Clock.Now().AddDate(0, 1, 0),
+					"nextRecurrence": testutils.RuleSetInTimezone(
+						t,
+						testutils.MustEz(t, user.Account.GetTimezone),
+						FirstDayOfEveryMonth,
+					).After(app.Clock.Now(), false),
 				}).
 				Expect().
 				Status(http.StatusOK).
@@ -2149,7 +2162,11 @@ func TestPutSpending(t *testing.T) {
 			assert.False(t, fundingScheduleId.IsZero(), "must be able to extract the funding schedule ID")
 		}
 
-		nextRecurrence := app.Clock.Now().Add(30 * 24 * time.Hour)
+		nextRecurrence := testutils.RuleSetInTimezone(
+			t,
+			testutils.MustEz(t, user.Account.GetTimezone),
+			FirstDayOfEveryMonth,
+		).After(app.Clock.Now(), false)
 
 		var spendingId ID[Spending]
 		{ // Create a goal
@@ -2216,7 +2233,7 @@ func TestPutSpending(t *testing.T) {
 		}
 
 		now := app.Clock.Now()
-		ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+		ruleset := testutils.RuleSetInTimezone(t, testutils.MustEz(t, user.Account.GetTimezone), FirstDayOfEveryMonth)
 		nextRecurrence := ruleset.After(now, false)
 
 		var spendingId ID[Spending]
@@ -2286,7 +2303,7 @@ func TestPutSpending(t *testing.T) {
 		}
 
 		now := app.Clock.Now()
-		ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+		ruleset := testutils.RuleSetInTimezone(t, testutils.MustEz(t, user.Account.GetTimezone), FirstDayOfEveryMonth)
 		nextRecurrence := ruleset.After(now, false)
 
 		var spendingId ID[Spending]
@@ -2730,7 +2747,11 @@ func TestDeleteSpending(t *testing.T) {
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      5000,
 					"spendingType":      SpendingTypeExpense,
-					"nextRecurrence":    app.Clock.Now().AddDate(0, 1, 0),
+					"nextRecurrence": testutils.RuleSetInTimezone(
+						t,
+						testutils.MustEz(t, user.Account.GetTimezone),
+						FirstDayOfEveryMonth,
+					).After(app.Clock.Now(), false),
 				}).
 				Expect().
 				Status(http.StatusOK).

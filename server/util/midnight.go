@@ -72,3 +72,9 @@ func ParseInLocal(format, input string, location *time.Location) (time.Time, err
 
 	return InLocal(date, location), nil
 }
+
+// IsMidnight returns true if the input timestamp is midnight in the specified
+// timezone, not necessarily midnight on the timestamp itself.
+func IsMidnight(input time.Time, timezone *time.Location) bool {
+	return input.In(timezone).Hour() == 0
+}
