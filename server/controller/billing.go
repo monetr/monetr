@@ -3,7 +3,7 @@ package controller
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/billing"
 	"github.com/pkg/errors"
 )

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/schemas"
 	"github.com/monetr/monetr/server/validators"
 	"github.com/monetr/validation"

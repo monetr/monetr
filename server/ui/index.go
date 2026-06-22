@@ -7,7 +7,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // immutableAssetPrefixes lists the rsbuild output directories whose filenames
