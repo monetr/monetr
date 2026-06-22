@@ -118,14 +118,14 @@ importers:
   emails:
     devDependencies:
       '@rsbuild/core':
-        specifier: 2.0.14
-        version: 2.0.14(core-js@3.47.0)
+        specifier: 2.0.15
+        version: 2.0.15(core-js@3.47.0)
       '@rsbuild/plugin-react':
         specifier: 2.0.1
-        version: 2.0.1(@rsbuild/core@2.0.14(core-js@3.47.0))(@rspack/core@2.0.8(@swc/helpers@0.5.23))
+        version: 2.0.1(@rsbuild/core@2.0.15(core-js@3.47.0))(@rspack/core@2.0.8(@swc/helpers@0.5.23))
       '@rsbuild/plugin-sass':
         specifier: 1.5.3
-        version: 1.5.3(@rsbuild/core@2.0.14(core-js@3.47.0))
+        version: 1.5.3(@rsbuild/core@2.0.15(core-js@3.47.0))
       '@types/html-to-text':
         specifier: 9.0.4
         version: 9.0.4
@@ -272,17 +272,17 @@ importers:
         specifier: 0.0.40
         version: 0.0.40
       '@rsbuild/core':
-        specifier: 2.0.14
-        version: 2.0.14(core-js@3.47.0)
+        specifier: 2.0.15
+        version: 2.0.15(core-js@3.47.0)
       '@rsbuild/plugin-babel':
         specifier: 1.2.1
-        version: 1.2.1(@rsbuild/core@2.0.14(core-js@3.47.0))
+        version: 1.2.1(@rsbuild/core@2.0.15(core-js@3.47.0))
       '@rsbuild/plugin-react':
         specifier: 2.0.1
-        version: 2.0.1(@rsbuild/core@2.0.14(core-js@3.47.0))(@rspack/core@2.0.8(@swc/helpers@0.5.23))
+        version: 2.0.1(@rsbuild/core@2.0.15(core-js@3.47.0))(@rspack/core@2.0.8(@swc/helpers@0.5.23))
       '@rsbuild/plugin-sass':
         specifier: 1.5.3
-        version: 1.5.3(@rsbuild/core@2.0.14(core-js@3.47.0))
+        version: 1.5.3(@rsbuild/core@2.0.15(core-js@3.47.0))
       '@rspack/binding-linux-arm64-gnu':
         specifier: 2.0.8
         version: 2.0.8
@@ -291,7 +291,7 @@ importers:
         version: 2.0.8
       '@rstest/adapter-rsbuild':
         specifier: 0.10.4
-        version: 0.10.4(@rsbuild/core@2.0.14(core-js@3.47.0))(@rstest/core@0.10.4(core-js@3.47.0)(jsdom@26.1.0))
+        version: 0.10.4(@rsbuild/core@2.0.15(core-js@3.47.0))(@rstest/core@0.10.4(core-js@3.47.0)(jsdom@26.1.0))
       '@rstest/core':
         specifier: 0.10.4
         version: 0.10.4(core-js@3.47.0)(jsdom@26.1.0)
@@ -1221,8 +1221,8 @@ packages:
       core-js:
         optional: true
 
-  '@rsbuild/core@2.0.14':
-    resolution: {integrity: sha512-SSPer6vM+v82CV6JXIOzyyT++A1ECgsVvvUuveD5rfGxX/W58vWGnB+zWcYbMfYOjTntD+9ve6QGGh6kBjPx6A==}
+  '@rsbuild/core@2.0.15':
+    resolution: {integrity: sha512-O8vmMhZu1YImO6jOqt/K/vlJSvkq7UtSq5YM1DIlcEd9LW8Gf6/dkQ1B2KPI6F+hSMFBnTTTumdcIowSLCw97g==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -4619,7 +4619,7 @@ snapshots:
     transitivePeerDependencies:
       - '@module-federation/runtime-tools'
 
-  '@rsbuild/core@2.0.14(core-js@3.47.0)':
+  '@rsbuild/core@2.0.15(core-js@3.47.0)':
     dependencies:
       '@rspack/core': 2.0.8(@swc/helpers@0.5.23)
       '@swc/helpers': 0.5.23
@@ -4628,7 +4628,7 @@ snapshots:
     transitivePeerDependencies:
       - '@module-federation/runtime-tools'
 
-  '@rsbuild/plugin-babel@1.2.1(@rsbuild/core@2.0.14(core-js@3.47.0))':
+  '@rsbuild/plugin-babel@1.2.1(@rsbuild/core@2.0.15(core-js@3.47.0))':
     dependencies:
       '@babel/core': 7.29.0
       '@babel/plugin-proposal-decorators': 7.29.0(@babel/core@7.29.0)
@@ -4637,7 +4637,7 @@ snapshots:
       '@types/babel__core': 7.20.5
       reduce-configs: 1.1.2
     optionalDependencies:
-      '@rsbuild/core': 2.0.14(core-js@3.47.0)
+      '@rsbuild/core': 2.0.15(core-js@3.47.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -4650,12 +4650,12 @@ snapshots:
     transitivePeerDependencies:
       - '@rspack/core'
 
-  '@rsbuild/plugin-react@2.0.1(@rsbuild/core@2.0.14(core-js@3.47.0))(@rspack/core@2.0.8(@swc/helpers@0.5.23))':
+  '@rsbuild/plugin-react@2.0.1(@rsbuild/core@2.0.15(core-js@3.47.0))(@rspack/core@2.0.8(@swc/helpers@0.5.23))':
     dependencies:
       '@rspack/plugin-react-refresh': 2.0.0(@rspack/core@2.0.8(@swc/helpers@0.5.23))(react-refresh@0.18.0)
       react-refresh: 0.18.0
     optionalDependencies:
-      '@rsbuild/core': 2.0.14(core-js@3.47.0)
+      '@rsbuild/core': 2.0.15(core-js@3.47.0)
     transitivePeerDependencies:
       - '@rspack/core'
 
@@ -4669,7 +4669,7 @@ snapshots:
     optionalDependencies:
       '@rsbuild/core': 2.0.11(core-js@3.47.0)
 
-  '@rsbuild/plugin-sass@1.5.3(@rsbuild/core@2.0.14(core-js@3.47.0))':
+  '@rsbuild/plugin-sass@1.5.3(@rsbuild/core@2.0.15(core-js@3.47.0))':
     dependencies:
       deepmerge: 4.3.1
       loader-utils: 2.0.4
@@ -4677,7 +4677,7 @@ snapshots:
       reduce-configs: 1.1.2
       sass-embedded: 1.100.0
     optionalDependencies:
-      '@rsbuild/core': 2.0.14(core-js@3.47.0)
+      '@rsbuild/core': 2.0.15(core-js@3.47.0)
 
   '@rspack/binding-darwin-arm64@2.0.8':
     optional: true
@@ -4804,14 +4804,14 @@ snapshots:
       - '@module-federation/runtime-tools'
       - core-js
 
-  '@rstest/adapter-rsbuild@0.10.4(@rsbuild/core@2.0.14(core-js@3.47.0))(@rstest/core@0.10.4(core-js@3.47.0)(jsdom@26.1.0))':
+  '@rstest/adapter-rsbuild@0.10.4(@rsbuild/core@2.0.15(core-js@3.47.0))(@rstest/core@0.10.4(core-js@3.47.0)(jsdom@26.1.0))':
     dependencies:
-      '@rsbuild/core': 2.0.14(core-js@3.47.0)
+      '@rsbuild/core': 2.0.15(core-js@3.47.0)
       '@rstest/core': 0.10.4(core-js@3.47.0)(jsdom@26.1.0)
 
   '@rstest/core@0.10.4(core-js@3.47.0)(jsdom@26.1.0)':
     dependencies:
-      '@rsbuild/core': 2.0.14(core-js@3.47.0)
+      '@rsbuild/core': 2.0.15(core-js@3.47.0)
       '@types/chai': 5.2.3
     optionalDependencies:
       jsdom: 26.1.0
