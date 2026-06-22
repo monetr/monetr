@@ -11,8 +11,8 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	"github.com/monetr/monetr/server/internal/ctxkeys"
 	"github.com/monetr/monetr/server/internal/sentryecho"
 	"github.com/monetr/monetr/server/security"
@@ -23,7 +23,7 @@ import (
 func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	if false {
 		app.Use(middleware.ContextTimeoutWithConfig(middleware.ContextTimeoutConfig{
-			ErrorHandler: func(err error, ctx echo.Context) error {
+			ErrorHandler: func(ctx *echo.Context, err error) error {
 				txn, ok := ctx.Get(databaseContextKey).(*pg.Tx)
 				if ok {
 					log := c.getLog(ctx)
@@ -42,7 +42,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 
 	if c.Stats != nil {
 		app.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-			return func(ctx echo.Context) error {
+			return func(ctx *echo.Context) error {
 				start := time.Now()
 				defer func() {
 					c.Stats.FinishedRequest(ctx, time.Since(start))
@@ -54,14 +54,14 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 
 	// Generic request logger, log the request being made with a debug level.
 	api.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(ctx echo.Context) error {
+		return func(ctx *echo.Context) error {
 			if ctx.Path() == APIPath+"/health" {
 				return next(ctx)
 			}
 
 			// Log after the request completes, this way we have information about the
 			// authenticated user (if there is one).
-			defer func(ctx echo.Context) {
+			defer func(ctx *echo.Context) {
 				log := c.Log.With(
 					"method", ctx.Request().Method,
 					"path", ctx.Path(),
@@ -97,7 +97,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	api.HEAD("/health", c.handleHealth)
 
 	baseParty := api.Group("", func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(ctx echo.Context) (returnErr error) {
+		return func(ctx *echo.Context) (returnErr error) {
 			var span *sentry.Span
 			if hub := sentryecho.GetHubFromContext(ctx); hub != nil {
 				requestId := util.GetRequestID(ctx)
@@ -141,7 +141,13 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 					} else {
 						span.Status = sentry.SpanStatusOK
 					}
-					span.SetTag("http.status_code", fmt.Sprint(ctx.Response().Status))
+					// echo v5 hides the status code behind the http.ResponseWriter,
+					// we have to unwrap the *echo.Response to read it.
+					status := 0
+					if response, err := echo.UnwrapResponse(ctx.Response()); err == nil {
+						status = response.Status
+					}
+					span.SetTag("http.status_code", fmt.Sprint(status))
 					span.Finish()
 				}()
 
@@ -174,8 +180,12 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 			err := next(ctx)
 			if err != nil { // Log the error for the request.
 				level := slog.LevelError
-				// If this is an HTTPError for the user, then don't log at an error level.
-				if raw, ok := err.(*echo.HTTPError); ok && raw.Code < 500 {
+				// If this is a client facing error (status < 500) then don't log
+				// at an error level. echo v5 dropped the typed HTTPError we used
+				// to assert on here, but both echo's HTTPError and monetr's own
+				// apiResponseError expose StatusCode() so we look for that.
+				var coder interface{ StatusCode() int }
+				if errors.As(err, &coder) && coder.StatusCode() < 500 {
 					level = slog.LevelWarn
 				}
 
@@ -188,34 +198,35 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 				log.Log(c.getContext(ctx), level, err.Error(), "err", err)
 			}
 
-			switch actualError := err.(type) {
+			switch err.(type) {
+			case nil:
+				return nil
 			case *json.MarshalerError:
 				// TODO, what would happen here, what would be thrown?
-			case *echo.HTTPError:
-				switch internalError := actualError.Internal.(type) {
-				case GenericAPIError:
-					if _, ok := internalError.(json.Marshaler); ok {
-						return ctx.JSON(actualError.Code, internalError)
-					}
-				default:
-					switch errorBody := actualError.Message.(type) {
-					case map[string]any:
-						return ctx.JSON(actualError.Code, errorBody)
-					default:
-						return ctx.JSON(actualError.Code, map[string]any{
-							"error": actualError.Message,
-						})
-					}
-				}
-			case nil:
 				return err
-			default:
-				return ctx.JSON(http.StatusInternalServerError, map[string]any{
-					"error": err.Error(),
+			}
+
+			// monetr's own errors carry a pre shaped body (a validation problems
+			// tree, a GenericAPIError, etc) that we want written to the client
+			// verbatim. In echo v4 we smuggled this through HTTPError.Message and
+			// HTTPError.Internal, but v5 narrowed those so we carry it ourselves.
+			var apiErr *apiResponseError
+			if errors.As(err, &apiErr) {
+				return ctx.JSON(apiErr.code, apiErr.body)
+			}
+
+			// echo (and monetr's plain string error helpers) produce HTTPErrors
+			// whose message is a string, render those as {"error": message}.
+			var httpErr *echo.HTTPError
+			if errors.As(err, &httpErr) {
+				return ctx.JSON(httpErr.Code, map[string]any{
+					"error": httpErr.Message,
 				})
 			}
 
-			return err
+			return ctx.JSON(http.StatusInternalServerError, map[string]any{
+				"error": err.Error(),
+			})
 		}
 	})
 

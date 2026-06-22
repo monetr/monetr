@@ -7,7 +7,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // immutableAssetPrefixes lists the rsbuild output directories whose filenames
@@ -29,7 +29,10 @@ type indexRenderer struct {
 	index *template.Template
 }
 
-func (i *indexRenderer) Render(w io.Writer, _ string, data any, _ echo.Context) error {
+// Render implements echo's Renderer interface. In echo v5 the context moved to
+// the first parameter, but we still dont need it here, the index template only
+// cares about the data we hand it.
+func (i *indexRenderer) Render(_ *echo.Context, w io.Writer, _ string, data any) error {
 	return i.index.Execute(w, data)
 }
 

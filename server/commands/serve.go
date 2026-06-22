@@ -14,6 +14,7 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/application"
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/build"
@@ -373,37 +374,67 @@ func ServeCommand(parent *cobra.Command) {
 				configuration.Server.ListenAddress,
 				strconv.Itoa(configuration.Server.ListenPort),
 			)
+			// echo v5 no longer exposes Start/Shutdown on the app itself, the
+			// server lifecycle now lives on a StartConfig. It does its own
+			// graceful shutdown once the context we hand it is canceled, which
+			// signal.NotifyContext does for us on the same signals we used to
+			// watch by hand.
+			serverCtx, stop := signal.NotifyContext(
+				context.Background(),
+				os.Interrupt,
+				syscall.SIGTERM,
+				syscall.SIGQUIT,
+			)
+			defer stop()
+
+			start := echo.StartConfig{
+				Address:         listenAddress,
+				HideBanner:      true,
+				HidePort:        true,
+				GracefulTimeout: 10 * time.Second,
+				OnShutdownError: func(err error) {
+					log.Error("failed to gracefully shutdown the server", "err", err)
+				},
+				// BeforeServeFunc runs after echo sets its own defaults, so our
+				// slowloris timeouts win. This replaces the old app.Server
+				// assignments.
+				BeforeServeFunc: func(server *http.Server) error {
+					application.ConfigureServer(server)
+					return nil
+				},
+			}
+
+			serverErr := make(chan error, 1)
 			go func() {
 				var err error
 				if configuration.Server.TLSCertificate != "" && configuration.Server.TLSKey != "" {
 					log.Info("server will start a TLS listener")
-					err = app.StartTLS(
-						listenAddress,
+					err = start.StartTLS(
+						serverCtx,
+						app,
 						configuration.Server.TLSCertificate,
 						configuration.Server.TLSKey,
 					)
 				} else {
-					err = app.Start(listenAddress)
+					err = start.Start(serverCtx, app)
 				}
 				if err != nil && err != http.ErrServerClosed {
 					log.Error("failed to start the server", "err", err)
 				}
+				serverErr <- err
 			}()
 
-			quit := make(chan os.Signal, 1)
-			signal.Notify(quit, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
 			log.Info("monetr is running",
 				"listenAddress", fmt.Sprintf("%s://%s", protocol, listenAddress),
 				"externalAddress", configuration.Server.GetBaseURL().String(),
 			)
 
-			<-quit
+			// Block until we receive a shutdown signal, then wait for echo to
+			// drain in flight requests (it does this itself once serverCtx is
+			// canceled) before we actually return.
+			<-serverCtx.Done()
 			log.Info("shutting down")
-			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-			defer cancel()
-			if err := app.Shutdown(ctx); err != nil {
-				log.Error("failed to gracefully shutdown the server", "err", err)
-			}
+			<-serverErr
 			log.Info("http server shutdown complete")
 
 			return nil

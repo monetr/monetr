@@ -6,13 +6,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/forecast"
 	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 )
 
-func (c *Controller) getForecast(ctx echo.Context) error {
+func (c *Controller) getForecast(ctx *echo.Context) error {
 	now := time.Now()
 	log := c.getLog(ctx)
 	var endDate time.Time
@@ -77,7 +77,7 @@ func (c *Controller) getForecast(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, result)
 }
 
-func (c *Controller) postForecastNewSpending(ctx echo.Context) error {
+func (c *Controller) postForecastNewSpending(ctx *echo.Context) error {
 	var request struct {
 		FundingScheduleId ID[FundingSchedule] `json:"fundingScheduleId"`
 		SpendingType      SpendingType        `json:"spendingType"`
@@ -157,7 +157,7 @@ func (c *Controller) postForecastNewSpending(ctx echo.Context) error {
 	})
 }
 
-func (c *Controller) postForecastNextFunding(ctx echo.Context) error {
+func (c *Controller) postForecastNextFunding(ctx *echo.Context) error {
 	var request struct {
 		FundingScheduleId ID[FundingSchedule] `json:"fundingScheduleId"`
 	}

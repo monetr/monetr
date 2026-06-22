@@ -3,7 +3,7 @@ package controller
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // Retrieve institution details.
@@ -16,7 +16,7 @@ import (
 // @Router /institutions/{institutionId} [get]
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) getInstitutionDetails(ctx echo.Context) error {
+func (c *Controller) getInstitutionDetails(ctx *echo.Context) error {
 	institutionId := ctx.Param("institutionId")
 	if institutionId == "" {
 		return c.badRequest(ctx, "must specify an institution ID")

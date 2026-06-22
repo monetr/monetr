@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	"github.com/monetr/monetr/server/internal/sentryecho"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/pkg/errors"
@@ -60,8 +60,8 @@ func (c *UIController) registerIndexRenderer(app *echo.Echo) {
 func (c *UIController) RegisterRoutes(app *echo.Echo) {
 	c.registerIndexRenderer(app)
 
-	app.GET("/*", func(ctx echo.Context) error {
-		defer func(ctx echo.Context) {
+	app.GET("/*", func(ctx *echo.Context) error {
+		defer func(ctx *echo.Context) {
 			if err := recover(); err != nil {
 				hub := sentryecho.GetHubFromContext(ctx)
 				hub.Recover(err)

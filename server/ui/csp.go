@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 const (
@@ -30,7 +30,7 @@ var (
 // not easy (or reasonable) to have a single CSP header that will securely cover
 // every browser. This code aims to provide a header based on the user-agent of
 // the browser in the request.
-func (c *UIController) ApplyContentSecurityPolicy(ctx echo.Context) {
+func (c *UIController) ApplyContentSecurityPolicy(ctx *echo.Context) {
 	cspPolicyFunc.Do(
 		func() {
 			cspPolicy, trustedTypesPolicy = c.buildPolicies()

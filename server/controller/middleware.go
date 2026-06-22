@@ -7,7 +7,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/ctxkeys"
 	"github.com/monetr/monetr/server/internal/sentryecho"
@@ -24,7 +24,7 @@ const (
 )
 
 func (c *Controller) databaseRepositoryMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(ctx echo.Context) error {
+	return func(ctx *echo.Context) error {
 		var cleanup func()
 		var dbi pg.DBI
 		var handlerError error
@@ -82,12 +82,12 @@ func (c *Controller) databaseRepositoryMiddleware(next echo.HandlerFunc) echo.Ha
 	}
 }
 
-func (c *Controller) removeCookieIfPresent(ctx echo.Context) {
+func (c *Controller) removeCookieIfPresent(ctx *echo.Context) {
 	c.updateAuthenticationCookie(ctx, ClearAuthentication)
 }
 
 func (c *Controller) requireActiveSubscriptionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(ctx echo.Context) error {
+	return func(ctx *echo.Context) error {
 		if !c.Configuration.Stripe.IsBillingEnabled() {
 			return next(ctx)
 		}
@@ -109,8 +109,8 @@ func (c *Controller) requireActiveSubscriptionMiddleware(next echo.HandlerFunc) 
 }
 
 func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(ctx echo.Context) (err error) {
-		err = func(ctx echo.Context) error {
+	return func(ctx *echo.Context) (err error) {
+		err = func(ctx *echo.Context) error {
 			now := c.Clock.Now()
 			log := c.getLog(ctx)
 			var token string
@@ -211,7 +211,7 @@ func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFun
 // scopes are valid.
 func (c *Controller) requireToken(scopes ...security.Scope) func(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(ctx echo.Context) error {
+		return func(ctx *echo.Context) error {
 			// Read the claims off of the current request context. If the claims are
 			// present and valid then this will proceed. If not then this will return
 			// an error.
@@ -242,7 +242,7 @@ func (c *Controller) requireToken(scopes ...security.Scope) func(next echo.Handl
 func (c *Controller) requireLunchFlowEnabledMiddleware(
 	next echo.HandlerFunc,
 ) echo.HandlerFunc {
-	return func(ctx echo.Context) error {
+	return func(ctx *echo.Context) error {
 		if !c.Configuration.LunchFlow.Enabled {
 			return c.notFound(ctx, "Lunch Flow is not enabled on this server")
 		}

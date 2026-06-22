@@ -5,14 +5,14 @@ import (
 
 	"log/slog"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/schemas"
 	"github.com/monetr/monetr/server/util"
 )
 
-func (c *Controller) getSpending(ctx echo.Context) error {
+func (c *Controller) getSpending(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
@@ -31,7 +31,7 @@ func (c *Controller) getSpending(ctx echo.Context) error {
 // getSpendingById serves a spending object by its specific ID, eventually it
 // will also support serving soft-deleted spending items that might not be
 // present in the index endpoint for spending.
-func (c *Controller) getSpendingById(ctx echo.Context) error {
+func (c *Controller) getSpendingById(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
@@ -54,7 +54,7 @@ func (c *Controller) getSpendingById(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, spending)
 }
 
-func (c *Controller) postSpending(ctx echo.Context) error {
+func (c *Controller) postSpending(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
@@ -157,7 +157,7 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, spending)
 }
 
-func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
+func (c *Controller) postSpendingTransfer(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "Must specify a valid bank account Id")
@@ -293,7 +293,7 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 	})
 }
 
-func (c *Controller) putSpending(ctx echo.Context) error {
+func (c *Controller) putSpending(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
@@ -424,7 +424,7 @@ func (c *Controller) putSpending(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, updatedSpending)
 }
 
-func (c *Controller) deleteSpending(ctx echo.Context) error {
+func (c *Controller) deleteSpending(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
@@ -454,7 +454,7 @@ func (c *Controller) deleteSpending(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusOK)
 }
 
-func (c *Controller) getSpendingTransactions(ctx echo.Context) error {
+func (c *Controller) getSpendingTransactions(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")

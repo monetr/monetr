@@ -126,7 +126,8 @@ func TestIndexRenderer_PreconnectTag(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			var buf strings.Builder
-			require.NoError(t, renderer.Render(&buf, "", tc.params, nil))
+			// echo v5 moved the context to the first Render parameter.
+			require.NoError(t, renderer.Render(nil, &buf, "", tc.params))
 			assert.Equal(t, tc.expected, buf.String())
 		})
 	}

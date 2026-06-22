@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // The identifier of the Echo SDK.
@@ -53,7 +53,7 @@ func New(options Options) echo.MiddlewareFunc {
 }
 
 func (h *handler) handle(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(ctx echo.Context) error {
+	return func(ctx *echo.Context) error {
 		hub := sentry.GetHubFromContext(ctx.Request().Context())
 		if hub == nil {
 			hub = sentry.CurrentHub().Clone()
@@ -85,8 +85,8 @@ func (h *handler) recoverWithSentry(hub *sentry.Hub, r *http.Request) {
 	}
 }
 
-// GetHubFromContext retrieves attached *sentry.Hub instance from echo.Context.
-func GetHubFromContext(ctx echo.Context) *sentry.Hub {
+// GetHubFromContext retrieves attached *sentry.Hub instance from *echo.Context.
+func GetHubFromContext(ctx *echo.Context) *sentry.Hub {
 	if hub, ok := ctx.Get(valuesKey).(*sentry.Hub); ok {
 		return hub
 	}

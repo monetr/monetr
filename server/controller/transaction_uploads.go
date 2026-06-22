@@ -7,14 +7,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/datasources/ofx/ofx_jobs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
 	"golang.org/x/net/websocket"
 )
 
-func (c *Controller) postTransactionUpload(ctx echo.Context) error {
+func (c *Controller) postTransactionUpload(ctx *echo.Context) error {
 	c.scrubSentryBody(ctx)
 
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
@@ -74,7 +74,7 @@ func (c *Controller) postTransactionUpload(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, upload)
 }
 
-func (c *Controller) getTransactionUploadById(ctx echo.Context) error {
+func (c *Controller) getTransactionUploadById(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
@@ -98,7 +98,7 @@ func (c *Controller) getTransactionUploadById(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, upload)
 }
 
-func (c *Controller) getTransactionUploadProgress(ctx echo.Context) error {
+func (c *Controller) getTransactionUploadProgress(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
@@ -212,7 +212,7 @@ func (c *Controller) getTransactionUploadProgress(ctx echo.Context) error {
 	return nil
 }
 
-func (c *Controller) sendWebsocketMessage(ctx echo.Context, ws *websocket.Conn, message any) error {
+func (c *Controller) sendWebsocketMessage(ctx *echo.Context, ws *websocket.Conn, message any) error {
 	log := c.getLog(ctx)
 	msg, err := json.Marshal(message)
 	if err != nil {

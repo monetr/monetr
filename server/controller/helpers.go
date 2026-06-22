@@ -7,7 +7,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
@@ -20,7 +20,7 @@ import (
 // user input for that field. It will validate that the input is not longer than
 // 250 characters and will return a bad request error if it is. It will also
 // return a whitespace trimmed version of the provided input.
-func (c *Controller) cleanString(ctx echo.Context, name, input string) (string, error) {
+func (c *Controller) cleanString(ctx *echo.Context, name, input string) (string, error) {
 	if len(input) > 250 {
 		return input, c.badRequest(ctx, "%s must not be longer than 250 characters", name)
 	}
@@ -30,11 +30,11 @@ func (c *Controller) cleanString(ctx echo.Context, name, input string) (string, 
 	return input, nil
 }
 
-// readJsonMap takes an echo.Context request object and returns a map if it was
+// readJsonMap takes an *echo.Context request object and returns a map if it was
 // able to decode the JSON body, or returns an error if it was not. All JSON
 // bodies are decoded using `json.Decoder.UseNumber()` to make validation
 // easier.
-func (*Controller) readJsonMap(ctx echo.Context) (map[string]any, error) {
+func (*Controller) readJsonMap(ctx *echo.Context) (map[string]any, error) {
 	rawData := map[string]any{}
 	decoder := json.NewDecoder(ctx.Request().Body)
 	decoder.UseNumber()
@@ -44,7 +44,7 @@ func (*Controller) readJsonMap(ctx echo.Context) (map[string]any, error) {
 	return rawData, nil
 }
 
-func (c *Controller) mustGetTimezone(ctx echo.Context) *time.Location {
+func (c *Controller) mustGetTimezone(ctx *echo.Context) *time.Location {
 	account, err := c.Accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
 	if err != nil {
 		panic(err)
@@ -59,7 +59,7 @@ func (c *Controller) mustGetTimezone(ctx echo.Context) *time.Location {
 }
 
 func (c *Controller) midnightInLocal(
-	ctx echo.Context,
+	ctx *echo.Context,
 	input time.Time,
 ) (time.Time, error) {
 	account, err := c.Accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
@@ -75,7 +75,7 @@ func (c *Controller) midnightInLocal(
 	return util.Midnight(input, timezone), nil
 }
 
-func (*Controller) getClaims(ctx echo.Context) (security.Claims, error) {
+func (*Controller) getClaims(ctx *echo.Context) (security.Claims, error) {
 	claims, ok := ctx.Get(authenticationKey).(security.Claims)
 	if !ok {
 		return claims, errors.New("unauthorized: claims not present on request")
@@ -84,7 +84,7 @@ func (*Controller) getClaims(ctx echo.Context) (security.Claims, error) {
 	return claims, claims.Valid()
 }
 
-func (c *Controller) mustGetClaims(ctx echo.Context) security.Claims {
+func (c *Controller) mustGetClaims(ctx *echo.Context) security.Claims {
 	claims, err := c.getClaims(ctx)
 	if err != nil {
 		panic("unauthorized: claims on request are invalid")
@@ -93,7 +93,7 @@ func (c *Controller) mustGetClaims(ctx echo.Context) security.Claims {
 	return claims
 }
 
-func (c *Controller) getLoginId(ctx echo.Context) (ID[Login], error) {
+func (c *Controller) getLoginId(ctx *echo.Context) (ID[Login], error) {
 	claims, err := c.getClaims(ctx)
 	if err != nil {
 		return "", err
@@ -107,7 +107,7 @@ func (c *Controller) getLoginId(ctx echo.Context) (ID[Login], error) {
 	return parsed, nil
 }
 
-func (c *Controller) mustGetLoginId(ctx echo.Context) ID[Login] {
+func (c *Controller) mustGetLoginId(ctx *echo.Context) ID[Login] {
 	loginId, err := c.getLoginId(ctx)
 	if err != nil {
 		panic(err)
@@ -120,7 +120,7 @@ func (c *Controller) mustGetLoginId(ctx echo.Context) ID[Login] {
 // on the context. If one is present it will be returned. If there is not one
 // present or if it is not in the correct format then an error will be returned
 // and a "zero" ID will be returned instead.
-func (c *Controller) getUserId(ctx echo.Context) (ID[User], error) {
+func (c *Controller) getUserId(ctx *echo.Context) (ID[User], error) {
 	claims, err := c.getClaims(ctx)
 	if err != nil {
 		return "", err
@@ -138,7 +138,7 @@ func (c *Controller) getUserId(ctx echo.Context) (ID[User], error) {
 	return parsed, nil
 }
 
-func (c *Controller) mustGetUserId(ctx echo.Context) ID[User] {
+func (c *Controller) mustGetUserId(ctx *echo.Context) ID[User] {
 	userId, err := c.getUserId(ctx)
 	if err != nil {
 		panic(err)
@@ -147,7 +147,7 @@ func (c *Controller) mustGetUserId(ctx echo.Context) ID[User] {
 	return userId
 }
 
-func (c *Controller) getAccountId(ctx echo.Context) (ID[Account], error) {
+func (c *Controller) getAccountId(ctx *echo.Context) (ID[Account], error) {
 	claims, err := c.getClaims(ctx)
 	if err != nil {
 		return "", err
@@ -165,7 +165,7 @@ func (c *Controller) getAccountId(ctx echo.Context) (ID[Account], error) {
 	return parsed, nil
 }
 
-func (c *Controller) mustGetAccountId(ctx echo.Context) ID[Account] {
+func (c *Controller) mustGetAccountId(ctx *echo.Context) ID[Account] {
 	accountId, err := c.getAccountId(ctx)
 	if err != nil {
 		panic(err)
@@ -174,7 +174,7 @@ func (c *Controller) mustGetAccountId(ctx echo.Context) ID[Account] {
 	return accountId
 }
 
-func (*Controller) mustGetDatabase(ctx echo.Context) pg.DBI {
+func (*Controller) mustGetDatabase(ctx *echo.Context) pg.DBI {
 	txn, ok := ctx.Get(databaseContextKey).(*pg.Tx)
 	if !ok {
 		panic("no database on context")
@@ -187,7 +187,7 @@ func (*Controller) mustGetDatabase(ctx echo.Context) pg.DBI {
 // that can interact with more security sensitive parts of the data layer. This
 // interface is not specific to a single tenant. If the interface cannot be
 // created due then this method will panic.
-func (c *Controller) mustGetSecurityRepository(ctx echo.Context) repository.SecurityRepository {
+func (c *Controller) mustGetSecurityRepository(ctx *echo.Context) repository.SecurityRepository {
 	db, ok := ctx.Get(databaseContextKey).(pg.DBI)
 	if !ok {
 		panic("failed to retrieve database object from controller context")
@@ -196,7 +196,7 @@ func (c *Controller) mustGetSecurityRepository(ctx echo.Context) repository.Secu
 	return repository.NewSecurityRepository(db, c.Clock)
 }
 
-func (c *Controller) getUnauthenticatedRepository(ctx echo.Context) (repository.UnauthenticatedRepository, error) {
+func (c *Controller) getUnauthenticatedRepository(ctx *echo.Context) (repository.UnauthenticatedRepository, error) {
 	txn, ok := ctx.Get(databaseContextKey).(*pg.Tx)
 	if !ok {
 		return nil, errors.Errorf("no transaction for request")
@@ -205,7 +205,7 @@ func (c *Controller) getUnauthenticatedRepository(ctx echo.Context) (repository.
 	return repository.NewUnauthenticatedRepository(c.Clock, txn), nil
 }
 
-func (c *Controller) mustGetUnauthenticatedRepository(ctx echo.Context) repository.UnauthenticatedRepository {
+func (c *Controller) mustGetUnauthenticatedRepository(ctx *echo.Context) repository.UnauthenticatedRepository {
 	repo, err := c.getUnauthenticatedRepository(ctx)
 	if err != nil {
 		panic(err)
@@ -215,7 +215,7 @@ func (c *Controller) mustGetUnauthenticatedRepository(ctx echo.Context) reposito
 }
 
 func (c *Controller) getAuthenticatedRepository(
-	ctx echo.Context,
+	ctx *echo.Context,
 ) (repository.Repository, error) {
 	userId, err := c.getUserId(ctx)
 	if err != nil {
@@ -241,7 +241,7 @@ func (c *Controller) getAuthenticatedRepository(
 	), nil
 }
 
-func (c *Controller) mustGetAuthenticatedRepository(ctx echo.Context) repository.Repository {
+func (c *Controller) mustGetAuthenticatedRepository(ctx *echo.Context) repository.Repository {
 	repo, err := c.getAuthenticatedRepository(ctx)
 	if err != nil {
 		panic("unauthorized")
@@ -250,7 +250,7 @@ func (c *Controller) mustGetAuthenticatedRepository(ctx echo.Context) repository
 	return repo
 }
 
-func (c *Controller) getSecretsRepository(ctx echo.Context) (repository.SecretsRepository, error) {
+func (c *Controller) getSecretsRepository(ctx *echo.Context) (repository.SecretsRepository, error) {
 	accountId, err := c.getAccountId(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "you are not authenticated to an account")
@@ -272,7 +272,7 @@ func (c *Controller) getSecretsRepository(ctx echo.Context) (repository.SecretsR
 	), nil
 }
 
-func (c *Controller) mustGetSecretsRepository(ctx echo.Context) repository.SecretsRepository {
+func (c *Controller) mustGetSecretsRepository(ctx *echo.Context) repository.SecretsRepository {
 	repo, err := c.getSecretsRepository(ctx)
 	if err != nil {
 		panic("unauthorized")
@@ -281,7 +281,7 @@ func (c *Controller) mustGetSecretsRepository(ctx echo.Context) repository.Secre
 	return repo
 }
 
-func (c *Controller) scrubSentryBody(ctx echo.Context) {
+func (c *Controller) scrubSentryBody(ctx *echo.Context) {
 	// If sentry is setup, make sure we never send the body for this request to
 	// sentry.
 	if hub := sentry.GetHubFromContext(c.getContext(ctx)); hub != nil {
@@ -298,7 +298,7 @@ func (c *Controller) scrubSentryBody(ctx echo.Context) {
 // the API request itself. This cannot be done on [echo.GET] endpoints!
 func enqueueJob[T any](
 	c *Controller,
-	ctx echo.Context,
+	ctx *echo.Context,
 	job func(ctx queue.Context, args T) error,
 	args T,
 ) error {

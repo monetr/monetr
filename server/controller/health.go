@@ -3,11 +3,11 @@ package controller
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/build"
 )
 
-func (c *Controller) handleHealth(ctx echo.Context) error {
+func (c *Controller) handleHealth(ctx *echo.Context) error {
 	status := http.StatusOK
 	err := c.DB.Ping(ctx.Request().Context())
 	if err != nil {

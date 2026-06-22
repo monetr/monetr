@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/schemas"
 	"github.com/monetr/monetr/server/validators"
 	"github.com/monetr/validation"
@@ -12,7 +12,7 @@ import (
 
 func parse[T any](
 	c *Controller,
-	ctx echo.Context,
+	ctx *echo.Context,
 	input *T,
 	schema validation.Rule,
 ) (*T, error) {
@@ -24,13 +24,14 @@ func parse[T any](
 	)
 	switch err := err.(type) {
 	case validation.Errors, validation.OneOfError:
-		return nil, echo.NewHTTPError(
-			http.StatusBadRequest,
-			map[string]any{
+		return nil, &apiResponseError{
+			code: http.StatusBadRequest,
+			body: map[string]any{
 				"error":    "Invalid request",
 				"problems": validators.MarshalErrorTree(err),
 			},
-		).WithInternal(err)
+			err: err,
+		}
 	case *json.SyntaxError:
 		return nil, c.invalidJsonError(ctx, err)
 	case nil:

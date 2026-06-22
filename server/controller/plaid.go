@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/datasources/plaid/plaid_jobs"
@@ -71,7 +71,7 @@ func (c *Controller) removeLinkTokenFromCache(
 	)
 }
 
-func (c *Controller) newPlaidToken(ctx echo.Context) error {
+func (c *Controller) newPlaidToken(ctx *echo.Context) error {
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	// Retrieve the user's details. We need to pass some of these along to
@@ -191,7 +191,7 @@ func (c *Controller) newPlaidToken(ctx echo.Context) error {
 	})
 }
 
-func (c *Controller) putUpdatePlaidLink(ctx echo.Context) error {
+func (c *Controller) putUpdatePlaidLink(ctx *echo.Context) error {
 	if !c.Configuration.Plaid.Enabled {
 		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}
@@ -251,7 +251,7 @@ func (c *Controller) putUpdatePlaidLink(ctx echo.Context) error {
 	})
 }
 
-func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
+func (c *Controller) updatePlaidTokenCallback(ctx *echo.Context) error {
 	if !c.Configuration.Plaid.Enabled {
 		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}
@@ -403,7 +403,7 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, link)
 }
 
-func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
+func (c *Controller) postPlaidTokenCallback(ctx *echo.Context) error {
 	if !c.Configuration.Plaid.Enabled {
 		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}
@@ -569,7 +569,7 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 	})
 }
 
-func (c *Controller) getWaitForPlaid(ctx echo.Context) error {
+func (c *Controller) getWaitForPlaid(ctx *echo.Context) error {
 	if !c.Configuration.Plaid.Enabled {
 		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}
@@ -635,7 +635,7 @@ func (c *Controller) getWaitForPlaid(ctx echo.Context) error {
 	}
 }
 
-func (c *Controller) postPlaidLinkSync(ctx echo.Context) error {
+func (c *Controller) postPlaidLinkSync(ctx *echo.Context) error {
 	if !c.Configuration.Plaid.Enabled {
 		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}

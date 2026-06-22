@@ -8,7 +8,7 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gavv/httpexpect/v2"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/application"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/internal/testutils"
@@ -59,7 +59,7 @@ func TestNewApp(t *testing.T) {
 type testController struct{}
 
 func (testController) RegisterRoutes(app *echo.Echo) {
-	app.GET("/test", func(ctx echo.Context) error {
+	app.GET("/test", func(ctx *echo.Context) error {
 		return ctx.NoContent(http.StatusOK)
 	})
 }
@@ -128,10 +128,13 @@ func TestNewAppHSTSHeader(t *testing.T) {
 }
 
 func TestNewAppServerTimeouts(t *testing.T) {
-	app := application.NewApp(config.Configuration{})
+	// echo v5 no longer exposes the http.Server, the timeouts now get applied via
+	// ConfigureServer in StartConfig.BeforeServeFunc so we assert against that.
+	server := &http.Server{}
+	application.ConfigureServer(server)
 
-	assert.Equal(t, 5*time.Second, app.Server.ReadHeaderTimeout, "ReadHeaderTimeout should be set to mitigate slowloris")
-	assert.Equal(t, 30*time.Second, app.Server.ReadTimeout, "ReadTimeout should be set to mitigate slowloris")
-	assert.Equal(t, 45*time.Second, app.Server.WriteTimeout, "WriteTimeout must exceed the 30s Plaid long-poll ceiling in controller.getWaitForPlaid")
-	assert.Equal(t, 120*time.Second, app.Server.IdleTimeout, "IdleTimeout should bound keep-alive idle duration")
+	assert.Equal(t, 5*time.Second, server.ReadHeaderTimeout, "ReadHeaderTimeout should be set to mitigate slowloris")
+	assert.Equal(t, 30*time.Second, server.ReadTimeout, "ReadTimeout should be set to mitigate slowloris")
+	assert.Equal(t, 45*time.Second, server.WriteTimeout, "WriteTimeout must exceed the 30s Plaid long-poll ceiling in controller.getWaitForPlaid")
+	assert.Equal(t, 120*time.Second, server.IdleTimeout, "IdleTimeout should bound keep-alive idle duration")
 }

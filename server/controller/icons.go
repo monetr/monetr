@@ -3,11 +3,11 @@ package controller
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/icons"
 )
 
-func (c *Controller) searchIcon(ctx echo.Context) error {
+func (c *Controller) searchIcon(ctx *echo.Context) error {
 	if !icons.GetIconsEnabled() {
 		return c.notFound(ctx, "icons are not enabled")
 	}

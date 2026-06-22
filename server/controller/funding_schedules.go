@@ -3,7 +3,7 @@ package controller
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *Controller) getFundingSchedules(ctx echo.Context) error {
+func (c *Controller) getFundingSchedules(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
@@ -31,7 +31,7 @@ func (c *Controller) getFundingSchedules(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, fundingSchedules)
 }
 
-func (c *Controller) getFundingScheduleById(ctx echo.Context) error {
+func (c *Controller) getFundingScheduleById(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
@@ -56,7 +56,7 @@ func (c *Controller) getFundingScheduleById(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, fundingSchedule)
 }
 
-func (c *Controller) postFundingSchedules(ctx echo.Context) error {
+func (c *Controller) postFundingSchedules(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
@@ -124,7 +124,7 @@ func (c *Controller) postFundingSchedules(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, fundingSchedule)
 }
 
-func (c *Controller) patchFundingSchedule(ctx echo.Context) error {
+func (c *Controller) patchFundingSchedule(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
@@ -245,7 +245,7 @@ func (c *Controller) patchFundingSchedule(ctx echo.Context) error {
 	})
 }
 
-func (c *Controller) deleteFundingSchedules(ctx echo.Context) error {
+func (c *Controller) deleteFundingSchedules(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")

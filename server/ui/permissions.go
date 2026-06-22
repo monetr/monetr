@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 var (
@@ -48,7 +48,7 @@ func init() {
 	}
 }
 
-func (*UIController) ApplyPermissionsPolicy(ctx echo.Context) {
+func (*UIController) ApplyPermissionsPolicy(ctx *echo.Context) {
 	if permissionHeader != "" {
 		ctx.Response().Header().Set("Permissions-Policy", permissionHeader)
 	}
