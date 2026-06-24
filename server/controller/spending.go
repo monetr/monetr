@@ -424,6 +424,123 @@ func (c *Controller) putSpending(ctx *echo.Context) error {
 	return ctx.JSON(http.StatusOK, updatedSpending)
 }
 
+func (c *Controller) patchSpending(ctx *echo.Context) error {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
+	}
+
+	spendingId, err := ParseID[Spending](ctx.Param("spendingId"))
+	if err != nil || spendingId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid spending Id")
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	existingSpending, err := repo.GetSpendingById(
+		c.getContext(ctx),
+		bankAccountId,
+		spendingId,
+	)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "failed to find existing spending")
+	}
+
+	schema := schemas.PatchSpendingExpense
+	if existingSpending.SpendingType == SpendingTypeGoal {
+		schema = schemas.PatchSpendingGoal
+	}
+
+	updatedSpending, err := parse(
+		c,
+		ctx,
+		existingSpending,
+		schema,
+	)
+	if err != nil {
+		return err
+	}
+
+	log := c.getLog(ctx)
+
+	// Only allow auto creating transactions for manual links, this is also
+	// enforced to be only available on expenses via the schema.
+	if updatedSpending.AutoCreateTransaction {
+		isManual, err := repo.GetLinkIsManualByBankAccountId(
+			c.getContext(ctx),
+			bankAccountId,
+		)
+		if err != nil {
+			return c.wrapPgError(ctx, err, "failed to validate if link is manual")
+		}
+		if !isManual {
+			return c.badRequest(ctx, "auto create transaction is only supported for manual links")
+		}
+	}
+
+	recalculateSpending := false
+	if updatedSpending.NextRecurrence != existingSpending.NextRecurrence {
+		newNext, err := c.midnightInLocal(ctx, updatedSpending.NextRecurrence)
+		if err != nil {
+			return c.badRequest(ctx, "failed to update next recurrence")
+		}
+
+		if newNext != existingSpending.NextRecurrence {
+			updatedSpending.NextRecurrence = newNext
+			recalculateSpending = true
+		}
+	}
+
+	if updatedSpending.TargetAmount != existingSpending.TargetAmount {
+		recalculateSpending = true
+	} else if updatedSpending.FundingScheduleId != existingSpending.FundingScheduleId {
+		recalculateSpending = true
+	} else if !recalculateSpending && updatedSpending.RuleSet != nil {
+		recalculateSpending = updatedSpending.RuleSet.String() == existingSpending.RuleSet.String()
+	}
+
+	// If the paused status of a spending object changes, recalculate the contributions.
+	if !updatedSpending.IsPaused && existingSpending.IsPaused {
+		recalculateSpending = true
+	} else if updatedSpending.IsPaused && !existingSpending.IsPaused {
+		// However, if we are pausing contributions, there is no need to do a recalculation no matter what. Since it
+		// will be invalidated when the user unpauses the spending object anyway.
+		recalculateSpending = false
+	}
+
+	if recalculateSpending {
+		timezone := c.mustGetTimezone(ctx)
+		fundingSchedule, err := repo.GetFundingSchedule(
+			c.getContext(ctx),
+			bankAccountId,
+			updatedSpending.FundingScheduleId,
+		)
+		if err != nil {
+			return c.wrapPgError(ctx, err, "failed to retrieve funding schedule")
+		}
+
+		updatedSpending.CalculateNextContribution(
+			c.getContext(ctx),
+			timezone,
+			fundingSchedule,
+			c.Clock.Now(),
+			log,
+		)
+	}
+
+	if err = repo.UpdateSpending(
+		c.getContext(ctx),
+		bankAccountId,
+		[]Spending{
+			*updatedSpending,
+		},
+	); err != nil {
+		return c.wrapPgError(ctx, err, "failed to update spending")
+	}
+
+	return ctx.JSON(http.StatusOK, updatedSpending)
+}
+
 func (c *Controller) deleteSpending(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
