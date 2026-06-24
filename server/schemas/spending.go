@@ -2,7 +2,6 @@ package schemas
 
 import (
 	"github.com/monetr/monetr/server/models"
-	"github.com/monetr/monetr/server/validators"
 	"github.com/monetr/validation"
 )
 
@@ -46,7 +45,7 @@ var (
 			).Required(Require),
 			validation.Key("autoCreateTransaction",
 				Boolean(),
-			).Required(validators.Optional),
+			).Required(Optional),
 		),
 		// Goal schema
 		validation.Map(
@@ -77,7 +76,7 @@ var (
 				validation.NotNil,
 			).Required(Optional),
 			validation.Key("ruleset",
-				validation.Never,
+				validation.Never.Error("Ruleset cannot be specified for goals"),
 			).Required(Optional),
 			validation.Key("nextRecurrence",
 				Timestamp().Error("Next recurrence must be a valid date"),
@@ -85,7 +84,68 @@ var (
 			).Required(Require),
 			validation.Key("isPaused",
 				Boolean(),
-			).Required(validators.Optional),
+			).Required(Optional),
 		),
+	)
+
+	PatchSpendingExpense = validation.Map(
+		validation.Key("fundingScheduleId",
+			ValidID[models.FundingSchedule](),
+			validation.Required,
+		).Required(Optional),
+		validation.Key("name",
+			Name(),
+		).Required(Optional),
+		validation.Key("description",
+			validation.OneOf(
+				validation.Nil,
+				TextField(),
+			),
+		).Required(Optional),
+		validation.Key("targetAmount",
+			PositiveAmount("Target amount"),
+			validation.Required,
+		).Required(Optional),
+		validation.Key("ruleset",
+			Ruleset(),
+			validation.Required,
+		).Required(Optional),
+		validation.Key("nextRecurrence",
+			Timestamp().Error("Next recurrence must be a valid date"),
+			validation.Required,
+		).Required(Optional),
+		validation.Key("autoCreateTransaction",
+			Boolean(),
+		).Required(Optional),
+	)
+
+	PatchSpendingGoal = validation.Map(
+		validation.Key("fundingScheduleId",
+			ValidID[models.FundingSchedule](),
+			validation.Required,
+		).Required(Optional),
+		validation.Key("name",
+			Name(),
+		).Required(Optional),
+		validation.Key("description",
+			validation.OneOf(
+				validation.Nil,
+				TextField(),
+			),
+		).Required(Optional),
+		validation.Key("targetAmount",
+			PositiveAmount("Target amount"),
+			validation.Required,
+		).Required(Optional),
+		validation.Key("ruleset",
+			validation.Never.Error("Ruleset cannot be specified for goals"),
+		).Required(Optional),
+		validation.Key("nextRecurrence",
+			Timestamp().Error("Next recurrence must be a valid date"),
+			validation.Required,
+		).Required(Optional),
+		validation.Key("isPaused",
+			Boolean(),
+		).Required(Optional),
 	)
 )

@@ -341,6 +341,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.POST("/bank_accounts/:bankAccountId/spending", c.postSpending)
 	billed.POST("/bank_accounts/:bankAccountId/spending/transfer", c.postSpendingTransfer)
 	billed.PUT("/bank_accounts/:bankAccountId/spending/:spendingId", c.putSpending)
+	billed.PATCH("/bank_accounts/:bankAccountId/spending/:spendingId", c.patchSpending)
 	billed.DELETE("/bank_accounts/:bankAccountId/spending/:spendingId", c.deleteSpending)
 	billed.GET("/bank_accounts/:bankAccountId/spending/:spendingId/transactions", c.getSpendingTransactions)
 	// Forecasting
