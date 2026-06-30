@@ -25,14 +25,9 @@ file(MAKE_DIRECTORY ${NGINX_DIRECTORY})
 # ExternalProject target that the certificates command below depends on.
 include(mkcert)
 
-# hostess for local development
-set(HOSTESS_EXECUTABLE ${GO_BIN_DIR}/hostess)
-set(HOSTESS_VERSION latest)
-go_install(
-  OUTPUT ${HOSTESS_EXECUTABLE}
-  PACKAGE "github.com/cbednarski/hostess"
-  VERSION ${HOSTESS_VERSION}
-)
+# hostess for local development. This sets HOSTESS_EXECUTABLE and a `hostess`
+# ExternalProject target that the hostsfile commands below depend on.
+include(hostess)
 
 # If the developer has not customized the local domain in their cmake user
 # presets file or otherwise then we fall back to `monetr.local`. This is the
@@ -288,6 +283,9 @@ foreach(LOCAL_DOMAIN ${LOCAL_DOMAINS})
     COMMENT "Setting up ${LOCAL_DOMAIN} domain with your /etc/hosts file. You may be prompted for a password"
     DEPENDS ${HOSTESS_EXECUTABLE}
   )
+  # Make sure the hostess binary has been downloaded and verified before we try
+  # to add domains to the hosts file with it.
+  add_dependencies(development.hostsfile.${LOCAL_DOMAIN} hostess)
   add_dependencies(development.hostsfile development.hostsfile.${LOCAL_DOMAIN})
 endforeach()
 

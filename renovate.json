@@ -29,7 +29,8 @@
       "matchPackageNames": [
         "@monetr/{/,}**",
         "github.com/monetr/{/,}**",
-        "monetr/mkcert"
+        "monetr/mkcert",
+        "monetr/hostess"
       ],
       "minimumReleaseAge": "0 days"
     },
@@ -197,6 +198,15 @@
       "fileMatch": [".+\\.cmake"],
       "matchStrings": ["set\\(MKCERT_\\w+\\s+\"(?<currentValue>v\\d+\\.\\d+\\.\\d+)\"\\s+\"(?<currentDigest>[a-f0-9]{64})\"\\)"],
       "depNameTemplate": "monetr/mkcert",
+      "datasourceTemplate": "github-release-attachments",
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "description": "Update monetr/hostess binary version and the per-arch sha256 we pin in CMake",
+      "fileMatch": [".+\\.cmake"],
+      "matchStrings": ["set\\(HOSTESS_\\w+\\s+\"(?<currentValue>v\\d+\\.\\d+\\.\\d+)\"\\s+\"(?<currentDigest>[a-f0-9]{64})\"\\)"],
+      "depNameTemplate": "monetr/hostess",
       "datasourceTemplate": "github-release-attachments",
       "versioningTemplate": "semver"
     },
