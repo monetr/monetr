@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/brianvoe/gofakeit/v6"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/server/datasources/plaid/plaid_jobs"
 	"github.com/monetr/monetr/server/internal/fixtures"

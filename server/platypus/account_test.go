@@ -3,7 +3,7 @@ package platypus
 import (
 	"testing"
 
-	"github.com/brianvoe/gofakeit/v6"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/plaid/plaid-go/v42/plaid"
 	"github.com/stretchr/testify/assert"

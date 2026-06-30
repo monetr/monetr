@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brianvoe/gofakeit/v6"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/monetr/monetr/server/config"
 	"github.com/plaid/plaid-go/v42/plaid"
 )

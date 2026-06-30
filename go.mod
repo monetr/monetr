@@ -14,7 +14,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.101.0
 	github.com/aws/smithy-go v1.25.1
 	github.com/benbjohnson/clock v1.3.5
-	github.com/brianvoe/gofakeit/v6 v6.28.0
+	github.com/brianvoe/gofakeit/v7 v7.15.0
 	github.com/elliotcourant/go-lclocale v0.1.2
 	github.com/elliotcourant/gofx v0.0.1
 	github.com/fsnotify/fsnotify v1.10.1

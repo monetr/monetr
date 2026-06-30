@@ -3,7 +3,7 @@ package stripe_helper
 import (
 	"testing"
 
-	"github.com/brianvoe/gofakeit/v6"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/server/internal/mock_stripe"
 	"github.com/monetr/monetr/server/internal/testutils"
