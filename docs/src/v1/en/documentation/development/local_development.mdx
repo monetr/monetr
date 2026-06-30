@@ -179,9 +179,9 @@ navigate to `https://my.monetr.local` then please run the following commands in 
 
 ```shell title="Shell"
 # Removes the current mkcert certificates
-sudo ./build/go/bin/mkcert -uninstall
+sudo ./build/tools/bin/mkcert -uninstall
 # Reinstall the certificates without root
-./build/go/bin/mkcert -install
+./build/tools/bin/mkcert -install
 ```
 
 On Linux you may also need to install `libnss3-tools` before running the mkcert install again.

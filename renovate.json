@@ -28,7 +28,8 @@
     {
       "matchPackageNames": [
         "@monetr/{/,}**",
-        "github.com/monetr/{/,}**"
+        "github.com/monetr/{/,}**",
+        "monetr/mkcert"
       ],
       "minimumReleaseAge": "0 days"
     },
@@ -189,6 +190,15 @@
       "matchStrings": ["[Nn]ode.*?(?<currentValue>\\d+\\.\\d+\\.\\d+)"],
       "depNameTemplate": "node",
       "datasourceTemplate": "node-version"
+    },
+    {
+      "customType": "regex",
+      "description": "Update monetr/mkcert binary version and the per-arch sha256 we pin in CMake",
+      "fileMatch": [".+\\.cmake"],
+      "matchStrings": ["set\\(MKCERT_\\w+\\s+\"(?<currentValue>v\\d+\\.\\d+\\.\\d+)\"\\s+\"(?<currentDigest>[a-f0-9]{64})\"\\)"],
+      "depNameTemplate": "monetr/mkcert",
+      "datasourceTemplate": "github-release-attachments",
+      "versioningTemplate": "semver"
     },
     {
       "customType": "regex",

@@ -21,14 +21,9 @@ file(MAKE_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY})
 set(NGINX_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY}/nginx)
 file(MAKE_DIRECTORY ${NGINX_DIRECTORY})
 
-# mkcert for local development
-set(MKCERT_EXECUTABLE ${GO_BIN_DIR}/mkcert)
-set(MKCERT_VERSION latest)
-go_install(
-  OUTPUT ${MKCERT_EXECUTABLE}
-  PACKAGE "filippo.io/mkcert"
-  VERSION ${MKCERT_VERSION}
-)
+# mkcert for local development. This sets MKCERT_EXECUTABLE and an `mkcert`
+# ExternalProject target that the certificates command below depends on.
+include(mkcert)
 
 # hostess for local development
 set(HOSTESS_EXECUTABLE ${GO_BIN_DIR}/hostess)
@@ -115,6 +110,9 @@ add_custom_command(
   DEPENDS ${MKCERT_EXECUTABLE}
 )
 add_custom_target(development.certificates DEPENDS ${LOCAL_CERTIFICATE_KEY} ${LOCAL_CERTIFICATE_CERT})
+# Make sure the mkcert binary has been downloaded and verified before we try to
+# provision certificates with it.
+add_dependencies(development.certificates mkcert)
 
 ########################################################################################################################
 # This section determines which compose files will be used when the development environment is started. Compose files
