@@ -15,9 +15,9 @@ $basePadding: 2 * variables.$size;
   inset: 0px;
   background-color: color-mix(in srgb, var(--background) 50%, transparent);
 
-  transition-property: opacity !important;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
-  transition-duration: 150ms !important;
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
 
   backdrop-filter: blur(4px) brightness(0.5);
 

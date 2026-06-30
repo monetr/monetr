@@ -22,7 +22,7 @@
   // a sentence link, so opt out. That underline snaps in instantly and fights
   // the eased border, which is the inconsistency that felt off on mouse over.
   // !important is the cheap way to beat the higher specificity prose rule.
-  text-decoration: none !important;
+  text-decoration: none;
   color: inherit;
   margin-top: 2 * variables.$size;
   margin-bottom: 2 * variables.$size;

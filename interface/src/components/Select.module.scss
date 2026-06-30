@@ -3,7 +3,7 @@
 $basePadding: 4 * variables.$size;
 
 .selectLoading {
-  display: flex !important;
+  display: flex;
   cursor: progress;
   gap: variables.$size;
   align-items: center;
@@ -26,7 +26,7 @@ $basePadding: 4 * variables.$size;
 }
 
 .select {
-  display: flex !important;
+  display: flex;
   cursor: text;
   gap: variables.$size;
   align-items: center;
