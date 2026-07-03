@@ -50,12 +50,13 @@ func (o *FundingSchedule) BeforeInsert(ctx context.Context) (context.Context, er
 // instead.
 func (o *FundingSchedule) GetNumberOfContributionsBetween(
 	start, end time.Time,
-	_ *time.Location,
+	timezone *time.Location,
 ) int64 {
-	rule := o.RuleSet.Set
 	// Make sure that the rule is using the timezone of the dates provided. This
 	// is an easy way to force that. We also need to truncate the hours on the
 	// start time. To make sure that we are operating relative to midnight.
+	rule := o.RuleSet.Clone()
+	rule.DTStart(rule.GetDTStart().In(timezone))
 	items := rule.Between(start, end, true)
 	return int64(len(items))
 }

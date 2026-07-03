@@ -88,10 +88,16 @@ func (e Spending) GetProgressAmount() int64 {
 // GetRecurrencesBefore will return an array of times that this spending item will be used (based on the recurrence
 // rule) between the provided now and before in the specified time zone. Goals will at most return a single time if the
 // goal is due within that window.
-func (e *Spending) GetRecurrencesBefore(now, before time.Time, _ *time.Location) []time.Time {
+func (e *Spending) GetRecurrencesBefore(now, before time.Time, timezone *time.Location) []time.Time {
 	switch e.SpendingType {
 	case SpendingTypeExpense:
-		return e.RuleSet.Between(now, before, false)
+		// Make sure that the rule increments relative to midnight in the user's
+		// timezone. The stored DTSTART is the same instant but is represented in
+		// UTC, which can shift occurrences onto the wrong day for timezones that
+		// are ahead of UTC.
+		rule := e.RuleSet.Clone()
+		rule.DTStart(rule.GetDTStart().In(timezone))
+		return rule.Between(now, before, false)
 	case SpendingTypeGoal:
 		if e.NextRecurrence.After(now) && e.NextRecurrence.Before(before) {
 			return []time.Time{e.NextRecurrence}

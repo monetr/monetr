@@ -293,13 +293,17 @@ func ProcessFundingSchedule(ctx queue.Context, args ProcessFundingScheduleArgume
 						log,
 					)
 
-					// If this expense has auto create transaction enabled, create a
-					// transaction for the just-passed due date and allocate it from the
-					// expense. Goals are excluded by design.
+					// If this expense has auto create transaction enabled and its due
+					// date has actually passed, create a transaction for that due date
+					// and allocate it from the expense. Funding often happens before
+					// the expense is due; in that case the transaction must not be
+					// created early here, ProcessSpending will create it once the due
+					// date passes. Goals are excluded by design.
 					if isManual &&
 						spending.SpendingType == models.SpendingTypeExpense &&
 						spending.AutoCreateTransaction &&
-						spending.TargetAmount > 0 {
+						spending.TargetAmount > 0 &&
+						dueDate.Before(ctx.Clock().Now()) {
 						if bankAccount == nil {
 							bankAccount, err = repo.GetBankAccount(ctx, args.BankAccountId)
 							if err != nil {

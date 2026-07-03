@@ -725,4 +725,76 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		assert.NoError(t, err)
 		assert.EqualValues(t, 16055, spending.NextContributionAmount, "should contribute half of the remaining amount")
 	})
+
+	t.Run("timezone ahead of UTC counts events in the right funding period", func(t *testing.T) {
+		// The stored DTSTART on a ruleset is the instant of midnight in the user's
+		// timezone but is represented in UTC. For timezones ahead of UTC that UTC
+		// representation falls on the previous day, and evaluating the rule without
+		// adjusting it back into the user's timezone shifts every occurrence a full
+		// day late. Here the expense is due on the 14th, the day before it is
+		// funded on the 15th, with nothing allocated to it; it must be considered
+		// behind. With the shifted occurrences the due date would collide with the
+		// funding date instead and the expense would not appear behind at all.
+		timezone, err := time.LoadLocation("Australia/Sydney")
+		require.NoError(t, err, "must be able to load timezone")
+		now := time.Date(2022, 2, 1, 12, 0, 0, 0, timezone)
+
+		// Due on the 14th of every month, midnight in Sydney (+11).
+		spendingString := "DTSTART:20220113T130000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=14"
+		spendingRule, err := NewRuleSet(spendingString)
+		require.NoError(t, err, "must be able to parse the rule")
+
+		// Funded on the 15th of every month, midnight in Sydney (+11).
+		contributionString := "DTSTART:20220114T130000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15"
+		contributionRule, err := NewRuleSet(contributionString)
+		require.NoError(t, err, "must be able to parse the rule")
+
+		spending := Spending{
+			SpendingType:   SpendingTypeExpense,
+			TargetAmount:   5000,
+			CurrentAmount:  0,
+			NextRecurrence: time.Date(2022, 2, 14, 0, 0, 0, 0, timezone).UTC(),
+			RuleSet:        spendingRule,
+		}
+
+		spending.CalculateNextContribution(
+			t.Context(),
+			timezone,
+			GiveMeAFundingSchedule(time.Date(2022, 2, 15, 0, 0, 0, 0, timezone).UTC(), contributionRule),
+			now,
+			testutils.GetLog(t),
+		)
+		assert.True(t, spending.IsBehind, "should be behind, the expense is due the day before it is funded and has nothing allocated")
+		assert.EqualValues(t, 5000, spending.NextContributionAmount, "should contribute the entire amount for the next spending event")
+	})
+}
+
+func TestSpending_GetRecurrencesBefore(t *testing.T) {
+	t.Run("occurrences are relative to midnight in the users timezone", func(t *testing.T) {
+		timezone, err := time.LoadLocation("Australia/Sydney")
+		require.NoError(t, err, "must be able to load timezone")
+
+		// Due on the 15th of every month, midnight in Sydney (+11). The DTSTART is
+		// the same instant represented in UTC, which falls on the 14th; the
+		// occurrences must still land on midnight of the 15th in Sydney.
+		ruleset, err := NewRuleSet("DTSTART:20220114T130000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15")
+		require.NoError(t, err, "must be able to parse the rule")
+
+		spending := Spending{
+			SpendingType: SpendingTypeExpense,
+			RuleSet:      ruleset,
+		}
+
+		recurrences := spending.GetRecurrencesBefore(
+			time.Date(2022, 2, 1, 0, 0, 0, 0, timezone),
+			time.Date(2022, 3, 1, 0, 0, 0, 0, timezone),
+			timezone,
+		)
+		assert.Len(t, recurrences, 1, "should recur exactly once in the window")
+		assert.True(
+			t,
+			recurrences[0].Equal(time.Date(2022, 2, 15, 0, 0, 0, 0, timezone)),
+			"recurrence should be midnight on the 15th in the user's timezone",
+		)
+	})
 }
