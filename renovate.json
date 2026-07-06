@@ -11,9 +11,6 @@
   "prConcurrentLimit": 20,
   "minimumReleaseAge": "7 days",
   "timezone": "America/Chicago",
-  "schedule": [
-    "before 6am on monday"
-  ],
   "vulnerabilityAlerts": {
     "minimumReleaseAge": "0 days",
     "schedule": [
