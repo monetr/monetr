@@ -104,19 +104,19 @@ jobs:
           git config --global --add safe.directory ${PWD}
           make sign-container CMAKE_OPTIONS="-DSIGN_RECURSIVE=ON" RELEASE_VERSION=${{ needs.release_please.outputs.version }}
       - name: Attest build provenance (ghcr.io)
-        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
         with:
           subject-name: ghcr.io/monetr/monetr
           subject-digest: ${{ steps.sign.outputs.digest }}
           push-to-registry: true
       - name: Attest build provenance (docker.io)
-        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
         with:
           subject-name: docker.io/monetr/monetr
           subject-digest: ${{ steps.sign.outputs.digest }}
           push-to-registry: true
       - name: Attest build provenance (quay.io)
-        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
         with:
           subject-name: quay.io/monetr/monetr
           subject-digest: ${{ steps.sign.outputs.digest }}
