@@ -269,8 +269,8 @@ importers:
         version: 3.10.0(react@19.2.7)
     devDependencies:
       '@imagemagick/magick-wasm':
-        specifier: 0.0.40
-        version: 0.0.40
+        specifier: 0.0.41
+        version: 0.0.41
       '@rsbuild/core':
         specifier: 2.0.15
         version: 2.0.15(core-js@3.47.0)
@@ -634,8 +634,8 @@ packages:
   '@fontsource/jetbrains-mono@5.2.8':
     resolution: {integrity: sha512-6w8/SG4kqvIMu7xd7wt6x3idn1Qux3p9N62s6G3rfldOUYHpWcc2FKrqf+Vo44jRvqWj2oAtTHrZXEP23oSKwQ==}
 
-  '@imagemagick/magick-wasm@0.0.40':
-    resolution: {integrity: sha512-vwV4qZ5JfPblYoJTBKn/dAMElXMmIf4inEsCtjskZwU3609ejpz1pvXWE3UEt8G+0L2SYHdoBNKCPU4ezpDXaQ==}
+  '@imagemagick/magick-wasm@0.0.41':
+    resolution: {integrity: sha512-ywIISf4/8/6k9lLfHUIE/uGuZCJfDG+NEcHJ7OHvzr2w+uLCoK5cIBsp6KlpQfq/EppYiNM+NqKXFiUSbJvHZA==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -4034,7 +4034,7 @@ snapshots:
 
   '@fontsource/jetbrains-mono@5.2.8': {}
 
-  '@imagemagick/magick-wasm@0.0.40': {}
+  '@imagemagick/magick-wasm@0.0.41': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
