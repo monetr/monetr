@@ -18,7 +18,7 @@ import (
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/v42/plaid"
+	"github.com/plaid/plaid-go/v43/plaid"
 )
 
 type WebhookVerificationKey struct {

@@ -15,7 +15,7 @@ import (
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/v42/plaid"
+	"github.com/plaid/plaid-go/v43/plaid"
 	"github.com/stretchr/testify/assert"
 )
 

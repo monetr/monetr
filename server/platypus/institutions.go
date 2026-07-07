@@ -8,7 +8,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/cache"
-	"github.com/plaid/plaid-go/v42/plaid"
+	"github.com/plaid/plaid-go/v43/plaid"
 )
 
 type PlaidInstitutions interface {

@@ -15,7 +15,7 @@ import (
 
 	models "github.com/monetr/monetr/server/models"
 	platypus "github.com/monetr/monetr/server/platypus"
-	plaid "github.com/plaid/plaid-go/v42/plaid"
+	plaid "github.com/plaid/plaid-go/v43/plaid"
 	gomock "go.uber.org/mock/gomock"
 )
 
