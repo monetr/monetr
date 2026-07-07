@@ -25,7 +25,7 @@
     "embla-carousel-react": "8.6.0",
     "hast-util-from-html": "2.0.3",
     "katex": "0.17.0",
-    "lucide-react": "1.20.0",
+    "lucide-react": "1.22.0",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "rehype-katex": "7.0.1",
