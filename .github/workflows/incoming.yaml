@@ -29,7 +29,7 @@ jobs:
           git config --global --add safe.directory ${PWD}
 
       - name: Go Build Cache
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: ${{ env.GOCACHE }}
           key: ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-go-build-${{ hashFiles('**/go.sum') }}
@@ -37,7 +37,7 @@ jobs:
             ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-go-build-
 
       - name: Go Mod Cache
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: ${{ env.GOMODCACHE }}
           key: ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-go-mod-${{ hashFiles('**/go.sum') }}
@@ -45,7 +45,7 @@ jobs:
             ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-go-mod-
 
       - name: pnpm Cache
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: ${{ env.STORE_PATH }}
           key: ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -107,7 +107,7 @@ jobs:
 
       # Cache go build cache, used to speedup go test
       - name: Go Build Cache
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: ${{ env.GOCACHE }}
           key: ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-test-go-build-${{ hashFiles('**/go.sum', '**/**.go') }}
@@ -118,7 +118,7 @@ jobs:
       # so they share a key. Go's build cache stays separate above because its invalidation is much
       # more aggressive (any *.go change).
       - name: Deps Cache
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: |
             ${{ env.GOMODCACHE }}
@@ -185,7 +185,7 @@ jobs:
           git config --global --add safe.directory ${PWD}
 
       - name: Go Build Cache
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: ${{ env.GOCACHE }}
           key: ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-go-build-${{ hashFiles('**/go.sum') }}
@@ -193,7 +193,7 @@ jobs:
             ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-go-build-
 
       - name: Go Mod Cache
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: ${{ env.GOMODCACHE }}
           key: ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-go-mod-${{ hashFiles('**/go.sum') }}
@@ -201,7 +201,7 @@ jobs:
             ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-go-mod-
 
       - name: pnpm Cache
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: ${{ env.STORE_PATH }}
           key: ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -259,7 +259,7 @@ jobs:
 
       # Cache go build cache, used to speedup go test
       - name: Go Build Cache
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: ${{ env.GOCACHE }}
           key: ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-localdev-go-build-${{ hashFiles('**/go.sum') }}
@@ -268,7 +268,7 @@ jobs:
 
       # Cache go mod cache, used to speedup builds
       - name: Go Mod Cache
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: ${{ env.GOMODCACHE }}
           key: ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-localdev-go-mod-${{ hashFiles('**/go.sum') }}
@@ -276,7 +276,7 @@ jobs:
             ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-localdev-go-mod-
 
       - name: pnpm Cache
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: ${{ env.STORE_PATH }}
           key: ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-localdev-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
