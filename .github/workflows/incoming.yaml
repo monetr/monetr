@@ -70,7 +70,7 @@ jobs:
       MONETR_PG_DATABASE: test-db
     services:
       postgres:
-        image: postgres:17
+        image: postgres:18
         env:
           POSTGRES_HOST_AUTH_METHOD: trust
           POSTGRES_USER: api-testing
