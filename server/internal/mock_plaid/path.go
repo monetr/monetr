@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/plaid/plaid-go/v42/plaid"
+	"github.com/plaid/plaid-go/v43/plaid"
 	"github.com/stretchr/testify/require"
 )
 
