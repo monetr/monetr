@@ -41,7 +41,9 @@ export default defineConfig({
   },
   globalStyles: path.join(__dirname, 'styles/globals.scss'),
   themeConfig: {
-    darkMode: true,
+    // Docs are dark-mode only: `force-dark` pins dark and hides the appearance
+    // toggle. (`darkMode: false` would force *light*, hence the string.)
+    darkMode: 'force-dark',
     socialLinks: [
       {
         icon: 'github',
@@ -174,11 +176,6 @@ export default defineConfig({
     },
     html: {
       tags: [
-        {
-          tag: 'script',
-          // Specify the default theme mode, which can be `dark` or `light`
-          children: "window.RSPRESS_THEME = 'dark';",
-        },
         {
           // Only include umami if we are doing a production build
           tag: 'script',

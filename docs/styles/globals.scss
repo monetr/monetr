@@ -57,8 +57,8 @@
     Consolas, monospace;
 }
 
-/* Map the tokens onto Rspress' own variables. monetr forces dark mode (see the
-   theme entry + the inline RSPRESS_THEME script), so we set these on every
+/* Map the tokens onto Rspress' own variables. monetr forces dark mode (via
+   `darkMode: 'force-dark'` in rspress.config.ts), so we set these on every
    appearance selector the original theme used rather than only on .rp-dark. */
 :root,
 :where(html.rp-dark),
@@ -114,9 +114,8 @@
   --shiki-token-link: var(--mtr-link);
 }
 
-/* Light mode is not the reference design and is effectively unreachable while
-   monetr forces dark, but keep it derived from the same palette so it does not
-   look broken if someone flips the scheme. */
+/* Light mode is not the reference design and is now unreachable under
+   `force-dark`, but kept as a harmless, palette-derived fallback. */
 :where(html:not(.dark)):root {
   --rp-c-bg: #F7F5FC;
   --rp-c-bg-soft: #FFFFFF;

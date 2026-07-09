@@ -1,4 +1,4 @@
-import { Fragment, useEffect } from 'react';
+import { Fragment } from 'react';
 
 import { useFrontmatter, usePage } from '@rspress/core/runtime';
 import { Layout as BasicLayout, Link, FallbackHeading as OriginalFallbackHeading } from '@rspress/core/theme-original';
@@ -85,12 +85,7 @@ function DocMeta() {
 }
 
 const Layout = () => {
-  useEffect(() => {
-    // Ensure dark mode classes are present
-    document.documentElement.classList.add('dark', 'rp-dark');
-    document.documentElement.style.colorScheme = 'dark';
-  }, []);
-
+  // Dark mode is pinned via `darkMode: 'force-dark'` in rspress.config.ts.
   return (
     <Fragment>
       <FundingBar />
