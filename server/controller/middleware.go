@@ -11,6 +11,7 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/ctxkeys"
 	"github.com/monetr/monetr/server/internal/sentryecho"
+	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
 )
@@ -108,6 +109,53 @@ func (c *Controller) requireActiveSubscriptionMiddleware(next echo.HandlerFunc) 
 	}
 }
 
+// maybeApiKeyMiddleware allows monetr API keys to be provided via the
+// authorization header as a username and password. Where they key ID of the API
+// key is the username and the secret is the password. The credentials are
+// validated if they are specified. If they are specified and are invalid then
+// the request will fail even if a valid session token is present on the
+// request.
+func (c *Controller) maybeApiKeyMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(ctx *echo.Context) error {
+		log := c.getLog(ctx)
+		username, password, ok := ctx.Request().BasicAuth()
+		if ok {
+			repo := c.mustGetUnauthenticatedRepository(ctx)
+			keyId, err := models.ParseID[models.ApiKey](username)
+			if err != nil {
+				log.WarnContext(
+					c.getContext(ctx),
+					"invalid api key username provided",
+					"err", err,
+				)
+				return c.unauthorized(ctx)
+			}
+			apiKey, err := repo.GetApiKey(c.getContext(ctx), keyId)
+			if err != nil {
+				log.WarnContext(
+					c.getContext(ctx),
+					"invalid api key username provided",
+					"err", err,
+				)
+				return c.unauthorized(ctx)
+			}
+
+			if !apiKey.Verify(keyId, password) {
+				log.WarnContext(
+					c.getContext(ctx),
+					"invalid api key username provided",
+					"err", "credential mismatch",
+				)
+				return c.unauthorized(ctx)
+			}
+
+			// TODO Store scope and such here
+		}
+
+		return next(ctx)
+	}
+}
+
 func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx *echo.Context) (err error) {
 		err = func(ctx *echo.Context) error {
@@ -141,12 +189,6 @@ func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFun
 				}
 			}
 
-			if token == "" {
-				if token = ctx.Request().Header.Get(c.Configuration.Server.Cookies.Name); token != "" {
-					data["source"] = "header"
-				}
-			}
-
 			// If there is still no token then we don't have one. Return nothing.
 			if token == "" {
 				return nil
@@ -155,9 +197,14 @@ func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFun
 			claims, err := c.ClientTokens.Parse(token)
 			if err != nil {
 				c.updateAuthenticationCookie(ctx, ClearAuthentication)
-				crumbs.Error(c.getContext(ctx), "failed to parse token", "authentication", map[string]any{
-					"error": err,
-				})
+				crumbs.Error(
+					c.getContext(ctx),
+					"failed to parse token",
+					"authentication",
+					map[string]any{
+						"error": err,
+					},
+				)
 				log.WarnContext(c.getContext(ctx), "invalid token provided", "err", err)
 				return nil
 			}
@@ -206,10 +253,13 @@ func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFun
 	}
 }
 
-// requireToken is an echo middleware that requires that the current HTTTP
-// request has a token with one of the provided scopes. Any of the specified
-// scopes are valid.
-func (c *Controller) requireToken(scopes ...security.Scope) func(next echo.HandlerFunc) echo.HandlerFunc {
+// requireAuthentication is an echo middleware that requires that the current
+// HTTTP request is authenticated with one of the provided scopes. Any of the
+// specified scopes are valid. The scopes can be derived from API keys or from
+// the actual token that monetr issues for sessions.
+func (c *Controller) requireAuthentication(
+	scopes ...security.Scope,
+) func(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx *echo.Context) error {
 			// Read the claims off of the current request context. If the claims are

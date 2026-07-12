@@ -217,6 +217,7 @@ type UnauthenticatedRepository interface {
 	SetEmailVerified(ctx context.Context, emailAddress string) error
 	UseBetaCode(ctx context.Context, betaId ID[Beta], usedBy ID[User]) error
 	ValidateBetaCode(ctx context.Context, betaCode string) (*Beta, error)
+	GetApiKey(ctx context.Context, keyId ID[ApiKey]) (*ApiKey, error)
 }
 
 func NewRepositoryFromSession(
