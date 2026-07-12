@@ -317,10 +317,6 @@ func (c *Controller) putSpending(ctx *echo.Context) error {
 	if err != nil {
 		return err
 	}
-	updatedSpending.Description, err = c.cleanString(ctx, "Description", updatedSpending.Description)
-	if err != nil {
-		return err
-	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
@@ -383,7 +379,7 @@ func (c *Controller) putSpending(ctx *echo.Context) error {
 	} else if updatedSpending.FundingScheduleId != existingSpending.FundingScheduleId {
 		recalculateSpending = true
 	} else if !recalculateSpending && updatedSpending.RuleSet != nil {
-		recalculateSpending = updatedSpending.RuleSet.String() == existingSpending.RuleSet.String()
+		recalculateSpending = updatedSpending.RuleSet.String() != existingSpending.RuleSet.String()
 	}
 
 	// If the paused status of a spending object changes, recalculate the contributions.
@@ -496,7 +492,7 @@ func (c *Controller) patchSpending(ctx *echo.Context) error {
 	} else if updatedSpending.FundingScheduleId != existingSpending.FundingScheduleId {
 		recalculateSpending = true
 	} else if !recalculateSpending && updatedSpending.RuleSet != nil {
-		recalculateSpending = updatedSpending.RuleSet.String() == existingSpending.RuleSet.String()
+		recalculateSpending = updatedSpending.RuleSet.String() != existingSpending.RuleSet.String()
 	}
 
 	// If the paused status of a spending object changes, recalculate the contributions.

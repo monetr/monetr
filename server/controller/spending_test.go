@@ -70,7 +70,7 @@ func TestPostSpending(t *testing.T) {
 		}
 	})
 
-	t.Run("name and description too long", func(t *testing.T) {
+	t.Run("name too long", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
@@ -122,38 +122,6 @@ func TestPostSpending(t *testing.T) {
 			// The schema validates against both the expense and goal variants, so the
 			// failure comes back as a oneOf envelope. The expense variant is first.
 			response.JSON().Path("$.problems.oneOf[0].name").String().IsEqual("Name must be between 1 and 300 characters")
-		}
-
-		{ // Create an expense with a description thats too long
-			now := app.Clock.Now()
-			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
-			nextRecurrence := ruleset.After(now, false)
-			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-
-			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
-				WithPath("bankAccountId", bank.BankAccountId).
-				WithCookie(TestCookieName, token).
-				WithJSON(map[string]any{
-					"name":              "Name is fine",
-					"description":       gofakeit.Sentence(250),
-					"ruleset":           FirstDayOfEveryMonth,
-					"fundingScheduleId": fundingScheduleId,
-					"targetAmount":      1000,
-					"spendingType":      SpendingTypeExpense,
-					"nextRecurrence":    nextRecurrence,
-				}).
-				Expect()
-
-			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("Invalid request")
-			// Description is validated as one of a nil value or a valid text field,
-			// so a too long description fails both branches inside the expense
-			// variant.
-			response.JSON().Path("$.problems.oneOf[0].description.oneOf").Array().ConsistsOf(
-				"must be nil",
-				"Must be between 1 and 300 characters",
-			)
 		}
 	})
 
@@ -2841,7 +2809,6 @@ func TestPatchSpending(t *testing.T) {
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
 					"name":              "Some Monthly Expense",
-					"description":       "The original description",
 					"ruleset":           FirstDayOfEveryMonth,
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      1000,
@@ -2870,7 +2837,6 @@ func TestPatchSpending(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.name").IsEqual("A brand new name")
 			// All of these should be exactly what we created the expense with.
-			response.JSON().Path("$.description").IsEqual("The original description")
 			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
 			response.JSON().Path("$.targetAmount").Number().IsEqual(1000)
 			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
@@ -2887,8 +2853,8 @@ func TestPatchSpending(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.name").IsEqual("A brand new name")
-			response.JSON().Path("$.description").IsEqual("The original description")
 			response.JSON().Path("$.targetAmount").Number().IsEqual(1000)
+			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
 		}
 	})
 
@@ -2999,19 +2965,36 @@ func TestPatchSpending(t *testing.T) {
 			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
 		}
 
-		{ // Move the next recurrence out to the later date.
+		{ // Move the next recurrence out to the later date, but send it as a
+			// timestamp in the middle of the day instead of at midnight. Spending
+			// objects always recur at midnight in the account's timezone, so whatever
+			// time of day we send should get snapped back to midnight for us.
+			middleOfTheDay := laterRecurrence.Add(13 * time.Hour)
+			assert.NotEqual(t, laterRecurrence, middleOfTheDay, "the timestamp we send must not already be midnight")
+
 			response := e.PATCH("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithPath("spendingId", spendingId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"nextRecurrence": laterRecurrence,
+					"nextRecurrence": middleOfTheDay,
 				}).
 				Expect()
 
 			response.Status(http.StatusOK)
-			// The recurrence we sent was already midnight in the account timezone so
-			// it should round trip exactly.
+			// Midnight on the same day, not the middle of the day that we sent.
+			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(laterRecurrence)
+		}
+
+		{ // And make sure it was the normalized recurrence that actually got
+			// stored, not the timestamp we sent.
+			response := e.GET("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spendingId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
 			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(laterRecurrence)
 		}
 	})
@@ -3041,6 +3024,7 @@ func TestPatchSpending(t *testing.T) {
 		).After(app.Clock.Now(), false)
 
 		var spendingId ID[Spending]
+		var originalContribution float64
 		{ // Create an expense that recurs on the first of the month
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -3058,9 +3042,14 @@ func TestPatchSpending(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
 			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
+			originalContribution = response.JSON().Path("$.nextContributionAmount").Number().Gt(0).Raw()
 		}
 
-		{ // Change just the ruleset over to the 15th and last day of the month
+		{ // Change just the ruleset over to the 15th and last day of the month. The
+			// expense is now spent twice as often, so monetr needs to put away more
+			// money at each funding event in order to keep up with it. Changing the
+			// ruleset has to trigger a recalculation or the contribution would be
+			// left over from the old, less frequent, ruleset.
 			response := e.PATCH("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithPath("spendingId", spendingId).
@@ -3072,6 +3061,20 @@ func TestPatchSpending(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.ruleset").IsEqual(FifthteenthAndLastDayOfEveryMonth)
+			response.JSON().Path("$.nextContributionAmount").Number().Gt(originalContribution)
+		}
+
+		{ // Make sure the new ruleset and the recalculated contribution both actually
+			// persisted.
+			response := e.GET("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spendingId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.ruleset").IsEqual(FifthteenthAndLastDayOfEveryMonth)
+			response.JSON().Path("$.nextContributionAmount").Number().Gt(originalContribution)
 		}
 	})
 
@@ -3158,6 +3161,7 @@ func TestPatchSpending(t *testing.T) {
 		).After(app.Clock.Now(), false)
 
 		var spendingId ID[Spending]
+		var originalContribution float64
 		{ // Create a goal that is not paused
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -3174,9 +3178,18 @@ func TestPatchSpending(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.isPaused").Boolean().IsFalse()
 			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
+			originalContribution = response.JSON().Path("$.nextContributionAmount").Number().Gt(0).Raw()
 		}
 
-		{ // Pause the goal
+		// Burn one of the funding events that the goal was counting on. The goal
+		// now has fewer paychecks left to save the same amount of money before its
+		// due date, so a recalculation would push its contribution up. This gives
+		// us a way to see whether a recalculation actually happened or not.
+		app.Clock.Add(7 * 24 * time.Hour)
+
+		{ // Pause the goal. Pausing on purpose skips the recalculation, since the
+			// contribution gets invalidated when the goal is unpaused anyway. So even
+			// though time has moved on, the contribution should come back untouched.
 			response := e.PATCH("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithPath("spendingId", spendingId).
@@ -3188,9 +3201,12 @@ func TestPatchSpending(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.isPaused").Boolean().IsTrue()
+			response.JSON().Path("$.nextContributionAmount").Number().IsEqual(originalContribution)
 		}
 
-		{ // And unpause it again
+		{ // And unpause it again. Unpausing forces a recalculation, and because we
+			// have burned one of the funding events the goal now has to save more at
+			// each of the funding events it has left.
 			response := e.PATCH("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithPath("spendingId", spendingId).
@@ -3198,6 +3214,18 @@ func TestPatchSpending(t *testing.T) {
 				WithJSON(map[string]any{
 					"isPaused": false,
 				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.isPaused").Boolean().IsFalse()
+			response.JSON().Path("$.nextContributionAmount").Number().Gt(originalContribution)
+		}
+
+		{ // Make sure the goal is actually stored as unpaused.
+			response := e.GET("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spendingId).
+				WithCookie(TestCookieName, token).
 				Expect()
 
 			response.Status(http.StatusOK)
@@ -3248,8 +3276,8 @@ func TestPatchSpending(t *testing.T) {
 			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
 		}
 
-		{ // isPaused only makes sense for goals, so the expense schema does not even
-			// have the field and rejects it as an unexpected key.
+		{ // isPaused only makes sense for goals, so the expense schema does not
+			// even have the field and rejects it as an unexpected key.
 			response := e.PATCH("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithPath("spendingId", spendingId).
@@ -3443,7 +3471,167 @@ func TestPatchSpending(t *testing.T) {
 		}
 	})
 
-	t.Run("can update the description", func(t *testing.T) {
+	t.Run("changing the funding schedule recalculates the contribution", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		// The expense starts out being funded twice a month...
+		semiMonthlyFundingScheduleId := ID[FundingSchedule](e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":    "Payday",
+				"ruleset": FifthteenthAndLastDayOfEveryMonth,
+			}).
+			Expect().
+			Status(http.StatusOK).
+			JSON().Path("$.fundingScheduleId").String().Raw())
+
+		// ...and we are going to move it over to a paycheck that arrives every week
+		// instead. More paychecks before the expense is due means monetr can put
+		// away less money at each one of them.
+		weeklyFundingScheduleId := ID[FundingSchedule](e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":    "Weekly Payday",
+				"ruleset": EveryFriday,
+			}).
+			Expect().
+			Status(http.StatusOK).
+			JSON().Path("$.fundingScheduleId").String().Raw())
+
+		nextRecurrence := testutils.RuleSetInTimezone(
+			t,
+			testutils.MustEz(t, user.Account.GetTimezone),
+			FirstDayOfEveryMonth,
+		).After(app.Clock.Now(), false)
+
+		var spendingId ID[Spending]
+		var originalContribution float64
+		{ // Create an expense funded by the semi monthly paycheck
+			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":              "Some Monthly Expense",
+					"ruleset":           FirstDayOfEveryMonth,
+					"fundingScheduleId": semiMonthlyFundingScheduleId,
+					"targetAmount":      1000,
+					"spendingType":      SpendingTypeExpense,
+					"nextRecurrence":    nextRecurrence,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
+			originalContribution = response.JSON().Path("$.nextContributionAmount").Number().Gt(0).Raw()
+		}
+
+		{ // Move the expense over to the weekly paycheck
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spendingId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"fundingScheduleId": weeklyFundingScheduleId,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.fundingScheduleId").IsEqual(weeklyFundingScheduleId)
+			// There are more paychecks between now and the due date now, so each
+			// individual contribution can be smaller.
+			response.JSON().Path("$.nextContributionAmount").Number().Lt(originalContribution)
+		}
+
+		{ // Make sure the new funding schedule and the recalculated contribution
+			// both persisted.
+			response := e.GET("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spendingId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.fundingScheduleId").IsEqual(weeklyFundingScheduleId)
+			response.JSON().Path("$.nextContributionAmount").Number().Lt(originalContribution)
+		}
+	})
+
+	t.Run("the funding schedule must exist", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		fundingScheduleId := ID[FundingSchedule](e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":    "Payday",
+				"ruleset": FifthteenthAndLastDayOfEveryMonth,
+			}).
+			Expect().
+			Status(http.StatusOK).
+			JSON().Path("$.fundingScheduleId").String().Raw())
+
+		nextRecurrence := testutils.RuleSetInTimezone(
+			t,
+			testutils.MustEz(t, user.Account.GetTimezone),
+			FirstDayOfEveryMonth,
+		).After(app.Clock.Now(), false)
+
+		spendingId := ID[Spending](e.POST("/api/bank_accounts/{bankAccountId}/spending").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":              "Some Monthly Expense",
+				"ruleset":           FirstDayOfEveryMonth,
+				"fundingScheduleId": fundingScheduleId,
+				"targetAmount":      1000,
+				"spendingType":      SpendingTypeExpense,
+				"nextRecurrence":    nextRecurrence,
+			}).
+			Expect().
+			Status(http.StatusOK).
+			JSON().Path("$.spendingId").String().Raw())
+
+		{ // The ID is a well formed funding schedule ID so it makes it past the
+			// schema, but there is not a funding schedule with this ID to move the
+			// expense over to. IDs in a request body have to be the full length, a
+			// short one like fund_bogus would get rejected by the schema before we
+			// ever went looking for it.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spendingId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"fundingScheduleId": "fund_01arz3ndektsv4rrffq69g5fav",
+				}).
+				Expect()
+
+			response.Status(http.StatusNotFound)
+			response.JSON().Path("$.error").String().IsEqual("failed to retrieve funding schedule: record does not exist")
+		}
+
+		{ // And the expense should have been left alone.
+			response := e.GET("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spendingId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
+		}
+	})
+
+	t.Run("can patch a goal", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
@@ -3468,42 +3656,65 @@ func TestPatchSpending(t *testing.T) {
 		).After(app.Clock.Now(), false)
 
 		var spendingId ID[Spending]
-		{ // Create an expense with no description
+		var originalContribution float64
+		{ // Create a goal
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"name":              "Some Monthly Expense",
-					"ruleset":           FirstDayOfEveryMonth,
+					"name":              "Vacation Savings",
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      1000,
-					"spendingType":      SpendingTypeExpense,
+					"spendingType":      SpendingTypeGoal,
 					"nextRecurrence":    nextRecurrence,
 				}).
 				Expect()
 
 			response.Status(http.StatusOK)
 			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
+			originalContribution = response.JSON().Path("$.nextContributionAmount").Number().Gt(0).Raw()
 		}
 
-		{ // Add a description to the expense
+		{ // Goals can be patched just like expenses can, they just have a different
+			// set of fields available to them. Bumping the target amount means we
+			// need to save more at each funding event to hit the goal on time.
 			response := e.PATCH("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithPath("spendingId", spendingId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"description": "Now it has a description",
+					"name":         "A Bigger Vacation",
+					"targetAmount": 2000,
 				}).
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.description").IsEqual("Now it has a description")
+			response.JSON().Path("$.name").IsEqual("A Bigger Vacation")
+			response.JSON().Path("$.targetAmount").Number().IsEqual(2000)
+			response.JSON().Path("$.nextContributionAmount").Number().Gt(originalContribution)
+			// The fields we did not send should be untouched, and a goal should still
+			// not have a ruleset after being patched.
+			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
+			response.JSON().Path("$.spendingType").IsEqual(SpendingTypeGoal)
+			response.JSON().Path("$.ruleset").IsNull()
+		}
+
+		{ // Make sure it all persisted.
+			response := e.GET("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spendingId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.name").IsEqual("A Bigger Vacation")
+			response.JSON().Path("$.targetAmount").Number().IsEqual(2000)
 		}
 	})
 
 	// These last few are the more boilerplate-y request validation cases that all
-	// of the other PATCH endpoints have. They are not super exciting but they make
-	// sure that we are not leaking anything or blowing up on bad input.
+	// of the other PATCH endpoints have. They are not super exciting but they
+	// make sure that we are not leaking anything or blowing up on bad input.
 
 	t.Run("invalid bank account Id", func(t *testing.T) {
 		app, e := NewTestApplication(t)
@@ -3704,6 +3915,132 @@ func TestPatchSpending(t *testing.T) {
 		}
 	})
 
+	t.Run("cannot change the spending type", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		fundingScheduleId := ID[FundingSchedule](e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":    "Payday",
+				"ruleset": FifthteenthAndLastDayOfEveryMonth,
+			}).
+			Expect().
+			Status(http.StatusOK).
+			JSON().Path("$.fundingScheduleId").String().Raw())
+
+		nextRecurrence := testutils.RuleSetInTimezone(
+			t,
+			testutils.MustEz(t, user.Account.GetTimezone),
+			FirstDayOfEveryMonth,
+		).After(app.Clock.Now(), false)
+
+		spendingId := ID[Spending](e.POST("/api/bank_accounts/{bankAccountId}/spending").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":              "Some Monthly Expense",
+				"ruleset":           FirstDayOfEveryMonth,
+				"fundingScheduleId": fundingScheduleId,
+				"targetAmount":      1000,
+				"spendingType":      SpendingTypeExpense,
+				"nextRecurrence":    nextRecurrence,
+			}).
+			Expect().
+			Status(http.StatusOK).
+			JSON().Path("$.spendingId").String().Raw())
+
+		{ // The patch schema is picked based on the spending type of the object
+			// that already exists, so the type itself is not something you are
+			// allowed to send. You cannot turn an expense into a goal after the fact.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spendingId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"spendingType": SpendingTypeGoal,
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.spendingType").String().NotEmpty()
+		}
+
+		{ // And it should still be an expense.
+			response := e.GET("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spendingId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.spendingType").IsEqual(SpendingTypeExpense)
+		}
+	})
+
+	t.Run("rejects a name that is too long", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		fundingScheduleId := ID[FundingSchedule](e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":    "Payday",
+				"ruleset": FifthteenthAndLastDayOfEveryMonth,
+			}).
+			Expect().
+			Status(http.StatusOK).
+			JSON().Path("$.fundingScheduleId").String().Raw())
+
+		nextRecurrence := testutils.RuleSetInTimezone(
+			t,
+			testutils.MustEz(t, user.Account.GetTimezone),
+			FirstDayOfEveryMonth,
+		).After(app.Clock.Now(), false)
+
+		spendingId := ID[Spending](e.POST("/api/bank_accounts/{bankAccountId}/spending").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":              "Some Monthly Expense",
+				"ruleset":           FirstDayOfEveryMonth,
+				"fundingScheduleId": fundingScheduleId,
+				"targetAmount":      1000,
+				"spendingType":      SpendingTypeExpense,
+				"nextRecurrence":    nextRecurrence,
+			}).
+			Expect().
+			Status(http.StatusOK).
+			JSON().Path("$.spendingId").String().Raw())
+
+		{ // The same length limits that apply when you create a spending object
+			// also apply when you patch one. Unlike the create schema there is no
+			// oneOf envelope here though, since the schema is picked by the spending
+			// type.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spendingId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name": gofakeit.Sentence(250),
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.name").String().IsEqual("Name must be between 1 and 300 characters")
+		}
+	})
+
 	t.Run("rejects a null name", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
@@ -3799,7 +4136,7 @@ func TestPatchSpending(t *testing.T) {
 			Status(http.StatusOK).
 			JSON().Path("$.spendingId").String().Raw())
 
-		{ // A null target amount is not allowed, it has to be a real positive value.
+		{ // A null target amount is not allowed, it has to be a real positive value
 			response := e.PATCH("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithPath("spendingId", spendingId).

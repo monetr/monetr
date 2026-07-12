@@ -1,29 +1,25 @@
 import { useMutation } from '@tanstack/react-query';
 
+import type BankAccount from '@monetr/interface/models/BankAccount';
+import type { ID } from '@monetr/interface/models/ID';
 import Spending from '@monetr/interface/models/Spending';
 import type { WithJsonValues } from '@monetr/interface/util/json';
+import type { Writable } from '@monetr/interface/util/readonly';
 import request from '@monetr/interface/util/request';
-import BankAccount from '@monetr/interface/models/BankAccount';
-import { ID } from '@monetr/interface/models/ID';
-import { Writable } from '@monetr/interface/util/readonly';
 
 export type PatchSpendingRequest = Partial<Writable<Spending>> & {
   spendingId: ID<Spending>;
   bankAccountId: ID<BankAccount>;
-}
+};
 
 export function useUpdateSpending(): (_spending: PatchSpendingRequest) => Promise<Spending> {
   const { mutateAsync } = useMutation({
-    async mutationFn({
-      spendingId,
-      bankAccountId,
-      ...spending
-    }: PatchSpendingRequest): Promise<Spending> {
+    async mutationFn({ spendingId, bankAccountId, ...spending }: PatchSpendingRequest): Promise<Spending> {
       return await request<WithJsonValues<Spending>>({
         method: 'PATCH',
         url: `/api/bank_accounts/${bankAccountId}/spending/${spendingId}`,
         data: spending,
-      }).then(result => new Spending(result.data))
+      }).then(result => new Spending(result.data));
     },
     onSuccess: (updatedSpending: Spending, _variables, _onMutateResult, { client: queryClient }) =>
       Promise.all([
