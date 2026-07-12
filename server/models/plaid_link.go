@@ -22,11 +22,12 @@ const (
 type PlaidLink struct {
 	tableName string `pg:"plaid_links"`
 
-	PlaidLinkId          ID[PlaidLink]   `json:"-" pg:"plaid_link_id,notnull,pk"`
-	AccountId            ID[Account]     `json:"-" pg:"account_id,notnull"`
-	Account              *Account        `json:"-" pg:"rel:has-one"`
-	SecretId             ID[Secret]      `json:"-" pg:"secret_id"`
-	Secret               *Secret         `json:"-" pg:"rel:has-one"`
+	PlaidLinkId ID[PlaidLink] `json:"-" pg:"plaid_link_id,notnull,pk"`
+	AccountId   ID[Account]   `json:"-" pg:"account_id,notnull"`
+	Account     *Account      `json:"-" pg:"rel:has-one"`
+	SecretId    ID[Secret]    `json:"-" pg:"secret_id"`
+	Secret      *Secret       `json:"-" pg:"rel:has-one"`
+	EncryptedData
 	PlaidId              string          `json:"-" pg:"item_id,unique,notnull"`
 	Products             []string        `json:"products" pg:"products,type:'text[]'"`
 	Status               PlaidLinkStatus `json:"status" pg:"status,notnull"`
