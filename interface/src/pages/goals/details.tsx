@@ -118,19 +118,17 @@ export default function GoalDetails(): React.JSX.Element | null {
 
     helpers.setSubmitting(true);
 
-    const updatedSpending = new Spending({
-      ...spending,
+    return await updateSpending({
+      spendingId: spending.spendingId,
+      bankAccountId: spending.bankAccountId,
       name: values.name,
       nextRecurrence: startOfDay(values.nextRecurrence, {
         in: inTimezone,
       }),
       fundingScheduleId: values.fundingScheduleId,
-      ruleset: null,
       targetAmount: locale.friendlyToAmount(values.amount),
       isPaused: values.isPaused,
-    });
-
-    return await updateSpending(updatedSpending)
+    })
       .then(
         () =>
           void enqueueSnackbar('Updated goal successfully', {

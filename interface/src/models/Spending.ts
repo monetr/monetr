@@ -30,7 +30,7 @@ export default class Spending {
   ruleset: string | null;
   readonly lastRecurrence: Date | null;
   nextRecurrence: Date;
-  nextContributionAmount: number;
+  readonly nextContributionAmount: number;
   readonly isBehind: boolean;
   isPaused: boolean;
   autoCreateTransaction: boolean;

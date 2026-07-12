@@ -124,8 +124,9 @@ export default function ExpenseDetails(): React.JSX.Element | null {
 
     helpers.setSubmitting(true);
 
-    const updatedSpending = new Spending({
-      ...spending,
+    return await updateSpending({
+      spendingId: spending.spendingId,
+      bankAccountId: spending.bankAccountId,
       name: values.name,
       nextRecurrence: startOfDay(values.nextRecurrence, {
         in: inTimezone,
@@ -133,12 +134,10 @@ export default function ExpenseDetails(): React.JSX.Element | null {
       fundingScheduleId: values.fundingScheduleId,
       ruleset: values.ruleset,
       targetAmount: locale.friendlyToAmount(values.amount),
-      // Auto create transaction is only supported on manual links; force it off
-      // otherwise so the API will not reject the update.
+      // Auto create transaction is only supported on manual links; force it off otherwise so the API will not reject
+      // the update.
       autoCreateTransaction: isManual && values.autoCreateTransaction,
-    });
-
-    return await updateSpending(updatedSpending)
+    })
       .then(
         () =>
           void enqueueSnackbar('Updated expense successfully', {
