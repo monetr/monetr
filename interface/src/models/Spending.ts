@@ -22,7 +22,6 @@ export default class Spending {
   readonly bankAccountId: ID<BankAccount>;
   fundingScheduleId: ID<FundingSchedule>;
   name: string;
-  description: string | null;
   readonly spendingType: SpendingType;
   targetAmount: number;
   currentAmount: number;
@@ -41,7 +40,6 @@ export default class Spending {
     this.bankAccountId = ID.from(data.bankAccountId);
     this.fundingScheduleId = ID.from(data.fundingScheduleId);
     this.name = data.name;
-    this.description = data.description;
     this.spendingType = data.spendingType;
     this.targetAmount = data.targetAmount;
     this.currentAmount = data.currentAmount;

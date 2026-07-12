@@ -76,7 +76,6 @@ func TestRepositoryBase_GetBalances(t *testing.T) {
 			FundingScheduleId:      funding.FundingScheduleId,
 			SpendingType:           models.SpendingTypeExpense,
 			Name:                   "Test Expense",
-			Description:            "Testing",
 			TargetAmount:           10000,
 			CurrentAmount:          1000, // $10
 			UsedAmount:             0,

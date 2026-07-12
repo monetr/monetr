@@ -45,7 +45,6 @@ func TestJobRepository_GetBankAccountsWithStaleSpending(t *testing.T) {
 			FundingScheduleId: fundingSchedule.FundingScheduleId,
 			SpendingType:      SpendingTypeExpense,
 			Name:              "Test Stale Expense",
-			Description:       "Description or something",
 			TargetAmount:      5000,
 			CurrentAmount:     5000,
 			RuleSet:           spendingRule,
