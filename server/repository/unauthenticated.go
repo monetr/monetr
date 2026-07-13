@@ -143,6 +143,8 @@ func (u *unauthenticatedRepo) GetApiKey(
 
 	var result ApiKey
 	err := u.txn.ModelContext(span.Context(), &result).
+		Relation("CreatedByUser").
+		Relation("CreatedByUser.Login").
 		Where(`"api_key"."api_key_id" = ?`, keyId).
 		Limit(1).
 		Select(&result)

@@ -120,6 +120,26 @@ func (c *Controller) maybeApiKeyMiddleware(next echo.HandlerFunc) echo.HandlerFu
 		log := c.getLog(ctx)
 		username, password, ok := ctx.Request().BasicAuth()
 		if ok {
+			now := c.Clock.Now()
+			data := map[string]any{
+				"source": "key",
+			}
+
+			breadcrumbMessage := "Request did not have valid auth"
+
+			if hub := sentry.GetHubFromContext(c.getContext(ctx)); hub != nil {
+				defer func() {
+					hub.AddBreadcrumb(&sentry.Breadcrumb{
+						Type:      "debug",
+						Category:  "authentication",
+						Message:   breadcrumbMessage,
+						Data:      data,
+						Level:     sentry.LevelDebug,
+						Timestamp: now,
+					}, nil)
+				}()
+			}
+
 			repo := c.mustGetUnauthenticatedRepository(ctx)
 			keyId, err := models.ParseID[models.ApiKey](username)
 			if err != nil {
@@ -149,7 +169,47 @@ func (c *Controller) maybeApiKeyMiddleware(next echo.HandlerFunc) echo.HandlerFu
 				return c.unauthorized(ctx)
 			}
 
-			// TODO Store scope and such here
+			claims := security.Claims{
+				CreatedAt:    c.Clock.Now(),
+				EmailAddress: apiKey.CreatedByUser.Login.Email,
+				UserId:       apiKey.CreatedBy.String(),
+				AccountId:    apiKey.AccountId.String(),
+				LoginId:      apiKey.CreatedByUser.LoginId.String(),
+				Scope:        security.AuthenticatedScope,
+				ReissueCount: 0,
+			}
+
+			if hub := sentryecho.GetHubFromContext(ctx); hub != nil {
+				hub.Scope().SetUser(sentry.User{
+					ID:        claims.AccountId,
+					Username:  claims.AccountId,
+					IPAddress: util.GetForwardedFor(ctx),
+					Data: map[string]string{
+						"userId":  claims.UserId,
+						"loginId": claims.LoginId,
+					},
+				})
+				hub.Scope().SetTag("userId", claims.UserId)
+				hub.Scope().SetTag("accountId", claims.AccountId)
+				hub.Scope().SetTag("loginId", claims.LoginId)
+			}
+
+			// Store the authentication claims on the request context so we can use it
+			// later.
+			ctx.Set(authenticationKey, claims)
+
+			{ // Add some basic values onto our context for logging later on.
+				spanContext := ctx.Get(spanContextKey).(context.Context)
+				spanContext = context.WithValue(spanContext, ctxkeys.AccountID, claims.AccountId)
+				spanContext = context.WithValue(spanContext, ctxkeys.UserID, claims.UserId)
+				spanContext = context.WithValue(spanContext, ctxkeys.LoginID, claims.LoginId)
+				ctx.Set(spanContextKey, spanContext)
+			}
+
+			breadcrumbMessage = "Auth is valid"
+			data["accountId"] = claims.AccountId
+			data["userId"] = claims.UserId
+			data["loginId"] = claims.LoginId
 		}
 
 		return next(ctx)
@@ -159,6 +219,12 @@ func (c *Controller) maybeApiKeyMiddleware(next echo.HandlerFunc) echo.HandlerFu
 func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx *echo.Context) (err error) {
 		err = func(ctx *echo.Context) error {
+			// If there are already credentials on the scope of the request from
+			// something else then do not do anything with the token
+			if ctx.Get(authenticationKey) != nil {
+				return nil
+			}
+
 			now := c.Clock.Now()
 			log := c.getLog(ctx)
 			var token string
@@ -209,8 +275,9 @@ func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFun
 				return nil
 			}
 
-			// If we can pull the hub from the current context, then we want to try to set some of our user data on it so that
-			// way we can grab it later if there is an error.
+			// If we can pull the hub from the current context, then we want to try to
+			// set some of our user data on it so that way we can grab it later if
+			// there is an error.
 			if hub := sentryecho.GetHubFromContext(ctx); hub != nil {
 				hub.Scope().SetUser(sentry.User{
 					ID:        claims.AccountId,
@@ -237,11 +304,6 @@ func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFun
 				spanContext = context.WithValue(spanContext, ctxkeys.LoginID, claims.LoginId)
 				ctx.Set(spanContextKey, spanContext)
 			}
-
-			breadcrumbMessage = "Auth is valid"
-			data["accountId"] = claims.AccountId
-			data["userId"] = claims.UserId
-			data["loginId"] = claims.LoginId
 
 			return nil
 		}(ctx)
