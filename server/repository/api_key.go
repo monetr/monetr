@@ -64,8 +64,8 @@ func (r *repositoryBase) CreateApiKey(
 
 	if _, err := r.txn.ModelContext(
 		span.Context(),
-		&key,
-	).Insert(&key); err != nil {
+		key,
+	).Insert(key); err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to create api key")
 	}

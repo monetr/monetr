@@ -64,7 +64,7 @@ func (o *ApiKey) BeforeUpdate(ctx context.Context) (context.Context, error) {
 // validate it against this [ApiKey]. It simply returns true or false indicating
 // whether or not the credentials are valid for this specific record.
 func (o *ApiKey) Verify(keyId ID[ApiKey], secret string) bool {
-	if o.ApiKeyId != keyId || strings.HasPrefix(secret, ApiKeySecretPrefix) {
+	if o.ApiKeyId != keyId || !strings.HasPrefix(secret, ApiKeySecretPrefix) {
 		return false
 	}
 
