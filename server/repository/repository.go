@@ -7,6 +7,7 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/models"
 	. "github.com/monetr/monetr/server/models"
 )
 
@@ -197,6 +198,11 @@ type BaseRepository interface {
 	CreateLunchFlowTransactions(ctx context.Context, transaction []LunchFlowTransaction) error
 
 	fileRepositoryInterface
+
+	GetApiKeyById(ctx context.Context, id models.ID[models.ApiKey]) (*models.ApiKey, error)
+	GetApiKeys(ctx context.Context) ([]models.ApiKey, error)
+	CreateApiKey(ctx context.Context, key *models.ApiKey) error
+	DeleteApiKey(ctx context.Context, id models.ID[models.ApiKey]) error
 }
 
 type Repository interface {

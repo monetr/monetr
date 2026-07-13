@@ -146,6 +146,7 @@ func (u *unauthenticatedRepo) GetApiKey(
 		Relation("CreatedByUser").
 		Relation("CreatedByUser.Login").
 		Where(`"api_key"."api_key_id" = ?`, keyId).
+		Where(`"api_key"."deleted_at" IS NULL`).
 		Limit(1).
 		Select(&result)
 	if err != nil {

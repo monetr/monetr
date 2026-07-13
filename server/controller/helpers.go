@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"encoding/json"
 	"strings"
 	"time"
 
@@ -28,20 +27,6 @@ func (c *Controller) cleanString(ctx *echo.Context, name, input string) (string,
 	// string we are not wasting time only to return an error.
 	input = strings.TrimSpace(input)
 	return input, nil
-}
-
-// readJsonMap takes an *echo.Context request object and returns a map if it was
-// able to decode the JSON body, or returns an error if it was not. All JSON
-// bodies are decoded using `json.Decoder.UseNumber()` to make validation
-// easier.
-func (*Controller) readJsonMap(ctx *echo.Context) (map[string]any, error) {
-	rawData := map[string]any{}
-	decoder := json.NewDecoder(ctx.Request().Body)
-	decoder.UseNumber()
-	if err := decoder.Decode(&rawData); err != nil {
-		return nil, errors.WithStack(err)
-	}
-	return rawData, nil
 }
 
 func (c *Controller) mustGetTimezone(ctx *echo.Context) *time.Location {

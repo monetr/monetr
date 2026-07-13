@@ -292,82 +292,93 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 		c.requireAuthentication(security.AuthenticatedScope),
 	)
 
-	billed := apiKeyOrToken.Group("", c.requireActiveSubscriptionMiddleware)
+	billedTokenOnly := tokenOnly.Group("", c.requireActiveSubscriptionMiddleware)
+	billedKeyOrToken := apiKeyOrToken.Group("", c.requireActiveSubscriptionMiddleware)
+
+	// API Credentials, reading and deactivating keys can be done without an
+	// active subscription. But creating new keys requires an active subscription
+	// when billing is enabled.
+	tokenOnly.GET("/keys", c.getApiKeys)
+	tokenOnly.DELETE("/keys/:apiKeyId", c.deleteApiKey)
+	billedTokenOnly.POST("/keys", c.postApiKey)
+
 	// Icons
-	billed.POST("/icons/search", c.searchIcon)
+	billedKeyOrToken.POST("/icons/search", c.searchIcon)
 	// Locale and currency data
-	billed.GET("/locale/currency", c.listCurrencies)
+	billedKeyOrToken.GET("/locale/currency", c.listCurrencies)
 	// Account
-	billed.DELETE("/account", c.deleteAccount)
+	billedKeyOrToken.DELETE("/account", c.deleteAccount)
 	// Links
-	billed.GET("/links", c.getLinks)
-	billed.GET("/links/:linkId", c.getLink)
-	billed.POST("/links", c.postLinks)
-	billed.PATCH("/links/:linkId", c.patchLink)
-	billed.DELETE("/links/:linkId", c.deleteLink)
+	billedKeyOrToken.GET("/links", c.getLinks)
+	billedKeyOrToken.GET("/links/:linkId", c.getLink)
+	billedKeyOrToken.POST("/links", c.postLinks)
+	billedKeyOrToken.PATCH("/links/:linkId", c.patchLink)
+	billedKeyOrToken.DELETE("/links/:linkId", c.deleteLink)
 	// Institutions
-	billed.GET("/institutions/:institutionId", c.getInstitutionDetails)
+	billedKeyOrToken.GET("/institutions/:institutionId", c.getInstitutionDetails)
 	// Bank Accounts
-	billed.GET("/bank_accounts", c.getBankAccounts)
-	billed.GET("/bank_accounts/:bankAccountId", c.getBankAccount)
-	billed.DELETE("/bank_accounts/:bankAccountId", c.deleteBankAccount)
-	billed.PATCH("/bank_accounts/:bankAccountId", c.patchBankAccount)
-	billed.GET("/bank_accounts/:bankAccountId/balances", c.getBalances)
-	billed.POST("/bank_accounts", c.postBankAccounts)
+	billedKeyOrToken.GET("/bank_accounts", c.getBankAccounts)
+	billedKeyOrToken.GET("/bank_accounts/:bankAccountId", c.getBankAccount)
+	billedKeyOrToken.DELETE("/bank_accounts/:bankAccountId", c.deleteBankAccount)
+	billedKeyOrToken.PATCH("/bank_accounts/:bankAccountId", c.patchBankAccount)
+	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/balances", c.getBalances)
+	billedKeyOrToken.POST("/bank_accounts", c.postBankAccounts)
 	// Transactions
-	billed.GET("/bank_accounts/:bankAccountId/transactions", c.getTransactions)
-	billed.GET("/bank_accounts/:bankAccountId/transactions/:transactionId", c.getTransactionById)
-	billed.GET("/bank_accounts/:bankAccountId/transactions/:transactionId/similar", c.getSimilarTransactionsById)
-	billed.POST("/bank_accounts/:bankAccountId/transactions", c.postTransactions)
-	billed.POST("/bank_accounts/:bankAccountId/transactions/upload", c.postTransactionUpload)
-	billed.GET("/bank_accounts/:bankAccountId/transactions/upload/:transactionUploadId", c.getTransactionUploadById)
-	billed.GET("/bank_accounts/:bankAccountId/transactions/upload/:transactionUploadId/progress", c.getTransactionUploadProgress)
-	billed.PATCH("/bank_accounts/:bankAccountId/transactions/:transactionId", c.patchTransaction)
-	billed.DELETE("/bank_accounts/:bankAccountId/transactions/:transactionId", c.deleteTransactions)
+	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/transactions", c.getTransactions)
+	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/transactions/:transactionId", c.getTransactionById)
+	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/transactions/:transactionId/similar", c.getSimilarTransactionsById)
+	billedKeyOrToken.POST("/bank_accounts/:bankAccountId/transactions", c.postTransactions)
+	billedKeyOrToken.POST("/bank_accounts/:bankAccountId/transactions/upload", c.postTransactionUpload)
+	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/transactions/upload/:transactionUploadId", c.getTransactionUploadById)
+	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/transactions/upload/:transactionUploadId/progress", c.getTransactionUploadProgress)
+	billedKeyOrToken.PATCH("/bank_accounts/:bankAccountId/transactions/:transactionId", c.patchTransaction)
+	billedKeyOrToken.DELETE("/bank_accounts/:bankAccountId/transactions/:transactionId", c.deleteTransactions)
 
 	// Mappings and transaction imports
 	if c.Configuration.Features.TransactionImports {
-		billed.GET("/mappings", c.getTransactionImportMappings)
-		billed.POST("/mappings", c.postTransactionImportMapping)
+		billedKeyOrToken.GET("/mappings", c.getTransactionImportMappings)
+		billedKeyOrToken.POST("/mappings", c.postTransactionImportMapping)
 		// Imports
-		billed.POST("/bank_accounts/:bankAccountId/transactions/import", c.postTransactionImport)
-		billed.GET("/bank_accounts/:bankAccountId/transactions/import/:transactionImportId", c.getTransactionImportById)
-		billed.PATCH("/bank_accounts/:bankAccountId/transactions/import/:transactionImportId", c.patchTransactionImport)
+		billedKeyOrToken.POST("/bank_accounts/:bankAccountId/transactions/import", c.postTransactionImport)
+		billedKeyOrToken.GET("/bank_accounts/:bankAccountId/transactions/import/:transactionImportId", c.getTransactionImportById)
+		billedKeyOrToken.PATCH("/bank_accounts/:bankAccountId/transactions/import/:transactionImportId", c.patchTransactionImport)
 	}
 
 	// Uploads
-	billed.GET("/files", c.getFiles)
+	billedKeyOrToken.GET("/files", c.getFiles)
 	// Funding schedules
-	billed.GET("/bank_accounts/:bankAccountId/funding_schedules", c.getFundingSchedules)
-	billed.GET("/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId", c.getFundingScheduleById)
-	billed.POST("/bank_accounts/:bankAccountId/funding_schedules", c.postFundingSchedules)
-	billed.PATCH("/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId", c.patchFundingSchedule)
-	billed.DELETE("/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId", c.deleteFundingSchedules)
+	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/funding_schedules", c.getFundingSchedules)
+	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId", c.getFundingScheduleById)
+	billedKeyOrToken.POST("/bank_accounts/:bankAccountId/funding_schedules", c.postFundingSchedules)
+	billedKeyOrToken.PATCH("/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId", c.patchFundingSchedule)
+	billedKeyOrToken.DELETE("/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId", c.deleteFundingSchedules)
 	// Spending
-	billed.GET("/bank_accounts/:bankAccountId/spending", c.getSpending)
-	billed.GET("/bank_accounts/:bankAccountId/spending/:spendingId", c.getSpendingById)
-	billed.POST("/bank_accounts/:bankAccountId/spending", c.postSpending)
-	billed.POST("/bank_accounts/:bankAccountId/spending/transfer", c.postSpendingTransfer)
-	billed.PUT("/bank_accounts/:bankAccountId/spending/:spendingId", c.putSpending)
-	billed.PATCH("/bank_accounts/:bankAccountId/spending/:spendingId", c.patchSpending)
-	billed.DELETE("/bank_accounts/:bankAccountId/spending/:spendingId", c.deleteSpending)
-	billed.GET("/bank_accounts/:bankAccountId/spending/:spendingId/transactions", c.getSpendingTransactions)
+	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/spending", c.getSpending)
+	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/spending/:spendingId", c.getSpendingById)
+	billedKeyOrToken.POST("/bank_accounts/:bankAccountId/spending", c.postSpending)
+	billedKeyOrToken.POST("/bank_accounts/:bankAccountId/spending/transfer", c.postSpendingTransfer)
+	billedKeyOrToken.PUT("/bank_accounts/:bankAccountId/spending/:spendingId", c.putSpending)
+	billedKeyOrToken.PATCH("/bank_accounts/:bankAccountId/spending/:spendingId", c.patchSpending)
+	billedKeyOrToken.DELETE("/bank_accounts/:bankAccountId/spending/:spendingId", c.deleteSpending)
+	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/spending/:spendingId/transactions", c.getSpendingTransactions)
 	// Forecasting
-	billed.GET("/bank_accounts/:bankAccountId/forecast", c.getForecast)
-	billed.POST("/bank_accounts/:bankAccountId/forecast/spending", c.postForecastNewSpending)
-	billed.POST("/bank_accounts/:bankAccountId/forecast/next_funding", c.postForecastNextFunding)
-	// Plaid Link
-	billed.PUT("/plaid/link/update/:linkId", c.putUpdatePlaidLink)
-	billed.POST("/plaid/link/update/callback", c.updatePlaidTokenCallback)
-	billed.GET("/plaid/link/token/new", c.newPlaidToken)
-	billed.POST("/plaid/link/token/callback", c.postPlaidTokenCallback)
-	billed.GET("/plaid/link/setup/wait/:linkId", c.getWaitForPlaid)
-	billed.POST("/plaid/link/sync", c.postPlaidLinkSync)
+	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/forecast", c.getForecast)
+	billedKeyOrToken.POST("/bank_accounts/:bankAccountId/forecast/spending", c.postForecastNewSpending)
+	billedKeyOrToken.POST("/bank_accounts/:bankAccountId/forecast/next_funding", c.postForecastNextFunding)
+
+	// Plaid Link, these endpoints are not accessible via API keys because it
+	// creates a potential spam vector for plaid.
+	billedTokenOnly.PUT("/plaid/link/update/:linkId", c.putUpdatePlaidLink)
+	billedTokenOnly.POST("/plaid/link/update/callback", c.updatePlaidTokenCallback)
+	billedTokenOnly.GET("/plaid/link/token/new", c.newPlaidToken)
+	billedTokenOnly.POST("/plaid/link/token/callback", c.postPlaidTokenCallback)
+	billedTokenOnly.GET("/plaid/link/setup/wait/:linkId", c.getWaitForPlaid)
+	billedTokenOnly.POST("/plaid/link/sync", c.postPlaidLinkSync)
 
 	// These endpoints should only be made available when lunch flow is actually
 	// enabled in the configuration. This way the endpoints are not available for
 	// the hosted version of monetr, but are available for self-hosted instances.
-	lunchFlow := billed.Group("",
+	lunchFlow := billedKeyOrToken.Group("",
 		c.requireLunchFlowEnabledMiddleware,
 	)
 	// Lunch Flow Links
