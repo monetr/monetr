@@ -83,7 +83,7 @@ func (r *repositoryBase) DeleteApiKey(
 		Set(`"deleted_at" = ?`, r.clock.Now()).
 		Where(`"api_key"."api_key_id" = ?`, id).
 		Where(`"api_key"."account_id" = ?`, r.AccountId()).
-		Where(`"api_key"."deleted_at" IS NULL`, r.AccountId()).
+		Where(`"api_key"."deleted_at" IS NULL`).
 		Update()
 	if err != nil {
 		return errors.Wrap(err, "failed to delete api key")

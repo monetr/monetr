@@ -265,8 +265,8 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	// You are allowed to request your own user info if you have a token scoped to
 	// MFA or just a normally authenticated token.
 	userInfo := repoParty.Group("",
-		c.maybeTokenMiddleware,
 		c.maybeApiKeyMiddleware,
+		c.maybeTokenMiddleware,
 		c.requireAuthentication(security.AuthenticatedScope, security.MultiFactorScope),
 	)
 	userInfo.GET("/users/me", c.getMe)
@@ -314,8 +314,9 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billedKeyOrToken.POST("/links", c.postLinks)
 	billedKeyOrToken.PATCH("/links/:linkId", c.patchLink)
 	billedKeyOrToken.DELETE("/links/:linkId", c.deleteLink)
-	// Institutions
-	billedKeyOrToken.GET("/institutions/:institutionId", c.getInstitutionDetails)
+	// Institutions, this is not accessible via API keys because it is backed by
+	// Plaid and would create a potential spam vector for plaid.
+	billedTokenOnly.GET("/institutions/:institutionId", c.getInstitutionDetails)
 	// Bank Accounts
 	billedKeyOrToken.GET("/bank_accounts", c.getBankAccounts)
 	billedKeyOrToken.GET("/bank_accounts/:bankAccountId", c.getBankAccount)

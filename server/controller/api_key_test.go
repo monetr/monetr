@@ -52,6 +52,24 @@ func createApiKeyWithProofOfWork(t *testing.T, e *httpexpect.Expect, token strin
 		JSON().Object().Value("apiKeyId").String().NotEmpty().Raw()
 }
 
+// GivenIHaveAnApiKey creates an API key for the session identified by token and
+// returns the key's Id and secret. These are the credentials a client would use
+// as the username and password of an HTTP basic auth header to authenticate as
+// the API key, see WithBasicAuth. This assumes proof of work is disabled, which
+// is the default for the test configuration.
+func GivenIHaveAnApiKey(t *testing.T, e *httpexpect.Expect, token string) (apiKeyId, secret string) {
+	response := e.POST("/api/keys").
+		WithCookie(TestCookieName, token).
+		WithJSON(map[string]any{
+			"name": gofakeit.UUID(),
+		}).
+		Expect()
+	response.Status(http.StatusOK)
+	apiKeyId = response.JSON().Path("$.apiKeyId").String().NotEmpty().Raw()
+	secret = response.JSON().Path("$.secret").String().NotEmpty().Raw()
+	return apiKeyId, secret
+}
+
 func TestPostApiKey(t *testing.T) {
 	t.Run("proof of work disabled", func(t *testing.T) {
 		_, e := NewTestApplication(t)
@@ -67,6 +85,25 @@ func TestPostApiKey(t *testing.T) {
 		response.JSON().Path("$.apiKeyId").String().NotEmpty()
 		response.JSON().Path("$.secret").String().NotEmpty()
 		response.JSON().Path("$.name").String().IsEqual("My First Key")
+	})
+
+	t.Run("rejects a challenge when proof of work is disabled", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		// With proof of work disabled the plain schema is used, which does not
+		// permit a challenge or nonce. Supplying them must be rejected rather than
+		// silently ignored.
+		response := e.POST("/api/keys").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":      "My First Key",
+				"challenge": "should-not-be-here",
+				"nonce":     42,
+			}).
+			Expect()
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
 	})
 
 	t.Run("proof of work required when enabled", func(t *testing.T) {
@@ -147,6 +184,49 @@ func TestPostApiKey(t *testing.T) {
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("challenge already used")
 	})
+
+	t.Run("does not accept an api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		// Creating an API key is a token only endpoint, a valid API key must not
+		// be accepted as authentication for it.
+		e.POST("/api/keys").
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			WithJSON(map[string]any{
+				"name": "Should Not Work",
+			}).
+			Expect().
+			Status(http.StatusUnauthorized)
+	})
+}
+
+func TestGetApiKeys(t *testing.T) {
+	t.Run("lists the account's api keys", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		GivenIHaveAnApiKey(t, e, token)
+
+		response := e.GET("/api/keys").
+			WithCookie(TestCookieName, token).
+			Expect()
+		response.Status(http.StatusOK)
+		response.JSON().Array().NotEmpty()
+	})
+
+	t.Run("does not accept an api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		// Listing API keys is a token only endpoint, a valid API key must not be
+		// accepted as authentication for it.
+		e.GET("/api/keys").
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect().
+			Status(http.StatusUnauthorized)
+	})
 }
 
 func TestDeleteApiKey(t *testing.T) {
@@ -199,5 +279,19 @@ func TestDeleteApiKey(t *testing.T) {
 			}).
 			Expect().
 			Status(http.StatusOK)
+	})
+
+	t.Run("does not accept an api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		// Deleting an API key is a token only endpoint, a valid API key must not be
+		// accepted as authentication for it.
+		e.DELETE("/api/keys/{apiKeyId}").
+			WithPath("apiKeyId", apiKeyId).
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect().
+			Status(http.StatusUnauthorized)
 	})
 }
