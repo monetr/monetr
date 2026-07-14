@@ -118,9 +118,20 @@ func (c *Controller) requireActiveSubscriptionMiddleware(next echo.HandlerFunc) 
 // request.
 func (c *Controller) maybeApiKeyMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx *echo.Context) error {
-		log := c.getLog(ctx)
-		username, password, ok := ctx.Request().BasicAuth()
-		if ok {
+		// The authentication work happens inside its own closure the same way it
+		// does in maybeTokenMiddleware. The breadcrumb below is deferred, so it
+		// only gets added to the Sentry scope when the closure it was registered in
+		// returns. If that were this outer closure then the breadcrumb would not be
+		// added until after next(ctx) had already run, and any event the handler
+		// captured would be missing it.
+		if err := func(ctx *echo.Context) error {
+			log := c.getLog(ctx)
+			username, password, ok := ctx.Request().BasicAuth()
+			if !ok {
+				// No basic auth on this request, there is no API key to validate.
+				return nil
+			}
+
 			now := c.Clock.Now()
 			data := map[string]any{
 				"source": "key",
@@ -227,6 +238,13 @@ func (c *Controller) maybeApiKeyMiddleware(next echo.HandlerFunc) echo.HandlerFu
 			data["accountId"] = claims.AccountId
 			data["userId"] = claims.UserId
 			data["loginId"] = claims.LoginId
+
+			return nil
+		}(ctx); err != nil {
+			// The errors returned above are already shaped for the client (a 401 for
+			// bad credentials, a 500 if we could not talk to the database). Return
+			// them as they are, do not turn them all into a 500 here.
+			return err
 		}
 
 		return next(ctx)
@@ -321,6 +339,15 @@ func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFun
 				spanContext = context.WithValue(spanContext, ctxkeys.LoginID, claims.LoginId)
 				ctx.Set(spanContextKey, spanContext)
 			}
+
+			// The request is authenticated, say so on the breadcrumb. Without this
+			// the deferred breadcrumb above still reads "Request did not have valid
+			// auth", which is the opposite of the truth for every cookie
+			// authenticated request that later errors.
+			breadcrumbMessage = "Auth is valid"
+			data["accountId"] = claims.AccountId
+			data["userId"] = claims.UserId
+			data["loginId"] = claims.LoginId
 
 			return nil
 		}(ctx)
