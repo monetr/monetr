@@ -182,7 +182,7 @@ func (c *Controller) mustGetSecurityRepository(ctx *echo.Context) repository.Sec
 }
 
 func (c *Controller) getUnauthenticatedRepository(ctx *echo.Context) (repository.UnauthenticatedRepository, error) {
-	txn, ok := ctx.Get(databaseContextKey).(*pg.Tx)
+	txn, ok := ctx.Get(databaseContextKey).(pg.DBI)
 	if !ok {
 		return nil, errors.Errorf("no transaction for request")
 	}
