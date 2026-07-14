@@ -306,8 +306,6 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billedKeyOrToken.POST("/icons/search", c.searchIcon)
 	// Locale and currency data
 	billedKeyOrToken.GET("/locale/currency", c.listCurrencies)
-	// Account
-	billedKeyOrToken.DELETE("/account", c.deleteAccount)
 	// Links
 	billedKeyOrToken.GET("/links", c.getLinks)
 	billedKeyOrToken.GET("/links/:linkId", c.getLink)
