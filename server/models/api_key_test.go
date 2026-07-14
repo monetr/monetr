@@ -92,6 +92,35 @@ func TestApiKey_Verify(t *testing.T) {
 		assert.False(t, key.Verify(key.ApiKeyId, secret), "a secret that is not valid base32 must not verify")
 	})
 
+	t.Run("uppercase secret still verifies", func(t *testing.T) {
+		key, secret := newKey(t)
+		shouty := ApiKeySecretPrefix + strings.ToUpper(strings.TrimPrefix(secret, ApiKeySecretPrefix))
+		assert.True(t, key.Verify(key.ApiKeyId, shouty), "the secret should be case insensitive")
+	})
+
+	t.Run("only the canonical encoding of the seed verifies", func(t *testing.T) {
+		// 52 base32 characters carry 260 bits but an ed25519 seed is only 256, so
+		// the final character has 4 bits that the decoder throws away. Without a
+		// canonicalization check, all 16 spellings of that last character decode to
+		// the same seed and verify against this key. Sweep the entire alphabet over
+		// the last character, exactly one of them (the issued one) may verify.
+		const alphabet = "abcdefghijklmnopqrstuvwxyz234567"
+
+		key, secret := newKey(t)
+		encoded := strings.TrimPrefix(secret, ApiKeySecretPrefix)
+		require.Len(t, encoded, 52, "an encoded ed25519 seed should be 52 base32 characters")
+
+		verified := make([]string, 0, 1)
+		for _, char := range alphabet {
+			candidate := ApiKeySecretPrefix + encoded[:len(encoded)-1] + string(char)
+			if key.Verify(key.ApiKeyId, candidate) {
+				verified = append(verified, candidate)
+			}
+		}
+
+		assert.Equal(t, []string{secret}, verified, "only the issued secret may verify, no other spelling of its final character")
+	})
+
 	t.Run("seed is the wrong length", func(t *testing.T) {
 		key, _ := newKey(t)
 		// A perfectly valid (unpadded) base32 string, but it decodes to 16 bytes

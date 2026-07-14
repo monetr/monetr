@@ -73,10 +73,18 @@ func (o *ApiKey) Verify(keyId ID[ApiKey], secret string) bool {
 	}
 
 	// I miss clojure :(
-	seed, err := apiKeySecretEncoding.DecodeString(
-		strings.ToUpper(strings.TrimPrefix(secret, ApiKeySecretPrefix)),
-	)
+	encoded := strings.ToUpper(strings.TrimPrefix(secret, ApiKeySecretPrefix))
+	seed, err := apiKeySecretEncoding.DecodeString(encoded)
 	if err != nil || len(seed) != ed25519.SeedSize {
+		return false
+	}
+
+	// A 32 byte seed only needs 256 of the 260 bits that 52 base32 characters
+	// carry, the decoder throws away the 4 leftover bits in the final character.
+	// That means 16 different secrets decode to the same seed. Re-encoding and
+	// comparing forces the caller to present the one canonical spelling, so a
+	// hash of the secret (leak detection, secret scanning) is stable.
+	if apiKeySecretEncoding.EncodeToString(seed) != encoded {
 		return false
 	}
 
