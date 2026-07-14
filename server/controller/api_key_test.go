@@ -6,6 +6,7 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gavv/httpexpect/v2"
+	"github.com/monetr/monetr/server/models"
 )
 
 // givenIHaveTokenWithProofOfWork registers and logs in a fresh user against a
@@ -293,5 +294,37 @@ func TestDeleteApiKey(t *testing.T) {
 			WithBasicAuth(apiKeyId, apiKeySecret).
 			Expect().
 			Status(http.StatusUnauthorized)
+	})
+}
+
+func TestApiKeyAuthentication(t *testing.T) {
+	t.Run("a key that does not exist is unauthorized", func(t *testing.T) {
+		// A well formed key Id that simply is not in the database is a definitively
+		// bad credential, the client should be told so.
+		_, e := NewTestApplication(t)
+
+		e.GET("/api/files").
+			WithBasicAuth(
+				models.NewID[models.ApiKey]().String(),
+				"monetr_secret_"+gofakeit.UUID(),
+			).
+			Expect().
+			Status(http.StatusUnauthorized)
+	})
+
+	t.Run("a database failure is not an authentication failure", func(t *testing.T) {
+		// If the database is unreachable then we cannot know whether the credentials
+		// are any good. Returning a 401 here would blame the client for our outage,
+		// and would make a real key look like it had been revoked. The request must
+		// fail with a 500 instead.
+		_, e := NewTestApplicationWithBadDatabase(t)
+
+		e.GET("/api/files").
+			WithBasicAuth(
+				models.NewID[models.ApiKey]().String(),
+				"monetr_secret_"+gofakeit.UUID(),
+			).
+			Expect().
+			Status(http.StatusInternalServerError)
 	})
 }

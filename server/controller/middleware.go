@@ -14,6 +14,7 @@ import (
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -146,24 +147,40 @@ func (c *Controller) maybeApiKeyMiddleware(next echo.HandlerFunc) echo.HandlerFu
 				log.WarnContext(
 					c.getContext(ctx),
 					"invalid api key username provided",
-					"err", err,
 				)
 				return c.unauthorized(ctx)
 			}
 			apiKey, err := repo.GetApiKey(c.getContext(ctx), keyId)
-			if err != nil {
+			switch {
+			case err == nil:
+				// Keep going, we found a key for this Id.
+			case errors.Is(err, pg.ErrNoRows):
+				// There is no key with this Id, the credentials are definitively bad.
 				log.WarnContext(
 					c.getContext(ctx),
-					"invalid api key username provided",
+					"invalid api key provided",
 					"err", err,
 				)
 				return c.unauthorized(ctx)
+			default:
+				// Any other error means we could not determine whether the credentials
+				// are valid, the database might be down. Telling the client they are
+				// unauthorized would be a lie, and would make an outage look like an
+				// authentication problem for anyone using an API key. Fail loudly
+				// instead so that this gets reported.
+				log.ErrorContext(
+					c.getContext(ctx),
+					"failed to retrieve api key for authentication",
+					"err", err,
+				)
+				breadcrumbMessage = "Request auth could not be verified"
+				return c.wrapPgError(ctx, err, "failed to authenticate api key")
 			}
 
 			if !apiKey.Verify(keyId, password) {
 				log.WarnContext(
 					c.getContext(ctx),
-					"invalid api key username provided",
+					"invalid api key provided",
 					"err", "credential mismatch",
 				)
 				return c.unauthorized(ctx)

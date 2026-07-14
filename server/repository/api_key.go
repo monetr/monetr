@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
@@ -88,7 +89,8 @@ func (r *repositoryBase) DeleteApiKey(
 	if err != nil {
 		return errors.Wrap(err, "failed to delete api key")
 	} else if result.RowsAffected() == 0 {
-		return errors.New("invalid api key specified or key is already deactivated")
+		// Return this error so our upstream wrapPgError handles it properly
+		return errors.Wrap(pg.ErrNoRows, "invalid api key specified")
 	}
 
 	return nil
