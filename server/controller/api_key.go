@@ -5,11 +5,39 @@ import (
 
 	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/powchallenge"
 	"github.com/monetr/monetr/server/schemas"
 )
 
 func (c *Controller) postApiKey(ctx *echo.Context) error {
 	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	// When proof of work is enabled the request must include a solved challenge,
+	// so validate against the schema that knows about those fields. When it is
+	// disabled the plain schema is used which rejects them outright.
+	createSchema := schemas.CreateApiKey
+	if c.Configuration.ProofOfWork.Enabled {
+		createSchema = schemas.CreateApiKeyChallenge
+	}
+	request, err := parse(
+		c,
+		ctx,
+		new(schemas.CreateApiKeyRequest),
+		createSchema,
+	)
+	if err != nil {
+		return err
+	}
+
+	// The cheap fail-fast before we generate a key. No-op when disabled.
+	if err := c.validateProofOfWork(
+		ctx,
+		powchallenge.PurposeCreateApiKey,
+		request.Challenge,
+		request.Nonce,
+	); err != nil {
+		return err // validateProofOfWork returns a valid http error.
+	}
 
 	key, secret, err := models.NewApiKey()
 	if err != nil {
@@ -20,16 +48,7 @@ func (c *Controller) postApiKey(ctx *echo.Context) error {
 			"Failed to generate API key",
 		)
 	}
-
-	key, err = parse(
-		c,
-		ctx,
-		key,
-		schemas.CreateApiKey,
-	)
-	if err != nil {
-		return err
-	}
+	key.Name = request.Name
 
 	if err := repo.CreateApiKey(c.getContext(ctx), key); err != nil {
 		return c.wrapPgError(ctx, err, "Failed to create API key")
@@ -60,6 +79,29 @@ func (c *Controller) deleteApiKey(ctx *echo.Context) error {
 	apiKeyId, err := models.ParseID[models.ApiKey](ctx.Param("apiKeyId"))
 	if err != nil {
 		return c.badRequest(ctx, "Must specify a valid API key Id")
+	}
+
+	// When proof of work is enabled the request must carry a solved challenge in
+	// its body. When it is disabled the delete request has no body at all.
+	if c.Configuration.ProofOfWork.Enabled {
+		request, err := parse(
+			c,
+			ctx,
+			new(schemas.DeleteApiKeyRequest),
+			schemas.DeleteApiKeyChallenge,
+		)
+		if err != nil {
+			return err
+		}
+
+		if err := c.validateProofOfWork(
+			ctx,
+			powchallenge.PurposeDeleteApiKey,
+			request.Challenge,
+			request.Nonce,
+		); err != nil {
+			return err // validateProofOfWork returns a valid http error.
+		}
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)

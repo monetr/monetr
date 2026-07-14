@@ -2054,7 +2054,7 @@ func TestPostProofOfWorkChallenge(t *testing.T) {
 
 		// Every purpose the UI might ask for should get a challenge back at the
 		// configured difficulty.
-		for _, purpose := range []string{"register", "login", "forgot", "resend"} {
+		for _, purpose := range []string{"register", "login", "forgot", "resend", "create_api_key", "delete_api_key"} {
 			response := e.POST("/api/authentication/challenge").
 				WithJSON(map[string]any{
 					"purpose": purpose,
