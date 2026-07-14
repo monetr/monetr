@@ -17,6 +17,10 @@ const (
 	ApiKeySecretPrefix = "monetr_secret_"
 )
 
+// apiKeySecretEncoding is just base32 without padding because i think trailing
+// equal signs looks ugly
+var apiKeySecretEncoding = base32.StdEncoding.WithPadding(base32.NoPadding)
+
 type ApiKey struct {
 	tableName string `pg:"api_keys"`
 
@@ -69,7 +73,7 @@ func (o *ApiKey) Verify(keyId ID[ApiKey], secret string) bool {
 	}
 
 	// I miss clojure :(
-	seed, err := base32.StdEncoding.DecodeString(
+	seed, err := apiKeySecretEncoding.DecodeString(
 		strings.ToUpper(strings.TrimPrefix(secret, ApiKeySecretPrefix)),
 	)
 	if err != nil || len(seed) != ed25519.SeedSize {
@@ -85,7 +89,7 @@ func NewApiKey() (*ApiKey, string, error) {
 	if err != nil {
 		return nil, "", errors.Wrap(err, "failed to generate api key")
 	}
-	secret := base32.StdEncoding.EncodeToString(private.Seed())
+	secret := apiKeySecretEncoding.EncodeToString(private.Seed())
 
 	return &ApiKey{
 		PublicKey: public,
