@@ -26,7 +26,7 @@ describe('create api key', () => {
       createdBy: 'user_01hy4rbb1gjdek7h2xmgy5pnwk', // 4,
       updatedAt: '2023-07-02T04:22:52.48118Z',
       deletedAt: null,
-      secret: 'monetr_sk_01hy4rfqk8z4xv1c2v44cf6abc',
+      secret: 'monetr_secret_aebagbafaydqqcikbmga2dqpcaireeyuculbogazdinryhi6d4qa',
     });
 
     const world = testRenderHook(useCreateApiKey, {
@@ -43,7 +43,7 @@ describe('create api key', () => {
     expect(result.name).toBe('Personal Automation');
     // The secret is only ever returned on create, it is not part of the ApiKey model itself so make sure the hook grafts
     // it onto the response instead of dropping it on the floor.
-    expect(result.secret).toBe('monetr_sk_01hy4rfqk8z4xv1c2v44cf6abc');
+    expect(result.secret).toBe('monetr_secret_aebagbafaydqqcikbmga2dqpcaireeyuculbogazdinryhi6d4qa');
     // The rest of the payload should still be hydrated the way the model would do it.
     expect(result.createdAt).toBeInstanceOf(Date);
     expect(result.deletedAt).toBeNull();
@@ -57,7 +57,7 @@ describe('create api key', () => {
       createdBy: 'user_01hy4rbb1gjdek7h2xmgy5pnwk', // 4,
       updatedAt: '2023-07-02T04:22:52.48118Z',
       deletedAt: null,
-      secret: 'monetr_sk_01hy4rfqk8z4xv1c2v44cf6abc',
+      secret: 'monetr_secret_aebagbafaydqqcikbmga2dqpcaireeyuculbogazdinryhi6d4qa',
     });
 
     const world = testRenderHook(useCreateApiKey, {
