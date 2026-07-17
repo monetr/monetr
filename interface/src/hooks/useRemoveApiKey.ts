@@ -9,8 +9,8 @@ import request from '@monetr/interface/util/request';
 export type RemoveApiKeyRequest =
   | {
       apiKeyId: ID<ApiKey>;
-      challenge: never;
-      nonce: never;
+      challenge?: never;
+      nonce?: never;
     }
   | {
       apiKeyId: ID<ApiKey>;
