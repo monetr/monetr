@@ -7,7 +7,7 @@ export default class ApiKey {
   readonly [idPrefix] = 'key';
 
   readonly apiKeyId: ID<ApiKey>;
-  readonly name: string;
+  name: string;
   readonly createdAt: Date;
   readonly createdBy: ID<User>;
   readonly updatedAt: Date;
