@@ -26,7 +26,7 @@ export default function Code(props: CodeProps): React.JSX.Element {
     id,
     ...props,
   };
-  const { labelDecorator, icon, ...otherProps } = props;
+  const { labelDecorator, icon, className, ...otherProps } = props;
   const LabelDecorator = labelDecorator ?? (() => null);
   const Icon = icon ?? (() => null);
 
@@ -54,7 +54,7 @@ export default function Code(props: CodeProps): React.JSX.Element {
       <div>
         <div className={mergeClasses(inputStyles.input, styles.root)}>
           <Icon />
-          <code className={styles.code} {...otherProps}>
+          <code className={mergeClasses(styles.code, className)} {...otherProps}>
             {props.children}
           </code>
           {Boolean(props.copy) && (
