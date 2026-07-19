@@ -49,7 +49,7 @@
     "react": "19.2.7",
     "react-day-picker": "10.0.1",
     "react-dom": "19.2.7",
-    "react-dropzone": "15.0.0",
+    "react-dropzone": "16.0.0",
     "react-number-format": "5.4.5",
     "react-plaid-link": "4.1.1",
     "react-qr-code": "2.2.0",
