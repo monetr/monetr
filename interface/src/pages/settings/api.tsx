@@ -1,35 +1,52 @@
-import { Book, KeyRound, Plus } from 'lucide-react';
+import { useCallback } from 'react';
+import { Book, KeyRound, Plus, RefreshCcw, ServerCrash } from 'lucide-react';
 
 import { Button } from '@monetr/interface/components/Button';
 import Card from '@monetr/interface/components/Card';
+import SettingsAPIHeader from '@monetr/interface/components/settings/SettingsAPI/Header';
 import Typography from '@monetr/interface/components/Typography';
+import useApiKeys from '@monetr/interface/hooks/useApiKeys';
 
 import styles from './api.module.scss';
 
 export default function SettingsAPIKeys(): React.JSX.Element {
+  const { data: keys, isLoading, isError, refetch, isFetching } = useApiKeys();
+
+  const refresh = useCallback(() => refetch(), [refetch]);
+
+  if (isLoading) {
+    return <div>Loading placeholder </div>;
+  }
+
+  if (isError) {
+    return (
+      <div className={styles.root}>
+        <SettingsAPIHeader />
+        <Card className={styles.cardRoot}>
+          <ServerCrash className={styles.errorLogo} />
+          <div className={styles.cardEmptyText}>
+            <Typography size='lg' weight='bold'>
+              We couldn't load your keys
+            </Typography>
+            <Typography color='subtle' size='lg' weight='normal'>
+              monetr didn't response as expected; your keys are safe and nothing was changed. Try again in just a
+              moment.
+            </Typography>
+          </div>
+          <div className={styles.cardEmptyActions}>
+            <Button disabled={isFetching} onClick={refresh}>
+              <RefreshCcw />
+              Try Again
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.root}>
-      <div className={styles.headerRow}>
-        <div>
-          <Typography color='emphasis' component='h1' size='3xl' weight='semibold'>
-            API Keys
-          </Typography>
-          <Typography size='md' weight='normal'>
-            Use API keys to connect monetr to scripts, or other custom automation tools. You can manage the keys created
-            for this account.
-          </Typography>
-        </div>
-        <div className={styles.headerRowAction}>
-          <Button variant='outlined'>
-            <Book />
-            API Docs
-          </Button>
-          <Button>
-            <Plus />
-            New API Key
-          </Button>
-        </div>
-      </div>
+      <SettingsAPIHeader />
       <Card className={styles.cardRoot}>
         <div className={styles.keyLogos}>
           <KeyRound className={styles.keyLogosBack} />

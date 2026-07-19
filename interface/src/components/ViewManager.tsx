@@ -20,7 +20,7 @@ export interface ViewContextType<T extends string, Metadata, Form> {
 
 const ViewContext = createContext<ViewContextType<string, unknown, unknown> | undefined>(undefined);
 
-function useViewContext<T extends string, Metadata extends {}, Form extends {}>() {
+function useViewContext<T extends string, Metadata extends {}, Form>() {
   const context = useContext(ViewContext);
   if (!context) {
     throw new Error('useViewContext must be used within a ViewManager');

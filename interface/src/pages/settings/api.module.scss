@@ -10,30 +10,6 @@
   flex: 1; // Grow without doing dumb shit
 }
 
-@media (max-width: variables.$largeScreen) {
-  .headerRow {
-    flex-direction: column;
-
-    &Action {
-      align-self: normal !important;
-    }
-  }
-}
-
-.headerRow {
-  display: flex;
-  width: 100%;
-  gap: 2 * variables.$size;
-  justify-content: space-between;
-
-  &Action {
-    display: inherit;
-    flex-shrink: 0;
-    align-self: center;
-    gap: inherit;
-  }
-}
-
 .cardRoot {
   display: flex;
   flex-direction: column;
@@ -63,6 +39,15 @@
 .cardEmptyActions {
   display: flex;
   gap: 2 * variables.$size;
+}
+
+.errorLogo {
+  display: flex;
+  height: 16 * variables.$size;
+  width: 16 * variables.$size;
+  padding: 3 * variables.$size;
+  border-radius: var(--border-radius);
+  background: var(--error);
 }
 
 .keyLogos {

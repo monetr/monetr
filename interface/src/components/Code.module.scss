@@ -1,0 +1,26 @@
+@use '@monetr/interface/variables';
+
+.root {
+  display: flex;
+  align-items: center;
+  gap: 2 * variables.$size;
+
+  > svg {
+    height: 4 * variables.$size;
+    width: 4 * variables.$size;
+    align-self: center;
+  }
+}
+
+.code {
+  flex: 1;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  line-height: normal;
+  overflow: hidden;
+  align-self: center;
+  text-box: trim-both cap alphabetic;
+  text-overflow: ellipsis;
+  min-width: 0px;
+  white-space: nowrap;
+  padding-block: 1 * variables.$size;
+}
