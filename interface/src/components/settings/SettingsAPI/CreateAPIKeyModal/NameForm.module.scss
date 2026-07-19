@@ -1,0 +1,8 @@
+@use '@monetr/interface/variables';
+
+.notice {
+  display: flex;
+  gap: 2 * variables.$size;
+  background: var(--background-subtle);
+  padding: 2 * variables.$size;
+}
