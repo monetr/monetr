@@ -48,14 +48,14 @@ export default function CreateAPIKeyModalNameForm(): React.JSX.Element {
         )
         .then(result => viewContext.updateMetadata({ result }))
         .then(() => viewContext.goToView(CreateAPIKeySteps.Secret))
-        .catch(
-          (error: ApiError<APIError>) =>
-            void enqueueSnackbar(error.response.data.error, {
-              variant: 'error',
-              disableWindowBlurListener: true,
-            }),
-        )
-        .finally(() => pow.reset());
+        .catch((error: ApiError<APIError>) => {
+          enqueueSnackbar(error.response.data.error, {
+            variant: 'error',
+            disableWindowBlurListener: true,
+          });
+          // To prevent duplicate challenge attempts and failures, reset the challenge so the user can try again.
+          pow.reset();
+        });
     },
     [createApiKey, enqueueSnackbar, pow, viewContext],
   );
