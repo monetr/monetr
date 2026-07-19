@@ -22,6 +22,7 @@ export default function SettingsLayout(props: SettingsLayoutProps): React.JSX.El
       <div className={styles.tabs}>
         <SettingTab to='/settings/overview'>Overview</SettingTab>
         <SettingTab to='/settings/security'>Security</SettingTab>
+        <SettingTab to='/settings/api'>API Keys</SettingTab>
         {config?.data?.billingEnabled && <SettingTab to='/settings/billing'>Billing</SettingTab>}
         <SettingTab to='/settings/about'>About</SettingTab>
       </div>
