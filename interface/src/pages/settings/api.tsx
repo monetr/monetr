@@ -12,6 +12,7 @@ import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { DateLength, formatDate } from '@monetr/interface/util/formatDate';
 
 import styles from './api.module.scss';
+import { showRevokeAPIKeyModal } from '@monetr/interface/components/settings/SettingsAPI/RevokeAPIKeyModal';
 
 export default function SettingsAPIKeys(): React.JSX.Element {
   const { data: keys, isLoading, isError, refetch, isFetching, isSuccess } = useApiKeys();
@@ -105,7 +106,7 @@ export default function SettingsAPIKeys(): React.JSX.Element {
             </div>
           </div>
           <div>
-            <Button variant='destructive'>
+            <Button onClick={() => showRevokeAPIKeyModal({ apiKey: item })} variant='destructive'>
               <Trash />
               Revoke
             </Button>
