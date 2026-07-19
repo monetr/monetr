@@ -2,6 +2,7 @@
 
 .root {
   display: flex;
+  min-width: 0px;
   align-items: center;
   gap: 2 * variables.$size;
 
@@ -14,6 +15,7 @@
 
 .code {
   flex: 1;
+  flex-shrink: 1;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   line-height: normal;
   overflow: hidden;

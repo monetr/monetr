@@ -1,10 +1,10 @@
 import { Book, Plus } from 'lucide-react';
 
 import { Button } from '@monetr/interface/components/Button';
+import { showCreateAPIKeyModal } from '@monetr/interface/components/settings/SettingsAPI/CreateAPIKeyModal';
 import Typography from '@monetr/interface/components/Typography';
 
 import styles from './Header.module.scss';
-import { showCreateAPIKeyModal } from '@monetr/interface/components/settings/SettingsAPI/CreateAPIKeyModal';
 
 export default function Header(): React.JSX.Element {
   return (

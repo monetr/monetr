@@ -3,9 +3,9 @@ import NiceModal, { useModal } from '@ebay/nice-modal-react';
 
 import Modal, { type ModalRef } from '@monetr/interface/components/Modal';
 import NameForm from '@monetr/interface/components/settings/SettingsAPI/CreateAPIKeyModal/NameForm';
+import SecretView from '@monetr/interface/components/settings/SettingsAPI/CreateAPIKeyModal/SecretView';
 import { ViewManager } from '@monetr/interface/components/ViewManager';
 import type { CreateApiKeyResponse } from '@monetr/interface/hooks/useCreateApiKey';
-import SecretView from '@monetr/interface/components/settings/SettingsAPI/CreateAPIKeyModal/SecretView';
 
 export interface CreateAPIKeyMetadata {
   result?: CreateApiKeyResponse;

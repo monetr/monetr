@@ -76,3 +76,24 @@
     margin-left: -2 * variables.$size;
   }
 }
+
+.item {
+  display: flex;
+  flex-direction: row;
+  gap: 4 * variables.$size;
+
+  &Content {
+    flex: 1;
+    min-width: 0;
+
+    &KeyId {
+      max-width: 96 * variables.$size;
+    }
+
+    &Metadata {
+      display: flex;
+      gap: 2 * variables.$size;
+    }
+  }
+
+}

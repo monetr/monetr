@@ -42,6 +42,7 @@ func (r *repositoryBase) GetApiKeys(
 	err := r.txn.ModelContext(span.Context(), &result).
 		Where(`"api_key"."account_id" = ?`, r.AccountId()).
 		Where(`"api_key"."deleted_at" IS NULL`).
+		Order(`api_key_id DESC`).
 		Select(&result)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
