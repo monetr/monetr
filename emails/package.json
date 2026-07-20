@@ -17,7 +17,7 @@
     "@types/webpack-env": "1.18.8",
     "cheerio": "1.2.0",
     "html-to-text": "10.0.0",
-    "juice": "11.1.1",
+    "juice": "12.1.1",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "sass": "1.101.0",
