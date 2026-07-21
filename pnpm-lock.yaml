@@ -281,11 +281,11 @@ importers:
         specifier: 2.0.1
         version: 2.0.1(@rsbuild/core@2.1.5(core-js@3.47.0))
       '@rspack/binding-linux-arm64-gnu':
-        specifier: 2.1.3
-        version: 2.1.3
+        specifier: 2.1.4
+        version: 2.1.4
       '@rspack/binding-linux-x64-gnu':
-        specifier: 2.1.3
-        version: 2.1.3
+        specifier: 2.1.4
+        version: 2.1.4
       '@rstest/adapter-rsbuild':
         specifier: 0.11.1
         version: 0.11.1(@rsbuild/core@2.1.5(core-js@3.47.0))(@rstest/core@0.11.1(core-js@3.47.0)(jsdom@26.1.0))
@@ -1249,6 +1249,12 @@ packages:
     os: [linux]
     libc: [glibc]
 
+  '@rspack/binding-linux-arm64-gnu@2.1.4':
+    resolution: {integrity: sha512-x0HQTLU1MusCtNamuXxf3ayEPkvh9uuaq4wVyBqveRkn4FznSOoHUsxTAKMnjGARX+vdLV/y/SwWJRDp2RI4zw==}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
   '@rspack/binding-linux-arm64-musl@2.1.3':
     resolution: {integrity: sha512-flIE7eluz0d21Fn28EVm3vPwoJooOSqtmjLFVSuOMcoCbwV9clfor195oIrAppp/W7dL/3XquFuVfrsa01Jy8Q==}
     cpu: [arm64]
@@ -1269,6 +1275,12 @@ packages:
 
   '@rspack/binding-linux-x64-gnu@2.1.3':
     resolution: {integrity: sha512-lMXjoGKf0SnviH596fmTszgtnXLHmWOoE90G8grG9MvKVa3pelRmfps5ewZL9s8ENf3NXRfOxIhIf/M9as6MqA==}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@rspack/binding-linux-x64-gnu@2.1.4':
+    resolution: {integrity: sha512-C53B3e6M4yzlYn4hDxR9cHZV+HqkfFGR0zuhH8QCfdBfN5KyGsmXmujiFU85ANEvBgf9CF8VreBQeJ20lyto/g==}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
@@ -4790,7 +4802,10 @@ snapshots:
   '@rspack/binding-darwin-x64@2.1.3':
     optional: true
 
-  '@rspack/binding-linux-arm64-gnu@2.1.3': {}
+  '@rspack/binding-linux-arm64-gnu@2.1.3':
+    optional: true
+
+  '@rspack/binding-linux-arm64-gnu@2.1.4': {}
 
   '@rspack/binding-linux-arm64-musl@2.1.3':
     optional: true
@@ -4801,7 +4816,10 @@ snapshots:
   '@rspack/binding-linux-riscv64-musl@2.1.3':
     optional: true
 
-  '@rspack/binding-linux-x64-gnu@2.1.3': {}
+  '@rspack/binding-linux-x64-gnu@2.1.3':
+    optional: true
+
+  '@rspack/binding-linux-x64-gnu@2.1.4': {}
 
   '@rspack/binding-linux-x64-musl@2.1.3':
     optional: true
