@@ -19,7 +19,7 @@ require (
 	github.com/elliotcourant/gofx v0.0.1
 	github.com/fsnotify/fsnotify v1.10.1
 	github.com/gavv/httpexpect/v2 v2.17.0
-	github.com/getsentry/sentry-go v0.47.0
+	github.com/getsentry/sentry-go v0.48.0
 	github.com/go-pg/pg/v10 v10.15.1
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
