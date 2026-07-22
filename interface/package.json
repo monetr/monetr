@@ -58,7 +58,7 @@
   },
   "devDependencies": {
     "@imagemagick/magick-wasm": "0.0.41",
-    "@rsbuild/core": "2.1.5",
+    "@rsbuild/core": "2.1.6",
     "@rsbuild/plugin-babel": "2.0.1",
     "@rsbuild/plugin-react": "2.1.0",
     "@rsbuild/plugin-sass": "2.0.1",
