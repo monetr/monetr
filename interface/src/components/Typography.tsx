@@ -27,7 +27,7 @@ export const textVariants = cva([styles.root], {
   variants: {
     component: {
       span: undefined,
-      p: undefined,
+      p: styles.prose,
       h1: undefined,
       h3: undefined,
       code: styles.code,

@@ -13,6 +13,11 @@ export interface MModalProps {
 
 export type MModalRef = HTMLDivElement;
 
+/**
+ * @deprecated Use {@link import('@monetr/interface/components/Modal').default} instead. This component doesn't forward
+ * `className`, so callers can't style it. Removal planned for the v2 UI pass.
+ * @see {@link import('@monetr/interface/components/Modal').default}
+ */
 const MModal = React.forwardRef<MModalRef, MModalProps>((props, ref) => {
   if (!props.open) {
     return null;

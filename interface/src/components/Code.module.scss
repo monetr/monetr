@@ -1,0 +1,35 @@
+@use '@monetr/interface/variables';
+
+.root {
+  display: flex;
+  min-width: 0px;
+  align-items: center;
+  gap: 2 * variables.$size;
+
+  > svg {
+    height: 4 * variables.$size;
+    width: 4 * variables.$size;
+    align-self: center;
+  }
+
+  > button {
+    // Without this it makes the text fields too big!
+    height: 6 * variables.$size;
+    padding-left: 2 * variables.$size;
+    padding-right: 2 * variables.$size;
+  }
+}
+
+.code {
+  flex: 1;
+  flex-shrink: 1;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  line-height: normal;
+  overflow: hidden;
+  align-self: center;
+  text-box: trim-both cap alphabetic;
+  text-overflow: ellipsis;
+  min-width: 0px;
+  white-space: nowrap;
+  padding-block: 1 * variables.$size;
+}

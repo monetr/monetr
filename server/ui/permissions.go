@@ -17,7 +17,7 @@ func init() {
 		"autoplay":                  {},
 		"camera":                    {},
 		"clipboard-read":            {},
-		"clipboard-write":           {},
+		"clipboard-write":           {"self"},
 		"cross-origin-isolated":     {},
 		"display-capture":           {},
 		"encrypted-media":           {},

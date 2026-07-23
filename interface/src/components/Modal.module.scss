@@ -72,3 +72,21 @@ $basePadding: 2 * variables.$size;
     padding: $basePadding;
   }
 }
+
+.heading {
+  margin-bottom: 2 * variables.$size;
+}
+
+.content {
+  display: flex;
+  padding: 2 * variables.$size;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+}
+
+.actions {
+  margin-top: 2 * variables.$size;
+  display: flex;
+  gap: 2 * variables.$size;
+  justify-content: end;
+}

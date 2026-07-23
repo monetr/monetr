@@ -1,43 +1,38 @@
 @use '@monetr/interface/mixins';
 @use '@monetr/interface/variables';
 
-:global(.sidebar-open) {
-  .bankSidebarWrapperRoot {
-    display: flex;
-  }
-
-  @media (max-width: variables.$largeScreen) {
+@media (max-width: variables.$largeScreen) {
+  :global(.sidebar-open) {
     .bankSidebarWrapperRoot {
       background-color: color-mix(in srgb, var(--background) 50%, transparent);
       backdrop-filter: blur(4px) brightness(0.3);
+      position: fixed;
+      display: flex;
     }
   }
-}
 
-:global(.sidebar-close) {
-  .bankSidebarWrapperRoot {
-    display: none;
-  }
-
-  @media (min-width: variables.$largeScreen) {
+  :global(.sidebar-close) {
     .bankSidebarWrapperRoot {
-      display: flex;
+      display: none;
     }
   }
 }
 
 .bankSidebarWrapperRoot {
   z-index: 41;
-  position: fixed;
+  position: sticky;
   left: 0;
   top: 0;
   bottom: 0;
+  display: flex;
+  flex-shrink: 0;
 
   border-right: 1px solid var(--border);
   flex-direction: column;
   width: var(--bank-sidebar-width-static);
   gap: 4 * variables.$size;
   align-items: center;
+  height: 100vh;
 
   padding-top: calc(4 * variables.$size + env(safe-area-inset-top));
   padding-bottom: calc(4 * variables.$size + env(safe-area-inset-bottom));

@@ -1,0 +1,99 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.root {
+  padding: 4 * variables.$size;
+  display: flex;
+  flex-direction: column;
+  gap: 4 * variables.$size;
+
+  flex: 1; // Grow without doing dumb shit
+}
+
+.cardRoot {
+  display: flex;
+  flex-direction: column;
+  gap: inherit;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.cardEmptyText {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  max-width: 75vw;
+}
+
+
+// When we move to a smaller screen we want to stack the empty action buttons.
+@media (max-width: variables.$smallScreen) {
+  .cardEmptyActions {
+    flex-direction: column;
+  }
+}
+
+.cardEmptyActions {
+  display: flex;
+  gap: 2 * variables.$size;
+}
+
+.errorLogo {
+  display: flex;
+  height: 16 * variables.$size;
+  width: 16 * variables.$size;
+  padding: 3 * variables.$size;
+  border-radius: var(--border-radius);
+  background: var(--error);
+}
+
+.keyLogos {
+  display: flex;
+
+  &Back {
+    color: var(--content);
+    height: 16 * variables.$size;
+    width: 16 * variables.$size;
+    padding: 3 * variables.$size;
+    border: 1px var(--border) solid;
+    border-radius: var(--border-radius);
+    background: var(--background-darker);
+    transform: rotate(-15deg);
+  }
+
+  &Front {
+    color: var(--content-emphasis);
+    height: 16 * variables.$size;
+    width: 16 * variables.$size;
+    padding: 3 * variables.$size;
+    border-radius: var(--border-radius);
+    background: var(--brand);
+    transform: rotate(10deg);
+    margin-top: 4 * variables.$size;
+    margin-left: -2 * variables.$size;
+  }
+}
+
+.item {
+  display: flex;
+  flex-direction: row;
+  gap: 4 * variables.$size;
+
+  &Content {
+    flex: 1;
+    min-width: 0;
+
+    &KeyId {
+      max-width: 96 * variables.$size;
+    }
+
+    &Metadata {
+      display: flex;
+      gap: 2 * variables.$size;
+    }
+  }
+
+}
