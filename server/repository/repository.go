@@ -197,6 +197,11 @@ type BaseRepository interface {
 	CreateLunchFlowTransactions(ctx context.Context, transaction []LunchFlowTransaction) error
 
 	fileRepositoryInterface
+
+	GetApiKeyById(ctx context.Context, id ID[ApiKey]) (*ApiKey, error)
+	GetApiKeys(ctx context.Context) ([]ApiKey, error)
+	CreateApiKey(ctx context.Context, key *ApiKey) error
+	DeleteApiKey(ctx context.Context, id ID[ApiKey]) error
 }
 
 type Repository interface {
@@ -217,6 +222,7 @@ type UnauthenticatedRepository interface {
 	SetEmailVerified(ctx context.Context, emailAddress string) error
 	UseBetaCode(ctx context.Context, betaId ID[Beta], usedBy ID[User]) error
 	ValidateBetaCode(ctx context.Context, betaCode string) (*Beta, error)
+	GetApiKey(ctx context.Context, keyId ID[ApiKey]) (*ApiKey, error)
 }
 
 func NewRepositoryFromSession(

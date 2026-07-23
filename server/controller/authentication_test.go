@@ -726,6 +726,22 @@ func TestMultifactor(t *testing.T) {
 			assert.Equal(t, security.AuthenticatedScope, claims.Scope, "token must have the authenticated scope")
 		}
 	})
+
+	t.Run("does not accept an api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		// The multifactor endpoint requires a token scoped for MFA, a valid API
+		// key must not be accepted as authentication for it.
+		e.POST("/api/authentication/multifactor").
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			WithJSON(map[string]any{
+				"totp": "123456",
+			}).
+			Expect().
+			Status(http.StatusUnauthorized)
+	})
 }
 
 func TestRegister(t *testing.T) {
@@ -2054,7 +2070,7 @@ func TestPostProofOfWorkChallenge(t *testing.T) {
 
 		// Every purpose the UI might ask for should get a challenge back at the
 		// configured difficulty.
-		for _, purpose := range []string{"register", "login", "forgot", "resend"} {
+		for _, purpose := range []string{"register", "login", "forgot", "resend", "create_api_key", "delete_api_key"} {
 			response := e.POST("/api/authentication/challenge").
 				WithJSON(map[string]any{
 					"purpose": purpose,

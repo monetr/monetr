@@ -19,7 +19,7 @@ var (
 	ChallengeSchema = validation.Map(
 		validation.Key("purpose",
 			// Corelates to [powchallenge.Purpose]
-			validation.In("register", "login", "forgot", "resend"),
+			validation.In("register", "login", "forgot", "resend", "create_api_key", "delete_api_key"),
 			validation.Required,
 		).Required(Require),
 	)

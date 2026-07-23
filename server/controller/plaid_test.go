@@ -322,3 +322,77 @@ func TestPostSyncPlaidManually(t *testing.T) {
 		response.JSON().Path("$.error").String().IsEqual("cannot manually sync a non-Plaid link")
 	})
 }
+
+// TestPlaidEndpointsRejectApiKeys makes sure that none of the Plaid endpoints
+// can be authenticated with an API key. They are intentionally token only
+// because allowing API keys to drive Plaid would create a spam vector against
+// Plaid. Each endpoint must reject a valid API key with a 401.
+func TestPlaidEndpointsRejectApiKeys(t *testing.T) {
+	t.Run("update plaid link", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		e.PUT("/api/plaid/link/update/{linkId}").
+			WithPath("linkId", "lnk_bogus").
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect().
+			Status(http.StatusUnauthorized)
+	})
+
+	t.Run("update plaid token callback", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		e.POST("/api/plaid/link/update/callback").
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect().
+			Status(http.StatusUnauthorized)
+	})
+
+	t.Run("new plaid token", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		e.GET("/api/plaid/link/token/new").
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect().
+			Status(http.StatusUnauthorized)
+	})
+
+	t.Run("plaid token callback", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		e.POST("/api/plaid/link/token/callback").
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect().
+			Status(http.StatusUnauthorized)
+	})
+
+	t.Run("wait for plaid", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		e.GET("/api/plaid/link/setup/wait/{linkId}").
+			WithPath("linkId", "lnk_bogus").
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect().
+			Status(http.StatusUnauthorized)
+	})
+
+	t.Run("plaid link sync", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		e.POST("/api/plaid/link/sync").
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect().
+			Status(http.StatusUnauthorized)
+	})
+}
