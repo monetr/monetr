@@ -11,6 +11,13 @@
     width: 4 * variables.$size;
     align-self: center;
   }
+
+  > button {
+    // Without this it makes the text fields too big!
+    height: 6 * variables.$size;
+    padding-left: 2 * variables.$size;
+    padding-right: 2 * variables.$size;
+  }
 }
 
 .code {
