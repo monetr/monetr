@@ -247,8 +247,8 @@ importers:
         specifier: 19.2.7
         version: 19.2.7(react@19.2.7)
       react-dropzone:
-        specifier: 17.0.0
-        version: 17.0.0(react@19.2.7)
+        specifier: 18.2.0
+        version: 18.2.0(@types/react@19.2.17)(react@19.2.7)
       react-number-format:
         specifier: 5.4.5
         version: 5.4.5(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -2215,9 +2215,9 @@ packages:
   fflate@0.7.4:
     resolution: {integrity: sha512-5u2V/CDW15QM1XbbgS+0DfPxVB+jUKhWEKuuFuHncbk3tEEqzmoXL+2KyOFuKGqOnmdIy0/davWF1CkuwtibCw==}
 
-  file-selector@2.1.0:
-    resolution: {integrity: sha512-ZuXAqGePcSPz4JuerOY06Dzzq0hrmQ6VGoXVzGyFI1npeOfBgqGIKKpznfYWRkSLJlXutkqVC5WvGZtkFVhu9Q==}
-    engines: {node: '>= 12'}
+  file-selector@4.0.2:
+    resolution: {integrity: sha512-gG5a3fIH+jVZY3AZeupJBjYnRd65YUTCO26gKhfE24LvmGPmBAx0peyxrjUkX6PhKfTUl9UPi7UYwvDS6RI2Jg==}
+    engines: {node: '>= 20'}
 
   fill-range@7.1.1:
     resolution: {integrity: sha512-YsGpe3WHLK8ZYi4tWDg2Jy3ebRz2rXowDxnld4bkQB00cc/1Zw9AWnC0i9ztDJitivtQvaI9KaLyKrc+hBW0yg==}
@@ -3037,11 +3037,15 @@ packages:
     peerDependencies:
       react: ^19.2.7
 
-  react-dropzone@17.0.0:
-    resolution: {integrity: sha512-yedj9VzdC/boq15u0XfzWRGX0Mqpb8dxy/TRDqOIFlISl8nhh38R9QKbztyFqxqLMwLdViVtLbXkv6x/b8gP8A==}
+  react-dropzone@18.2.0:
+    resolution: {integrity: sha512-odmq0PrrSHuyf+RdyBQrd3GIu+H3LuY51fQUXmn/aJfQcNt6Xsec+fFkjzKjrMZwoqsLYERFiPZWovHxcx9fKQ==}
     engines: {node: '>= 20'}
     peerDependencies:
+      '@types/react': '*'
       react: '>= 18'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
 
   react-fast-compare@2.0.4:
     resolution: {integrity: sha512-suNP+J1VU1MWFKcyt7RtjiSWUjvidmQSlqu+eHslq+342xCbGTYmC0mEhPCOHxlW0CywylOC1u2DFAT+bv4dBw==}
@@ -5731,9 +5735,7 @@ snapshots:
 
   fflate@0.7.4: {}
 
-  file-selector@2.1.0:
-    dependencies:
-      tslib: 2.8.1
+  file-selector@4.0.2: {}
 
   fill-range@7.1.1:
     dependencies:
@@ -7065,11 +7067,13 @@ snapshots:
       react: 19.2.7
       scheduler: 0.27.0
 
-  react-dropzone@17.0.0(react@19.2.7):
+  react-dropzone@18.2.0(@types/react@19.2.17)(react@19.2.7):
     dependencies:
       attr-accept: 2.2.5
-      file-selector: 2.1.0
+      file-selector: 4.0.2
       react: 19.2.7
+    optionalDependencies:
+      '@types/react': 19.2.17
 
   react-fast-compare@2.0.4: {}
 
