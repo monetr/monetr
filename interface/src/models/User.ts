@@ -24,4 +24,8 @@ export default class User {
     this.account = data.account;
     this.login = new Login(data.login);
   }
+
+  name(): string {
+    return `${this.login.firstName} ${this.login.lastName}`.trim();
+  }
 }

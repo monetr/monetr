@@ -203,3 +203,19 @@ func (c *Controller) postConfirmTOTP(ctx *echo.Context) error {
 
 	return ctx.NoContent(http.StatusOK)
 }
+
+func (c *Controller) getUserById(ctx *echo.Context) error {
+	userId, err := models.ParseID[models.User](ctx.Param("userId"))
+	if err != nil || userId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid user Id")
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	user, err := repo.GetUserById(c.getContext(ctx), userId)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "could not retrieve user")
+	}
+
+	return ctx.JSON(http.StatusOK, user)
+}

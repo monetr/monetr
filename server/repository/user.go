@@ -62,6 +62,36 @@ func (r *repositoryBase) GetMe(ctx context.Context) (*User, error) {
 	return &user, nil
 }
 
+func (r *repositoryBase) GetUserById(
+	ctx context.Context,
+	id ID[User],
+) (*User, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	var user User
+	err := r.txn.ModelContext(span.Context(), &user).
+		Relation("Login").
+		Relation("Account").
+		Where(`"user"."account_id" = ?`, r.AccountId()).
+		Where(`"user"."user_id" = ?`, r.UserId()).
+		Limit(1).
+		Select(&user)
+	switch err {
+	case pg.ErrNoRows:
+		span.Status = sentry.SpanStatusNotFound
+		return nil, errors.Errorf("user does not exist")
+	case nil:
+	default:
+		span.Status = sentry.SpanStatusInternalError
+		return nil, errors.Wrapf(err, "failed to retrieve user")
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return &user, nil
+}
+
 // GetAccountOwner will return a User object for the currently authenticated
 // account, as well as the Login and Account sub object for that user. If one is
 // not found then an error is returned.

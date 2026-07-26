@@ -6,17 +6,11 @@ import type { ID } from '@monetr/interface/models/ID';
 import type { WithJsonValues } from '@monetr/interface/util/json';
 import request from '@monetr/interface/util/request';
 
-export type RemoveApiKeyRequest =
-  | {
-      apiKeyId: ID<ApiKey>;
-      challenge?: never;
-      nonce?: never;
-    }
-  | {
-      apiKeyId: ID<ApiKey>;
-      challenge: string;
-      nonce: number;
-    };
+export type RemoveApiKeyRequest = {
+  apiKeyId: ID<ApiKey>;
+  challenge?: string;
+  nonce?: number;
+};
 
 export default function useRemoveApiKey(): (_: RemoveApiKeyRequest) => Promise<void> {
   const removeApiKey = useCallback(async (data: RemoveApiKeyRequest): Promise<void> => {
