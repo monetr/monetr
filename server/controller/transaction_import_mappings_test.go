@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/fixtures"
 )
 
@@ -184,6 +185,89 @@ func TestPostTransactionImportMapping(t *testing.T) {
 		response.Status(http.StatusOK)
 		response.JSON().Path("$.transactionImportMappingId").String().NotEmpty()
 		response.JSON().Path("$.signature").String().NotEmpty()
+	})
+
+	t.Run("with a valid api key", func(t *testing.T) {
+		// The mapping endpoints accept API key authentication. A valid API key that
+		// belongs to the same account must be able to create a mapping exactly the
+		// same way a session token can.
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		// The API key must belong to the same account creating the mapping, so it
+		// is created with the same session token used to seed the account.
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		response := e.POST("/api/mappings").
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			WithJSON(map[string]any{
+				"mapping": map[string]any{
+					"id": map[string]any{
+						"kind": "native",
+						"fields": []any{
+							map[string]any{
+								"name": "Id",
+							},
+						},
+					},
+					"amount": map[string]any{
+						"kind": "sign",
+						"fields": []any{
+							map[string]any{
+								"name": "Amount",
+							},
+						},
+					},
+					"memo": map[string]any{
+						"name": "Description",
+					},
+					"date": map[string]any{
+						"fields": []any{
+							map[string]any{
+								"name": "Date",
+							},
+						},
+						"format": "YYYY-MM-DD",
+					},
+					"balance": map[string]any{
+						"kind": "none",
+					},
+					"headers": []string{
+						"Date",
+						"Description",
+						"Amount",
+						"Id",
+					},
+				},
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transactionImportMappingId").String().NotEmpty()
+		response.JSON().Path("$.signature").String().NotEmpty()
+	})
+
+	t.Run("with an invalid api key", func(t *testing.T) {
+		// A well-formed but non-existent API key must be rejected with a 401 before
+		// the request body is ever considered.
+		_, e := NewTestApplication(t)
+
+		response := e.POST("/api/mappings").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithJSON(map[string]any{
+				"mapping": map[string]any{
+					"id":      map[string]any{"kind": "native", "fields": []any{map[string]any{"name": "Id"}}},
+					"amount":  map[string]any{"kind": "sign", "fields": []any{map[string]any{"name": "Amount"}}},
+					"memo":    map[string]any{"name": "Description"},
+					"date":    map[string]any{"fields": []any{map[string]any{"name": "Date"}}, "format": "YYYY-MM-DD"},
+					"balance": map[string]any{"kind": "none"},
+					"headers": []string{"Date", "Description", "Amount", "Id"},
+				},
+			}).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
 	})
 }
 
@@ -405,5 +489,53 @@ func TestGetTransactionImportMappings(t *testing.T) {
 
 		response.Status(http.StatusOK)
 		response.JSON().Array().IsEmpty()
+	})
+
+	t.Run("with a valid api key", func(t *testing.T) {
+		// Listing mappings accepts API key authentication. A valid API key must see
+		// exactly the mappings that belong to its own account.
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		// Seed a mapping under the account with the session token so the list has
+		// something to return.
+		seed := e.POST("/api/mappings").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"mapping": map[string]any{
+					"id":      map[string]any{"kind": "native", "fields": []any{map[string]any{"name": "Id"}}},
+					"amount":  map[string]any{"kind": "sign", "fields": []any{map[string]any{"name": "Amount"}}},
+					"memo":    map[string]any{"name": "Description"},
+					"date":    map[string]any{"fields": []any{map[string]any{"name": "Date"}}, "format": "YYYY-MM-DD"},
+					"balance": map[string]any{"kind": "none"},
+					"headers": []string{"Date", "Description", "Amount", "Id"},
+				},
+			}).
+			Expect()
+		seed.Status(http.StatusOK)
+		seededId := seed.JSON().Path("$.transactionImportMappingId").String().Raw()
+
+		// The API key must belong to the same account that seeded the mapping.
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		response := e.GET("/api/mappings").
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Array().Length().IsEqual(1)
+		response.JSON().Path("$[0].transactionImportMappingId").IsEqual(seededId)
+	})
+
+	t.Run("with an invalid api key", func(t *testing.T) {
+		// A well-formed but non-existent API key must be rejected with a 401.
+		_, e := NewTestApplication(t)
+
+		response := e.GET("/api/mappings").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
 	})
 }

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/brianvoe/gofakeit/v6"
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/server/datasources/lunch_flow"
 	"github.com/monetr/monetr/server/internal/fixtures"
@@ -30,6 +31,45 @@ func TestPostLunchFlowLink(t *testing.T) {
 		response.JSON().Path("$.lunchFlowLinkId").String().IsASCII()
 		response.JSON().Path("$.status").String().IsEqual("pending")
 		response.JSON().Object().Keys().NotContainsAll("secretId", "secret")
+	})
+
+	t.Run("with a valid api key", func(t *testing.T) {
+		// This endpoint is part of the billedKeyOrToken route group so an API key
+		// that belongs to the same account should be able to create a Lunch Flow
+		// link exactly like a session token can.
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		response := e.POST("/api/lunch_flow/link").
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			WithJSON(map[string]any{
+				"name":         "US Bank",
+				"lunchFlowURL": "https://www.lunchflow.app/api/v1",
+				"apiKey":       "foobar",
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.lunchFlowLinkId").String().IsASCII()
+		response.JSON().Path("$.status").String().IsEqual("pending")
+		response.JSON().Object().Keys().NotContainsAll("secretId", "secret")
+	})
+
+	t.Run("with an invalid api key", func(t *testing.T) {
+		// A well formed but bogus API key must be rejected by the authentication
+		// middleware before the request ever reaches the handler.
+		_, e := NewTestApplication(t)
+		response := e.POST("/api/lunch_flow/link").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithJSON(map[string]any{
+				"name":         "US Bank",
+				"lunchFlowURL": "https://www.lunchflow.app/api/v1",
+				"apiKey":       "foobar",
+			}).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
 	})
 
 	t.Run("lunch flow is disabled", func(t *testing.T) {
@@ -349,6 +389,67 @@ func TestPostLunchFlowLinkBankAccountsRefresh(t *testing.T) {
 		}, "must match Lunch Flow API calls")
 	})
 
+	t.Run("with a valid api key", func(t *testing.T) {
+		// Refreshing the bank accounts on a link should work with an API key that
+		// belongs to the same account. We mock the Lunch Flow API the same way the
+		// happy path does so the refresh can succeed.
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		mock_lunch_flow.MockFetchAccounts(t, []lunch_flow.Account{
+			{
+				Id:              "1234",
+				Name:            "Main Account",
+				InstitutionName: "Finance",
+				InstitutionLogo: nil,
+				Provider:        "gocardless",
+				Status:          "ACTIVE",
+			},
+		})
+
+		mock_lunch_flow.MockFetchBalance(t, "1234", lunch_flow.Balance{
+			Amount:   "1234.56",
+			Currency: "USD",
+		})
+
+		var id ID[LunchFlowLink]
+		{ // Seed a Lunch Flow link using the session token first.
+			response := e.POST("/api/lunch_flow/link").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":         "US Bank",
+					"lunchFlowURL": "https://www.lunchflow.app/api/v1",
+					"apiKey":       "foobar",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			id = ID[LunchFlowLink](response.JSON().Path("$.lunchFlowLinkId").String().Raw())
+		}
+
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+		response := e.POST("/api/lunch_flow/link/{lunchFlowLinkId}/bank_accounts/refresh").
+			WithPath("lunchFlowLinkId", id).
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect()
+
+		response.Status(http.StatusNoContent)
+		response.Body().IsEmpty()
+	})
+
+	t.Run("with an invalid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		response := e.POST("/api/lunch_flow/link/{lunchFlowLinkId}/bank_accounts/refresh").
+			WithPath("lunchFlowLinkId", "lfx_bogusbogusbogusbogusbo").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+	})
+
 	t.Run("no accounts returned", func(t *testing.T) {
 		httpmock.Activate()
 		defer httpmock.DeactivateAndReset()
@@ -519,6 +620,43 @@ func TestGetLunchFlowLinks(t *testing.T) {
 		}
 	})
 
+	t.Run("with a valid api key", func(t *testing.T) {
+		// Listing Lunch Flow links should work with an API key that belongs to the
+		// same account that created the links.
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		{ // Seed a single Lunch Flow link using the session token.
+			response := e.POST("/api/lunch_flow/link").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":         "US Bank",
+					"lunchFlowURL": "https://www.lunchflow.app/api/v1",
+					"apiKey":       "foobar",
+				}).
+				Expect()
+			response.Status(http.StatusOK)
+		}
+
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+		response := e.GET("/api/lunch_flow/link").
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().IsArray()
+		response.JSON().Array().Length().IsEqual(1)
+	})
+
+	t.Run("with an invalid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		response := e.GET("/api/lunch_flow/link").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+	})
+
 	t.Run("no cross user reads", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 
@@ -582,6 +720,39 @@ func TestPostLunchFlowLinkSync(t *testing.T) {
 
 		response.Status(http.StatusAccepted)
 		response.Body().IsEmpty()
+	})
+
+	t.Run("with a valid api key", func(t *testing.T) {
+		// Manually triggering a sync should work with an API key that belongs to the
+		// same account that owns the link. The link has no bank accounts so nothing
+		// is enqueued, but the request is still accepted.
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveALunchFlowLink(t, app.Clock, user)
+		token := GivenILogin(t, e, user.Login.Email, password)
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		response := e.POST("/api/lunch_flow/link/sync").
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			WithJSON(map[string]any{
+				"linkId": link.LinkId,
+			}).
+			Expect()
+
+		response.Status(http.StatusAccepted)
+		response.Body().IsEmpty()
+	})
+
+	t.Run("with an invalid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		response := e.POST("/api/lunch_flow/link/sync").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithJSON(map[string]any{
+				"linkId": "link_bogusbogusbogusbogusbo",
+			}).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
 	})
 
 	t.Run("missing link Id", func(t *testing.T) {
@@ -724,5 +895,134 @@ func TestPostLunchFlowLinkSync(t *testing.T) {
 
 		response.Status(http.StatusNotFound)
 		response.JSON().Path("$.error").String().IsEqual("Lunch Flow is not enabled on this server")
+	})
+}
+
+func TestGetLunchFlowLink(t *testing.T) {
+	t.Run("with a valid api key", func(t *testing.T) {
+		// Retrieving a single Lunch Flow link should work with an API key that
+		// belongs to the same account that created the link.
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var id ID[LunchFlowLink]
+		{ // Seed a Lunch Flow link using the session token.
+			response := e.POST("/api/lunch_flow/link").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":         "US Bank",
+					"lunchFlowURL": "https://www.lunchflow.app/api/v1",
+					"apiKey":       "foobar",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			id = ID[LunchFlowLink](response.JSON().Path("$.lunchFlowLinkId").String().Raw())
+		}
+
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+		response := e.GET("/api/lunch_flow/link/{lunchFlowLinkId}").
+			WithPath("lunchFlowLinkId", id).
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.lunchFlowLinkId").IsEqual(id)
+		response.JSON().Path("$.status").String().IsEqual("pending")
+	})
+
+	t.Run("with an invalid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		response := e.GET("/api/lunch_flow/link/{lunchFlowLinkId}").
+			WithPath("lunchFlowLinkId", "lfx_bogusbogusbogusbogusbo").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+	})
+}
+
+func TestGetLunchFlowLinkBankAccounts(t *testing.T) {
+	t.Run("with a valid api key", func(t *testing.T) {
+		// Listing the bank accounts for a Lunch Flow link should work with an API
+		// key that belongs to the same account. The freshly created link has no bank
+		// accounts yet so the endpoint returns an empty array, which is still a
+		// successful (2xx) response.
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var id ID[LunchFlowLink]
+		{ // Seed a Lunch Flow link using the session token.
+			response := e.POST("/api/lunch_flow/link").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":         "US Bank",
+					"lunchFlowURL": "https://www.lunchflow.app/api/v1",
+					"apiKey":       "foobar",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			id = ID[LunchFlowLink](response.JSON().Path("$.lunchFlowLinkId").String().Raw())
+		}
+
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+		response := e.GET("/api/lunch_flow/link/{lunchFlowLinkId}/bank_accounts").
+			WithPath("lunchFlowLinkId", id).
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Array().IsEmpty()
+	})
+
+	t.Run("with an invalid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		response := e.GET("/api/lunch_flow/link/{lunchFlowLinkId}/bank_accounts").
+			WithPath("lunchFlowLinkId", "lfx_bogusbogusbogusbogusbo").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+	})
+}
+
+func TestGetLunchFlowLinkSyncProgress(t *testing.T) {
+	t.Run("with a valid api key", func(t *testing.T) {
+		// This endpoint upgrades the connection to a websocket. A valid API key that
+		// belongs to the same account should be accepted and the handshake should
+		// succeed, which the server signals with a 101 Switching Protocols response
+		// rather than a normal 2xx status. The golang.org/x/net/websocket server
+		// requires an Origin header on the handshake, so we set one.
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveALunchFlowLink(t, app.Clock, user)
+		bankAccount := fixtures.GivenIHaveALunchFlowBankAccount(t, app.Clock, &link)
+		token := GivenILogin(t, e, user.Login.Email, password)
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		response := e.GET("/api/lunch_flow/link/sync/{linkId}/bank_account/{bankAccountId}/progress").
+			WithPath("linkId", link.LinkId).
+			WithPath("bankAccountId", bankAccount.BankAccountId).
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			WithHeader("Origin", "http://localhost").
+			WithWebsocketUpgrade().
+			Expect()
+
+		response.Status(http.StatusSwitchingProtocols)
+		response.Websocket().Disconnect()
+	})
+
+	t.Run("with an invalid api key", func(t *testing.T) {
+		// An invalid API key must be rejected by the authentication middleware
+		// before the websocket upgrade is ever attempted.
+		_, e := NewTestApplication(t)
+		response := e.GET("/api/lunch_flow/link/sync/{linkId}/bank_account/{bankAccountId}/progress").
+			WithPath("linkId", "link_bogusbogusbogusbogusbo").
+			WithPath("bankAccountId", "bac_bogusbogusbogusbogusbo").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
 	})
 }

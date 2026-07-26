@@ -359,6 +359,49 @@ func TestPostFundingSchedules(t *testing.T) {
 		response.JSON().Path("$.autoCreateTransaction").Boolean().IsTrue()
 		response.JSON().Path("$.estimatedDeposit").Number().IsEqual(100000)
 	})
+
+	t.Run("create a funding schedule with a valid api key", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+		// The API key must belong to the same account that seeded the bank
+		// account, so create it with the same token used above.
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			WithJSON(map[string]any{
+				"name":        "Payday",
+				"description": "15th and the Last day of every month",
+				"ruleset":     FifthteenthAndLastDayOfEveryMonth,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.fundingScheduleId").String().NotEmpty()
+		response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+		response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).Gt(app.Clock.Now())
+		response.JSON().Path("$.excludeWeekends").Boolean().IsFalse()
+	})
+
+	t.Run("cannot create a funding schedule with an invalid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+			WithPath("bankAccountId", "bac_fake").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithJSON(map[string]any{
+				"name":        "Payday",
+				"description": "15th and the Last day of every month",
+				"ruleset":     FifthteenthAndLastDayOfEveryMonth,
+			}).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+	})
 }
 
 func TestPatchFundingSchedule(t *testing.T) {
@@ -848,6 +891,56 @@ func TestPatchFundingSchedule(t *testing.T) {
 		response.JSON().Path("$.fundingSchedule.autoCreateTransaction").Boolean().IsTrue()
 		response.JSON().Path("$.fundingSchedule.estimatedDeposit").Number().IsEqual(100000)
 	})
+
+	t.Run("can patch a funding schedule with a valid api key", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		// Hack to fix the mock clock thing for now.
+		app.Clock.Add(time.Since(app.Clock.Now()))
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		token := GivenILogin(t, e, user.Login.Email, password)
+		// The API key must belong to the same account that seeded the funding
+		// schedule, so create it with the same token used above.
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		fundingSchedule.Name = "This is an updated name"
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+			WithPath("bankAccountId", fundingSchedule.BankAccountId).
+			WithPath("fundingScheduleId", fundingSchedule.FundingScheduleId).
+			WithJSON(map[string]any{
+				"name":             fundingSchedule.Name,
+				"description":      fundingSchedule.Description,
+				"ruleset":          fundingSchedule.RuleSet,
+				"excludeWeekends":  fundingSchedule.ExcludeWeekends,
+				"estimatedDeposit": fundingSchedule.EstimatedDeposit,
+				"nextRecurrence":   fundingSchedule.NextRecurrence,
+			}).
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.fundingSchedule.name").String().IsEqual(fundingSchedule.Name)
+		response.JSON().Path("$.spending").IsArray()
+		response.JSON().Path("$.spending").Array().IsEmpty()
+	})
+
+	t.Run("cannot patch a funding schedule with an invalid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+			WithPath("bankAccountId", "bac_fake").
+			WithPath("fundingScheduleId", "fund_fake").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithJSON(map[string]any{
+				"name": "This is an updated name",
+			}).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+	})
 }
 
 func TestDeleteFundingSchedules(t *testing.T) {
@@ -1001,6 +1094,39 @@ func TestDeleteFundingSchedules(t *testing.T) {
 			response.JSON().Path("$.error").String().IsEqual("cannot remove funding schedule, it does not exist")
 		}
 	})
+
+	t.Run("can delete a funding schedule with a valid api key", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		token := GivenILogin(t, e, user.Login.Email, password)
+		// The API key must belong to the same account that seeded the funding
+		// schedule, so create it with the same token used above.
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		response := e.DELETE("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+			WithPath("bankAccountId", fundingSchedule.BankAccountId).
+			WithPath("fundingScheduleId", fundingSchedule.FundingScheduleId).
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.Body().IsEmpty()
+	})
+
+	t.Run("cannot delete a funding schedule with an invalid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		response := e.DELETE("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+			WithPath("bankAccountId", "bac_fake").
+			WithPath("fundingScheduleId", "fund_fake").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+	})
 }
 
 func TestGetFundingSchedulesByID(t *testing.T) {
@@ -1105,5 +1231,93 @@ func TestGetFundingSchedulesByID(t *testing.T) {
 			response.Status(http.StatusNotFound)
 			response.JSON().Path("$.error").String().IsEqual("failed to retrieve funding schedule: record does not exist")
 		}
+	})
+
+	t.Run("can retrieve a schedule by ID with a valid api key", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+		// The API key must belong to the same account that seeded the funding
+		// schedule, so create it with the same token used below.
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		var fundingScheduleId models.ID[models.FundingSchedule]
+		{ // Create the funding schedule.
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":        "Payday",
+					"description": "15th and the Last day of every month",
+					"ruleset":     FifthteenthAndLastDayOfEveryMonth,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.fundingScheduleId").String().IsASCII()
+			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+
+			// Save the ID of the created funding schedule so we can use it below.
+			fundingScheduleId = models.ID[models.FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+		}
+
+		response := e.GET("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("fundingScheduleId", fundingScheduleId).
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
+		response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+	})
+
+	t.Run("cannot retrieve a schedule by ID with an invalid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		response := e.GET("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+			WithPath("bankAccountId", "bac_fake").
+			WithPath("fundingScheduleId", "fund_fake").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+	})
+}
+
+func TestGetFundingSchedules(t *testing.T) {
+	t.Run("can list schedules with a valid api key", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		token := GivenILogin(t, e, user.Login.Email, password)
+		// The API key must belong to the same account that seeded the funding
+		// schedule, so create it with the same token used above.
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		response := e.GET("/api/bank_accounts/{bankAccountId}/funding_schedules").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Array().NotEmpty()
+		response.JSON().Path("$[0].fundingScheduleId").IsEqual(fundingSchedule.FundingScheduleId)
+		response.JSON().Path("$[0].bankAccountId").IsEqual(bank.BankAccountId)
+	})
+
+	t.Run("cannot list schedules with an invalid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		response := e.GET("/api/bank_accounts/{bankAccountId}/funding_schedules").
+			WithPath("bankAccountId", "bac_fake").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
 	})
 }

@@ -90,6 +90,10 @@ func (c *Controller) postChallenge(ctx *echo.Context) error {
 		purpose = powchallenge.PurposeForgot
 	case "resend":
 		purpose = powchallenge.PurposeResend
+	case "create_api_key":
+		purpose = powchallenge.PurposeCreateApiKey
+	case "delete_api_key":
+		purpose = powchallenge.PurposeDeleteApiKey
 	default:
 		return c.badRequest(ctx, "invalid proof of work purpose")
 	}

@@ -297,6 +297,45 @@ func TestPostLink(t *testing.T) {
 			response.JSON().Path("$.error").String().IsEqual("Cannot create a link from a Lunch Flow link that is not in a pending status")
 		}
 	})
+
+	t.Run("with a valid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		// An API key created from this session belongs to the same account, so it
+		// is allowed to create a link exactly like the session token can. This
+		// endpoint lives in the billedKeyOrToken route group.
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+		response := e.POST("/api/links").
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			WithJSON(map[string]any{
+				"institutionName": "U.S. Bank",
+				"description":     "My personal link",
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.linkId").String().IsASCII()
+		response.JSON().Path("$.linkType").IsEqual(models.ManualLinkType)
+		response.JSON().Path("$.institutionName").String().NotEmpty()
+		response.JSON().Path("$.description").String().IsEqual("My personal link")
+	})
+
+	t.Run("with an invalid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		// A well formed but completely unknown API key must be rejected by the auth
+		// middleware before the request body is ever considered.
+		response := e.POST("/api/links").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithJSON(map[string]any{
+				"institutionName": "U.S. Bank",
+				"description":     "My personal link",
+			}).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+	})
 }
 
 func TestGetLink(t *testing.T) {
@@ -484,6 +523,94 @@ func TestGetLink(t *testing.T) {
 			response.Status(http.StatusNotFound)
 			response.JSON().Path("$.error").String().IsEqual("failed to retrieve link: record does not exist")
 		}
+	})
+
+	t.Run("list with a valid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var linkId models.ID[models.Link]
+		{ // Seed a link on this account using the session token.
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+					"description":     "My personal link",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").String().IsASCII()
+			linkId = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
+		}
+
+		// An API key on the same account should list exactly the links the session
+		// token would. GET /api/links is in the billedKeyOrToken route group.
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+		response := e.GET("/api/links").
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$").Array().Length().IsEqual(1)
+		response.JSON().Path("$[0].linkId").IsEqual(linkId)
+	})
+
+	t.Run("list with an invalid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		// A well formed but unknown API key must not be able to list any links.
+		response := e.GET("/api/links").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+	})
+
+	t.Run("precise with a valid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		institutionName := "U.S. Bank"
+
+		var linkId models.ID[models.Link]
+		{ // Create the link with the session token.
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": institutionName,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").String().IsASCII()
+			response.JSON().Path("$.institutionName").String().IsEqual(institutionName)
+			linkId = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
+		}
+
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+		{ // Retrieve the link with the API key and make sure the linkId matches.
+			response := e.GET("/api/links/{linkId}").
+				WithPath("linkId", linkId).
+				WithBasicAuth(apiKeyId, apiKeySecret).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").IsEqual(linkId)
+		}
+	})
+
+	t.Run("precise with an invalid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		// The auth check happens before we ever look up the link, so a bogus Id is
+		// fine here; the unknown key is what gets rejected.
+		response := e.GET("/api/links/{linkId}").
+			WithPath("linkId", "link_bogus").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
 	})
 }
 
@@ -698,6 +825,60 @@ func TestPatchLink(t *testing.T) {
 			response.Status(http.StatusUnauthorized)
 			response.JSON().Path("$.error").String().IsEqual("unauthorized")
 		}
+	})
+
+	t.Run("with a valid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var linkId models.ID[models.Link]
+		{ // Create the manual link via the API with the session token
+			institutionName := "U.S. Bank"
+
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": institutionName,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").String().IsASCII()
+			response.JSON().Path("$.institutionName").String().IsEqual(institutionName)
+			linkId = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
+		}
+
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+		{ // Update the link with a patch request authenticated by the API key.
+			// PATCH /api/links/{linkId} is in the billedKeyOrToken route group.
+			response := e.PATCH("/api/links/{linkId}").
+				WithPath("linkId", linkId).
+				WithBasicAuth(apiKeyId, apiKeySecret).
+				WithJSON(map[string]any{
+					"institutionName": "My Own Name",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").IsEqual(linkId)
+			response.JSON().Path("$.institutionName").String().IsEqual("My Own Name")
+		}
+	})
+
+	t.Run("with an invalid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		// A well formed but unknown API key must be rejected before the patch is
+		// ever applied.
+		response := e.PATCH("/api/links/{linkId}").
+			WithPath("linkId", "link_bogus").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithJSON(map[string]any{
+				"institutionName": "My Own Name",
+			}).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
 	})
 }
 
@@ -955,5 +1136,84 @@ func TestDeleteLink(t *testing.T) {
 			response.Status(http.StatusNotFound)
 			response.JSON().Path("$.error").IsEqual("failed to retrieve the specified link: record does not exist")
 		}
+	})
+
+	t.Run("with a valid api key", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		clock := clock.New()
+		app, e := NewTestApplication(t)
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, clock)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		institutionName := "U.S. Bank"
+
+		var linkId models.ID[models.Link]
+		{ // Create the link with the session token.
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": institutionName,
+					"description":     "My personal link",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").String().IsASCII()
+			response.JSON().Path("$.institutionName").String().IsEqual(institutionName)
+			linkId = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
+		}
+
+		// Create the API key before we set up the queue expectations so that the
+		// key creation cannot be mistaken for one of the queued jobs below.
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		app.Queue.EXPECT().
+			WithTransaction(
+				gomock.Any(),
+			).
+			Return(app.Queue)
+		app.Queue.EXPECT().
+			EnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(link_jobs.RemoveLink),
+				gomock.Any(),
+				gomock.Eq(link_jobs.RemoveLinkArguments{
+					AccountId: user.AccountId,
+					LinkId:    linkId,
+				}),
+			).
+			MaxTimes(1).
+			Return(nil)
+
+		{ // Delete the link authenticated with the API key. DELETE
+			// /api/links/{linkId} is in the billedKeyOrToken route group.
+			response := e.DELETE("/api/links/{linkId}").
+				WithPath("linkId", linkId).
+				WithBasicAuth(apiKeyId, apiKeySecret).
+				WithTimeout(5 * time.Second).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.NoContent()
+		}
+
+		assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{}, "should not have made ANY plaid API calls")
+	})
+
+	t.Run("with an invalid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		// A well formed but unknown API key must be rejected before we attempt to
+		// retrieve or delete anything.
+		response := e.DELETE("/api/links/{linkId}").
+			WithPath("linkId", "link_bogus").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithTimeout(5 * time.Second).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
 	})
 }

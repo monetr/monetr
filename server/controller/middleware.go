@@ -11,8 +11,10 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/ctxkeys"
 	"github.com/monetr/monetr/server/internal/sentryecho"
+	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -108,9 +110,156 @@ func (c *Controller) requireActiveSubscriptionMiddleware(next echo.HandlerFunc) 
 	}
 }
 
+// maybeApiKeyMiddleware allows monetr API keys to be provided via the
+// authorization header as a username and password. Where they key ID of the API
+// key is the username and the secret is the password. The credentials are
+// validated if they are specified. If they are specified and are invalid then
+// the request will fail even if a valid session token is present on the
+// request.
+func (c *Controller) maybeApiKeyMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(ctx *echo.Context) error {
+		// The authentication work happens inside its own closure the same way it
+		// does in maybeTokenMiddleware. The breadcrumb below is deferred, so it
+		// only gets added to the Sentry scope when the closure it was registered in
+		// returns. If that were this outer closure then the breadcrumb would not be
+		// added until after next(ctx) had already run, and any event the handler
+		// captured would be missing it.
+		if err := func(ctx *echo.Context) error {
+			log := c.getLog(ctx)
+			username, password, ok := ctx.Request().BasicAuth()
+			if !ok {
+				// No basic auth on this request, there is no API key to validate.
+				return nil
+			}
+
+			now := c.Clock.Now()
+			data := map[string]any{
+				"source": "key",
+			}
+
+			breadcrumbMessage := "Request did not have valid auth"
+
+			if hub := sentry.GetHubFromContext(c.getContext(ctx)); hub != nil {
+				defer func() {
+					hub.AddBreadcrumb(&sentry.Breadcrumb{
+						Type:      "debug",
+						Category:  "authentication",
+						Message:   breadcrumbMessage,
+						Data:      data,
+						Level:     sentry.LevelDebug,
+						Timestamp: now,
+					}, nil)
+				}()
+			}
+
+			repo := c.mustGetUnauthenticatedRepository(ctx)
+			keyId, err := models.ParseID[models.ApiKey](username)
+			if err != nil {
+				log.WarnContext(
+					c.getContext(ctx),
+					"invalid api key username provided",
+				)
+				return c.unauthorized(ctx)
+			}
+			apiKey, err := repo.GetApiKey(c.getContext(ctx), keyId)
+			switch {
+			case err == nil:
+				// Keep going, we found a key for this Id.
+			case errors.Is(err, pg.ErrNoRows):
+				// There is no key with this Id, the credentials are definitively bad.
+				log.WarnContext(
+					c.getContext(ctx),
+					"invalid api key provided",
+					"err", err,
+				)
+				return c.unauthorized(ctx)
+			default:
+				// Any other error means we could not determine whether the credentials
+				// are valid, the database might be down. Telling the client they are
+				// unauthorized would be a lie, and would make an outage look like an
+				// authentication problem for anyone using an API key. Fail loudly
+				// instead so that this gets reported.
+				log.ErrorContext(
+					c.getContext(ctx),
+					"failed to retrieve api key for authentication",
+					"err", err,
+				)
+				breadcrumbMessage = "Request auth could not be verified"
+				return c.wrapPgError(ctx, err, "failed to authenticate api key")
+			}
+
+			if !apiKey.Verify(keyId, password) {
+				log.WarnContext(
+					c.getContext(ctx),
+					"invalid api key provided",
+					"err", "credential mismatch",
+				)
+				return c.unauthorized(ctx)
+			}
+
+			claims := security.Claims{
+				CreatedAt:    c.Clock.Now(),
+				EmailAddress: apiKey.CreatedByUser.Login.Email,
+				UserId:       apiKey.CreatedBy.String(),
+				AccountId:    apiKey.AccountId.String(),
+				LoginId:      apiKey.CreatedByUser.LoginId.String(),
+				Scope:        security.AuthenticatedScope,
+				ReissueCount: 0,
+			}
+
+			if hub := sentryecho.GetHubFromContext(ctx); hub != nil {
+				hub.Scope().SetUser(sentry.User{
+					ID:        claims.AccountId,
+					Username:  claims.AccountId,
+					IPAddress: util.GetForwardedFor(ctx),
+					Data: map[string]string{
+						"userId":  claims.UserId,
+						"loginId": claims.LoginId,
+					},
+				})
+				hub.Scope().SetTag("userId", claims.UserId)
+				hub.Scope().SetTag("accountId", claims.AccountId)
+				hub.Scope().SetTag("loginId", claims.LoginId)
+			}
+
+			// Store the authentication claims on the request context so we can use it
+			// later.
+			ctx.Set(authenticationKey, claims)
+
+			{ // Add some basic values onto our context for logging later on.
+				spanContext := ctx.Get(spanContextKey).(context.Context)
+				spanContext = context.WithValue(spanContext, ctxkeys.AccountID, claims.AccountId)
+				spanContext = context.WithValue(spanContext, ctxkeys.UserID, claims.UserId)
+				spanContext = context.WithValue(spanContext, ctxkeys.LoginID, claims.LoginId)
+				ctx.Set(spanContextKey, spanContext)
+			}
+
+			breadcrumbMessage = "Auth is valid"
+			data["accountId"] = claims.AccountId
+			data["userId"] = claims.UserId
+			data["loginId"] = claims.LoginId
+
+			return nil
+		}(ctx); err != nil {
+			// The errors returned above are already shaped for the client (a 401 for
+			// bad credentials, a 500 if we could not talk to the database). Return
+			// them as they are, do not turn them all into a 500 here.
+			return err
+		}
+
+		return next(ctx)
+	}
+}
+
 func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx *echo.Context) (err error) {
 		err = func(ctx *echo.Context) error {
+			// If there are already credentials on the scope of the request from
+			// something else then do not do anything with the token
+			if ctx.Get(authenticationKey) != nil {
+				return nil
+			}
+
 			now := c.Clock.Now()
 			log := c.getLog(ctx)
 			var token string
@@ -141,12 +290,6 @@ func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFun
 				}
 			}
 
-			if token == "" {
-				if token = ctx.Request().Header.Get(c.Configuration.Server.Cookies.Name); token != "" {
-					data["source"] = "header"
-				}
-			}
-
 			// If there is still no token then we don't have one. Return nothing.
 			if token == "" {
 				return nil
@@ -155,15 +298,21 @@ func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFun
 			claims, err := c.ClientTokens.Parse(token)
 			if err != nil {
 				c.updateAuthenticationCookie(ctx, ClearAuthentication)
-				crumbs.Error(c.getContext(ctx), "failed to parse token", "authentication", map[string]any{
-					"error": err,
-				})
+				crumbs.Error(
+					c.getContext(ctx),
+					"failed to parse token",
+					"authentication",
+					map[string]any{
+						"error": err,
+					},
+				)
 				log.WarnContext(c.getContext(ctx), "invalid token provided", "err", err)
 				return nil
 			}
 
-			// If we can pull the hub from the current context, then we want to try to set some of our user data on it so that
-			// way we can grab it later if there is an error.
+			// If we can pull the hub from the current context, then we want to try to
+			// set some of our user data on it so that way we can grab it later if
+			// there is an error.
 			if hub := sentryecho.GetHubFromContext(ctx); hub != nil {
 				hub.Scope().SetUser(sentry.User{
 					ID:        claims.AccountId,
@@ -191,6 +340,10 @@ func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFun
 				ctx.Set(spanContextKey, spanContext)
 			}
 
+			// The request is authenticated, say so on the breadcrumb. Without this
+			// the deferred breadcrumb above still reads "Request did not have valid
+			// auth", which is the opposite of the truth for every cookie
+			// authenticated request that later errors.
 			breadcrumbMessage = "Auth is valid"
 			data["accountId"] = claims.AccountId
 			data["userId"] = claims.UserId
@@ -206,10 +359,13 @@ func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFun
 	}
 }
 
-// requireToken is an echo middleware that requires that the current HTTTP
-// request has a token with one of the provided scopes. Any of the specified
-// scopes are valid.
-func (c *Controller) requireToken(scopes ...security.Scope) func(next echo.HandlerFunc) echo.HandlerFunc {
+// requireAuthentication is an echo middleware that requires that the current
+// HTTTP request is authenticated with one of the provided scopes. Any of the
+// specified scopes are valid. The scopes can be derived from API keys or from
+// the actual token that monetr issues for sessions.
+func (c *Controller) requireAuthentication(
+	scopes ...security.Scope,
+) func(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx *echo.Context) error {
 			// Read the claims off of the current request context. If the claims are

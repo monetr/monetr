@@ -17,6 +17,7 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gavv/httpexpect/v2"
+	"github.com/go-pg/pg/v10"
 	"github.com/gomodule/redigo/redis"
 	"github.com/monetr/monetr/server/application"
 	"github.com/monetr/monetr/server/billing"
@@ -103,6 +104,21 @@ type TestAppInterfaces struct {
 }
 
 func NewTestApplicationWithConfig(t *testing.T, configuration config.Configuration) (*TestApp, *httpexpect.Expect) {
+	return newTestApplication(t, configuration, testutils.GetPgDatabase(t))
+}
+
+// NewTestApplicationWithBadDatabase builds a test application whose database
+// will refuse every connection, simulating the database being down. Requests
+// against it should fail with a 500, not with an authentication error.
+func NewTestApplicationWithBadDatabase(t *testing.T) (*TestApp, *httpexpect.Expect) {
+	return newTestApplication(t, NewTestApplicationConfig(t), testutils.GetBadPgDatabase(t))
+}
+
+func newTestApplication(
+	t *testing.T,
+	configuration config.Configuration,
+	db *pg.DB,
+) (*TestApp, *httpexpect.Expect) {
 	mockController := gomock.NewController(t)
 	t.Cleanup(func() {
 		defer mockController.Finish()
@@ -131,7 +147,6 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 		}
 	})
 	log := testutils.GetLog(t)
-	db := testutils.GetPgDatabase(t)
 	kms := secrets.NewPlaintextKMS()
 	plaidClient := platypus.NewPlaid(log, clock, kms, db, configuration.Plaid)
 

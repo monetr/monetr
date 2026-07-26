@@ -292,3 +292,42 @@ func TestGetBillingPortal(t *testing.T) {
 		}
 	})
 }
+
+// TestBillingEndpointsRejectApiKeys makes sure that none of the billing
+// endpoints can be authenticated with an API key. They are token only, so a
+// valid API key must be rejected with a 401.
+func TestBillingEndpointsRejectApiKeys(t *testing.T) {
+	t.Run("create checkout", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		e.POST("/api/billing/create_checkout").
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect().
+			Status(http.StatusUnauthorized)
+	})
+
+	t.Run("get after checkout", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		e.GET("/api/billing/checkout/{checkoutSessionId}").
+			WithPath("checkoutSessionId", "cs_bogus").
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect().
+			Status(http.StatusUnauthorized)
+	})
+
+	t.Run("get billing portal", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		e.GET("/api/billing/portal").
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect().
+			Status(http.StatusUnauthorized)
+	})
+}

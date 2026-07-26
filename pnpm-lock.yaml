@@ -168,6 +168,9 @@ importers:
       '@fontsource-variable/inter':
         specifier: 5.2.8
         version: 5.2.8
+      '@fontsource/jetbrains-mono':
+        specifier: 5.2.8
+        version: 5.2.8
       '@monetr/notify':
         specifier: 1.0.6
         version: 1.0.6(react-dom@19.2.7(react@19.2.7))(react@19.2.7)

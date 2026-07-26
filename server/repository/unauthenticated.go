@@ -134,6 +134,28 @@ func (u *unauthenticatedRepo) GetLoginForEmail(ctx context.Context, emailAddress
 	return &login, nil
 }
 
+func (u *unauthenticatedRepo) GetApiKey(
+	ctx context.Context,
+	keyId ID[ApiKey],
+) (*ApiKey, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	var result ApiKey
+	err := u.txn.ModelContext(span.Context(), &result).
+		Relation("CreatedByUser").
+		Relation("CreatedByUser.Login").
+		Where(`"api_key"."api_key_id" = ?`, keyId).
+		Where(`"api_key"."deleted_at" IS NULL`).
+		Limit(1).
+		Select(&result)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve api key by Id")
+	}
+
+	return &result, nil
+}
+
 func (u *unauthenticatedRepo) SetEmailVerified(ctx context.Context, emailAddress string) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()

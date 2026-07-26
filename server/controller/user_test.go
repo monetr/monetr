@@ -103,6 +103,35 @@ func TestMe(t *testing.T) {
 		}
 	})
 
+	t.Run("with a valid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		// /users/me accepts an API key as authentication, provided via the basic
+		// auth header where the username is the key Id and the password is the
+		// secret.
+		response := e.GET(`/api/users/me`).
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.user").Object().NotEmpty()
+		response.JSON().Path("$.user.userId").String().IsASCII()
+		response.JSON().Path("$.user.login.loginId").String().IsASCII()
+	})
+
+	t.Run("with an invalid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		// A well formed but unknown API key must be rejected.
+		response := e.GET(`/api/users/me`).
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+	})
+
 	t.Run("bad token", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 
@@ -478,6 +507,23 @@ func TestChangePassword(t *testing.T) {
 
 		response.Status(http.StatusUnauthorized)
 	})
+
+	t.Run("does not accept an api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		// Changing a password is a token only endpoint, a valid API key must not
+		// be accepted as authentication for it.
+		e.PUT(`/api/users/security/password`).
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			WithJSON(map[string]any{
+				"currentPassword": gofakeit.Generate("????????"),
+				"newPassword":     gofakeit.Generate("????????"),
+			}).
+			Expect().
+			Status(http.StatusUnauthorized)
+	})
 }
 
 func TestSetupTOTP(t *testing.T) {
@@ -571,6 +617,19 @@ func TestSetupTOTP(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
+	})
+
+	t.Run("does not accept an api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		// Setting up TOTP is a token only endpoint, a valid API key must not be
+		// accepted as authentication for it.
+		e.POST(`/api/users/security/totp/setup`).
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect().
+			Status(http.StatusUnauthorized)
 	})
 }
 
@@ -722,5 +781,21 @@ func TestConfirmTOTP(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
+	})
+
+	t.Run("does not accept an api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		// Confirming TOTP is a token only endpoint, a valid API key must not be
+		// accepted as authentication for it.
+		e.POST(`/api/users/security/totp/confirm`).
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			WithJSON(map[string]any{
+				"totp": "123456",
+			}).
+			Expect().
+			Status(http.StatusUnauthorized)
 	})
 }

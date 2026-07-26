@@ -27,15 +27,23 @@ import (
 type Purpose uint8
 
 const (
-	PurposeRegister Purpose = 1
-	PurposeLogin    Purpose = 2
-	PurposeForgot   Purpose = 3
-	PurposeResend   Purpose = 4 // Resend verification email.
+	PurposeRegister     Purpose = 1
+	PurposeLogin        Purpose = 2
+	PurposeForgot       Purpose = 3
+	PurposeResend       Purpose = 4 // Resend verification email.
+	PurposeCreateApiKey Purpose = 5
+	PurposeDeleteApiKey Purpose = 6
 )
 
 func (p Purpose) valid() bool {
 	switch p {
-	case PurposeRegister, PurposeLogin, PurposeForgot, PurposeResend:
+	case
+		PurposeRegister,
+		PurposeLogin,
+		PurposeForgot,
+		PurposeResend,
+		PurposeCreateApiKey,
+		PurposeDeleteApiKey:
 		return true
 	default:
 		return false
@@ -332,7 +340,8 @@ func (c *challengerBase) consumedValue(random []byte) []byte {
 	return c.tag("pow-consumed:", random)
 }
 
-// HMAC a label with the random; distinct labels keep key/unused/consumed different.
+// HMAC a label with the random; distinct labels keep key/unused/consumed
+// different.
 func (c *challengerBase) tag(label string, random []byte) []byte {
 	mac := hmac.New(sha256.New, c.secret)
 	mac.Write([]byte(label))

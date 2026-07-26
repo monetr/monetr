@@ -114,6 +114,140 @@ func TestGetTransactions(t *testing.T) {
 			response.JSON().Array().IsEmpty()
 		}
 	})
+
+	t.Run("with a valid api key", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		{ // Seed the data for the test, cloning the simple happy path above.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			fixtures.GivenIHaveNTransactions(t, app.Clock, bank, 10)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		// The API key is created with the same token, so it belongs to the same
+		// account that seeded the data above.
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		response := e.GET("/api/bank_accounts/{bankAccountId}/transactions").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Array().Length().IsEqual(10)
+	})
+
+	t.Run("with an invalid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		// An unknown API key must be rejected by the authentication middleware
+		// before the handler runs, even though the bank account Id in the path is
+		// bogus.
+		response := e.GET("/api/bank_accounts/{bankAccountId}/transactions").
+			WithPath("bankAccountId", "bac_fake").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+	})
+}
+
+func TestGetTransaction(t *testing.T) {
+	t.Run("with a valid api key", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var transaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			transaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		response := e.GET("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", transaction.TransactionId).
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transactionId").IsEqual(transaction.TransactionId)
+	})
+
+	t.Run("with an invalid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		response := e.GET("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", "bac_fake").
+			WithPath("transactionId", "txn_fake").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+	})
+}
+
+func TestGetSimilarTransactions(t *testing.T) {
+	t.Run("with a valid api key", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var transaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			transaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			// Seed a transaction cluster that includes our transaction as a member so
+			// the endpoint returns the cluster with a 200 OK instead of a 204 No
+			// Content.
+			testutils.MustInsert(t, TransactionCluster{
+				AccountId:     bank.AccountId,
+				BankAccountId: bank.BankAccountId,
+				Name:          transaction.Name,
+				OriginalName:  transaction.OriginalName,
+				Members:       []ID[Transaction]{transaction.TransactionId},
+			})
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		response := e.GET("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}/similar").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", transaction.TransactionId).
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.members").Array().NotEmpty()
+	})
+
+	t.Run("with an invalid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		response := e.GET("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}/similar").
+			WithPath("bankAccountId", "bac_fake").
+			WithPath("transactionId", "txn_fake").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+	})
 }
 
 func TestPostTransactions(t *testing.T) {
@@ -601,6 +735,57 @@ func TestPostTransactions(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.transaction.transactionId").String().NotEmpty()
 		}
+	})
+
+	t.Run("with a valid api key", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		{ // Seed the data for the test. Creating transactions requires a manual link.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			fixtures.GivenIHaveNTransactions(t, app.Clock, bank, 10)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		response := e.POST("/api/bank_accounts/{bankAccountId}/transactions").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			WithJSON(map[string]any{
+				"amount":         100, // $1
+				"isPending":      false,
+				"name":           "I spent some money",
+				"date":           app.Clock.Now(), // Should use midnight, but idc
+				"adjustsBalance": false,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transaction.transactionId").String().NotEmpty()
+	})
+
+	t.Run("with an invalid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		// Auth runs before the handler, so the body is never validated. An unknown
+		// key must be rejected even with a bogus bank account Id in the path.
+		response := e.POST("/api/bank_accounts/{bankAccountId}/transactions").
+			WithPath("bankAccountId", "bac_fake").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithJSON(map[string]any{
+				"amount":    100,
+				"isPending": false,
+				"name":      "I spent some money",
+				"date":      "2023-07-28T05:00:00Z",
+			}).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
 	})
 }
 
@@ -1917,6 +2102,55 @@ func TestPatchTransaction(t *testing.T) {
 		response.JSON().Path("$.balance.available").Number().IsEqual(availableBefore)
 		response.JSON().Path("$.balance.current").Number().IsEqual(currentBefore)
 	})
+
+	t.Run("with a valid api key", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+
+		{ // Seed the data for the test, cloning the update name happy path.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		newName := "A More Friendly Name"
+		assert.NotEqual(t, originalTransaction.Name, newName, "make sure the names dont somehow match")
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			WithJSON(map[string]any{
+				"name": newName,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transaction.transactionId").IsEqual(originalTransaction.TransactionId)
+		response.JSON().Path("$.transaction.name").String().IsEqual(newName)
+	})
+
+	t.Run("with an invalid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", "bac_fake").
+			WithPath("transactionId", "txn_fake").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithJSON(map[string]any{
+				"name": "A More Friendly Name",
+			}).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+	})
 }
 
 func TestDeleteTransactions(t *testing.T) {
@@ -2557,5 +2791,44 @@ func TestDeleteTransactions(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Cannot delete transactions for non-manual links")
+	})
+
+	t.Run("with a valid api key", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var transaction Transaction
+
+		{ // Seed the data for the test. Deleting transactions requires a manual link.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			transaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		response := e.DELETE("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", transaction.TransactionId).
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.balance.available").Number()
+	})
+
+	t.Run("with an invalid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		response := e.DELETE("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", "bac_fake").
+			WithPath("transactionId", "txn_fake").
+			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
 	})
 }

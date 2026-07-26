@@ -29,6 +29,7 @@ const (
 	PlaidSyncIDKind          Kind = "psyn"
 	PlaidBankAccountIDKind   Kind = "pbac"
 	PlaidTransactionIDKind   Kind = "ptxn"
+	ApiKeyIDKind             Kind = "key"
 )
 
 type Identifiable interface {
