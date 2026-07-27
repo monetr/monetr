@@ -18,7 +18,7 @@
     "@rspress/plugin-sitemap": "2.0.18",
     "@rspress/shared": "2.0.18",
     "@shikijs/transformers": "4.3.0",
-    "@tanstack/react-query": "5.101.2",
+    "@tanstack/react-query": "5.101.3",
     "class-variance-authority": "0.7.1",
     "date-fns": "4.4.0",
     "embla-carousel-autoplay": "8.6.0",
