@@ -39,7 +39,7 @@
     "@sentry/core": "10.66.0",
     "@sentry/react": "10.66.0",
     "@sentry/utils": "8.55.2",
-    "@tanstack/react-query": "5.101.3",
+    "@tanstack/react-query": "5.101.4",
     "class-variance-authority": "0.7.1",
     "cmdk": "1.1.1",
     "date-fns": "4.4.0",
