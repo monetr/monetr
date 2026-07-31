@@ -29,7 +29,7 @@ require (
 	github.com/labstack/echo/v5 v5.3.0
 	github.com/monetr/devslog v0.0.17
 	github.com/monetr/validation v1.3.0
-	github.com/oklog/ulid/v2 v2.1.1
+	github.com/oklog/ulid/v2 v2.1.2
 	github.com/openbao/openbao/api/v2 v2.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/plaid/plaid-go/v43 v43.0.0
