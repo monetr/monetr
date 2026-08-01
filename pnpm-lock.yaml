@@ -100,8 +100,8 @@ importers:
         specifier: 19.2.3
         version: 19.2.3(@types/react@19.2.17)
       sass:
-        specifier: 1.101.3
-        version: 1.101.3
+        specifier: 1.102.0
+        version: 1.102.0
       satori:
         specifier: 0.28.1
         version: 0.28.1
@@ -151,8 +151,8 @@ importers:
         specifier: 19.2.8
         version: 19.2.8(react@19.2.8)
       sass:
-        specifier: 1.101.3
-        version: 1.101.3
+        specifier: 1.102.0
+        version: 1.102.0
       typescript:
         specifier: 7.0.2
         version: 7.0.2
@@ -320,8 +320,8 @@ importers:
         specifier: 1.0.0
         version: 1.0.0
       sass:
-        specifier: 1.101.3
-        version: 1.101.3
+        specifier: 1.102.0
+        version: 1.102.0
       sass-embedded-linux-arm64:
         specifier: 1.100.0
         version: 1.100.0
@@ -3528,8 +3528,8 @@ packages:
     engines: {node: '>=20.19.0'}
     hasBin: true
 
-  sass@1.101.3:
-    resolution: {integrity: sha512-Z1lLHhtAII+dyLNIQB6JQTZMy7sDxk3f5NzbINRc9ks1P0HCGvSuKev0wUhULFpLSaHBIMZrcTs9WDQUZerrgA==}
+  sass@1.102.0:
+    resolution: {integrity: sha512-NSOyTnaQF7rTAEOtI2fwb386vL+akyiQLBZu8Na7hXCb+umJy0GAqlcMIaqACZ6Z1VgTBS4K9PG6B3IdjHGJsw==}
     engines: {node: '>=20.19.0'}
     hasBin: true
 
@@ -7789,7 +7789,7 @@ snapshots:
       '@parcel/watcher': 2.4.1
     optional: true
 
-  sass@1.101.3:
+  sass@1.102.0:
     dependencies:
       chokidar: 5.0.0
       immutable: 5.1.5
