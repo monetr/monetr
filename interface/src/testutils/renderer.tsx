@@ -13,6 +13,11 @@ import { memoryLocation } from 'wouter/memory-location';
 export interface Options<Q extends Queries = typeof queries, Container extends Element | DocumentFragment = HTMLElement>
   extends RenderOptions<Q, Container> {
   initialRoute: string;
+  // Render against the real browser history instead of an in memory location. The memory location does not react to
+  // `history.pushState`/`history.replaceState` at all, so pages that manipulate the URL directly need the browser
+  // location in order to be exercised the way they actually behave. When this is used the route comes from
+  // `window.location` rather than `initialRoute`.
+  browserLocation?: boolean;
 }
 
 function testRenderer<Q extends Queries = typeof queries, Container extends Element | DocumentFragment = HTMLElement>(
@@ -22,7 +27,7 @@ function testRenderer<Q extends Queries = typeof queries, Container extends Elem
   const { hook } = memoryLocation({ path: options?.initialRoute ?? '/' });
   const Wrapper = (props: React.PropsWithChildren<unknown>) => {
     return (
-      <Router hook={hook}>
+      <Router hook={options?.browserLocation ? undefined : hook}>
         <MQueryClient>
           <MSnackbarProvider>
             <TooltipProvider>

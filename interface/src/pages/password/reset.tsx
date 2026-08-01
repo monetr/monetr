@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type { FormikErrors, FormikHelpers } from 'formik';
 import { useLocation, useSearch } from 'wouter';
 
@@ -27,7 +27,12 @@ export default function PasswordResetNew(): React.JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const [pathname, navigate] = useLocation();
   const resetPassword = useResetPassword();
-  const query = new URLSearchParams(useSearch());
+  // Only ever read the query string from the very first render. The effect below strips the token out of the URL, and
+  // wouter's `useSearch` is reactive to `history.replaceState` (it monkey patches it) which means reading the live
+  // query string would make the token vanish the moment we clean the URL up, immediately bouncing the user back to the
+  // login page with a warning.
+  const initialSearch = useRef(useSearch());
+  const query = new URLSearchParams(initialSearch.current);
   // The reason indicates whether the user was forced here by a `PASSWORD_CHANGE_REQUIRED` login response (in which
   // case we show a different message) or arrived via the password reset link in their email.
   const reason = query.get('reason');
@@ -98,6 +103,7 @@ export default function PasswordResetNew(): React.JSX.Element {
           autoComplete='current-password'
           autoFocus
           className={styles.input}
+          data-testid='reset-password'
           label='Password'
           name='password'
           required
@@ -106,12 +112,13 @@ export default function PasswordResetNew(): React.JSX.Element {
         <FormTextField
           autoComplete='current-password'
           className={styles.input}
+          data-testid='reset-verify-password'
           label='Verify Password'
           name='verifyPassword'
           required
           type='password'
         />
-        <FormButton className={styles.input} role='form' type='submit' variant='primary'>
+        <FormButton className={styles.input} data-testid='reset-submit' role='form' type='submit' variant='primary'>
           Reset Password
         </FormButton>
       </div>
