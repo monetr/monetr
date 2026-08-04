@@ -247,9 +247,10 @@ func TestChangePassword(t *testing.T) {
 			response.Body().IsEmpty()
 		}
 
-		// This is just here to make sure that the current token still works after changing the password. If this test
-		// ever fails at this point then that means the behavior has changed and tokens become invalidated upon changing
-		// a password.
+		// This is just here to make sure that the current token still works after
+		// changing the password. If this test ever fails at this point then that
+		// means the behavior has changed and tokens become invalidated upon
+		// changing a password.
 		{
 			response := e.GET(`/api/users/me`).
 				WithCookie(TestCookieName, token).
@@ -797,5 +798,136 @@ func TestConfirmTOTP(t *testing.T) {
 			}).
 			Expect().
 			Status(http.StatusUnauthorized)
+	})
+}
+
+func TestGetUserById(t *testing.T) {
+	t.Run("authenticated", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, currentPassword := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+
+		var token string
+		{ // Login to the user with their current password.
+			response := e.POST(`/api/authentication/login`).
+				WithJSON(map[string]any{
+					"email":    user.Login.Email,
+					"password": currentPassword,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			// Then make sure we get a token back and that it is valid.
+			token = AssertSetTokenCookie(t, response)
+		}
+
+		{ // Then retrieve the user by Id.
+			response := e.GET(`/api/users/{userId}`).
+				WithPath("userId", user.UserId.String()).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.userId").String().IsEqual(user.UserId.String())
+			response.JSON().Path("$.accountId").String().IsEqual(user.AccountId.String())
+			response.JSON().Path("$.loginId").String().IsEqual(user.LoginId.String())
+			response.JSON().Path("$.login").Object().NotEmpty()
+			response.JSON().Path("$.login.loginId").String().IsASCII()
+			response.JSON().Path("$.login").Object().Keys().IsEqualUnordered([]string{
+				// Make sure that no additional fields are exposed ever on the login
+				// object. There are some sensitive fields on the login record that
+				// should never be readable via the API. This helps make sure those stay
+				// out of API responses.
+				"loginId",
+				"email",
+				"firstName",
+				"lastName",
+				"passwordResetAt",
+				"isEmailVerified",
+				"emailVerifiedAt",
+				"totpEnabledAt",
+			})
+			response.JSON().Path("$.account").Object().NotEmpty()
+			response.JSON().Path("$.account.accountId").String().IsASCII()
+		}
+	})
+
+	t.Run("invalid user id", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		response := e.GET(`/api/users/{userId}`).
+			WithPath("userId", "not-a-valid-id").
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("must specify a valid user Id")
+	})
+
+	t.Run("bad token", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		response := e.GET(`/api/users/{userId}`).
+			WithPath("userId", gofakeit.UUID()).
+			WithCookie(TestCookieName, gofakeit.UUID()).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+	})
+
+	t.Run("no token", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		response := e.GET(`/api/users/{userId}`).
+			WithPath("userId", gofakeit.UUID()).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+	})
+
+	t.Run("does not accept an api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		// Getting a user by Id is a token only endpoint, a valid API key must not
+		// be accepted as authentication for it.
+		e.GET(`/api/users/{userId}`).
+			WithPath("userId", gofakeit.UUID()).
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			Expect().
+			Status(http.StatusUnauthorized)
+	})
+
+	t.Run("authenticated pending MFA", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		// Then configure the login fixture with TOTP.
+		_ = fixtures.GivenIHaveTOTPForLogin(t, app.Clock, user.Login)
+
+		var token string
+		{ // Send the initial request and make sure it responds with the error.
+			response := e.POST("/api/authentication/login").
+				WithJSON(map[string]any{
+					"email":    user.Login.Email,
+					"password": password,
+				}).
+				Expect()
+
+			response.Status(http.StatusPreconditionRequired)
+			response.JSON().Path("$.error").String().IsEqual("login requires MFA")
+			response.JSON().Path("$.code").String().IsEqual("MFA_REQUIRED")
+			token = AssertSetTokenCookie(t, response)
+		}
+
+		{ // A token with only MultiFactorScope must be rejected by a tokenOnly
+			// endpoint.
+			response := e.GET(`/api/users/{userId}`).
+				WithPath("userId", user.UserId.String()).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusUnauthorized)
+		}
 	})
 }

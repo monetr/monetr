@@ -167,3 +167,121 @@ func TestRepositoryBase_GetAccountOwner(t *testing.T) {
 		}
 	})
 }
+
+func TestRepositoryBase_GetUserById(t *testing.T) {
+	t.Run("happy path", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			db,
+			log,
+		)
+
+		result, err := repo.GetUserById(t.Context(), user.UserId)
+		assert.NoError(t, err, "should not return an error for retrieving user by id")
+		assert.Equal(t, user.UserId, result.UserId, "should be for the same user")
+		assert.NotNil(t, result.Login, "login cannot be nil, it is used")
+		assert.NotNil(t, result.Account, "account cannot be nil, it is used")
+	})
+
+	t.Run("user does not exist", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+
+		// Create a repo with a user ID that does not exist in the database. The
+		// query will filter by r.UserId(), so it won't find a matching row.
+		fakeUserId := models.NewID[models.User]()
+		fakeAccountId := models.NewID[models.Account]()
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			fakeUserId,
+			fakeAccountId,
+			db,
+			log,
+		)
+
+		result, err := repo.GetUserById(t.Context(), fakeUserId)
+		assert.Error(t, err, "must return an error when the user does not exist")
+		assert.Nil(t, result, "user should be nil when not found")
+		assert.Contains(t, err.Error(), "user does not exist", "error should indicate the user was not found")
+	})
+
+	t.Run("is scoped to the account", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+
+		userOne, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		userTwo, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+
+		// Build a repo using userOne's user ID but userTwo's account ID. The query
+		// filters by both r.AccountId() and r.UserId(), so mixing them should
+		// produce no rows.
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			userOne.UserId,
+			userTwo.AccountId,
+			db,
+			log,
+		)
+
+		result, err := repo.GetUserById(t.Context(), userOne.UserId)
+		assert.Error(t, err, "must not be able to read a user from a different account")
+		assert.Nil(t, result, "user should be nil for a cross-account lookup")
+	})
+
+	t.Run("id parameter does not change the result", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			db,
+			log,
+		)
+
+		// Passing a completely unrelated user Id still returns the session user
+		// because the query filters by r.UserId(), not by the id arg.
+		bogusId := models.NewID[models.User]()
+		result, err := repo.GetUserById(t.Context(), bogusId)
+		assert.NoError(t, err, "should succeed regardless of the id argument")
+		assert.Equal(t, user.UserId, result.UserId, "should return the session user, not the id argument")
+	})
+
+	t.Run("includes login and account relations", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			db,
+			log,
+		)
+
+		result, err := repo.GetUserById(t.Context(), user.UserId)
+		assert.NoError(t, err, "should not return an error")
+		assert.NotNil(t, result.Login, "login relation should be eagerly loaded")
+		assert.Equal(t, user.LoginId, result.Login.LoginId, "login should match the user's login")
+		assert.NotNil(t, result.Account, "account relation should be eagerly loaded")
+		assert.Equal(t, user.AccountId, result.Account.AccountId, "account should match the user's account")
+	})
+}
