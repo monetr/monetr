@@ -3,12 +3,14 @@ import { Book, KeyRound, Plus, RefreshCcw, ServerCrash } from 'lucide-react';
 
 import { Button } from '@monetr/interface/components/Button';
 import Card from '@monetr/interface/components/Card';
+import { Skeleton } from '@monetr/interface/components/Skeleton';
 import APIKeyItem from '@monetr/interface/components/settings/SettingsAPI/APIKeyItem';
 import { showCreateAPIKeyModal } from '@monetr/interface/components/settings/SettingsAPI/CreateAPIKeyModal';
 import SettingsAPIHeader from '@monetr/interface/components/settings/SettingsAPI/Header';
 import Typography from '@monetr/interface/components/Typography';
 import useApiKeys from '@monetr/interface/hooks/useApiKeys';
 
+import itemStyles from '@monetr/interface/components/settings/SettingsAPI/APIKeyItem.module.scss';
 import styles from './api.module.scss';
 
 export default function SettingsAPIKeys(): React.JSX.Element {
@@ -17,7 +19,24 @@ export default function SettingsAPIKeys(): React.JSX.Element {
   const refresh = useCallback(() => refetch(), [refetch]);
 
   if (isLoading) {
-    return <div>Loading placeholder </div>;
+    return (
+      <div className={styles.root}>
+        <SettingsAPIHeader />
+        {[0, 1, 2].map(i => (
+          <Card className={itemStyles.itemSkeleton} key={i}>
+            <div className={itemStyles.itemSkeletonContent}>
+              <Skeleton className={itemStyles.itemSkeletonName} />
+              <Skeleton className={itemStyles.itemSkeletonKeyId} />
+              <div className={itemStyles.itemSkeletonMeta}>
+                <Skeleton className={itemStyles.itemSkeletonMetaLine} />
+                <Skeleton className={itemStyles.itemSkeletonMetaLine} />
+              </div>
+            </div>
+            <Skeleton className={itemStyles.itemSkeletonAction} />
+          </Card>
+        ))}
+      </div>
+    );
   }
 
   if (isError || !isSuccess) {

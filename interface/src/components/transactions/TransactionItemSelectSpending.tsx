@@ -13,9 +13,9 @@ import { FREE_TO_USE, FreeToUse } from '@monetr/interface/models/Spending';
 import type Transaction from '@monetr/interface/models/Transaction';
 import mergeClasses from '@monetr/interface/util/mergeClasses';
 
-import styles from './TransactionItemSelectSpending.module.scss';
 import inputStyles from '../FormTextField.module.scss';
 import selectStyles from '../Select.module.scss';
+import styles from './TransactionItemSelectSpending.module.scss';
 
 // We only ever read a handful of fields off the spending options here, this lets us treat the real spending objects
 // and the free-to-use pseudo spending interchangeably. Same shape MSelectSpending uses.

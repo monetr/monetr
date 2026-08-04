@@ -69,13 +69,23 @@
                 "react-test-renderer"
               ],
               ":BLANK_LINE:",
-              ["@monetr/**"],
+              ["@monetr/**", "!**/*.module.scss", "!**/*.scss", "!**/*.css"],
               ":ALIAS:",
               ":BLANK_LINE:",
-              ["./**"],
-              ":PATH:",
+              ["./**", "!**/*.scss"],
               ":BLANK_LINE:",
-              ["**/*.scss", "**/*.css", "**/*.svg", "**/*.png", "**/*.jpg", "**/*.gif", "**/*.jpeg", "**/*.webp"],
+              [
+                "@monetr/**/*.module.scss",
+                "**/*.module.scss",
+                "**/*.scss",
+                "**/*.css",
+                "**/*.svg",
+                "**/*.png",
+                "**/*.jpg",
+                "**/*.gif",
+                "**/*.jpeg",
+                "**/*.webp"
+              ],
               ":BLANK_LINE:"
             ]
           }

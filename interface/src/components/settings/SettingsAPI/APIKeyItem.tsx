@@ -1,10 +1,9 @@
-import { Fragment } from 'react';
 import { KeyRound, Trash } from 'lucide-react';
 
 import { Button } from '@monetr/interface/components/Button';
 import Card from '@monetr/interface/components/Card';
 import Code from '@monetr/interface/components/Code';
-import { showRevokeAPIKeyModal } from '@monetr/interface/components/settings/SettingsAPI/RevokeAPIKeyModal';
+import { Skeleton } from '@monetr/interface/components/Skeleton';
 import Typography from '@monetr/interface/components/Typography';
 import { useLocale } from '@monetr/interface/hooks/useLocale';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
@@ -24,7 +23,19 @@ export default function APIKeyItem(props: APIKeyItemProps): React.JSX.Element {
   const { data: createdByUser } = useUser(props.apiKey.createdBy);
 
   if (localeIsLoading) {
-    return <Fragment />;
+    return (
+      <Card className={styles.itemSkeleton}>
+        <div className={styles.itemSkeletonContent}>
+          <Skeleton className={styles.itemSkeletonName} />
+          <Skeleton className={styles.itemSkeletonKeyId} />
+          <div className={styles.itemSkeletonMeta}>
+            <Skeleton className={styles.itemSkeletonMetaLine} />
+            <Skeleton className={styles.itemSkeletonMetaLine} />
+          </div>
+        </div>
+        <Skeleton className={styles.itemSkeletonAction} />
+      </Card>
+    );
   }
 
   return (

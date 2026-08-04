@@ -9,8 +9,9 @@ import Typography from '@monetr/interface/components/Typography';
 import { useLinks } from '@monetr/interface/hooks/useLinks';
 import mergeClasses from '@monetr/interface/util/mergeClasses';
 
-import styles from './BankSidebar.module.scss';
 import BankSidebarSubscriptionItem from './BankSidebarSubscriptionItem';
+
+import styles from './BankSidebar.module.scss';
 
 export interface BankSidebarProps {
   className?: string;

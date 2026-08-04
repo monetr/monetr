@@ -1,7 +1,5 @@
 import { createElement } from 'react';
 
-import { toPlainText } from '../toPlainText';
-
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -9,6 +7,7 @@ import type { RsbuildPlugin } from '@rsbuild/core';
 import { load as loadHtml } from 'cheerio';
 import juice from 'juice';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { toPlainText } from '../toPlainText';
 
 const SSG_BUNDLE_FOLDER = '__email_ssg__';
 const SSG_BUNDLE_NAME = 'email-bundle.cjs';
