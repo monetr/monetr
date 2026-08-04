@@ -250,10 +250,13 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		now := time.Date(2022, 4, 14, 12, 0, 0, 0, time.UTC)
 		nextDueDate := time.Date(2022, 4, 15, 0, 0, 0, 0, time.UTC)
 
-		// We need to spend this expense every Friday.
+		// We need to spend this expense every Friday. In April the Fridays are the
+		// 15th, 22nd, and 29th, and the 15th also happens to be a payday below.
 		spendingRule := RuleToSet(t, time.UTC, "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR", now)
 
-		// Contribute to the spending object on the 15th and last day of every month.
+		// Contribute to the spending object on the 15th and last day of every
+		// month, so the first paycheck after now lands on the 15th and the next on
+		// the 30th.
 		fundingRule := RuleToSet(t, time.UTC, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", now)
 
 		spending := Spending{
@@ -272,7 +275,10 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			testutils.GetLog(t),
 		)
 		assert.False(t, spending.IsBehind, "should not be behind")
-		assert.EqualValues(t, 3000, spending.NextContributionAmount, "next contribution amount should be more than the target to account for frequency")
+		// The paycheck on the 15th has to cover every Friday before the next one on
+		// the 30th: the 15th, 22nd, and 29th. The Friday that lands on payday still
+		// counts, so that is 3 * 1500.
+		assert.EqualValues(t, 4500, spending.NextContributionAmount, "should cover all three Fridays before the next paycheck")
 	})
 
 	t.Run("more frequent, odd scenario", func(t *testing.T) {
@@ -561,6 +567,40 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		assert.EqualValues(t, 12500, spending.NextContributionAmount, "should be half of the target amount")
 	})
 
+	t.Run("expense recurring on the first funding date is funded by that paycheck", func(t *testing.T) {
+		// Expense costs $100 every Friday and we get paid on the 15th and last day
+		// of the month. In August 2025 the 15th is a Friday, so the spending lands
+		// right on a payday. The paycheck on the 15th has to cover every spending
+		// until the next paycheck on the 31st (the 15th, 22nd, and 29th), so we
+		// need $300. We used to drop the spending that fell on the 15th and only
+		// set aside $200, leaving us a spend short. Timezone is pinned to UTC so
+		// this does not get flaky.
+		now := time.Date(2025, 8, 11, 12, 0, 0, 0, time.UTC)        // Monday before payday
+		nextDueDate := time.Date(2025, 8, 15, 0, 0, 0, 0, time.UTC) // Friday, also a payday
+
+		spendingRule := RuleToSet(t, time.UTC, "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR", now)
+		fundingRule := RuleToSet(t, time.UTC, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", now)
+
+		spending := Spending{
+			SpendingType:   SpendingTypeExpense,
+			TargetAmount:   100,
+			CurrentAmount:  0,
+			NextRecurrence: nextDueDate,
+			RuleSet:        spendingRule,
+		}
+
+		spending.CalculateNextContribution(
+			t.Context(),
+			time.UTC,
+			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
+			now,
+			testutils.GetLog(t),
+		)
+
+		assert.False(t, spending.IsBehind, "should not be behind before the first paycheck")
+		assert.EqualValues(t, 300, spending.NextContributionAmount, "should cover the cleaning on the 15th too, so all three Fridays")
+	})
+
 	t.Run("goal is due on a funding date", func(t *testing.T) {
 		timezone, err := time.LoadLocation("America/Chicago")
 		require.NoError(t, err, "must be able to load timezone")
@@ -795,6 +835,32 @@ func TestSpending_GetRecurrencesBefore(t *testing.T) {
 			t,
 			recurrences[0].Equal(time.Date(2022, 2, 15, 0, 0, 0, 0, timezone)),
 			"recurrence should be midnight on the 15th in the user's timezone",
+		)
+	})
+
+	t.Run("half-open interval includes the start boundary and excludes the end boundary", func(t *testing.T) {
+		// This window is half-open: we keep an occurrence that lands right on the
+		// start, but hand off one that lands on the end to the next window. If we
+		// dropped both (like the old code did) an expense that recurs on a payday
+		// would just vanish from the math. The 15th & last day rule only fires on
+		// the 15th and 31st of January, so those two dates are both the window
+		// edges and the only occurrences: we should get the 15th back but not the
+		// 31st.
+		ruleset := RuleToSet(t, time.UTC, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC))
+		spending := Spending{
+			SpendingType: SpendingTypeExpense,
+			RuleSet:      ruleset,
+		}
+
+		start := time.Date(2022, 1, 15, 0, 0, 0, 0, time.UTC)
+		end := time.Date(2022, 1, 31, 0, 0, 0, 0, time.UTC)
+
+		recurrences := spending.GetRecurrencesBefore(start, end, time.UTC)
+		require.Len(t, recurrences, 1, "should keep the 15th and drop the 31st")
+		assert.True(
+			t,
+			recurrences[0].Equal(start),
+			"should be the occurrence on the 15th",
 		)
 	})
 }
