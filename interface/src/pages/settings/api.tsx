@@ -4,6 +4,7 @@ import { Book, KeyRound, Plus, RefreshCcw, ServerCrash } from 'lucide-react';
 import { Button } from '@monetr/interface/components/Button';
 import Card from '@monetr/interface/components/Card';
 import APIKeyItem from '@monetr/interface/components/settings/SettingsAPI/APIKeyItem';
+import { showCreateAPIKeyModal } from '@monetr/interface/components/settings/SettingsAPI/CreateAPIKeyModal';
 import SettingsAPIHeader from '@monetr/interface/components/settings/SettingsAPI/Header';
 import Typography from '@monetr/interface/components/Typography';
 import useApiKeys from '@monetr/interface/hooks/useApiKeys';
@@ -68,7 +69,7 @@ export default function SettingsAPIKeys(): React.JSX.Element {
               <Book />
               Read the Docs
             </Button>
-            <Button>
+            <Button onClick={showCreateAPIKeyModal}>
               <Plus />
               Create your first API Key
             </Button>
