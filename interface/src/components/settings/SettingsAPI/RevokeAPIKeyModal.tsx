@@ -4,7 +4,6 @@ import { Trash } from 'lucide-react';
 
 import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
-import Card from '@monetr/interface/components/Card';
 import Modal, {
   ModalActions,
   ModalContent,
@@ -12,11 +11,10 @@ import Modal, {
   type ModalRef,
   ModalTitle,
 } from '@monetr/interface/components/Modal';
-import Typography from '@monetr/interface/components/Typography';
+import APIKeyItem from '@monetr/interface/components/settings/SettingsAPI/APIKeyItem';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import { useProofOfWork } from '@monetr/interface/hooks/useProofOfWork';
 import useRemoveApiKey from '@monetr/interface/hooks/useRemoveApiKey';
-import { useUser } from '@monetr/interface/hooks/useUser';
 import type ApiKey from '@monetr/interface/models/ApiKey';
 import type { APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
@@ -31,7 +29,6 @@ function RevokeAPIKeyModal(props: RevokeAPIKeyModalProps): React.JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const { data: config } = useAppConfiguration();
   const pow = useProofOfWork('delete_api_key', Boolean(config?.proofOfWorkEnabled));
-  const { data: createdByUser } = useUser(props.apiKey.createdBy);
   const removeApiKey = useRemoveApiKey();
   const [submitting, setSubmitting] = useState(false);
 
@@ -64,15 +61,7 @@ function RevokeAPIKeyModal(props: RevokeAPIKeyModalProps): React.JSX.Element {
           <ModalTitle>Revoke API Key?</ModalTitle>
           <ModalDescription>Any automation or script using this key will stop working immediately.</ModalDescription>
         </div>
-        <Card>
-          <Typography weight='bold'>{props.apiKey.name}</Typography>
-          <Typography component='code' ellipsis>
-            {props.apiKey.apiKeyId}
-          </Typography>
-          <Typography component='p' ellipsis size='sm'>
-            Created By: <b>{createdByUser?.name() ?? '...'}</b>
-          </Typography>
-        </Card>
+        <APIKeyItem apiKey={props.apiKey} hideRevoke />
         <ModalActions>
           <Button disabled={submitting} onClick={modal.remove} variant='secondary'>
             Cancel

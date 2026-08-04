@@ -16,6 +16,7 @@ import styles from './APIKeyItem.module.scss';
 
 interface APIKeyItemProps {
   apiKey: ApiKey;
+  hideRevoke?: boolean;
 }
 
 export default function APIKeyItem(props: APIKeyItemProps): React.JSX.Element {
@@ -57,12 +58,14 @@ export default function APIKeyItem(props: APIKeyItemProps): React.JSX.Element {
           </Typography>
         </div>
       </div>
-      <div>
-        <Button onClick={() => showRevokeAPIKeyModal({ apiKey: props.apiKey })} variant='destructive'>
-          <Trash />
-          Revoke
-        </Button>
-      </div>
+      {!props.hideRevoke && (
+        <div>
+          <Button onClick={() => showRevokeAPIKeyModal({ apiKey: props.apiKey })} variant='destructive'>
+            <Trash />
+            Revoke
+          </Button>
+        </div>
+      )}
     </Card>
   );
 }
