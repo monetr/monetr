@@ -1,0 +1,26 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+@media (max-width: variables.$largeScreen) {
+  .headerRow {
+    flex-direction: column;
+
+    &Action {
+      align-self: normal !important;
+    }
+  }
+}
+
+.headerRow {
+  display: flex;
+  width: 100%;
+  gap: 2 * variables.$size;
+  justify-content: space-between;
+
+  &Action {
+    display: inherit;
+    flex-shrink: 0;
+    align-self: center;
+    gap: inherit;
+  }
+}

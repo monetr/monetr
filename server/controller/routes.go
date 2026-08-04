@@ -280,6 +280,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	tokenOnly.PUT("/users/security/password", c.changePassword)
 	tokenOnly.POST("/users/security/totp/setup", c.postSetupTOTP)
 	tokenOnly.POST("/users/security/totp/confirm", c.postConfirmTOTP)
+	tokenOnly.GET("/users/:userId", c.getUserById)
 	// Billing
 	tokenOnly.POST("/billing/create_checkout", c.handlePostCreateCheckout)
 	tokenOnly.GET("/billing/checkout/:checkoutSessionId", c.handleGetAfterCheckout)

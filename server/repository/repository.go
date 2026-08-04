@@ -202,6 +202,11 @@ type BaseRepository interface {
 	GetApiKeys(ctx context.Context) ([]ApiKey, error)
 	CreateApiKey(ctx context.Context, key *ApiKey) error
 	DeleteApiKey(ctx context.Context, id ID[ApiKey]) error
+
+	GetUserById(
+		ctx context.Context,
+		id ID[User],
+	) (*User, error)
 }
 
 type Repository interface {

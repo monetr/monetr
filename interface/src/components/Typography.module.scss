@@ -108,6 +108,10 @@
   font-weight: var(--bold);
 }
 
+.prose {
+  display: block;
+}
+
 .code {
   background-color: var(--background-subtle);
   padding-top: 0.5 * variables.$size;

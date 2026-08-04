@@ -2,8 +2,9 @@ import { createElement, useMemo, useState } from 'react';
 
 import { toPlainText } from '@monetr/emails/toPlainText';
 
-import styles from './App.module.scss';
 import { templateList } from './templates';
+
+import styles from './App.module.scss';
 
 import { renderToStaticMarkup } from 'react-dom/server';
 

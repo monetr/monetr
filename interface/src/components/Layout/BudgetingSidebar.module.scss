@@ -1,51 +1,47 @@
 @use '@monetr/interface/mixins';
 @use '@monetr/interface/variables';
 
-:global(.sidebar-open) {
-  .budgetSidebarRoot {
-    display: flex;
-    width: 100%;
-  }
-
-  @media (max-width: variables.$largeScreen) {
+// Only apply toggle sidebar styles when we are on a screen smaller than our
+// "large" screen size. That way the styles for normal desktop screens and
+// smaller mobile screens are fucked.
+@media (max-width: variables.$largeScreen) {
+  :global(.sidebar-open) {
     .budgetSidebarRoot {
+      width: 100%;
+      display: flex;
       background-color: color-mix(in srgb, var(--background) 50%, transparent);
       backdrop-filter: blur(4px) brightness(0.3);
+      padding-left: var(--bank-sidebar-width-static);
+      position: fixed;
     }
   }
 
-  @media (min-width: variables.$largeScreen) {
+  :global(.sidebar-close) {
     .budgetSidebarRoot {
-      display: flex;
-      width: calc(var(--bank-sidebar-width-static) + var(--budget-sidebar-width));
+      display: none;
     }
   }
 }
 
-:global(.sidebar-close) {
+// On large screens we are just always visible.
+@media (min-width: variables.$largeScreen) {
   .budgetSidebarRoot {
-    display: none;
-  }
-
-  @media (min-width: variables.$largeScreen) {
-    .budgetSidebarRoot {
-      display: flex;
-      width: calc(var(--bank-sidebar-width-static) + var(--budget-sidebar-width));
-    }
+    display: flex;
   }
 }
 
 .budgetSidebarRoot {
   z-index: 40;
-  position: fixed;
+  position: sticky;
   top: 0;
   bottom: 0;
   left: 0;
-  padding-left: var(--bank-sidebar-width-static);
 
   flex-direction: column;
   border-right: 1px solid var(--border);
   align-items: center;
+  width: var(--budget-sidebar-width);
+  height: 100vh;
 
   padding-bottom: calc(4 * variables.$size + env(safe-area-inset-bottom));
 }

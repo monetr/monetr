@@ -35,6 +35,7 @@ import PasswordReset from '@monetr/interface/pages/password/reset';
 import OauthReturn from '@monetr/interface/pages/plaid/oauth-return';
 import Register from '@monetr/interface/pages/register';
 import SettingsAbout from '@monetr/interface/pages/settings/about';
+import SettingsAPIKeys from '@monetr/interface/pages/settings/api';
 import SettingsBilling from '@monetr/interface/pages/settings/billing';
 import SettingsOverview from '@monetr/interface/pages/settings/overview';
 import SettingsSecurity from '@monetr/interface/pages/settings/security';
@@ -186,6 +187,7 @@ export default function Monetr(): React.JSX.Element {
                   <Switch>
                     <Route component={SettingsOverview} path='/settings/overview' />
                     <Route component={SettingsSecurity} path='/settings/security' />
+                    <Route component={SettingsAPIKeys} path='/settings/api' />
                     {config?.billingEnabled && <Route component={SettingsBilling} path='/settings/billing' />}
                     <Route component={SettingsAbout} path='/settings/about' />
                     <Route path='*'>

@@ -4,8 +4,9 @@ import { Link } from 'wouter';
 
 import mergeClasses from '@monetr/interface/util/mergeClasses';
 
-import styles from './MLink.module.scss';
 import type { TextSize } from './types';
+
+import styles from './MLink.module.scss';
 
 export interface MLinkProps extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> {
   to: string;

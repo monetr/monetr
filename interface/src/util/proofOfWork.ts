@@ -2,7 +2,7 @@ import request from '@monetr/interface/util/request';
 
 import { solve } from './proofOfWorkSolver';
 
-export type PowPurpose = 'register' | 'login' | 'forgot' | 'resend';
+export type PowPurpose = 'register' | 'login' | 'forgot' | 'resend' | 'create_api_key' | 'delete_api_key';
 
 export interface PowChallenge {
   challenge: string;

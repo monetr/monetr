@@ -19,8 +19,9 @@ import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankA
 import { AmountType } from '@monetr/interface/util/amounts';
 import mergeClasses from '@monetr/interface/util/mergeClasses';
 
-import styles from './BudgetingSidebar.module.scss';
 import BudgetingSidebarTitle from './BudgetingSidebarTitle';
+
+import styles from './BudgetingSidebar.module.scss';
 
 export interface BudgetingSidebarProps {
   className?: string;

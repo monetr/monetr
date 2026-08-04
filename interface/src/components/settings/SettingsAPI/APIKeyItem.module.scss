@@ -1,0 +1,68 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.item {
+  display: flex;
+  flex-direction: row;
+  gap: 4 * variables.$size;
+
+  &Content {
+    flex: 1;
+    min-width: 0;
+
+    &KeyId {
+      max-width: 96 * variables.$size;
+    }
+
+    &Metadata {
+      display: flex;
+      gap: 2 * variables.$size;
+    }
+  }
+
+}
+
+// Loading skeleton for a key item card. Also used by the page-level loading
+// state to show placeholder cards before the key list arrives.
+.itemSkeleton {
+  display: flex;
+  flex-direction: row;
+  gap: 4 * variables.$size;
+
+  &Content {
+    display: flex;
+    flex-direction: column;
+    gap: 2 * variables.$size;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &Name {
+    width: 40%;
+    height: 7 * variables.$size;
+  }
+
+  &KeyId {
+    max-width: 96 * variables.$size;
+    // Shorter than the real Code field (21 * $size) to absorb the two content
+    // gaps that the real layout doesn't have.
+    height: 17 * variables.$size;
+  }
+
+  &Meta {
+    display: flex;
+    gap: 2 * variables.$size;
+  }
+
+  &MetaLine {
+    width: 36 * variables.$size;
+    height: 5 * variables.$size;
+  }
+
+  &Action {
+    width: 24 * variables.$size;
+    height: 8 * variables.$size;
+    flex-shrink: 0;
+    align-self: center;
+  }
+}

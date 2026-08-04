@@ -34,8 +34,9 @@ import { AmountType } from '@monetr/interface/util/amounts';
 import type { APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
 
-import styles from './details.module.scss';
 import ExpenseTimeline from './ExpenseTimeline';
+
+import styles from './details.module.scss';
 
 interface ExpenseValues {
   name: string;
