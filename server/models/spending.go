@@ -84,8 +84,11 @@ func (e Spending) GetProgressAmount() int64 {
 	}
 }
 
-// GetRecurrencesBefore will return an array of times that this spending item will be used (based on the recurrence
-// rule) between the provided now and before in the specified time zone. Goals will at most return a single time if the
+// GetRecurrencesBefore will return an array of times that this spending item
+// will be used (based on the recurrence rule) between the provided now and
+// before in the specified time zone. The window includes now but stops just
+// short of before, so an event that lands right on before belongs to the next
+// window instead of this one. Goals will at most return a single time if the
 // goal is due within that window.
 func (e *Spending) GetRecurrencesBefore(now, before time.Time, timezone *time.Location) []time.Time {
 	switch e.SpendingType {
@@ -96,9 +99,18 @@ func (e *Spending) GetRecurrencesBefore(now, before time.Time, timezone *time.Lo
 		// are ahead of UTC.
 		rule := e.RuleSet.Clone()
 		rule.DTStart(rule.GetDTStart().In(timezone))
-		return rule.Between(now, before, false)
+		// We want every occurrence from now up to but not including before. That
+		// way an event that lands right on now still counts here, but one that
+		// lands on before rolls into the next window. rrule's Between treats both
+		// ends the same, so we ask for both included and then drop the last one if
+		// it happens to fall exactly on before.
+		occurrences := rule.Between(now, before, true)
+		if n := len(occurrences); n > 0 && occurrences[n-1].Equal(before) {
+			occurrences = occurrences[:n-1]
+		}
+		return occurrences
 	case SpendingTypeGoal:
-		if e.NextRecurrence.After(now) && e.NextRecurrence.Before(before) {
+		if !e.NextRecurrence.Before(now) && e.NextRecurrence.Before(before) {
 			return []time.Time{e.NextRecurrence}
 		}
 		fallthrough
