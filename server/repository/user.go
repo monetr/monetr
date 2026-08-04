@@ -74,13 +74,15 @@ func (r *repositoryBase) GetUserById(
 		Relation("Login").
 		Relation("Account").
 		Where(`"user"."account_id" = ?`, r.AccountId()).
-		Where(`"user"."user_id" = ?`, r.UserId()).
+		Where(`"user"."user_id" = ?`, id).
 		Limit(1).
 		Select(&user)
 	switch err {
 	case pg.ErrNoRows:
 		span.Status = sentry.SpanStatusNotFound
-		return nil, errors.Errorf("user does not exist")
+		// Keep pg.ErrNoRows as the cause so the controller can translate this
+		// into a 404 instead of a 500.
+		return nil, errors.Wrap(err, "user does not exist")
 	case nil:
 	default:
 		span.Status = sentry.SpanStatusInternalError

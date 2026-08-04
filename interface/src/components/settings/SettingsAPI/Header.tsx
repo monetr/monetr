@@ -23,7 +23,7 @@ export default function Header(): React.JSX.Element {
           <Book />
           API Docs
         </Button>
-        <Button onClick={showCreateAPIKeyModal}>
+        <Button data-testid='api-keys-create' onClick={showCreateAPIKeyModal}>
           <Plus />
           New API Key
         </Button>

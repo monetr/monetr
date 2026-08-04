@@ -15,7 +15,7 @@ export default function CreateAPIKeyModalSecretView(): React.JSX.Element {
   const viewContext = useViewContext<CreateAPIKeySteps, CreateAPIKeyMetadata, unknown>();
 
   return (
-    <ModalContent>
+    <ModalContent data-testid='create-api-key-secret'>
       <div>
         <ModalTitle>
           <Key />
@@ -35,7 +35,7 @@ export default function CreateAPIKeyModalSecretView(): React.JSX.Element {
         <b>secret</b> as the password.
       </Typography>
       <ModalActions>
-        <Button onClick={closeCreateAPIKeyModal} variant='primary'>
+        <Button data-testid='close-create-api-key-secret' onClick={closeCreateAPIKeyModal} variant='primary'>
           Done
         </Button>
       </ModalActions>

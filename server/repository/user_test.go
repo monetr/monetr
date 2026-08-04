@@ -11,6 +11,7 @@ import (
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRepositoryBase_GetMe(t *testing.T) {
@@ -196,8 +197,8 @@ func TestRepositoryBase_GetUserById(t *testing.T) {
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 
-		// Create a repo with a user ID that does not exist in the database. The
-		// query will filter by r.UserId(), so it won't find a matching row.
+		// Create a repo for a user and account that do not exist in the database,
+		// looking up any id in that session won't find a matching row.
 		fakeUserId := models.NewID[models.User]()
 		fakeAccountId := models.NewID[models.Account]()
 
@@ -223,12 +224,11 @@ func TestRepositoryBase_GetUserById(t *testing.T) {
 		userOne, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		userTwo, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 
-		// Build a repo using userOne's user ID but userTwo's account ID. The query
-		// filters by both r.AccountId() and r.UserId(), so mixing them should
-		// produce no rows.
+		// userOne belongs to a different account than userTwo's session, so the
+		// lookup must come back empty even though the user id is real.
 		repo := repository.NewRepositoryFromSession(
 			clock,
-			userOne.UserId,
+			userTwo.UserId,
 			userTwo.AccountId,
 			db,
 			log,
@@ -239,7 +239,41 @@ func TestRepositoryBase_GetUserById(t *testing.T) {
 		assert.Nil(t, result, "user should be nil for a cross-account lookup")
 	})
 
-	t.Run("id parameter does not change the result", func(t *testing.T) {
+	t.Run("retrieves another user in the same account", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+
+		userOne, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+
+		// Add a second user to the same account with their own login, this mirrors
+		// what the fixtures do when they seed the first user.
+		secondLogin, _ := fixtures.GivenIHaveLogin(t, clock)
+		userTwo := models.User{
+			LoginId:   secondLogin.LoginId,
+			AccountId: userOne.AccountId,
+			Role:      models.UserRoleMember,
+		}
+		unauthenticatedRepo := repository.NewUnauthenticatedRepository(clock, db)
+		require.NoError(t, unauthenticatedRepo.CreateUser(t.Context(), &userTwo), "must be able to seed a second user")
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			userOne.UserId,
+			userOne.AccountId,
+			db,
+			log,
+		)
+
+		// The lookup must honor the id argument, userOne needs to be able to read
+		// userTwo's details for things like the Created By line in the UI.
+		result, err := repo.GetUserById(t.Context(), userTwo.UserId)
+		assert.NoError(t, err, "should be able to retrieve another user in the same account")
+		assert.Equal(t, userTwo.UserId, result.UserId, "should return the requested user, not the session user")
+		assert.Equal(t, secondLogin.LoginId, result.Login.LoginId, "should include the requested user's login")
+	})
+
+	t.Run("does not return the session user for a bogus id", func(t *testing.T) {
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
@@ -254,12 +288,13 @@ func TestRepositoryBase_GetUserById(t *testing.T) {
 			log,
 		)
 
-		// Passing a completely unrelated user Id still returns the session user
-		// because the query filters by r.UserId(), not by the id arg.
+		// Even though the session user exists, asking for an id that doesn't must
+		// not fall back to the session user.
 		bogusId := models.NewID[models.User]()
 		result, err := repo.GetUserById(t.Context(), bogusId)
-		assert.NoError(t, err, "should succeed regardless of the id argument")
-		assert.Equal(t, user.UserId, result.UserId, "should return the session user, not the id argument")
+		assert.Error(t, err, "must not fall back to the session user for a bogus id")
+		assert.Nil(t, result, "user should be nil for a bogus id")
+		assert.Contains(t, err.Error(), "user does not exist", "error should indicate the user was not found")
 	})
 
 	t.Run("includes login and account relations", func(t *testing.T) {

@@ -56,17 +56,22 @@ function RevokeAPIKeyModal(props: RevokeAPIKeyModalProps): React.JSX.Element {
 
   return (
     <Modal open={modal.visible} ref={ref}>
-      <ModalContent>
+      <ModalContent data-testid='revoke-api-key-modal'>
         <div>
           <ModalTitle>Revoke API Key?</ModalTitle>
           <ModalDescription>Any automation or script using this key will stop working immediately.</ModalDescription>
         </div>
         <APIKeyItem apiKey={props.apiKey} hideRevoke />
         <ModalActions>
-          <Button disabled={submitting} onClick={modal.remove} variant='secondary'>
+          <Button
+            data-testid='close-revoke-api-key-modal'
+            disabled={submitting}
+            onClick={modal.remove}
+            variant='secondary'
+          >
             Cancel
           </Button>
-          <Button disabled={submitting} onClick={submit} variant='destructive'>
+          <Button data-testid='revoke-api-key-confirm' disabled={submitting} onClick={submit} variant='destructive'>
             <Trash />
             Revoke
           </Button>

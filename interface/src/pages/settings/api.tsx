@@ -43,19 +43,18 @@ export default function SettingsAPIKeys(): React.JSX.Element {
     return (
       <div className={styles.root}>
         <SettingsAPIHeader />
-        <Card className={styles.cardRoot}>
+        <Card className={styles.cardRoot} data-testid='api-keys-error'>
           <ServerCrash className={styles.errorLogo} />
           <div className={styles.cardEmptyText}>
             <Typography size='lg' weight='bold'>
               We couldn't load your keys
             </Typography>
             <Typography color='subtle' size='lg' weight='normal'>
-              monetr didn't response as expected; your keys are safe and nothing was changed. Try again in just a
-              moment.
+              monetr didn't respond as expected; your keys are safe and nothing was changed. Try again in just a moment.
             </Typography>
           </div>
           <div className={styles.cardEmptyActions}>
-            <Button disabled={isFetching} onClick={refresh}>
+            <Button data-testid='api-keys-retry' disabled={isFetching} onClick={refresh}>
               <RefreshCcw />
               Try Again
             </Button>
@@ -69,7 +68,7 @@ export default function SettingsAPIKeys(): React.JSX.Element {
     return (
       <div className={styles.root}>
         <SettingsAPIHeader />
-        <Card className={styles.cardRoot}>
+        <Card className={styles.cardRoot} data-testid='api-keys-empty'>
           <div className={styles.keyLogos}>
             <KeyRound className={styles.keyLogosBack} />
             <KeyRound className={styles.keyLogosFront} />
@@ -88,7 +87,7 @@ export default function SettingsAPIKeys(): React.JSX.Element {
               <Book />
               Read the Docs
             </Button>
-            <Button onClick={showCreateAPIKeyModal}>
+            <Button data-testid='api-keys-empty-create' onClick={showCreateAPIKeyModal}>
               <Plus />
               Create your first API Key
             </Button>

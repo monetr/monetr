@@ -65,7 +65,7 @@ export default function CreateAPIKeyModalNameForm(): React.JSX.Element {
   };
 
   return (
-    <MForm initialValues={initialValues} onSubmit={submit}>
+    <MForm data-testid='create-api-key-modal' initialValues={initialValues} onSubmit={submit}>
       <ModalContent>
         <div>
           <ModalTitle>
@@ -77,6 +77,7 @@ export default function CreateAPIKeyModalNameForm(): React.JSX.Element {
         <FormTextField
           autoComplete='off'
           data-1p-ignore
+          data-testid='create-api-key-name'
           label='Name'
           maxLength={300}
           minLength={1}
@@ -92,10 +93,10 @@ export default function CreateAPIKeyModalNameForm(): React.JSX.Element {
           </Typography>
         </Card>
         <ModalActions>
-          <Button onClick={closeCreateAPIKeyModal} variant='secondary'>
+          <Button data-testid='close-create-api-key-modal' onClick={closeCreateAPIKeyModal} variant='secondary'>
             Cancel
           </Button>
-          <FormButton type='submit' variant='primary'>
+          <FormButton data-testid='create-api-key-submit' type='submit' variant='primary'>
             <Key />
             Create
           </FormButton>

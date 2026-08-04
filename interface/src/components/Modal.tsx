@@ -41,8 +41,12 @@ export function ModalDescription(props: TypographyProps): React.JSX.Element {
   );
 }
 
-export function ModalContent({ children }: React.PropsWithChildren): React.JSX.Element {
-  return <div className={styles.content}>{children}</div>;
+export function ModalContent({ children, ...props }: React.ComponentPropsWithoutRef<'div'>): React.JSX.Element {
+  return (
+    <div className={styles.content} {...props}>
+      {children}
+    </div>
+  );
 }
 
 export function ModalActions({ children }: React.PropsWithChildren): React.JSX.Element {

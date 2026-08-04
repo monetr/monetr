@@ -41,7 +41,9 @@ export default function APIKeyItem(props: APIKeyItemProps): React.JSX.Element {
   }
 
   return (
-    <Card className={styles.item} key={props.apiKey.apiKeyId}>
+    // The revoke modal renders a preview of the same key while the list item is still mounted, only the canonical list
+    // entry carries the key's id so the id stays unique in the document.
+    <Card className={styles.item} id={props.hideRevoke ? undefined : props.apiKey.apiKeyId}>
       <div className={styles.itemContent}>
         <Typography size='lg' weight='bold'>
           {props.apiKey.name}

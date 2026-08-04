@@ -10,8 +10,12 @@ import (
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mock_stripe"
+	"github.com/monetr/monetr/server/internal/testutils"
+	"github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/security"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/xlzd/gotp"
 )
 
@@ -849,6 +853,62 @@ func TestGetUserById(t *testing.T) {
 			response.JSON().Path("$.account").Object().NotEmpty()
 			response.JSON().Path("$.account.accountId").String().IsASCII()
 		}
+	})
+
+	t.Run("another user in the same account", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, currentPassword := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+
+		// Seed a second user on the same account with their own login, they will be
+		// the target of the lookup.
+		secondLogin, _ := fixtures.GivenIHaveLogin(t, app.Clock)
+		secondUser := models.User{
+			LoginId:   secondLogin.LoginId,
+			AccountId: user.AccountId,
+			Role:      models.UserRoleMember,
+		}
+		repo := repository.NewUnauthenticatedRepository(app.Clock, testutils.GetPgDatabase(t))
+		require.NoError(t, repo.CreateUser(t.Context(), &secondUser), "must be able to seed a second user")
+
+		var token string
+		{ // Login as the first user.
+			response := e.POST(`/api/authentication/login`).
+				WithJSON(map[string]any{
+					"email":    user.Login.Email,
+					"password": currentPassword,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			token = AssertSetTokenCookie(t, response)
+		}
+
+		{ // The lookup must return the requested user, not the session user.
+			response := e.GET(`/api/users/{userId}`).
+				WithPath("userId", secondUser.UserId.String()).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.userId").String().IsEqual(secondUser.UserId.String())
+			response.JSON().Path("$.login.loginId").String().IsEqual(secondLogin.LoginId.String())
+			response.JSON().Path("$.login.firstName").String().IsEqual(secondLogin.FirstName)
+		}
+	})
+
+	t.Run("user does not exist", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		// A well formed id that doesn't belong to any user must come back as a 404,
+		// not fall back to the session user and not a 500.
+		response := e.GET(`/api/users/{userId}`).
+			WithPath("userId", models.NewID[models.User]().String()).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").String().IsEqual("could not retrieve user: record does not exist")
 	})
 
 	t.Run("invalid user id", func(t *testing.T) {
