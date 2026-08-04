@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { Trash } from 'lucide-react';
 
@@ -33,9 +33,10 @@ function RevokeAPIKeyModal(props: RevokeAPIKeyModalProps): React.JSX.Element {
   const pow = useProofOfWork('delete_api_key', Boolean(config?.proofOfWorkEnabled));
   const { data: createdByUser } = useUser(props.apiKey.createdBy);
   const removeApiKey = useRemoveApiKey();
+  const [submitting, setSubmitting] = useState(false);
 
-  // TODO This doesn't disable the button when they submit so it won't show a great loading state at the moment
   const submit = useCallback(async () => {
+    setSubmitting(true);
     return await pow
       .getSolution()
       .then(solution =>
@@ -47,6 +48,7 @@ function RevokeAPIKeyModal(props: RevokeAPIKeyModalProps): React.JSX.Element {
       )
       .then(() => modal.remove())
       .catch((error: ApiError<APIError>) => {
+        setSubmitting(false);
         enqueueSnackbar(error.response.data.error, {
           variant: 'error',
           disableWindowBlurListener: true,
@@ -72,10 +74,10 @@ function RevokeAPIKeyModal(props: RevokeAPIKeyModalProps): React.JSX.Element {
           </Typography>
         </Card>
         <ModalActions>
-          <Button onClick={modal.remove} variant='secondary'>
+          <Button disabled={submitting} onClick={modal.remove} variant='secondary'>
             Cancel
           </Button>
-          <Button onClick={submit} variant='destructive'>
+          <Button disabled={submitting} onClick={submit} variant='destructive'>
             <Trash />
             Revoke
           </Button>
