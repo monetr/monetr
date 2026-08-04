@@ -4,6 +4,7 @@ import { Button } from '@monetr/interface/components/Button';
 import Card from '@monetr/interface/components/Card';
 import Code from '@monetr/interface/components/Code';
 import { Skeleton } from '@monetr/interface/components/Skeleton';
+import { showRevokeAPIKeyModal } from '@monetr/interface/components/settings/SettingsAPI/RevokeAPIKeyModal';
 import Typography from '@monetr/interface/components/Typography';
 import { useLocale } from '@monetr/interface/hooks/useLocale';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
