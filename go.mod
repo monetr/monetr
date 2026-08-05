@@ -25,7 +25,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/gomodule/redigo v1.9.3
 	github.com/hashicorp/vault/api v1.23.0
-	github.com/jarcoal/httpmock v1.4.1
+	github.com/jarcoal/httpmock v1.4.2
 	github.com/labstack/echo/v5 v5.3.0
 	github.com/monetr/devslog v0.0.17
 	github.com/monetr/validation v1.3.0
