@@ -1,0 +1,292 @@
+---
+title: "Uploads and Files API"
+description: "Import transactions into monetr from an OFX file over the API, watch the async import finish over a WebSocket, and list files stored on your account."
+---
+
+import { Badge } from '@rspress/core/theme';
+
+# Uploads and Files API
+
+If your bank isn't on Plaid but will hand you a download, you can import transactions from a
+file. You upload an OFX file, monetr stores it and queues a background job, and the
+transactions show up on the bank account once the job finishes.
+
+The import is asynchronous. The upload call returns as soon as the file is stored, with a
+status of `pending`, and the actual parsing happens afterwards. So you either
+[poll the upload](#get-an-upload) or [connect to its progress socket](#watch-an-uploads-progress)
+to find out how it went.
+
+File uploads need object storage configured on the server. Without it, uploading returns a
+404 saying uploads aren't enabled.
+
+## The transaction upload object
+
+| Attribute | Type | Description |
+| --- | --- | --- |
+| `transactionUploadId` | string (ulid) | Identifies the upload. |
+| `bankAccountId` | string (ulid) | The bank account the transactions will land on. |
+| `fileId` | string (ulid) | The stored file. |
+| `file` | object | The stored file, described below. Present on the response to the upload itself. |
+| `status` | string | `pending`, `processing`, `complete` or `failed`. |
+| `error` | string | Why it failed. Absent unless `status` is `failed`. |
+| `createdAt` | timestamp | When the file was uploaded. |
+| `createdBy` | string (ulid) | The user who uploaded it. |
+| `processedAt` | timestamp, nullable | When the background job picked it up. Null while it's still queued. |
+| `completedAt` | timestamp, nullable | When processing finished, successfully or not. Null while it's still going. |
+
+## The file object
+
+| Attribute | Type | Description |
+| --- | --- | --- |
+| `fileId` | string (ulid) | Identifies the file. |
+| `kind` | string | What the file is for. Transaction uploads use `transactions/uploads`. |
+| `name` | string | The original filename you uploaded. |
+| `contentType` | string | What kind of file it is. See the supported types below. |
+| `size` | integer | Size in bytes. |
+| `createdAt` | timestamp | When it was uploaded. |
+| `createdBy` | string (ulid) | The user who uploaded it. |
+| `expiresAt` | timestamp, nullable | When monetr will clean it up. Transaction upload files get an hour, since they're only needed until the import finishes. Null means it's kept indefinitely. |
+| `deletedAt` | timestamp, nullable | When it was deleted. |
+
+## <Badge type="tip">POST</Badge> Upload a transaction file
+
+Uploads an OFX file and queues it for import. Returns immediately with a `pending` upload,
+it doesn't wait for the transactions to be parsed.
+
+**In the app:** The import transactions dialog, where you drop in a file from your bank.
+
+```
+POST /api/bank_accounts/:bankAccountId/transactions/upload
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `bankAccountId` | string (ulid) | Yes | The bank account to import into. |
+
+### Body
+
+This one is `multipart/form-data`, not JSON.
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `data` | file | Yes | The file itself. The form field has to be named exactly `data`. |
+
+Only OFX is accepted for transaction uploads, so `application/vnd.intu.QFX` in practice.
+If your client sends `application/octet-stream`, monetr falls back to the file extension and
+recognizes `.qfx`, `.ofx` and `.qbo`. Anything it still can't identify is a 400.
+
+monetr's file storage knows about CSV, XLSX and CAMT.053 as well, but this endpoint rejects
+them. Only OFX gets you transactions today.
+
+### Example
+
+```bash
+curl --request POST \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions/upload" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
+  --form "data=@august-statement.qfx"
+```
+
+```json
+{
+  "transactionUploadId": "txup_01j6c8pw3nq5rk9m2vtxeh7bda",
+  "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+  "fileId": "file_01j6c8pw3nq5rk9m2vtxeh7bdb",
+  "file": {
+    "fileId": "file_01j6c8pw3nq5rk9m2vtxeh7bdb",
+    "kind": "transactions/uploads",
+    "name": "august-statement.qfx",
+    "contentType": "application/vnd.intu.QFX",
+    "size": 48213,
+    "createdAt": "2024-08-29T15:02:44.331Z",
+    "createdBy": "user_01fpwx3sdm7kb1s0jbrbvbdw4c",
+    "expiresAt": "2024-08-29T16:02:44.331Z",
+    "deletedAt": null
+  },
+  "status": "pending",
+  "createdAt": "2024-08-29T15:02:44.331Z",
+  "createdBy": "user_01fpwx3sdm7kb1s0jbrbvbdw4c",
+  "processedAt": null,
+  "completedAt": null
+}
+```
+
+Note `expiresAt` on the file is an hour out. The upload record sticks around, the file
+itself doesn't.
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | No `data` field, or the file isn't something monetr recognizes as OFX. |
+| 404 | File storage isn't configured on this server. |
+
+## <Badge type="info">GET</Badge> Get an upload
+
+Returns the current state of an upload. Poll this if you'd rather not use the socket.
+
+**In the app:** The import dialog reads this once the progress socket tells it the job
+finished, to pick up the final record.
+
+```
+GET /api/bank_accounts/:bankAccountId/transactions/upload/:transactionUploadId
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `bankAccountId` | string (ulid) | Yes | The bank account the upload belongs to. |
+| `transactionUploadId` | string (ulid) | Yes | The upload you want. |
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions/upload/txup_01j6c8pw3nq5rk9m2vtxeh7bda" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+{
+  "transactionUploadId": "txup_01j6c8pw3nq5rk9m2vtxeh7bda",
+  "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+  "fileId": "file_01j6c8pw3nq5rk9m2vtxeh7bdb",
+  "status": "complete",
+  "createdAt": "2024-08-29T15:02:44.331Z",
+  "createdBy": "user_01fpwx3sdm7kb1s0jbrbvbdw4c",
+  "processedAt": "2024-08-29T15:02:46.910Z",
+  "completedAt": "2024-08-29T15:02:51.447Z"
+}
+```
+
+A failed one carries the reason:
+
+```json
+{
+  "transactionUploadId": "txup_01j6c9r4kx8zt3nw6mvqbde5fh",
+  "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+  "fileId": "file_01j6c9r4kx8zt3nw6mvqbde5fj",
+  "status": "failed",
+  "error": "failed to parse OFX document: unexpected end of file",
+  "createdAt": "2024-08-29T15:11:02.774Z",
+  "createdBy": "user_01fpwx3sdm7kb1s0jbrbvbdw4c",
+  "processedAt": "2024-08-29T15:11:04.201Z",
+  "completedAt": "2024-08-29T15:11:04.663Z"
+}
+```
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | Either ID is malformed. |
+| 404 | No such upload on that bank account. |
+
+## <Badge type="info">GET</Badge> Watch an upload's progress
+
+Streams status changes for an upload until it reaches a final state. This is the one endpoint
+in the API that isn't a normal request.
+
+:::warning This is a WebSocket
+Despite being registered as a `GET`, this upgrades the connection to a WebSocket. curl won't
+do anything useful with it. Connect with a WebSocket client over `ws://` or `wss://`
+depending on whether your instance uses TLS.
+:::
+
+**In the app:** The progress bar in the import transactions dialog.
+
+```
+GET /api/bank_accounts/:bankAccountId/transactions/upload/:transactionUploadId/progress
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `bankAccountId` | string (ulid) | Yes | The bank account the upload belongs to. |
+| `transactionUploadId` | string (ulid) | Yes | The upload to watch. |
+
+### Messages
+
+The first message is the whole upload object, so you get the current state without a
+separate call. Every message after that carries only a status:
+
+```json
+{ "status": "processing" }
+```
+
+```json
+{ "status": "complete" }
+```
+
+The socket closes on its own once it sends `complete` or `failed`. If the upload was already
+in a final state when you connected, you get the object, then the status, then a close.
+
+The server re-reads the status from the database every 5 seconds and sends it, so a missed
+notification doesn't leave you hanging. The whole thing gives up after 2 minutes, sending a
+final message before closing:
+
+```json
+{ "status": "timed out" }
+```
+
+A timeout doesn't mean the import failed, only that the socket stopped waiting. Fetch the
+upload to find out where it actually landed.
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | Either ID is malformed. |
+| 404 | No such upload on that bank account. |
+
+## <Badge type="info">GET</Badge> List files
+
+Returns the 100 most recently uploaded files on your account, newest first. Uploaded
+transaction files show up here until they expire. There's no paging, so with more than 100
+files you can only see the newest.
+
+**In the app:** Nothing in the app calls this. It's here for looking at what you've uploaded
+and what's still taking up space.
+
+```
+GET /api/files
+```
+
+**Auth:** API key, subscription required.
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/files" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+[
+  {
+    "fileId": "file_01j6c8pw3nq5rk9m2vtxeh7bdb",
+    "kind": "transactions/uploads",
+    "name": "august-statement.qfx",
+    "contentType": "application/vnd.intu.QFX",
+    "size": 48213,
+    "createdAt": "2024-08-29T15:02:44.331Z",
+    "createdBy": "user_01fpwx3sdm7kb1s0jbrbvbdw4c",
+    "expiresAt": "2024-08-29T16:02:44.331Z",
+    "deletedAt": null
+  }
+]
+```
+
+There's no endpoint for downloading a file back, and no endpoint for deleting one. Files go
+away on their own when `expiresAt` passes.

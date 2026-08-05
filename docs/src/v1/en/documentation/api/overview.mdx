@@ -1,0 +1,280 @@
+---
+title: "REST API Overview"
+description: "Authenticate to monetr's REST API with an API key, then learn the error shapes, ID formats and money conventions every endpoint follows."
+---
+
+# REST API Overview
+
+Everything the monetr app does, it does through this API. There's no second, private set of
+endpoints that the app gets and you don't. When you open the transactions page, the app calls
+`GET /api/bank_accounts/:bankAccountId/transactions`, the same call documented on this
+site, with the same parameters you'd use. So these pages describe the real thing, and
+every example here works if you paste it into a terminal.
+
+Read this page first. It covers the stuff that's true everywhere: how you authenticate,
+what an error looks like, and how IDs, timestamps and money are represented. The resource
+pages don't repeat any of it.
+
+## The basics
+
+Everything lives under `/api` on whatever host your instance runs on. Request and response
+bodies are JSON, and you should send `Content-Type: application/json` on anything with a
+body. There's no API version in the path.
+
+Examples on these pages use `https://my.monetr.local` as the host. Swap in your own.
+
+## Authenticating
+
+You call monetr with an API key. Keys go over HTTP Basic auth, where the key ID is the
+username and the secret is the password.
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/links" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+Every curl example on these pages uses that exact form. Export both variables in your shell
+and the examples run as written, no editing:
+
+```bash
+export MONETR_API_KEY_ID="key_01hy4rfqk8z4xv1c2v44cf6abc"
+export MONETR_API_KEY_SECRET="the-secret-you-copied-when-you-made-the-key"
+```
+
+If you send Basic auth credentials and they're wrong, the request fails with a 401 right
+there. It doesn't fall through and try something else.
+
+### Getting a key
+
+Keys are managed entirely in the monetr web app, under **Settings** then **API**. You create
+them there, and you revoke them there. The secret comes back once, in the response to the
+call that creates the key, and it's never returned again. Listing keys later gives you IDs
+and names, never secrets. So copy it somewhere safe the moment you see it. Lose it and your
+only option is a new key and a revoked old one.
+
+A key can't manage keys, including its own. See [API keys](./api_keys) for why.
+
+### What a key can't do
+
+Some endpoints refuse API keys. Each refusal has a reason.
+
+Anything backed by Plaid rejects them outright. That's institution lookups and the entire
+Plaid link flow. The reasoning is in `routes.go`: accepting keys there would turn monetr
+into a convenient way to hammer Plaid's API on someone else's account.
+
+Account operations reject them too. Signing in, changing a password, setting up TOTP,
+managing keys, and everything under billing. Those are things a person does in a browser,
+deliberately not something a long lived credential can do on its own.
+
+Endpoints like that are marked **Auth:** Not available to API keys, and the page says what
+reaches them instead.
+
+## What each endpoint requires
+
+Each endpoint states one of these on a line that reads **Auth:**.
+
+| Auth line | What it means |
+| --- | --- |
+| None | No credentials needed at all. |
+| API key | Send your key over Basic auth. |
+| API key, subscription required | Same, and the account also needs an active subscription. This is most of the API. |
+| Not available to API keys | You can't reach this with a key. The page tells you what can. |
+
+Anything marked **subscription required** returns 402 with
+`{"error": "subscription is not active"}` when the account isn't paid up.
+
+:::info Self-hosting with billing off
+If you haven't configured Stripe, the subscription check is skipped entirely. It returns
+before it ever looks at your account, so a 402 isn't something a self-hosted instance can
+produce. Read "subscription required" as if it said "API key".
+:::
+
+## Errors
+
+Errors are JSON with an `error` key holding a message meant for a human.
+
+```json
+{
+  "error": "failed to retrieve transaction: record does not exist"
+}
+```
+
+A few errors carry an extra `code` field that's more stable to branch on than the message
+text. All of them come out of the sign-in flow the web app uses, so you won't run into them
+with an API key.
+
+Validation failures are the one shape that's different. When a request body fails schema
+validation you get a `problems` tree alongside the message, keyed by the field that broke:
+
+```json
+{
+  "error": "Invalid request",
+  "problems": {
+    "name": "cannot be blank",
+    "targetAmount": "must be no less than 1"
+  }
+}
+```
+
+Sending a key the endpoint doesn't accept lands here too, as `"key not expected"`. Request
+bodies are closed: monetr rejects unknown fields rather than ignoring them, so fetching an
+object, editing one value and posting the whole thing back will fail.
+
+Some endpoints accept more than one shape of body. Creating a spending object is the main
+one, since an expense and a goal are validated differently. Those wrap the problems in a
+`oneOf` array, one entry per shape your body could have been:
+
+```json
+{
+  "error": "Invalid request",
+  "problems": {
+    "oneOf": [
+      { "ruleset": "required key is missing" },
+      { "ruleset": "Ruleset cannot be specified for goals" }
+    ]
+  }
+}
+```
+
+Both entries are reported even though you only meant one of them, so an expense that's
+missing its recurrence rule also gets told off about goals. Read the entry matching the shape
+you intended. The same wrapping shows up on individual fields that accept either a value or
+null, as `problems.<field>.oneOf`.
+
+### Status codes
+
+| Code | What it means here |
+| --- | --- |
+| 200 | Fine. |
+| 204 | Fine, and there's nothing to send back. A few endpoints use this instead of an empty array or `null`. |
+| 400 | Your request was wrong. Bad JSON, a malformed ID, a query parameter out of range, or a failed validation. |
+| 401 | Missing credentials, or a key ID and secret that don't match. Also what you get for an endpoint that doesn't accept keys. |
+| 402 | Subscription isn't active. Only possible when billing is enabled. |
+| 404 | The record doesn't exist, doesn't belong to your account, or the feature is turned off on this server. monetr won't tell you which, so that a stranger can't probe the API to find out what exists. |
+| 406 | The server can't do what you asked because of how it's configured. Asking for a Plaid link on an instance without Plaid, for example. |
+| 408 | The request took too long and was cut off. |
+| 425 | You asked for a manual sync too soon after the last one. Only Lunch Flow and Plaid syncing return this. |
+| 428 | Something has to happen before this'll work: verify your email, finish MFA, or reset your password. Only the sign-in flow returns this, so an API key won't see it. Check the `code`. |
+| 500 | Our fault. |
+
+Two more you'll only meet in specific corners: **202** when a background job was queued rather
+than run inline (Lunch Flow and Plaid syncs), and **424** from the Plaid webhook when an
+upstream call fails.
+
+## Conventions
+
+### IDs
+
+Every object is identified by a ULID with a short lowercase prefix naming its type, joined
+by an underscore.
+
+```
+txn_01j68vszqeq30t7jz7atk9yd9r
+```
+
+The prefix is part of the ID, not decoration. Pass the whole string. Sending a
+`bac_` prefixed ID where a `txn_` is expected gets you a 400, not a 404, because monetr can
+tell it's the wrong kind of thing before it ever hits the database.
+
+| Prefix | Object |
+| --- | --- |
+| `acct` | Account |
+| `bac` | Bank account |
+| `beta` | Beta code |
+| `file` | File |
+| `fund` | Funding schedule |
+| `job` | Background job |
+| `key` | API key |
+| `lbac` | Lunch Flow bank account |
+| `lfx` | Lunch Flow link |
+| `lgn` | Login |
+| `link` | Link |
+| `ltxn` | Lunch Flow transaction |
+| `pbac` | Plaid bank account |
+| `plx` | Plaid link |
+| `psyn` | Plaid sync |
+| `ptxn` | Plaid transaction |
+| `scrt` | Secret |
+| `spnd` | Spending |
+| `tcl` | Transaction cluster |
+| `trl` | Transaction rule |
+| `txim` | Transaction import |
+| `txix` | Transaction import mapping |
+| `txn` | Transaction |
+| `txup` | Transaction upload |
+| `user` | User |
+
+ULIDs sort lexicographically by creation time, so sorting a list of IDs as strings gives
+you oldest to newest for free.
+
+### Timestamps
+
+RFC 3339, always UTC, sometimes with fractional seconds.
+
+```
+2024-08-27T02:49:28.059Z
+```
+
+Fields that represent a calendar day rather than a moment, like a transaction's `date`, are
+midnight in your account's timezone written as UTC. If your account is set to
+`America/Chicago`, August 27th shows up as `2024-08-27T05:00:00Z`. Don't truncate the
+string to get the date, convert it to the account timezone first or you'll be off by a day
+for anything late in the evening.
+
+### Money
+
+**Amounts are integers in the currency's smallest unit.** Not decimals. `3446` in a USD
+account is $34.46.
+
+**How many decimal places that implies depends on the currency.** USD and EUR have two, so
+divide by 100. JPY has none, so `1234` is ¥1234. BHD has three, so `1234` is 1.234 BHD.
+There's no field telling you the exponent, you're expected to know it from the `currency`
+code on the bank account. A hardcoded divide by 100 is a bug waiting on your first
+non-dollar user.
+
+**On transactions, a positive amount is money leaving your account.** A $34.46 coffee is
+`3446`. A paycheck landing is negative. Your bank statement prints it the other way around.
+
+### Pagination
+
+Endpoints that return long lists take `limit` and `offset` as query parameters.
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `limit` | integer | No | How many records to return. Defaults to 25, and has to be between 1 and 100. Anything outside that is a 400, it does not silently clamp. |
+| `offset` | integer | No | How many records to skip. Defaults to 0. Negative values are a 400. |
+
+There's no total count and no cursor. You've reached the end when you get back fewer
+records than you asked for. Two endpoints take these, the transactions list and
+`GET /api/bank_accounts/:bankAccountId/spending/:spendingId/transactions`. Every other list
+endpoint returns everything it has.
+
+One rough edge: an out-of-range number is a 400, but a value that isn't a number at all falls
+back to the default rather than failing. `?limit=200` is rejected; `?limit=all` quietly gives
+you 25.
+
+## What's supported and what isn't
+
+Anything on these pages without an Internal banner is something you can build against. If
+the shape changes in a way that would break you, it goes in the release notes.
+
+Endpoints that don't get that promise are marked, and there are three markings:
+
+:::warning Internal
+This endpoint exists to serve the monetr app and can change in any release without notice.
+It's documented so you know it's there, not so you can build on it.
+:::
+
+:::info Hosted only
+This endpoint is part of monetr's paid hosted service. If you're self-hosting with billing
+disabled, it isn't going to do anything useful for you.
+:::
+
+:::info Self-hosted only
+These endpoints only exist when `LunchFlow.Enabled` is set in your configuration. On
+monetr's hosted service they return 404 with "Lunch Flow is not enabled on this server."
+:::
+
+Webhook endpoints are documented too, on their own page. You never call those, Plaid and
+Stripe do.

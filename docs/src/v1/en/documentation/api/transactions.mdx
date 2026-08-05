@@ -1,0 +1,608 @@
+---
+title: "Transactions API"
+description: "List, create, update and delete transactions with monetr's REST API, assign them to budget envelopes, and find similar ones, with curl examples."
+---
+
+import { Badge } from '@rspress/core/theme';
+
+# Transactions API
+
+Transactions belong to a bank account. They come from one of four places: Plaid syncing them
+from your bank, a Lunch Flow instance, a file you uploaded, or you typing them in by hand on
+a manual link.
+Once a transaction exists, the interesting thing you do with it is point it at a spending
+object, which is how monetr knows the money was already budgeted for.
+
+A few endpoints here only work on [manual links](./links#create-a-manual-link). Creating,
+editing the amount of, and deleting a transaction all assume monetr owns the record. On a
+Plaid link the bank owns it, and monetr won't let you rewrite history it didn't write.
+
+## The transaction object
+
+| Attribute | Type | Description |
+| --- | --- | --- |
+| `transactionId` | string (ulid) | Identifies the transaction. |
+| `bankAccountId` | string (ulid) | The bank account the transaction belongs to. |
+| `plaidTransaction` | object, nullable | The raw Plaid record behind this transaction. Only filled in by [Get a transaction](#get-a-transaction); the list endpoint always returns null. Also null for manual, uploaded and Lunch Flow transactions. |
+| `pendingPlaidTransaction` | object, nullable | The pending Plaid record this was matched against, if it started life as a pending charge. |
+| `lunchFlowTransaction` | object | The upstream Lunch Flow record. Only present on Lunch Flow transactions. |
+| `amount` | integer | What the transaction was for, in the currency's smallest unit. Positive means money left the account, negative means it came in. See [Money](./overview#money) before you do arithmetic on this. |
+| `spendingId` | string (ulid), nullable | The [spending object](./spending#the-spending-object) this transaction is spent from. Null means it came out of free-to-use. This is the field you change to re-budget something. |
+| `spending` | object | The spending object this is assigned to. Only appears on the create and update responses, which return the envelope they touched so you don't have to re-fetch it. Never present when you read a transaction. |
+| `spendingAmount` | integer | How much was actually taken out of the spending object. Smaller than `amount` when the envelope didn't have enough in it to cover the whole thing. Absent when the transaction isn't assigned to anything. |
+| `createdBySpendingId` | string (ulid), nullable | Set when a spending object with automatic transactions created this. Different from `spendingId`, which you can change. You can't change this one. |
+| `createdByFundingScheduleId` | string (ulid), nullable | Set when a funding schedule with automatic transactions created this. You can't set it yourself. |
+| `categories` | array of strings, nullable | Plaid's older style category hierarchy, general to specific. Null on transactions monetr didn't get from Plaid. |
+| `category` | string, nullable | Plaid's newer single category value, like `FOOD_AND_DRINK_COFFEE`. Null on anything that didn't come from Plaid. |
+| `date` | timestamp | The day the transaction happened, as midnight in your account's timezone. |
+| `name` | string | The transaction name as shown in the app. Absent if it's never been given one. |
+| `originalName` | string | The name as it arrived from the bank or the file. Renaming a transaction leaves this alone, so you can always get back to what the bank actually said. |
+| `merchantName` | string | Who you paid, cleaned up for display. Absent when monetr has nothing better than the raw name. |
+| `originalMerchantName` | string | The merchant name as it arrived, before anyone tidied it. |
+| `isPending` | boolean | Whether the bank still considers this pending. |
+| `uploadIdentifier` | string, nullable | The identifier from the file this came in on, for uploaded transactions. Null otherwise. |
+| `source` | string | Where it came from. One of `plaid`, `upload`, `manual` or `lunch_flow`. |
+| `createdAt` | timestamp | When monetr first stored the transaction, which is not when it happened. Use `date` for that. |
+| `deletedAt` | timestamp, nullable | When the transaction was soft deleted. Null on everything you'll normally see. |
+
+## <Badge type="info">GET</Badge> List transactions
+
+Returns a bank account's transactions, newest first. This is the feed on the app's main
+transactions page, and it's the endpoint you'll reach for most.
+
+**In the app:** The main transactions feed. It loads 25 at a time and asks for more as
+you scroll.
+
+```
+GET /api/bank_accounts/:bankAccountId/transactions
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `bankAccountId` | string (ulid) | Yes | The bank account whose transactions you want. If it isn't yours you get a 404. |
+
+### Query parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `limit` | integer | No | How many to return. Defaults to 25, and has to be between 1 and 100. Outside that range is a 400, it doesn't quietly clamp. |
+| `offset` | integer | No | How many to skip first. Defaults to 0. Negative is a 400. |
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions?limit=2" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+[
+  {
+    "transactionId": "txn_01j68vszqeq30t7jz7atk9yd9r",
+    "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+    "plaidTransaction": null,
+    "pendingPlaidTransaction": null,
+    "amount": 685,
+    "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
+    "spendingAmount": 685,
+    "createdBySpendingId": null,
+    "createdByFundingScheduleId": null,
+    "categories": ["Food and Drink", "Coffee Shop"],
+    "category": "FOOD_AND_DRINK_COFFEE",
+    "date": "2024-08-27T05:00:00Z",
+    "name": "Ruby Coffee Roasters",
+    "originalName": "SQ *RUBY COFFEE ROASTERS",
+    "merchantName": "Ruby Coffee Roasters",
+    "originalMerchantName": "Ruby Coffee Roasters",
+    "isPending": false,
+    "uploadIdentifier": null,
+    "source": "plaid",
+    "createdAt": "2024-08-27T02:49:28.059Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": "txn_01j5m4enxf50k3d2h2c9dtst4z",
+    "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+    "plaidTransaction": null,
+    "pendingPlaidTransaction": null,
+    "amount": -204300,
+    "spendingId": null,
+    "createdBySpendingId": null,
+    "createdByFundingScheduleId": null,
+    "categories": ["Transfer", "Payroll"],
+    "category": "INCOME_WAGES",
+    "date": "2024-08-26T05:00:00Z",
+    "name": "Acme Payroll",
+    "originalName": "ACME INC DIRECT DEP",
+    "merchantName": "Acme",
+    "originalMerchantName": "Acme",
+    "isPending": false,
+    "uploadIdentifier": null,
+    "source": "plaid",
+    "createdAt": "2024-08-26T11:02:14.221Z",
+    "deletedAt": null
+  }
+]
+```
+
+Look at the second one. `-204300` is a paycheck arriving, not a $2,043 refund. Money coming
+in is negative. Also notice `spendingAmount` is missing there, because that transaction
+isn't assigned to a spending object.
+
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | `limit` is outside 1 to 100, `offset` is negative, or `bankAccountId` isn't a valid ID. |
+
+## <Badge type="info">GET</Badge> Get a transaction
+
+Returns one transaction. Handy when you have an ID from somewhere else and want the current
+state of it.
+
+**In the app:** The transaction details page, and the upload flow while it waits on a
+file to finish processing.
+
+```
+GET /api/bank_accounts/:bankAccountId/transactions/:transactionId
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `bankAccountId` | string (ulid) | Yes | The bank account the transaction belongs to. |
+| `transactionId` | string (ulid) | Yes | The transaction you want. |
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions/txn_01j68vszqeq30t7jz7atk9yd9r" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+{
+  "transactionId": "txn_01j68vszqeq30t7jz7atk9yd9r",
+  "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+  "plaidTransaction": {
+    "categories": ["Food and Drink", "Coffee Shop"],
+    "category": "FOOD_AND_DRINK_COFFEE",
+    "date": "2024-08-27T05:00:00Z",
+    "authorizedDate": "2024-08-26T05:00:00Z",
+    "name": "SQ *RUBY COFFEE ROASTERS",
+    "merchantName": "Ruby Coffee Roasters",
+    "amount": 685,
+    "currency": "USD",
+    "isPending": false,
+    "createdAt": "2024-08-27T02:49:28.059Z",
+    "deletedAt": null
+  },
+  "pendingPlaidTransaction": null,
+  "amount": 685,
+  "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
+  "spendingAmount": 685,
+  "createdBySpendingId": null,
+  "createdByFundingScheduleId": null,
+  "categories": ["Food and Drink", "Coffee Shop"],
+  "category": "FOOD_AND_DRINK_COFFEE",
+  "date": "2024-08-27T05:00:00Z",
+  "name": "Ruby Coffee Roasters",
+  "originalName": "SQ *RUBY COFFEE ROASTERS",
+  "merchantName": "Ruby Coffee Roasters",
+  "originalMerchantName": "Ruby Coffee Roasters",
+  "isPending": false,
+  "uploadIdentifier": null,
+  "source": "plaid",
+  "createdAt": "2024-08-27T02:49:28.059Z",
+  "deletedAt": null
+}
+```
+
+This is the one endpoint that fills in `plaidTransaction`, holding the record exactly as
+Plaid sent it. That's where you look when monetr's cleaned up `name` and the bank's version
+disagree and you want to know which is which. The list endpoint doesn't load the relation, so
+it returns `null` there for the very same transaction. Manual, uploaded and Lunch Flow
+transactions have nothing to fill in and return `null` on both.
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | Either ID is malformed. |
+| 404 | No transaction with that ID on that bank account. |
+
+## <Badge type="info">GET</Badge> Find similar transactions
+
+Returns the cluster of transactions that look like the one you asked about, which is how
+monetr spots recurring spending. Clusters are built by a background job, so a brand new
+transaction won't be in one yet.
+
+**In the app:** The similar transactions panel on the transaction details page.
+
+```
+GET /api/bank_accounts/:bankAccountId/transactions/:transactionId/similar
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `bankAccountId` | string (ulid) | Yes | The bank account the transaction belongs to. |
+| `transactionId` | string (ulid) | Yes | The transaction to find relatives of. |
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions/txn_01j68vszqeq30t7jz7atk9yd9r/similar" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+{
+  "transactionClusterId": "tcl_01j6a2mkxw5rt8p9e3vqn7hd4c",
+  "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+  "signature": "ruby coffee roasters",
+  "centroid": "txn_01j68vszqeq30t7jz7atk9yd9r",
+  "name": "Ruby Coffee Roasters",
+  "originalName": "SQ *RUBY COFFEE ROASTERS",
+  "members": [
+    "txn_01j68vszqeq30t7jz7atk9yd9r",
+    "txn_01j61k7dp3wc8xm2r9tzs4bnhy",
+    "txn_01j5tq9wr6vj0k4h8bxdm2ncfe"
+  ],
+  "debug": [
+    {
+      "word": "ruby",
+      "sanitized": "ruby",
+      "order": 0,
+      "value": 0.48,
+      "rank": 1,
+      "count": 3
+    }
+  ],
+  "merchant": [],
+  "createdAt": "2024-08-27T03:15:02.881Z",
+  "updatedAt": "2024-08-27T03:15:02.881Z"
+}
+```
+
+`members` includes the transaction you asked about. `centroid` is whichever member the
+clustering picked as most representative, and it can be null. `debug` and `merchant` are the
+term weights the clustering worked from, which are there for diagnosing bad groupings and
+aren't worth reading otherwise.
+
+The `TransactionCluster` model has a `rules` field, but nothing loads that relation, so it's
+always omitted from this response.
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 204 | No cluster. Normal for anything one-off, and the most common response here. The body is empty, and it is a success rather than an error. |
+| 400 | Either ID is malformed. |
+
+## <Badge type="tip">POST</Badge> Create a transaction
+
+Adds a transaction by hand. Only works on manual links, since on a Plaid link the bank
+decides what exists.
+
+**In the app:** Adding a transaction by hand on a manual account.
+
+```
+POST /api/bank_accounts/:bankAccountId/transactions
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `bankAccountId` | string (ulid) | Yes | The manual bank account to add the transaction to. |
+
+The examples below use `bac_01j6b4nqx8ws5rt2m9pked7hvc`, the manual account created on the
+[bank accounts page](./bank_accounts#create-a-bank-account), rather than the Plaid checking
+account the rest of this page reads from. The Plaid account would reject both of these.
+
+### Body
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `amount` | integer | Yes | The amount in the currency's smallest unit. Positive spends money, negative deposits it. Zero is rejected. |
+| `date` | timestamp | Yes | When it happened, RFC 3339. |
+| `name` | string | Yes | What to call it. This gets written to `originalName` too, since there's no bank version to preserve. |
+| `adjustsBalance` | boolean | No | Whether to move the bank account's balance to match. Defaults to false. See below, this one has a real consequence. |
+| `isPending` | boolean | No | Mark it pending. Defaults to false. |
+| `merchantName` | string | No | Who you paid. |
+| `spendingId` | string (ulid) | No | A spending object to fund it from. Send null or leave it out to spend from free-to-use. |
+
+Send anything else and the whole request is rejected with a 400 and
+`{"problems": {"source": "key not expected"}}`. That catches people out, because the natural
+move is to fetch a transaction, change one field and post the whole object back. That won't
+work here or on any other endpoint in this API. `categories`, `category` and `source` are set
+by monetr, and a transaction created this way is always `source: "manual"`.
+
+When `adjustsBalance` is true, monetr subtracts the amount from the account's available
+balance, and from the current balance too if the transaction isn't pending. That's a real edit
+to the balance monetr reports for the account. Leave it false and you record the transaction
+without touching the balance, which is what you want if the balance is already right.
+
+### Example
+
+```bash
+curl --request POST \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01j6b4nqx8ws5rt2m9pked7hvc/transactions" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "name": "Reykjavik flights",
+    "merchantName": "Icelandair",
+    "amount": 84200,
+    "date": "2024-08-28T05:00:00Z",
+    "isPending": false,
+    "adjustsBalance": true
+  }'
+```
+
+```json
+{
+  "transaction": {
+    "transactionId": "txn_01j6d5htqw3zr8mv2npxek4bcf",
+    "bankAccountId": "bac_01j6b4nqx8ws5rt2m9pked7hvc",
+    "plaidTransaction": null,
+    "pendingPlaidTransaction": null,
+    "amount": 84200,
+    "spendingId": null,
+    "createdBySpendingId": null,
+    "createdByFundingScheduleId": null,
+    "categories": null,
+    "category": null,
+    "date": "2024-08-28T05:00:00Z",
+    "name": "Reykjavik flights",
+    "originalName": "Reykjavik flights",
+    "merchantName": "Icelandair",
+    "originalMerchantName": "",
+    "isPending": false,
+    "uploadIdentifier": null,
+    "source": "manual",
+    "createdAt": "2024-08-28T16:41:09.882Z",
+    "deletedAt": null
+  },
+  "balance": {
+    "bankAccountId": "bac_01j6b4nqx8ws5rt2m9pked7hvc",
+    "currency": "USD",
+    "current": 225800,
+    "available": 225800,
+    "limit": 0,
+    "free": 225800,
+    "expenses": 0,
+    "goals": 0
+  }
+}
+```
+
+The response carries more than the transaction. `balance` is the account's recalculated
+balances, included so a client doesn't have to make a follow up call. Because
+`adjustsBalance` was true, the account dropped from 310000 to 225800.
+
+There's no `spending` key here because this transaction wasn't assigned to an envelope. Set
+`spendingId` to a spending object **on the same bank account** and you get a third key,
+`spending`, holding that envelope with its balance already updated.
+
+Note `originalName` came back matching `name`, and `originalMerchantName` is empty. On a
+manual transaction there's no bank version to preserve, so monetr copies the name across and
+leaves the merchant original blank.
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | The link isn't manual, `amount` is 0, a required field is missing, or `spendingId` points at something that isn't yours. |
+
+## <Badge type="warning">PATCH</Badge> Update a transaction
+
+Changes a transaction. What you're allowed to change depends on whether the link is manual.
+On a Plaid link you get the name, the merchant name, and what it's spent from. On a manual
+link you also get the amount, the date, and the pending flag.
+
+**In the app:** Renaming a transaction on its details page, and changing which envelope
+it comes out of from the transaction list.
+
+```
+PATCH /api/bank_accounts/:bankAccountId/transactions/:transactionId
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `bankAccountId` | string (ulid) | Yes | The bank account the transaction belongs to. |
+| `transactionId` | string (ulid) | Yes | The transaction to change. |
+
+### Body
+
+Send only what you're changing. Everything is optional.
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `merchantName` | string | No | Who you paid, for display. Editable on any link, including Plaid ones, because `originalMerchantName` keeps the bank's version safe. |
+| `name` | string | No | What to call it. Same deal, `originalName` is left alone. |
+| `spendingId` | string (ulid), nullable | No | Which spending object it comes out of. Send null to move it back to free-to-use. |
+
+On manual links only, three more:
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `amount` | integer | No | A new amount, in the smallest unit. |
+| `date` | timestamp | No | A new date, RFC 3339. |
+| `isPending` | boolean | No | Whether it's still pending. |
+
+Sending `amount`, `date` or `isPending` on a Plaid link fails validation. `adjustsBalance`
+is rejected here on purpose, even on manual links: monetr doesn't recalculate balances when
+an amount changes yet, so rather than accept a flag it wouldn't honor, it says no.
+
+### Example
+
+Move the coffee out of the Coffee envelope and back to free-to-use:
+
+```bash
+curl --request PATCH \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions/txn_01j68vszqeq30t7jz7atk9yd9r" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "spendingId": null
+  }'
+```
+
+```json
+{
+  "transaction": {
+    "transactionId": "txn_01j68vszqeq30t7jz7atk9yd9r",
+    "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+    "plaidTransaction": null,
+    "pendingPlaidTransaction": null,
+    "amount": 685,
+    "spendingId": null,
+    "createdBySpendingId": null,
+    "createdByFundingScheduleId": null,
+    "categories": ["Food and Drink", "Coffee Shop"],
+    "category": "FOOD_AND_DRINK_COFFEE",
+    "date": "2024-08-27T05:00:00Z",
+    "name": "Ruby Coffee Roasters",
+    "originalName": "SQ *RUBY COFFEE ROASTERS",
+    "merchantName": "Ruby Coffee Roasters",
+    "originalMerchantName": "Ruby Coffee Roasters",
+    "isPending": false,
+    "uploadIdentifier": null,
+    "source": "plaid",
+    "createdAt": "2024-08-27T02:49:28.059Z",
+    "deletedAt": null
+  },
+  "balance": {
+    "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+    "currency": "USD",
+    "current": 384219,
+    "available": 384219,
+    "limit": 0,
+    "free": 120359,
+    "expenses": 218860,
+    "goals": 45000
+  },
+  "spending": [
+    {
+      "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
+      "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+      "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
+      "spendingType": "expense",
+      "name": "Coffee",
+      "targetAmount": 8000,
+      "currentAmount": 2000,
+      "usedAmount": 0,
+      "ruleset": "DTSTART:20240801T050000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1",
+      "lastSpentFrom": null,
+      "lastRecurrence": "2024-08-01T05:00:00Z",
+      "nextRecurrence": "2024-09-01T05:00:00Z",
+      "nextContributionAmount": 6000,
+      "isBehind": false,
+      "isPaused": false,
+      "autoCreateTransaction": false,
+      "createdAt": "2022-01-14T18:32:11.044Z"
+    }
+  ]
+}
+```
+
+`spending` here is an array, not a single object like it is on create. Moving a transaction
+between envelopes can touch two of them, so the response carries every spending object that
+changed. It's an empty array when nothing did.
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | You sent a manual-only field on a Plaid link, sent `adjustsBalance`, or set a `spendingId` on a deposit. Negative amounts are deposits, and monetr won't let a deposit be spent from an envelope. |
+| 404 | No transaction with that ID on that bank account. |
+
+## <Badge type="danger">DELETE</Badge> Delete a transaction
+
+Removes a transaction. Manual links only, same reasoning as create.
+
+**In the app:** Deleting a transaction, behind the confirmation prompt.
+
+```
+DELETE /api/bank_accounts/:bankAccountId/transactions/:transactionId
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `bankAccountId` | string (ulid) | Yes | The manual bank account the transaction belongs to. |
+| `transactionId` | string (ulid) | Yes | The transaction to delete. |
+
+### Query parameters
+
+Both of these are snake case, unlike everything else in the API.
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `adjusts_balance` | boolean | No | Add the amount back onto the account's balances. Defaults to false. |
+| `soft` | boolean | No | Soft delete, which stamps `deletedAt` and leaves the row alone. Defaults to **true**, so a plain DELETE does not actually destroy anything. Pass `soft=false` to really remove it. |
+
+### Example
+
+```bash
+curl --request DELETE \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01j6b4nqx8ws5rt2m9pked7hvc/transactions/txn_01j6d5htqw3zr8mv2npxek4bcf?adjusts_balance=true" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+{
+  "balance": {
+    "bankAccountId": "bac_01j6b4nqx8ws5rt2m9pked7hvc",
+    "currency": "USD",
+    "current": 310000,
+    "available": 310000,
+    "limit": 0,
+    "free": 310000,
+    "expenses": 0,
+    "goals": 0
+  },
+  "spending": []
+}
+```
+
+You don't get the deleted transaction back, only the balances and any spending objects that
+changed as a result. If the transaction was assigned to an envelope and you passed
+`adjusts_balance=true`, the money goes back into that envelope and it shows up in `spending`.
+
+The reverse is the trap: deleting a transaction that's still assigned to an envelope
+**without** `adjusts_balance=true` leaves that money allocated to the envelope with nothing
+to show for it. `spending` comes back empty and the envelope quietly keeps the deduction.
+Clear `spendingId` with a PATCH first if you want the money back.
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | The link isn't manual, or an ID is malformed. |
+| 404 | No transaction with that ID on that bank account. |

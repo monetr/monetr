@@ -1,0 +1,706 @@
+---
+title: "Spending API (Expenses and Goals)"
+description: "The envelope budgeting endpoints in monetr's API: create expenses and goals, fund them from a paycheck, and transfer money between envelopes."
+---
+
+import { Badge } from '@rspress/core/theme';
+
+# Spending API
+
+Spending objects are the envelopes. Each one sits on a
+[bank account](./bank_accounts#the-bank-account-object), has a target amount, and gets filled
+up a little at a time by a [funding schedule](./funding_schedules). When you spend money on
+something, you point the transaction at the envelope it came out of, and monetr takes the
+money from there instead of from your free-to-use balance.
+
+There are two kinds, and the difference matters for almost every endpoint here.
+
+**Expenses** repeat. Rent every month, insurance every six months. They have a recurrence
+rule, and when the due date comes around the envelope empties and starts filling again for
+the next one.
+
+**Goals** don't repeat. You're saving up for one thing by one date, and when you get there
+you're done. Goals have no recurrence rule at all, and sending one is an error.
+
+Both are the same object with the same fields, so `spendingType` is the thing to branch on.
+
+## The spending object
+
+| Attribute | Type | Description |
+| --- | --- | --- |
+| `spendingId` | string (ulid) | Identifies the spending object. |
+| `bankAccountId` | string (ulid) | The bank account this belongs to. |
+| `fundingScheduleId` | string (ulid) | The funding schedule that fills this. |
+| `spendingType` | string | `expense` or `goal`. Set at creation and never changes. |
+| `name` | string | What you call it. Has to be unique per bank account, per type. |
+| `targetAmount` | integer | How much needs to be in the envelope by the due date. Has to be greater than zero. |
+| `currentAmount` | integer | How much is in the envelope right now, in the currency's smallest unit. |
+| `usedAmount` | integer | How much has been spent out of it. Only meaningful for goals, where it's how you tell a finished goal from an empty one. |
+| `ruleset` | string, nullable | The recurrence rule, as an RFC 5545 string like `DTSTART:20240801T050000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1`. Always null on goals. |
+| `lastSpentFrom` | timestamp, nullable | Intended to record when a transaction last took money out of this. Nothing in monetr writes it today, so it is always null. Don't build on it. |
+| `lastRecurrence` | timestamp, nullable | The previous due date. Null until it's come due at least once. |
+| `nextRecurrence` | timestamp | The next due date, as midnight in your account's timezone. |
+| `nextContributionAmount` | integer | How much the next funding event will put in. monetr recalculates this whenever something relevant changes. |
+| `isBehind` | boolean | Whether monetr thinks it can't get to `targetAmount` in time given the funding schedule. This is the flag behind the warning in the app. |
+| `isPaused` | boolean | Whether contributions are stopped. A paused object keeps whatever's in it but stops receiving more. |
+| `autoCreateTransaction` | boolean | Whether monetr should write a transaction by itself when this comes due. Expenses on manual links only. |
+| `createdAt` | timestamp | When it was created. |
+
+## <Badge type="info">GET</Badge> List spending objects
+
+Returns every expense and goal on a bank account.
+
+**In the app:** The expenses and goals pages, and the transaction list when it shows
+which envelope something came out of.
+
+```
+GET /api/bank_accounts/:bankAccountId/spending
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `bankAccountId` | string (ulid) | Yes | The bank account whose envelopes you want. |
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/spending" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+[
+  {
+    "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
+    "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+    "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
+    "spendingType": "expense",
+    "name": "Coffee",
+    "targetAmount": 8000,
+    "currentAmount": 1315,
+    "usedAmount": 0,
+    "ruleset": "DTSTART:20240801T050000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1",
+    "lastSpentFrom": null,
+    "lastRecurrence": "2024-08-01T05:00:00Z",
+    "nextRecurrence": "2024-09-01T05:00:00Z",
+    "nextContributionAmount": 6685,
+    "isBehind": false,
+    "isPaused": false,
+    "autoCreateTransaction": false,
+    "createdAt": "2022-01-14T18:32:11.044Z"
+  },
+  {
+    "spendingId": "spnd_01j3d7k2vwqrx8m5t9pnbeh4cz",
+    "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+    "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
+    "spendingType": "goal",
+    "name": "New Laptop",
+    "targetAmount": 250000,
+    "currentAmount": 45000,
+    "usedAmount": 0,
+    "ruleset": null,
+    "lastSpentFrom": null,
+    "lastRecurrence": null,
+    "nextRecurrence": "2025-03-01T06:00:00Z",
+    "nextContributionAmount": 14642,
+    "isBehind": false,
+    "isPaused": false,
+    "autoCreateTransaction": false,
+    "createdAt": "2024-07-14T09:03:52.771Z"
+  }
+]
+```
+
+The goal has `ruleset` and `lastRecurrence` as null, which is what a goal always looks like.
+
+## <Badge type="info">GET</Badge> Get a spending object
+
+Returns one expense or goal.
+
+**In the app:** The expense and goal detail pages.
+
+```
+GET /api/bank_accounts/:bankAccountId/spending/:spendingId
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `bankAccountId` | string (ulid) | Yes | The bank account it belongs to. |
+| `spendingId` | string (ulid) | Yes | The spending object you want. |
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/spending/spnd_01fpwx67z8djhb8bqcy17mrzfe" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+{
+  "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
+  "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+  "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
+  "spendingType": "expense",
+  "name": "Coffee",
+  "targetAmount": 8000,
+  "currentAmount": 1315,
+  "usedAmount": 0,
+  "ruleset": "DTSTART:20240801T050000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1",
+  "lastSpentFrom": null,
+  "lastRecurrence": "2024-08-01T05:00:00Z",
+  "nextRecurrence": "2024-09-01T05:00:00Z",
+  "nextContributionAmount": 6685,
+  "isBehind": false,
+  "isPaused": false,
+  "autoCreateTransaction": false,
+  "createdAt": "2022-01-14T18:32:11.044Z"
+}
+```
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | Either ID is malformed. |
+| 404 | No such spending object on that bank account. |
+
+## <Badge type="info">GET</Badge> List a spending object's transactions
+
+Returns the transactions that were spent out of one envelope, so you can see where the money
+in it went.
+
+**In the app:** The list of transactions on an expense's detail page.
+
+```
+GET /api/bank_accounts/:bankAccountId/spending/:spendingId/transactions
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `bankAccountId` | string (ulid) | Yes | The bank account it belongs to. |
+| `spendingId` | string (ulid) | Yes | The spending object whose transactions you want. |
+
+### Query parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `limit` | integer | No | How many to return. Defaults to 25, between 1 and 100. |
+| `offset` | integer | No | How many to skip. Defaults to 0. |
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/spending/spnd_01fpwx67z8djhb8bqcy17mrzfe/transactions?limit=1" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+Returns an array of transaction objects, same shape as
+[List transactions](./transactions#list-transactions).
+
+```json
+[
+  {
+    "transactionId": "txn_01j68vszqeq30t7jz7atk9yd9r",
+    "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+    "plaidTransaction": null,
+    "pendingPlaidTransaction": null,
+    "amount": 685,
+    "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
+    "spendingAmount": 685,
+    "createdBySpendingId": null,
+    "createdByFundingScheduleId": null,
+    "categories": ["Food and Drink", "Coffee Shop"],
+    "category": "FOOD_AND_DRINK_COFFEE",
+    "date": "2024-08-27T05:00:00Z",
+    "name": "Ruby Coffee Roasters",
+    "originalName": "SQ *RUBY COFFEE ROASTERS",
+    "merchantName": "Ruby Coffee Roasters",
+    "originalMerchantName": "Ruby Coffee Roasters",
+    "isPending": false,
+    "uploadIdentifier": null,
+    "source": "plaid",
+    "createdAt": "2024-08-27T02:49:28.059Z",
+    "deletedAt": null
+  }
+]
+```
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | An ID is malformed, or `limit` is outside 1 to 100. |
+| 404 | No such spending object on that bank account. |
+
+## <Badge type="tip">POST</Badge> Create a spending object
+
+Makes a new expense or goal. Which fields are valid depends entirely on which one you're
+making, and monetr validates the whole body against one shape or the other.
+
+**In the app:** The new expense and new goal forms.
+
+```
+POST /api/bank_accounts/:bankAccountId/spending
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `bankAccountId` | string (ulid) | Yes | The bank account to create it on. |
+
+### Body
+
+Shared by both types:
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `fundingScheduleId` | string (ulid) | Yes | The funding schedule that'll fill this. Has to [already exist](./funding_schedules#create-a-funding-schedule) on the same bank account. |
+| `name` | string | Yes | What to call it. |
+| `nextRecurrence` | timestamp | Yes | The due date. This one is fussy, see below. |
+| `spendingType` | string | Yes | `expense` or `goal`. |
+| `targetAmount` | integer | Yes | How much you need by the due date, in the smallest unit. Must be greater than zero. |
+| `currentAmount` | integer | No | How much is already in it. Leave the key out and it starts at 0. Sending `0` explicitly is rejected with "Current amount must be greater than zero", so omit it rather than serializing a zero. |
+
+Expenses also take:
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `ruleset` | string | Yes | The recurrence rule as an RFC 5545 string. Required on expenses, rejected on goals. See the [cookbook](./recurrence_rules#cookbook). |
+| `autoCreateTransaction` | boolean | No | Have monetr write the transaction itself when this comes due. Manual links only. |
+
+Goals also take:
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `isPaused` | boolean | No | Start it paused. Only accepted on goals, expenses can't be paused at creation. |
+
+`nextRecurrence` has two rules that catch people.
+
+It has to be midnight in your account's timezone. If your account is `America/Chicago`, that
+means `2024-09-01T05:00:00Z` in summer and `2024-12-01T06:00:00Z` in winter, because the
+offset moves with daylight saving. Don't hardcoded an offset, convert through the timezone.
+The check is on the hour, so any time in the midnight hour passes and gets truncated, but
+send noon and you get a 400.
+
+And it can't be in the past, which is stricter than it sounds: midnight *today* has already
+happened, so the earliest value that works is midnight tomorrow. A date picker defaulting to
+today will fail here.
+
+### Example
+
+```bash
+curl --request POST \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/spending" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "spendingType": "expense",
+    "name": "Coffee",
+    "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
+    "targetAmount": 8000,
+    "ruleset": "DTSTART:20240801T050000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1",
+    "nextRecurrence": "2024-09-01T05:00:00Z"
+  }'
+```
+
+```json
+{
+  "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
+  "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+  "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
+  "spendingType": "expense",
+  "name": "Coffee",
+  "targetAmount": 8000,
+  "currentAmount": 0,
+  "usedAmount": 0,
+  "ruleset": "DTSTART:20240801T050000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1",
+  "lastSpentFrom": null,
+  "lastRecurrence": null,
+  "nextRecurrence": "2024-09-01T05:00:00Z",
+  "nextContributionAmount": 8000,
+  "isBehind": false,
+  "isPaused": false,
+  "autoCreateTransaction": false,
+  "createdAt": "2024-08-28T11:07:44.318Z"
+}
+```
+
+`nextContributionAmount` came back calculated. monetr worked out how many funding events
+happen before the due date and divided the shortfall across them.
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | `nextRecurrence` is in the past or isn't midnight in your timezone, you sent a `ruleset` on a goal or left it off an expense, `targetAmount` is zero or negative, the funding schedule doesn't exist, or you asked for `autoCreateTransaction` on a goal or a non-manual link. |
+
+## <Badge type="warning">PATCH</Badge> Update a spending object
+
+Changes an existing expense or goal. Send only what you're changing.
+
+**In the app:** Editing an expense or goal from its detail page.
+
+```
+PATCH /api/bank_accounts/:bankAccountId/spending/:spendingId
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `bankAccountId` | string (ulid) | Yes | The bank account it belongs to. |
+| `spendingId` | string (ulid) | Yes | The spending object to change. |
+
+### Body
+
+Everything is optional, but which keys are allowed depends on the existing object's
+`spendingType`. You can't change the type itself.
+
+On both:
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `fundingScheduleId` | string (ulid) | No | Move it to a different funding schedule. |
+| `name` | string | No | Rename it. |
+| `nextRecurrence` | timestamp | No | Change the due date. Gets snapped to midnight in your timezone. |
+| `targetAmount` | integer | No | Change the target. Must be greater than zero. |
+
+Expenses only:
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `autoCreateTransaction` | boolean | No | Manual links only. |
+| `ruleset` | string | No | A new recurrence rule. |
+
+Goals only:
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `isPaused` | boolean | No | Stop or resume contributions. |
+
+Changing `targetAmount`, `fundingScheduleId`, `nextRecurrence` or `ruleset` makes monetr
+recalculate `nextContributionAmount`. So does unpausing. Pausing doesn't, since the number
+would be stale by the time you unpause anyway.
+
+`currentAmount`, `usedAmount` and `isBehind` are not editable here. Money moves between
+envelopes with [transfer](#transfer-between-spending-objects), not by writing amounts
+directly.
+
+### Example
+
+```bash
+curl --request PATCH \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/spending/spnd_01fpwx67z8djhb8bqcy17mrzfe" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "targetAmount": 12000
+  }'
+```
+
+```json
+{
+  "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
+  "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+  "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
+  "spendingType": "expense",
+  "name": "Coffee",
+  "targetAmount": 12000,
+  "currentAmount": 1315,
+  "usedAmount": 0,
+  "ruleset": "DTSTART:20240801T050000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1",
+  "lastSpentFrom": null,
+  "lastRecurrence": "2024-08-01T05:00:00Z",
+  "nextRecurrence": "2024-09-01T05:00:00Z",
+  "nextContributionAmount": 10685,
+  "isBehind": false,
+  "isPaused": false,
+  "autoCreateTransaction": false,
+  "createdAt": "2022-01-14T18:32:11.044Z"
+}
+```
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | You sent a goal-only field on an expense or the other way around, `targetAmount` is zero or negative, or `autoCreateTransaction` on a non-manual link. |
+| 404 | No such spending object. |
+
+## <Badge type="warning">PUT</Badge> Replace a spending object
+
+Replaces a spending object wholesale rather than patching it. You send the complete object
+and monetr overwrites what it's allowed to.
+
+**In the app:** Nothing in the app uses this. Every edit in the UI goes through PATCH
+instead. It's here for API consumers who'd rather send a whole object than a diff.
+
+```
+PUT /api/bank_accounts/:bankAccountId/spending/:spendingId
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `bankAccountId` | string (ulid) | Yes | The bank account it belongs to. |
+| `spendingId` | string (ulid) | Yes | The spending object to replace. |
+
+### Body
+
+Send the full spending object. Every field below behaves as required, even the ones you might
+expect to be optional:
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `autoCreateTransaction` | boolean | Yes | Manual links and expenses only. Omitting it turns the flag off. |
+| `fundingScheduleId` | string (ulid) | Yes | The funding schedule that fills it. Omitting it blanks the reference and the request fails. |
+| `isPaused` | boolean | Yes | Whether contributions are stopped. Omitting it unpauses a paused object. |
+| `name` | string | Yes | What to call it. Omitting it writes an empty name. |
+| `nextRecurrence` | timestamp | Yes | The due date. Snapped to midnight in your timezone. |
+| `ruleset` | string | Yes on expenses | Required if the existing object is an expense. Ignored and cleared if it's a goal. |
+| `targetAmount` | integer | Yes | Must be greater than zero. |
+
+:::warning This is a true replace, and omission is destructive
+Unlike the PATCH above, this endpoint decodes your body into a **fresh** object rather than
+merging it onto the stored one. A field you leave out doesn't keep its old value, it becomes
+the zero value: `false` for a boolean, an empty string, a blank ID. So omitting `isPaused` on
+a paused goal silently unpauses it, and omitting `autoCreateTransaction` silently turns it
+off. `lastSpentFrom` is wiped this way too, and it isn't in the protected list below.
+
+Reach for [PATCH](#update-a-spending-object) unless you genuinely have the whole object.
+:::
+
+A handful of fields are protected: whatever you send for `spendingType`, `createdAt`,
+`usedAmount`, `currentAmount`, `bankAccountId`, `isBehind`, `lastRecurrence` and
+`nextContributionAmount` is discarded and restored from the existing record. So you can't use
+this to rewrite balances or turn an expense into a goal.
+
+Unlike PATCH, this endpoint doesn't run the request through a validation schema, so a
+malformed body tends to surface as a plain 400 rather than a `problems` tree.
+
+### Example
+
+```bash
+curl --request PUT \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/spending/spnd_01fpwx67z8djhb8bqcy17mrzfe" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
+    "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+    "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
+    "spendingType": "expense",
+    "name": "Coffee and pastries",
+    "targetAmount": 12000,
+    "ruleset": "DTSTART:20240801T050000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1",
+    "nextRecurrence": "2024-09-01T05:00:00Z",
+    "isPaused": false,
+    "autoCreateTransaction": false
+  }'
+```
+
+```json
+{
+  "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
+  "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+  "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
+  "spendingType": "expense",
+  "name": "Coffee and pastries",
+  "targetAmount": 12000,
+  "currentAmount": 1315,
+  "usedAmount": 0,
+  "ruleset": "DTSTART:20240801T050000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1",
+  "lastSpentFrom": null,
+  "lastRecurrence": "2024-08-01T05:00:00Z",
+  "nextRecurrence": "2024-09-01T05:00:00Z",
+  "nextContributionAmount": 10685,
+  "isBehind": false,
+  "isPaused": false,
+  "autoCreateTransaction": false,
+  "createdAt": "2022-01-14T18:32:11.044Z"
+}
+```
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | `targetAmount` is zero or negative, the object is an expense and you left off `ruleset`, or `autoCreateTransaction` on a goal or non-manual link. |
+| 404 | No such spending object. |
+
+## <Badge type="tip">POST</Badge> Transfer between spending objects
+
+Moves already-allocated money from one envelope to another, or between an envelope and
+free-to-use. This is what you use when you've decided the vacation fund matters more than
+the new laptop this month.
+
+**In the app:** The transfer dialog, where you move money between envelopes.
+
+```
+POST /api/bank_accounts/:bankAccountId/spending/transfer
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `bankAccountId` | string (ulid) | Yes | The bank account whose envelopes you're moving money between. |
+
+### Body
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `amount` | integer | Yes | How much to move, in the smallest unit. Has to be greater than zero, so reverse the direction rather than sending a negative. |
+| `fromSpendingId` | string (ulid), nullable | No | Where the money comes from. Leave it out to take it from free-to-use. |
+| `toSpendingId` | string (ulid), nullable | No | Where it goes. Leave it out to send it back to free-to-use. |
+
+You have to send at least one of `fromSpendingId` and `toSpendingId`. Sending neither is a
+400. Sending both moves money directly between two envelopes without touching free-to-use.
+
+### Example
+
+Move $50 out of the laptop goal and into the coffee envelope:
+
+```bash
+curl --request POST \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/spending/transfer" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "fromSpendingId": "spnd_01j3d7k2vwqrx8m5t9pnbeh4cz",
+    "toSpendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
+    "amount": 5000
+  }'
+```
+
+```json
+{
+  "balance": {
+    "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+    "currency": "USD",
+    "current": 384219,
+    "available": 384219,
+    "limit": 0,
+    "free": 121044,
+    "expenses": 223175,
+    "goals": 40000
+  },
+  "spending": [
+    {
+      "spendingId": "spnd_01j3d7k2vwqrx8m5t9pnbeh4cz",
+      "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+      "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
+      "spendingType": "goal",
+      "name": "New Laptop",
+      "targetAmount": 250000,
+      "currentAmount": 40000,
+      "usedAmount": 0,
+      "ruleset": null,
+      "lastSpentFrom": null,
+      "lastRecurrence": null,
+      "nextRecurrence": "2025-03-01T06:00:00Z",
+      "nextContributionAmount": 15000,
+      "isBehind": false,
+      "isPaused": false,
+      "autoCreateTransaction": false,
+      "createdAt": "2024-07-14T09:03:52.771Z"
+    },
+    {
+      "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
+      "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+      "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
+      "spendingType": "expense",
+      "name": "Coffee",
+      "targetAmount": 12000,
+      "currentAmount": 6315,
+      "usedAmount": 0,
+      "ruleset": "DTSTART:20240801T050000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1",
+      "lastSpentFrom": null,
+      "lastRecurrence": "2024-08-01T05:00:00Z",
+      "nextRecurrence": "2024-09-01T05:00:00Z",
+      "nextContributionAmount": 5685,
+      "isBehind": false,
+      "isPaused": false,
+      "autoCreateTransaction": false,
+      "createdAt": "2022-01-14T18:32:11.044Z"
+    }
+  ]
+}
+```
+
+Both envelopes come back with recalculated contribution amounts, along with the account's
+new balances. `spending` has one entry when you only sent one side, two when you sent both.
+
+Notice the account's `current` and `available` didn't change. Transferring doesn't move real
+money, it changes how monetr has the existing balance labeled.
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | `amount` is zero or negative, you sent neither `fromSpendingId` nor `toSpendingId`, or the source doesn't have enough in it. |
+| 404 | One of the spending objects doesn't exist on that bank account. |
+
+## <Badge type="danger">DELETE</Badge> Delete a spending object
+
+Removes an expense or goal. Whatever was allocated to it goes back to free-to-use, and any
+transactions that pointed at it get their `spendingId` cleared rather than being deleted
+themselves.
+
+**In the app:** Deleting an expense or goal from its detail page.
+
+```
+DELETE /api/bank_accounts/:bankAccountId/spending/:spendingId
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `bankAccountId` | string (ulid) | Yes | The bank account it belongs to. |
+| `spendingId` | string (ulid) | Yes | The spending object to delete. |
+
+### Example
+
+```bash
+curl --request DELETE \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/spending/spnd_01j3d7k2vwqrx8m5t9pnbeh4cz" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+Returns 200 with an empty body. Unlike transfer and the transaction endpoints, you don't get
+updated balances back, so re-fetch them if you're tracking that.
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | Either ID is malformed. |
+| 404 | No such spending object on that bank account. |

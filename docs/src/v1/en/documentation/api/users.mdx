@@ -1,0 +1,223 @@
+---
+title: "Users API"
+description: "Read the user, account and login behind a monetr API key, change a password, and set up TOTP two-factor authentication over the REST API."
+---
+
+import { Badge } from '@rspress/core/theme';
+
+# Users API
+
+monetr keeps three things apart that people often expect to be one thing.
+
+A **login** is a set of credentials: an email address, a password, and optionally TOTP. An
+**account** is the budget, with its own timezone, locale and subscription. A **user** joins
+one login to one account, with a role. One login can have users on more than one account,
+which is how a shared budget works.
+
+When you authenticate with an API key, you're acting as the user who created that key.
+
+## <Badge type="info">GET</Badge> Get the current user
+
+Returns who you are, plus the state of the account you're on. This is the call the app makes
+first, before it decides what to show you.
+
+**In the app:** Loaded on startup, before anything else renders. It's what decides whether
+you land on your budget, the setup wizard, or the subscribe page.
+
+```
+GET /api/users/me
+```
+
+**Auth:** API key.
+
+Note this one doesn't need an active subscription, so it works even when billing has lapsed.
+It has to, since it's how a client finds out that billing has lapsed.
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/users/me" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+{
+  "user": {
+    "userId": "user_01fpwx3sdm7kb1s0jbrbvbdw4c",
+    "loginId": "lgn_01fpwx3q1e4rtvmhnzc8dkgb2y",
+    "login": {
+      "loginId": "lgn_01fpwx3q1e4rtvmhnzc8dkgb2y",
+      "email": "someone@example.com",
+      "firstName": "Alex",
+      "lastName": "Rivera",
+      "passwordResetAt": null,
+      "isEmailVerified": true,
+      "emailVerifiedAt": "2022-01-14T18:24:55.019Z",
+      "totpEnabledAt": null
+    },
+    "accountId": "acct_01fpwx3n8bqz5j7kvdrhm2ce6t",
+    "account": {
+      "accountId": "acct_01fpwx3n8bqz5j7kvdrhm2ce6t",
+      "timezone": "America/Chicago",
+      "locale": "en_US",
+      "subscriptionActiveUntil": null,
+      "subscriptionStatus": null,
+      "trialEndsAt": null,
+      "createdAt": "2022-01-14T18:24:55.019Z"
+    },
+    "role": "owner"
+  },
+  "mfaPending": false,
+  "isSetup": true,
+  "isActive": true,
+  "isTrialing": false,
+  "activeUntil": null,
+  "trialingUntil": null,
+  "hasSubscription": false,
+  "defaultCurrency": "USD"
+}
+```
+
+### Response attributes
+
+| Attribute | Type | Description |
+| --- | --- | --- |
+| `user` | object | The user, with its login and account included. `user.account.timezone` is the one to grab: it is what "midnight" means for every due date you send, and it is set at registration with no endpoint to change it afterwards. |
+| `mfaPending` | boolean | Whether the credentials being used still owe a TOTP code. Always false for an API key, since keys don't do MFA. |
+| `isSetup` | boolean | Whether the account has finished setup, meaning it has at least one link with bank accounts. False here means a client should send you to the setup flow. |
+| `isActive` | boolean | Whether the account can use the paid endpoints. Always true with billing disabled. |
+| `isTrialing` | boolean | Whether the account is in a trial. Always false with billing disabled. |
+| `hasSubscription` | boolean | Whether a subscription exists at all, lapsed or not. Always false with billing disabled. |
+| `defaultCurrency` | string | The ISO 4217 code implied by the account's locale, falling back to monetr's default. Use this when creating a bank account without saying what currency it's in. |
+| `nextUrl` | string | Where the app thinks you should go. Only present when something needs your attention, like a lapsed subscription. Absent otherwise. |
+| `activeUntil` | timestamp, nullable | When the subscription lapses. Always null with billing disabled. |
+| `trialingUntil` | timestamp, nullable | When the trial runs out. Always null with billing disabled. |
+
+The `user.login` object never includes the password hash, the TOTP secret, or the recovery
+codes. `totpEnabledAt` being non-null is how you tell TOTP is on.
+
+:::info Self-hosting with billing off
+Every subscription field above is hardcoded to the "everything is fine forever" answer when
+Stripe isn't configured. `isActive` is true, `isTrialing` is false, and the three timestamps
+are null. Don't read them as real subscription state on a self-hosted instance.
+:::
+
+## <Badge type="info">GET</Badge> Get a user
+
+Returns one user on your account by ID. Use it to turn a `createdBy` into a name, since most
+objects in monetr record who made them as a bare user ID.
+
+**In the app:** The API keys table under settings, resolving the `createdBy` on each key into
+the person who created it.
+
+```
+GET /api/users/:userId
+```
+
+**Auth:** Not available to API keys.
+
+Awkwardly, the objects that carry a `createdBy` worth resolving are reachable with a key while
+this endpoint isn't. If you're scripting and you need to attribute something, carry your own
+mapping of user IDs to people, or read your own from
+[Get the current user](#get-the-current-user), which does accept a key.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `userId` | string (ulid) | Yes | The user you want. Has to be on your account. |
+
+### Response
+
+A user object, the same shape as `user` inside [Get the current user](#get-the-current-user).
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | `userId` is malformed. |
+| 404 | No such user on your account. |
+
+## <Badge type="warning">PUT</Badge> Change your password
+
+Replaces the password on your login. You have to prove you know the current one.
+
+**In the app:** The change password dialog under security settings.
+
+```
+PUT /api/users/security/password
+```
+
+**Auth:** Not available to API keys.
+
+### Body
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `currentPassword` | string | Yes | Your existing password. |
+| `newPassword` | string | Yes | The new one. At least 8 characters after trimming whitespace, and it can't match the current password. |
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | The new password is under 8 characters, or it's the same as the current one. |
+| 401 | `currentPassword` is wrong. |
+
+## <Badge type="tip">POST</Badge> Start TOTP setup
+
+Generates a TOTP secret and a set of recovery codes. This doesn't turn TOTP on: it's step
+one of two, and the code isn't required at login until you confirm it.
+
+**In the app:** The enable two-factor dialog under security settings, which turns the
+returned URI into a QR code.
+
+```
+POST /api/users/security/totp/setup
+```
+
+**Auth:** Not available to API keys.
+
+### Response
+
+| Attribute | Type | Description |
+| --- | --- | --- |
+| `uri` | string | An `otpauth://` URI holding the secret. Render it as a QR code, or let someone paste it into their authenticator by hand. |
+| `recoveryCodes` | array of strings | One-time codes for getting back in without your authenticator. Show them once and tell the user to save them, they aren't retrievable later. |
+
+Calling this on a login that already has TOTP enabled fails. Turn it off first.
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 500 | TOTP is already set up on this login, or the secret couldn't be generated. |
+
+## <Badge type="tip">POST</Badge> Confirm TOTP setup
+
+Finishes turning on TOTP by proving your authenticator is working. After this, signing in
+needs a code.
+
+**In the app:** The second step of the enable two-factor dialog, where you type in the code
+your authenticator is showing.
+
+```
+POST /api/users/security/totp/confirm
+```
+
+**Auth:** Not available to API keys.
+
+### Body
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `totp` | string | Yes | The current code from the authenticator you just set up. |
+
+Returns 200 with an empty body. From then on `totpEnabledAt` on your login is set.
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | The code is missing, wrong, or expired. |
