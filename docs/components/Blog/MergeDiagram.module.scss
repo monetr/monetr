@@ -1,0 +1,320 @@
+@use '@monetr/docs/styles/variables';
+@use '@monetr/docs/styles/mixins';
+
+/*
+MergeDiagram lays out the three inputs to a PATCH (the existing row, the schema
+and the request body) as sheets of paper sitting side by side, then shows the
+merged result underneath. On mobile the sheets stack into a plain column so
+nothing gets clipped.
+
+Tone is carried on a `data-tone` attribute rather than extra class names so each
+element keeps a single class. Cyan means a write happened, pink means the field
+is unreachable, violet is the purple family default for an intentional unset and
+muted is "nothing happened here".
+*/
+
+.root {
+  margin: 8 * variables.$size 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3 * variables.$size;
+}
+
+.sheets {
+  display: flex;
+  flex-direction: column;
+  gap: 3 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    flex-direction: row;
+    gap: 2 * variables.$size;
+    align-items: stretch;
+  }
+}
+
+.sheet,
+.result {
+  background: var(--mtr-surface);
+  border: 1px solid var(--mtr-line);
+  border-radius: var(--rp-radius);
+  padding: 4 * variables.$size;
+  box-shadow: 0 2 * variables.$size 6 * variables.$size rgba(0, 0, 0, 0.28);
+}
+
+.sheet {
+  @media (min-width: variables.$mediumScreen) {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+
+.title {
+  @include mixins.text-small;
+  margin: 0;
+  font-family: var(--mtr-font-body);
+  font-weight: var(--semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mtr-text);
+}
+
+.subtitle {
+  @include mixins.text-extra-small;
+  margin: 0.5 * variables.$size 0 0;
+  color: var(--mtr-muted);
+
+  .sheet[data-kind='prose'] & {
+    font-family: var(--mtr-font-mono);
+  }
+}
+
+.fields {
+  margin: 3 * variables.$size 0 0;
+  padding: 3 * variables.$size 0 0;
+  border-top: 1px solid var(--mtr-line-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 2.5 * variables.$size;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5 * variables.$size;
+  min-width: 0;
+}
+
+.fieldName {
+  @include mixins.text-extra-small;
+  color: var(--mtr-faint);
+  font-family: var(--mtr-font-body);
+}
+
+.fieldValue {
+  @include mixins.text-small;
+  margin: 0;
+  font-family: var(--mtr-font-mono);
+  color: var(--mtr-text);
+  overflow-wrap: anywhere;
+
+  .sheet[data-kind='prose'] & {
+    font-family: var(--mtr-font-body);
+  }
+
+  &[data-tone='updated'] {
+    color: var(--mtr-cyan);
+  }
+
+  &[data-tone='cleared'] {
+    color: var(--mtr-violet);
+  }
+
+  &[data-tone='rejected'] {
+    color: var(--mtr-pink);
+  }
+}
+
+// An absent key is drawn as an empty dashed slot. The client did not send a
+// value here, so there is deliberately nothing to read.
+.absent {
+  @include mixins.text-extra-small;
+  margin: 0;
+  padding: 0.75 * variables.$size 2 * variables.$size;
+  border: 1px dashed var(--mtr-line);
+  border-radius: 1 * variables.$size;
+  color: var(--mtr-faint);
+  font-style: italic;
+  align-self: flex-start;
+}
+
+.chevrons {
+  display: none;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    justify-items: center;
+
+    span {
+      width: 2 * variables.$size;
+      height: 2 * variables.$size;
+      border-right: 1.5px solid var(--mtr-faint);
+      border-bottom: 1.5px solid var(--mtr-faint);
+      transform: rotate(45deg);
+    }
+  }
+}
+
+.band {
+  @include mixins.text-small;
+  margin: 0;
+  padding: 2 * variables.$size 4 * variables.$size;
+  text-align: center;
+  color: var(--mtr-muted);
+  background: var(--mtr-surface-2);
+  border: 1px solid var(--mtr-line-soft);
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+
+// Everything below is scoped through .result on purpose. The docs prose styles
+// reach into plain table elements, so the extra class buys the specificity to
+// win without resorting to !important.
+.result .outcomes {
+  width: 100%;
+  margin: 3 * variables.$size 0 0;
+  padding-top: 3 * variables.$size;
+  border-top: 1px solid var(--mtr-line-soft);
+  border-collapse: collapse;
+  // Fixed layout means the column widths below are actually honoured, which is
+  // what lets the name and value cells ellipsis rather than shoving the badge
+  // out past the edge of the card.
+  table-layout: fixed;
+
+  tr {
+    border: none;
+    background: none;
+  }
+
+  td,
+  th {
+    border: none;
+    background: none;
+    padding: 1.5 * variables.$size 0;
+    text-align: left;
+    vertical-align: middle;
+  }
+}
+
+// Truncation is a safety net, not the plan. Both cells carry a title attribute
+// so the full text is still reachable when it does kick in.
+.result .outcomeName,
+.result .outcomeValue {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 2 * variables.$size;
+}
+
+.result .outcomeName {
+  @include mixins.text-small;
+  font-family: var(--mtr-font-mono);
+  font-weight: var(--normal);
+  color: var(--mtr-muted);
+  width: 36%;
+}
+
+.result .outcomeValue {
+  @include mixins.text-small;
+  font-family: var(--mtr-font-mono);
+  color: var(--mtr-text);
+  width: 28%;
+
+  [data-tone='updated'] & {
+    color: var(--mtr-cyan);
+  }
+
+  [data-tone='cleared'] & {
+    color: var(--mtr-violet);
+  }
+}
+
+.result .outcomeBadgeCell {
+  width: 36%;
+  padding-right: 2 * variables.$size;
+}
+
+.badge {
+  @include mixins.text-extra-small;
+  display: inline-block;
+  padding: 0.75 * variables.$size 2.5 * variables.$size;
+  border-radius: 999px;
+  font-weight: var(--semibold);
+  white-space: nowrap;
+  color: var(--mtr-muted);
+  background: rgba(156, 146, 184, 0.12);
+
+  [data-tone='updated'] & {
+    color: var(--mtr-cyan);
+    background: var(--mtr-cyan-dim);
+  }
+
+  [data-tone='cleared'] & {
+    color: var(--mtr-violet);
+    background: var(--mtr-violet-dim);
+  }
+
+  [data-tone='rejected'] & {
+    color: var(--mtr-pink);
+    background: var(--mtr-pink-dim);
+  }
+}
+
+// The note column is commentary, it is the first thing to go when there is not
+// enough room for it.
+.result .outcomeNote {
+  @include mixins.text-extra-small;
+  color: var(--mtr-faint);
+  display: none;
+}
+
+// Once the note is back the other three columns give up some room for it.
+@media (min-width: variables.$largeScreen) {
+  .result .outcomeNote {
+    display: table-cell;
+    width: 38%;
+  }
+
+  .result .outcomeName {
+    width: 22%;
+  }
+
+  .result .outcomeValue {
+    width: 18%;
+  }
+
+  .result .outcomeBadgeCell {
+    width: 22%;
+  }
+}
+
+// On a phone three columns simply do not fit, the badge ends up hanging off the
+// side of the card. Break each row into two lines instead so nothing truncates
+// at the width where truncation would hurt the most.
+@media (max-width: #{variables.$smallScreen - 1px}) {
+  .result .outcomes,
+  .result .outcomes tbody,
+  .result .outcomes tr {
+    display: block;
+  }
+
+  .result .outcomes tr {
+    padding: 1.5 * variables.$size 0;
+  }
+
+  .result .outcomes th,
+  .result .outcomes td {
+    padding: 0;
+  }
+
+  .result .outcomeName {
+    display: block;
+    width: auto;
+    margin-bottom: 1 * variables.$size;
+  }
+
+  .result .outcomeValue {
+    display: inline-block;
+    width: auto;
+    max-width: 60%;
+    vertical-align: middle;
+  }
+
+  .result .outcomeBadgeCell {
+    display: inline-block;
+    width: auto;
+    padding-right: 0;
+    margin-left: 1.5 * variables.$size;
+    vertical-align: middle;
+  }
+}
