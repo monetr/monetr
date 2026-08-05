@@ -11,6 +11,19 @@
   overflow: hidden;
 }
 
+/* Display math does not wrap and drags the column sideways. Scale it down on
+   small screens, scroll what still does not fit. Scaling alone cannot
+   guarantee a fit, the scroll can. */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: 1 * variables.$size;
+
+  @media (max-width: #{variables.$smallScreen - 1px}) {
+    font-size: 0.85em;
+  }
+}
+
 /* ==========================================================================
    monetr documentation theme tokens
 
@@ -55,6 +68,14 @@
     'Segoe UI', Roboto, sans-serif;
   --mtr-font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo,
     Consolas, monospace;
+
+  /* Reading measure. At 15.5px Inter, 640px is ~80 characters a line, 600px
+     for a tighter 73. Wide is the escape hatch for diagrams and tables.
+     Scrollbar matches ::-webkit-scrollbar below, 100vw counts it and we do
+     not. */
+  --mtr-measure: 640px;
+  --mtr-measure-wide: 1080px;
+  --mtr-scrollbar: 16px;
 }
 
 /* Map the tokens onto Rspress' own variables. monetr forces dark mode (via
@@ -739,6 +760,37 @@
 @media (max-width: 1180px) {
   .rp-doc-layout__outline {
     display: none;
+  }
+}
+
+/* ==========================================================================
+   Reading measure on doc-wide pages
+
+   doc-wide hands the article the sidebar and outline columns too, so the prose
+   runs ~1412px, about 160 characters a line.
+
+   Clamp the article, not the container. The container is a flex item and auto
+   inline margins stop those stretching, it sizes to content and runs off the
+   viewport. Padding stays on the container, rspress steps it down already.
+   ========================================================================== */
+.rp-doc-layout__doc--wide .rp-doc.rspress-doc {
+  max-width: var(--mtr-measure);
+  margin-inline: auto;
+}
+
+/* Figures and tables break back out. Code blocks do not, they scroll on their
+   own and matching the prose keeps the left edge steady. */
+.rp-doc-layout__doc--wide .rp-doc.rspress-doc {
+  > figure,
+  > .rp-table-scroll-container {
+    /* 100% is the measure. min() collapses the overhang on narrow screens,
+       max() pins it at zero because 100vw counts the scrollbar. */
+    --mtr-overhang: max(0px, (min(
+      var(--mtr-measure-wide),
+      100vw - var(--rp-content-padding-x) * 2 - var(--mtr-scrollbar)
+    ) - 100%) / 2);
+    margin-left: calc(-1 * var(--mtr-overhang));
+    margin-right: calc(-1 * var(--mtr-overhang));
   }
 }
 

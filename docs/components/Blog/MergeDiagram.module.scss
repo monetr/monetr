@@ -2,15 +2,11 @@
 @use '@monetr/docs/styles/mixins';
 
 /*
-MergeDiagram lays out the three inputs to a PATCH (the existing row, the schema
-and the request body) as sheets of paper sitting side by side, then shows the
-merged result underneath. On mobile the sheets stack into a plain column so
-nothing gets clipped.
+The three inputs to a PATCH sitting side by side, merged result underneath. The
+sheets stack into a column on mobile.
 
-Tone is carried on a `data-tone` attribute rather than extra class names so each
-element keeps a single class. Cyan means a write happened, pink means the field
-is unreachable, violet is the purple family default for an intentional unset and
-muted is "nothing happened here".
+Tone rides on data-tone so every element keeps a single class. Cyan wrote,
+violet unset, pink unreachable, muted nothing happened.
 */
 
 .root {
@@ -114,8 +110,8 @@ muted is "nothing happened here".
   }
 }
 
-// An absent key is drawn as an empty dashed slot. The client did not send a
-// value here, so there is deliberately nothing to read.
+// An absent key is an empty slot. Nothing was sent, so there is nothing to
+// read.
 .absent {
   @include mixins.text-extra-small;
   margin: 0;
@@ -157,18 +153,16 @@ muted is "nothing happened here".
   letter-spacing: 0.02em;
 }
 
-// Everything below is scoped through .result on purpose. The docs prose styles
-// reach into plain table elements, so the extra class buys the specificity to
-// win without resorting to !important.
+// Scoped through .result. Prose styles reach into bare th and td, the extra
+// class wins that without !important.
 .result .outcomes {
   width: 100%;
   margin: 3 * variables.$size 0 0;
   padding-top: 3 * variables.$size;
   border-top: 1px solid var(--mtr-line-soft);
   border-collapse: collapse;
-  // Fixed layout means the column widths below are actually honoured, which is
-  // what lets the name and value cells ellipsis rather than shoving the badge
-  // out past the edge of the card.
+  // Fixed layout so the widths below hold. Cells ellipsis instead of shoving
+  // the badge off the card.
   table-layout: fixed;
 
   tr {
@@ -186,8 +180,7 @@ muted is "nothing happened here".
   }
 }
 
-// Truncation is a safety net, not the plan. Both cells carry a title attribute
-// so the full text is still reachable when it does kick in.
+// Safety net, not the plan. Both cells carry a title with the full text.
 .result .outcomeName,
 .result .outcomeValue {
   overflow: hidden;
@@ -250,15 +243,14 @@ muted is "nothing happened here".
   }
 }
 
-// The note column is commentary, it is the first thing to go when there is not
-// enough room for it.
+// The note is commentary. First thing to go.
 .result .outcomeNote {
   @include mixins.text-extra-small;
   color: var(--mtr-faint);
   display: none;
 }
 
-// Once the note is back the other three columns give up some room for it.
+// Note is back, the others give up room.
 @media (min-width: variables.$largeScreen) {
   .result .outcomeNote {
     display: table-cell;
@@ -278,9 +270,8 @@ muted is "nothing happened here".
   }
 }
 
-// On a phone three columns simply do not fit, the badge ends up hanging off the
-// side of the card. Break each row into two lines instead so nothing truncates
-// at the width where truncation would hurt the most.
+// Three columns do not fit on a phone, the badge hangs off the card. Two lines
+// per row instead, so nothing truncates where it would hurt most.
 @media (max-width: #{variables.$smallScreen - 1px}) {
   .result .outcomes,
   .result .outcomes tbody,
