@@ -1,0 +1,163 @@
+---
+title: "API Keys"
+description: "How monetr API keys work: the ID and secret pair you send over Basic auth, how to create and revoke them, and why a key can't manage keys."
+---
+
+import { Badge } from '@rspress/core/theme';
+
+# API Keys
+
+API keys are how anything that isn't a browser talks to monetr. A key has two halves: an ID
+that looks like any other monetr identifier, and a secret that's shown to you exactly once.
+Together they go over HTTP Basic auth, which is covered in the
+[overview](./overview#authenticating).
+
+:::warning You can't manage keys with a key
+All three endpoints on this page reject API keys. Creating, listing and revoking keys are
+things you do signed in to the monetr web app, under **Settings** then **API**. A key that
+could mint more keys, or quietly revoke the key someone is watching, would make the whole
+credential a lot more dangerous than it needs to be.
+:::
+
+They're documented here anyway so you know the shape of what the app is doing, and so the
+list of what exists is complete.
+
+## The API key object
+
+| Attribute | Type | Description |
+| --- | --- | --- |
+| `apiKeyId` | string (ulid) | Identifies the key. This is also the Basic auth username. |
+| `name` | string | Whatever you called it, so you can tell keys apart later. |
+| `createdAt` | timestamp | When the key was made. |
+| `createdBy` | string (ulid) | The user who made it. Requests using this key act as that user. Resolve it to a name with [Get a user](./users#get-a-user). |
+| `updatedAt` | timestamp | When the record last changed. |
+| `deletedAt` | timestamp | When the key was revoked. Absent on live keys. |
+
+The secret is never in this object. monetr stores a public key derived from the secret and
+verifies against that, so it genuinely cannot give the secret back to you, even in principle.
+
+## <Badge type="info">GET</Badge> List API keys
+
+Returns every key on your account, including revoked ones.
+
+**In the app:** The API keys table under settings.
+
+```
+GET /api/keys
+```
+
+**Auth:** Not available to API keys.
+
+### Response
+
+An array of API key objects.
+
+```json
+[
+  {
+    "apiKeyId": "key_01hy4rfqk8z4xv1c2v44cf6abc",
+    "name": "Budget sync script",
+    "createdAt": "2024-06-11T20:14:03.882Z",
+    "createdBy": "user_01fpwx3sdm7kb1s0jbrbvbdw4c",
+    "updatedAt": "2024-06-11T20:14:03.882Z"
+  },
+  {
+    "apiKeyId": "key_01hz8p2mvw6te4rk9jnxdb5cgh",
+    "name": "Old laptop",
+    "createdAt": "2024-02-03T11:47:19.220Z",
+    "createdBy": "user_01fpwx3sdm7kb1s0jbrbvbdw4c",
+    "updatedAt": "2024-05-28T09:02:41.673Z",
+    "deletedAt": "2024-05-28T09:02:41.673Z"
+  }
+]
+```
+
+The second key is revoked. Live keys have no `deletedAt` key at all rather than a null one.
+
+## <Badge type="tip">POST</Badge> Create an API key
+
+Makes a new key and returns the secret. This is the only time the secret exists anywhere you
+can read it.
+
+**In the app:** The create key dialog under settings, which shows you the secret once and
+then can't get it back.
+
+```
+POST /api/keys
+```
+
+**Auth:** Not available to API keys.
+
+Creating a key also needs an active subscription, where listing and revoking don't. That way
+someone whose subscription has lapsed can still clean up after themselves.
+
+### Body
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `name` | string | Yes | A label so you can tell your keys apart. |
+
+When proof of work is enabled on the server, the body also has to carry a solved challenge.
+That's part of the app's sign-up and key-creation flow, not something you'd assemble by
+hand.
+
+### Response
+
+An API key object with one extra field:
+
+| Attribute | Type | Description |
+| --- | --- | --- |
+| `secret` | string | The Basic auth password: `monetr_secret_` followed by 52 lowercase base32 characters. Shown here and nowhere else, ever. |
+
+```json
+{
+  "apiKeyId": "key_01hy4rfqk8z4xv1c2v44cf6abc",
+  "name": "Budget sync script",
+  "createdAt": "2024-06-11T20:14:03.882Z",
+  "createdBy": "user_01fpwx3sdm7kb1s0jbrbvbdw4c",
+  "updatedAt": "2024-06-11T20:14:03.882Z",
+  "secret": "monetr_secret_k3rjq7mfxg2pv8dwzs5hn4a6tcyu9bel0i1owmdrkfxq3jvnza"
+}
+```
+
+Take `apiKeyId` and `secret` and export them as `MONETR_API_KEY_ID` and
+`MONETR_API_KEY_SECRET`, and every example on this site works as written. The
+[quickstart](./quickstart) picks up from there.
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | `name` is missing, or the proof of work challenge is missing or wrong. |
+| 402 | No active subscription, on an instance with billing enabled. |
+
+## <Badge type="danger">DELETE</Badge> Revoke an API key
+
+Turns off a key. Anything using it starts failing with a 401 immediately.
+
+**In the app:** The revoke button in the API keys table.
+
+```
+DELETE /api/keys/:apiKeyId
+```
+
+**Auth:** Not available to API keys.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `apiKeyId` | string (ulid) | Yes | The key to revoke. |
+
+Returns 200 with an empty body. Revoking is a soft delete: the record stays, with `deletedAt`
+set, so a revoked key still shows up in the list.
+
+When proof of work is enabled, this takes a body carrying a solved challenge. When it isn't,
+it takes no body at all.
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | `apiKeyId` is malformed, or the key is already revoked. Revoking twice is an error rather than a no-op. |
+| 404 | No such key on your account. |

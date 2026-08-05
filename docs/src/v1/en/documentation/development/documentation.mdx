@@ -51,6 +51,24 @@ If you want to work on the documentation in real time locally you can run the fo
 This will start an Rspress development server locally serving docs. As you edit files in the `docs/` directory you will
 be able to see those changes automatically refresh in your browser.
 
+## API documentation
+
+**API changes update the API documentation in the same pull request.** If you add, remove or
+change an endpoint in `server/controller/routes.go`, the corresponding page under
+`docs/src/v1/en/documentation/api/` changes with it.
+
+The existence half of that promise is enforced automatically.
+`TestApiDocumentationCoverage` in `server/controller/documentation_test.go` compares the
+registered route table against the request lines in those pages, and fails the build with
+two lists: routes that have no documentation, and documented routes that no longer exist. So
+adding an endpoint without documenting it is a red build, the same as a failing unit test.
+
+Endpoints that exist only to serve the monetr app still have to appear, but they get a short
+entry on the internal endpoints page rather than the full treatment. Before writing a new
+page, read `docs/API_STYLE.md` at the repository root. It has the per-endpoint template, the
+voice rules, and a fully rendered example to work from. The checklist of what is documented
+lives in `docs/API_COVERAGE.md`.
+
 ## Style
 
 We would like our documentation to follow a general guide, this creates some consistency in how our documentation is
