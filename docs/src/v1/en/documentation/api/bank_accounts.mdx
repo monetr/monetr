@@ -1,0 +1,433 @@
+---
+title: "Bank Accounts API"
+description: "monetr's API for bank accounts: list them, read current and available balances, and create manual accounts you keep up to date yourself."
+---
+
+import { Badge } from '@rspress/core/theme';
+
+# Bank Accounts API
+
+A bank account belongs to a [link](./links). If the link is a Plaid one, monetr created the
+bank accounts for you when you connected your bank, and their names and balances come from
+there. If it's a manual link, you make them yourself and you own everything about them,
+including the balances.
+
+Bank accounts are where the budgeting actually happens.
+[Transactions](./transactions), [spending objects](./spending) and
+[funding schedules](./funding_schedules) all hang off a bank account, not off the link.
+
+## The bank account object
+
+| Attribute | Type | Description |
+| --- | --- | --- |
+| `bankAccountId` | string (ulid) | Identifies the bank account. |
+| `linkId` | string (ulid) | The [link](./links#the-link-object) this account belongs to. |
+| `plaidBankAccount` | object | The raw Plaid record. Only on Plaid accounts. |
+| `lunchFlowBankAccountId` | string (ulid), nullable | The Lunch Flow account behind this one. Null on everything else. |
+| `lunchFlowBankAccount` | object | The upstream Lunch Flow record. Only on Lunch Flow accounts. |
+| `currency` | string | ISO 4217 code. This is what tells you how many decimal places the balance amounts imply. |
+| `availableBalance` | integer | What you can actually spend right now, in the currency's smallest unit. Pending charges are already taken out. |
+| `currentBalance` | integer | The posted balance, ignoring anything pending. |
+| `limitBalance` | integer | The credit limit for credit accounts. Zero on everything else. Never negative. |
+| `mask` | string, nullable | The last 4 digits of the account number, for telling two checking accounts apart. Exactly 4, no more and no fewer. Null when nothing provided one. |
+| `name` | string | The display name. Absent if it's never been set. |
+| `originalName` | string | The name as the bank gave it. Renaming leaves this alone. |
+| `accountType` | string | Broad classification. One of `depository`, `credit`, `loan`, `investment` or `other`. Unrecognized values become `other`. |
+| `accountSubType` | string | Narrower classification. `checking`, `savings`, `hsa`, `cd`, `money market`, `paypal`, `prepaid`, `cash management`, `ebt`, `credit card`, `auto`, or `other`. Anything monetr doesn't recognize becomes `other`. |
+| `status` | string | `active`, `inactive`, or `unknown`. Archiving an account sets it to `inactive`. |
+| `lastUpdated` | timestamp | When the balances were last refreshed. |
+| `createdAt` | timestamp | When monetr created the record. |
+| `updatedAt` | timestamp | When the record last changed. |
+| `deletedAt` | timestamp, nullable | When the account was archived. Present only on archived accounts. |
+
+Balances don't use the sign flip that transaction amounts do. A positive `currentBalance`
+means you have money. See [Money](./overview#money) for the decimal places problem, which
+does apply here.
+
+## <Badge type="info">GET</Badge> List bank accounts
+
+Returns every bank account on your monetr account, across all links.
+
+**In the app:** The account switcher in the sidebar. Almost every screen needs to know
+which accounts exist, so this is one of the first calls the app makes.
+
+```
+GET /api/bank_accounts
+```
+
+**Auth:** API key, subscription required.
+
+### Query parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `link_id` | string (ulid) | No | Only return accounts on this link. Snake case, unlike most of the API. This filter also includes archived accounts, where the unfiltered call leaves them out. A link with no accounts returns `null` here rather than an empty array. |
+
+Calling this with no parameters gives you live accounts. Calling it with `link_id` gives you everything that link has ever had,
+archived ones included, because the link details screen needs to show them.
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/bank_accounts" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+[
+  {
+    "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+    "linkId": "link_01gds6ecrxq2wq8vmg2mvvv1sh",
+    "lunchFlowBankAccountId": null,
+    "currency": "USD",
+    "availableBalance": 384219,
+    "currentBalance": 384219,
+    "limitBalance": 0,
+    "mask": "4485",
+    "name": "Checking",
+    "originalName": "TOTAL CHECKING",
+    "accountType": "depository",
+    "accountSubType": "checking",
+    "status": "active",
+    "lastUpdated": "2024-08-27T06:00:12.418Z",
+    "createdAt": "2022-01-14T18:29:03.921Z",
+    "updatedAt": "2024-08-27T06:00:12.418Z"
+  },
+  {
+    "bankAccountId": "bac_01h9m3kx7vqe4t8n2p5rwd6ycb",
+    "linkId": "link_01gds6ecrxq2wq8vmg2mvvv1sh",
+    "lunchFlowBankAccountId": null,
+    "currency": "USD",
+    "availableBalance": 1250000,
+    "currentBalance": 1250000,
+    "limitBalance": 0,
+    "mask": null,
+    "name": "Emergency Fund",
+    "originalName": "SAVINGS",
+    "accountType": "depository",
+    "accountSubType": "savings",
+    "status": "active",
+    "lastUpdated": "2024-08-27T06:00:12.418Z",
+    "createdAt": "2022-01-14T18:29:03.921Z",
+    "updatedAt": "2024-08-27T06:00:12.418Z"
+  }
+]
+```
+
+## <Badge type="info">GET</Badge> Get a bank account
+
+Returns one bank account.
+
+**In the app:** Loading whichever account you currently have selected. The app shows the
+cached copy from the list immediately, then confirms it against this.
+
+```
+GET /api/bank_accounts/:bankAccountId
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `bankAccountId` | string (ulid) | Yes | The account you want. |
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+{
+  "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+  "linkId": "link_01gds6ecrxq2wq8vmg2mvvv1sh",
+  "lunchFlowBankAccountId": null,
+  "currency": "USD",
+  "availableBalance": 384219,
+  "currentBalance": 384219,
+  "limitBalance": 0,
+  "mask": "4485",
+  "name": "Checking",
+  "originalName": "TOTAL CHECKING",
+  "accountType": "depository",
+  "accountSubType": "checking",
+  "status": "active",
+  "lastUpdated": "2024-08-27T06:00:12.418Z",
+  "createdAt": "2022-01-14T18:29:03.921Z",
+  "updatedAt": "2024-08-27T06:00:12.418Z"
+}
+```
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | `bankAccountId` is malformed. |
+| 404 | No such account on your monetr account. |
+
+## <Badge type="info">GET</Badge> Get balances
+
+Returns the account's balances plus how that money is currently carved up between expenses,
+goals and what's left over. This is the endpoint behind the numbers at the top of the app.
+
+**In the app:** The free-to-use and limit figures at the top of the budgeting sidebar.
+
+```
+GET /api/bank_accounts/:bankAccountId/balances
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `bankAccountId` | string (ulid) | Yes | The account whose balances you want. |
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/balances" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+{
+  "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+  "currency": "USD",
+  "current": 384219,
+  "available": 384219,
+  "limit": 0,
+  "free": 121044,
+  "expenses": 218175,
+  "goals": 45000
+}
+```
+
+### Response attributes
+
+This is its own object, not the bank account. The same shape comes back on the transaction
+create, update and delete responses.
+
+| Attribute | Type | Description |
+| --- | --- | --- |
+| `bankAccountId` | string (ulid) | The account these belong to. |
+| `currency` | string | ISO 4217 code for all the amounts here. |
+| `current` | integer | The account's current balance. |
+| `available` | integer | The account's available balance, same value as `availableBalance` on the bank account. |
+| `limit` | integer | The credit limit. |
+| `free` | integer | Available minus expenses minus goals. What you can spend without raiding an envelope. This is the number the app calls free-to-use, and it can go negative if you've over-allocated. |
+| `expenses` | integer | Total currently sitting in expense spending objects. |
+| `goals` | integer | Total currently sitting in goal spending objects. |
+
+## <Badge type="tip">POST</Badge> Create a bank account
+
+Adds a bank account by hand. Only works on manual and Lunch Flow links, since Plaid links
+get their accounts from the bank.
+
+**In the app:** Adding an account to a manual link, and both the manual and Lunch Flow
+setup flows.
+
+```
+POST /api/bank_accounts
+```
+
+**Auth:** API key, subscription required.
+
+### Body
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `linkId` | string (ulid) | Yes | The link to attach it to. Has to be a manual or Lunch Flow link, anything else is a 400. |
+| `name` | string | Yes | What to call it. |
+| `accountSubType` | string | No | Defaults to `checking`. |
+| `accountType` | string | No | Defaults to `depository`. |
+| `availableBalance` | integer | No | Starting available balance. Defaults to 0. Can be negative. |
+| `currency` | string | No | ISO 4217 code. Defaults to whatever your account's locale implies, falling back to monetr's default. |
+| `currentBalance` | integer | No | Starting current balance. Defaults to 0. Can be negative. |
+| `limitBalance` | integer | No | Credit limit. Defaults to 0 and can't be negative. |
+| `lunchFlowBankAccountId` | string (ulid) | No | Required when the link is a Lunch Flow link, and it has to belong to that link. Leave it off for manual links. |
+| `mask` | string | No | The last 4 digits of the account number. Has to be exactly 4 digits, so `"0912"` works and `"912"` is a 400. |
+| `originalName` | string | No | The bank's name for it, 1 to 300 characters. On a Lunch Flow link monetr sets this from the upstream account and ignores what you send. |
+| `status` | string | No | Defaults to `active`. |
+
+### Example
+
+```bash
+curl --request POST \
+  --url "https://my.monetr.local/api/bank_accounts" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "linkId": "link_01j2n8xqvr4kd9wt3m7hbzc5pf",
+    "name": "Vacation Savings",
+    "accountType": "depository",
+    "accountSubType": "savings",
+    "currentBalance": 250000,
+    "availableBalance": 250000,
+    "currency": "USD",
+    "mask": "0912"
+  }'
+```
+
+```json
+{
+  "bankAccountId": "bac_01j6b4nqx8ws5rt2m9pked7hvc",
+  "linkId": "link_01j2n8xqvr4kd9wt3m7hbzc5pf",
+  "lunchFlowBankAccountId": null,
+  "currency": "USD",
+  "availableBalance": 250000,
+  "currentBalance": 250000,
+  "limitBalance": 0,
+  "mask": "0912",
+  "name": "Vacation Savings",
+  "originalName": "",
+  "accountType": "depository",
+  "accountSubType": "savings",
+  "status": "active",
+  "lastUpdated": "2024-08-28T09:14:22.006Z",
+  "createdAt": "2024-08-28T09:14:22.006Z",
+  "updatedAt": "2024-08-28T09:14:22.006Z"
+}
+```
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | The link is a Plaid link, `name` is missing, the link is Lunch Flow and you didn't send a valid `lunchFlowBankAccountId`, or `limitBalance` is negative. |
+
+## <Badge type="warning">PATCH</Badge> Update a bank account
+
+Changes a bank account. How much you can change depends on what kind of account it is.
+
+**In the app:** The bank account settings page.
+
+```
+PATCH /api/bank_accounts/:bankAccountId
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `bankAccountId` | string (ulid) | Yes | The account to change. |
+
+### Body
+
+On a Plaid account, one field. That's it, because everything else is the bank's to say.
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `name` | string | No | The display name. Can't be blanked out. |
+
+On a manual account, quite a bit more, since nothing is syncing these for you:
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `accountSubType` | string | No | Reclassify it. Can't be blanked out. |
+| `accountType` | string | No | Reclassify it. Can't be blanked out. |
+| `availableBalance` | integer | No | Set the available balance directly. Zero is fine, null is rejected. |
+| `currency` | string | No | ISO 4217 code. Can't be blanked out. |
+| `currentBalance` | integer | No | Set the current balance directly. Zero is fine, null is rejected. |
+| `limitBalance` | integer, nullable | No | Credit limit, or null to clear it. Can't be negative. |
+| `mask` | string, nullable | No | The last 4 digits, or null to clear it. Exactly 4 when set. |
+| `name` | string | No | The display name. Can't be blanked out. |
+
+On a Lunch Flow account, three: `name`, `currency` and `mask`.
+
+Note `status` is never editable, on any account type. monetr owns it, and archiving is what
+changes it.
+
+Every field here is optional, so send only what you're changing. But if you do send one of
+the non-nullable ones, you can't send null or an empty string for it. That's on purpose:
+an empty string would slip past the format checks and silently wipe the field.
+
+### Example
+
+```bash
+curl --request PATCH \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01j6b4nqx8ws5rt2m9pked7hvc" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "name": "Iceland Fund",
+    "currentBalance": 310000,
+    "availableBalance": 310000
+  }'
+```
+
+```json
+{
+  "bankAccountId": "bac_01j6b4nqx8ws5rt2m9pked7hvc",
+  "linkId": "link_01j2n8xqvr4kd9wt3m7hbzc5pf",
+  "lunchFlowBankAccountId": null,
+  "currency": "USD",
+  "availableBalance": 310000,
+  "currentBalance": 310000,
+  "limitBalance": 0,
+  "mask": "0912",
+  "name": "Iceland Fund",
+  "originalName": "",
+  "accountType": "depository",
+  "accountSubType": "savings",
+  "status": "active",
+  "lastUpdated": "2024-08-28T09:14:22.006Z",
+  "createdAt": "2024-08-28T09:14:22.006Z",
+  "updatedAt": "2024-08-29T17:41:55.732Z"
+}
+```
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | You sent a manual-only field on a Plaid account, tried to blank out a non-nullable field, or sent a negative `limitBalance`. |
+| 404 | No such account. |
+
+## <Badge type="danger">DELETE</Badge> Archive a bank account
+
+Takes a bank account out of circulation. Despite the verb, this doesn't destroy anything: it
+sets `status` to `inactive` and stamps `deletedAt`. Transactions, spending objects and
+history all stay put.
+
+**In the app:** Archiving an account from its settings page.
+
+```
+DELETE /api/bank_accounts/:bankAccountId
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `bankAccountId` | string (ulid) | Yes | The account to archive. |
+
+### Example
+
+```bash
+curl --request DELETE \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01j6b4nqx8ws5rt2m9pked7hvc" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+Returns 200 with an empty body. To see the archived record afterwards,
+[list bank accounts](#list-bank-accounts) with the `link_id` filter, which is the only call
+that includes them.
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | It's a Plaid account. Those can't be archived on their own, you remove the whole link instead. |
+| 404 | No such account. |

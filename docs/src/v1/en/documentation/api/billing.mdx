@@ -1,0 +1,142 @@
+---
+title: "Billing API"
+description: "monetr's Stripe checkout and billing portal endpoints. Hosted only: all three return 404 on a self-hosted instance with billing disabled."
+---
+
+import { Badge } from '@rspress/core/theme';
+
+# Billing API
+
+monetr's hosted service charges for itself through Stripe, and these three endpoints are how
+the app hands you off to Stripe and picks you back up afterwards. monetr never sees a card
+number: both endpoints that matter return a Stripe URL for the browser to go to.
+
+:::info Hosted only
+These endpoints are part of monetr's paid hosted service. If you're self-hosting with
+billing disabled, all three return 404 with `{"error": "billing is not enabled"}`. That's a
+hard check at the top of each handler, before anything else happens.
+:::
+
+:::warning Not for API keys
+All three reject API keys. They're reachable only from the monetr web app while signed in.
+A long lived credential shouldn't be able to start a subscription or open a billing portal on
+its own.
+:::
+
+### Self-hosting with billing turned on
+
+Worth spelling out, because it's the one configuration where these two banners leave you
+stuck. If you self-host and you *have* configured Stripe, then the subscription check is
+live: an account that isn't paid up gets a 402 on most of the API, and none of the three
+remedies on this page can be reached with an API key.
+
+The way out is to sign in to your own instance in a browser and use the subscribe flow there.
+If you didn't mean to turn billing on, unset your Stripe configuration and the check is
+skipped entirely, as described in [the overview](./overview#what-each-endpoint-requires).
+
+## <Badge type="tip">POST</Badge> Start a checkout
+
+Creates a Stripe checkout session and returns where to send the browser.
+
+**In the app:** The subscribe button on the "your subscription isn't active" screen.
+
+```
+POST /api/billing/create_checkout
+```
+
+**Auth:** Not available to API keys.
+
+### Body
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `cancelPath` | string, nullable | No | Where to drop the user back in monetr if they abandon Stripe's checkout. Leave it out and Stripe uses monetr's default. |
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | The account already has an active subscription, or already has a subscription of any kind. Those are separate errors with different messages, since a lapsed subscription needs the portal rather than a new checkout. |
+| 404 | Billing isn't enabled on this server. |
+
+## <Badge type="info">GET</Badge> Finish a checkout
+
+Called when Stripe sends the user back to monetr. It checks with Stripe whether the payment
+actually went through and updates the account, then tells the client where to go.
+
+**In the app:** The page Stripe redirects to after checkout, which reads the answer and
+either lets you in or sends you back to subscribe.
+
+```
+GET /api/billing/checkout/:checkoutSessionId
+```
+
+**Auth:** Not available to API keys.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `checkoutSessionId` | string | Yes | Stripe's checkout session identifier, from the redirect. This is a Stripe ID, not a monetr ULID. |
+
+### Responses
+
+Payment went through:
+
+```json
+{
+  "nextUrl": "/",
+  "isActive": true
+}
+```
+
+It didn't, or hasn't yet:
+
+```json
+{
+  "message": "Subscription is not active.",
+  "nextUrl": "/account/subscribe",
+  "isActive": false
+}
+```
+
+Both are 200. Check `isActive`, not the status code. An inactive answer isn't necessarily
+failure either, Stripe's webhook may not have landed yet.
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | `checkoutSessionId` is empty. |
+| 404 | Billing isn't enabled on this server. |
+
+## <Badge type="info">GET</Badge> Open the billing portal
+
+Returns a URL to Stripe's billing portal, where someone can change their card, see invoices
+or cancel.
+
+**In the app:** The manage subscription button on the subscription settings page.
+
+```
+GET /api/billing/portal
+```
+
+**Auth:** Not available to API keys.
+
+### Response
+
+```json
+{
+  "url": "https://billing.stripe.com/p/session/live_YWNjdF8xTTJKVGtMa2RJd0h1N2l4"
+}
+```
+
+Send the browser there. The link is short lived and single use, so fetch a fresh one each
+time rather than storing it.
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | The account has no subscription at all, so there's no portal to open. Start a checkout instead. |
+| 404 | Billing isn't enabled on this server. |

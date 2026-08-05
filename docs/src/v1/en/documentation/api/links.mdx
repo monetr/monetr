@@ -1,0 +1,335 @@
+---
+title: "Links API"
+description: "A link is one bank connection in monetr. Use the API to list Plaid, manual and Lunch Flow links, create manual ones, and remove them cleanly."
+---
+
+import { Badge } from '@rspress/core/theme';
+
+# Links API
+
+A link is one connection to one financial institution, and it owns the bank accounts under
+it. In the app it's the thing you see in the sidebar with a bank's name on it, with the
+accounts nested underneath.
+
+There are three kinds you'll actually run into. **Plaid** links sync from your bank on
+their own. **Manual** links are ones you maintain by hand, entering transactions and
+updating balances yourself. **Lunch Flow** links pull from a Lunch Flow instance, and only
+exist when that's enabled on your server.
+
+The endpoints here create and manage manual links. Making a Plaid link is a multi-step
+handshake with Plaid's browser SDK that an API key can't drive, so it lives in
+[internal endpoints](./internal).
+
+## The link object
+
+| Attribute | Type | Description |
+| --- | --- | --- |
+| `linkId` | string (ulid) | Identifies the link. |
+| `linkType` | string | `plaid`, `manual`, `lunch_flow`, `stripe`, or `unknown`. |
+| `plaidLink` | object | Sync state for Plaid links, described below. Absent on every other kind. |
+| `lunchFlowLinkId` | string (ulid) | The Lunch Flow link behind this one. Only on Lunch Flow links. |
+| `lunchFlowLink` | object | The upstream Lunch Flow link. Only on Lunch Flow links. |
+| `institutionName` | string | The bank's name. On a manual link this is whatever you called it, and it's the label you see in the sidebar. |
+| `description` | string, nullable | Your own note about the link. Null when you haven't set one. |
+| `createdAt` | timestamp | When the link was made. |
+| `createdBy` | string (ulid) | The user who made it. |
+| `updatedAt` | timestamp | When the link last changed. |
+| `deletedAt` | timestamp, nullable | When the link was removed. Always null in list responses, which filter deleted links out entirely. |
+
+### The `plaidLink` object
+
+Only present on Plaid links. This is where you look to find out whether a bank connection
+is healthy.
+
+| Attribute | Type | Description |
+| --- | --- | --- |
+| `products` | array of strings | The Plaid products this connection was authorized for. |
+| `status` | string | `pending`, `setup`, `error`, `pending_expiration`, `revoked`, `deactivated`, or `unknown`. |
+| `errorCode` | string | Plaid's error code when the connection is broken. Absent when it's fine. |
+| `expirationDate` | timestamp, nullable | When the bank's consent runs out, for institutions that expire it. Null when nothing expires. |
+| `newAccountsAvailable` | boolean | Whether the bank has accounts monetr knows about but you haven't added. |
+| `institutionId` | string | Plaid's institution identifier, like `ins_116794`. This is what you pass to the [institution lookup](./internal#institution-details). |
+| `institutionName` | string | The institution's name according to Plaid. |
+| `lastManualSync` | timestamp, nullable | When someone last forced a sync by hand. |
+| `lastSuccessfulUpdate` | timestamp, nullable | When data last actually came through. |
+| `lastAttemptedUpdate` | timestamp, nullable | When monetr last tried to sync, successful or not. Compare against `lastSuccessfulUpdate` to spot a connection that's been failing quietly. |
+| `lastAccountSync` | timestamp, nullable | When monetr last checked for new accounts at the bank. |
+| `updatedAt` | timestamp | When the sync state last changed. |
+| `createdAt` | timestamp | When the Plaid connection was made. |
+| `createdBy` | string (ulid) | The user who connected it. |
+| `deletedAt` | timestamp, nullable | When it was deactivated. |
+
+The access token, item ID and webhook URL are all deliberately left out of the response.
+
+## <Badge type="info">GET</Badge> List links
+
+Returns every link on your account. Deleted links are filtered out.
+
+**In the app:** The bank sidebar, which is one of the first things the app loads.
+
+```
+GET /api/links
+```
+
+**Auth:** API key, subscription required.
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/links" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+[
+  {
+    "linkId": "link_01gds6ecrxq2wq8vmg2mvvv1sh",
+    "linkType": "plaid",
+    "plaidLink": {
+      "products": ["transactions"],
+      "status": "setup",
+      "expirationDate": null,
+      "newAccountsAvailable": false,
+      "institutionId": "ins_116794",
+      "institutionName": "Chase",
+      "lastManualSync": null,
+      "lastSuccessfulUpdate": "2024-08-27T06:00:12.418Z",
+      "lastAttemptedUpdate": "2024-08-27T06:00:12.418Z",
+      "lastAccountSync": "2024-08-20T06:00:09.882Z",
+      "updatedAt": "2024-08-27T06:00:12.418Z",
+      "createdAt": "2022-01-14T18:29:03.114Z",
+      "createdBy": "user_01fpwx3sdm7kb1s0jbrbvbdw4c",
+      "deletedAt": null
+    },
+    "institutionName": "Chase",
+    "description": null,
+    "createdAt": "2022-01-14T18:29:03.114Z",
+    "createdBy": "user_01fpwx3sdm7kb1s0jbrbvbdw4c",
+    "updatedAt": "2024-08-27T06:00:12.418Z",
+    "deletedAt": null
+  },
+  {
+    "linkId": "link_01j2n8xqvr4kd9wt3m7hbzc5pf",
+    "linkType": "manual",
+    "institutionName": "Credit Union",
+    "description": "The joint account we never automated",
+    "createdAt": "2024-07-02T13:44:51.229Z",
+    "createdBy": "user_01fpwx3sdm7kb1s0jbrbvbdw4c",
+    "updatedAt": "2024-07-02T13:44:51.229Z",
+    "deletedAt": null
+  }
+]
+```
+
+Notice the manual link has no `plaidLink` key at all. It's omitted rather than null.
+
+## <Badge type="info">GET</Badge> Get a link
+
+Returns one link.
+
+**In the app:** The link details page, and the card that tells you when Plaid last
+updated.
+
+```
+GET /api/links/:linkId
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `linkId` | string (ulid) | Yes | The link you want. |
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/links/link_01j2n8xqvr4kd9wt3m7hbzc5pf" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+{
+  "linkId": "link_01j2n8xqvr4kd9wt3m7hbzc5pf",
+  "linkType": "manual",
+  "institutionName": "Credit Union",
+  "description": "The joint account we never automated",
+  "createdAt": "2024-07-02T13:44:51.229Z",
+  "createdBy": "user_01fpwx3sdm7kb1s0jbrbvbdw4c",
+  "updatedAt": "2024-07-02T13:44:51.229Z",
+  "deletedAt": null
+}
+```
+
+Unlike the list, this one will return a deleted link if you ask for it by ID, with
+`deletedAt` set.
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | `linkId` is malformed. |
+| 404 | No such link on your account. |
+
+## <Badge type="tip">POST</Badge> Create a manual link
+
+Makes a link you maintain yourself. This is the starting point for tracking an account
+monetr can't connect to automatically: create the link, then
+[create bank accounts](./bank_accounts#create-a-bank-account) on it, then
+[add transactions](./transactions#create-a-transaction). The
+[quickstart](./quickstart) walks the whole sequence.
+
+**In the app:** Setting up a manual link, and the Lunch Flow setup flow.
+
+```
+POST /api/links
+```
+
+**Auth:** API key, subscription required.
+
+### Body
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `institutionName` | string | Yes | What to call the link. This is the label in the sidebar, so use the bank's name. |
+| `description` | string, nullable | No | A note to yourself. |
+| `lunchFlowLinkId` | string (ulid), nullable | No | Turns this into a Lunch Flow link instead of a manual one. The Lunch Flow link has to already exist and be in a pending status, and creating the link activates it. Leave this off unless you're wiring up Lunch Flow. |
+
+`linkType` is not something you send. Leave `lunchFlowLinkId` off and you get a manual link.
+Send it and you get a Lunch Flow link. Plaid links can't be made here at all.
+
+### Example
+
+```bash
+curl --request POST \
+  --url "https://my.monetr.local/api/links" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "institutionName": "Credit Union",
+    "description": "The joint account we never automated"
+  }'
+```
+
+```json
+{
+  "linkId": "link_01j2n8xqvr4kd9wt3m7hbzc5pf",
+  "linkType": "manual",
+  "institutionName": "Credit Union",
+  "description": "The joint account we never automated",
+  "createdAt": "2024-07-02T13:44:51.229Z",
+  "createdBy": "user_01fpwx3sdm7kb1s0jbrbvbdw4c",
+  "updatedAt": "2024-07-02T13:44:51.229Z",
+  "deletedAt": null
+}
+```
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | `institutionName` is missing, or you sent a `lunchFlowLinkId` for a Lunch Flow link that isn't pending. |
+| 404 | You sent a `lunchFlowLinkId` on a server where Lunch Flow isn't enabled. |
+
+## <Badge type="warning">PATCH</Badge> Update a link
+
+Renames a link or changes its description. Works on any link type, including Plaid ones,
+since these two fields are yours rather than the bank's.
+
+**In the app:** Renaming a link or editing its description on the link details page.
+
+```
+PATCH /api/links/:linkId
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `linkId` | string (ulid) | Yes | The link to change. |
+
+### Body
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `description` | string, nullable | No | A note to yourself, or null to clear it. |
+| `institutionName` | string | No | A new name for the link. |
+
+### Example
+
+```bash
+curl --request PATCH \
+  --url "https://my.monetr.local/api/links/link_01j2n8xqvr4kd9wt3m7hbzc5pf" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "institutionName": "Lakeside Credit Union",
+    "description": null
+  }'
+```
+
+```json
+{
+  "linkId": "link_01j2n8xqvr4kd9wt3m7hbzc5pf",
+  "linkType": "manual",
+  "institutionName": "Lakeside Credit Union",
+  "description": null,
+  "createdAt": "2024-07-02T13:44:51.229Z",
+  "createdBy": "user_01fpwx3sdm7kb1s0jbrbvbdw4c",
+  "updatedAt": "2024-08-29T20:11:03.507Z",
+  "deletedAt": null
+}
+```
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | `institutionName` was sent but blank. |
+| 404 | No such link. |
+
+## <Badge type="danger">DELETE</Badge> Remove a link
+
+Deletes a link and everything hanging off it. This is the destructive one on this page: the
+bank accounts, transactions, spending objects and funding schedules underneath all go with
+it.
+
+The call itself marks the link deleted and hands the rest to a background job, so it returns
+before the cleanup has finished. On a Plaid link it also tells Plaid to release the
+connection, which is why the connection stops costing you anything after this.
+
+**In the app:** Removing a link, behind the confirmation prompt.
+
+```
+DELETE /api/links/:linkId
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `linkId` | string (ulid) | Yes | The link to remove. |
+
+### Example
+
+```bash
+curl --request DELETE \
+  --url "https://my.monetr.local/api/links/link_01j2n8xqvr4kd9wt3m7hbzc5pf" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+Returns 200 with an empty body.
+
+### Errors
+
+| Status | When |
+| --- | --- |
+| 400 | `linkId` is malformed, or the link is already deleted. Calling this twice is an error rather than a no-op, so monetr doesn't ask Plaid to remove the same item twice. |
+| 404 | No such link. |
