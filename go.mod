@@ -4,7 +4,7 @@ go 1.26.0
 
 require (
 	aidanwoods.dev/go-paseto v1.6.0
-	github.com/MicahParks/jwkset v0.11.0
+	github.com/MicahParks/jwkset v0.11.2
 	github.com/MicahParks/keyfunc/v3 v3.8.0
 	github.com/alicebob/miniredis/v2 v2.38.0
 	github.com/aws/aws-sdk-go-v2 v1.42.1
