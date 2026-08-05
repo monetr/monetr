@@ -16,7 +16,7 @@ async function generateOg() {
   // TODO Make this work with woff2 files.
   const fontPath = require.resolve('@fontsource-variable/inter/files/inter-latin-standard-normal.woff2');
   // TODO Since it doesn't work with woff2 files, just use the downloaded files from fontsource for now.
-  const fontData = fs.readFileSync('/home/elliotcourant/Downloads/inter_5.2.8/ttf/inter-latin-400-normal.ttf');
+  const fontData = fs.readFileSync('/home/elliotcourant/Downloads/inter/static/inter-latin-400-normal.ttf');
 
   const logoPath = path.join('images/logo.png');
   const logoBase64 = fs.readFileSync(logoPath).toString('base64');
@@ -106,7 +106,7 @@ async function generateOg() {
                       lineHeight: 1.1,
                       marginBottom: '24px',
                     },
-                    children: `How monetr's similar transactions work`,
+                    children: `API Keys Built on ed25519`,
                   },
                 },
                 {
@@ -117,7 +117,7 @@ async function generateOg() {
                       fontSize: 32,
                       opacity: 0.85,
                     },
-                    children: 'A technical deep-dive into how monetr detects similar transactions offline and without AI.',
+                    children: `monetr now has API credentials, built on ed25519 keypairs instead of hashes, plus a lot of rambling about PATCH mechanics in Golang.`,
                   },
                 },
               ],
@@ -150,8 +150,7 @@ async function generateOg() {
   const pngData = resvg.render().asPng();
 
   const outputPaths = [
-    'docs/public/blog/2025-12-31-similar-transactions/preview.png',
-    'docs/src/pages/blog/2025-12-31-similar-transactions/preview.png',
+    'docs/src/public/v1/en/blog/2026-08-07-api-credentials/preview.png',
   ];
   outputPaths.forEach(outputPath => {
     fs.writeFileSync(outputPath, pngData);
