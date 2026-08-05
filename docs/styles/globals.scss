@@ -1005,3 +1005,12 @@ mark {
 .rp-doc-layout__menu:has(> .rp-sidebar-menu > .rp-sidebar-menu__left:empty + .rp-sidebar-menu__right:empty) {
   display: none;
 }
+
+/* rspress badges are inline-flex, so they baseline off their own line box and
+ * sag a few pixels in a heading. `middle` gets most of that back, the 2px is
+ * the leftover. Translate so it stays visual and the heading height is
+ * unchanged. ToC badges already sit right, hence the heading scope. */
+:is(h1, h2, h3, h4, h5, h6) > .rp-badge {
+  vertical-align: middle;
+  translate: 0 -2px;
+}
