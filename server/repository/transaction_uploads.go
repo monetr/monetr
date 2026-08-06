@@ -18,12 +18,13 @@ func (r *repositoryBase) GetTransactionUpload(
 	defer span.Finish()
 
 	var item TransactionUpload
-	err := r.txn.ModelContext(span.Context(), &item).
+	err := r.txn.NewSelect().
+		Model(&item).
 		Where(`"account_id" = ?`, r.AccountId()).
 		Where(`"bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction_upload_id" = ?`, transactionUploadId).
 		Limit(1).
-		Select(&item)
+		Scan(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve transaction upload")
@@ -47,8 +48,10 @@ func (r *repositoryBase) CreateTransactionUpload(
 	transactionUpload.CreatedAt = r.clock.Now().UTC()
 	transactionUpload.CreatedBy = r.UserId()
 
-	_, err := r.txn.ModelContext(span.Context(), transactionUpload).
-		Insert(transactionUpload)
+	_, err := r.txn.NewInsert().
+		Model(transactionUpload).
+		Returning("*").
+		Exec(span.Context())
 	if err != nil {
 		return errors.Wrap(err, "failed to create transaction upload record")
 	}

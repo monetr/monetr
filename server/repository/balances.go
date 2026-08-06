@@ -10,15 +10,15 @@ import (
 )
 
 type Balances struct {
-	BankAccountId ID[BankAccount] `json:"bankAccountId" pg:"bank_account_id"`
-	AccountId     ID[Account]     `json:"-" pg:"account_id"`
-	Currency      string          `json:"currency" pg:"currency"`
-	Current       int64           `json:"current" pg:"current"`
-	Available     int64           `json:"available" pg:"available"`
-	Limit         int64           `json:"limit" pg:"limit"`
-	Free          int64           `json:"free" pg:"free"`
-	Expenses      int64           `json:"expenses" pg:"expenses"`
-	Goals         int64           `json:"goals" pg:"goals"`
+	BankAccountId ID[BankAccount] `json:"bankAccountId" bun:"bank_account_id"`
+	AccountId     ID[Account]     `json:"-" bun:"account_id"`
+	Currency      string          `json:"currency" bun:"currency"`
+	Current       int64           `json:"current" bun:"current"`
+	Available     int64           `json:"available" bun:"available"`
+	Limit         int64           `json:"limit" bun:"limit"`
+	Free          int64           `json:"free" bun:"free"`
+	Expenses      int64           `json:"expenses" bun:"expenses"`
+	Goals         int64           `json:"goals" bun:"goals"`
 }
 
 func (r *repositoryBase) GetBalances(
@@ -30,7 +30,7 @@ func (r *repositoryBase) GetBalances(
 
 	var balance Balances
 
-	expenseQuery := r.txn.ModelContext(span.Context(), &Spending{}).
+	expenseQuery := r.txn.NewSelect().Model(&Spending{}).
 		ColumnExpr(`"spending"."bank_account_id"`).
 		ColumnExpr(`"spending"."account_id"`).
 		ColumnExpr(`SUM("spending"."current_amount") AS "current_amount"`).
@@ -38,7 +38,7 @@ func (r *repositoryBase) GetBalances(
 		GroupExpr(`"spending"."bank_account_id"`).
 		GroupExpr(`"spending"."account_id"`)
 
-	goalQuery := r.txn.ModelContext(span.Context(), &Spending{}).
+	goalQuery := r.txn.NewSelect().Model(&Spending{}).
 		ColumnExpr(`"spending"."bank_account_id"`).
 		ColumnExpr(`"spending"."account_id"`).
 		ColumnExpr(`SUM("spending"."current_amount") AS "current_amount"`).
@@ -46,7 +46,7 @@ func (r *repositoryBase) GetBalances(
 		GroupExpr(`"spending"."bank_account_id"`).
 		GroupExpr(`"spending"."account_id"`)
 
-	err := r.txn.ModelContext(span.Context(), &BankAccount{}).
+	err := r.txn.NewSelect().Model(&BankAccount{}).
 		With(`expense`, expenseQuery).
 		With(`goal`, goalQuery).
 		ColumnExpr(`"bank_account"."bank_account_id"`).
@@ -69,7 +69,7 @@ func (r *repositoryBase) GetBalances(
 		GroupExpr(`"bank_account"."bank_account_id"`).
 		GroupExpr(`"bank_account"."account_id"`).
 		Limit(1).
-		Select(&balance)
+		Scan(span.Context(), &balance)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve balances")

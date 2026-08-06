@@ -131,7 +131,7 @@ func GivenIHaveNTransactions(t *testing.T, clock clock.Clock, bankAccount BankAc
 
 func AssertThatIHaveZeroTransactions(t *testing.T, accountId ID[Account]) {
 	db := testutils.GetPgDatabase(t)
-	exists, err := db.Model(&Transaction{}).Where(`"transaction"."account_id" = ?`, accountId).Exists()
+	exists, err := db.NewSelect().Model(&Transaction{}).Where(`"transaction"."account_id" = ?`, accountId).Exists(t.Context())
 	require.NoError(t, err, "must be able to query transactions successfully")
 	if exists {
 		panic("account has transactions")
@@ -140,10 +140,10 @@ func AssertThatIHaveZeroTransactions(t *testing.T, accountId ID[Account]) {
 
 func CountNonDeletedTransactions(t *testing.T, accountId ID[Account]) int64 {
 	db := testutils.GetPgDatabase(t)
-	count, err := db.Model(&Transaction{}).
+	count, err := db.NewSelect().Model(&Transaction{}).
 		Where(`"transaction"."account_id" = ?`, accountId).
 		Where(`"transaction"."deleted_at" IS NULL`).
-		Count()
+		Count(t.Context())
 	require.NoError(t, err, "must be able to query transactions successfully")
 
 	return int64(count)
@@ -151,9 +151,9 @@ func CountNonDeletedTransactions(t *testing.T, accountId ID[Account]) int64 {
 
 func CountAllTransactions(t *testing.T, accountId ID[Account]) int64 {
 	db := testutils.GetPgDatabase(t)
-	count, err := db.Model(&Transaction{}).
+	count, err := db.NewSelect().Model(&Transaction{}).
 		Where(`"transaction"."account_id" = ?`, accountId).
-		Count()
+		Count(t.Context())
 	require.NoError(t, err, "must be able to query transactions successfully")
 
 	return int64(count)
@@ -161,11 +161,11 @@ func CountAllTransactions(t *testing.T, accountId ID[Account]) int64 {
 
 func CountPendingTransactions(t *testing.T, accountId ID[Account]) int64 {
 	db := testutils.GetPgDatabase(t)
-	count, err := db.Model(&Transaction{}).
+	count, err := db.NewSelect().Model(&Transaction{}).
 		Where(`"transaction"."account_id" = ?`, accountId).
 		Where(`"transaction"."is_pending" = ?`, true).
 		Where(`"transaction"."deleted_at" IS NULL`).
-		Count()
+		Count(t.Context())
 	require.NoError(t, err, "must be able to query transactions successfully")
 
 	return int64(count)

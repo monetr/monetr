@@ -4,28 +4,28 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-pg/pg/v10"
+	"github.com/uptrace/bun"
 )
 
 type PlaidBankAccount struct {
-	tableName string `pg:"plaid_bank_accounts"`
+	bun.BaseModel `bun:"table:plaid_bank_accounts,alias:plaid_bank_account"`
 
-	PlaidBankAccountId ID[PlaidBankAccount] `json:"-" pg:"plaid_bank_account_id,notnull,pk"`
-	AccountId          ID[Account]          `json:"-" pg:"account_id,notnull,pk"`
-	Account            *Account             `json:"-" pg:"rel:has-one"`
-	PlaidLinkId        ID[PlaidLink]        `json:"-" pg:"plaid_link_id"`
-	PlaidLink          *PlaidLink           `json:"-" pg:"rel:has-one"`
-	PlaidId            string               `json:"-" pg:"plaid_id,notnull"`
-	Name               string               `json:"name" pg:"name,notnull"`
-	OfficialName       string               `json:"officialName" pg:"official_name"`
-	Mask               string               `json:"mask" pg:"mask"`
-	Currency           string               `json:"currency" pg:"currency,notnull"`
-	AvailableBalance   int64                `json:"availableBalance" pg:"available_balance,notnull,use_zero"`
-	CurrentBalance     int64                `json:"currentBalance" pg:"current_balance,notnull,use_zero"`
-	LimitBalance       int64                `json:"limitBalance" pg:"limit_balance,use_zero"`
-	CreatedAt          time.Time            `json:"createdAt" pg:"created_at,notnull"`
-	CreatedBy          ID[User]             `json:"createdBy" pg:"created_by,notnull"`
-	CreatedByUser      *User                `json:"-" pg:"rel:has-one,fk:created_by"`
+	PlaidBankAccountId ID[PlaidBankAccount] `json:"-" bun:"plaid_bank_account_id,notnull,pk"`
+	AccountId          ID[Account]          `json:"-" bun:"account_id,notnull,pk"`
+	Account            *Account             `json:"-" bun:"rel:belongs-to,join:account_id=account_id"`
+	PlaidLinkId        ID[PlaidLink]        `json:"-" bun:"plaid_link_id,nullzero"`
+	PlaidLink          *PlaidLink           `json:"-" bun:"rel:belongs-to,join:plaid_link_id=plaid_link_id"`
+	PlaidId            string               `json:"-" bun:"plaid_id,notnull,nullzero"`
+	Name               string               `json:"name" bun:"name,notnull,nullzero"`
+	OfficialName       string               `json:"officialName" bun:"official_name,nullzero"`
+	Mask               string               `json:"mask" bun:"mask,nullzero"`
+	Currency           string               `json:"currency" bun:"currency,notnull,nullzero"`
+	AvailableBalance   int64                `json:"availableBalance" bun:"available_balance,notnull"`
+	CurrentBalance     int64                `json:"currentBalance" bun:"current_balance,notnull"`
+	LimitBalance       int64                `json:"limitBalance" bun:"limit_balance"`
+	CreatedAt          time.Time            `json:"createdAt" bun:"created_at,notnull,nullzero"`
+	CreatedBy          ID[User]             `json:"createdBy" bun:"created_by,notnull,nullzero"`
+	CreatedByUser      *User                `json:"-" bun:"rel:belongs-to,join:created_by=user_id"`
 }
 
 func (PlaidBankAccount) IdentityPrefix() string {
@@ -33,18 +33,21 @@ func (PlaidBankAccount) IdentityPrefix() string {
 }
 
 var (
-	_ pg.BeforeInsertHook = (*PlaidBankAccount)(nil)
+	_ bun.BeforeAppendModelHook = (*PlaidBankAccount)(nil)
 )
 
-func (o *PlaidBankAccount) BeforeInsert(ctx context.Context) (context.Context, error) {
-	if o.PlaidBankAccountId.IsZero() {
-		o.PlaidBankAccountId = NewID[PlaidBankAccount]()
+func (o *PlaidBankAccount) BeforeAppendModel(ctx context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		if o.PlaidBankAccountId.IsZero() {
+			o.PlaidBankAccountId = NewID[PlaidBankAccount]()
+		}
+
+		now := time.Now()
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = now
+		}
 	}
 
-	now := time.Now()
-	if o.CreatedAt.IsZero() {
-		o.CreatedAt = now
-	}
-
-	return ctx, nil
+	return nil
 }

@@ -6,11 +6,11 @@ import (
 	"io"
 	"time"
 
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/merge"
 	"github.com/monetr/monetr/server/validators"
 	"github.com/monetr/validation"
 	"github.com/pkg/errors"
+	"github.com/uptrace/bun"
 )
 
 type BankAccountType string
@@ -101,57 +101,60 @@ func ParseBankAccountStatus[T string | BankAccountStatus](input T) BankAccountSt
 }
 
 var (
-	_ pg.BeforeInsertHook = (*BankAccount)(nil)
-	_ Identifiable        = BankAccount{}
+	_ bun.BeforeAppendModelHook = (*BankAccount)(nil)
+	_ Identifiable              = BankAccount{}
 )
 
 type BankAccount struct {
-	tableName string `pg:"bank_accounts"`
+	bun.BaseModel `bun:"table:bank_accounts,alias:bank_account"`
 
-	BankAccountId          ID[BankAccount]           `json:"bankAccountId" pg:"bank_account_id,notnull,pk"`
-	AccountId              ID[Account]               `json:"-" pg:"account_id,notnull,pk"`
-	Account                *Account                  `json:"-" pg:"rel:has-one"`
-	LinkId                 ID[Link]                  `json:"linkId" pg:"link_id,notnull"`
-	Link                   *Link                     `json:"-,omitempty" pg:"rel:has-one"`
-	PlaidBankAccountId     *ID[PlaidBankAccount]     `json:"-" pg:"plaid_bank_account_id"`
-	PlaidBankAccount       *PlaidBankAccount         `json:"plaidBankAccount,omitempty" pg:"rel:has-one"`
-	LunchFlowBankAccountId *ID[LunchFlowBankAccount] `json:"lunchFlowBankAccountId" pg:"lunch_flow_bank_account_id"`
-	LunchFlowBankAccount   *LunchFlowBankAccount     `json:"lunchFlowBankAccount,omitempty" pg:"rel:has-one"`
-	Currency               string                    `json:"currency" pg:"currency,notnull"`
-	AvailableBalance       int64                     `json:"availableBalance" pg:"available_balance,notnull,use_zero"`
-	CurrentBalance         int64                     `json:"currentBalance" pg:"current_balance,notnull,use_zero"`
-	LimitBalance           int64                     `json:"limitBalance" pg:"limit_balance,notnull,use_zero"`
-	Mask                   *string                   `json:"mask" pg:"mask"`
-	Name                   string                    `json:"name,omitempty" pg:"name,notnull"`
-	OriginalName           string                    `json:"originalName" pg:"original_name,notnull"`
-	AccountType            BankAccountType           `json:"accountType" pg:"account_type"`
-	AccountSubType         BankAccountSubType        `json:"accountSubType" pg:"account_sub_type"`
-	Status                 BankAccountStatus         `json:"status" pg:"status,notnull"`
-	LastUpdated            time.Time                 `json:"lastUpdated" pg:"last_updated,notnull"`
-	CreatedAt              time.Time                 `json:"createdAt" pg:"created_at,notnull"`
-	UpdatedAt              time.Time                 `json:"updatedAt" pg:"updated_at,notnull"`
-	DeletedAt              *time.Time                `json:"deletedAt,omitempty" pg:"deleted_at"`
+	BankAccountId          ID[BankAccount]           `json:"bankAccountId" bun:"bank_account_id,notnull,pk"`
+	AccountId              ID[Account]               `json:"-" bun:"account_id,notnull,pk"`
+	Account                *Account                  `json:"-" bun:"rel:belongs-to,join:account_id=account_id"`
+	LinkId                 ID[Link]                  `json:"linkId" bun:"link_id,notnull,nullzero"`
+	Link                   *Link                     `json:"-,omitempty" bun:"rel:belongs-to,join:link_id=link_id,join:account_id=account_id"`
+	PlaidBankAccountId     *ID[PlaidBankAccount]     `json:"-" bun:"plaid_bank_account_id"`
+	PlaidBankAccount       *PlaidBankAccount         `json:"plaidBankAccount,omitempty" bun:"rel:belongs-to,join:plaid_bank_account_id=plaid_bank_account_id,join:account_id=account_id"`
+	LunchFlowBankAccountId *ID[LunchFlowBankAccount] `json:"lunchFlowBankAccountId" bun:"lunch_flow_bank_account_id"`
+	LunchFlowBankAccount   *LunchFlowBankAccount     `json:"lunchFlowBankAccount,omitempty" bun:"rel:belongs-to,join:lunch_flow_bank_account_id=lunch_flow_bank_account_id,join:account_id=account_id"`
+	Currency               string                    `json:"currency" bun:"currency,notnull,nullzero"`
+	AvailableBalance       int64                     `json:"availableBalance" bun:"available_balance,notnull"`
+	CurrentBalance         int64                     `json:"currentBalance" bun:"current_balance,notnull"`
+	LimitBalance           int64                     `json:"limitBalance" bun:"limit_balance,notnull"`
+	Mask                   *string                   `json:"mask" bun:"mask"`
+	Name                   string                    `json:"name,omitempty" bun:"name,notnull,nullzero"`
+	OriginalName           string                    `json:"originalName" bun:"original_name,notnull,nullzero"`
+	AccountType            BankAccountType           `json:"accountType" bun:"account_type,nullzero"`
+	AccountSubType         BankAccountSubType        `json:"accountSubType" bun:"account_sub_type,nullzero"`
+	Status                 BankAccountStatus         `json:"status" bun:"status,notnull,nullzero"`
+	LastUpdated            time.Time                 `json:"lastUpdated" bun:"last_updated,notnull,nullzero"`
+	CreatedAt              time.Time                 `json:"createdAt" bun:"created_at,notnull,nullzero"`
+	UpdatedAt              time.Time                 `json:"updatedAt" bun:"updated_at,notnull,nullzero"`
+	DeletedAt              *time.Time                `json:"deletedAt,omitempty" bun:"deleted_at"`
 }
 
 func (BankAccount) IdentityPrefix() string {
 	return "bac"
 }
 
-func (o *BankAccount) BeforeInsert(ctx context.Context) (context.Context, error) {
-	if o.BankAccountId.IsZero() {
-		o.BankAccountId = NewID[BankAccount]()
+func (o *BankAccount) BeforeAppendModel(ctx context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		if o.BankAccountId.IsZero() {
+			o.BankAccountId = NewID[BankAccount]()
+		}
+
+		now := time.Now()
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = now
+		}
+
+		if o.UpdatedAt.IsZero() {
+			o.UpdatedAt = now
+		}
 	}
 
-	now := time.Now()
-	if o.CreatedAt.IsZero() {
-		o.CreatedAt = now
-	}
-
-	if o.UpdatedAt.IsZero() {
-		o.UpdatedAt = now
-	}
-
-	return ctx, nil
+	return nil
 }
 
 // UpdateValidator returns an array of validation rules that can be used to

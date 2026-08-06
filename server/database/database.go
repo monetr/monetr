@@ -5,40 +5,49 @@ import (
 	"crypto/rand"
 	"crypto/tls"
 	"crypto/x509"
+	"database/sql"
 	"net"
 	"os"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strconv"
 	"time"
 
 	"log/slog"
 
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/certhelper"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/metrics"
 	"github.com/monetr/monetr/server/migrations"
 	"github.com/pkg/errors"
+	"github.com/uptrace/bun"
+	"github.com/uptrace/bun/dialect/pgdialect"
+	"github.com/uptrace/bun/driver/pgdriver"
 )
 
 func GetDatabase(
 	log *slog.Logger,
 	configuration config.Configuration,
 	stats *metrics.Stats,
-) (*pg.DB, error) {
-	pg.SetLogger(logging.NewPGLogger(log))
-	pgOptions := &pg.Options{
-		Addr: net.JoinHostPort(
+) (*bun.DB, error) {
+	options := []pgdriver.Option{
+		pgdriver.WithNetwork("tcp"),
+		pgdriver.WithAddr(net.JoinHostPort(
 			configuration.PostgreSQL.Address,
 			strconv.Itoa(configuration.PostgreSQL.Port),
-		),
-		User:            configuration.PostgreSQL.Username,
-		Password:        configuration.PostgreSQL.Password,
-		Database:        configuration.PostgreSQL.Database,
-		ApplicationName: "monetr",
-		MaxConnAge:      9 * time.Minute,
+		)),
+		pgdriver.WithUser(configuration.PostgreSQL.Username),
+		pgdriver.WithPassword(configuration.PostgreSQL.Password),
+		pgdriver.WithDatabase(configuration.PostgreSQL.Database),
+		pgdriver.WithApplicationName("monetr"),
+		// go-pg did not apply socket timeouts by default; pgdriver does. Keep
+		// the old behavior, long running things like migrations rely on it.
+		pgdriver.WithReadTimeout(0),
+		pgdriver.WithWriteTimeout(0),
+		// No TLS unless a CA certificate is configured below, same as go-pg.
+		pgdriver.WithInsecure(true),
 	}
 
 	var tlsConfiguration *tls.Config
@@ -80,17 +89,17 @@ func GetDatabase(
 			}
 		}
 
-		pgOptions.TLSConfig = tlsConfiguration
-		pgOptions.OnConnect = func(ctx context.Context, _ *pg.Conn) error {
-			if tlsConfiguration != nil {
-				log.Log(ctx, logging.LevelTrace, "new connection with cert")
-			}
-
-			return nil
-		}
+		options = append(options, pgdriver.WithTLSConfig(tlsConfiguration))
 	}
 
-	db := pg.Connect(pgOptions)
+	connector := pgdriver.NewConnector(options...)
+	sqldb := sql.OpenDB(connector)
+	// Mirror go-pg's connection pool defaults.
+	sqldb.SetMaxOpenConns(10 * runtime.NumCPU())
+	sqldb.SetConnMaxIdleTime(5 * time.Minute)
+	sqldb.SetConnMaxLifetime(9 * time.Minute)
+
+	db := bun.NewDB(sqldb, pgdialect.New())
 	db.AddQueryHook(logging.NewPostgresHooks(log, stats))
 	if configuration.PostgreSQL.CACertificatePath != "" {
 		paths := make([]string, 0, 3)
@@ -152,7 +161,10 @@ func GetDatabase(
 					}
 				}
 
-				db.Options().TLSConfig = tlsConfig
+				// Future connections will be established with the new TLS
+				// configuration; existing connections are unaffected, matching the
+				// old go-pg behavior of swapping Options().TLSConfig.
+				connector.Config().TLSConfig = tlsConfig
 
 				log.DebugContext(context.Background(), "successfully swapped ca certificate")
 
@@ -168,7 +180,7 @@ func GetDatabase(
 		defer watchCertificate.Stop()
 	}
 
-	if err := db.Ping(context.Background()); err != nil {
+	if err := db.PingContext(context.Background()); err != nil {
 		return db, errors.Wrap(err, "failed to ping postgresql")
 	}
 

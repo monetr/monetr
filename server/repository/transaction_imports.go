@@ -18,12 +18,13 @@ func (r *repositoryBase) GetTransactionImport(
 	defer span.Finish()
 
 	var item TransactionImport
-	err := r.txn.ModelContext(span.Context(), &item).
+	err := r.txn.NewSelect().
+		Model(&item).
 		Where(`"account_id" = ?`, r.AccountId()).
 		Where(`"bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction_import_id" = ?`, transactionImportId).
 		Limit(1).
-		Select(&item)
+		Scan(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve transaction import")
@@ -47,8 +48,10 @@ func (r *repositoryBase) CreateTransactionImport(
 	transactionImport.CreatedAt = r.clock.Now().UTC()
 	transactionImport.CreatedBy = r.UserId()
 
-	_, err := r.txn.ModelContext(span.Context(), transactionImport).
-		Insert(transactionImport)
+	_, err := r.txn.NewInsert().
+		Model(transactionImport).
+		Returning("*").
+		Exec(span.Context())
 	if err != nil {
 		return errors.Wrap(err, "failed to create transaction import record")
 	}
@@ -71,9 +74,11 @@ func (r *repositoryBase) UpdateTransactionImport(
 	transactionImport.BankAccountId = bankAccountId
 	transactionImport.UpdatedAt = r.clock.Now().UTC()
 
-	_, err := r.txn.ModelContext(span.Context(), transactionImport).
+	_, err := r.txn.NewUpdate().
+		Model(transactionImport).
 		WherePK().
-		Update(transactionImport)
+		Returning("*").
+		Exec(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to update transaction import")

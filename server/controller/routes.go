@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 	"github.com/monetr/monetr/server/internal/ctxkeys"
@@ -18,13 +17,14 @@ import (
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
+	"github.com/uptrace/bun"
 )
 
 func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	if false {
 		app.Use(middleware.ContextTimeoutWithConfig(middleware.ContextTimeoutConfig{
 			ErrorHandler: func(ctx *echo.Context, err error) error {
-				txn, ok := ctx.Get(databaseContextKey).(*pg.Tx)
+				txn, ok := ctx.Get(databaseContextKey).(bun.Tx)
 				if ok {
 					log := c.getLog(ctx)
 					log.WarnContext(c.getContext(ctx), "request timed out, rolling back transaction", "err", err)

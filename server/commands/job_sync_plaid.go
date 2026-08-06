@@ -79,10 +79,11 @@ func jobSyncPlaid(parent *cobra.Command) {
 				jobs = append(jobs, jobArgs)
 			} else {
 				var links []models.Link
-				db.Model(&links).
+				db.NewSelect().
+					Model(&links).
 					Where(`"link"."link_type" = ?`, models.PlaidLinkType).
 					Where(`"link"."plaid_link_id" IS NOT NULL`).
-					Select(&links)
+					Scan(ctx)
 				for _, link := range links {
 					jobs = append(jobs, plaid_jobs.SyncPlaidArguments{
 						AccountId: link.AccountId,
@@ -96,7 +97,7 @@ func jobSyncPlaid(parent *cobra.Command) {
 
 			for _, jobArgs := range jobs {
 				if arguments.Local || arguments.DryRun {
-					txn, err := db.BeginContext(ctx)
+					txn, err := db.BeginTx(ctx, nil)
 					if err != nil {
 						log.Error("failed to begin transaction to cleanup jobs", "err", err)
 						return err
@@ -123,15 +124,15 @@ func jobSyncPlaid(parent *cobra.Command) {
 						jobArgs,
 					); err != nil {
 						log.Error("failed to run sync latest transactions", "err", err)
-						_ = txn.RollbackContext(ctx)
+						_ = txn.Rollback()
 						continue
 					}
 
 					if arguments.DryRun {
 						log.Info("dry run... rolling changes back")
-						return txn.RollbackContext(ctx)
+						return txn.Rollback()
 					} else {
-						return txn.CommitContext(ctx)
+						return txn.Commit()
 					}
 				} else {
 					jobQueue := queue.NewPostgresQueue(

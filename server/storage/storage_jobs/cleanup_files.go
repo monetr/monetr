@@ -11,10 +11,10 @@ func CleanupFilesCron(ctx queue.Context) error {
 	log.DebugContext(ctx, "looking for expired files that need to be removed")
 
 	var expiredFiles []models.File
-	if err := ctx.DB().ModelContext(ctx, &expiredFiles).
+	if err := ctx.DB().NewSelect().Model(&expiredFiles).
 		Where(`"expires_at" < ?`, ctx.Clock().Now()).
 		Where(`"reconciled_at" IS NULL`).
-		Select(&expiredFiles); err != nil {
+		Scan(ctx); err != nil {
 		log.ErrorContext(ctx, "failed to retrieve expired filed", "err", err)
 		return err
 	}

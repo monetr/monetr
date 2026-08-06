@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
+	"github.com/uptrace/bun"
 )
 
 // TransactionImportStatus covers all of the different states of a transaction
@@ -34,25 +35,25 @@ const (
 )
 
 type TransactionImport struct {
-	tableName string `pg:"transaction_imports"`
+	bun.BaseModel `bun:"table:transaction_imports,alias:transaction_import"`
 
-	TransactionImportId        ID[TransactionImport]         `json:"transactionImportId" pg:"transaction_import_id,notnull,pk"`
-	AccountId                  ID[Account]                   `json:"-" pg:"account_id,notnull,pk"`
-	Account                    *Account                      `json:"-" pg:"rel:has-one"`
-	BankAccountId              ID[BankAccount]               `json:"bankAccountId" pg:"bank_account_id,notnull,pk"`
-	BankAccount                *BankAccount                  `json:"-" pg:"rel:has-one"`
-	FileId                     ID[File]                      `json:"fileId" pg:"file_id,notnull"`
-	File                       *File                         `json:"file,omitempty" pg:"rel:has-one"`
-	TransactionImportMappingId *ID[TransactionImportMapping] `json:"transactionImportMappingId" pg:"transaction_import_mapping_id"`
-	TransactionImportMapping   *TransactionImportMapping     `json:"transactionImportMapping,omitempty" pg:"rel:has-one"`
-	Headers                    []string                      `json:"headers" pg:"headers,notnull,type:'text[]'"`
-	Delimeter                  string                        `json:"delimeter" pg:"delimeter,notnull"`
-	Status                     TransactionImportStatus       `json:"status" pg:"status,notnull"`
-	CreatedAt                  time.Time                     `json:"createdAt" pg:"created_at,notnull"`
-	UpdatedAt                  time.Time                     `json:"updatedAt" pg:"updated_at,notnull"`
-	CompletedAt                *time.Time                    `json:"completedAt" pg:"completed_at"`
-	CreatedBy                  ID[User]                      `json:"createdBy" pg:"created_by,notnull"`
-	CreatedByUser              *User                         `json:"-" pg:"rel:has-one,fk:created_by"`
+	TransactionImportId        ID[TransactionImport]         `json:"transactionImportId" bun:"transaction_import_id,notnull,pk"`
+	AccountId                  ID[Account]                   `json:"-" bun:"account_id,notnull,pk"`
+	Account                    *Account                      `json:"-" bun:"rel:belongs-to,join:account_id=account_id"`
+	BankAccountId              ID[BankAccount]               `json:"bankAccountId" bun:"bank_account_id,notnull,pk"`
+	BankAccount                *BankAccount                  `json:"-" bun:"rel:belongs-to,join:bank_account_id=bank_account_id,join:account_id=account_id"`
+	FileId                     ID[File]                      `json:"fileId" bun:"file_id,notnull,nullzero"`
+	File                       *File                         `json:"file,omitempty" bun:"rel:belongs-to,join:file_id=file_id,join:account_id=account_id"`
+	TransactionImportMappingId *ID[TransactionImportMapping] `json:"transactionImportMappingId" bun:"transaction_import_mapping_id"`
+	TransactionImportMapping   *TransactionImportMapping     `json:"transactionImportMapping,omitempty" bun:"rel:belongs-to,join:transaction_import_mapping_id=transaction_import_mapping_id,join:account_id=account_id"`
+	Headers                    []string                      `json:"headers" bun:"headers,notnull,array,nullzero"`
+	Delimeter                  string                        `json:"delimeter" bun:"delimeter,notnull,nullzero"`
+	Status                     TransactionImportStatus       `json:"status" bun:"status,notnull,nullzero"`
+	CreatedAt                  time.Time                     `json:"createdAt" bun:"created_at,notnull,nullzero"`
+	UpdatedAt                  time.Time                     `json:"updatedAt" bun:"updated_at,notnull,nullzero"`
+	CompletedAt                *time.Time                    `json:"completedAt" bun:"completed_at"`
+	CreatedBy                  ID[User]                      `json:"createdBy" bun:"created_by,notnull,nullzero"`
+	CreatedByUser              *User                         `json:"-" bun:"rel:belongs-to,join:created_by=user_id"`
 }
 
 func (TransactionImport) FileKind() string {
@@ -70,18 +71,21 @@ func (TransactionImport) IdentityPrefix() string {
 	return "txim"
 }
 
-func (o *TransactionImport) BeforeInsert(ctx context.Context) (context.Context, error) {
-	if o.TransactionImportId.IsZero() {
-		o.TransactionImportId = NewID[TransactionImport]()
+func (o *TransactionImport) BeforeAppendModel(ctx context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		if o.TransactionImportId.IsZero() {
+			o.TransactionImportId = NewID[TransactionImport]()
+		}
+
+		now := time.Now()
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = now
+		}
+		if o.UpdatedAt.IsZero() {
+			o.UpdatedAt = now
+		}
 	}
 
-	now := time.Now()
-	if o.CreatedAt.IsZero() {
-		o.CreatedAt = now
-	}
-	if o.UpdatedAt.IsZero() {
-		o.UpdatedAt = now
-	}
-
-	return ctx, nil
+	return nil
 }

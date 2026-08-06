@@ -18,13 +18,13 @@ func (r *repositoryBase) GetLink(
 	span.SetData("linkId", linkId)
 
 	var link Link
-	err := r.txn.ModelContext(span.Context(), &link).
+	err := r.txn.NewSelect().Model(&link).
 		Relation("PlaidLink").
 		Relation("LunchFlowLink").
 		Where(`"link"."account_id" = ?`, r.AccountId()).
 		Where(`"link"."link_id" = ?`, linkId).
 		Limit(1).
-		Select(&link)
+		Scan(span.Context())
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get link")
 	}
@@ -37,12 +37,12 @@ func (r *repositoryBase) GetLinks(ctx context.Context) ([]Link, error) {
 	defer span.Finish()
 
 	result := make([]Link, 0)
-	err := r.txn.ModelContext(span.Context(), &result).
+	err := r.txn.NewSelect().Model(&result).
 		Relation("PlaidLink").
 		Relation("LunchFlowLink").
 		Where(`"link"."account_id" = ?`, r.accountId).
 		Where(`"link"."deleted_at" IS NULL`).
-		Select(&result)
+		Scan(span.Context())
 	if err != nil {
 		return nil, crumbs.WrapError(span.Context(), err, "failed to retrieve links")
 	}
@@ -54,11 +54,11 @@ func (r *repositoryBase) GetNumberOfPlaidLinks(ctx context.Context) (int, error)
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	count, err := r.txn.ModelContext(span.Context(), &Link{}).
+	count, err := r.txn.NewSelect().Model(&Link{}).
 		Where(`"link"."account_id" = ?`, r.accountId).
 		Where(`"link"."link_type" = ?`, PlaidLinkType).
 		Where(`"link"."deleted_at" IS NULL`).
-		Count()
+		Count(span.Context())
 	if err != nil {
 		return count, crumbs.WrapError(span.Context(), err, "failed to retrieve links")
 	}
@@ -74,14 +74,14 @@ func (r *repositoryBase) GetLinkIsManualByBankAccountId(
 	defer span.Finish()
 	span.SetData("bankAccountId", bankAccountId)
 
-	ok, err := r.txn.ModelContext(span.Context(), &Link{}).
+	ok, err := r.txn.NewSelect().Model(&Link{}).
 		Join(`INNER JOIN "bank_accounts" AS "bank_account"`).
 		JoinOn(`"bank_account"."link_id" = "link"."link_id" AND "bank_account"."account_id" = "link"."account_id"`).
 		Where(`"link"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."bank_account_id" = ?`, bankAccountId).
 		Where(`"link"."link_type" = ?`, ManualLinkType).
 		Where(`"link"."deleted_at" IS NULL`).
-		Exists()
+		Exists(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return false, crumbs.WrapError(span.Context(), err, "failed to get link by bank account Id")
@@ -103,7 +103,7 @@ func (r *repositoryBase) CreateLink(ctx context.Context, link *Link) error {
 	link.CreatedAt = now
 	link.UpdatedAt = now
 
-	_, err := r.txn.ModelContext(span.Context(), link).Insert(link)
+	_, err := r.txn.NewInsert().Model(link).Returning("*").Exec(span.Context())
 	return errors.Wrap(err, "failed to insert link")
 }
 
@@ -114,9 +114,9 @@ func (r *repositoryBase) UpdateLink(ctx context.Context, link *Link) error {
 	link.AccountId = r.AccountId()
 	link.UpdatedAt = r.clock.Now().UTC()
 
-	_, err := r.txn.ModelContext(span.Context(), link).
+	_, err := r.txn.NewUpdate().Model(link).
 		WherePK().
 		Returning(`*`).
-		Update(link)
+		Exec(span.Context())
 	return errors.Wrap(err, "failed to update link")
 }

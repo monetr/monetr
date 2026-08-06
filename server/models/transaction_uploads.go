@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
-	"github.com/go-pg/pg/v10"
+	"github.com/uptrace/bun"
 )
 
 type TransactionUploadStatus string
@@ -18,27 +18,27 @@ const (
 )
 
 var (
-	_ pg.BeforeInsertHook = (*TransactionUpload)(nil)
-	_ Identifiable        = TransactionUpload{}
+	_ bun.BeforeAppendModelHook = (*TransactionUpload)(nil)
+	_ Identifiable              = TransactionUpload{}
 )
 
 type TransactionUpload struct {
-	tableName string `pg:"transaction_uploads"`
+	bun.BaseModel `bun:"table:transaction_uploads,alias:transaction_upload"`
 
-	TransactionUploadId ID[TransactionUpload]   `json:"transactionUploadId" pg:"transaction_upload_id,notnull,pk"`
-	AccountId           ID[Account]             `json:"-" pg:"account_id,notnull,pk"`
-	Account             *Account                `json:"-" pg:"rel:has-one"`
-	BankAccountId       ID[BankAccount]         `json:"bankAccountId" pg:"bank_account_id,notnull"`
-	BankAccount         *BankAccount            `json:"-" pg:"rel:has-one"`
-	FileId              ID[File]                `json:"fileId" pg:"file_id,notnull"`
-	File                *File                   `json:"file,omitempty" pg:"rel:has-one"`
-	Status              TransactionUploadStatus `json:"status" pg:"status,notnull"`
-	Error               *string                 `json:"error,omitempty" pg:"error"`
-	CreatedAt           time.Time               `json:"createdAt" pg:"created_at,notnull"`
-	CreatedBy           ID[User]                `json:"createdBy" pg:"created_by,notnull"`
-	CreatedByUser       *User                   `json:"-" pg:"rel:has-one,fk:created_by"`
-	ProcessedAt         *time.Time              `json:"processedAt" pg:"processed_at"`
-	CompletedAt         *time.Time              `json:"completedAt" pg:"completed_at"`
+	TransactionUploadId ID[TransactionUpload]   `json:"transactionUploadId" bun:"transaction_upload_id,notnull,pk"`
+	AccountId           ID[Account]             `json:"-" bun:"account_id,notnull,pk"`
+	Account             *Account                `json:"-" bun:"rel:belongs-to,join:account_id=account_id"`
+	BankAccountId       ID[BankAccount]         `json:"bankAccountId" bun:"bank_account_id,notnull,nullzero"`
+	BankAccount         *BankAccount            `json:"-" bun:"rel:belongs-to,join:bank_account_id=bank_account_id,join:account_id=account_id"`
+	FileId              ID[File]                `json:"fileId" bun:"file_id,notnull,nullzero"`
+	File                *File                   `json:"file,omitempty" bun:"rel:belongs-to,join:file_id=file_id,join:account_id=account_id"`
+	Status              TransactionUploadStatus `json:"status" bun:"status,notnull,nullzero"`
+	Error               *string                 `json:"error,omitempty" bun:"error"`
+	CreatedAt           time.Time               `json:"createdAt" bun:"created_at,notnull,nullzero"`
+	CreatedBy           ID[User]                `json:"createdBy" bun:"created_by,notnull,nullzero"`
+	CreatedByUser       *User                   `json:"-" bun:"rel:belongs-to,join:created_by=user_id"`
+	ProcessedAt         *time.Time              `json:"processedAt" bun:"processed_at"`
+	CompletedAt         *time.Time              `json:"completedAt" bun:"completed_at"`
 }
 
 func (TransactionUpload) FileKind() string {
@@ -56,15 +56,18 @@ func (TransactionUpload) IdentityPrefix() string {
 	return "txup"
 }
 
-func (o *TransactionUpload) BeforeInsert(ctx context.Context) (context.Context, error) {
-	if o.TransactionUploadId.IsZero() {
-		o.TransactionUploadId = NewID[TransactionUpload]()
+func (o *TransactionUpload) BeforeAppendModel(ctx context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		if o.TransactionUploadId.IsZero() {
+			o.TransactionUploadId = NewID[TransactionUpload]()
+		}
+
+		now := time.Now()
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = now
+		}
 	}
 
-	now := time.Now()
-	if o.CreatedAt.IsZero() {
-		o.CreatedAt = now
-	}
-
-	return ctx, nil
+	return nil
 }

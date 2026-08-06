@@ -2,11 +2,11 @@ package controller
 
 import (
 	"context"
+	"database/sql"
 	"net/http"
 	"strings"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
 	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/ctxkeys"
@@ -15,6 +15,7 @@ import (
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
+	"github.com/uptrace/bun"
 )
 
 const (
@@ -28,7 +29,7 @@ const (
 func (c *Controller) databaseRepositoryMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx *echo.Context) error {
 		var cleanup func()
-		var dbi pg.DBI
+		var dbi bun.IDB
 		var handlerError error
 		switch strings.ToUpper(ctx.Request().Method) {
 		case "GET", "OPTIONS":
@@ -42,7 +43,7 @@ func (c *Controller) databaseRepositoryMiddleware(next echo.HandlerFunc) echo.Ha
 			}
 			fallthrough
 		case "PATCH", "PUT", "DELETE":
-			txn, err := c.DB.BeginContext(c.getContext(ctx))
+			txn, err := c.DB.BeginTx(c.getContext(ctx), nil)
 			if err != nil {
 				c.Log.ErrorContext(c.getContext(ctx), "failed to begin transaction", "err", err)
 				return c.wrapAndReturnError(
@@ -56,11 +57,11 @@ func (c *Controller) databaseRepositoryMiddleware(next echo.HandlerFunc) echo.Ha
 			cleanup = func() {
 				panicErr := recover()
 				if handlerError != nil || panicErr != nil {
-					if err := txn.RollbackContext(c.getContext(ctx)); err != nil {
+					if err := txn.Rollback(); err != nil {
 						c.Log.ErrorContext(c.getContext(ctx), "failed to rollback request", "err", err)
 					}
 				} else {
-					if err := txn.CommitContext(c.getContext(ctx)); err != nil {
+					if err := txn.Commit(); err != nil {
 						panic(err)
 					}
 				}
@@ -165,7 +166,7 @@ func (c *Controller) maybeApiKeyMiddleware(next echo.HandlerFunc) echo.HandlerFu
 			switch {
 			case err == nil:
 				// Keep going, we found a key for this Id.
-			case errors.Is(err, pg.ErrNoRows):
+			case errors.Is(err, sql.ErrNoRows):
 				// There is no key with this Id, the credentials are definitively bad.
 				log.WarnContext(
 					c.getContext(ctx),

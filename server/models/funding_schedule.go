@@ -5,29 +5,29 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/util"
+	"github.com/uptrace/bun"
 )
 
 type FundingSchedule struct {
-	tableName string `pg:"funding_schedules"`
+	bun.BaseModel `bun:"table:funding_schedules,alias:funding_schedule"`
 
-	FundingScheduleId      ID[FundingSchedule] `json:"fundingScheduleId" pg:"funding_schedule_id,notnull,pk"`
-	AccountId              ID[Account]         `json:"-" pg:"account_id,notnull,pk"`
-	Account                *Account            `json:"-" pg:"rel:has-one"`
-	BankAccountId          ID[BankAccount]     `json:"bankAccountId" pg:"bank_account_id,notnull,pk,unique:per_bank"`
-	BankAccount            *BankAccount        `json:"bankAccount,omitempty" pg:"rel:has-one"`
-	Name                   string              `json:"name" pg:"name,notnull,unique:per_bank"`
-	Description            string              `json:"description,omitempty" pg:"description"`
-	RuleSet                *RuleSet            `json:"ruleset" pg:"ruleset,notnull,type:'text'"`
-	ExcludeWeekends        bool                `json:"excludeWeekends" pg:"exclude_weekends,notnull,use_zero"`
-	WaitForDeposit         bool                `json:"waitForDeposit" pg:"wait_for_deposit,notnull,use_zero"`
-	AutoCreateTransaction  bool                `json:"autoCreateTransaction" pg:"auto_create_transaction,notnull,use_zero"`
-	EstimatedDeposit       *int64              `json:"estimatedDeposit" pg:"estimated_deposit"`
-	LastRecurrence         *time.Time          `json:"lastRecurrence" pg:"last_recurrence"`
-	NextRecurrence         time.Time           `json:"nextRecurrence" pg:"next_recurrence,notnull"`
-	NextRecurrenceOriginal time.Time           `json:"nextRecurrenceOriginal" pg:"next_recurrence_original,notnull"`
+	FundingScheduleId      ID[FundingSchedule] `json:"fundingScheduleId" bun:"funding_schedule_id,notnull,pk"`
+	AccountId              ID[Account]         `json:"-" bun:"account_id,notnull,pk"`
+	Account                *Account            `json:"-" bun:"rel:belongs-to,join:account_id=account_id"`
+	BankAccountId          ID[BankAccount]     `json:"bankAccountId" bun:"bank_account_id,notnull,pk,unique:per_bank"`
+	BankAccount            *BankAccount        `json:"bankAccount,omitempty" bun:"rel:belongs-to,join:bank_account_id=bank_account_id,join:account_id=account_id"`
+	Name                   string              `json:"name" bun:"name,notnull,unique:per_bank,nullzero"`
+	Description            string              `json:"description,omitempty" bun:"description,nullzero"`
+	RuleSet                *RuleSet            `json:"ruleset" bun:"ruleset,notnull,type:text"`
+	ExcludeWeekends        bool                `json:"excludeWeekends" bun:"exclude_weekends,notnull"`
+	WaitForDeposit         bool                `json:"waitForDeposit" bun:"wait_for_deposit,notnull"`
+	AutoCreateTransaction  bool                `json:"autoCreateTransaction" bun:"auto_create_transaction,notnull"`
+	EstimatedDeposit       *int64              `json:"estimatedDeposit" bun:"estimated_deposit"`
+	LastRecurrence         *time.Time          `json:"lastRecurrence" bun:"last_recurrence"`
+	NextRecurrence         time.Time           `json:"nextRecurrence" bun:"next_recurrence,notnull,nullzero"`
+	NextRecurrenceOriginal time.Time           `json:"nextRecurrenceOriginal" bun:"next_recurrence_original,notnull,nullzero"`
 }
 
 func (FundingSchedule) IdentityPrefix() string {
@@ -35,15 +35,18 @@ func (FundingSchedule) IdentityPrefix() string {
 }
 
 var (
-	_ pg.BeforeInsertHook = (*FundingSchedule)(nil)
+	_ bun.BeforeAppendModelHook = (*FundingSchedule)(nil)
 )
 
-func (o *FundingSchedule) BeforeInsert(ctx context.Context) (context.Context, error) {
-	if o.FundingScheduleId.IsZero() {
-		o.FundingScheduleId = NewID[FundingSchedule]()
+func (o *FundingSchedule) BeforeAppendModel(ctx context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		if o.FundingScheduleId.IsZero() {
+			o.FundingScheduleId = NewID[FundingSchedule]()
+		}
 	}
 
-	return ctx, nil
+	return nil
 }
 
 // Deprecated: Use the forecasting package funding instructions interface

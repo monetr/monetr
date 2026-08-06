@@ -2,14 +2,15 @@ package controller
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"net/http"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
 	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/pkg/errors"
+	pgdriver "github.com/uptrace/bun/driver/pgdriver"
 )
 
 // apiResponseError carries an HTTP status code and a response body that should
@@ -45,7 +46,7 @@ func (e *apiResponseError) Unwrap() error {
 // given. If it cannot infer a status code, an InternalServerError is used.
 func (c *Controller) wrapPgError(ctx *echo.Context, err error, msg string, args ...any) error {
 	switch errors.Cause(err) {
-	case pg.ErrNoRows:
+	case sql.ErrNoRows:
 		friendlyError := fmt.Sprintf("%s: record does not exist", fmt.Sprintf(msg, args...))
 
 		crumbs.Error(
@@ -63,7 +64,7 @@ func (c *Controller) wrapPgError(ctx *echo.Context, err error, msg string, args 
 		).Wrap(err)
 	default:
 		switch actualErr := errors.Cause(err).(type) {
-		case pg.Error:
+		case pgdriver.Error:
 			status, cleanedErr := c.sanitizePgError(actualErr)
 			switch status {
 			case http.StatusInternalServerError:
@@ -82,7 +83,7 @@ func (c *Controller) wrapPgError(ctx *echo.Context, err error, msg string, args 
 	}
 }
 
-func (*Controller) sanitizePgError(err pg.Error) (int, error) {
+func (*Controller) sanitizePgError(err pgdriver.Error) (int, error) {
 	switch err.Field(67) {
 	case "23505": // Duplicate
 		// TODO Return actual duplicate information in this error.

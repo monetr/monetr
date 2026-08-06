@@ -1,12 +1,16 @@
 package models
 
-type PlaidToken struct {
-	tableName string `pg:"plaid_tokens"`
+import (
+	"github.com/uptrace/bun"
+)
 
-	ItemId      string   `pg:"item_id,notnull"`
-	AccountId   uint64   `pg:"account_id,notnull"`
-	Account     *Account `pg:"rel:has-one"`
-	KeyID       *string  `pg:"key_id"`
-	Version     *string  `pg:"version"`
-	AccessToken string   `pg:"access_token,notnull"`
+type PlaidToken struct {
+	bun.BaseModel `bun:"table:plaid_tokens,alias:plaid_token"`
+
+	ItemId      string   `bun:"item_id,notnull,nullzero"`
+	AccountId   uint64   `bun:"account_id,notnull,nullzero"`
+	Account     *Account `bun:"rel:belongs-to,join:account_id=account_id"`
+	KeyID       *string  `bun:"key_id"`
+	Version     *string  `bun:"version"`
+	AccessToken string   `bun:"access_token,notnull,nullzero"`
 }

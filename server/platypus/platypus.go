@@ -12,7 +12,6 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
@@ -22,6 +21,7 @@ import (
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/v45/plaid"
+	"github.com/uptrace/bun"
 )
 
 //go:generate go run go.uber.org/mock/mockgen@v0.6.0 -source=platypus.go -package=mockgen -destination=../internal/mockgen/platypus.go Platypus
@@ -72,7 +72,7 @@ func NewPlaid(
 	log *slog.Logger,
 	clock clock.Clock,
 	kms secrets.KeyManagement,
-	db pg.DBI,
+	db bun.IDB,
 	options config.Plaid,
 ) *Plaid {
 	httpClient := &http.Client{
@@ -148,7 +148,7 @@ func NewPlaid(
 type Plaid struct {
 	clock  clock.Clock
 	client *plaid.APIClient
-	db     pg.DBI
+	db     bun.IDB
 	log    *slog.Logger
 	kms    secrets.KeyManagement
 	repo   repository.PlaidRepository

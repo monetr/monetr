@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
+	"github.com/uptrace/bun"
 )
 
 type JobRepository interface {
@@ -21,34 +21,34 @@ type JobRepository interface {
 }
 
 type ProcessFundingSchedulesItem struct {
-	AccountId          ID[Account]           `pg:"account_id"`
-	BankAccountId      ID[BankAccount]       `pg:"bank_account_id"`
-	FundingScheduleIds []ID[FundingSchedule] `pg:"funding_schedule_ids,type:varchar(32)[]"`
+	AccountId          ID[Account]           `bun:"account_id"`
+	BankAccountId      ID[BankAccount]       `bun:"bank_account_id"`
+	FundingScheduleIds []ID[FundingSchedule] `bun:"funding_schedule_ids,array"`
 }
 
 type CheckingPendingTransactionsItem struct {
-	AccountId ID[Account] `pg:"account_id"`
-	LinkId    ID[Link]    `pg:"link_id"`
+	AccountId ID[Account] `bun:"account_id"`
+	LinkId    ID[Link]    `bun:"link_id"`
 }
 
 type PlaidLinksForAccount struct {
-	tableName string `pg:"links"`
+	bun.BaseModel `bun:"table:links,alias:plaid_links_for_account"`
 
-	AccountId ID[Account] `pg:"account_id"`
-	LinkIds   []ID[Link]  `pg:"link_ids,type:varchar(32)[]"`
+	AccountId ID[Account] `bun:"account_id"`
+	LinkIds   []ID[Link]  `bun:"link_ids,array"`
 }
 
 type BankAccountWithStaleSpendingItem struct {
-	AccountId     ID[Account]     `pg:"account_id"`
-	BankAccountId ID[BankAccount] `pg:"bank_account_id"`
+	AccountId     ID[Account]     `bun:"account_id"`
+	BankAccountId ID[BankAccount] `bun:"bank_account_id"`
 }
 
 type jobRepository struct {
-	txn   pg.DBI
+	txn   bun.IDB
 	clock clock.Clock
 }
 
-func NewJobRepository(db pg.DBI, clock clock.Clock) JobRepository {
+func NewJobRepository(db bun.IDB, clock clock.Clock) JobRepository {
 	return &jobRepository{
 		txn:   db,
 		clock: clock,
@@ -61,9 +61,7 @@ func (j *jobRepository) GetFundingSchedulesToProcess(ctx context.Context) ([]Pro
 
 	var items []ProcessFundingSchedulesItem
 	// TODO Exclude deleted bank accounts from processing
-	_, err := j.txn.QueryContext(
-		span.Context(),
-		&items,
+	err := j.txn.NewRaw(
 		`
 		SELECT
 			"funding_schedules"."account_id",
@@ -74,7 +72,7 @@ func (j *jobRepository) GetFundingSchedulesToProcess(ctx context.Context) ([]Pro
 		GROUP BY "funding_schedules"."account_id", "funding_schedules"."bank_account_id"
 		`,
 		j.clock.Now(),
-	)
+	).Scan(span.Context(), &items)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve accounts and their funding schedules")
 	}
@@ -84,11 +82,11 @@ func (j *jobRepository) GetFundingSchedulesToProcess(ctx context.Context) ([]Pro
 
 func (r *repositoryBase) GetJob(jobId string) (Job, error) {
 	var result Job
-	err := r.txn.Model(&result).
+	err := r.txn.NewSelect().Model(&result).
 		Where(`"job"."account_id" = ?`, r.AccountId()).
 		Where(`"job"."job_id" = ?`, jobId).
 		Limit(1).
-		Select(&result)
+		Scan(context.Background())
 
 	return result, errors.Wrap(err, "failed to retrieve job")
 }
@@ -101,12 +99,12 @@ func (j *jobRepository) GetLinksForExpiredAccounts(ctx context.Context) ([]Link,
 	expirationCutoff := j.clock.Now().Add(-90 * 24 * time.Hour).UTC()
 
 	var result []Link
-	err := j.txn.ModelContext(span.Context(), &result).
+	err := j.txn.NewSelect().Model(&result).
 		Join(`INNER JOIN "accounts" AS "account"`).
 		JoinOn(`"account"."account_id" = "link"."account_id"`).
 		Where(`"link"."link_type" = ?`, PlaidLinkType).
 		Where(`GREATEST("account"."subscription_active_until", "account"."trial_ends_at") < ?`, expirationCutoff).
-		Select(&result)
+		Scan(span.Context())
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve Plaid links for expired accounts")
 	}
@@ -122,7 +120,7 @@ func (j *jobRepository) GetBankAccountsWithStaleSpending(ctx context.Context) ([
 	defer span.Finish()
 
 	var result []BankAccountWithStaleSpendingItem
-	err := j.txn.ModelContext(span.Context(), &BankAccount{}).
+	err := j.txn.NewSelect().Model(&BankAccount{}).
 		ColumnExpr(`"bank_account"."account_id"`).
 		ColumnExpr(`"bank_account"."bank_account_id"`).
 		Join(`INNER JOIN "spending" AS "spending"`).
@@ -131,7 +129,7 @@ func (j *jobRepository) GetBankAccountsWithStaleSpending(ctx context.Context) ([
 		Where(`"spending"."is_paused" = ?`, false).
 		GroupExpr(`"bank_account"."account_id"`).
 		GroupExpr(`"bank_account"."bank_account_id"`).
-		Select(&result)
+		Scan(span.Context(), &result)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve bank accounts with stale spending objects")
 	}
@@ -140,10 +138,10 @@ func (j *jobRepository) GetBankAccountsWithStaleSpending(ctx context.Context) ([
 }
 
 type AccountWithTooManyFiles struct {
-	tableName string `pg:"files"`
+	bun.BaseModel `bun:"table:files,alias:account_with_too_many_files"`
 
-	AccountId ID[Account] `pg:"account_id"`
-	Count     int64       `pg:"count"`
+	AccountId ID[Account] `bun:"account_id"`
+	Count     int64       `bun:"count"`
 }
 
 func (j *jobRepository) GetAccountsWithTooManyFiles(ctx context.Context) ([]AccountWithTooManyFiles, error) {
@@ -151,12 +149,12 @@ func (j *jobRepository) GetAccountsWithTooManyFiles(ctx context.Context) ([]Acco
 	defer span.Finish()
 
 	var result []AccountWithTooManyFiles
-	err := j.txn.ModelContext(span.Context(), &result).
+	err := j.txn.NewSelect().Model(&result).
 		ColumnExpr(`"account_id"`).
 		ColumnExpr(`COUNT("file_id") AS "count"`).
 		GroupExpr(`"account_id"`).
 		Having(`COUNT("file_id") > ?`, 10).
-		Select(&result)
+		Scan(span.Context())
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to find accounts with too many files")
 	}
@@ -175,7 +173,7 @@ func (j *jobRepository) GetLunchFlowAccountsToSync(
 
 	bankAccounts := make([]BankAccount, 0)
 	cutoff := j.clock.Now().Add(-6 * time.Hour)
-	err := j.txn.ModelContext(ctx, &bankAccounts).
+	err := j.txn.NewSelect().Model(&bankAccounts).
 		Relation("LunchFlowBankAccount").
 		// Retrieve all of the bank accounts and their associated links.
 		Join(`INNER JOIN "links" AS "link"`).
@@ -198,7 +196,7 @@ func (j *jobRepository) GetLunchFlowAccountsToSync(
 		Where(`"lunch_flow_bank_account"."deleted_at" IS NULL`).
 		Where(`"link"."deleted_at" IS NULL`).
 		Where(`"bank_account"."deleted_at" IS NULL`).
-		Select(&bankAccounts)
+		Scan(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to find lunch flow bank accounts to sync")
 	}
@@ -217,11 +215,11 @@ func (j *jobRepository) GetStaleLunchFlowLinks(
 
 	links := make([]LunchFlowLink, 0)
 	cutoff := j.clock.Now().Add(-24 * time.Hour)
-	err := j.txn.ModelContext(ctx, &links).
+	err := j.txn.NewSelect().Model(&links).
 		Where(`"created_at" < ?`, cutoff).
 		Where(`"status" = ?`, LunchFlowLinkStatusPending).
 		Order(`lunch_flow_link_id DESC`).
-		Select(&links)
+		Scan(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to find stale lunch flow links")
 	}

@@ -41,10 +41,11 @@ func adminSecretView(parent *cobra.Command) {
 			}
 
 			var token models.PlaidToken
-			err = db.Model(&token).
+			err = db.NewSelect().
+				Model(&token).
 				Where(`"item_id" = ?`, arguments.ItemID).
 				Limit(1).
-				Select(&token)
+				Scan(cmd.Context())
 			if err != nil {
 				log.Error("failed to retrieve secret", "err", err)
 				return errors.Wrap(err, "failed to retrieve secret")

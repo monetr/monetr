@@ -8,7 +8,6 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
 	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/cache"
@@ -26,6 +25,7 @@ import (
 	"github.com/monetr/monetr/server/storage"
 	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/monetr/monetr/server/util"
+	"github.com/uptrace/bun"
 
 	"github.com/pkg/errors"
 )
@@ -38,7 +38,7 @@ type Controller struct {
 	ClientTokens             security.ClientTokens
 	Clock                    clock.Clock
 	Configuration            config.Configuration
-	DB                       *pg.DB
+	DB                       *bun.DB
 	Email                    communication.EmailCommunication
 	FileStorage              storage.Storage
 	Queue                    queue.Enqueuer

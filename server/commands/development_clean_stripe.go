@@ -33,10 +33,11 @@ func developmentCleanStripe(parent *cobra.Command) {
 
 			log.Info("retrieving accounts with stripe details from the database")
 			var stripeItems []models.Account
-			db.Model(&stripeItems).
+			db.NewSelect().
+				Model(&stripeItems).
 				WhereOr(`"account"."stripe_customer_id" IS NOT NULL`).
 				WhereOr(`"account"."stripe_subscription_id" IS NOT NULL`).
-				Select(&stripeItems)
+				Scan(context.Background())
 
 			if len(stripeItems) == 0 {
 				log.Info("no Stripe customers or subscriptions to clean up")

@@ -8,50 +8,53 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/datasources/table"
+	"github.com/uptrace/bun"
 )
 
 var (
-	_ pg.BeforeInsertHook = (*TransactionImportMapping)(nil)
-	_ Identifiable        = TransactionImportMapping{}
+	_ bun.BeforeAppendModelHook = (*TransactionImportMapping)(nil)
+	_ Identifiable              = TransactionImportMapping{}
 )
 
 type TransactionImportMapping struct {
-	tableName string `pg:"transaction_import_mappings"`
+	bun.BaseModel `bun:"table:transaction_import_mappings,alias:transaction_import_mapping"`
 
-	TransactionImportMappingId ID[TransactionImportMapping] `json:"transactionImportMappingId" pg:"transaction_import_mapping_id,notnull,pk"`
-	AccountId                  ID[Account]                  `json:"-" pg:"account_id,notnull,pk"`
-	Account                    *Account                     `json:"-" pg:"rel:has-one"`
-	Signature                  string                       `json:"signature" pg:"signature,notnull"`
-	Mapping                    table.Mapping                `json:"mapping" pg:"mapping,notnull,jsonb"`
-	CreatedAt                  time.Time                    `json:"createdAt" pg:"created_at,notnull"`
-	UpdatedAt                  time.Time                    `json:"updatedAt" pg:"updated_at,notnull"`
-	CreatedBy                  ID[User]                     `json:"createdBy" pg:"created_by,notnull"`
-	CreatedByUser              *User                        `json:"-" pg:"rel:has-one,fk:created_by"`
+	TransactionImportMappingId ID[TransactionImportMapping] `json:"transactionImportMappingId" bun:"transaction_import_mapping_id,notnull,pk"`
+	AccountId                  ID[Account]                  `json:"-" bun:"account_id,notnull,pk"`
+	Account                    *Account                     `json:"-" bun:"rel:belongs-to,join:account_id=account_id"`
+	Signature                  string                       `json:"signature" bun:"signature,notnull,nullzero"`
+	Mapping                    table.Mapping                `json:"mapping" bun:"mapping,notnull,type:jsonb"`
+	CreatedAt                  time.Time                    `json:"createdAt" bun:"created_at,notnull,nullzero"`
+	UpdatedAt                  time.Time                    `json:"updatedAt" bun:"updated_at,notnull,nullzero"`
+	CreatedBy                  ID[User]                     `json:"createdBy" bun:"created_by,notnull,nullzero"`
+	CreatedByUser              *User                        `json:"-" bun:"rel:belongs-to,join:created_by=user_id"`
 }
 
 func (TransactionImportMapping) IdentityPrefix() string {
 	return "txix"
 }
 
-func (o *TransactionImportMapping) BeforeInsert(ctx context.Context) (context.Context, error) {
-	if o.TransactionImportMappingId.IsZero() {
-		o.TransactionImportMappingId = NewID[TransactionImportMapping]()
+func (o *TransactionImportMapping) BeforeAppendModel(ctx context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		if o.TransactionImportMappingId.IsZero() {
+			o.TransactionImportMappingId = NewID[TransactionImportMapping]()
+		}
+
+		now := time.Now()
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = now
+		}
+		if o.UpdatedAt.IsZero() {
+			o.UpdatedAt = now
+		}
+		if o.Signature == "" {
+			o.Signature = signMappingHeaders(o.Mapping.Headers)
+		}
 	}
 
-	now := time.Now()
-	if o.CreatedAt.IsZero() {
-		o.CreatedAt = now
-	}
-	if o.UpdatedAt.IsZero() {
-		o.UpdatedAt = now
-	}
-	if o.Signature == "" {
-		o.Signature = signMappingHeaders(o.Mapping.Headers)
-	}
-
-	return ctx, nil
+	return nil
 }
 
 func signMappingHeaders(headers []string) string {

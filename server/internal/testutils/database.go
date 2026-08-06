@@ -3,6 +3,7 @@ package testutils
 import (
 	"context"
 	"crypto/sha256"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -13,7 +14,6 @@ import (
 	"log/slog"
 
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/metrics"
@@ -21,10 +21,13 @@ import (
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/require"
+	"github.com/uptrace/bun"
+	"github.com/uptrace/bun/dialect/pgdialect"
+	"github.com/uptrace/bun/driver/pgdriver"
 )
 
 var (
-	_ pg.QueryHook = &queryHook{}
+	_ bun.QueryHook = &queryHook{}
 )
 
 type queryHook struct {
@@ -32,7 +35,7 @@ type queryHook struct {
 	stats *metrics.Stats
 }
 
-func (q *queryHook) BeforeQuery(ctx context.Context, event *pg.QueryEvent) (context.Context, error) {
+func (q *queryHook) BeforeQuery(ctx context.Context, event *bun.QueryEvent) context.Context {
 	queryId := gofakeit.UUID()[0:8]
 	if event.Stash != nil {
 		event.Stash["queryId"] = queryId
@@ -42,17 +45,12 @@ func (q *queryHook) BeforeQuery(ctx context.Context, event *pg.QueryEvent) (cont
 		}
 	}
 
-	query, err := event.FormattedQuery()
-	if err != nil {
-		return ctx, nil
-	}
+	q.log.Log(ctx, logging.LevelTrace, event.Query, "queryId", queryId)
 
-	q.log.Log(ctx, logging.LevelTrace, string(query), "queryId", queryId)
-
-	return ctx, nil
+	return ctx
 }
 
-func (q *queryHook) AfterQuery(ctx context.Context, event *pg.QueryEvent) error {
+func (q *queryHook) AfterQuery(ctx context.Context, event *bun.QueryEvent) {
 	if q.stats != nil {
 		q.stats.Queries.With(prometheus.Labels{}).Inc()
 	}
@@ -66,14 +64,12 @@ func (q *queryHook) AfterQuery(ctx context.Context, event *pg.QueryEvent) error 
 		}
 		log.WarnContext(ctx, "query failed", "err", event.Err)
 	}
-
-	return nil
 }
 
-func GetPgDatabaseTxn(t *testing.T) *pg.Tx {
+func GetPgDatabaseTxn(t *testing.T) bun.Tx {
 	db := GetPgDatabase(t)
 
-	txn, err := db.Begin()
+	txn, err := db.BeginTx(context.Background(), nil)
 	require.NoError(t, err, "must begin transaction")
 
 	t.Cleanup(func() {
@@ -85,20 +81,20 @@ func GetPgDatabaseTxn(t *testing.T) *pg.Tx {
 
 var testDatabases struct {
 	lock      sync.Mutex
-	databases map[string]*pg.DB
+	databases map[string]*bun.DB
 }
 
 func init() {
 	testDatabases = struct {
 		lock      sync.Mutex
-		databases map[string]*pg.DB
+		databases map[string]*bun.DB
 	}{
 		lock:      sync.Mutex{},
-		databases: map[string]*pg.DB{},
+		databases: map[string]*bun.DB{},
 	}
 }
 
-func GetPgOptions(_ *testing.T) *pg.Options {
+func GetPgOptions(_ *testing.T) []pgdriver.Option {
 	port := myownsanity.CoalesceStrings(
 		os.Getenv("MONETR_PG_PORT"),
 		os.Getenv("POSTGRES_PORT"),
@@ -111,16 +107,25 @@ func GetPgOptions(_ *testing.T) *pg.Options {
 		"localhost",
 	)
 
-	options := &pg.Options{
-		Network:         "tcp",
-		Addr:            net.JoinHostPort(host, port),
-		User:            myownsanity.CoalesceStrings(os.Getenv("MONETR_PG_USERNAME"), os.Getenv("POSTGRES_USER")),
-		Password:        myownsanity.CoalesceStrings(os.Getenv("MONETR_PG_PASSWORD"), os.Getenv("POSTGRES_PASSWORD")),
-		Database:        myownsanity.CoalesceStrings(os.Getenv("MONETR_PG_DATABASE"), os.Getenv("POSTGRES_DB")),
-		ApplicationName: "monetr - api - tests",
+	return []pgdriver.Option{
+		pgdriver.WithNetwork("tcp"),
+		pgdriver.WithAddr(net.JoinHostPort(host, port)),
+		// The trailing PG* / "postgres" tiers mirror go-pg's own defaulting for
+		// empty values; pgdriver panics on empty options instead of defaulting.
+		pgdriver.WithUser(myownsanity.CoalesceStrings(os.Getenv("MONETR_PG_USERNAME"), os.Getenv("POSTGRES_USER"), os.Getenv("PGUSER"), "postgres")),
+		pgdriver.WithPassword(myownsanity.CoalesceStrings(os.Getenv("MONETR_PG_PASSWORD"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("PGPASSWORD"), "postgres")),
+		pgdriver.WithDatabase(myownsanity.CoalesceStrings(os.Getenv("MONETR_PG_DATABASE"), os.Getenv("POSTGRES_DB"), os.Getenv("PGDATABASE"), "postgres")),
+		pgdriver.WithApplicationName("monetr - api - tests"),
+		pgdriver.WithReadTimeout(0),
+		pgdriver.WithWriteTimeout(0),
+		pgdriver.WithInsecure(true),
 	}
+}
 
-	return options
+// connectBun opens a bun database handle for the provided pgdriver options.
+func connectBun(options ...pgdriver.Option) *bun.DB {
+	sqldb := sql.OpenDB(pgdriver.NewConnector(options...))
+	return bun.NewDB(sqldb, pgdialect.New())
 }
 
 type DatabaseOption uint8
@@ -129,12 +134,12 @@ const (
 	IsolatedDatabase DatabaseOption = 1
 )
 
-func GetBadPgDatabase(t *testing.T) *pg.DB {
-	options := GetPgOptions(t)
-	options.Dialer = func(_ context.Context, _, _ string) (net.Conn, error) {
+func GetBadPgDatabase(t *testing.T) *bun.DB {
+	connector := pgdriver.NewConnector(GetPgOptions(t)...)
+	connector.Config().Dialer = func(_ context.Context, _, _ string) (net.Conn, error) {
 		return nil, errors.New("forcing a bad connection")
 	}
-	db := pg.Connect(options)
+	db := bun.NewDB(sql.OpenDB(connector), pgdialect.New())
 	t.Cleanup(func() {
 		db.Close()
 	})
@@ -142,7 +147,7 @@ func GetBadPgDatabase(t *testing.T) *pg.DB {
 	return db
 }
 
-func GetPgDatabase(t *testing.T, databaseOptions ...DatabaseOption) *pg.DB {
+func GetPgDatabase(t *testing.T, databaseOptions ...DatabaseOption) *bun.DB {
 	testDatabases.lock.Lock()
 	defer testDatabases.lock.Unlock()
 
@@ -151,9 +156,9 @@ func GetPgDatabase(t *testing.T, databaseOptions ...DatabaseOption) *pg.DB {
 	}
 
 	options := GetPgOptions(t)
-	db := pg.Connect(options)
+	db := connectBun(options...)
 
-	require.NoError(t, db.Ping(context.Background()), "must ping database")
+	require.NoError(t, db.PingContext(context.Background()), "must ping database")
 
 	log := GetLog(t)
 
@@ -161,7 +166,7 @@ func GetPgDatabase(t *testing.T, databaseOptions ...DatabaseOption) *pg.DB {
 		log: log,
 	})
 
-	var databaseToReturn *pg.DB
+	var databaseToReturn *bun.DB
 	databaseToReturn = db
 	if len(databaseOptions) > 0 {
 		for _, option := range databaseOptions {
@@ -176,9 +181,8 @@ func GetPgDatabase(t *testing.T, databaseOptions ...DatabaseOption) *pg.DB {
 				_, err = db.Exec(fmt.Sprintf(`CREATE DATABASE %q;`, databaseName))
 				require.NoError(t, err, "must be able to create the isolated database")
 
-				isolatedOptions := *options
-				isolatedOptions.Database = databaseName
-				databaseToReturn = pg.Connect(&isolatedOptions)
+				isolatedOptions := append(GetPgOptions(t), pgdriver.WithDatabase(databaseName))
+				databaseToReturn = connectBun(isolatedOptions...)
 				databaseToReturn.AddQueryHook(&queryHook{
 					log: log,
 				})
@@ -206,16 +210,18 @@ func GetPgDatabase(t *testing.T, databaseOptions ...DatabaseOption) *pg.DB {
 
 func MustInsert[T any](t *testing.T, model T) T {
 	db := GetPgDatabase(t)
-	result, err := db.Model(&model).Insert(&model)
+	result, err := db.NewInsert().Model(&model).Returning("*").Exec(context.Background())
 	require.NoError(t, err, "must insert data")
-	require.GreaterOrEqual(t, 1, result.RowsAffected(), "must insert at least one row")
+	affected, err := result.RowsAffected()
+	require.NoError(t, err, "must read affected rows")
+	require.GreaterOrEqual(t, int64(1), affected, "must insert at least one row")
 	return model
 }
 
 func MustRetrieve[T any](t *testing.T, model T) T {
 	var result T
 	db := GetPgDatabase(t)
-	err := db.Model(&model).WherePK().Select(&result)
+	err := db.NewSelect().Model(&model).WherePK().Scan(context.Background(), &result)
 	require.NoError(t, err, "must retrieve data")
 	return result
 }
@@ -239,36 +245,43 @@ func MustUnmarshalJSON(t *testing.T, data []byte, destination any) {
 
 func MustDBUpdate[T any](t *testing.T, model *T) {
 	db := GetPgDatabase(t) // Don't need options, DB should already be in cache
-	result, err := db.Model(model).WherePK().Update(model)
+	// No RETURNING: every column was just written from the model, and models
+	// like Login intentionally omit table columns (crypt) that bun would refuse
+	// to discard when scanning RETURNING *.
+	result, err := db.NewUpdate().Model(model).WherePK().Exec(context.Background())
 	require.NoError(t, err, "must be able to update record")
-	require.EqualValues(t, 1, result.RowsAffected(), "must have updated one record")
+	affected, err := result.RowsAffected()
+	require.NoError(t, err, "must read affected rows")
+	require.EqualValues(t, 1, affected, "must have updated one record")
 }
 
 func MustDBInsert[T any](t *testing.T, model *T) {
 	db := GetPgDatabase(t) // Don't need options, DB should already be in cache
-	result, err := db.Model(model).Insert(model)
+	result, err := db.NewInsert().Model(model).Returning("*").Exec(context.Background())
 	require.NoError(t, err, "must be able to create record")
-	require.EqualValues(t, 1, result.RowsAffected(), "must have created one record")
+	affected, err := result.RowsAffected()
+	require.NoError(t, err, "must read affected rows")
+	require.EqualValues(t, 1, affected, "must have created one record")
 }
 
 func MustDBRead[T any](t *testing.T, model T) T {
 	db := GetPgDatabase(t) // Don't need options, DB should already be in cache
 	var result T
-	err := db.Model(&model).WherePK().Select(&result)
+	err := db.NewSelect().Model(&model).WherePK().Scan(context.Background(), &result)
 	require.NoError(t, err, "must be able to read updated record")
 	return result
 }
 
 func MustDBNotExist[T any](t *testing.T, model T) {
 	db := GetPgDatabase(t) // Don't need options, DB should already be in cache
-	exists, err := db.Model(&model).WherePK().Exists()
+	exists, err := db.NewSelect().Model(&model).WherePK().Exists(context.Background())
 	require.NoError(t, err, "must be able to read without an error")
 	require.Falsef(t, exists, "%T must not exist", model)
 }
 
 func MustDBExist[T any](t *testing.T, model T) {
 	db := GetPgDatabase(t) // Don't need options, DB should already be in cache
-	exists, err := db.Model(&model).WherePK().Exists()
+	exists, err := db.NewSelect().Model(&model).WherePK().Exists(context.Background())
 	require.NoError(t, err, "must be able to read record from the database")
 	require.Truef(t, exists, "%T must exist", model)
 }

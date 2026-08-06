@@ -30,46 +30,46 @@ func RecoverStalledJobsCron(ctx queue.Context) error {
 		// Any jobs that have a started at more than 10 minutes ago and are in a
 		// processing status have likely timed out. We want to requeue the ones that
 		// have remaining attempts left.
-		retried, err := ctx.DB().ModelContext(ctx, new(models.Job)).
+		retried, err := ctx.DB().NewUpdate().Model(new(models.Job)).
 			Set(`"status" = ?`, models.PendingJobStatus).
 			Set(`"attempt" = "attempt" + 1`).
 			Set(`"started_at" = NULL`).
 			Set(`"updated_at" = ?`, now).
 			Where(
 				`"job_id" IN (?)`,
-				ctx.DB().Model(new(models.Job)).
+				ctx.DB().NewSelect().Model(new(models.Job)).
 					Column("job_id").
 					Where(`"status" = ?`, models.ProcessingJobStatus).
 					Where(`"started_at" < ?`, cutoff).
 					Where(`"attempt" < ?`, maxAttempts).
 					For(`UPDATE SKIP LOCKED`),
 			).
-			Update()
+			Exec(ctx)
 		if err != nil {
 			return errors.Wrap(err, "failed to recover stalled jobs")
 		}
 
 		// Mark stalled jobs that have exhausted all attempts as failed.
-		failed, err := ctx.DB().ModelContext(ctx, new(models.Job)).
+		failed, err := ctx.DB().NewUpdate().Model(new(models.Job)).
 			Set(`"status" = ?`, models.FailedJobStatus).
 			Set(`"completed_at" = ?`, now).
 			Set(`"updated_at" = ?`, now).
 			Where(
 				`"job_id" IN (?)`,
-				ctx.DB().Model(new(models.Job)).
+				ctx.DB().NewSelect().Model(new(models.Job)).
 					Column("job_id").
 					Where(`"status" = ?`, models.ProcessingJobStatus).
 					Where(`"started_at" < ?`, cutoff).
 					Where(`"attempt" >= ?`, maxAttempts).
 					For(`UPDATE SKIP LOCKED`),
 			).
-			Update()
+			Exec(ctx)
 		if err != nil {
 			return errors.Wrap(err, "failed to mark exhausted stalled jobs as failed")
 		}
 
-		retriedCount := retried.RowsAffected()
-		failedCount := failed.RowsAffected()
+		retriedCount, _ := retried.RowsAffected()
+		failedCount, _ := failed.RowsAffected()
 		if retriedCount > 0 || failedCount > 0 {
 			log.WarnContext(ctx, "recovered stalled jobs",
 				"retried", retriedCount,

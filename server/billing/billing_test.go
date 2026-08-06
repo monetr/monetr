@@ -141,7 +141,7 @@ func TestBilling_GetHasSubscription(t *testing.T) {
 		paywall := NewBilling(log, clock, conf, accountRepo, stripeHelper, pubSub)
 
 		hasSubscription, err := paywall.GetHasSubscription(t.Context(), "acct_bogus")
-		assert.EqualError(t, err, "could not determine whether subscription was present: failed to retrieve account by Id: pg: no rows in result set")
+		assert.EqualError(t, err, "could not determine whether subscription was present: failed to retrieve account by Id: sql: no rows in result set")
 		assert.False(t, hasSubscription, "account that does not exist should return false")
 	})
 }

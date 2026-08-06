@@ -17,7 +17,6 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gavv/httpexpect/v2"
-	"github.com/go-pg/pg/v10"
 	"github.com/gomodule/redigo/redis"
 	"github.com/monetr/monetr/server/application"
 	"github.com/monetr/monetr/server/billing"
@@ -37,6 +36,7 @@ import (
 	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/uptrace/bun"
 	"go.uber.org/mock/gomock"
 )
 
@@ -117,7 +117,7 @@ func NewTestApplicationWithBadDatabase(t *testing.T) (*TestApp, *httpexpect.Expe
 func newTestApplication(
 	t *testing.T,
 	configuration config.Configuration,
-	db *pg.DB,
+	db *bun.DB,
 ) (*TestApp, *httpexpect.Expect) {
 	mockController := gomock.NewController(t)
 	t.Cleanup(func() {

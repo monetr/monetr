@@ -3,6 +3,7 @@ package controller
 import (
 	"crypto/sha256"
 	"crypto/subtle"
+	"database/sql"
 	"encoding/hex"
 	"encoding/json"
 	"io"
@@ -10,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-pg/pg/v10"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/crumbs"
@@ -186,7 +186,7 @@ func (c *Controller) processWebhook(ctx *echo.Context, hook PlaidWebhook) error 
 		)
 
 		// If the link is not even in the database then there is nothing to be done.
-		if errors.Is(err, pg.ErrNoRows) {
+		if errors.Is(err, sql.ErrNoRows) {
 			log.WarnContext(c.getContext(ctx), "link is not in database, webhook cannot be handled", "err", err)
 			return nil
 		}

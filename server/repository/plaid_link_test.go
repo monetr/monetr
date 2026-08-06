@@ -30,7 +30,7 @@ func TestPlaidRepositoryBase_GetLink(t *testing.T) {
 
 	t.Run("not found", func(t *testing.T) {
 		readLink, err := plaidRepo.GetLink(t.Context(), link.AccountId, "link_bogus")
-		assert.EqualError(t, err, "failed to retrieve link: pg: no rows in result set")
+		assert.EqualError(t, err, "failed to retrieve link: sql: no rows in result set")
 		assert.Nil(t, readLink, "link must be nil")
 	})
 }
@@ -55,7 +55,7 @@ func TestPlaidRepositoryBase_GetLinkByItemId(t *testing.T) {
 
 	t.Run("not found", func(t *testing.T) {
 		readLink, err := plaidRepo.GetLinkByItemId(t.Context(), "not a real item id")
-		assert.EqualError(t, err, "failed to retrieve link by item Id: pg: no rows in result set")
+		assert.EqualError(t, err, "failed to retrieve link by item Id: sql: no rows in result set")
 		assert.Nil(t, readLink, "link must be nil")
 	})
 }

@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-pg/pg/v10"
+	"github.com/uptrace/bun"
 )
 
 type LunchFlowLinkStatus string
@@ -35,24 +35,24 @@ const (
 )
 
 type LunchFlowLink struct {
-	tableName string `pg:"lunch_flow_links"`
+	bun.BaseModel `bun:"table:lunch_flow_links,alias:lunch_flow_link"`
 
-	LunchFlowLinkId      ID[LunchFlowLink]   `json:"lunchFlowLinkId" pg:"lunch_flow_link_id,notnull,pk"`
-	AccountId            ID[Account]         `json:"-" pg:"account_id,pk,notnull"`
-	Account              *Account            `json:"-" pg:"rel:has-one"`
-	SecretId             ID[Secret]          `json:"-" pg:"secret_id,notnull"`
-	Secret               *Secret             `json:"-" pg:"rel:has-one"`
-	Name                 string              `json:"name" pg:"name,notnull"`
-	ApiUrl               string              `json:"apiUrl" pg:"api_url,notnull"`
-	Status               LunchFlowLinkStatus `json:"status" pg:"status,notnull"`
-	LastManualSync       *time.Time          `json:"lastManualSync" pg:"last_manual_sync"`
-	LastSuccessfulUpdate *time.Time          `json:"lastSuccessfulUpdate" pg:"last_successful_update"`
-	LastAttemptedUpdate  *time.Time          `json:"lastAttemptedUpdate" pg:"last_attempted_update"`
-	UpdatedAt            time.Time           `json:"updatedAt" pg:"updated_at,notnull"`
-	CreatedAt            time.Time           `json:"createdAt" pg:"created_at,notnull"`
-	CreatedBy            ID[User]            `json:"createdBy" pg:"created_by,notnull"`
-	CreatedByUser        *User               `json:"-" pg:"rel:has-one,fk:created_by"`
-	DeletedAt            *time.Time          `json:"deletedAt,omitempty" pg:"deleted_at"`
+	LunchFlowLinkId      ID[LunchFlowLink]   `json:"lunchFlowLinkId" bun:"lunch_flow_link_id,notnull,pk"`
+	AccountId            ID[Account]         `json:"-" bun:"account_id,pk,notnull"`
+	Account              *Account            `json:"-" bun:"rel:belongs-to,join:account_id=account_id"`
+	SecretId             ID[Secret]          `json:"-" bun:"secret_id,notnull,nullzero"`
+	Secret               *Secret             `json:"-" bun:"rel:belongs-to,join:secret_id=secret_id,join:account_id=account_id"`
+	Name                 string              `json:"name" bun:"name,notnull,nullzero"`
+	ApiUrl               string              `json:"apiUrl" bun:"api_url,notnull,nullzero"`
+	Status               LunchFlowLinkStatus `json:"status" bun:"status,notnull,nullzero"`
+	LastManualSync       *time.Time          `json:"lastManualSync" bun:"last_manual_sync"`
+	LastSuccessfulUpdate *time.Time          `json:"lastSuccessfulUpdate" bun:"last_successful_update"`
+	LastAttemptedUpdate  *time.Time          `json:"lastAttemptedUpdate" bun:"last_attempted_update"`
+	UpdatedAt            time.Time           `json:"updatedAt" bun:"updated_at,notnull,nullzero"`
+	CreatedAt            time.Time           `json:"createdAt" bun:"created_at,notnull,nullzero"`
+	CreatedBy            ID[User]            `json:"createdBy" bun:"created_by,notnull,nullzero"`
+	CreatedByUser        *User               `json:"-" bun:"rel:belongs-to,join:created_by=user_id"`
+	DeletedAt            *time.Time          `json:"deletedAt,omitempty" bun:"deleted_at"`
 }
 
 func (LunchFlowLink) IdentityPrefix() string {
@@ -60,22 +60,25 @@ func (LunchFlowLink) IdentityPrefix() string {
 }
 
 var (
-	_ pg.BeforeInsertHook = (*LunchFlowLink)(nil)
+	_ bun.BeforeAppendModelHook = (*LunchFlowLink)(nil)
 )
 
-func (o *LunchFlowLink) BeforeInsert(ctx context.Context) (context.Context, error) {
-	if o.LunchFlowLinkId.IsZero() {
-		o.LunchFlowLinkId = NewID[LunchFlowLink]()
+func (o *LunchFlowLink) BeforeAppendModel(ctx context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		if o.LunchFlowLinkId.IsZero() {
+			o.LunchFlowLinkId = NewID[LunchFlowLink]()
+		}
+
+		now := time.Now()
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = now
+		}
+
+		if o.UpdatedAt.IsZero() {
+			o.UpdatedAt = now
+		}
 	}
 
-	now := time.Now()
-	if o.CreatedAt.IsZero() {
-		o.CreatedAt = now
-	}
-
-	if o.UpdatedAt.IsZero() {
-		o.UpdatedAt = now
-	}
-
-	return ctx, nil
+	return nil
 }

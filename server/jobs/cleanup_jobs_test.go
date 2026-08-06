@@ -47,7 +47,7 @@ func TestCleanupJobsJob_Run(t *testing.T) {
 			Input:     "",
 			Output:    "",
 			Status:    models.PendingJobStatus,
-			Priority:  uint64(now.Add(-30 * 24 * time.Hour).Unix()),
+			Priority:  int64(now.Add(-30 * 24 * time.Hour).Unix()),
 			CreatedAt: now.Add(-30 * 24 * time.Hour),
 			UpdatedAt: now.Add(-30 * 24 * time.Hour),
 		})
@@ -80,7 +80,7 @@ func TestCleanupJobsJob_Run(t *testing.T) {
 			Input:     "",
 			Output:    "",
 			Status:    models.PendingJobStatus,
-			Priority:  uint64(now.Add(24 * time.Hour).Unix()),
+			Priority:  int64(now.Add(24 * time.Hour).Unix()),
 			CreatedAt: now.Add(-30 * 24 * time.Hour),
 			UpdatedAt: now.Add(-30 * 24 * time.Hour),
 		})
@@ -112,7 +112,7 @@ func TestCleanupJobsJob_Run(t *testing.T) {
 			Input:     "",
 			Output:    "",
 			Status:    models.PendingJobStatus,
-			Priority:  uint64(now.Add(-20 * 24 * time.Hour).Unix()),
+			Priority:  int64(now.Add(-20 * 24 * time.Hour).Unix()),
 			CreatedAt: now.Add(-30 * 24 * time.Hour),
 			UpdatedAt: now.Add(-30 * 24 * time.Hour),
 		})

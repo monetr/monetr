@@ -21,6 +21,6 @@ func (r *repositoryBase) CreateLunchFlowTransactions(
 		transactions[i].CreatedAt = now
 	}
 
-	_, err := r.txn.ModelContext(span.Context(), &transactions).Insert(&transactions)
+	_, err := r.txn.NewInsert().Model(&transactions).Returning("*").Exec(span.Context())
 	return errors.Wrap(err, "failed to create Lunch Flow transactions")
 }

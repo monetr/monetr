@@ -4,27 +4,27 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-pg/pg/v10"
+	"github.com/uptrace/bun"
 )
 
 type Link struct {
-	tableName string `pg:"links"`
+	bun.BaseModel `bun:"table:links,alias:link"`
 
-	LinkId          ID[Link]           `json:"linkId" pg:"link_id,notnull,pk"`
-	AccountId       ID[Account]        `json:"-" pg:"account_id,notnull,pk"`
-	Account         *Account           `json:"-" pg:"rel:has-one"`
-	LinkType        LinkType           `json:"linkType" pg:"link_type,notnull"`
-	PlaidLinkId     *ID[PlaidLink]     `json:"-" pg:"plaid_link_id"`
-	PlaidLink       *PlaidLink         `json:"plaidLink,omitempty" pg:"rel:has-one"`
-	LunchFlowLinkId *ID[LunchFlowLink] `json:"lunchFlowLinkId,omitempty" pg:"lunch_flow_link_id"`
-	LunchFlowLink   *LunchFlowLink     `json:"lunchFlowLink,omitempty" pg:"rel:has-one"`
-	InstitutionName string             `json:"institutionName" pg:"institution_name"`
-	Description     *string            `json:"description" pg:"description"`
-	CreatedAt       time.Time          `json:"createdAt" pg:"created_at,notnull"`
-	CreatedBy       ID[User]           `json:"createdBy" pg:"created_by,notnull"`
-	CreatedByUser   *User              `json:"-,omitempty" pg:"rel:has-one,fk:created_by"`
-	UpdatedAt       time.Time          `json:"updatedAt" pg:"updated_at,notnull"`
-	DeletedAt       *time.Time         `json:"deletedAt" pg:"deleted_at"`
+	LinkId          ID[Link]           `json:"linkId" bun:"link_id,notnull,pk"`
+	AccountId       ID[Account]        `json:"-" bun:"account_id,notnull,pk"`
+	Account         *Account           `json:"-" bun:"rel:belongs-to,join:account_id=account_id"`
+	LinkType        LinkType           `json:"linkType" bun:"link_type,notnull,nullzero"`
+	PlaidLinkId     *ID[PlaidLink]     `json:"-" bun:"plaid_link_id"`
+	PlaidLink       *PlaidLink         `json:"plaidLink,omitempty" bun:"rel:belongs-to,join:plaid_link_id=plaid_link_id"`
+	LunchFlowLinkId *ID[LunchFlowLink] `json:"lunchFlowLinkId,omitempty" bun:"lunch_flow_link_id"`
+	LunchFlowLink   *LunchFlowLink     `json:"lunchFlowLink,omitempty" bun:"rel:belongs-to,join:lunch_flow_link_id=lunch_flow_link_id,join:account_id=account_id"`
+	InstitutionName string             `json:"institutionName" bun:"institution_name,nullzero"`
+	Description     *string            `json:"description" bun:"description"`
+	CreatedAt       time.Time          `json:"createdAt" bun:"created_at,notnull,nullzero"`
+	CreatedBy       ID[User]           `json:"createdBy" bun:"created_by,notnull,nullzero"`
+	CreatedByUser   *User              `json:"-,omitempty" bun:"rel:belongs-to,join:created_by=user_id"`
+	UpdatedAt       time.Time          `json:"updatedAt" bun:"updated_at,notnull,nullzero"`
+	DeletedAt       *time.Time         `json:"deletedAt" bun:"deleted_at"`
 }
 
 func (Link) IdentityPrefix() string {
@@ -32,18 +32,21 @@ func (Link) IdentityPrefix() string {
 }
 
 var (
-	_ pg.BeforeInsertHook = (*Link)(nil)
+	_ bun.BeforeAppendModelHook = (*Link)(nil)
 )
 
-func (o *Link) BeforeInsert(ctx context.Context) (context.Context, error) {
-	if o.LinkId.IsZero() {
-		o.LinkId = NewID[Link]()
+func (o *Link) BeforeAppendModel(ctx context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		if o.LinkId.IsZero() {
+			o.LinkId = NewID[Link]()
+		}
+
+		now := time.Now()
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = now
+		}
 	}
 
-	now := time.Now()
-	if o.CreatedAt.IsZero() {
-		o.CreatedAt = now
-	}
-
-	return ctx, nil
+	return nil
 }

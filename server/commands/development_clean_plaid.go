@@ -42,10 +42,11 @@ func developmentCleanPlaid(parent *cobra.Command) {
 
 			log.Info("retrieving Plaid links from the database")
 			var plaidLinks []models.Link
-			db.Model(&plaidLinks).
+			db.NewSelect().
+				Model(&plaidLinks).
 				Relation("PlaidLink").
 				Where(`"link"."link_type" = ?`, models.PlaidLinkType).
-				Select(&plaidLinks)
+				Scan(context.Background())
 			if len(plaidLinks) == 0 {
 				log.Info("no Plaid links to clean up")
 				return nil
@@ -74,7 +75,7 @@ func developmentCleanPlaid(parent *cobra.Command) {
 					continue
 				}
 
-				db.Model(&link).Set(`"link_type" = ?`, models.ManualLinkType).Update(&link)
+				db.NewUpdate().Model(&link).Set(`"link_type" = ?`, models.ManualLinkType).WherePK().Returning("*").Exec(context.Background())
 			}
 
 			log.Info("done!")

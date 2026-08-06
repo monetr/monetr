@@ -2,9 +2,9 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
@@ -17,14 +17,16 @@ func (r *repositoryBase) UpdateUser(ctx context.Context, user *User) error {
 	user.UserId = r.UserId()
 	user.AccountId = r.AccountId()
 
-	result, err := r.txn.ModelContext(span.Context(), user).
+	result, err := r.txn.NewUpdate().
+		Model(user).
 		WherePK().
-		Update(user)
+		Returning("*").
+		Exec(span.Context())
 	if err != nil {
 		return errors.Wrap(err, "failed to update user")
 	}
 
-	if affected := result.RowsAffected(); affected != 1 {
+	if affected, _ := result.RowsAffected(); affected != 1 {
 		return errors.Errorf("invalid number of user(s) updated; expected: 1 updated: %d", affected)
 	}
 
@@ -41,14 +43,15 @@ func (r *repositoryBase) GetMe(ctx context.Context) (*User, error) {
 	}
 
 	var user User
-	err := r.txn.ModelContext(span.Context(), &user).
+	err := r.txn.NewSelect().
+		Model(&user).
 		Relation("Login").
 		Relation("Account").
 		Where(`"user"."user_id" = ? AND "user"."account_id" = ?`, r.userId, r.accountId).
 		Limit(1).
-		Select(&user)
+		Scan(span.Context())
 	switch err {
-	case pg.ErrNoRows:
+	case sql.ErrNoRows:
 		span.Status = sentry.SpanStatusNotFound
 		return nil, errors.Errorf("user does not exist")
 	case nil:
@@ -70,17 +73,18 @@ func (r *repositoryBase) GetUserById(
 	defer span.Finish()
 
 	var user User
-	err := r.txn.ModelContext(span.Context(), &user).
+	err := r.txn.NewSelect().
+		Model(&user).
 		Relation("Login").
 		Relation("Account").
 		Where(`"user"."account_id" = ?`, r.AccountId()).
 		Where(`"user"."user_id" = ?`, id).
 		Limit(1).
-		Select(&user)
+		Scan(span.Context())
 	switch err {
-	case pg.ErrNoRows:
+	case sql.ErrNoRows:
 		span.Status = sentry.SpanStatusNotFound
-		// Keep pg.ErrNoRows as the cause so the controller can translate this
+		// Keep sql.ErrNoRows as the cause so the controller can translate this
 		// into a 404 instead of a 500.
 		return nil, errors.Wrap(err, "user does not exist")
 	case nil:
@@ -106,13 +110,14 @@ func (r *repositoryBase) GetAccountOwner(ctx context.Context) (*User, error) {
 	}
 
 	var user User
-	err := r.txn.ModelContext(span.Context(), &user).
+	err := r.txn.NewSelect().
+		Model(&user).
 		Relation("Login").
 		Relation("Account").
 		Where(`"user"."account_id" = ?`, r.AccountId()).
 		Where(`"user"."role" = ?`, UserRoleOwner).
 		Limit(1).
-		Select(&user)
+		Scan(span.Context())
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to find account owner")
 	}

@@ -4,49 +4,52 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/zoneinfo"
 	"github.com/pkg/errors"
 	"github.com/stripe/stripe-go/v81"
+	"github.com/uptrace/bun"
 )
 
 var (
-	_ pg.BeforeInsertHook = (*Account)(nil)
-	_ Identifiable        = Account{}
+	_ bun.BeforeAppendModelHook = (*Account)(nil)
+	_ Identifiable              = Account{}
 )
 
 type Account struct {
-	tableName string `pg:"accounts"`
+	bun.BaseModel `bun:"table:accounts,alias:account"`
 
-	AccountId                     ID[Account]                `json:"accountId" pg:"account_id,notnull,pk"`
-	Timezone                      string                     `json:"timezone" pg:"timezone,notnull,default:'UTC'"`
-	Locale                        string                     `json:"locale" pg:"locale,notnull"`
-	StripeCustomerId              *string                    `json:"-" pg:"stripe_customer_id"`
-	StripeSubscriptionId          *string                    `json:"-" pg:"stripe_subscription_id"`
-	StripeWebhookLatestTimestamp  *time.Time                 `json:"-" pg:"stripe_webhook_latest_timestamp"`
-	SubscriptionActiveUntil       *time.Time                 `json:"subscriptionActiveUntil" pg:"subscription_active_until"`
-	SubscriptionStatus            *stripe.SubscriptionStatus `json:"subscriptionStatus" pg:"subscription_status"`
-	TrialEndsAt                   *time.Time                 `json:"trialEndsAt" pg:"trial_ends_at"`
-	TrialExpiryNotificationSentAt *time.Time                 `json:"-" pg:"trial_expiry_notification_sent_at"`
-	CreatedAt                     time.Time                  `json:"createdAt" pg:"created_at,notnull"`
+	AccountId                     ID[Account]                `json:"accountId" bun:"account_id,notnull,pk"`
+	Timezone                      string                     `json:"timezone" bun:"timezone,notnull,default:'UTC',nullzero"`
+	Locale                        string                     `json:"locale" bun:"locale,notnull,nullzero"`
+	StripeCustomerId              *string                    `json:"-" bun:"stripe_customer_id"`
+	StripeSubscriptionId          *string                    `json:"-" bun:"stripe_subscription_id"`
+	StripeWebhookLatestTimestamp  *time.Time                 `json:"-" bun:"stripe_webhook_latest_timestamp"`
+	SubscriptionActiveUntil       *time.Time                 `json:"subscriptionActiveUntil" bun:"subscription_active_until"`
+	SubscriptionStatus            *stripe.SubscriptionStatus `json:"subscriptionStatus" bun:"subscription_status"`
+	TrialEndsAt                   *time.Time                 `json:"trialEndsAt" bun:"trial_ends_at"`
+	TrialExpiryNotificationSentAt *time.Time                 `json:"-" bun:"trial_expiry_notification_sent_at"`
+	CreatedAt                     time.Time                  `json:"createdAt" bun:"created_at,notnull,nullzero"`
 }
 
 func (Account) IdentityPrefix() string {
 	return "acct"
 }
 
-func (o *Account) BeforeInsert(ctx context.Context) (context.Context, error) {
-	if o.AccountId.IsZero() {
-		o.AccountId = NewID[Account]()
+func (o *Account) BeforeAppendModel(ctx context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		if o.AccountId.IsZero() {
+			o.AccountId = NewID[Account]()
+		}
+
+		now := time.Now()
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = now
+		}
 	}
 
-	now := time.Now()
-	if o.CreatedAt.IsZero() {
-		o.CreatedAt = now
-	}
-
-	return ctx, nil
+	return nil
 }
 
 func (a *Account) GetTimezone() (*time.Location, error) {

@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-pg/pg/v10"
+	"github.com/uptrace/bun"
 )
 
 type LunchFlowBankAccountStatus string
@@ -37,26 +37,26 @@ const (
 )
 
 type LunchFlowBankAccount struct {
-	tableName string `pg:"lunch_flow_bank_accounts"`
+	bun.BaseModel `bun:"table:lunch_flow_bank_accounts,alias:lunch_flow_bank_account"`
 
-	LunchFlowBankAccountId ID[LunchFlowBankAccount]           `json:"lunchFlowBankAccountId" pg:"lunch_flow_bank_account_id,notnull,pk"`
-	AccountId              ID[Account]                        `json:"-" pg:"account_id,notnull,pk"`
-	Account                *Account                           `json:"-" pg:"rel:has-one"`
-	LunchFlowLinkId        ID[LunchFlowLink]                  `json:"lunchFlowLinkId" pg:"lunch_flow_link_id,notnull"`
-	LunchFlowLink          *LunchFlowLink                     `json:"-" pg:"rel:has-one"`
-	LunchFlowId            string                             `json:"lunchFlowId" pg:"lunch_flow_id,notnull"`
-	LunchFlowStatus        LunchFlowBankAccountExternalStatus `json:"lunchFlowStatus" pg:"lunch_flow_status,notnull"`
-	Name                   string                             `json:"name" pg:"name,notnull"`
-	InstitutionName        string                             `json:"institutionName" pg:"institution_name,notnull"`
-	Provider               string                             `json:"provider" pg:"provider,notnull"`
-	Currency               string                             `json:"currency" pg:"currency,notnull"`
-	Status                 LunchFlowBankAccountStatus         `json:"status" pg:"status,notnull"`
-	CurrentBalance         int64                              `json:"currentBalance" pg:"current_balance,notnull,use_zero"`
-	CreatedAt              time.Time                          `json:"createdAt" pg:"created_at,notnull"`
-	CreatedBy              ID[User]                           `json:"createdBy" pg:"created_by,notnull"`
-	CreatedByUser          *User                              `json:"-" pg:"rel:has-one,fk:created_by"`
-	UpdatedAt              time.Time                          `json:"updatedAt" pg:"updated_at,notnull"`
-	DeletedAt              *time.Time                         `json:"deletedAt,omitempty" pg:"deleted_at"`
+	LunchFlowBankAccountId ID[LunchFlowBankAccount]           `json:"lunchFlowBankAccountId" bun:"lunch_flow_bank_account_id,notnull,pk"`
+	AccountId              ID[Account]                        `json:"-" bun:"account_id,notnull,pk"`
+	Account                *Account                           `json:"-" bun:"rel:belongs-to,join:account_id=account_id"`
+	LunchFlowLinkId        ID[LunchFlowLink]                  `json:"lunchFlowLinkId" bun:"lunch_flow_link_id,notnull,nullzero"`
+	LunchFlowLink          *LunchFlowLink                     `json:"-" bun:"rel:belongs-to,join:lunch_flow_link_id=lunch_flow_link_id,join:account_id=account_id"`
+	LunchFlowId            string                             `json:"lunchFlowId" bun:"lunch_flow_id,notnull,nullzero"`
+	LunchFlowStatus        LunchFlowBankAccountExternalStatus `json:"lunchFlowStatus" bun:"lunch_flow_status,notnull,nullzero"`
+	Name                   string                             `json:"name" bun:"name,notnull,nullzero"`
+	InstitutionName        string                             `json:"institutionName" bun:"institution_name,notnull,nullzero"`
+	Provider               string                             `json:"provider" bun:"provider,notnull,nullzero"`
+	Currency               string                             `json:"currency" bun:"currency,notnull,nullzero"`
+	Status                 LunchFlowBankAccountStatus         `json:"status" bun:"status,notnull,nullzero"`
+	CurrentBalance         int64                              `json:"currentBalance" bun:"current_balance,notnull"`
+	CreatedAt              time.Time                          `json:"createdAt" bun:"created_at,notnull,nullzero"`
+	CreatedBy              ID[User]                           `json:"createdBy" bun:"created_by,notnull,nullzero"`
+	CreatedByUser          *User                              `json:"-" bun:"rel:belongs-to,join:created_by=user_id"`
+	UpdatedAt              time.Time                          `json:"updatedAt" bun:"updated_at,notnull,nullzero"`
+	DeletedAt              *time.Time                         `json:"deletedAt,omitempty" bun:"deleted_at"`
 }
 
 func (LunchFlowBankAccount) IdentityPrefix() string {
@@ -64,28 +64,27 @@ func (LunchFlowBankAccount) IdentityPrefix() string {
 }
 
 var (
-	_ pg.BeforeInsertHook = (*LunchFlowBankAccount)(nil)
-	_ pg.BeforeUpdateHook = (*LunchFlowBankAccount)(nil)
+	_ bun.BeforeAppendModelHook = (*LunchFlowBankAccount)(nil)
 )
 
-func (o *LunchFlowBankAccount) BeforeInsert(ctx context.Context) (context.Context, error) {
-	if o.LunchFlowBankAccountId.IsZero() {
-		o.LunchFlowBankAccountId = NewID[LunchFlowBankAccount]()
+func (o *LunchFlowBankAccount) BeforeAppendModel(ctx context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		if o.LunchFlowBankAccountId.IsZero() {
+			o.LunchFlowBankAccountId = NewID[LunchFlowBankAccount]()
+		}
+
+		now := time.Now()
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = now
+		}
+
+		if o.UpdatedAt.IsZero() {
+			o.UpdatedAt = now
+		}
+	case *bun.UpdateQuery:
+		o.UpdatedAt = time.Now()
 	}
 
-	now := time.Now()
-	if o.CreatedAt.IsZero() {
-		o.CreatedAt = now
-	}
-
-	if o.UpdatedAt.IsZero() {
-		o.UpdatedAt = now
-	}
-
-	return ctx, nil
-}
-
-func (o *LunchFlowBankAccount) BeforeUpdate(ctx context.Context) (context.Context, error) {
-	o.UpdatedAt = time.Now()
-	return ctx, nil
+	return nil
 }

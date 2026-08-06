@@ -2,10 +2,10 @@ package controller
 
 import (
 	"bytes"
+	"database/sql"
 	"net/http"
 
 	locale "github.com/elliotcourant/go-lclocale"
-	"github.com/go-pg/pg/v10"
 	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/consts"
 	. "github.com/monetr/monetr/server/models"
@@ -145,7 +145,7 @@ func (c *Controller) postBankAccounts(ctx *echo.Context) error {
 			*bankAccount.LunchFlowBankAccountId,
 		)
 		if err != nil {
-			if errors.Cause(err) == pg.ErrNoRows {
+			if errors.Cause(err) == sql.ErrNoRows {
 				return c.badRequest(
 					ctx,
 					"Lunch Flow Bank Account ID must belong to the specified link",

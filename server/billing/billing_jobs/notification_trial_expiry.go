@@ -30,7 +30,7 @@ func NotificationTrialExpiryCron(ctx queue.Context) error {
 	var accounts []models.Account
 	cutoff := ctx.Clock().Now().AddDate(0, 0, 5)
 
-	err := ctx.DB().ModelContext(ctx, &accounts).
+	err := ctx.DB().NewSelect().Model(&accounts).
 		Join(`INNER JOIN "users" AS "user"`).
 		JoinOn(`"user"."account_id" = "account"."account_id"`).
 		Join(`INNER JOIN "logins" AS "login"`).
@@ -43,7 +43,7 @@ func NotificationTrialExpiryCron(ctx queue.Context) error {
 		Where(`"user"."role" = ?`, models.UserRoleOwner).
 		// Only if the owner has verified.
 		Where(`"login"."email_verified_at" IS NOT NULL`).
-		Select(&accounts)
+		Scan(ctx)
 	if err != nil {
 		return errors.Wrap(err, "failed to query accounts who need a trial expiry notification")
 	}
@@ -133,9 +133,10 @@ func NotificationTrialExpiry(ctx queue.Context, args NotificationTrialExpiryArgu
 		// should be in its own table somehow? Maybe in the long run the billing
 		// interface should handle this expiry email notification as well, then we
 		// don't need to prop-drill the account repo everywhere?
-		_, err = ctx.DB().ModelContext(ctx, owner.Account).
+		_, err = ctx.DB().NewUpdate().Model(owner.Account).
 			WherePK().
-			Update(owner.Account)
+			Returning("*").
+			Exec(ctx)
 		if err != nil {
 			return errors.Wrap(err, "failed to mark account as notified about trial expiration")
 		}

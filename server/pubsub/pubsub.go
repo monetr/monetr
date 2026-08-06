@@ -8,10 +8,11 @@ import (
 	"log/slog"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
+	"github.com/uptrace/bun"
+	"github.com/uptrace/bun/driver/pgdriver"
 )
 
 type (
@@ -59,12 +60,12 @@ var (
 
 type (
 	postgresNotification struct {
-		base pg.Notification
+		base pgdriver.Notification
 	}
 
 	postgresPubSub struct {
 		log *slog.Logger
-		db  *pg.DB
+		db  *bun.DB
 	}
 
 	postgresListener struct {
@@ -72,13 +73,13 @@ type (
 		channel       string
 		hashedChannel string
 		log           *slog.Logger
-		listener      *pg.Listener
+		listener      *pgdriver.Listener
 		closeChannel  chan struct{}
 		dataChannel   chan Notification
 	}
 )
 
-func NewPostgresPubSub(log *slog.Logger, db *pg.DB) PublishSubscribe {
+func NewPostgresPubSub(log *slog.Logger, db *bun.DB) PublishSubscribe {
 	return &postgresPubSub{
 		log: log,
 		db:  db,
@@ -99,7 +100,10 @@ func (p *postgresPubSub) Subscribe(
 	channel string,
 ) (Listener, error) {
 	hashedChannel := p.hashChannel(accountId, channel)
-	listener := p.db.Listen(ctx, hashedChannel)
+	listener := pgdriver.NewListener(p.db)
+	if err := listener.Listen(ctx, hashedChannel); err != nil {
+		return nil, errors.Wrap(err, "failed to listen on channel")
+	}
 
 	pgListener := &postgresListener{
 		accountId:     accountId,
@@ -145,19 +149,16 @@ func (p *postgresPubSub) Notify(
 		"hashedChannel", hashedChannel,
 	)
 
-	_, err := p.db.ExecContext(
-		span.Context(),
-		fmt.Sprintf(`NOTIFY %q, ?`, hashedChannel),
-		payload,
-	)
+	err := pgdriver.Notify(span.Context(), p.db, hashedChannel, payload)
 
 	return errors.Wrap(err, "failed to notify channel")
 }
 
 func (p *postgresListener) backgroundListener() {
+	notifications := p.listener.Channel()
 	for {
 		select {
-		case message := <-p.listener.Channel():
+		case message := <-notifications:
 			if message.Channel != p.hashedChannel {
 				p.log.WarnContext(context.Background(), "ignoring message on channel",
 					"channel", p.channel,

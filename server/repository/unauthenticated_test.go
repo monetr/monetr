@@ -264,9 +264,14 @@ func seedLogin(t *testing.T, login *models.Login) {
 	}
 
 	db := testutils.GetPgDatabase(t)
-	result, err := db.Model(&loginWithPassword).Insert(&loginWithPassword)
+	result, err := db.NewInsert().
+		Model(&loginWithPassword).
+		Returning("*").
+		Exec(t.Context())
 	assert.NoError(t, err, "must insert login for test")
-	assert.Equal(t, 1, result.RowsAffected(), "must affect 1 row for the insert")
+	affected, err := result.RowsAffected()
+	require.NoError(t, err, "must not have an error getting rows affected")
+	assert.EqualValues(t, 1, affected, "must affect 1 row for the insert")
 
 	login.LoginId = loginWithPassword.LoginId
 }
@@ -274,11 +279,12 @@ func seedLogin(t *testing.T, login *models.Login) {
 func TestEmailRepositoryBase_SetEmailVerified(t *testing.T) {
 	assertEmailVerified := func(t *testing.T, emailAddress string, verified bool) {
 		db := testutils.GetPgDatabase(t)
-		exists, err := db.Model(&models.Login{}).
+		exists, err := db.NewSelect().
+			Model(&models.Login{}).
 			Where(`"login"."email" = ?`, emailAddress).
 			Where(`"login"."is_email_verified" = ?`, verified).
 			Limit(1).
-			Exists()
+			Exists(t.Context())
 		assert.NoError(t, err, "must assert that the email is verified")
 		assert.True(t, exists, "login must be in the expected state")
 	}
@@ -388,7 +394,7 @@ func TestEmailRepositoryBase_GetLoginForEmail(t *testing.T) {
 		repo := GetTestUnauthenticatedRepository(t, clock)
 
 		login, err := repo.GetLoginForEmail(t.Context(), emailAddress)
-		assert.EqualError(t, err, "failed to retrieve login by email: pg: no rows in result set")
+		assert.EqualError(t, err, "failed to retrieve login by email: sql: no rows in result set")
 		assert.Nil(t, login, "login result should be nil")
 	})
 }

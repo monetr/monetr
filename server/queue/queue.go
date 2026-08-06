@@ -19,7 +19,6 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/config"
@@ -30,6 +29,7 @@ import (
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/storage"
 	"github.com/pkg/errors"
+	"github.com/uptrace/bun"
 )
 
 type Context interface {
@@ -37,7 +37,7 @@ type Context interface {
 	Billing() billing.Billing
 	Clock() clock.Clock
 	Configuration() config.Configuration
-	DB() pg.DBI
+	DB() bun.IDB
 	Email() communication.EmailCommunication
 	Enqueuer() Enqueuer
 	Job() models.Job
@@ -85,7 +85,7 @@ type Enqueuer interface {
 	// WithTransaction take the current enqueuer, and returns a copy of it but
 	// with the database scoped to the provided interface. This way if a job must
 	// be enqueued within a transaction, this is the safe way to do it.
-	WithTransaction(db pg.DBI) Enqueuer
+	WithTransaction(db bun.IDB) Enqueuer
 }
 
 // Processor is the interface above the implementation of a job processor, it is

@@ -1,10 +1,10 @@
 package repository_test
 
 import (
+	"database/sql"
 	"testing"
 
 	"github.com/benbjohnson/clock"
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
@@ -192,10 +192,10 @@ func TestRepositoryBase_DeleteApiKey(t *testing.T) {
 		require.NoError(t, err, "the first revocation should succeed")
 
 		err = repo.DeleteApiKey(t.Context(), key.ApiKeyId)
-		assert.EqualError(t, err, "invalid api key specified: pg: no rows in result set", "revoking an already revoked key should fail")
-		// The error must wrap pg.ErrNoRows, that is what wrapPgError keys off of to
+		assert.EqualError(t, err, "invalid api key specified: sql: no rows in result set", "revoking an already revoked key should fail")
+		// The error must wrap sql.ErrNoRows, that is what wrapPgError keys off of to
 		// return a 404 to the client instead of a 500.
-		assert.ErrorIs(t, err, pg.ErrNoRows, "the failure should be a no rows error")
+		assert.ErrorIs(t, err, sql.ErrNoRows, "the failure should be a no rows error")
 	})
 
 	t.Run("cannot revoke another account's key", func(t *testing.T) {
@@ -211,7 +211,7 @@ func TestRepositoryBase_DeleteApiKey(t *testing.T) {
 		assert.Error(t, err, "must not be able to revoke another account's key")
 		// Another account's key is indistinguishable from one that does not exist,
 		// the account never learns that the key is real.
-		assert.ErrorIs(t, err, pg.ErrNoRows, "the failure should be a no rows error")
+		assert.ErrorIs(t, err, sql.ErrNoRows, "the failure should be a no rows error")
 
 		// The key must still be active for its own account.
 		stillActive := testutils.MustDBRead(t, *key)

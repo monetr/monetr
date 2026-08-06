@@ -62,7 +62,7 @@ func adminKMSMigrate(parent *cobra.Command) {
 				return errors.Wrap(err, "failed to initialize database")
 			}
 
-			txn, err := db.Begin()
+			txn, err := db.BeginTx(context.Background(), nil)
 			if err != nil {
 				log.Error("failed to begin database transaction", "err", err)
 				return errors.Wrap(err, "failed to being database transaction")
@@ -72,11 +72,12 @@ func adminKMSMigrate(parent *cobra.Command) {
 			for {
 				log.Log(context.Background(), logging.LevelTrace, "querying batch of 100 secrets", "offset", offset)
 				var secrets []models.Secret
-				err := txn.Model(&secrets).
+				err := txn.NewSelect().
+					Model(&secrets).
 					Order(`secret_id ASC`).
 					Limit(100).
 					Offset(offset).
-					Select(&secrets)
+					Scan(context.Background())
 				if err != nil {
 					log.Error("failed to retrieve batch of secrets", "offset", offset, "err", err)
 					return err
@@ -123,7 +124,7 @@ func adminKMSMigrate(parent *cobra.Command) {
 						secret.KeyID = newKeyId
 						secret.Version = newVersion
 						secret.Secret = newCiphertext
-						_, err = txn.Model(&secret).WherePK().Update(&secret)
+						_, err = txn.NewUpdate().Model(&secret).WherePK().Returning("*").Exec(ctx)
 						if err != nil {
 							log.Error("failed to update secret with rotated ciphertext",
 								"secretId", secret.SecretId,

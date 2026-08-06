@@ -12,6 +12,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/uptrace/bun/driver/pgdriver"
 )
 
 type testJobArgs struct {
@@ -161,7 +162,7 @@ func TestPostgresProcessor_ExecuteJob(t *testing.T) {
 		job := testutils.MustInsert(t, models.Job{
 			Queue:     "test-noop",
 			Signature: "test-sig-noop",
-			Priority:  uint64(now.Unix()),
+			Priority:  int64(now.Unix()),
 			Input:     `{}`,
 			Status:    models.ProcessingJobStatus,
 			Attempt:   1,
@@ -199,7 +200,7 @@ func TestPostgresProcessor_ExecuteJob(t *testing.T) {
 		job := testutils.MustInsert(t, models.Job{
 			Queue:     "test-failing",
 			Signature: "test-sig-failing",
-			Priority:  uint64(now.Unix()),
+			Priority:  int64(now.Unix()),
 			Input:     `{}`,
 			Status:    models.ProcessingJobStatus,
 			Attempt:   1,
@@ -238,7 +239,7 @@ func TestPostgresProcessor_ExecuteJob(t *testing.T) {
 		job := testutils.MustInsert(t, models.Job{
 			Queue:     "test-exhausted",
 			Signature: "test-sig-exhausted",
-			Priority:  uint64(now.Unix()),
+			Priority:  int64(now.Unix()),
 			Input:     `{}`,
 			Status:    models.ProcessingJobStatus,
 			Attempt:   maxAttempts, // no attempts remaining
@@ -276,7 +277,7 @@ func TestPostgresProcessor_ExecuteJob(t *testing.T) {
 		job := testutils.MustInsert(t, models.Job{
 			Queue:     "test-panic",
 			Signature: "test-sig-panic",
-			Priority:  uint64(now.Unix()),
+			Priority:  int64(now.Unix()),
 			Input:     `{}`,
 			Status:    models.ProcessingJobStatus,
 			Attempt:   1,
@@ -315,7 +316,7 @@ func TestPostgresProcessor_ExecuteJob(t *testing.T) {
 		job := testutils.MustInsert(t, models.Job{
 			Queue:     "test-backoff",
 			Signature: "test-sig-backoff",
-			Priority:  uint64(now.Unix()),
+			Priority:  int64(now.Unix()),
 			Input:     `{}`,
 			Status:    models.ProcessingJobStatus,
 			Attempt:   2,
@@ -326,7 +327,7 @@ func TestPostgresProcessor_ExecuteJob(t *testing.T) {
 		p.executeJob(&job)
 
 		updated := testutils.MustDBRead(t, job)
-		expectedPriority := uint64(now.Add(attemptBackoff * 2).Unix())
+		expectedPriority := int64(now.Add(attemptBackoff * 2).Unix())
 		assert.Equal(t, models.PendingJobStatus, updated.Status, "job must be rescheduled as pending")
 		assert.Equal(t, expectedPriority, updated.Priority, "priority must be bumped by attemptBackoff * attempt")
 	})
@@ -354,7 +355,7 @@ func TestPostgresProcessor_ExecuteJob(t *testing.T) {
 		job := testutils.MustInsert(t, models.Job{
 			Queue:     "test-successive",
 			Signature: "test-sig-successive",
-			Priority:  uint64(now.Unix()),
+			Priority:  int64(now.Unix()),
 			Input:     `{}`,
 			Status:    models.ProcessingJobStatus,
 			Attempt:   1,
@@ -406,9 +407,10 @@ func TestPostgresProcessor_EnqueueAndExecute(t *testing.T) {
 		assert.NoError(t, err, "must be able to enqueue a job")
 
 		require.Eventually(t, func() bool {
-			count, err := db.Model(new(models.Job)).
+			count, err := db.NewSelect().
+				Model(new(models.Job)).
 				Where(`"status" = ?`, models.CompletedJobStatus).
-				Count()
+				Count(t.Context())
 			return err == nil && count > 0
 		}, 10*time.Second, 100*time.Millisecond, "job must be executed and marked as completed")
 	})
@@ -440,7 +442,7 @@ func TestPostgresProcessor_EnqueueAndExecute(t *testing.T) {
 		err = EnqueueAt(t.Context(), processor, at, testNoopJob, args)
 		assert.NoError(t, err, "duplicate enqueue must not return an error")
 
-		count, err := db.Model(new(models.Job)).Count()
+		count, err := db.NewSelect().Model(new(models.Job)).Count(t.Context())
 		assert.NoError(t, err)
 		assert.Equal(t, 1, count, "only one job row must exist despite two enqueue calls")
 	})
@@ -478,7 +480,7 @@ func TestPostgresProcessor_EnqueueAndExecute(t *testing.T) {
 		err = p.EnqueueAt(t.Context(), "cron-b", at, nil)
 		assert.NoError(t, err, "second queue enqueue must succeed")
 
-		count, err := db.Model(new(models.Job)).Count()
+		count, err := db.NewSelect().Model(new(models.Job)).Count(t.Context())
 		assert.NoError(t, err)
 		assert.Equal(t, 2, count, "both jobs must exist because they belong to different queues")
 	})
@@ -506,9 +508,10 @@ func TestPostgresProcessor_EnqueueAndExecute(t *testing.T) {
 		defer processor.Close()
 
 		require.Eventually(t, func() bool {
-			count, err := db.Model(new(models.Job)).
+			count, err := db.NewSelect().
+				Model(new(models.Job)).
 				Where(`"status" = ?`, models.CompletedJobStatus).
-				Count()
+				Count(t.Context())
 			return err == nil && count > 0
 		}, 5*time.Second, 100*time.Millisecond, "cron job must fire and be marked as completed")
 	})
@@ -539,7 +542,7 @@ func TestPostgresProcessor_EnqueueAt(t *testing.T) {
 		assert.NoError(t, err, "must be able to enqueue a job")
 
 		var job models.Job
-		err = db.Model(&job).Where(`"queue" = ?`, "test-enqueue").Select()
+		err = db.NewSelect().Model(&job).Where(`"queue" = ?`, "test-enqueue").Scan(t.Context())
 		require.NoError(t, err)
 		assert.EqualValues(t, 1, job.Attempt, "initial attempt must be 1")
 		assert.Equal(t, models.PendingJobStatus, job.Status, "initial status must be pending")
@@ -569,9 +572,9 @@ func TestPostgresProcessor_EnqueueAt(t *testing.T) {
 		assert.NoError(t, err, "must be able to enqueue a job")
 
 		var job models.Job
-		err = db.Model(&job).Where(`"queue" = ?`, "test-priority").Select()
+		err = db.NewSelect().Model(&job).Where(`"queue" = ?`, "test-priority").Scan(t.Context())
 		require.NoError(t, err)
-		assert.Equal(t, uint64(at.Unix()), job.Priority, "priority must match the at timestamp")
+		assert.Equal(t, int64(at.Unix()), job.Priority, "priority must match the at timestamp")
 	})
 }
 
@@ -599,7 +602,7 @@ func TestPostgresProcessor_ConsumeJobMaybe(t *testing.T) {
 		testutils.MustInsert(t, models.Job{
 			Queue:     "test-consume",
 			Signature: "test-sig-consume",
-			Priority:  uint64(now.Add(-1 * time.Hour).Unix()),
+			Priority:  int64(now.Add(-1 * time.Hour).Unix()),
 			Input:     `{}`,
 			Status:    models.PendingJobStatus,
 			Attempt:   1,
@@ -638,7 +641,7 @@ func TestPostgresProcessor_ConsumeJobMaybe(t *testing.T) {
 		testutils.MustInsert(t, models.Job{
 			Queue:     "test-no-consume",
 			Signature: "test-sig-no-consume",
-			Priority:  uint64(now.Add(-1 * time.Hour).Unix()),
+			Priority:  int64(now.Add(-1 * time.Hour).Unix()),
 			Input:     `{}`,
 			Status:    models.ProcessingJobStatus,
 			Attempt:   1,
@@ -675,7 +678,7 @@ func TestPostgresProcessor_ConsumeJobMaybe(t *testing.T) {
 		testutils.MustInsert(t, models.Job{
 			Queue:     "test-unregistered",
 			Signature: "test-sig-unregistered",
-			Priority:  uint64(clock.Now().Add(-1 * time.Hour).Unix()),
+			Priority:  int64(clock.Now().Add(-1 * time.Hour).Unix()),
 			Input:     `{}`,
 			Status:    models.PendingJobStatus,
 			Attempt:   1,
@@ -734,7 +737,7 @@ func TestPostgresProcessor_ConsumeJobMaybe(t *testing.T) {
 		testutils.MustInsert(t, models.Job{
 			Queue:     "test-future",
 			Signature: "test-sig-future",
-			Priority:  uint64(clock.Now().Add(1 * time.Hour).Unix()),
+			Priority:  int64(clock.Now().Add(1 * time.Hour).Unix()),
 			Input:     `{}`,
 			Status:    models.PendingJobStatus,
 			Attempt:   1,
@@ -837,16 +840,18 @@ func TestPostgresProcessor_HydrateCronJobTable(t *testing.T) {
 		assert.NoError(t, err, "hydrate must not return an error")
 
 		// The stale cron must have been removed.
-		staleExists, err := db.Model(new(models.CronJob)).
+		staleExists, err := db.NewSelect().
+			Model(new(models.CronJob)).
 			Where(`"queue" = ?`, "test-stale").
-			Exists()
+			Exists(t.Context())
 		assert.NoError(t, err)
 		assert.False(t, staleExists, "stale cron job must be removed")
 
 		// The registered cron must exist.
-		currentExists, err := db.Model(new(models.CronJob)).
+		currentExists, err := db.NewSelect().
+			Model(new(models.CronJob)).
 			Where(`"queue" = ?`, "test-current").
-			Exists()
+			Exists(t.Context())
 		assert.NoError(t, err)
 		assert.True(t, currentExists, "registered cron job must exist")
 	})
@@ -874,7 +879,7 @@ func TestPostgresProcessor_HydrateCronJobTable(t *testing.T) {
 		assert.NoError(t, err, "hydrate must not return an error")
 
 		var cronJob models.CronJob
-		err = db.Model(&cronJob).Where(`"queue" = ?`, "test-new-cron").Select()
+		err = db.NewSelect().Model(&cronJob).Where(`"queue" = ?`, "test-new-cron").Scan(t.Context())
 		require.NoError(t, err, "cron job row must exist after hydration")
 		assert.Equal(t, "0 0 * * * *", cronJob.CronSchedule, "schedule must match the registered schedule")
 		assert.True(t, cronJob.NextRunAt.After(clock.Now()), "next_run_at must be in the future relative to the clock")
@@ -911,7 +916,7 @@ func TestPostgresProcessor_HydrateCronJobTable(t *testing.T) {
 		assert.NoError(t, err, "hydrate must not return an error")
 
 		var cronJob models.CronJob
-		err = db.Model(&cronJob).Where(`"queue" = ?`, "test-update-cron").Select()
+		err = db.NewSelect().Model(&cronJob).Where(`"queue" = ?`, "test-update-cron").Scan(t.Context())
 		require.NoError(t, err)
 		assert.Equal(t, "0 0 * * * *", cronJob.CronSchedule, "schedule must be updated to the newly registered expression")
 	})
@@ -958,9 +963,10 @@ func TestPostgresProcessor_Close(t *testing.T) {
 		err = p.Close()
 		assert.NoError(t, err, "graceful shutdown must complete without error")
 
-		count, err := db.Model(new(models.Job)).
+		count, err := db.NewSelect().
+			Model(new(models.Job)).
 			Where(`"status" = ?`, models.CompletedJobStatus).
-			Count()
+			Count(t.Context())
 		assert.NoError(t, err)
 		assert.Equal(t, 1, count, "in-flight job must be completed after graceful shutdown")
 	})
@@ -972,7 +978,8 @@ func TestPostgresProcessor_WakeNotification(t *testing.T) {
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 		log := testutils.GetLog(t)
 
-		listener := db.Listen(context.Background(), "queue:wake")
+		listener := pgdriver.NewListener(db)
+		require.NoError(t, listener.Listen(context.Background(), "queue:wake"))
 		defer listener.Close()
 		notifications := listener.Channel()
 
@@ -1018,7 +1025,8 @@ func TestPostgresProcessor_WakeNotification(t *testing.T) {
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 		log := testutils.GetLog(t)
 
-		listener := db.Listen(context.Background(), "queue:wake")
+		listener := pgdriver.NewListener(db)
+		require.NoError(t, listener.Listen(context.Background(), "queue:wake"))
 		defer listener.Close()
 		notifications := listener.Channel()
 
@@ -1079,7 +1087,7 @@ func TestPostgresProcessor_WakeNotification(t *testing.T) {
 		}
 
 		// All three jobs must exist despite the single notification.
-		count, err := db.Model(new(models.Job)).Count()
+		count, err := db.NewSelect().Model(new(models.Job)).Count(t.Context())
 		assert.NoError(t, err)
 		assert.Equal(t, 3, count, "all three jobs must be enqueued within the transaction")
 	})
@@ -1089,7 +1097,8 @@ func TestPostgresProcessor_WakeNotification(t *testing.T) {
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 		log := testutils.GetLog(t)
 
-		listener := db.Listen(context.Background(), "queue:wake")
+		listener := pgdriver.NewListener(db)
+		require.NoError(t, listener.Listen(context.Background(), "queue:wake"))
 		defer listener.Close()
 		notifications := listener.Channel()
 
@@ -1122,7 +1131,7 @@ func TestPostgresProcessor_WakeNotification(t *testing.T) {
 		require.ErrorIs(t, err, rollbackErr)
 
 		// The job row must not exist because the transaction was rolled back.
-		count, err := db.Model(new(models.Job)).Count()
+		count, err := db.NewSelect().Model(new(models.Job)).Count(t.Context())
 		assert.NoError(t, err)
 		assert.Equal(t, 0, count, "no jobs must exist after a rolled back transaction")
 
