@@ -74,12 +74,12 @@ reaches them instead.
 
 Each endpoint states one of these on a line that reads **Auth:**.
 
-| Auth line | What it means |
-| --- | --- |
-| None | No credentials needed at all. |
-| API key | Send your key over Basic auth. |
+| Auth line                      | What it means                                                                     |
+| ------------------------------ | --------------------------------------------------------------------------------- |
+| None                           | No credentials needed at all.                                                     |
+| API key                        | Send your key over Basic auth.                                                    |
 | API key, subscription required | Same, and the account also needs an active subscription. This is most of the API. |
-| Not available to API keys | You can't reach this with a key. The page tells you what can. |
+| Not available to API keys      | You can't reach this with a key. The page tells you what can.                     |
 
 Anything marked **subscription required** returns 402 with
 `{"error": "subscription is not active"}` when the account isn't paid up.
@@ -144,19 +144,19 @@ null, as `problems.<field>.oneOf`.
 
 ### Status codes
 
-| Code | What it means here |
-| --- | --- |
-| 200 | Fine. |
-| 204 | Fine, and there's nothing to send back. A few endpoints use this instead of an empty array or `null`. |
-| 400 | Your request was wrong. Bad JSON, a malformed ID, a query parameter out of range, or a failed validation. |
-| 401 | Missing credentials, or a key ID and secret that don't match. Also what you get for an endpoint that doesn't accept keys. |
-| 402 | Subscription isn't active. Only possible when billing is enabled. |
-| 404 | The record doesn't exist, doesn't belong to your account, or the feature is turned off on this server. monetr won't tell you which, so that a stranger can't probe the API to find out what exists. |
-| 406 | The server can't do what you asked because of how it's configured. Asking for a Plaid link on an instance without Plaid, for example. |
-| 408 | The request took too long and was cut off. |
-| 425 | You asked for a manual sync too soon after the last one. Only Lunch Flow and Plaid syncing return this. |
-| 428 | Something has to happen before this'll work: verify your email, finish MFA, or reset your password. Only the sign-in flow returns this, so an API key won't see it. Check the `code`. |
-| 500 | Our fault. |
+| Code | What it means here                                                                                                                                                                                  |
+| ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 200  | Fine.                                                                                                                                                                                               |
+| 204  | Fine, and there's nothing to send back. A few endpoints use this instead of an empty array or `null`.                                                                                               |
+| 400  | Your request was wrong. Bad JSON, a malformed ID, a query parameter out of range, or a failed validation.                                                                                           |
+| 401  | Missing credentials, or a key ID and secret that don't match. Also what you get for an endpoint that doesn't accept keys.                                                                           |
+| 402  | Subscription isn't active. Only possible when billing is enabled.                                                                                                                                   |
+| 404  | The record doesn't exist, doesn't belong to your account, or the feature is turned off on this server. monetr won't tell you which, so that a stranger can't probe the API to find out what exists. |
+| 406  | The server can't do what you asked because of how it's configured. Asking for a Plaid link on an instance without Plaid, for example.                                                               |
+| 408  | The request took too long and was cut off.                                                                                                                                                          |
+| 425  | You asked for a manual sync too soon after the last one. Only Lunch Flow and Plaid syncing return this.                                                                                             |
+| 428  | Something has to happen before this'll work: verify your email, finish MFA, or reset your password. Only the sign-in flow returns this, so an API key won't see it. Check the `code`.               |
+| 500  | Our fault.                                                                                                                                                                                          |
 
 Two more you'll only meet in specific corners: **202** when a background job was queued rather
 than run inline (Lunch Flow and Plaid syncs), and **424** from the Plaid webhook when an
@@ -177,33 +177,33 @@ The prefix is part of the ID, not decoration. Pass the whole string. Sending a
 `bac_` prefixed ID where a `txn_` is expected gets you a 400, not a 404, because monetr can
 tell it's the wrong kind of thing before it ever hits the database.
 
-| Prefix | Object |
-| --- | --- |
-| `acct` | Account |
-| `bac` | Bank account |
-| `beta` | Beta code |
-| `file` | File |
-| `fund` | Funding schedule |
-| `job` | Background job |
-| `key` | API key |
-| `lbac` | Lunch Flow bank account |
-| `lfx` | Lunch Flow link |
-| `lgn` | Login |
-| `link` | Link |
-| `ltxn` | Lunch Flow transaction |
-| `pbac` | Plaid bank account |
-| `plx` | Plaid link |
-| `psyn` | Plaid sync |
-| `ptxn` | Plaid transaction |
-| `scrt` | Secret |
-| `spnd` | Spending |
-| `tcl` | Transaction cluster |
-| `trl` | Transaction rule |
-| `txim` | Transaction import |
+| Prefix | Object                     |
+| ------ | -------------------------- |
+| `acct` | Account                    |
+| `bac`  | Bank account               |
+| `beta` | Beta code                  |
+| `file` | File                       |
+| `fund` | Funding schedule           |
+| `job`  | Background job             |
+| `key`  | API key                    |
+| `lbac` | Lunch Flow bank account    |
+| `lfx`  | Lunch Flow link            |
+| `lgn`  | Login                      |
+| `link` | Link                       |
+| `ltxn` | Lunch Flow transaction     |
+| `pbac` | Plaid bank account         |
+| `plx`  | Plaid link                 |
+| `psyn` | Plaid sync                 |
+| `ptxn` | Plaid transaction          |
+| `scrt` | Secret                     |
+| `spnd` | Spending                   |
+| `tcl`  | Transaction cluster        |
+| `trl`  | Transaction rule           |
+| `txim` | Transaction import         |
 | `txix` | Transaction import mapping |
-| `txn` | Transaction |
-| `txup` | Transaction upload |
-| `user` | User |
+| `txn`  | Transaction                |
+| `txup` | Transaction upload         |
+| `user` | User                       |
 
 ULIDs sort lexicographically by creation time, so sorting a list of IDs as strings gives
 you oldest to newest for free.
@@ -240,10 +240,10 @@ non-dollar user.
 
 Endpoints that return long lists take `limit` and `offset` as query parameters.
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `limit` | integer | No | How many records to return. Defaults to 25, and has to be between 1 and 100. Anything outside that is a 400, it does not silently clamp. |
-| `offset` | integer | No | How many records to skip. Defaults to 0. Negative values are a 400. |
+| Attribute | Type    | Required | Description                                                                                                                              |
+| --------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `limit`   | integer | No       | How many records to return. Defaults to 25, and has to be between 1 and 100. Anything outside that is a 400, it does not silently clamp. |
+| `offset`  | integer | No       | How many records to skip. Defaults to 0. Negative values are a 400.                                                                      |
 
 There's no total count and no cursor. You've reached the end when you get back fewer
 records than you asked for. Two endpoints take these, the transactions list and

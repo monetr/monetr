@@ -3,7 +3,7 @@ title: "Links API"
 description: "A link is one bank connection in monetr. Use the API to list Plaid, manual and Lunch Flow links, create manual ones, and remove them cleanly."
 ---
 
-import { Badge } from '@rspress/core/theme';
+import { Badge } from "@rspress/core/theme";
 
 # Links API
 
@@ -22,44 +22,48 @@ handshake with Plaid's browser SDK that an API key can't drive, so it lives in
 
 ## The link object
 
-| Attribute | Type | Description |
-| --- | --- | --- |
-| `linkId` | string (ulid) | Identifies the link. |
-| `linkType` | string | `plaid`, `manual`, `lunch_flow`, `stripe`, or `unknown`. |
-| `plaidLink` | object | Sync state for Plaid links, described below. Absent on every other kind. |
-| `lunchFlowLinkId` | string (ulid) | The Lunch Flow link behind this one. Only on Lunch Flow links. |
-| `lunchFlowLink` | object | The upstream Lunch Flow link. Only on Lunch Flow links. |
-| `institutionName` | string | The bank's name. On a manual link this is whatever you called it, and it's the label you see in the sidebar. |
-| `description` | string, nullable | Your own note about the link. Null when you haven't set one. |
-| `createdAt` | timestamp | When the link was made. |
-| `createdBy` | string (ulid) | The user who made it. |
-| `updatedAt` | timestamp | When the link last changed. |
-| `deletedAt` | timestamp, nullable | When the link was removed. Always null in list responses, which filter deleted links out entirely. |
+| Attribute         | Type                | Description                                                                                                  |
+| ----------------- | ------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `linkId`          | string (ulid)       | Identifies the link.                                                                                         |
+| `linkType`        | string              | `plaid`, `manual`, `lunch_flow`, or `unknown`.                                                               |
+| `plaidLink`       | object              | Sync state for Plaid links, described below. Absent on every other kind.                                     |
+| `lunchFlowLinkId` | string (ulid)       | The Lunch Flow link behind this one. Only on Lunch Flow links.                                               |
+| `lunchFlowLink`   | object              | The upstream Lunch Flow link. Only on Lunch Flow links.                                                      |
+| `institutionName` | string              | The bank's name. On a manual link this is whatever you called it, and it's the label you see in the sidebar. |
+| `description`     | string, nullable    | Your own note about the link. Null when you haven't set one.                                                 |
+| `createdAt`       | timestamp           | When the link was made.                                                                                      |
+| `createdBy`       | string (ulid)       | The user who made it.                                                                                        |
+| `updatedAt`       | timestamp           | When the link last changed.                                                                                  |
+| `deletedAt`       | timestamp, nullable | When the link was removed. Always null in list responses, which filter deleted links out entirely.           |
 
 ### The `plaidLink` object
 
 Only present on Plaid links. This is where you look to find out whether a bank connection
 is healthy.
 
-| Attribute | Type | Description |
-| --- | --- | --- |
-| `products` | array of strings | The Plaid products this connection was authorized for. |
-| `status` | string | `pending`, `setup`, `error`, `pending_expiration`, `revoked`, `deactivated`, or `unknown`. |
-| `errorCode` | string | Plaid's error code when the connection is broken. Absent when it's fine. |
-| `expirationDate` | timestamp, nullable | When the bank's consent runs out, for institutions that expire it. Null when nothing expires. |
-| `newAccountsAvailable` | boolean | Whether the bank has accounts monetr knows about but you haven't added. |
-| `institutionId` | string | Plaid's institution identifier, like `ins_116794`. This is what you pass to the [institution lookup](./internal#institution-details). |
-| `institutionName` | string | The institution's name according to Plaid. |
-| `lastManualSync` | timestamp, nullable | When someone last forced a sync by hand. |
-| `lastSuccessfulUpdate` | timestamp, nullable | When data last actually came through. |
-| `lastAttemptedUpdate` | timestamp, nullable | When monetr last tried to sync, successful or not. Compare against `lastSuccessfulUpdate` to spot a connection that's been failing quietly. |
-| `lastAccountSync` | timestamp, nullable | When monetr last checked for new accounts at the bank. |
-| `updatedAt` | timestamp | When the sync state last changed. |
-| `createdAt` | timestamp | When the Plaid connection was made. |
-| `createdBy` | string (ulid) | The user who connected it. |
-| `deletedAt` | timestamp, nullable | When it was deactivated. |
+| Attribute              | Type                | Description                                                                                                                                 |
+| ---------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `products`             | array of strings    | The Plaid products this connection was authorized for.                                                                                      |
+| `status`               | string              | `pending`, `setup`, `error`, `pending_expiration`, `revoked`, `deactivated`, or `unknown`.                                                  |
+| `errorCode`            | string              | Plaid's error code when the connection is broken. Absent when it's fine.                                                                    |
+| `expirationDate`       | timestamp, nullable | When the bank's consent runs out, for institutions that expire it. Null when nothing expires.                                               |
+| `newAccountsAvailable` | boolean             | Whether the bank has accounts monetr knows about but you haven't added.                                                                     |
+| `institutionId`        | string              | Plaid's institution identifier, like `ins_116794`. This is what you pass to the [institution lookup](./internal#institution-details).       |
+| `institutionName`      | string              | The institution's name according to Plaid.                                                                                                  |
+| `lastManualSync`       | timestamp, nullable | When someone last forced a sync by hand.                                                                                                    |
+| `lastSuccessfulUpdate` | timestamp, nullable | When data last actually came through.                                                                                                       |
+| `lastAttemptedUpdate`  | timestamp, nullable | When monetr last tried to sync, successful or not. Compare against `lastSuccessfulUpdate` to spot a connection that's been failing quietly. |
+| `lastAccountSync`      | timestamp, nullable | When monetr last checked for new accounts at the bank.                                                                                      |
+| `updatedAt`            | timestamp           | When the sync state last changed.                                                                                                           |
+| `createdAt`            | timestamp           | When the Plaid connection was made.                                                                                                         |
+| `createdBy`            | string (ulid)       | The user who connected it.                                                                                                                  |
+| `deletedAt`            | timestamp, nullable | When it was deactivated.                                                                                                                    |
 
 The access token, item ID and webhook URL are all deliberately left out of the response.
+
+### The `lunchFlowLink` object
+
+The Lunch Flow link sub-object is documented [here](./lunch_flow.mdx#the-lunch-flow-link-object)
 
 ## <Badge type="info">GET</Badge> List links
 
@@ -139,9 +143,9 @@ GET /api/links/:linkId
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `linkId` | string (ulid) | Yes | The link you want. |
+| Attribute | Type          | Required | Description        |
+| --------- | ------------- | -------- | ------------------ |
+| `linkId`  | string (ulid) | Yes      | The link you want. |
 
 ### Example
 
@@ -169,10 +173,10 @@ Unlike the list, this one will return a deleted link if you ask for it by ID, wi
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | `linkId` is malformed. |
-| 404 | No such link on your account. |
+| Status | When                          |
+| ------ | ----------------------------- |
+| 400    | `linkId` is malformed.        |
+| 404    | No such link on your account. |
 
 ## <Badge type="tip">POST</Badge> Create a manual link
 
@@ -192,11 +196,11 @@ POST /api/links
 
 ### Body
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `institutionName` | string | Yes | What to call the link. This is the label in the sidebar, so use the bank's name. |
-| `description` | string, nullable | No | A note to yourself. |
-| `lunchFlowLinkId` | string (ulid), nullable | No | Turns this into a Lunch Flow link instead of a manual one. The Lunch Flow link has to already exist and be in a pending status, and creating the link activates it. Leave this off unless you're wiring up Lunch Flow. |
+| Attribute         | Type                    | Required | Description                                                                                                                                                                                                            |
+| ----------------- | ----------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `institutionName` | string                  | Yes      | What to call the link. This is the label in the sidebar, so use the bank's name.                                                                                                                                       |
+| `description`     | string, nullable        | No       | A note to yourself.                                                                                                                                                                                                    |
+| `lunchFlowLinkId` | string (ulid), nullable | No       | Turns this into a Lunch Flow link instead of a manual one. The Lunch Flow link has to already exist and be in a pending status, and creating the link activates it. Leave this off unless you're wiring up Lunch Flow. |
 
 `linkType` is not something you send. Leave `lunchFlowLinkId` off and you get a manual link.
 Send it and you get a Lunch Flow link. Plaid links can't be made here at all.
@@ -229,10 +233,10 @@ curl --request POST \
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | `institutionName` is missing, or you sent a `lunchFlowLinkId` for a Lunch Flow link that isn't pending. |
-| 404 | You sent a `lunchFlowLinkId` on a server where Lunch Flow isn't enabled. |
+| Status | When                                                                                                    |
+| ------ | ------------------------------------------------------------------------------------------------------- |
+| 400    | `institutionName` is missing, or you sent a `lunchFlowLinkId` for a Lunch Flow link that isn't pending. |
+| 404    | You sent a `lunchFlowLinkId` on a server where Lunch Flow isn't enabled.                                |
 
 ## <Badge type="warning">PATCH</Badge> Update a link
 
@@ -249,16 +253,16 @@ PATCH /api/links/:linkId
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `linkId` | string (ulid) | Yes | The link to change. |
+| Attribute | Type          | Required | Description         |
+| --------- | ------------- | -------- | ------------------- |
+| `linkId`  | string (ulid) | Yes      | The link to change. |
 
 ### Body
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `description` | string, nullable | No | A note to yourself, or null to clear it. |
-| `institutionName` | string | No | A new name for the link. |
+| Attribute         | Type             | Required | Description                              |
+| ----------------- | ---------------- | -------- | ---------------------------------------- |
+| `description`     | string, nullable | No       | A note to yourself, or null to clear it. |
+| `institutionName` | string           | No       | A new name for the link.                 |
 
 ### Example
 
@@ -288,10 +292,10 @@ curl --request PATCH \
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | `institutionName` was sent but blank. |
-| 404 | No such link. |
+| Status | When                                  |
+| ------ | ------------------------------------- |
+| 400    | `institutionName` was sent but blank. |
+| 404    | No such link.                         |
 
 ## <Badge type="danger">DELETE</Badge> Remove a link
 
@@ -313,9 +317,9 @@ DELETE /api/links/:linkId
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `linkId` | string (ulid) | Yes | The link to remove. |
+| Attribute | Type          | Required | Description         |
+| --------- | ------------- | -------- | ------------------- |
+| `linkId`  | string (ulid) | Yes      | The link to remove. |
 
 ### Example
 
@@ -329,7 +333,7 @@ Returns 200 with an empty body.
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | `linkId` is malformed, or the link is already deleted. Calling this twice is an error rather than a no-op, so monetr doesn't ask Plaid to remove the same item twice. |
-| 404 | No such link. |
+| Status | When                                                                                                                                                                  |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 400    | `linkId` is malformed, or the link is already deleted. Calling this twice is an error rather than a no-op, so monetr doesn't ask Plaid to remove the same item twice. |
+| 404    | No such link.                                                                                                                                                         |

@@ -3,7 +3,7 @@ title: "Webhooks (Plaid and Stripe)"
 description: "The inbound Plaid and Stripe webhook endpoints in monetr, how each signature is verified, and what an operator has to configure to receive them."
 ---
 
-import { Badge } from '@rspress/core/theme';
+import { Badge } from "@rspress/core/theme";
 
 # Webhooks
 
@@ -60,14 +60,14 @@ Anything that fails is a 401 or a 400. There's no partial trust.
 
 Dispatch is on `webhook_type` and `webhook_code`:
 
-| Type | Code | What happens |
-| --- | --- | --- |
-| `TRANSACTIONS` | `SYNC_UPDATES_AVAILABLE`, `INITIAL_UPDATE`, `HISTORICAL_UPDATE` | Queues a sync job for the link. |
-| `TRANSACTIONS` | `RECURRING_TRANSACTIONS_UPDATE` | Logged and ignored. monetr does its own recurring detection. |
-| `ITEM` | `LOGIN_REPAIRED` | Clears the error and puts the link back to `setup`. |
-| `ITEM` | `ERROR` | Marks the link `error` and records Plaid's error code. |
-| `ITEM` | `PENDING_EXPIRATION` | Marks the link `pending_expiration` and records when consent runs out. |
-| `ITEM` | `USER_PERMISSION_REVOKED`, `USER_ACCOUNT_REVOKED` | Marks the link `revoked`. |
+| Type           | Code                                                            | What happens                                                           |
+| -------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `TRANSACTIONS` | `SYNC_UPDATES_AVAILABLE`, `INITIAL_UPDATE`, `HISTORICAL_UPDATE` | Queues a sync job for the link.                                        |
+| `TRANSACTIONS` | `RECURRING_TRANSACTIONS_UPDATE`                                 | Logged and ignored. monetr does its own recurring detection.           |
+| `ITEM`         | `LOGIN_REPAIRED`                                                | Clears the error and puts the link back to `setup`.                    |
+| `ITEM`         | `ERROR`                                                         | Marks the link `error` and records Plaid's error code.                 |
+| `ITEM`         | `PENDING_EXPIRATION`                                            | Marks the link `pending_expiration` and records when consent runs out. |
+| `ITEM`         | `USER_PERMISSION_REVOKED`, `USER_ACCOUNT_REVOKED`               | Marks the link `revoked`.                                              |
 
 Anything else is logged and ignored, so monetr doesn't sync twice for events that mean the
 same thing.
@@ -104,11 +104,11 @@ version than the library still works.
 
 ### What monetr does with it
 
-| Event | What happens |
-| --- | --- |
-| `checkout.session.completed` | Marks the account's subscription active. |
+| Event                                                                                             | What happens                                       |
+| ------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| `checkout.session.completed`                                                                      | Marks the account's subscription active.           |
 | `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted` | Updates the stored subscription status and expiry. |
-| `customer.deleted` | Clears the subscription from the account. |
+| `customer.deleted`                                                                                | Clears the subscription from the account.          |
 
 Other events are accepted and ignored, which is the right answer for a webhook: Stripe
 retries anything that doesn't return a success status, so failing an event you don't

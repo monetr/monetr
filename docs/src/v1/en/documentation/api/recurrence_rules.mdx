@@ -64,19 +64,19 @@ occurrence you actually want, keeping the time at midnight in your timezone.
 
 These are the same patterns the app's own funding schedule picker offers.
 
-| What you want | Rule |
-| --- | --- |
-| Every week on Friday | `DTSTART:20240105T060000Z\nRRULE:FREQ=WEEKLY;BYDAY=FR` |
-| Every other week on Friday | `DTSTART:20240105T060000Z\nRRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=FR` |
-| Monthly on the 1st | `DTSTART:20240101T060000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1` |
-| Monthly on the 15th | `DTSTART:20240115T060000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=15` |
-| Monthly on the last day | `DTSTART:20240131T060000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=-1` |
-| 1st and 15th of every month | `DTSTART:20240101T060000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1,15` |
-| 15th and last day of every month | `DTSTART:20240115T060000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=15,-1` |
-| Every other month | `DTSTART:20240101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=2;BYMONTHDAY=1` |
-| Quarterly | `DTSTART:20240101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=1` |
-| Every six months | `DTSTART:20240101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=6;BYMONTHDAY=1` |
-| Yearly | `DTSTART:20240101T060000Z\nRRULE:FREQ=YEARLY` |
+| What you want                    | Rule                                                                   |
+| -------------------------------- | ---------------------------------------------------------------------- |
+| Every week on Friday             | `DTSTART:20240105T060000Z\nRRULE:FREQ=WEEKLY;BYDAY=FR`                 |
+| Every other week on Friday       | `DTSTART:20240105T060000Z\nRRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=FR`      |
+| Monthly on the 1st               | `DTSTART:20240101T060000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1`            |
+| Monthly on the 15th              | `DTSTART:20240115T060000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=15`           |
+| Monthly on the last day          | `DTSTART:20240131T060000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=-1`           |
+| 1st and 15th of every month      | `DTSTART:20240101T060000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1,15`         |
+| 15th and last day of every month | `DTSTART:20240115T060000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=15,-1`        |
+| Every other month                | `DTSTART:20240101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=2;BYMONTHDAY=1` |
+| Quarterly                        | `DTSTART:20240101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=1` |
+| Every six months                 | `DTSTART:20240101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=6;BYMONTHDAY=1` |
+| Yearly                           | `DTSTART:20240101T060000Z\nRRULE:FREQ=YEARLY`                          |
 
 `BYMONTHDAY=-1` counts backwards from the end of the month, so it lands on the 28th, 30th or
 31st as appropriate. That's how you say "last day of the month" without special-casing
