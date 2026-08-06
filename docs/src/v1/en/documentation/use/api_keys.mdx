@@ -1,0 +1,157 @@
+---
+title: API Keys
+description: Create an API key in monetr's Settings, use it to call the REST API from scripts or other tools, and revoke it when you're done. Includes example requests for both a working key and a revoked one.
+---
+
+import { Steps } from '@rspress/core/theme'
+
+# API Keys
+
+An API key lets a script or another tool talk to monetr without a browser session sitting
+behind it. Anything the app can do, a key can do too, since the app itself calls the exact
+same REST API that's documented on this site.
+
+Under the hood a key is a Basic auth pair: an ID that looks like any other monetr
+identifier, and a secret you only see once.
+
+You'll need a monetr account first. If you don't have one yet, start with [Getting
+Started](/documentation/use/getting_started).
+
+## Create a key
+
+:::info
+Creating a key needs an active subscription on monetr's hosted service. Self-hosted
+instances with billing turned off skip that check entirely.
+:::
+
+Once you're signed in, click the **gear icon** on the sidebar to open **Settings**, then
+click **API Keys** along the top.
+
+![API Keys, empty](/v1/en/documentation/use/assets/api_keys_empty.png)
+
+<Steps>
+
+### Click New API Key
+
+Click **New API Key** in the top right.
+
+![Create API Key modal](/v1/en/documentation/use/assets/api_key_create_modal.png)
+
+### Name it
+
+Give the key a name that'll remind you what it's for later, the script or tool that's going
+to use it works well. This key has full read and write access to your account, so treat the
+name as a label you can audit later, not just a reminder for today.
+
+![Naming a new API key](/v1/en/documentation/use/assets/api_key_named.png)
+
+Click **Create** once you're happy with the name.
+
+### Copy the secret
+
+monetr shows you the secret exactly once. It stores a public key derived from it and
+verifies requests against that, so it genuinely can't show this to you again once the
+dialog closes.
+
+![API key created, secret shown once](/v1/en/documentation/use/assets/api_key_secret.png)
+
+:::warning
+Treat the secret like a password. Don't commit it to git, don't paste it into a chat, don't
+leave it sitting in a screenshot. If you lose it, revoke the key and make a new one, there's
+no way to recover the original.
+:::
+
+Copy both the **Key ID** and the **Secret** somewhere safe, then click **Done**.
+
+### Manage it later
+
+Your key now shows up in the table, along with who created it and when.
+
+![API Keys table with one key](/v1/en/documentation/use/assets/api_keys_table.png)
+
+You can revoke a key from here at any time. Revoking takes effect immediately, anything
+still using that key starts failing with a 401 on its next request.
+
+</Steps>
+
+## Using your key
+
+Export both halves as environment variables and every curl example on this site runs
+unedited:
+
+```bash
+export MONETR_API_KEY_ID="key_01hy4rfqk8z4xv1c2v44cf6abc"
+export MONETR_API_KEY_SECRET="the-secret-you-copied-above"
+```
+
+Then try listing your links:
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/links" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+[
+  {
+    "linkId": "link_01kzbxb1hzhj66ymc3j17t7ncr",
+    "linkType": "manual",
+    "institutionName": "Lakeside Credit Union",
+    "description": null,
+    "createdAt": "2026-08-06T16:08:42.815Z",
+    "createdBy": "user_01kzbx2fzjyxqzfjg30p7hempa",
+    "updatedAt": "2026-08-06T16:08:42.815Z",
+    "deletedAt": null
+  }
+]
+```
+
+That's the manual budget from [Getting Started](/documentation/use/getting_started), read
+back over the API instead of the app.
+
+**Full reference:** [API Keys](/documentation/api/api_keys), [List
+links](/documentation/api/links#list-links)
+
+## Revoking a key
+
+Revoke a key the moment you're done with whatever was using it, or the moment you suspect
+it's leaked. monetr doesn't have a way to rotate a secret in place, revoking and creating a
+new key is the only path.
+
+Back on the **API Keys** tab, click **Revoke** next to the key.
+
+![Revoke API Key confirmation dialog](/v1/en/documentation/use/assets/api_key_revoke_confirm.png)
+
+Click **Revoke** again to confirm. There's no undo, the key disappears from the table right
+away and you're back to the empty state from the start of this guide if it was the only one
+you had.
+
+### Using a revoked key
+
+Once a key is revoked, every request using it comes back `401`, immediately, no grace
+period:
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/links" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+{
+  "error": "unauthorized"
+}
+```
+
+That's the same 401 you'd get from a key ID and secret that never matched in the first
+place, monetr doesn't distinguish "revoked" from "never valid" in the error body. See
+[Errors](/documentation/api/overview#errors) for the rest of the error shapes, and [Revoke
+an API key](/documentation/api/api_keys#revoke-an-api-key) for the endpoint itself.
+
+## What to read next
+
+- [Quickstart](/documentation/api/quickstart) builds a whole budget over the API in six
+  calls, starting from the same manual link you just read back above.
+- [REST API Overview](/documentation/api/overview) covers how auth, errors, IDs and money
+  work everywhere on the API, not just here.
