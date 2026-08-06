@@ -3,7 +3,7 @@ title: "API Keys"
 description: "How monetr API keys work: the ID and secret pair you send over Basic auth, how to create and revoke them, and why a key can't manage keys."
 ---
 
-import { Badge } from '@rspress/core/theme';
+import { Badge } from "@rspress/core/theme";
 
 # API Keys
 
@@ -24,14 +24,14 @@ list of what exists is complete.
 
 ## The API key object
 
-| Attribute | Type | Description |
-| --- | --- | --- |
-| `apiKeyId` | string (ulid) | Identifies the key. This is also the Basic auth username. |
-| `name` | string | Whatever you called it, so you can tell keys apart later. |
-| `createdAt` | timestamp | When the key was made. |
+| Attribute   | Type          | Description                                                                                                                 |
+| ----------- | ------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `apiKeyId`  | string (ulid) | Identifies the key. This is also the Basic auth username.                                                                   |
+| `name`      | string        | Whatever you called it, so you can tell keys apart later.                                                                   |
+| `createdAt` | timestamp     | When the key was made.                                                                                                      |
 | `createdBy` | string (ulid) | The user who made it. Requests using this key act as that user. Resolve it to a name with [Get a user](./users#get-a-user). |
-| `updatedAt` | timestamp | When the record last changed. |
-| `deletedAt` | timestamp | When the key was revoked. Absent on live keys. |
+| `updatedAt` | timestamp     | When the record last changed.                                                                                               |
+| `deletedAt` | timestamp     | When the key was revoked. Absent on live keys.                                                                              |
 
 The secret is never in this object. monetr stores a public key derived from the secret and
 verifies against that, so it genuinely cannot give the secret back to you, even in principle.
@@ -93,9 +93,9 @@ someone whose subscription has lapsed can still clean up after themselves.
 
 ### Body
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `name` | string | Yes | A label so you can tell your keys apart. |
+| Attribute | Type   | Required | Description                              |
+| --------- | ------ | -------- | ---------------------------------------- |
+| `name`    | string | Yes      | A label so you can tell your keys apart. |
 
 When proof of work is enabled on the server, the body also has to carry a solved challenge.
 That's part of the app's sign-up and key-creation flow, not something you'd assemble by
@@ -105,9 +105,9 @@ hand.
 
 An API key object with one extra field:
 
-| Attribute | Type | Description |
-| --- | --- | --- |
-| `secret` | string | The Basic auth password: `monetr_secret_` followed by 52 lowercase base32 characters. Shown here and nowhere else, ever. |
+| Attribute | Type   | Description                                                                                                              |
+| --------- | ------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `secret`  | string | The Basic auth password: `monetr_secret_` followed by 52 lowercase base32 characters. Shown here and nowhere else, ever. |
 
 ```json
 {
@@ -126,10 +126,10 @@ Take `apiKeyId` and `secret` and export them as `MONETR_API_KEY_ID` and
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | `name` is missing, or the proof of work challenge is missing or wrong. |
-| 402 | No active subscription, on an instance with billing enabled. |
+| Status | When                                                                   |
+| ------ | ---------------------------------------------------------------------- |
+| 400    | `name` is missing, or the proof of work challenge is missing or wrong. |
+| 402    | No active subscription, on an instance with billing enabled.           |
 
 ## <Badge type="danger">DELETE</Badge> Revoke an API key
 
@@ -145,9 +145,9 @@ DELETE /api/keys/:apiKeyId
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `apiKeyId` | string (ulid) | Yes | The key to revoke. |
+| Attribute  | Type          | Required | Description        |
+| ---------- | ------------- | -------- | ------------------ |
+| `apiKeyId` | string (ulid) | Yes      | The key to revoke. |
 
 Returns 200 with an empty body. Revoking is a soft delete: the record stays, with `deletedAt`
 set, so a revoked key still shows up in the list.
@@ -157,7 +157,7 @@ it takes no body at all.
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | `apiKeyId` is malformed, or the key is already revoked. Revoking twice is an error rather than a no-op. |
-| 404 | No such key on your account. |
+| Status | When                                                                                                    |
+| ------ | ------------------------------------------------------------------------------------------------------- |
+| 400    | `apiKeyId` is malformed, or the key is already revoked. Revoking twice is an error rather than a no-op. |
+| 404    | No such key on your account.                                                                            |
