@@ -26,7 +26,7 @@ happens. This is what draws the timeline charts in the app.
 
 **In the app:** The timeline charts on the funding and goals pages.
 
-```
+```http
 GET /api/bank_accounts/:bankAccountId/forecast
 ```
 
@@ -200,7 +200,7 @@ anything. Use it to show someone the damage before they commit.
 **In the app:** Nothing in the app uses this today. The new expense and goal forms work
 out their estimate another way.
 
-```
+```http
 POST /api/bank_accounts/:bankAccountId/forecast/spending
 ```
 
@@ -277,7 +277,7 @@ object on one funding schedule will take at its next funding event.
 **In the app:** The committed amount shown next to each funding schedule in the funding
 list.
 
-```
+```http
 POST /api/bank_accounts/:bankAccountId/forecast/next_funding
 ```
 

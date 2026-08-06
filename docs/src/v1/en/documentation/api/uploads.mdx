@@ -55,7 +55,7 @@ it doesn't wait for the transactions to be parsed.
 
 **In the app:** The import transactions dialog, where you drop in a file from your bank.
 
-```
+```http
 POST /api/bank_accounts/:bankAccountId/transactions/upload
 ```
 
@@ -132,7 +132,7 @@ Returns the current state of an upload. Poll this if you'd rather not use the so
 **In the app:** The import dialog reads this once the progress socket tells it the job
 finished, to pick up the final record.
 
-```
+```http
 GET /api/bank_accounts/:bankAccountId/transactions/upload/:transactionUploadId
 ```
 
@@ -202,7 +202,7 @@ depending on whether your instance uses TLS.
 
 **In the app:** The progress bar in the import transactions dialog.
 
-```
+```http
 GET /api/bank_accounts/:bankAccountId/transactions/upload/:transactionUploadId/progress
 ```
 
@@ -258,7 +258,7 @@ files you can only see the newest.
 **In the app:** Nothing in the app calls this. It's here for looking at what you've uploaded
 and what's still taking up space.
 
-```
+```http
 GET /api/files
 ```
 

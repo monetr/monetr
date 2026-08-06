@@ -24,7 +24,7 @@ first, before it decides what to show you.
 **In the app:** Loaded on startup, before anything else renders. It's what decides whether
 you land on your budget, the setup wizard, or the subscribe page.
 
-```
+```http
 GET /api/users/me
 ```
 
@@ -111,7 +111,7 @@ objects in monetr record who made them as a bare user ID.
 **In the app:** The API keys table under settings, resolving the `createdBy` on each key into
 the person who created it.
 
-```
+```http
 GET /api/users/:userId
 ```
 
@@ -145,7 +145,7 @@ Replaces the password on your login. You have to prove you know the current one.
 
 **In the app:** The change password dialog under security settings.
 
-```
+```http
 PUT /api/users/security/password
 ```
 
@@ -173,7 +173,7 @@ one of two, and the code isn't required at login until you confirm it.
 **In the app:** The enable two-factor dialog under security settings, which turns the
 returned URI into a QR code.
 
-```
+```http
 POST /api/users/security/totp/setup
 ```
 
@@ -202,7 +202,7 @@ needs a code.
 **In the app:** The second step of the enable two-factor dialog, where you type in the code
 your authenticator is showing.
 
-```
+```http
 POST /api/users/security/totp/confirm
 ```
 

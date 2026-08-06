@@ -42,7 +42,7 @@ when there aren't any.
 **In the app:** The funding page, and the schedule picker you use when creating an
 expense or goal.
 
-```
+```http
 GET /api/bank_accounts/:bankAccountId/funding_schedules
 ```
 
@@ -87,7 +87,7 @@ Returns one funding schedule.
 
 **In the app:** The funding and goal timeline charts.
 
-```
+```http
 GET /api/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId
 ```
 
@@ -139,7 +139,7 @@ since both require one.
 
 **In the app:** The new funding schedule form, and first-time setup.
 
-```
+```http
 POST /api/bank_accounts/:bankAccountId/funding_schedules
 ```
 
@@ -215,7 +215,7 @@ to it gets funded, so monetr recalculates all of them and hands them back to you
 
 **In the app:** Editing a funding schedule from its details page.
 
-```
+```http
 PATCH /api/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId
 ```
 
@@ -325,7 +325,7 @@ at it, the call fails and nothing happens.
 
 **In the app:** Deleting a funding schedule from its details page.
 
-```
+```http
 DELETE /api/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId
 ```
 

@@ -51,7 +51,7 @@ Returns every bank account on your monetr account, across all links.
 **In the app:** The account switcher in the sidebar. Almost every screen needs to know
 which accounts exist, so this is one of the first calls the app makes.
 
-```
+```http
 GET /api/bank_accounts
 ```
 
@@ -122,7 +122,7 @@ Returns one bank account.
 **In the app:** Loading whichever account you currently have selected. The app shows the
 cached copy from the list immediately, then confirms it against this.
 
-```
+```http
 GET /api/bank_accounts/:bankAccountId
 ```
 
@@ -177,7 +177,7 @@ goals and what's left over. This is the endpoint behind the numbers at the top o
 
 **In the app:** The free-to-use and limit figures at the top of the budgeting sidebar.
 
-```
+```http
 GET /api/bank_accounts/:bankAccountId/balances
 ```
 
@@ -234,7 +234,7 @@ get their accounts from the bank.
 **In the app:** Adding an account to a manual link, and both the manual and Lunch Flow
 setup flows.
 
-```
+```http
 POST /api/bank_accounts
 ```
 
@@ -309,7 +309,7 @@ Changes a bank account. How much you can change depends on what kind of account 
 
 **In the app:** The bank account settings page.
 
-```
+```http
 PATCH /api/bank_accounts/:bankAccountId
 ```
 
@@ -401,7 +401,7 @@ history all stay put.
 
 **In the app:** Archiving an account from its settings page.
 
-```
+```http
 DELETE /api/bank_accounts/:bankAccountId
 ```
 

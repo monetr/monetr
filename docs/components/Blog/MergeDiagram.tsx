@@ -133,7 +133,9 @@ export default function MergeDiagram(): React.JSX.Element {
                 <div className={styles.field} key={field.name}>
                   <dt className={styles.fieldName}>{field.name}</dt>
                   {field.value ? (
-                    <dd className={styles.fieldValue} data-tone={field.tone}>{field.value}</dd>
+                    <dd className={styles.fieldValue} data-tone={field.tone}>
+                      {field.value}
+                    </dd>
                   ) : (
                     <dd className={styles.absent}>key absent</dd>
                   )}
@@ -159,8 +161,12 @@ export default function MergeDiagram(): React.JSX.Element {
           <tbody>
             {OUTCOMES.map(outcome => (
               <tr data-tone={outcome.tone} key={outcome.name}>
-                <th className={styles.outcomeName} scope='row' title={outcome.name}>{outcome.name}</th>
-                <td className={styles.outcomeValue} title={outcome.value}>{outcome.value}</td>
+                <th className={styles.outcomeName} scope='row' title={outcome.name}>
+                  {outcome.name}
+                </th>
+                <td className={styles.outcomeValue} title={outcome.value}>
+                  {outcome.value}
+                </td>
                 <td className={styles.outcomeBadgeCell}>
                   <span className={styles.badge}>{outcome.badge}</span>
                 </td>

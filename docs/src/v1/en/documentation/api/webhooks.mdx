@@ -24,7 +24,7 @@ either rejects everything or, worse, isn't reachable at all and your data goes s
 Plaid calls this when something changes on a linked bank: new transactions to sync, a login
 that needs repairing, consent about to expire.
 
-```
+```http
 POST /api/plaid/webhook
 ```
 
@@ -79,7 +79,7 @@ Returns 200 with an empty body when it's handled.
 Stripe calls this when a subscription is created, changed or canceled, and when a checkout
 completes. It's how an account's access actually turns on after someone pays.
 
-```
+```http
 POST /api/stripe/webhook
 ```
 

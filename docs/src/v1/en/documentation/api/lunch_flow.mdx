@@ -92,7 +92,7 @@ Returns every Lunch Flow connection on your account.
 **In the app:** The Lunch Flow section of the setup flow, listing connections you've already
 made.
 
-```
+```http
 GET /api/lunch_flow/link
 ```
 
@@ -130,7 +130,7 @@ Returns one connection.
 **In the app:** The Lunch Flow setup screens, checking the connection's status as you work
 through them.
 
-```
+```http
 GET /api/lunch_flow/link/:lunchFlowLinkId
 ```
 
@@ -157,7 +157,7 @@ whether they work.
 
 **In the app:** The form where you enter your Lunch Flow instance URL and API key.
 
-```
+```http
 POST /api/lunch_flow/link
 ```
 
@@ -229,7 +229,7 @@ connection.
 
 **In the app:** The account discovery step of Lunch Flow setup.
 
-```
+```http
 POST /api/lunch_flow/link/:lunchFlowLinkId/bank_accounts/refresh
 ```
 
@@ -258,7 +258,7 @@ them to your budget yet.
 
 **In the app:** The list of accounts you tick during Lunch Flow setup.
 
-```
+```http
 GET /api/lunch_flow/link/:lunchFlowLinkId/bank_accounts
 ```
 
@@ -309,7 +309,7 @@ when you know something changed upstream.
 
 **In the app:** The sync now button on a Lunch Flow link.
 
-```
+```http
 POST /api/lunch_flow/link/sync
 ```
 
@@ -350,7 +350,7 @@ upgrades to a WebSocket despite being a `GET`. curl won't do anything useful wit
 
 **In the app:** The per-account progress shown while a Lunch Flow sync runs.
 
-```
+```http
 GET /api/lunch_flow/link/sync/:linkId/bank_account/:bankAccountId/progress
 ```
 

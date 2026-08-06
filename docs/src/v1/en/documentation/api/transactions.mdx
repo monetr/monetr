@@ -53,7 +53,7 @@ transactions page, and it's the endpoint you'll reach for most.
 **In the app:** The main transactions feed. It loads 25 at a time and asks for more as
 you scroll.
 
-```
+```http
 GET /api/bank_accounts/:bankAccountId/transactions
 ```
 
@@ -149,7 +149,7 @@ state of it.
 **In the app:** The transaction details page, and the upload flow while it waits on a
 file to finish processing.
 
-```
+```http
 GET /api/bank_accounts/:bankAccountId/transactions/:transactionId
 ```
 
@@ -229,7 +229,7 @@ transaction won't be in one yet.
 
 **In the app:** The similar transactions panel on the transaction details page.
 
-```
+```http
 GET /api/bank_accounts/:bankAccountId/transactions/:transactionId/similar
 ```
 
@@ -301,7 +301,7 @@ decides what exists.
 
 **In the app:** Adding a transaction by hand on a manual account.
 
-```
+```http
 POST /api/bank_accounts/:bankAccountId/transactions
 ```
 
@@ -421,7 +421,7 @@ link you also get the amount, the date, and the pending flag.
 **In the app:** Renaming a transaction on its details page, and changing which envelope
 it comes out of from the transaction list.
 
-```
+```http
 PATCH /api/bank_accounts/:bankAccountId/transactions/:transactionId
 ```
 
@@ -545,7 +545,7 @@ Removes a transaction. Manual links only, same reasoning as create.
 
 **In the app:** Deleting a transaction, behind the confirmation prompt.
 
-```
+```http
 DELETE /api/bank_accounts/:bankAccountId/transactions/:transactionId
 ```
 

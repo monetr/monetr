@@ -18,11 +18,11 @@ an uptime monitor at.
 **In the app:** Nothing in the app calls this. It's for monitoring, container health checks,
 and load balancer probes.
 
-```
+```http
 GET /api/health
 ```
 
-```
+```http
 HEAD /api/health
 ```
 
@@ -70,7 +70,7 @@ system's locale data rather than a list monetr maintains.
 
 **In the app:** The currency picker when you create or edit a bank account.
 
-```
+```http
 GET /api/locale/currency
 ```
 

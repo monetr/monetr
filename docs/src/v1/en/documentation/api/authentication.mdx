@@ -42,7 +42,7 @@ demand to change an expired password.
 
 **In the app:** The login screen.
 
-```
+```http
 POST /api/authentication/login
 ```
 
@@ -95,7 +95,7 @@ into a real one.
 
 **In the app:** The two-factor code screen you land on after the login screen.
 
-```
+```http
 POST /api/authentication/multifactor
 ```
 
@@ -123,7 +123,7 @@ Ends the session.
 
 **In the app:** The sign out button.
 
-```
+```http
 GET /api/authentication/logout
 ```
 
@@ -138,7 +138,7 @@ Creates a login, an account, and the user joining them.
 
 **In the app:** The sign-up form.
 
-```
+```http
 POST /api/authentication/register
 ```
 
@@ -172,7 +172,7 @@ Confirms an email address using the token from the verification email.
 
 **In the app:** The page you land on from the link in the verification email.
 
-```
+```http
 POST /api/authentication/verify
 ```
 
@@ -204,7 +204,7 @@ Sends the verification email again.
 
 **In the app:** The resend link on the "check your email" screen.
 
-```
+```http
 POST /api/authentication/verify/resend
 ```
 
@@ -230,7 +230,7 @@ Emails a reset link to an address.
 
 **In the app:** The forgot password form.
 
-```
+```http
 POST /api/authentication/forgot
 ```
 
@@ -257,7 +257,7 @@ Sets a new password using a reset token.
 **In the app:** The set-a-new-password form you reach from the reset email, and the same
 form after a sign-in that demanded a password change.
 
-```
+```http
 POST /api/authentication/reset
 ```
 
