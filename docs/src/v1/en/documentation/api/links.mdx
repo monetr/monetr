@@ -7,18 +7,15 @@ import { Badge } from "@rspress/core/theme";
 
 # Links API
 
-A link is one connection to one financial institution, and it owns the bank accounts under
-it. In the app it's the thing you see in the sidebar with a bank's name on it, with the
-accounts nested underneath.
+A link is one connection to one financial institution, and it owns the bank accounts under it. In the app it's the thing
+you see in the sidebar with a bank's name on it, with the accounts nested underneath.
 
-There are three kinds you'll actually run into. **Plaid** links sync from your bank on
-their own. **Manual** links are ones you maintain by hand, entering transactions and
-updating balances yourself. **Lunch Flow** links pull from a Lunch Flow instance, and only
-exist when that's enabled on your server.
+There are three kinds you'll actually run into. **Plaid** links sync from your bank on their own. **Manual** links are
+ones you maintain by hand, entering transactions and updating balances yourself. **Lunch Flow** links pull from a Lunch
+Flow instance, and only exist when that's enabled on your server.
 
-The endpoints here create and manage manual links. Making a Plaid link is a multi-step
-handshake with Plaid's browser SDK that an API key can't drive, so it lives in
-[internal endpoints](./internal).
+The endpoints here create and manage manual links. Making a Plaid link is a multi-step handshake with Plaid's browser
+SDK that an API key can't drive, so it lives in [internal endpoints](./internal).
 
 ## The link object
 
@@ -38,8 +35,7 @@ handshake with Plaid's browser SDK that an API key can't drive, so it lives in
 
 ### The `plaidLink` object
 
-Only present on Plaid links. This is where you look to find out whether a bank connection
-is healthy.
+Only present on Plaid links. This is where you look to find out whether a bank connection is healthy.
 
 | Attribute              | Type                | Description                                                                                                                                 |
 | ---------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -132,8 +128,7 @@ Notice the manual link has no `plaidLink` key at all. It's omitted rather than n
 
 Returns one link.
 
-**In the app:** The link details page, and the card that tells you when Plaid last
-updated.
+**In the app:** The link details page, and the card that tells you when Plaid last updated.
 
 ```http
 GET /api/links/:linkId
@@ -168,8 +163,7 @@ curl --request GET \
 }
 ```
 
-Unlike the list, this one will return a deleted link if you ask for it by ID, with
-`deletedAt` set.
+Unlike the list, this one will return a deleted link if you ask for it by ID, with `deletedAt` set.
 
 ### Errors
 
@@ -180,11 +174,9 @@ Unlike the list, this one will return a deleted link if you ask for it by ID, wi
 
 ## <Badge type="tip">POST</Badge> Create a manual link
 
-Makes a link you maintain yourself. This is the starting point for tracking an account
-monetr can't connect to automatically: create the link, then
-[create bank accounts](./bank_accounts#create-a-bank-account) on it, then
-[add transactions](./transactions#create-a-transaction). The
-[quickstart](./quickstart) walks the whole sequence.
+Makes a link you maintain yourself. This is the starting point for tracking an account monetr can't connect to
+automatically: create the link, then [create bank accounts](./bank_accounts#create-a-bank-account) on it, then [add
+transactions](./transactions#create-a-transaction). The [quickstart](./quickstart) walks the whole sequence.
 
 **In the app:** Setting up a manual link, and the Lunch Flow setup flow.
 
@@ -202,8 +194,8 @@ POST /api/links
 | `description`     | string, nullable        | No       | A note to yourself.                                                                                                                                                                                                    |
 | `lunchFlowLinkId` | string (ulid), nullable | No       | Turns this into a Lunch Flow link instead of a manual one. The Lunch Flow link has to already exist and be in a pending status, and creating the link activates it. Leave this off unless you're wiring up Lunch Flow. |
 
-`linkType` is not something you send. Leave `lunchFlowLinkId` off and you get a manual link.
-Send it and you get a Lunch Flow link. Plaid links can't be made here at all.
+`linkType` is not something you send. Leave `lunchFlowLinkId` off and you get a manual link. Send it and you get a Lunch
+Flow link. Plaid links can't be made here at all.
 
 ### Example
 
@@ -240,8 +232,8 @@ curl --request POST \
 
 ## <Badge type="warning">PATCH</Badge> Update a link
 
-Renames a link or changes its description. Works on any link type, including Plaid ones,
-since these two fields are yours rather than the bank's.
+Renames a link or changes its description. Works on any link type, including Plaid ones, since these two fields are
+yours rather than the bank's.
 
 **In the app:** Renaming a link or editing its description on the link details page.
 
@@ -299,13 +291,12 @@ curl --request PATCH \
 
 ## <Badge type="danger">DELETE</Badge> Remove a link
 
-Deletes a link and everything hanging off it. This is the destructive one on this page: the
-bank accounts, transactions, spending objects and funding schedules underneath all go with
-it.
+Deletes a link and everything hanging off it. This is the destructive one on this page: the bank accounts, transactions,
+spending objects and funding schedules underneath all go with it.
 
-The call itself marks the link deleted and hands the rest to a background job, so it returns
-before the cleanup has finished. On a Plaid link it also tells Plaid to release the
-connection, which is why the connection stops costing you anything after this.
+The call itself marks the link deleted and hands the rest to a background job, so it returns before the cleanup has
+finished. On a Plaid link it also tells Plaid to release the connection, which is why the connection stops costing you
+anything after this.
 
 **In the app:** Removing a link, behind the confirmation prompt.
 
