@@ -357,7 +357,6 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/spending/:spendingId", c.getSpendingById)
 	billedKeyOrToken.POST("/bank_accounts/:bankAccountId/spending", c.postSpending)
 	billedKeyOrToken.POST("/bank_accounts/:bankAccountId/spending/transfer", c.postSpendingTransfer)
-	billedKeyOrToken.PUT("/bank_accounts/:bankAccountId/spending/:spendingId", c.putSpending)
 	billedKeyOrToken.PATCH("/bank_accounts/:bankAccountId/spending/:spendingId", c.patchSpending)
 	billedKeyOrToken.DELETE("/bank_accounts/:bankAccountId/spending/:spendingId", c.deleteSpending)
 	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/spending/:spendingId/transactions", c.getSpendingTransactions)

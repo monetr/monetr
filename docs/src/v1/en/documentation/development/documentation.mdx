@@ -51,6 +51,35 @@ If you want to work on the documentation in real time locally you can run the fo
 This will start an Rspress development server locally serving docs. As you edit files in the `docs/` directory you will
 be able to see those changes automatically refresh in your browser.
 
+## API documentation
+
+**API changes update the API documentation in the same pull request.** If you add, remove or change an endpoint in
+`server/controller/routes.go`, the corresponding page under `docs/src/v1/en/documentation/api/` changes with it.
+
+The existence half of that promise is enforced automatically. `TestApiDocumentationCoverage` in
+`server/controller/documentation_test.go` compares the registered route table against the request lines in those pages,
+and fails the build with two lists: routes that have no documentation, and documented routes that no longer exist. So
+adding an endpoint without documenting it is a red build, the same as a failing unit test.
+
+Endpoints that exist only to serve the monetr app still have to appear, but they get a short entry on the internal
+endpoints page rather than the full treatment.
+
+### Writing a page
+
+Read the Go code first: the route registration in `routes.go` (its middleware group tells you the auth line), the
+handler, the request and response structs with their json tags, and the handler's tests. Never document from a handler
+name, and never invent a field or behavior you can't confirm from the code, leave a `{/* TODO(docs): ... */}` instead.
+
+Every endpoint follows the same shape:
+
+- A heading naming the action, with a `<Badge>` for the HTTP method.
+- One to three sentences of *why* before *how*.
+- An **In the app** line naming the screen the call happens on, not a hook or a file, those churn constantly while the
+  API sits still.
+- A fenced `http` code block with the exact request line: method and path.
+- An **Auth** line using one of `None`, `API key`, `API key, subscription required`, or `Not available to API keys`.
+- Parameter tables, a curl example with a real response body, and an errors table.
+
 ## Style
 
 We would like our documentation to follow a general guide, this creates some consistency in how our documentation is

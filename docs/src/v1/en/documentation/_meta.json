@@ -6,6 +6,8 @@
   { "type": "dir", "name": "install", "label": "Installation", "collapsed": true },
   { "type": "dir", "name": "configure", "label": "Configuration", "collapsed": true },
   { "type": "dir", "name": "guides", "label": "Guides", "collapsed": true },
+  { "type": "section-header", "label": "API", "collapsed": true },
+  { "type": "dir", "name": "api", "label": "REST API", "collapsed": true },
   { "type": "section-header", "label": "Contributing", "collapsed": true },
   { "type": "dir", "name": "development", "label": "Development", "collapsed": true }
 ]

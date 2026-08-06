@@ -83,9 +83,11 @@ export default function SettingsAPIKeys(): React.JSX.Element {
             </Typography>
           </div>
           <div className={styles.cardEmptyActions}>
-            <Button variant='outlined'>
-              <Book />
-              Read the Docs
+            <Button asChild variant='outlined'>
+              <a href='https://monetr.app/documentation/use/api_keys' rel='noopener noreferrer' target='_blank'>
+                <Book />
+                Read the Docs
+              </a>
             </Button>
             <Button data-testid='api-keys-empty-create' onClick={showCreateAPIKeyModal}>
               <Plus />
