@@ -29,7 +29,7 @@
     border-color: var(--border-string);
   }
 
-  @media (min-width: variables.$largeScreen) {
+  @media (min-width: variables.$largeScreenUp) {
     // lg:h-10
     height: 10 * variables.$size;
 
@@ -56,7 +56,7 @@
     transition-delay: 0s;
   }
 
-  @media (min-width: variables.$largeScreen) {
+  @media (min-width: variables.$largeScreenUp) {
     // lg:opacity-0
     opacity: 0;
 

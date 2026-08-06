@@ -41,7 +41,8 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): React.JS
   }
 
   return (
-    <div className={mergeClasses(styles.budgetSidebarRoot, props.className)}>
+    // Marks the panel's secondary column; the mobile drawer derives its width and close behavior from this.
+    <div className={mergeClasses(styles.budgetSidebarRoot, props.className)} data-sidebar-secondary>
       <BudgetingSidebarTitle />
       <div className={styles.content}>
         <SelectBankAccount />

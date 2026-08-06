@@ -2,7 +2,7 @@ import { useCallback, useContext } from 'react';
 import { ArrowLeft, PanelLeft, PanelLeftClose } from 'lucide-react';
 import { useLocation } from 'wouter';
 
-import { MobileSidebarContext } from '@monetr/interface/components/Layout/MobileSidebarContextProvider';
+import { MobileSidebarContext } from '@monetr/interface/components/Layout/MobileSidebarContext';
 import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './MSidebarToggle.module.scss';
@@ -14,7 +14,7 @@ export interface MSidebarToggleProps {
 
 export default function MSidebarToggle(props: MSidebarToggleProps): React.JSX.Element {
   const [, navigate] = useLocation();
-  const { isOpen, setIsOpen } = useContext(MobileSidebarContext);
+  const { toggle } = useContext(MobileSidebarContext);
 
   const onClick = useCallback(() => {
     // Same as the title in MTopNavigation, if we came from the page this points to then actually go back to it.
@@ -22,10 +22,10 @@ export default function MSidebarToggle(props: MSidebarToggleProps): React.JSX.El
       window.history.back();
     } else if (props.backButton) {
       navigate(props.backButton);
-    } else {
-      setIsOpen(!isOpen);
+      return;
     }
-  }, [props.backButton, isOpen, navigate, setIsOpen]);
+    toggle();
+  }, [props.backButton, navigate, toggle]);
 
   const className = mergeClasses(styles.toggle, props.className);
 
@@ -37,10 +37,12 @@ export default function MSidebarToggle(props: MSidebarToggleProps): React.JSX.El
     );
   }
 
+  // Both glyphs render and CSS swaps them off the drawer's live position, so the icon stays right mid drag without a
+  // re-render on the frame path.
   return (
     <button className={className} onClick={onClick} type='button'>
-      {!isOpen && <PanelLeft />}
-      {isOpen && <PanelLeftClose />}
+      <PanelLeft className={styles.iconClosed} />
+      <PanelLeftClose className={styles.iconOpen} />
     </button>
   );
 }

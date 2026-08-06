@@ -12,7 +12,23 @@
   color: var(--content-emphasis);
 
   // `lg:hidden`
-  @media (min-width: variables.$largeScreen) {
+  @media (min-width: variables.$largeScreenUp) {
     display: none;
+  }
+}
+
+// The glyph follows the drawer's live position, published as a data attribute
+// on the document element, so a drag never re-renders the icon.
+.iconOpen {
+  display: none;
+}
+
+:global(html[data-sidebar-past='true']) {
+  .iconClosed {
+    display: none;
+  }
+
+  .iconOpen {
+    display: block;
   }
 }

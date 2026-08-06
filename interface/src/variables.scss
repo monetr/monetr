@@ -6,4 +6,9 @@ $size: 0.25rem; // 4px
 $smallScreen: 640px; // 160 -> 32
 $mediumScreen: 768px; // 192 -> 64
 $largeScreen: 1024px; // 256 -> 64
+// The desktop side of the large screen breakpoint. `max-width: $largeScreen` matches at exactly 1024px, and so does
+// useIsMobile's `(max-width: 1024px)`, so a desktop rule written as `min-width: $largeScreen` matches there as well
+// and the two sides get resolved by source order. Anything that has to agree with useIsMobile, meaning the sidebar and
+// everything in it, uses this instead.
+$largeScreenUp: 1024.02px;
 $extraLargeScreen: 1280px; // 320

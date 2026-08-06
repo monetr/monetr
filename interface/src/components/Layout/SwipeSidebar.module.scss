@@ -1,0 +1,146 @@
+@use '@monetr/interface/variables';
+
+// Desktop is the base and mobile is the media query. `max-width: $largeScreen`
+// is exactly what useIsMobile matches, so the CSS and the JS agree at every
+// width including 1024px itself.
+//
+// On desktop the panel and the page are display: contents; their children
+// become #root's flex items directly and the layout is unchanged.
+
+.panel {
+  display: contents;
+  // Hidden with visibility rather than display on mobile so the closed panel
+  // stays out of the tab order. visibility inherits, so it must be reset here
+  // or the real sidebars are blank on desktop.
+  visibility: visible;
+}
+
+.page {
+  display: contents;
+}
+
+.scrim,
+.edge,
+.catcher {
+  display: none;
+}
+
+@media (max-width: variables.$largeScreen) {
+  .panel {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 42;
+
+    display: flex;
+    flex-direction: row;
+    // Rail only; the drawer adds data-secondary when there is a secondary
+    // column, see SwipeSidebar.tsx.
+    width: var(--bank-sidebar-width-static);
+
+    visibility: hidden;
+    // Resting closed position: right before any script runs, and right again
+    // after a reset.
+    transform: translate3d(-100%, 0, 0);
+
+    background-color: var(--background);
+    border-right: 1px solid var(--border);
+    outline: none;
+
+    // Vertical scrolling inside the panel stays native, horizontal belongs to
+    // the drawer.
+    touch-action: pan-y pinch-zoom;
+
+    &[data-secondary] {
+      // Capped so a strip of the page always peeks out (55px on a 390px
+      // viewport).
+      width: min(calc(var(--bank-sidebar-width-static) + var(--sidebar-secondary-width)), 86vw);
+    }
+
+    // The rail sets height: 100dvh, which overshoots the panel whenever the
+    // URL bar is showing.
+    > * {
+      height: 100%;
+      min-height: 0;
+    }
+  }
+
+  // Secondary column layout lives here rather than in each sidebar that can
+  // fill the slot, so a future one only needs the data attribute. Specificity
+  // is (0,2,0) against the sidebar module's (0,1,0) so these win without
+  // !important.
+  .panel :global([data-sidebar-secondary]) {
+    display: flex;
+    position: relative;
+    width: auto;
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 100%;
+    border-right: none;
+    overflow-y: auto;
+    // Stops a flick at the end of the list chaining out to the page behind it.
+    overscroll-behavior: contain;
+    // The rail accounts for the status bar but the secondary column did not,
+    // its header sat underneath it in the standalone PWA.
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .page {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+    // Deliberately not auto. iOS commits to a native pan well before the 12px
+    // of slop the drawer needs to pick an axis, and once Safari is scrolling,
+    // preventDefault on later touchmoves is ignored.
+    //
+    // This means no horizontal scrollers inside .page, since touch-action
+    // intersects down the tree. pinch-zoom stays because iOS ignores
+    // user-scalable=no, so it is a real accessibility affordance.
+    touch-action: pan-y pinch-zoom;
+  }
+
+  // Flat black rather than --background at an alpha: a scrim the same color as
+  // the page only dims content pixels. Black at 0.62 lands near the
+  // brightness(0.3) backdrop-filter this replaces, without re-blurring the
+  // page on every frame.
+  .scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background-color: #000;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  // A 24px gradient strip riding the panel's right edge instead of a blurred
+  // box-shadow on a viewport height element; same look, none of the raster
+  // cost.
+  .edge {
+    display: block;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 24px;
+    z-index: 41;
+    visibility: hidden;
+    pointer-events: none;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0));
+  }
+
+  // Sits over the page once the drawer is off its resting position. Swallows
+  // taps, blocks touch scrolling, and is itself draggable to close.
+  .catcher {
+    display: block;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    z-index: 41;
+    touch-action: none;
+    pointer-events: none;
+  }
+}
