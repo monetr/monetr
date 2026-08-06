@@ -3,7 +3,7 @@ title: "Health and Reference Data"
 description: "Point an uptime monitor at monetr's unauthenticated health endpoint, and list the currencies a monetr instance knows how to format money in."
 ---
 
-import { Badge } from '@rspress/core/theme';
+import { Badge } from "@rspress/core/theme";
 
 # Health and Reference Data
 
@@ -50,14 +50,14 @@ curl --request GET \
 
 ### Response attributes
 
-| Attribute | Type | Description |
-| --- | --- | --- |
-| `dbHealthy` | boolean | Whether monetr could ping PostgreSQL just now. This is the field that actually tells you something. |
-| `apiHealthy` | boolean | Always true. If the API weren't healthy you wouldn't be getting a response at all. |
-| `release` | string, nullable | The release version. Null on builds made outside the release process, like local ones. |
-| `revision` | string | The git commit the running binary was built from. |
-| `buildTime` | string | When the running binary was built. |
-| `serverTime` | timestamp | The server's current time in UTC. Handy for spotting clock drift, which matters here because TOTP and recurrence rules both care about time. |
+| Attribute    | Type             | Description                                                                                                                                  |
+| ------------ | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dbHealthy`  | boolean          | Whether monetr could ping PostgreSQL just now. This is the field that actually tells you something.                                          |
+| `apiHealthy` | boolean          | Always true. If the API weren't healthy you wouldn't be getting a response at all.                                                           |
+| `release`    | string, nullable | The release version. Null on builds made outside the release process, like local ones.                                                       |
+| `revision`   | string           | The git commit the running binary was built from.                                                                                            |
+| `buildTime`  | string           | When the running binary was built.                                                                                                           |
+| `serverTime` | timestamp        | The server's current time in UTC. Handy for spotting clock drift, which matters here because TOTP and recurrence rules both care about time. |
 
 **Watch the status code, not only the body.** When the database ping fails you get a **500**,
 with `dbHealthy` set to false. A monitor checking only for 200 will catch that, but one
@@ -85,7 +85,20 @@ curl --request GET \
 ```
 
 ```json
-["AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS", "AUD", "EUR", "GBP", "JPY", "USD"]
+[
+  "AED",
+  "AFN",
+  "ALL",
+  "AMD",
+  "ANG",
+  "AOA",
+  "ARS",
+  "AUD",
+  "EUR",
+  "GBP",
+  "JPY",
+  "USD"
+]
 ```
 
 A flat array of ISO 4217 codes, nothing more. The real list is much longer, this is a

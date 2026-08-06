@@ -3,7 +3,7 @@ title: "Uploads and Files API"
 description: "Import transactions into monetr from an OFX file over the API, watch the async import finish over a WebSocket, and list files stored on your account."
 ---
 
-import { Badge } from '@rspress/core/theme';
+import { Badge } from "@rspress/core/theme";
 
 # Uploads and Files API
 
@@ -21,32 +21,32 @@ File uploads need object storage configured on the server. Without it, uploading
 
 ## The transaction upload object
 
-| Attribute | Type | Description |
-| --- | --- | --- |
-| `transactionUploadId` | string (ulid) | Identifies the upload. |
-| `bankAccountId` | string (ulid) | The bank account the transactions will land on. |
-| `fileId` | string (ulid) | The stored file. |
-| `file` | object | The stored file, described below. Present on the response to the upload itself. |
-| `status` | string | `pending`, `processing`, `complete` or `failed`. |
-| `error` | string | Why it failed. Absent unless `status` is `failed`. |
-| `createdAt` | timestamp | When the file was uploaded. |
-| `createdBy` | string (ulid) | The user who uploaded it. |
-| `processedAt` | timestamp, nullable | When the background job picked it up. Null while it's still queued. |
-| `completedAt` | timestamp, nullable | When processing finished, successfully or not. Null while it's still going. |
+| Attribute             | Type                | Description                                                                     |
+| --------------------- | ------------------- | ------------------------------------------------------------------------------- |
+| `transactionUploadId` | string (ulid)       | Identifies the upload.                                                          |
+| `bankAccountId`       | string (ulid)       | The bank account the transactions will land on.                                 |
+| `fileId`              | string (ulid)       | The stored file.                                                                |
+| `file`                | object              | The stored file, described below. Present on the response to the upload itself. |
+| `status`              | string              | `pending`, `processing`, `complete` or `failed`.                                |
+| `error`               | string              | Why it failed. Absent unless `status` is `failed`.                              |
+| `createdAt`           | timestamp           | When the file was uploaded.                                                     |
+| `createdBy`           | string (ulid)       | The user who uploaded it.                                                       |
+| `processedAt`         | timestamp, nullable | When the background job picked it up. Null while it's still queued.             |
+| `completedAt`         | timestamp, nullable | When processing finished, successfully or not. Null while it's still going.     |
 
 ## The file object
 
-| Attribute | Type | Description |
-| --- | --- | --- |
-| `fileId` | string (ulid) | Identifies the file. |
-| `kind` | string | What the file is for. Transaction uploads use `transactions/uploads`. |
-| `name` | string | The original filename you uploaded. |
-| `contentType` | string | What kind of file it is. See the supported types below. |
-| `size` | integer | Size in bytes. |
-| `createdAt` | timestamp | When it was uploaded. |
-| `createdBy` | string (ulid) | The user who uploaded it. |
-| `expiresAt` | timestamp, nullable | When monetr will clean it up. Transaction upload files get an hour, since they're only needed until the import finishes. Null means it's kept indefinitely. |
-| `deletedAt` | timestamp, nullable | When it was deleted. |
+| Attribute     | Type                | Description                                                                                                                                                 |
+| ------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fileId`      | string (ulid)       | Identifies the file.                                                                                                                                        |
+| `kind`        | string              | What the file is for. Transaction uploads use `transactions/uploads`.                                                                                       |
+| `name`        | string              | The original filename you uploaded.                                                                                                                         |
+| `contentType` | string              | What kind of file it is. See the supported types below.                                                                                                     |
+| `size`        | integer             | Size in bytes.                                                                                                                                              |
+| `createdAt`   | timestamp           | When it was uploaded.                                                                                                                                       |
+| `createdBy`   | string (ulid)       | The user who uploaded it.                                                                                                                                   |
+| `expiresAt`   | timestamp, nullable | When monetr will clean it up. Transaction upload files get an hour, since they're only needed until the import finishes. Null means it's kept indefinitely. |
+| `deletedAt`   | timestamp, nullable | When it was deleted.                                                                                                                                        |
 
 ## <Badge type="tip">POST</Badge> Upload a transaction file
 
@@ -63,17 +63,17 @@ POST /api/bank_accounts/:bankAccountId/transactions/upload
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The bank account to import into. |
+| Attribute       | Type          | Required | Description                      |
+| --------------- | ------------- | -------- | -------------------------------- |
+| `bankAccountId` | string (ulid) | Yes      | The bank account to import into. |
 
 ### Body
 
 This one is `multipart/form-data`, not JSON.
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `data` | file | Yes | The file itself. The form field has to be named exactly `data`. |
+| Attribute | Type | Required | Description                                                     |
+| --------- | ---- | -------- | --------------------------------------------------------------- |
+| `data`    | file | Yes      | The file itself. The form field has to be named exactly `data`. |
 
 Only OFX is accepted for transaction uploads, so `application/vnd.intu.QFX` in practice.
 If your client sends `application/octet-stream`, monetr falls back to the file extension and
@@ -120,10 +120,10 @@ itself doesn't.
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | No `data` field, or the file isn't something monetr recognizes as OFX. |
-| 404 | File storage isn't configured on this server. |
+| Status | When                                                                   |
+| ------ | ---------------------------------------------------------------------- |
+| 400    | No `data` field, or the file isn't something monetr recognizes as OFX. |
+| 404    | File storage isn't configured on this server.                          |
 
 ## <Badge type="info">GET</Badge> Get an upload
 
@@ -140,10 +140,10 @@ GET /api/bank_accounts/:bankAccountId/transactions/upload/:transactionUploadId
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The bank account the upload belongs to. |
-| `transactionUploadId` | string (ulid) | Yes | The upload you want. |
+| Attribute             | Type          | Required | Description                             |
+| --------------------- | ------------- | -------- | --------------------------------------- |
+| `bankAccountId`       | string (ulid) | Yes      | The bank account the upload belongs to. |
+| `transactionUploadId` | string (ulid) | Yes      | The upload you want.                    |
 
 ### Example
 
@@ -184,10 +184,10 @@ A failed one carries the reason:
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | Either ID is malformed. |
-| 404 | No such upload on that bank account. |
+| Status | When                                 |
+| ------ | ------------------------------------ |
+| 400    | Either ID is malformed.              |
+| 404    | No such upload on that bank account. |
 
 ## <Badge type="info">GET</Badge> Watch an upload's progress
 
@@ -210,10 +210,10 @@ GET /api/bank_accounts/:bankAccountId/transactions/upload/:transactionUploadId/p
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The bank account the upload belongs to. |
-| `transactionUploadId` | string (ulid) | Yes | The upload to watch. |
+| Attribute             | Type          | Required | Description                             |
+| --------------------- | ------------- | -------- | --------------------------------------- |
+| `bankAccountId`       | string (ulid) | Yes      | The bank account the upload belongs to. |
+| `transactionUploadId` | string (ulid) | Yes      | The upload to watch.                    |
 
 ### Messages
 
@@ -244,10 +244,10 @@ upload to find out where it actually landed.
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | Either ID is malformed. |
-| 404 | No such upload on that bank account. |
+| Status | When                                 |
+| ------ | ------------------------------------ |
+| 400    | Either ID is malformed.              |
+| 404    | No such upload on that bank account. |
 
 ## <Badge type="info">GET</Badge> List files
 

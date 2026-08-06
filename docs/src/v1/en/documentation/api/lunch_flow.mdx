@@ -3,7 +3,7 @@ title: "Lunch Flow API"
 description: "Connect a self-hosted monetr instance to Lunch Flow for bank data, choose which accounts to sync, and trigger a manual sync from the REST API."
 ---
 
-import { Badge } from '@rspress/core/theme';
+import { Badge } from "@rspress/core/theme";
 
 # Lunch Flow API
 
@@ -34,53 +34,53 @@ After that, syncing happens on its own.
 
 ## The Lunch Flow link object
 
-| Attribute | Type | Description |
-| --- | --- | --- |
-| `lunchFlowLinkId` | string (ulid) | Identifies the connection. |
-| `name` | string | What you called it. |
-| `apiUrl` | string | The Lunch Flow instance monetr talks to. |
-| `status` | string | `pending`, `active`, `deactivated` or `error`. |
-| `lastManualSync` | timestamp, nullable | When someone last forced a sync. This is what the 30 minute rate limit is measured against. |
-| `lastSuccessfulUpdate` | timestamp, nullable | When data last actually came through. |
-| `lastAttemptedUpdate` | timestamp, nullable | When monetr last tried to sync. |
-| `updatedAt` | timestamp | When the record last changed. |
-| `createdAt` | timestamp | When it was created. |
-| `createdBy` | string (ulid) | The user who set it up. |
-| `deletedAt` | timestamp | When it was removed. Absent on live connections. |
+| Attribute              | Type                | Description                                                                                 |
+| ---------------------- | ------------------- | ------------------------------------------------------------------------------------------- |
+| `lunchFlowLinkId`      | string (ulid)       | Identifies the connection.                                                                  |
+| `name`                 | string              | What you called it.                                                                         |
+| `apiUrl`               | string              | The Lunch Flow instance monetr talks to.                                                    |
+| `status`               | string              | `pending`, `active`, `deactivated` or `error`.                                              |
+| `lastManualSync`       | timestamp, nullable | When someone last forced a sync. This is what the 30 minute rate limit is measured against. |
+| `lastSuccessfulUpdate` | timestamp, nullable | When data last actually came through.                                                       |
+| `lastAttemptedUpdate`  | timestamp, nullable | When monetr last tried to sync.                                                             |
+| `updatedAt`            | timestamp           | When the record last changed.                                                               |
+| `createdAt`            | timestamp           | When it was created.                                                                        |
+| `createdBy`            | string (ulid)       | The user who set it up.                                                                     |
+| `deletedAt`            | timestamp           | When it was removed. Absent on live connections.                                            |
 
 The API key is never in the response. It goes into monetr's secret storage on the way in and
 doesn't come back out.
 
 ### Statuses
 
-| Status | Meaning |
-| --- | --- |
-| `pending` | Created but not attached to a monetr link yet. Nothing syncs. Abandoned pending connections may get cleaned up. |
-| `active` | Attached and syncing on a schedule. |
-| `deactivated` | Turned off by hand or on its way out. Background jobs skip it. |
-| `error` | Sync failed enough times that monetr gave up. You move it back to active yourself. |
+| Status        | Meaning                                                                                                         |
+| ------------- | --------------------------------------------------------------------------------------------------------------- |
+| `pending`     | Created but not attached to a monetr link yet. Nothing syncs. Abandoned pending connections may get cleaned up. |
+| `active`      | Attached and syncing on a schedule.                                                                             |
+| `deactivated` | Turned off by hand or on its way out. Background jobs skip it.                                                  |
+| `error`       | Sync failed enough times that monetr gave up. You move it back to active yourself.                              |
 
 ## The Lunch Flow bank account object
 
 These are the accounts monetr found on your Lunch Flow instance. They aren't monetr bank
 accounts yet, they're candidates.
 
-| Attribute | Type | Description |
-| --- | --- | --- |
-| `lunchFlowBankAccountId` | string (ulid) | Identifies the candidate account. Pass this to [Create a bank account](./bank_accounts#create-a-bank-account). |
-| `lunchFlowLinkId` | string (ulid) | The connection it came from. |
-| `lunchFlowId` | string | The account's ID on the Lunch Flow side. Not a monetr ULID, and its format is whatever your Lunch Flow instance uses. |
-| `lunchFlowStatus` | string | What Lunch Flow says about the account: `ACTIVE`, `DISCONNECTED` or `ERROR`. Upper case, unlike monetr's own statuses. |
-| `name` | string | The account name. |
-| `institutionName` | string | The bank, according to Lunch Flow. |
-| `provider` | string | Which upstream provider Lunch Flow got it from. |
-| `currency` | string | ISO 4217 code. |
-| `status` | string | monetr's own view: `active` once you've added it, `inactive` if you haven't or you archived it, `error` if syncing failed. |
-| `currentBalance` | integer | The balance according to Lunch Flow, in the currency's smallest unit. |
-| `createdAt` | timestamp | When monetr first saw it. |
-| `createdBy` | string (ulid) | The user whose refresh discovered it. |
-| `updatedAt` | timestamp | When the record last changed. |
-| `deletedAt` | timestamp | When it was removed. Absent normally. |
+| Attribute                | Type          | Description                                                                                                                |
+| ------------------------ | ------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `lunchFlowBankAccountId` | string (ulid) | Identifies the candidate account. Pass this to [Create a bank account](./bank_accounts#create-a-bank-account).             |
+| `lunchFlowLinkId`        | string (ulid) | The connection it came from.                                                                                               |
+| `lunchFlowId`            | string        | The account's ID on the Lunch Flow side. Not a monetr ULID, and its format is whatever your Lunch Flow instance uses.      |
+| `lunchFlowStatus`        | string        | What Lunch Flow says about the account: `ACTIVE`, `DISCONNECTED` or `ERROR`. Upper case, unlike monetr's own statuses.     |
+| `name`                   | string        | The account name.                                                                                                          |
+| `institutionName`        | string        | The bank, according to Lunch Flow.                                                                                         |
+| `provider`               | string        | Which upstream provider Lunch Flow got it from.                                                                            |
+| `currency`               | string        | ISO 4217 code.                                                                                                             |
+| `status`                 | string        | monetr's own view: `active` once you've added it, `inactive` if you haven't or you archived it, `error` if syncing failed. |
+| `currentBalance`         | integer       | The balance according to Lunch Flow, in the currency's smallest unit.                                                      |
+| `createdAt`              | timestamp     | When monetr first saw it.                                                                                                  |
+| `createdBy`              | string (ulid) | The user whose refresh discovered it.                                                                                      |
+| `updatedAt`              | timestamp     | When the record last changed.                                                                                              |
+| `deletedAt`              | timestamp     | When it was removed. Absent normally.                                                                                      |
 
 Two status fields on one object is confusing at first. `lunchFlowStatus` is what the
 upstream thinks, `status` is whether monetr is using it.
@@ -138,16 +138,16 @@ GET /api/lunch_flow/link/:lunchFlowLinkId
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `lunchFlowLinkId` | string (ulid) | Yes | The connection you want. |
+| Attribute         | Type          | Required | Description              |
+| ----------------- | ------------- | -------- | ------------------------ |
+| `lunchFlowLinkId` | string (ulid) | Yes      | The connection you want. |
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | `lunchFlowLinkId` is malformed. |
-| 404 | No such connection, or Lunch Flow isn't enabled on this server. |
+| Status | When                                                            |
+| ------ | --------------------------------------------------------------- |
+| 400    | `lunchFlowLinkId` is malformed.                                 |
+| 404    | No such connection, or Lunch Flow isn't enabled on this server. |
 
 ## <Badge type="tip">POST</Badge> Create a Lunch Flow connection
 
@@ -165,11 +165,11 @@ POST /api/lunch_flow/link
 
 ### Body
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `apiKey` | string | Yes | Your Lunch Flow API key, 1 to 100 letters and numbers. Stored in monetr's secret storage and never returned. |
-| `lunchFlowURL` | string | Yes | The base URL of your Lunch Flow instance. See the rules below. |
-| `name` | string | Yes | What to call this connection. |
+| Attribute      | Type   | Required | Description                                                                                                  |
+| -------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------ |
+| `apiKey`       | string | Yes      | Your Lunch Flow API key, 1 to 100 letters and numbers. Stored in monetr's secret storage and never returned. |
+| `lunchFlowURL` | string | Yes      | The base URL of your Lunch Flow instance. See the rules below.                                               |
+| `name`         | string | Yes      | What to call this connection.                                                                                |
 
 The URL is validated against four rules:
 
@@ -213,10 +213,10 @@ curl --request POST \
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | The URL is malformed, has query parameters or credentials, uses a scheme other than HTTP or HTTPS, or isn't on the server's allow list. Also if the API key is missing or has characters other than letters and numbers. |
-| 404 | Lunch Flow isn't enabled on this server. |
+| Status | When                                                                                                                                                                                                                     |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 400    | The URL is malformed, has query parameters or credentials, uses a scheme other than HTTP or HTTPS, or isn't on the server's allow list. Also if the API key is missing or has characters other than letters and numbers. |
+| 404    | Lunch Flow isn't enabled on this server.                                                                                                                                                                                 |
 
 ## <Badge type="tip">POST</Badge> Refresh available bank accounts
 
@@ -237,19 +237,19 @@ POST /api/lunch_flow/link/:lunchFlowLinkId/bank_accounts/refresh
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `lunchFlowLinkId` | string (ulid) | Yes | The connection to refresh. |
+| Attribute         | Type          | Required | Description                |
+| ----------------- | ------------- | -------- | -------------------------- |
+| `lunchFlowLinkId` | string (ulid) | Yes      | The connection to refresh. |
 
 Returns **204** with no body. To see what it found, [list the bank accounts](#list-available-bank-accounts) afterwards.
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | `lunchFlowLinkId` is malformed. |
-| 404 | No such connection, or Lunch Flow isn't enabled. |
-| 500 | monetr couldn't reach your Lunch Flow instance, or the API key was rejected. This is where bad credentials surface, not on create. |
+| Status | When                                                                                                                               |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| 400    | `lunchFlowLinkId` is malformed.                                                                                                    |
+| 404    | No such connection, or Lunch Flow isn't enabled.                                                                                   |
+| 500    | monetr couldn't reach your Lunch Flow instance, or the API key was rejected. This is where bad credentials surface, not on create. |
 
 ## <Badge type="info">GET</Badge> List available bank accounts
 
@@ -266,9 +266,9 @@ GET /api/lunch_flow/link/:lunchFlowLinkId/bank_accounts
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `lunchFlowLinkId` | string (ulid) | Yes | The connection whose accounts you want. |
+| Attribute         | Type          | Required | Description                             |
+| ----------------- | ------------- | -------- | --------------------------------------- |
+| `lunchFlowLinkId` | string (ulid) | Yes      | The connection whose accounts you want. |
 
 ### Example
 
@@ -320,9 +320,9 @@ isn't in the path. That's different from every other endpoint on this page.
 
 ### Body
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `linkId` | string (ulid) | Yes | The monetr link to sync. Has to be a `lunch_flow` link. |
+| Attribute | Type          | Required | Description                                             |
+| --------- | ------------- | -------- | ------------------------------------------------------- |
+| `linkId`  | string (ulid) | Yes      | The monetr link to sync. Has to be a `lunch_flow` link. |
 
 Returns **202** with no body. The sync runs in the background, so a 202 means it started, not
 that it finished. Either [watch the progress socket](#watch-sync-progress) or
@@ -333,11 +333,11 @@ Asking again too soon is a 425. Handle it, it is a normal answer rather than a m
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | `linkId` is missing or malformed, the link isn't a Lunch Flow link, or the connection is deactivated. A connection in `error` status can still be synced by hand, which is how you recover one. |
-| 404 | No such link, or Lunch Flow isn't enabled. |
-| 425 | Synced by hand less than 30 minutes ago. |
+| Status | When                                                                                                                                                                                            |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 400    | `linkId` is missing or malformed, the link isn't a Lunch Flow link, or the connection is deactivated. A connection in `error` status can still be synced by hand, which is how you recover one. |
+| 404    | No such link, or Lunch Flow isn't enabled.                                                                                                                                                      |
+| 425    | Synced by hand less than 30 minutes ago.                                                                                                                                                        |
 
 ## <Badge type="info">GET</Badge> Watch sync progress
 
@@ -358,10 +358,10 @@ GET /api/lunch_flow/link/sync/:linkId/bank_account/:bankAccountId/progress
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `linkId` | string (ulid) | Yes | The monetr link being synced. Must be a Lunch Flow link. |
-| `bankAccountId` | string (ulid) | Yes | The bank account to watch. One socket per account, so syncing several means several sockets. |
+| Attribute       | Type          | Required | Description                                                                                  |
+| --------------- | ------------- | -------- | -------------------------------------------------------------------------------------------- |
+| `linkId`        | string (ulid) | Yes      | The monetr link being synced. Must be a Lunch Flow link.                                     |
+| `bankAccountId` | string (ulid) | Yes      | The bank account to watch. One socket per account, so syncing several means several sockets. |
 
 Messages carry the account and its current status. The socket gives up after **5 minutes**,
 which is longer than the upload socket's 2 minutes because a Lunch Flow sync pulls a lot
@@ -369,7 +369,7 @@ more history.
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | Either ID is malformed, or the link isn't a Lunch Flow link. |
-| 404 | No such link, or Lunch Flow isn't enabled. |
+| Status | When                                                         |
+| ------ | ------------------------------------------------------------ |
+| 400    | Either ID is malformed, or the link isn't a Lunch Flow link. |
+| 404    | No such link, or Lunch Flow isn't enabled.                   |

@@ -3,7 +3,7 @@ title: "Forecast API"
 description: "Project a monetr bank account's allocations forward with the forecast API, and estimate what a new expense or savings goal costs you per paycheck."
 ---
 
-import { Badge } from '@rspress/core/theme';
+import { Badge } from "@rspress/core/theme";
 
 # Forecast API
 
@@ -34,15 +34,15 @@ GET /api/bank_accounts/:bankAccountId/forecast
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The bank account to forecast. |
+| Attribute       | Type          | Required | Description                   |
+| --------------- | ------------- | -------- | ----------------------------- |
+| `bankAccountId` | string (ulid) | Yes      | The bank account to forecast. |
 
 ### Query parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `end` | timestamp | No | How far to project, RFC 3339. Defaults to 90 days out. Has to be in the future and no more than 12 months away. |
+| Attribute | Type      | Required | Description                                                                                                     |
+| --------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------- |
+| `end`     | timestamp | No       | How far to project, RFC 3339. Defaults to 90 days out. Has to be in the future and no more than 12 months away. |
 
 ### Example
 
@@ -145,52 +145,52 @@ moves, not how much is in the account, so plotting these numbers against the bal
 
 ### Response attributes
 
-| Attribute | Type | Description |
-| --- | --- | --- |
-| `startingTime` | timestamp | When the projection starts, which is the moment you made the request, on the server's clock. |
-| `endingTime` | timestamp | Where the projection stops, either your `end` or 90 days out. |
-| `startingBalance` | integer | The total allocated across every unpaused expense and goal at the moment you asked. See the warning above, this is not the account balance. |
-| `endingBalance` | integer | The projected total allocated at the end, which is always the last event's `balance`. Equal to `startingBalance` when there are no events. |
-| `events` | array | One entry per day something happens. Days where nothing happens are skipped, so these aren't evenly spaced. |
+| Attribute         | Type      | Description                                                                                                                                 |
+| ----------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `startingTime`    | timestamp | When the projection starts, which is the moment you made the request, on the server's clock.                                                |
+| `endingTime`      | timestamp | Where the projection stops, either your `end` or 90 days out.                                                                               |
+| `startingBalance` | integer   | The total allocated across every unpaused expense and goal at the moment you asked. See the warning above, this is not the account balance. |
+| `endingBalance`   | integer   | The projected total allocated at the end, which is always the last event's `balance`. Equal to `startingBalance` when there are no events.  |
+| `events`          | array     | One entry per day something happens. Days where nothing happens are skipped, so these aren't evenly spaced.                                 |
 
 Each event:
 
-| Attribute | Type | Description |
-| --- | --- | --- |
-| `date` | timestamp | The day. Every spending event inside shares this date, because events are grouped by it. |
-| `delta` | integer | `contribution` minus `transaction`. Positive means more got allocated than spent that day, which is the opposite of the transaction sign convention. |
-| `contribution` | integer | The sum of `contributionAmount` across this day's spending events. |
-| `transaction` | integer | The sum of `transactionAmount` across this day's spending events. |
-| `balance` | integer | The running total after this day, so the previous event's `balance` plus this one's `delta`. |
-| `spending` | array | The spending events on this day. Never empty, since an event only exists because a spending event landed on that date. |
-| `funding` | array | The funding events that fired on this day. |
+| Attribute      | Type      | Description                                                                                                                                          |
+| -------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `date`         | timestamp | The day. Every spending event inside shares this date, because events are grouped by it.                                                             |
+| `delta`        | integer   | `contribution` minus `transaction`. Positive means more got allocated than spent that day, which is the opposite of the transaction sign convention. |
+| `contribution` | integer   | The sum of `contributionAmount` across this day's spending events.                                                                                   |
+| `transaction`  | integer   | The sum of `transactionAmount` across this day's spending events.                                                                                    |
+| `balance`      | integer   | The running total after this day, so the previous event's `balance` plus this one's `delta`.                                                         |
+| `spending`     | array     | The spending events on this day. Never empty, since an event only exists because a spending event landed on that date.                               |
+| `funding`      | array     | The funding events that fired on this day.                                                                                                           |
 
 Each funding event:
 
-| Attribute | Type | Description |
-| --- | --- | --- |
-| `fundingScheduleId` | string (ulid) | Which schedule fired. |
-| `date` | timestamp | When the funding actually happens, after any weekend adjustment. |
-| `originalDate` | timestamp | When the rule said it would happen, before adjustment. |
-| `weekendAvoided` | boolean | Whether the date got moved because it landed on a weekend. |
+| Attribute           | Type          | Description                                                      |
+| ------------------- | ------------- | ---------------------------------------------------------------- |
+| `fundingScheduleId` | string (ulid) | Which schedule fired.                                            |
+| `date`              | timestamp     | When the funding actually happens, after any weekend adjustment. |
+| `originalDate`      | timestamp     | When the rule said it would happen, before adjustment.           |
+| `weekendAvoided`    | boolean       | Whether the date got moved because it landed on a weekend.       |
 
 Each spending event:
 
-| Attribute | Type | Description |
-| --- | --- | --- |
-| `spendingId` | string (ulid) | Which spending object this is for. |
-| `date` | timestamp | When the spending object comes due. |
-| `transactionAmount` | integer | How much comes out when it's due. |
-| `contributionAmount` | integer | How much goes into the envelope at this point. |
-| `rollingAllocation` | integer | How much is expected to be in the envelope when it comes due. |
-| `funding` | array | The funding events that will fill this before it's due. |
+| Attribute            | Type          | Description                                                   |
+| -------------------- | ------------- | ------------------------------------------------------------- |
+| `spendingId`         | string (ulid) | Which spending object this is for.                            |
+| `date`               | timestamp     | When the spending object comes due.                           |
+| `transactionAmount`  | integer       | How much comes out when it's due.                             |
+| `contributionAmount` | integer       | How much goes into the envelope at this point.                |
+| `rollingAllocation`  | integer       | How much is expected to be in the envelope when it comes due. |
+| `funding`            | array         | The funding events that will fill this before it's due.       |
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | `end` isn't valid RFC 3339, is in the past, or is more than 12 months out. |
-| 408 | The forecast took longer than 15 seconds. |
+| Status | When                                                                       |
+| ------ | -------------------------------------------------------------------------- |
+| 400    | `end` isn't valid RFC 3339, is in the past, or is more than 12 months out. |
+| 408    | The forecast took longer than 15 seconds.                                  |
 
 ## <Badge type="tip">POST</Badge> Estimate the cost of a new spending object
 
@@ -208,20 +208,20 @@ POST /api/bank_accounts/:bankAccountId/forecast/spending
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The bank account whose funding schedules to plan against. |
+| Attribute       | Type          | Required | Description                                               |
+| --------------- | ------------- | -------- | --------------------------------------------------------- |
+| `bankAccountId` | string (ulid) | Yes      | The bank account whose funding schedules to plan against. |
 
 ### Body
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `fundingScheduleId` | string (ulid) | Yes | Which [funding schedule](./funding_schedules#list-funding-schedules) would pay for it. |
-| `targetAmount` | integer | Yes | How much you'd need, in the smallest unit. Must be greater than zero. |
-| `currentAmount` | integer | No | How much you'd start with. Defaults to 0, can't be negative. |
-| `nextRecurrence` | timestamp | No | When it would first be due. |
-| `recurrenceRule` | string | No | The recurrence rule. Required if `spendingType` is `expense`, rejected if it's `goal`. |
-| `spendingType` | string | No | `expense` or `goal`. |
+| Attribute           | Type          | Required | Description                                                                            |
+| ------------------- | ------------- | -------- | -------------------------------------------------------------------------------------- |
+| `fundingScheduleId` | string (ulid) | Yes      | Which [funding schedule](./funding_schedules#list-funding-schedules) would pay for it. |
+| `targetAmount`      | integer       | Yes      | How much you'd need, in the smallest unit. Must be greater than zero.                  |
+| `currentAmount`     | integer       | No       | How much you'd start with. Defaults to 0, can't be negative.                           |
+| `nextRecurrence`    | timestamp     | No       | When it would first be due.                                                            |
+| `recurrenceRule`    | string        | No       | The recurrence rule. Required if `spendingType` is `expense`, rejected if it's `goal`. |
+| `spendingType`      | string        | No       | `expense` or `goal`.                                                                   |
 
 The rule field is called `recurrenceRule` here, not `ruleset` like it is everywhere else on
 [spending](./spending). Same format, different key. It's an inconsistency in the API, not a
@@ -264,10 +264,10 @@ between two amounts that never occur.
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | `targetAmount` is zero or negative, `currentAmount` is negative, `fundingScheduleId` is missing, or the recurrence rule is missing on an expense or present on a goal. |
-| 408 | The forecast took longer than 25 seconds. |
+| Status | When                                                                                                                                                                   |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 400    | `targetAmount` is zero or negative, `currentAmount` is negative, `fundingScheduleId` is missing, or the recurrence rule is missing on an expense or present on a goal. |
+| 408    | The forecast took longer than 25 seconds.                                                                                                                              |
 
 ## <Badge type="tip">POST</Badge> Estimate the next contribution
 
@@ -285,15 +285,15 @@ POST /api/bank_accounts/:bankAccountId/forecast/next_funding
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The bank account the schedule belongs to. |
+| Attribute       | Type          | Required | Description                               |
+| --------------- | ------------- | -------- | ----------------------------------------- |
+| `bankAccountId` | string (ulid) | Yes      | The bank account the schedule belongs to. |
 
 ### Body
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `fundingScheduleId` | string (ulid) | Yes | The funding schedule to add up. |
+| Attribute           | Type          | Required | Description                     |
+| ------------------- | ------------- | -------- | ------------------------------- |
+| `fundingScheduleId` | string (ulid) | Yes      | The funding schedule to add up. |
 
 ### Example
 
@@ -317,8 +317,8 @@ Compare that against the schedule's `estimatedDeposit` from [Get a funding sched
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | `fundingScheduleId` is missing or malformed. |
-| 404 | No such funding schedule on that bank account. |
-| 408 | The forecast took longer than 25 seconds. |
+| Status | When                                           |
+| ------ | ---------------------------------------------- |
+| 400    | `fundingScheduleId` is missing or malformed.   |
+| 404    | No such funding schedule on that bank account. |
+| 408    | The forecast took longer than 25 seconds.      |

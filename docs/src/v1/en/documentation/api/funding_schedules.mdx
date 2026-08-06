@@ -3,7 +3,7 @@ title: "Funding Schedules API"
 description: "Funding schedule endpoints in monetr's API. Create the paycheck schedules that decide when money moves into your budgeted expenses and goals."
 ---
 
-import { Badge } from '@rspress/core/theme';
+import { Badge } from "@rspress/core/theme";
 
 # Funding Schedules API
 
@@ -19,20 +19,20 @@ with a rule that fires twice a month, not two schedules.
 
 ## The funding schedule object
 
-| Attribute | Type | Description |
-| --- | --- | --- |
-| `fundingScheduleId` | string (ulid) | Identifies the funding schedule. |
-| `bankAccountId` | string (ulid) | The bank account this belongs to. |
-| `name` | string | What you call it, like "Paycheck". Has to be unique per bank account. |
-| `description` | string | Your own note. Absent when you haven't set one. |
-| `ruleset` | string | The recurrence rule as an RFC 5545 string. |
-| `excludeWeekends` | boolean | When the rule lands on a Saturday or Sunday, move it back to the preceding Friday. Most payrolls work this way. |
-| `waitForDeposit` | boolean | Whether monetr should hold off on contributing until it actually sees a deposit land. |
-| `autoCreateTransaction` | boolean | Whether monetr should write a deposit transaction on its own each time this fires. Manual links only, and it needs `estimatedDeposit` set. |
-| `estimatedDeposit` | integer, nullable | Roughly how much you expect to be paid, in the currency's smallest unit. Used for forecasting and required if `autoCreateTransaction` is on. Null when you haven't told monetr. |
-| `lastRecurrence` | timestamp, nullable | The previous funding event. Null until it's fired at least once. |
-| `nextRecurrence` | timestamp | The next funding event, as midnight in your account's timezone. This already has the weekend adjustment applied. |
-| `nextRecurrenceOriginal` | timestamp | The next event before the weekend adjustment. Same as `nextRecurrence` unless a weekend was avoided, which is how you can tell one happened. |
+| Attribute                | Type                | Description                                                                                                                                                                     |
+| ------------------------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fundingScheduleId`      | string (ulid)       | Identifies the funding schedule.                                                                                                                                                |
+| `bankAccountId`          | string (ulid)       | The bank account this belongs to.                                                                                                                                               |
+| `name`                   | string              | What you call it, like "Paycheck". Has to be unique per bank account.                                                                                                           |
+| `description`            | string              | Your own note. Absent when you haven't set one.                                                                                                                                 |
+| `ruleset`                | string              | The recurrence rule as an RFC 5545 string.                                                                                                                                      |
+| `excludeWeekends`        | boolean             | When the rule lands on a Saturday or Sunday, move it back to the preceding Friday. Most payrolls work this way.                                                                 |
+| `waitForDeposit`         | boolean             | Whether monetr should hold off on contributing until it actually sees a deposit land.                                                                                           |
+| `autoCreateTransaction`  | boolean             | Whether monetr should write a deposit transaction on its own each time this fires. Manual links only, and it needs `estimatedDeposit` set.                                      |
+| `estimatedDeposit`       | integer, nullable   | Roughly how much you expect to be paid, in the currency's smallest unit. Used for forecasting and required if `autoCreateTransaction` is on. Null when you haven't told monetr. |
+| `lastRecurrence`         | timestamp, nullable | The previous funding event. Null until it's fired at least once.                                                                                                                |
+| `nextRecurrence`         | timestamp           | The next funding event, as midnight in your account's timezone. This already has the weekend adjustment applied.                                                                |
+| `nextRecurrenceOriginal` | timestamp           | The next event before the weekend adjustment. Same as `nextRecurrence` unless a weekend was avoided, which is how you can tell one happened.                                    |
 
 ## <Badge type="info">GET</Badge> List funding schedules
 
@@ -50,9 +50,9 @@ GET /api/bank_accounts/:bankAccountId/funding_schedules
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The bank account whose schedules you want. |
+| Attribute       | Type          | Required | Description                                |
+| --------------- | ------------- | -------- | ------------------------------------------ |
+| `bankAccountId` | string (ulid) | Yes      | The bank account whose schedules you want. |
 
 ### Example
 
@@ -95,10 +95,10 @@ GET /api/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The bank account it belongs to. |
-| `fundingScheduleId` | string (ulid) | Yes | The schedule you want. |
+| Attribute           | Type          | Required | Description                     |
+| ------------------- | ------------- | -------- | ------------------------------- |
+| `bankAccountId`     | string (ulid) | Yes      | The bank account it belongs to. |
+| `fundingScheduleId` | string (ulid) | Yes      | The schedule you want.          |
 
 ### Example
 
@@ -127,10 +127,10 @@ curl --request GET \
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | Either ID is malformed. |
-| 404 | No such funding schedule on that bank account. |
+| Status | When                                           |
+| ------ | ---------------------------------------------- |
+| 400    | Either ID is malformed.                        |
+| 404    | No such funding schedule on that bank account. |
 
 ## <Badge type="tip">POST</Badge> Create a funding schedule
 
@@ -147,21 +147,21 @@ POST /api/bank_accounts/:bankAccountId/funding_schedules
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The bank account to create it on. |
+| Attribute       | Type          | Required | Description                       |
+| --------------- | ------------- | -------- | --------------------------------- |
+| `bankAccountId` | string (ulid) | Yes      | The bank account to create it on. |
 
 ### Body
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `name` | string | Yes | What to call it. Unique per bank account. |
-| `ruleset` | string | Yes | The recurrence rule as an RFC 5545 string. See the [cookbook](./recurrence_rules#cookbook) for one per pay frequency. |
-| `autoCreateTransaction` | boolean | No | Write a deposit transaction automatically each time it fires. Manual links only, and requires `estimatedDeposit`. Defaults to false. |
-| `description` | string | No | A note to yourself. |
-| `estimatedDeposit` | integer, nullable | No | Roughly what you get paid, in the smallest unit. Can't be negative. |
-| `excludeWeekends` | boolean | No | Shift weekend occurrences back to Friday. Defaults to false. |
-| `nextRecurrence` | timestamp | No | When the next event should be. Leave it off and monetr works it out from the rule, relative to now. |
+| Attribute               | Type              | Required | Description                                                                                                                          |
+| ----------------------- | ----------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`                  | string            | Yes      | What to call it. Unique per bank account.                                                                                            |
+| `ruleset`               | string            | Yes      | The recurrence rule as an RFC 5545 string. See the [cookbook](./recurrence_rules#cookbook) for one per pay frequency.                |
+| `autoCreateTransaction` | boolean           | No       | Write a deposit transaction automatically each time it fires. Manual links only, and requires `estimatedDeposit`. Defaults to false. |
+| `description`           | string            | No       | A note to yourself.                                                                                                                  |
+| `estimatedDeposit`      | integer, nullable | No       | Roughly what you get paid, in the smallest unit. Can't be negative.                                                                  |
+| `excludeWeekends`       | boolean           | No       | Shift weekend occurrences back to Friday. Defaults to false.                                                                         |
+| `nextRecurrence`        | timestamp         | No       | When the next event should be. Leave it off and monetr works it out from the rule, relative to now.                                  |
 
 `nextRecurrence` is more forgiving here than it is on spending objects. If you leave it off,
 or send something already in the past, monetr calculates the next occurrence from your rule
@@ -203,10 +203,10 @@ curl --request POST \
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | `name` or `ruleset` missing, `ruleset` isn't a valid rule, `estimatedDeposit` is negative, or `autoCreateTransaction` is on without a positive `estimatedDeposit` or on a non-manual link. |
-| 404 | The bank account isn't yours. |
+| Status | When                                                                                                                                                                                       |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 400    | `name` or `ruleset` missing, `ruleset` isn't a valid rule, `estimatedDeposit` is negative, or `autoCreateTransaction` is on without a positive `estimatedDeposit` or on a non-manual link. |
+| 404    | The bank account isn't yours.                                                                                                                                                              |
 
 ## <Badge type="warning">PATCH</Badge> Update a funding schedule
 
@@ -223,24 +223,24 @@ PATCH /api/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The bank account it belongs to. |
-| `fundingScheduleId` | string (ulid) | Yes | The schedule to change. |
+| Attribute           | Type          | Required | Description                     |
+| ------------------- | ------------- | -------- | ------------------------------- |
+| `bankAccountId`     | string (ulid) | Yes      | The bank account it belongs to. |
+| `fundingScheduleId` | string (ulid) | Yes      | The schedule to change.         |
 
 ### Body
 
 Everything is optional, send what you're changing.
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `autoCreateTransaction` | boolean | No | Manual links only, requires a positive `estimatedDeposit`. |
-| `description` | string | No | A note to yourself. |
-| `estimatedDeposit` | integer | No | Roughly what you get paid. Can't be negative. |
-| `excludeWeekends` | boolean | No | Shift weekend occurrences back to Friday. |
-| `name` | string | No | Rename it. Can't be blanked out. |
-| `nextRecurrence` | timestamp | No | Move the next event. Must be in the future, unlike on create. |
-| `ruleset` | string | No | A new recurrence rule. Can't be blanked out. |
+| Attribute               | Type      | Required | Description                                                   |
+| ----------------------- | --------- | -------- | ------------------------------------------------------------- |
+| `autoCreateTransaction` | boolean   | No       | Manual links only, requires a positive `estimatedDeposit`.    |
+| `description`           | string    | No       | A note to yourself.                                           |
+| `estimatedDeposit`      | integer   | No       | Roughly what you get paid. Can't be negative.                 |
+| `excludeWeekends`       | boolean   | No       | Shift weekend occurrences back to Friday.                     |
+| `name`                  | string    | No       | Rename it. Can't be blanked out.                              |
+| `nextRecurrence`        | timestamp | No       | Move the next event. Must be in the future, unlike on create. |
+| `ruleset`               | string    | No       | A new recurrence rule. Can't be blanked out.                  |
 
 Changing `nextRecurrence`, `ruleset` or `excludeWeekends` triggers the recalculation.
 Changing the name, description or estimated deposit doesn't.
@@ -311,10 +311,10 @@ change.
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | `nextRecurrence` is in the past, `name` or `ruleset` sent but blank, `estimatedDeposit` negative, or `autoCreateTransaction` without a positive estimated deposit or on a non-manual link. |
-| 404 | No such funding schedule. |
+| Status | When                                                                                                                                                                                       |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 400    | `nextRecurrence` is in the past, `name` or `ruleset` sent but blank, `estimatedDeposit` negative, or `autoCreateTransaction` without a positive estimated deposit or on a non-manual link. |
+| 404    | No such funding schedule.                                                                                                                                                                  |
 
 ## <Badge type="danger">DELETE</Badge> Delete a funding schedule
 
@@ -333,10 +333,10 @@ DELETE /api/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The bank account it belongs to. |
-| `fundingScheduleId` | string (ulid) | Yes | The schedule to delete. |
+| Attribute           | Type          | Required | Description                     |
+| ------------------- | ------------- | -------- | ------------------------------- |
+| `bankAccountId`     | string (ulid) | Yes      | The bank account it belongs to. |
+| `fundingScheduleId` | string (ulid) | Yes      | The schedule to delete.         |
 
 ### Example
 
@@ -350,7 +350,7 @@ Returns 200 with an empty body.
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | Expenses or goals are still using this schedule. |
-| 404 | No such funding schedule on that bank account. |
+| Status | When                                             |
+| ------ | ------------------------------------------------ |
+| 400    | Expenses or goals are still using this schedule. |
+| 404    | No such funding schedule on that bank account.   |

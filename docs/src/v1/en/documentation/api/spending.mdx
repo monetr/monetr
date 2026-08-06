@@ -3,7 +3,7 @@ title: "Spending API (Expenses and Goals)"
 description: "The envelope budgeting endpoints in monetr's API: create expenses and goals, fund them from a paycheck, and transfer money between envelopes."
 ---
 
-import { Badge } from '@rspress/core/theme';
+import { Badge } from "@rspress/core/theme";
 
 # Spending API
 
@@ -26,25 +26,25 @@ Both are the same object with the same fields, so `spendingType` is the thing to
 
 ## The spending object
 
-| Attribute | Type | Description |
-| --- | --- | --- |
-| `spendingId` | string (ulid) | Identifies the spending object. |
-| `bankAccountId` | string (ulid) | The bank account this belongs to. |
-| `fundingScheduleId` | string (ulid) | The funding schedule that fills this. |
-| `spendingType` | string | `expense` or `goal`. Set at creation and never changes. |
-| `name` | string | What you call it. Has to be unique per bank account, per type. |
-| `targetAmount` | integer | How much needs to be in the envelope by the due date. Has to be greater than zero. |
-| `currentAmount` | integer | How much is in the envelope right now, in the currency's smallest unit. |
-| `usedAmount` | integer | How much has been spent out of it. Only meaningful for goals, where it's how you tell a finished goal from an empty one. |
-| `ruleset` | string, nullable | The recurrence rule, as an RFC 5545 string like `DTSTART:20240801T050000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1`. Always null on goals. |
-| `lastSpentFrom` | timestamp, nullable | Intended to record when a transaction last took money out of this. Nothing in monetr writes it today, so it is always null. Don't build on it. |
-| `lastRecurrence` | timestamp, nullable | The previous due date. Null until it's come due at least once. |
-| `nextRecurrence` | timestamp | The next due date, as midnight in your account's timezone. |
-| `nextContributionAmount` | integer | How much the next funding event will put in. monetr recalculates this whenever something relevant changes. |
-| `isBehind` | boolean | Whether monetr thinks it can't get to `targetAmount` in time given the funding schedule. This is the flag behind the warning in the app. |
-| `isPaused` | boolean | Whether contributions are stopped. A paused object keeps whatever's in it but stops receiving more. |
-| `autoCreateTransaction` | boolean | Whether monetr should write a transaction by itself when this comes due. Expenses on manual links only. |
-| `createdAt` | timestamp | When it was created. |
+| Attribute                | Type                | Description                                                                                                                                    |
+| ------------------------ | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `spendingId`             | string (ulid)       | Identifies the spending object.                                                                                                                |
+| `bankAccountId`          | string (ulid)       | The bank account this belongs to.                                                                                                              |
+| `fundingScheduleId`      | string (ulid)       | The funding schedule that fills this.                                                                                                          |
+| `spendingType`           | string              | `expense` or `goal`. Set at creation and never changes.                                                                                        |
+| `name`                   | string              | What you call it. Has to be unique per bank account, per type.                                                                                 |
+| `targetAmount`           | integer             | How much needs to be in the envelope by the due date. Has to be greater than zero.                                                             |
+| `currentAmount`          | integer             | How much is in the envelope right now, in the currency's smallest unit.                                                                        |
+| `usedAmount`             | integer             | How much has been spent out of it. Only meaningful for goals, where it's how you tell a finished goal from an empty one.                       |
+| `ruleset`                | string, nullable    | The recurrence rule, as an RFC 5545 string like `DTSTART:20240801T050000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1`. Always null on goals.             |
+| `lastSpentFrom`          | timestamp, nullable | Intended to record when a transaction last took money out of this. Nothing in monetr writes it today, so it is always null. Don't build on it. |
+| `lastRecurrence`         | timestamp, nullable | The previous due date. Null until it's come due at least once.                                                                                 |
+| `nextRecurrence`         | timestamp           | The next due date, as midnight in your account's timezone.                                                                                     |
+| `nextContributionAmount` | integer             | How much the next funding event will put in. monetr recalculates this whenever something relevant changes.                                     |
+| `isBehind`               | boolean             | Whether monetr thinks it can't get to `targetAmount` in time given the funding schedule. This is the flag behind the warning in the app.       |
+| `isPaused`               | boolean             | Whether contributions are stopped. A paused object keeps whatever's in it but stops receiving more.                                            |
+| `autoCreateTransaction`  | boolean             | Whether monetr should write a transaction by itself when this comes due. Expenses on manual links only.                                        |
+| `createdAt`              | timestamp           | When it was created.                                                                                                                           |
 
 ## <Badge type="info">GET</Badge> List spending objects
 
@@ -61,9 +61,9 @@ GET /api/bank_accounts/:bankAccountId/spending
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The bank account whose envelopes you want. |
+| Attribute       | Type          | Required | Description                                |
+| --------------- | ------------- | -------- | ------------------------------------------ |
+| `bankAccountId` | string (ulid) | Yes      | The bank account whose envelopes you want. |
 
 ### Example
 
@@ -132,10 +132,10 @@ GET /api/bank_accounts/:bankAccountId/spending/:spendingId
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The bank account it belongs to. |
-| `spendingId` | string (ulid) | Yes | The spending object you want. |
+| Attribute       | Type          | Required | Description                     |
+| --------------- | ------------- | -------- | ------------------------------- |
+| `bankAccountId` | string (ulid) | Yes      | The bank account it belongs to. |
+| `spendingId`    | string (ulid) | Yes      | The spending object you want.   |
 
 ### Example
 
@@ -169,10 +169,10 @@ curl --request GET \
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | Either ID is malformed. |
-| 404 | No such spending object on that bank account. |
+| Status | When                                          |
+| ------ | --------------------------------------------- |
+| 400    | Either ID is malformed.                       |
+| 404    | No such spending object on that bank account. |
 
 ## <Badge type="info">GET</Badge> List a spending object's transactions
 
@@ -189,17 +189,17 @@ GET /api/bank_accounts/:bankAccountId/spending/:spendingId/transactions
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The bank account it belongs to. |
-| `spendingId` | string (ulid) | Yes | The spending object whose transactions you want. |
+| Attribute       | Type          | Required | Description                                      |
+| --------------- | ------------- | -------- | ------------------------------------------------ |
+| `bankAccountId` | string (ulid) | Yes      | The bank account it belongs to.                  |
+| `spendingId`    | string (ulid) | Yes      | The spending object whose transactions you want. |
 
 ### Query parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `limit` | integer | No | How many to return. Defaults to 25, between 1 and 100. |
-| `offset` | integer | No | How many to skip. Defaults to 0. |
+| Attribute | Type    | Required | Description                                            |
+| --------- | ------- | -------- | ------------------------------------------------------ |
+| `limit`   | integer | No       | How many to return. Defaults to 25, between 1 and 100. |
+| `offset`  | integer | No       | How many to skip. Defaults to 0.                       |
 
 ### Example
 
@@ -242,10 +242,10 @@ Returns an array of transaction objects, same shape as
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | An ID is malformed, or `limit` is outside 1 to 100. |
-| 404 | No such spending object on that bank account. |
+| Status | When                                                |
+| ------ | --------------------------------------------------- |
+| 400    | An ID is malformed, or `limit` is outside 1 to 100. |
+| 404    | No such spending object on that bank account.       |
 
 ## <Badge type="tip">POST</Badge> Create a spending object
 
@@ -262,35 +262,35 @@ POST /api/bank_accounts/:bankAccountId/spending
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The bank account to create it on. |
+| Attribute       | Type          | Required | Description                       |
+| --------------- | ------------- | -------- | --------------------------------- |
+| `bankAccountId` | string (ulid) | Yes      | The bank account to create it on. |
 
 ### Body
 
 Shared by both types:
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `fundingScheduleId` | string (ulid) | Yes | The funding schedule that'll fill this. Has to [already exist](./funding_schedules#create-a-funding-schedule) on the same bank account. |
-| `name` | string | Yes | What to call it. |
-| `nextRecurrence` | timestamp | Yes | The due date. This one is fussy, see below. |
-| `spendingType` | string | Yes | `expense` or `goal`. |
-| `targetAmount` | integer | Yes | How much you need by the due date, in the smallest unit. Must be greater than zero. |
-| `currentAmount` | integer | No | How much is already in it. Leave the key out and it starts at 0. Sending `0` explicitly is rejected with "Current amount must be greater than zero", so omit it rather than serializing a zero. |
+| Attribute           | Type          | Required | Description                                                                                                                                                                                     |
+| ------------------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fundingScheduleId` | string (ulid) | Yes      | The funding schedule that'll fill this. Has to [already exist](./funding_schedules#create-a-funding-schedule) on the same bank account.                                                         |
+| `name`              | string        | Yes      | What to call it.                                                                                                                                                                                |
+| `nextRecurrence`    | timestamp     | Yes      | The due date. This one is fussy, see below.                                                                                                                                                     |
+| `spendingType`      | string        | Yes      | `expense` or `goal`.                                                                                                                                                                            |
+| `targetAmount`      | integer       | Yes      | How much you need by the due date, in the smallest unit. Must be greater than zero.                                                                                                             |
+| `currentAmount`     | integer       | No       | How much is already in it. Leave the key out and it starts at 0. Sending `0` explicitly is rejected with "Current amount must be greater than zero", so omit it rather than serializing a zero. |
 
 Expenses also take:
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `ruleset` | string | Yes | The recurrence rule as an RFC 5545 string. Required on expenses, rejected on goals. See the [cookbook](./recurrence_rules#cookbook). |
-| `autoCreateTransaction` | boolean | No | Have monetr write the transaction itself when this comes due. Manual links only. |
+| Attribute               | Type    | Required | Description                                                                                                                          |
+| ----------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `ruleset`               | string  | Yes      | The recurrence rule as an RFC 5545 string. Required on expenses, rejected on goals. See the [cookbook](./recurrence_rules#cookbook). |
+| `autoCreateTransaction` | boolean | No       | Have monetr write the transaction itself when this comes due. Manual links only.                                                     |
 
 Goals also take:
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `isPaused` | boolean | No | Start it paused. Only accepted on goals, expenses can't be paused at creation. |
+| Attribute  | Type    | Required | Description                                                                    |
+| ---------- | ------- | -------- | ------------------------------------------------------------------------------ |
+| `isPaused` | boolean | No       | Start it paused. Only accepted on goals, expenses can't be paused at creation. |
 
 `nextRecurrence` has two rules that catch people.
 
@@ -300,7 +300,7 @@ offset moves with daylight saving. Don't hardcoded an offset, convert through th
 The check is on the hour, so any time in the midnight hour passes and gets truncated, but
 send noon and you get a 400.
 
-And it can't be in the past, which is stricter than it sounds: midnight *today* has already
+And it can't be in the past, which is stricter than it sounds: midnight _today_ has already
 happened, so the earliest value that works is midnight tomorrow. A date picker defaulting to
 today will fail here.
 
@@ -348,9 +348,9 @@ happen before the due date and divided the shortfall across them.
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | `nextRecurrence` is in the past or isn't midnight in your timezone, you sent a `ruleset` on a goal or left it off an expense, `targetAmount` is zero or negative, the funding schedule doesn't exist, or you asked for `autoCreateTransaction` on a goal or a non-manual link. |
+| Status | When                                                                                                                                                                                                                                                                           |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 400    | `nextRecurrence` is in the past or isn't midnight in your timezone, you sent a `ruleset` on a goal or left it off an expense, `targetAmount` is zero or negative, the funding schedule doesn't exist, or you asked for `autoCreateTransaction` on a goal or a non-manual link. |
 
 ## <Badge type="warning">PATCH</Badge> Update a spending object
 
@@ -366,10 +366,10 @@ PATCH /api/bank_accounts/:bankAccountId/spending/:spendingId
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The bank account it belongs to. |
-| `spendingId` | string (ulid) | Yes | The spending object to change. |
+| Attribute       | Type          | Required | Description                     |
+| --------------- | ------------- | -------- | ------------------------------- |
+| `bankAccountId` | string (ulid) | Yes      | The bank account it belongs to. |
+| `spendingId`    | string (ulid) | Yes      | The spending object to change.  |
 
 ### Body
 
@@ -378,25 +378,25 @@ Everything is optional, but which keys are allowed depends on the existing objec
 
 On both:
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `fundingScheduleId` | string (ulid) | No | Move it to a different funding schedule. |
-| `name` | string | No | Rename it. |
-| `nextRecurrence` | timestamp | No | Change the due date. Gets snapped to midnight in your timezone. |
-| `targetAmount` | integer | No | Change the target. Must be greater than zero. |
+| Attribute           | Type          | Required | Description                                                     |
+| ------------------- | ------------- | -------- | --------------------------------------------------------------- |
+| `fundingScheduleId` | string (ulid) | No       | Move it to a different funding schedule.                        |
+| `name`              | string        | No       | Rename it.                                                      |
+| `nextRecurrence`    | timestamp     | No       | Change the due date. Gets snapped to midnight in your timezone. |
+| `targetAmount`      | integer       | No       | Change the target. Must be greater than zero.                   |
 
 Expenses only:
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `autoCreateTransaction` | boolean | No | Manual links only. |
-| `ruleset` | string | No | A new recurrence rule. |
+| Attribute               | Type    | Required | Description            |
+| ----------------------- | ------- | -------- | ---------------------- |
+| `autoCreateTransaction` | boolean | No       | Manual links only.     |
+| `ruleset`               | string  | No       | A new recurrence rule. |
 
 Goals only:
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `isPaused` | boolean | No | Stop or resume contributions. |
+| Attribute  | Type    | Required | Description                   |
+| ---------- | ------- | -------- | ----------------------------- |
+| `isPaused` | boolean | No       | Stop or resume contributions. |
 
 Changing `targetAmount`, `fundingScheduleId`, `nextRecurrence` or `ruleset` makes monetr
 recalculate `nextContributionAmount`. So does unpausing. Pausing doesn't, since the number
@@ -442,114 +442,10 @@ curl --request PATCH \
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | You sent a goal-only field on an expense or the other way around, `targetAmount` is zero or negative, or `autoCreateTransaction` on a non-manual link. |
-| 404 | No such spending object. |
-
-## <Badge type="warning">PUT</Badge> Replace a spending object
-
-Replaces a spending object wholesale rather than patching it. You send the complete object
-and monetr overwrites what it's allowed to.
-
-**In the app:** Nothing in the app uses this. Every edit in the UI goes through PATCH
-instead. It's here for API consumers who'd rather send a whole object than a diff.
-
-```http
-PUT /api/bank_accounts/:bankAccountId/spending/:spendingId
-```
-
-**Auth:** API key, subscription required.
-
-### Path parameters
-
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The bank account it belongs to. |
-| `spendingId` | string (ulid) | Yes | The spending object to replace. |
-
-### Body
-
-Send the full spending object. Every field below behaves as required, even the ones you might
-expect to be optional:
-
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `autoCreateTransaction` | boolean | Yes | Manual links and expenses only. Omitting it turns the flag off. |
-| `fundingScheduleId` | string (ulid) | Yes | The funding schedule that fills it. Omitting it blanks the reference and the request fails. |
-| `isPaused` | boolean | Yes | Whether contributions are stopped. Omitting it unpauses a paused object. |
-| `name` | string | Yes | What to call it. Omitting it writes an empty name. |
-| `nextRecurrence` | timestamp | Yes | The due date. Snapped to midnight in your timezone. |
-| `ruleset` | string | Yes on expenses | Required if the existing object is an expense. Ignored and cleared if it's a goal. |
-| `targetAmount` | integer | Yes | Must be greater than zero. |
-
-:::warning This is a true replace, and omission is destructive
-Unlike the PATCH above, this endpoint decodes your body into a **fresh** object rather than
-merging it onto the stored one. A field you leave out doesn't keep its old value, it becomes
-the zero value: `false` for a boolean, an empty string, a blank ID. So omitting `isPaused` on
-a paused goal silently unpauses it, and omitting `autoCreateTransaction` silently turns it
-off. `lastSpentFrom` is wiped this way too, and it isn't in the protected list below.
-
-Reach for [PATCH](#update-a-spending-object) unless you genuinely have the whole object.
-:::
-
-A handful of fields are protected: whatever you send for `spendingType`, `createdAt`,
-`usedAmount`, `currentAmount`, `bankAccountId`, `isBehind`, `lastRecurrence` and
-`nextContributionAmount` is discarded and restored from the existing record. So you can't use
-this to rewrite balances or turn an expense into a goal.
-
-Unlike PATCH, this endpoint doesn't run the request through a validation schema, so a
-malformed body tends to surface as a plain 400 rather than a `problems` tree.
-
-### Example
-
-```bash
-curl --request PUT \
-  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/spending/spnd_01fpwx67z8djhb8bqcy17mrzfe" \
-  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
-  --header "Content-Type: application/json" \
-  --data '{
-    "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
-    "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
-    "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
-    "spendingType": "expense",
-    "name": "Coffee and pastries",
-    "targetAmount": 12000,
-    "ruleset": "DTSTART:20240801T050000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1",
-    "nextRecurrence": "2024-09-01T05:00:00Z",
-    "isPaused": false,
-    "autoCreateTransaction": false
-  }'
-```
-
-```json
-{
-  "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
-  "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
-  "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
-  "spendingType": "expense",
-  "name": "Coffee and pastries",
-  "targetAmount": 12000,
-  "currentAmount": 1315,
-  "usedAmount": 0,
-  "ruleset": "DTSTART:20240801T050000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1",
-  "lastSpentFrom": null,
-  "lastRecurrence": "2024-08-01T05:00:00Z",
-  "nextRecurrence": "2024-09-01T05:00:00Z",
-  "nextContributionAmount": 10685,
-  "isBehind": false,
-  "isPaused": false,
-  "autoCreateTransaction": false,
-  "createdAt": "2022-01-14T18:32:11.044Z"
-}
-```
-
-### Errors
-
-| Status | When |
-| --- | --- |
-| 400 | `targetAmount` is zero or negative, the object is an expense and you left off `ruleset`, or `autoCreateTransaction` on a goal or non-manual link. |
-| 404 | No such spending object. |
+| Status | When                                                                                                                                                   |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 400    | You sent a goal-only field on an expense or the other way around, `targetAmount` is zero or negative, or `autoCreateTransaction` on a non-manual link. |
+| 404    | No such spending object.                                                                                                                               |
 
 ## <Badge type="tip">POST</Badge> Transfer between spending objects
 
@@ -567,20 +463,19 @@ POST /api/bank_accounts/:bankAccountId/spending/transfer
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The bank account whose envelopes you're moving money between. |
+| Attribute       | Type          | Required | Description                                                   |
+| --------------- | ------------- | -------- | ------------------------------------------------------------- |
+| `bankAccountId` | string (ulid) | Yes      | The bank account whose envelopes you're moving money between. |
 
 ### Body
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `amount` | integer | Yes | How much to move, in the smallest unit. Has to be greater than zero, so reverse the direction rather than sending a negative. |
-| `fromSpendingId` | string (ulid), nullable | No | Where the money comes from. Leave it out to take it from free-to-use. |
-| `toSpendingId` | string (ulid), nullable | No | Where it goes. Leave it out to send it back to free-to-use. |
+| Attribute        | Type                    | Required | Description                                                                                                                   |
+| ---------------- | ----------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `amount`         | integer                 | Yes      | How much to move, in the smallest unit. Has to be greater than zero, so reverse the direction rather than sending a negative. |
+| `fromSpendingId` | string (ulid), nullable | No       | Where the money comes from. Leave it out to take it from free-to-use.                                                         |
+| `toSpendingId`   | string (ulid), nullable | No       | Where it goes. Leave it out to send it back to free-to-use.                                                                   |
 
-You have to send at least one of `fromSpendingId` and `toSpendingId`. Sending neither is a
-400. Sending both moves money directly between two envelopes without touching free-to-use.
+You have to send at least one of `fromSpendingId` and `toSpendingId`. Sending neither is a 400. Sending both moves money directly between two envelopes without touching free-to-use.
 
 ### Example
 
@@ -661,10 +556,10 @@ money, it changes how monetr has the existing balance labeled.
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | `amount` is zero or negative, you sent neither `fromSpendingId` nor `toSpendingId`, or the source doesn't have enough in it. |
-| 404 | One of the spending objects doesn't exist on that bank account. |
+| Status | When                                                                                                                         |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| 400    | `amount` is zero or negative, you sent neither `fromSpendingId` nor `toSpendingId`, or the source doesn't have enough in it. |
+| 404    | One of the spending objects doesn't exist on that bank account.                                                              |
 
 ## <Badge type="danger">DELETE</Badge> Delete a spending object
 
@@ -682,10 +577,10 @@ DELETE /api/bank_accounts/:bankAccountId/spending/:spendingId
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The bank account it belongs to. |
-| `spendingId` | string (ulid) | Yes | The spending object to delete. |
+| Attribute       | Type          | Required | Description                     |
+| --------------- | ------------- | -------- | ------------------------------- |
+| `bankAccountId` | string (ulid) | Yes      | The bank account it belongs to. |
+| `spendingId`    | string (ulid) | Yes      | The spending object to delete.  |
 
 ### Example
 
@@ -700,7 +595,7 @@ updated balances back, so re-fetch them if you're tracking that.
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | Either ID is malformed. |
-| 404 | No such spending object on that bank account. |
+| Status | When                                          |
+| ------ | --------------------------------------------- |
+| 400    | Either ID is malformed.                       |
+| 404    | No such spending object on that bank account. |

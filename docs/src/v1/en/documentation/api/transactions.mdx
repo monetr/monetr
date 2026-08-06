@@ -3,7 +3,7 @@ title: "Transactions API"
 description: "List, create, update and delete transactions with monetr's REST API, assign them to budget envelopes, and find similar ones, with curl examples."
 ---
 
-import { Badge } from '@rspress/core/theme';
+import { Badge } from "@rspress/core/theme";
 
 # Transactions API
 
@@ -19,31 +19,31 @@ Plaid link the bank owns it, and monetr won't let you rewrite history it didn't 
 
 ## The transaction object
 
-| Attribute | Type | Description |
-| --- | --- | --- |
-| `transactionId` | string (ulid) | Identifies the transaction. |
-| `bankAccountId` | string (ulid) | The bank account the transaction belongs to. |
-| `plaidTransaction` | object, nullable | The raw Plaid record behind this transaction. Only filled in by [Get a transaction](#get-a-transaction); the list endpoint always returns null. Also null for manual, uploaded and Lunch Flow transactions. |
-| `pendingPlaidTransaction` | object, nullable | The pending Plaid record this was matched against, if it started life as a pending charge. |
-| `lunchFlowTransaction` | object | The upstream Lunch Flow record. Only present on Lunch Flow transactions. |
-| `amount` | integer | What the transaction was for, in the currency's smallest unit. Positive means money left the account, negative means it came in. See [Money](./overview#money) before you do arithmetic on this. |
-| `spendingId` | string (ulid), nullable | The [spending object](./spending#the-spending-object) this transaction is spent from. Null means it came out of free-to-use. This is the field you change to re-budget something. |
-| `spending` | object | The spending object this is assigned to. Only appears on the create and update responses, which return the envelope they touched so you don't have to re-fetch it. Never present when you read a transaction. |
-| `spendingAmount` | integer | How much was actually taken out of the spending object. Smaller than `amount` when the envelope didn't have enough in it to cover the whole thing. Absent when the transaction isn't assigned to anything. |
-| `createdBySpendingId` | string (ulid), nullable | Set when a spending object with automatic transactions created this. Different from `spendingId`, which you can change. You can't change this one. |
-| `createdByFundingScheduleId` | string (ulid), nullable | Set when a funding schedule with automatic transactions created this. You can't set it yourself. |
-| `categories` | array of strings, nullable | Plaid's older style category hierarchy, general to specific. Null on transactions monetr didn't get from Plaid. |
-| `category` | string, nullable | Plaid's newer single category value, like `FOOD_AND_DRINK_COFFEE`. Null on anything that didn't come from Plaid. |
-| `date` | timestamp | The day the transaction happened, as midnight in your account's timezone. |
-| `name` | string | The transaction name as shown in the app. Absent if it's never been given one. |
-| `originalName` | string | The name as it arrived from the bank or the file. Renaming a transaction leaves this alone, so you can always get back to what the bank actually said. |
-| `merchantName` | string | Who you paid, cleaned up for display. Absent when monetr has nothing better than the raw name. |
-| `originalMerchantName` | string | The merchant name as it arrived, before anyone tidied it. |
-| `isPending` | boolean | Whether the bank still considers this pending. |
-| `uploadIdentifier` | string, nullable | The identifier from the file this came in on, for uploaded transactions. Null otherwise. |
-| `source` | string | Where it came from. One of `plaid`, `upload`, `manual` or `lunch_flow`. |
-| `createdAt` | timestamp | When monetr first stored the transaction, which is not when it happened. Use `date` for that. |
-| `deletedAt` | timestamp, nullable | When the transaction was soft deleted. Null on everything you'll normally see. |
+| Attribute                    | Type                       | Description                                                                                                                                                                                                   |
+| ---------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `transactionId`              | string (ulid)              | Identifies the transaction.                                                                                                                                                                                   |
+| `bankAccountId`              | string (ulid)              | The bank account the transaction belongs to.                                                                                                                                                                  |
+| `plaidTransaction`           | object, nullable           | The raw Plaid record behind this transaction. Only filled in by [Get a transaction](#get-a-transaction); the list endpoint always returns null. Also null for manual, uploaded and Lunch Flow transactions.   |
+| `pendingPlaidTransaction`    | object, nullable           | The pending Plaid record this was matched against, if it started life as a pending charge.                                                                                                                    |
+| `lunchFlowTransaction`       | object                     | The upstream Lunch Flow record. Only present on Lunch Flow transactions.                                                                                                                                      |
+| `amount`                     | integer                    | What the transaction was for, in the currency's smallest unit. Positive means money left the account, negative means it came in. See [Money](./overview#money) before you do arithmetic on this.              |
+| `spendingId`                 | string (ulid), nullable    | The [spending object](./spending#the-spending-object) this transaction is spent from. Null means it came out of free-to-use. This is the field you change to re-budget something.                             |
+| `spending`                   | object                     | The spending object this is assigned to. Only appears on the create and update responses, which return the envelope they touched so you don't have to re-fetch it. Never present when you read a transaction. |
+| `spendingAmount`             | integer                    | How much was actually taken out of the spending object. Smaller than `amount` when the envelope didn't have enough in it to cover the whole thing. Absent when the transaction isn't assigned to anything.    |
+| `createdBySpendingId`        | string (ulid), nullable    | Set when a spending object with automatic transactions created this. Different from `spendingId`, which you can change. You can't change this one.                                                            |
+| `createdByFundingScheduleId` | string (ulid), nullable    | Set when a funding schedule with automatic transactions created this. You can't set it yourself.                                                                                                              |
+| `categories`                 | array of strings, nullable | Plaid's older style category hierarchy, general to specific. Null on transactions monetr didn't get from Plaid.                                                                                               |
+| `category`                   | string, nullable           | Plaid's newer single category value, like `FOOD_AND_DRINK_COFFEE`. Null on anything that didn't come from Plaid.                                                                                              |
+| `date`                       | timestamp                  | The day the transaction happened, as midnight in your account's timezone.                                                                                                                                     |
+| `name`                       | string                     | The transaction name as shown in the app. Absent if it's never been given one.                                                                                                                                |
+| `originalName`               | string                     | The name as it arrived from the bank or the file. Renaming a transaction leaves this alone, so you can always get back to what the bank actually said.                                                        |
+| `merchantName`               | string                     | Who you paid, cleaned up for display. Absent when monetr has nothing better than the raw name.                                                                                                                |
+| `originalMerchantName`       | string                     | The merchant name as it arrived, before anyone tidied it.                                                                                                                                                     |
+| `isPending`                  | boolean                    | Whether the bank still considers this pending.                                                                                                                                                                |
+| `uploadIdentifier`           | string, nullable           | The identifier from the file this came in on, for uploaded transactions. Null otherwise.                                                                                                                      |
+| `source`                     | string                     | Where it came from. One of `plaid`, `upload`, `manual` or `lunch_flow`.                                                                                                                                       |
+| `createdAt`                  | timestamp                  | When monetr first stored the transaction, which is not when it happened. Use `date` for that.                                                                                                                 |
+| `deletedAt`                  | timestamp, nullable        | When the transaction was soft deleted. Null on everything you'll normally see.                                                                                                                                |
 
 ## <Badge type="info">GET</Badge> List transactions
 
@@ -61,16 +61,16 @@ GET /api/bank_accounts/:bankAccountId/transactions
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The bank account whose transactions you want. If it isn't yours you get a 404. |
+| Attribute       | Type          | Required | Description                                                                    |
+| --------------- | ------------- | -------- | ------------------------------------------------------------------------------ |
+| `bankAccountId` | string (ulid) | Yes      | The bank account whose transactions you want. If it isn't yours you get a 404. |
 
 ### Query parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `limit` | integer | No | How many to return. Defaults to 25, and has to be between 1 and 100. Outside that range is a 400, it doesn't quietly clamp. |
-| `offset` | integer | No | How many to skip first. Defaults to 0. Negative is a 400. |
+| Attribute | Type    | Required | Description                                                                                                                 |
+| --------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `limit`   | integer | No       | How many to return. Defaults to 25, and has to be between 1 and 100. Outside that range is a 400, it doesn't quietly clamp. |
+| `offset`  | integer | No       | How many to skip first. Defaults to 0. Negative is a 400.                                                                   |
 
 ### Example
 
@@ -134,12 +134,11 @@ Look at the second one. `-204300` is a paycheck arriving, not a $2,043 refund. M
 in is negative. Also notice `spendingAmount` is missing there, because that transaction
 isn't assigned to a spending object.
 
-
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | `limit` is outside 1 to 100, `offset` is negative, or `bankAccountId` isn't a valid ID. |
+| Status | When                                                                                    |
+| ------ | --------------------------------------------------------------------------------------- |
+| 400    | `limit` is outside 1 to 100, `offset` is negative, or `bankAccountId` isn't a valid ID. |
 
 ## <Badge type="info">GET</Badge> Get a transaction
 
@@ -157,10 +156,10 @@ GET /api/bank_accounts/:bankAccountId/transactions/:transactionId
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The bank account the transaction belongs to. |
-| `transactionId` | string (ulid) | Yes | The transaction you want. |
+| Attribute       | Type          | Required | Description                                  |
+| --------------- | ------------- | -------- | -------------------------------------------- |
+| `bankAccountId` | string (ulid) | Yes      | The bank account the transaction belongs to. |
+| `transactionId` | string (ulid) | Yes      | The transaction you want.                    |
 
 ### Example
 
@@ -216,10 +215,10 @@ transactions have nothing to fill in and return `null` on both.
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | Either ID is malformed. |
-| 404 | No transaction with that ID on that bank account. |
+| Status | When                                              |
+| ------ | ------------------------------------------------- |
+| 400    | Either ID is malformed.                           |
+| 404    | No transaction with that ID on that bank account. |
 
 ## <Badge type="info">GET</Badge> Find similar transactions
 
@@ -237,10 +236,10 @@ GET /api/bank_accounts/:bankAccountId/transactions/:transactionId/similar
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The bank account the transaction belongs to. |
-| `transactionId` | string (ulid) | Yes | The transaction to find relatives of. |
+| Attribute       | Type          | Required | Description                                  |
+| --------------- | ------------- | -------- | -------------------------------------------- |
+| `bankAccountId` | string (ulid) | Yes      | The bank account the transaction belongs to. |
+| `transactionId` | string (ulid) | Yes      | The transaction to find relatives of.        |
 
 ### Example
 
@@ -289,10 +288,10 @@ always omitted from this response.
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 204 | No cluster. Normal for anything one-off, and the most common response here. The body is empty, and it is a success rather than an error. |
-| 400 | Either ID is malformed. |
+| Status | When                                                                                                                                     |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 204    | No cluster. Normal for anything one-off, and the most common response here. The body is empty, and it is a success rather than an error. |
+| 400    | Either ID is malformed.                                                                                                                  |
 
 ## <Badge type="tip">POST</Badge> Create a transaction
 
@@ -309,9 +308,9 @@ POST /api/bank_accounts/:bankAccountId/transactions
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The manual bank account to add the transaction to. |
+| Attribute       | Type          | Required | Description                                        |
+| --------------- | ------------- | -------- | -------------------------------------------------- |
+| `bankAccountId` | string (ulid) | Yes      | The manual bank account to add the transaction to. |
 
 The examples below use `bac_01j6b4nqx8ws5rt2m9pked7hvc`, the manual account created on the
 [bank accounts page](./bank_accounts#create-a-bank-account), rather than the Plaid checking
@@ -319,15 +318,15 @@ account the rest of this page reads from. The Plaid account would reject both of
 
 ### Body
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `amount` | integer | Yes | The amount in the currency's smallest unit. Positive spends money, negative deposits it. Zero is rejected. |
-| `date` | timestamp | Yes | When it happened, RFC 3339. |
-| `name` | string | Yes | What to call it. This gets written to `originalName` too, since there's no bank version to preserve. |
-| `adjustsBalance` | boolean | No | Whether to move the bank account's balance to match. Defaults to false. See below, this one has a real consequence. |
-| `isPending` | boolean | No | Mark it pending. Defaults to false. |
-| `merchantName` | string | No | Who you paid. |
-| `spendingId` | string (ulid) | No | A spending object to fund it from. Send null or leave it out to spend from free-to-use. |
+| Attribute        | Type          | Required | Description                                                                                                         |
+| ---------------- | ------------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
+| `amount`         | integer       | Yes      | The amount in the currency's smallest unit. Positive spends money, negative deposits it. Zero is rejected.          |
+| `date`           | timestamp     | Yes      | When it happened, RFC 3339.                                                                                         |
+| `name`           | string        | Yes      | What to call it. This gets written to `originalName` too, since there's no bank version to preserve.                |
+| `adjustsBalance` | boolean       | No       | Whether to move the bank account's balance to match. Defaults to false. See below, this one has a real consequence. |
+| `isPending`      | boolean       | No       | Mark it pending. Defaults to false.                                                                                 |
+| `merchantName`   | string        | No       | Who you paid.                                                                                                       |
+| `spendingId`     | string (ulid) | No       | A spending object to fund it from. Send null or leave it out to spend from free-to-use.                             |
 
 Send anything else and the whole request is rejected with a 400 and
 `{"problems": {"source": "key not expected"}}`. That catches people out, because the natural
@@ -408,9 +407,9 @@ leaves the merchant original blank.
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | The link isn't manual, `amount` is 0, a required field is missing, or `spendingId` points at something that isn't yours. |
+| Status | When                                                                                                                     |
+| ------ | ------------------------------------------------------------------------------------------------------------------------ |
+| 400    | The link isn't manual, `amount` is 0, a required field is missing, or `spendingId` points at something that isn't yours. |
 
 ## <Badge type="warning">PATCH</Badge> Update a transaction
 
@@ -429,28 +428,28 @@ PATCH /api/bank_accounts/:bankAccountId/transactions/:transactionId
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The bank account the transaction belongs to. |
-| `transactionId` | string (ulid) | Yes | The transaction to change. |
+| Attribute       | Type          | Required | Description                                  |
+| --------------- | ------------- | -------- | -------------------------------------------- |
+| `bankAccountId` | string (ulid) | Yes      | The bank account the transaction belongs to. |
+| `transactionId` | string (ulid) | Yes      | The transaction to change.                   |
 
 ### Body
 
 Send only what you're changing. Everything is optional.
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `merchantName` | string | No | Who you paid, for display. Editable on any link, including Plaid ones, because `originalMerchantName` keeps the bank's version safe. |
-| `name` | string | No | What to call it. Same deal, `originalName` is left alone. |
-| `spendingId` | string (ulid), nullable | No | Which spending object it comes out of. Send null to move it back to free-to-use. |
+| Attribute      | Type                    | Required | Description                                                                                                                          |
+| -------------- | ----------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `merchantName` | string                  | No       | Who you paid, for display. Editable on any link, including Plaid ones, because `originalMerchantName` keeps the bank's version safe. |
+| `name`         | string                  | No       | What to call it. Same deal, `originalName` is left alone.                                                                            |
+| `spendingId`   | string (ulid), nullable | No       | Which spending object it comes out of. Send null to move it back to free-to-use.                                                     |
 
 On manual links only, three more:
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `amount` | integer | No | A new amount, in the smallest unit. |
-| `date` | timestamp | No | A new date, RFC 3339. |
-| `isPending` | boolean | No | Whether it's still pending. |
+| Attribute   | Type      | Required | Description                         |
+| ----------- | --------- | -------- | ----------------------------------- |
+| `amount`    | integer   | No       | A new amount, in the smallest unit. |
+| `date`      | timestamp | No       | A new date, RFC 3339.               |
+| `isPending` | boolean   | No       | Whether it's still pending.         |
 
 Sending `amount`, `date` or `isPending` on a Plaid link fails validation. `adjustsBalance`
 is rejected here on purpose, even on manual links: monetr doesn't recalculate balances when
@@ -534,10 +533,10 @@ changed. It's an empty array when nothing did.
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | You sent a manual-only field on a Plaid link, sent `adjustsBalance`, or set a `spendingId` on a deposit. Negative amounts are deposits, and monetr won't let a deposit be spent from an envelope. |
-| 404 | No transaction with that ID on that bank account. |
+| Status | When                                                                                                                                                                                              |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 400    | You sent a manual-only field on a Plaid link, sent `adjustsBalance`, or set a `spendingId` on a deposit. Negative amounts are deposits, and monetr won't let a deposit be spent from an envelope. |
+| 404    | No transaction with that ID on that bank account.                                                                                                                                                 |
 
 ## <Badge type="danger">DELETE</Badge> Delete a transaction
 
@@ -553,19 +552,19 @@ DELETE /api/bank_accounts/:bankAccountId/transactions/:transactionId
 
 ### Path parameters
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `bankAccountId` | string (ulid) | Yes | The manual bank account the transaction belongs to. |
-| `transactionId` | string (ulid) | Yes | The transaction to delete. |
+| Attribute       | Type          | Required | Description                                         |
+| --------------- | ------------- | -------- | --------------------------------------------------- |
+| `bankAccountId` | string (ulid) | Yes      | The manual bank account the transaction belongs to. |
+| `transactionId` | string (ulid) | Yes      | The transaction to delete.                          |
 
 ### Query parameters
 
 Both of these are snake case, unlike everything else in the API.
 
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `adjusts_balance` | boolean | No | Add the amount back onto the account's balances. Defaults to false. |
-| `soft` | boolean | No | Soft delete, which stamps `deletedAt` and leaves the row alone. Defaults to **true**, so a plain DELETE does not actually destroy anything. Pass `soft=false` to really remove it. |
+| Attribute         | Type    | Required | Description                                                                                                                                                                        |
+| ----------------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `adjusts_balance` | boolean | No       | Add the amount back onto the account's balances. Defaults to false.                                                                                                                |
+| `soft`            | boolean | No       | Soft delete, which stamps `deletedAt` and leaves the row alone. Defaults to **true**, so a plain DELETE does not actually destroy anything. Pass `soft=false` to really remove it. |
 
 ### Example
 
@@ -602,7 +601,7 @@ Clear `spendingId` with a PATCH first if you want the money back.
 
 ### Errors
 
-| Status | When |
-| --- | --- |
-| 400 | The link isn't manual, or an ID is malformed. |
-| 404 | No transaction with that ID on that bank account. |
+| Status | When                                              |
+| ------ | ------------------------------------------------- |
+| 400    | The link isn't manual, or an ID is malformed.     |
+| 404    | No transaction with that ID on that bank account. |
