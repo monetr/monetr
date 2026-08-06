@@ -25,7 +25,7 @@ the only thing that's current. Everything not on this page is covered by the
 Tells the web app what this server has turned on: whether sign-up is allowed, whether Plaid
 is configured, which features exist, and what build is running.
 
-```
+```http
 GET /api/config
 ```
 
@@ -39,7 +39,7 @@ something new from it.
 Issues a challenge that the browser has to solve before it's allowed to submit sign-in,
 registration, password reset or API key creation. Returns 404 when proof of work is off.
 
-```
+```http
 POST /api/authentication/challenge
 ```
 
@@ -53,7 +53,7 @@ consume its output are the ones you'd otherwise reach for.
 Looks up a merchant icon by name for the app's icon picker. Returns 204 when there's no
 match and 404 when icons weren't compiled into the build.
 
-```
+```http
 POST /api/icons/search
 ```
 
@@ -65,7 +65,7 @@ Proxies Plaid's institution lookup so the app can show a bank's name and logo. T
 is Plaid's shape, passed through unchanged, so monetr isn't in a position to promise
 anything about it.
 
-```
+```http
 GET /api/institutions/:institutionId
 ```
 
@@ -81,7 +81,7 @@ All six return 406 on a server without Plaid configured.
 
 Get a link token to hand to Plaid's SDK to start connecting a bank:
 
-```
+```http
 GET /api/plaid/link/token/new
 ```
 
@@ -89,7 +89,7 @@ GET /api/plaid/link/token/new
 
 Exchange the public token the SDK gives you back for a real connection:
 
-```
+```http
 POST /api/plaid/link/token/callback
 ```
 
@@ -97,7 +97,7 @@ POST /api/plaid/link/token/callback
 
 Start the re-authentication flow for a link whose credentials went stale:
 
-```
+```http
 PUT /api/plaid/link/update/:linkId
 ```
 
@@ -105,7 +105,7 @@ PUT /api/plaid/link/update/:linkId
 
 Finish that re-authentication flow:
 
-```
+```http
 POST /api/plaid/link/update/callback
 ```
 
@@ -114,7 +114,7 @@ POST /api/plaid/link/update/callback
 Long poll while monetr sets up a newly connected link, so the app can show a spinner rather
 than an empty budget:
 
-```
+```http
 GET /api/plaid/link/setup/wait/:linkId
 ```
 
@@ -122,7 +122,7 @@ GET /api/plaid/link/setup/wait/:linkId
 
 Trigger a manual sync of a Plaid link:
 
-```
+```http
 POST /api/plaid/link/sync
 ```
 
@@ -142,7 +142,7 @@ finished and does work.
 
 List the saved column mappings used to interpret an import file:
 
-```
+```http
 GET /api/mappings
 ```
 
@@ -150,7 +150,7 @@ GET /api/mappings
 
 Save a new column mapping:
 
-```
+```http
 POST /api/mappings
 ```
 
@@ -158,7 +158,7 @@ POST /api/mappings
 
 Start an import on a bank account:
 
-```
+```http
 POST /api/bank_accounts/:bankAccountId/transactions/import
 ```
 
@@ -166,7 +166,7 @@ POST /api/bank_accounts/:bankAccountId/transactions/import
 
 Check on an import:
 
-```
+```http
 GET /api/bank_accounts/:bankAccountId/transactions/import/:transactionImportId
 ```
 
@@ -174,7 +174,7 @@ GET /api/bank_accounts/:bankAccountId/transactions/import/:transactionImportId
 
 Update an in-progress import:
 
-```
+```http
 PATCH /api/bank_accounts/:bankAccountId/transactions/import/:transactionImportId
 ```
 

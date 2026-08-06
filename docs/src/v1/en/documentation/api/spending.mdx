@@ -53,7 +53,7 @@ Returns every expense and goal on a bank account.
 **In the app:** The expenses and goals pages, and the transaction list when it shows
 which envelope something came out of.
 
-```
+```http
 GET /api/bank_accounts/:bankAccountId/spending
 ```
 
@@ -124,7 +124,7 @@ Returns one expense or goal.
 
 **In the app:** The expense and goal detail pages.
 
-```
+```http
 GET /api/bank_accounts/:bankAccountId/spending/:spendingId
 ```
 
@@ -181,7 +181,7 @@ in it went.
 
 **In the app:** The list of transactions on an expense's detail page.
 
-```
+```http
 GET /api/bank_accounts/:bankAccountId/spending/:spendingId/transactions
 ```
 
@@ -254,7 +254,7 @@ making, and monetr validates the whole body against one shape or the other.
 
 **In the app:** The new expense and new goal forms.
 
-```
+```http
 POST /api/bank_accounts/:bankAccountId/spending
 ```
 
@@ -358,7 +358,7 @@ Changes an existing expense or goal. Send only what you're changing.
 
 **In the app:** Editing an expense or goal from its detail page.
 
-```
+```http
 PATCH /api/bank_accounts/:bankAccountId/spending/:spendingId
 ```
 
@@ -455,7 +455,7 @@ and monetr overwrites what it's allowed to.
 **In the app:** Nothing in the app uses this. Every edit in the UI goes through PATCH
 instead. It's here for API consumers who'd rather send a whole object than a diff.
 
-```
+```http
 PUT /api/bank_accounts/:bankAccountId/spending/:spendingId
 ```
 
@@ -559,7 +559,7 @@ the new laptop this month.
 
 **In the app:** The transfer dialog, where you move money between envelopes.
 
-```
+```http
 POST /api/bank_accounts/:bankAccountId/spending/transfer
 ```
 
@@ -674,7 +674,7 @@ themselves.
 
 **In the app:** Deleting an expense or goal from its detail page.
 
-```
+```http
 DELETE /api/bank_accounts/:bankAccountId/spending/:spendingId
 ```
 

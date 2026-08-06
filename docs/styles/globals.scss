@@ -1006,11 +1006,46 @@ mark {
   display: none;
 }
 
-/* rspress badges are inline-flex, so they baseline off their own line box and
- * sag a few pixels in a heading. `middle` gets most of that back, the 2px is
- * the leftover. Translate so it stays visual and the heading height is
- * unchanged. ToC badges already sit right, hence the heading scope. */
+/* Badge is inline-flex, so it baselines off its own line box and sags in a
+ * heading. `middle` fixes most of it, the 2px is the rest. Translate so the
+ * heading height doesn't change. ToC badges are already fine. */
 :is(h1, h2, h3, h4, h5, h6) > .rp-badge {
   vertical-align: middle;
   translate: 0 -2px;
+}
+
+/* The rail gap above is padding-left on the span, because the depth indent is an
+ * inline style on the anchor and would win there. The span is inline though, so
+ * the padding only lands on the first line and wrapped lines outdent. Block
+ * applies it to the whole box. Site wide, every long heading had this. */
+.rp-toc-item__text {
+  display: block;
+}
+
+/* Badge plus a long name doesn't fit 240px. Truncate, like Redoc and Scalar.
+ * The tooltip would be the way to read a truncated one, but rspress builds it
+ * from the heading markup, so it reads `<span class="rp-badge...">GET</span>`
+ * instead of the text. Left alone for now.
+ *
+ * Has to be the span, not the anchor: text-overflow needs a block container,
+ * and the anchor is a flex item where overflow:hidden lets it collapse to
+ * nothing. */
+.rp-toc-item:has(.rp-badge) .rp-toc-item__text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* rspress hardcodes 24px, taller than a row, so badged entries sat 4px taller.
+ * */
+.rp-toc-item__text > .rp-badge {
+  height: 16px;
+  min-width: 48px;
+  justify-content: center;
+  margin-right: 6px;
+  padding: 0 5px;
+  border-radius: 4px;
+  font-size: 10px;
+  line-height: 16px;
+  vertical-align: middle;
 }

@@ -67,7 +67,7 @@ Returns every link on your account. Deleted links are filtered out.
 
 **In the app:** The bank sidebar, which is one of the first things the app loads.
 
-```
+```http
 GET /api/links
 ```
 
@@ -131,7 +131,7 @@ Returns one link.
 **In the app:** The link details page, and the card that tells you when Plaid last
 updated.
 
-```
+```http
 GET /api/links/:linkId
 ```
 
@@ -184,7 +184,7 @@ monetr can't connect to automatically: create the link, then
 
 **In the app:** Setting up a manual link, and the Lunch Flow setup flow.
 
-```
+```http
 POST /api/links
 ```
 
@@ -241,7 +241,7 @@ since these two fields are yours rather than the bank's.
 
 **In the app:** Renaming a link or editing its description on the link details page.
 
-```
+```http
 PATCH /api/links/:linkId
 ```
 
@@ -305,7 +305,7 @@ connection, which is why the connection stops costing you anything after this.
 
 **In the app:** Removing a link, behind the confirmation prompt.
 
-```
+```http
 DELETE /api/links/:linkId
 ```
 
