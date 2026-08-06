@@ -7,15 +7,13 @@ import { Badge } from "@rspress/core/theme";
 
 # Funding Schedules API
 
-A funding schedule is your payday. It's the recurring event where money shows up, and it's
-when monetr moves money into your [expenses and goals](./spending). Every spending object
-points at one,
-and the schedule is what makes `nextContributionAmount` mean anything: monetr counts how
-many funding events happen between now and a due date, then splits the shortfall across
-them.
+A funding schedule is your payday. It's the recurring event where money shows up, and it's when monetr moves money into
+your [expenses and goals](./spending). Every spending object points at one, and the schedule is what makes
+`nextContributionAmount` mean anything: monetr counts how many funding events happen between now and a due date, then
+splits the shortfall across them.
 
-Most people have one funding schedule. If you get paid twice a month you have one schedule
-with a rule that fires twice a month, not two schedules.
+Most people have one funding schedule. If you get paid twice a month you have one schedule with a rule that fires twice
+a month, not two schedules.
 
 ## The funding schedule object
 
@@ -36,11 +34,9 @@ with a rule that fires twice a month, not two schedules.
 
 ## <Badge type="info">GET</Badge> List funding schedules
 
-Returns every funding schedule on a bank account. Returns an empty array rather than null
-when there aren't any.
+Returns every funding schedule on a bank account. Returns an empty array rather than null when there aren't any.
 
-**In the app:** The funding page, and the schedule picker you use when creating an
-expense or goal.
+**In the app:** The funding page, and the schedule picker you use when creating an expense or goal.
 
 ```http
 GET /api/bank_accounts/:bankAccountId/funding_schedules
@@ -134,8 +130,7 @@ curl --request GET \
 
 ## <Badge type="tip">POST</Badge> Create a funding schedule
 
-Adds a funding schedule. You'll want one of these before you create any expenses or goals,
-since both require one.
+Adds a funding schedule. You'll want one of these before you create any expenses or goals, since both require one.
 
 **In the app:** The new funding schedule form, and first-time setup.
 
@@ -163,10 +158,9 @@ POST /api/bank_accounts/:bankAccountId/funding_schedules
 | `excludeWeekends`       | boolean           | No       | Shift weekend occurrences back to Friday. Defaults to false.                                                                         |
 | `nextRecurrence`        | timestamp         | No       | When the next event should be. Leave it off and monetr works it out from the rule, relative to now.                                  |
 
-`nextRecurrence` is more forgiving here than it is on spending objects. If you leave it off,
-or send something already in the past, monetr calculates the next occurrence from your rule
-instead of rejecting it. That's deliberate, since picking today in a date picker usually
-means midnight today, which is already gone.
+`nextRecurrence` is more forgiving here than it is on spending objects. If you leave it off, or send something already
+in the past, monetr calculates the next occurrence from your rule instead of rejecting it. That's deliberate, since
+picking today in a date picker usually means midnight today, which is already gone.
 
 ### Example
 
@@ -210,8 +204,8 @@ curl --request POST \
 
 ## <Badge type="warning">PATCH</Badge> Update a funding schedule
 
-Changes a funding schedule. Moving the schedule changes when every expense and goal attached
-to it gets funded, so monetr recalculates all of them and hands them back to you.
+Changes a funding schedule. Moving the schedule changes when every expense and goal attached to it gets funded, so
+monetr recalculates all of them and hands them back to you.
 
 **In the app:** Editing a funding schedule from its details page.
 
@@ -242,14 +236,13 @@ Everything is optional, send what you're changing.
 | `nextRecurrence`        | timestamp | No       | Move the next event. Must be in the future, unlike on create. |
 | `ruleset`               | string    | No       | A new recurrence rule. Can't be blanked out.                  |
 
-Changing `nextRecurrence`, `ruleset` or `excludeWeekends` triggers the recalculation.
-Changing the name, description or estimated deposit doesn't.
+Changing `nextRecurrence`, `ruleset` or `excludeWeekends` triggers the recalculation. Changing the name, description or
+estimated deposit doesn't.
 
 :::warning A stale schedule can't be patched at all
-The "must be in the future" check runs against the merged object, not against what you sent.
-So if a schedule's stored `nextRecurrence` has already passed, every PATCH fails with
-"Next recurrence must be in the future", even one that only changes the name. Send a new
-`nextRecurrence` along with whatever else you're changing to get out of it.
+The "must be in the future" check runs against the merged object, not against what you sent. So if a schedule's stored
+`nextRecurrence` has already passed, every PATCH fails with "Next recurrence must be in the future", even one that only
+changes the name. Send a new `nextRecurrence` along with whatever else you're changing to get out of it.
 :::
 
 ### Example
@@ -304,10 +297,9 @@ curl --request PATCH \
 }
 ```
 
-The response wraps the schedule in a `fundingSchedule` key rather than returning it at the
-top level, which is different from create and get on this same resource. `spending` holds
-every spending object that got recalculated, and it's an empty array when nothing needed to
-change.
+The response wraps the schedule in a `fundingSchedule` key rather than returning it at the top level, which is different
+from create and get on this same resource. `spending` holds every spending object that got recalculated, and it's an
+empty array when nothing needed to change.
 
 ### Errors
 
@@ -318,10 +310,9 @@ change.
 
 ## <Badge type="danger">DELETE</Badge> Delete a funding schedule
 
-Removes a funding schedule. It has to be unused first: if any expense or goal still points
-at it, the call fails and nothing happens.
-[Move those to another schedule](./spending#update-a-spending-object) or
-[delete them](./spending#delete-a-spending-object), then try again.
+Removes a funding schedule. It has to be unused first: if any expense or goal still points at it, the call fails and
+nothing happens. [Move those to another schedule](./spending#update-a-spending-object) or [delete
+them](./spending#delete-a-spending-object), then try again.
 
 **In the app:** Deleting a funding schedule from its details page.
 

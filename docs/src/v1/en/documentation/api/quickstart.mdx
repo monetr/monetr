@@ -5,14 +5,12 @@ description: "Build a working monetr budget from scratch over the REST API in si
 
 # Quickstart
 
-Six calls, start to finish. By the end you'll have a bank account monetr is tracking, a
-paycheck schedule filling an envelope, and a transaction spent out of that envelope, all
-created over the API.
+Six calls, start to finish. By the end you'll have a bank account monetr is tracking, a paycheck schedule filling an
+envelope, and a transaction spent out of that envelope, all created over the API.
 
-Everything here uses a **manual link**, which is the kind you maintain yourself. Plaid links
-are created through a browser handshake an API key can't drive, so a manual link is the only
-way to build an account from scratch over the API. It's also the honest way to try things
-without connecting a real bank.
+Everything here uses a **manual link**, which is the kind you maintain yourself. Plaid links are created through a
+browser handshake an API key can't drive, so a manual link is the only way to build an account from scratch over the
+API. It's also the honest way to try things without connecting a real bank.
 
 You'll need an API key. Make one in the app under **Settings** then **API**, then:
 
@@ -23,25 +21,22 @@ export MONETR_API_KEY_SECRET="the-secret-you-copied-when-you-made-the-key"
 
 ## The order matters
 
-This is the part that isn't guessable, so it's worth having up front. Each thing needs the
-one above it to exist first:
+This is the part that isn't guessable, so it's worth having up front. Each thing needs the one above it to exist first:
 
 ```
 link
  └── bank account
-      ├── funding schedule          (when you get paid)
-      └── spending object           (needs a funding schedule to point at)
-           └── transaction          (optionally points at a spending object)
+      ├── funding schedule  (when you get paid)
+      └── spending object   (needs a funding schedule to point at)
+           └── transaction  (optionally points at a spending object)
 ```
 
 Try to create an expense before a funding schedule exists and you'll get a 400, because
-[`fundingScheduleId`](./spending#create-a-spending-object) is required and has to already be
-on the same bank account.
+[`fundingScheduleId`](./spending#create-a-spending-object) is required and has to already be on the same bank account.
 
 ## 1. Find your timezone
 
-Not strictly a setup step, but you need it before step 4 and getting it wrong is the most
-common way this goes sideways.
+Not strictly a setup step, but you need it before step 4 and getting it wrong is the most common way this goes sideways.
 
 ```bash
 curl --request GET \
@@ -49,9 +44,9 @@ curl --request GET \
   --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
 ```
 
-Look for `user.account.timezone`. The rest of this guide assumes `America/Chicago`. Every due
-date you send has to be midnight in **your** account's timezone, so if yours differs, adjust
-the times below. See [Timestamps](./overview#timestamps) for why.
+Look for `user.account.timezone`. The rest of this guide assumes `America/Chicago`. Every due date you send has to be
+midnight in **your** account's timezone, so if yours differs, adjust the times below. See
+[Timestamps](./overview#timestamps) for why.
 
 **Full reference:** [Get the current user](./users#get-the-current-user)
 
@@ -105,9 +100,8 @@ curl --request POST \
   }'
 ```
 
-`310000` is $3,100.00. Amounts are integers in the currency's smallest unit, and that trips
-up more people than anything else in this API. Read [Money](./overview#money) once before you
-go further.
+`310000` is $3,100.00. Amounts are integers in the currency's smallest unit, and that trips up more people than anything
+else in this API. Read [Money](./overview#money) once before you go further.
 
 ```json
 {
@@ -151,10 +145,10 @@ curl --request POST \
   }'
 ```
 
-That `ruleset` says every other Friday. It's an RFC 5545 recurrence rule, and monetr is fussy
-about them in ways that aren't obvious, so if you get `"Ruleset must be valid"` back go read
-[Recurrence Rules](./recurrence_rules). The [cookbook](./recurrence_rules#cookbook) has a
-copy-paste rule for every schedule the app itself offers.
+That `ruleset` says every other Friday. It's an [RFC 5545](https://datatracker.ietf.org/doc/html/rfc5545) recurrence
+rule, and monetr is fussy about them in ways that aren't obvious, so if you get `"Ruleset must be valid"` back go read
+[Recurrence Rules](./recurrence_rules). The [cookbook](./recurrence_rules#cookbook) has a copy-paste rule for every
+schedule the app itself offers.
 
 ```json
 {
@@ -172,8 +166,8 @@ copy-paste rule for every schedule the app itself offers.
 }
 ```
 
-You didn't send `nextRecurrence` and monetr worked it out from the rule. That's specific to
-funding schedules; the next step is stricter.
+You didn't send `nextRecurrence` and monetr worked it out from the rule. That's specific to funding schedules; the next
+step is stricter.
 
 ## 5. Create an expense
 
@@ -197,11 +191,10 @@ curl --request POST \
 ```
 
 :::warning `nextRecurrence` is the fussiest field in the API
-It has to be **midnight in your account's timezone**, and it has to be in the **future**.
-Midnight today has already happened, so the earliest value that works is midnight tomorrow.
-`2024-09-01T05:00:00Z` is midnight in `America/Chicago` during daylight saving; in winter the
-same wall clock time is `T06:00:00Z`. Convert through the timezone rather than using a hardcoded
-offset.
+It has to be **midnight in your account's timezone**, and it has to be in the **future**. Midnight today has already
+happened, so the earliest value that works is midnight tomorrow. `2024-09-01T05:00:00Z` is midnight in `America/Chicago`
+during daylight saving; in winter the same wall clock time is `T06:00:00Z`. Convert through the timezone rather than
+using a hardcoded offset.
 :::
 
 ```json
@@ -226,8 +219,8 @@ offset.
 }
 ```
 
-`nextContributionAmount` came back calculated: one payday falls before the 1st, so that
-payday has to cover the whole 8000.
+`nextContributionAmount` came back calculated: one payday falls before the 1st, so that payday has to cover the whole
+8000.
 
 ## 6. Record a transaction against it
 
@@ -248,14 +241,12 @@ curl --request POST \
   }'
 ```
 
-Two things worth knowing here. A **positive** amount is money leaving the account, which is
-backwards from a bank statement. And `date` should be midnight in your timezone like every
-other date in monetr, because nothing normalizes it for you: send a wall clock time and it's
-stored exactly as sent.
+Two things worth knowing here. A **positive** amount is money leaving the account, which is backwards from a bank
+statement. And `date` should be midnight in your timezone like every other date in monetr, because nothing normalizes it
+for you: send a wall clock time and it's stored exactly as sent.
 
-The response carries the transaction, the account's recalculated balances, and the envelope
-that got debited, so you don't need a follow up call. The
-[full response is described here](./transactions#create-a-transaction).
+The response carries the transaction, the account's recalculated balances, and the envelope that got debited, so you
+don't need a follow up call. The [full response is described here](./transactions#create-a-transaction).
 
 ## 7. Check the balances
 
@@ -280,20 +271,18 @@ curl --request GET \
 }
 ```
 
-`expenses` is still 0 because payday hasn't happened yet, so nothing has been put into the
-Coffee envelope. Come back after the 30th and `expenses` will be 8000 with `free` lower to
-match. `free` is what you can spend without raiding an envelope, and it's the number the app
-calls free-to-use.
+`expenses` is still 0 because payday hasn't happened yet, so nothing has been put into the Coffee envelope. Come back
+after the 30th and `expenses` will be 8000 with `free` lower to match. `free` is what you can spend without raiding an
+envelope, and it's the number the app calls free-to-use.
 
 ## What to read next
 
 - [Money](./overview#money), if you skipped it. It's the one that causes silent bugs.
 - [Recurrence Rules](./recurrence_rules#cookbook) for schedules beyond every-other-Friday.
-- [List transactions](./transactions#list-transactions) to read the feed back, and
-  [Update a transaction](./transactions#update-a-transaction) to move one between envelopes.
-- [Transfer between spending objects](./spending#transfer-between-spending-objects) when you
-  need to move money you've already allocated.
-- [Get a forecast](./forecast#get-a-forecast) to project this forward, and
-  [Estimate the cost of a new spending object](./forecast#estimate-the-cost-of-a-new-spending-object)
-  to price something before you commit to it.
+- [List transactions](./transactions#list-transactions) to read the feed back, and [Update a
+  transaction](./transactions#update-a-transaction) to move one between envelopes.
+- [Transfer between spending objects](./spending#transfer-between-spending-objects) when you need to move money you've
+  already allocated.
+- [Get a forecast](./forecast#get-a-forecast) to project this forward, and [Estimate the cost of a new spending
+  object](./forecast#estimate-the-cost-of-a-new-spending-object) to price something before you commit to it.
 - [Errors](./overview#errors) when something comes back 400, especially the `problems` tree.

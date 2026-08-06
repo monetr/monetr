@@ -7,20 +7,18 @@ import { Badge } from "@rspress/core/theme";
 
 # Spending API
 
-Spending objects are the envelopes. Each one sits on a
-[bank account](./bank_accounts#the-bank-account-object), has a target amount, and gets filled
-up a little at a time by a [funding schedule](./funding_schedules). When you spend money on
-something, you point the transaction at the envelope it came out of, and monetr takes the
-money from there instead of from your free-to-use balance.
+Spending objects are the envelopes. Each one sits on a [bank account](./bank_accounts#the-bank-account-object), has a
+target amount, and gets filled up a little at a time by a [funding schedule](./funding_schedules). When you spend money
+on something, you point the transaction at the envelope it came out of, and monetr takes the money from there instead of
+from your free-to-use balance.
 
 There are two kinds, and the difference matters for almost every endpoint here.
 
-**Expenses** repeat. Rent every month, insurance every six months. They have a recurrence
-rule, and when the due date comes around the envelope empties and starts filling again for
-the next one.
+**Expenses** repeat. Rent every month, insurance every six months. They have a recurrence rule, and when the due date
+comes around the envelope empties and starts filling again for the next one.
 
-**Goals** don't repeat. You're saving up for one thing by one date, and when you get there
-you're done. Goals have no recurrence rule at all, and sending one is an error.
+**Goals** don't repeat. You're saving up for one thing by one date, and when you get there you're done. Goals have no
+recurrence rule at all, and sending one is an error.
 
 Both are the same object with the same fields, so `spendingType` is the thing to branch on.
 
@@ -50,8 +48,8 @@ Both are the same object with the same fields, so `spendingType` is the thing to
 
 Returns every expense and goal on a bank account.
 
-**In the app:** The expenses and goals pages, and the transaction list when it shows
-which envelope something came out of.
+**In the app:** The expenses and goals pages, and the transaction list when it shows which envelope something came out
+of.
 
 ```http
 GET /api/bank_accounts/:bankAccountId/spending
@@ -176,8 +174,7 @@ curl --request GET \
 
 ## <Badge type="info">GET</Badge> List a spending object's transactions
 
-Returns the transactions that were spent out of one envelope, so you can see where the money
-in it went.
+Returns the transactions that were spent out of one envelope, so you can see where the money in it went.
 
 **In the app:** The list of transactions on an expense's detail page.
 
@@ -209,8 +206,7 @@ curl --request GET \
   --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
 ```
 
-Returns an array of transaction objects, same shape as
-[List transactions](./transactions#list-transactions).
+Returns an array of transaction objects, same shape as [List transactions](./transactions#list-transactions).
 
 ```json
 [
@@ -249,8 +245,8 @@ Returns an array of transaction objects, same shape as
 
 ## <Badge type="tip">POST</Badge> Create a spending object
 
-Makes a new expense or goal. Which fields are valid depends entirely on which one you're
-making, and monetr validates the whole body against one shape or the other.
+Makes a new expense or goal. Which fields are valid depends entirely on which one you're making, and monetr validates
+the whole body against one shape or the other.
 
 **In the app:** The new expense and new goal forms.
 
@@ -294,15 +290,13 @@ Goals also take:
 
 `nextRecurrence` has two rules that catch people.
 
-It has to be midnight in your account's timezone. If your account is `America/Chicago`, that
-means `2024-09-01T05:00:00Z` in summer and `2024-12-01T06:00:00Z` in winter, because the
-offset moves with daylight saving. Don't hardcoded an offset, convert through the timezone.
-The check is on the hour, so any time in the midnight hour passes and gets truncated, but
-send noon and you get a 400.
+It has to be midnight in your account's timezone. If your account is `America/Chicago`, that means
+`2024-09-01T05:00:00Z` in summer and `2024-12-01T06:00:00Z` in winter, because the offset moves with daylight saving.
+Don't hardcoded an offset, convert through the timezone. The check is on the hour, so any time in the midnight hour
+passes and gets truncated, but send noon and you get a 400.
 
-And it can't be in the past, which is stricter than it sounds: midnight _today_ has already
-happened, so the earliest value that works is midnight tomorrow. A date picker defaulting to
-today will fail here.
+And it can't be in the past, which is stricter than it sounds: midnight _today_ has already happened, so the earliest
+value that works is midnight tomorrow. A date picker defaulting to today will fail here.
 
 ### Example
 
@@ -343,8 +337,8 @@ curl --request POST \
 }
 ```
 
-`nextContributionAmount` came back calculated. monetr worked out how many funding events
-happen before the due date and divided the shortfall across them.
+`nextContributionAmount` came back calculated. monetr worked out how many funding events happen before the due date and
+divided the shortfall across them.
 
 ### Errors
 
@@ -373,8 +367,8 @@ PATCH /api/bank_accounts/:bankAccountId/spending/:spendingId
 
 ### Body
 
-Everything is optional, but which keys are allowed depends on the existing object's
-`spendingType`. You can't change the type itself.
+Everything is optional, but which keys are allowed depends on the existing object's `spendingType`. You can't change the
+type itself.
 
 On both:
 
@@ -398,13 +392,12 @@ Goals only:
 | ---------- | ------- | -------- | ----------------------------- |
 | `isPaused` | boolean | No       | Stop or resume contributions. |
 
-Changing `targetAmount`, `fundingScheduleId`, `nextRecurrence` or `ruleset` makes monetr
-recalculate `nextContributionAmount`. So does unpausing. Pausing doesn't, since the number
-would be stale by the time you unpause anyway.
+Changing `targetAmount`, `fundingScheduleId`, `nextRecurrence` or `ruleset` makes monetr recalculate
+`nextContributionAmount`. So does unpausing. Pausing doesn't, since the number would be stale by the time you unpause
+anyway.
 
-`currentAmount`, `usedAmount` and `isBehind` are not editable here. Money moves between
-envelopes with [transfer](#transfer-between-spending-objects), not by writing amounts
-directly.
+`currentAmount`, `usedAmount` and `isBehind` are not editable here. Money moves between envelopes with
+[transfer](#transfer-between-spending-objects), not by writing amounts directly.
 
 ### Example
 
@@ -449,9 +442,8 @@ curl --request PATCH \
 
 ## <Badge type="tip">POST</Badge> Transfer between spending objects
 
-Moves already-allocated money from one envelope to another, or between an envelope and
-free-to-use. This is what you use when you've decided the vacation fund matters more than
-the new laptop this month.
+Moves already-allocated money from one envelope to another, or between an envelope and free-to-use. This is what you use
+when you've decided the vacation fund matters more than the new laptop this month.
 
 **In the app:** The transfer dialog, where you move money between envelopes.
 
@@ -475,7 +467,8 @@ POST /api/bank_accounts/:bankAccountId/spending/transfer
 | `fromSpendingId` | string (ulid), nullable | No       | Where the money comes from. Leave it out to take it from free-to-use.                                                         |
 | `toSpendingId`   | string (ulid), nullable | No       | Where it goes. Leave it out to send it back to free-to-use.                                                                   |
 
-You have to send at least one of `fromSpendingId` and `toSpendingId`. Sending neither is a 400. Sending both moves money directly between two envelopes without touching free-to-use.
+You have to send at least one of `fromSpendingId` and `toSpendingId`. Sending neither is a 400. Sending both moves money
+directly between two envelopes without touching free-to-use.
 
 ### Example
 
@@ -548,11 +541,11 @@ curl --request POST \
 }
 ```
 
-Both envelopes come back with recalculated contribution amounts, along with the account's
-new balances. `spending` has one entry when you only sent one side, two when you sent both.
+Both envelopes come back with recalculated contribution amounts, along with the account's new balances. `spending` has
+one entry when you only sent one side, two when you sent both.
 
-Notice the account's `current` and `available` didn't change. Transferring doesn't move real
-money, it changes how monetr has the existing balance labeled.
+Notice the account's `current` and `available` didn't change. Transferring doesn't move real money, it changes how
+monetr has the existing balance labeled.
 
 ### Errors
 
@@ -563,9 +556,8 @@ money, it changes how monetr has the existing balance labeled.
 
 ## <Badge type="danger">DELETE</Badge> Delete a spending object
 
-Removes an expense or goal. Whatever was allocated to it goes back to free-to-use, and any
-transactions that pointed at it get their `spendingId` cleared rather than being deleted
-themselves.
+Removes an expense or goal. Whatever was allocated to it goes back to free-to-use, and any transactions that pointed at
+it get their `spendingId` cleared rather than being deleted themselves.
 
 **In the app:** Deleting an expense or goal from its detail page.
 
@@ -590,8 +582,8 @@ curl --request DELETE \
   --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
 ```
 
-Returns 200 with an empty body. Unlike transfer and the transaction endpoints, you don't get
-updated balances back, so re-fetch them if you're tracking that.
+Returns 200 with an empty body. Unlike transfer and the transaction endpoints, you don't get updated balances back, so
+re-fetch them if you're tracking that.
 
 ### Errors
 

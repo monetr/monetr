@@ -7,32 +7,20 @@ import { Badge } from "@rspress/core/theme";
 
 # Billing API
 
-monetr's hosted service charges for itself through Stripe, and these three endpoints are how
-the app hands you off to Stripe and picks you back up afterwards. monetr never sees a card
-number: both endpoints that matter return a Stripe URL for the browser to go to.
+monetr's hosted service charges for itself through Stripe, and these three endpoints are how the app hands you off to
+Stripe and picks you back up afterwards. monetr never sees a card number: both endpoints that matter return a Stripe URL
+for the browser to go to.
 
 :::info Hosted only
-These endpoints are part of monetr's paid hosted service. If you're self-hosting with
-billing disabled, all three return 404 with `{"error": "billing is not enabled"}`. That's a
-hard check at the top of each handler, before anything else happens.
+These endpoints are part of monetr's paid hosted service. If you're self-hosting with billing disabled, all three return
+404 with `{"error": "billing is not enabled"}`. That's a hard check at the top of each handler, before anything else
+happens.
 :::
 
 :::warning Not for API keys
-All three reject API keys. They're reachable only from the monetr web app while signed in.
-A long lived credential shouldn't be able to start a subscription or open a billing portal on
-its own.
+All three reject API keys. They're reachable only from the monetr web app while signed in. A long lived credential
+shouldn't be able to start a subscription or open a billing portal on its own.
 :::
-
-### Self-hosting with billing turned on
-
-Worth spelling out, because it's the one configuration where these two banners leave you
-stuck. If you self-host and you _have_ configured Stripe, then the subscription check is
-live: an account that isn't paid up gets a 402 on most of the API, and none of the three
-remedies on this page can be reached with an API key.
-
-The way out is to sign in to your own instance in a browser and use the subscribe flow there.
-If you didn't mean to turn billing on, unset your Stripe configuration and the check is
-skipped entirely, as described in [the overview](./overview#what-each-endpoint-requires).
 
 ## <Badge type="tip">POST</Badge> Start a checkout
 
@@ -61,11 +49,11 @@ POST /api/billing/create_checkout
 
 ## <Badge type="info">GET</Badge> Finish a checkout
 
-Called when Stripe sends the user back to monetr. It checks with Stripe whether the payment
-actually went through and updates the account, then tells the client where to go.
+Called when Stripe sends the user back to monetr. It checks with Stripe whether the payment actually went through and
+updates the account, then tells the client where to go.
 
-**In the app:** The page Stripe redirects to after checkout, which reads the answer and
-either lets you in or sends you back to subscribe.
+**In the app:** The page Stripe redirects to after checkout, which reads the answer and either lets you in or sends you
+back to subscribe.
 
 ```http
 GET /api/billing/checkout/:checkoutSessionId
@@ -100,8 +88,8 @@ It didn't, or hasn't yet:
 }
 ```
 
-Both are 200. Check `isActive`, not the status code. An inactive answer isn't necessarily
-failure either, Stripe's webhook may not have landed yet.
+Both are 200. Check `isActive`, not the status code. An inactive answer isn't necessarily failure either, Stripe's
+webhook may not have landed yet.
 
 ### Errors
 
@@ -112,8 +100,7 @@ failure either, Stripe's webhook may not have landed yet.
 
 ## <Badge type="info">GET</Badge> Open the billing portal
 
-Returns a URL to Stripe's billing portal, where someone can change their card, see invoices
-or cancel.
+Returns a URL to Stripe's billing portal, where someone can change their card, see invoices or cancel.
 
 **In the app:** The manage subscription button on the subscription settings page.
 
@@ -131,8 +118,7 @@ GET /api/billing/portal
 }
 ```
 
-Send the browser there. The link is short lived and single use, so fetch a fresh one each
-time rather than storing it.
+Send the browser there. The link is short lived and single use, so fetch a fresh one each time rather than storing it.
 
 ### Errors
 

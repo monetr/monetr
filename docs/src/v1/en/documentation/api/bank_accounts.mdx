@@ -7,14 +7,12 @@ import { Badge } from "@rspress/core/theme";
 
 # Bank Accounts API
 
-A bank account belongs to a [link](./links). If the link is a Plaid one, monetr created the
-bank accounts for you when you connected your bank, and their names and balances come from
-there. If it's a manual link, you make them yourself and you own everything about them,
-including the balances.
+A bank account belongs to a [link](./links). If the link is a Plaid one, monetr created the bank accounts for you when
+you connected your bank, and their names and balances come from there. If it's a manual link, you make them yourself and
+you own everything about them, including the balances.
 
-Bank accounts are where the budgeting actually happens.
-[Transactions](./transactions), [spending objects](./spending) and
-[funding schedules](./funding_schedules) all hang off a bank account, not off the link.
+Bank accounts are where the budgeting actually happens. [Transactions](./transactions), [spending objects](./spending)
+and [funding schedules](./funding_schedules) all hang off a bank account, not off the link.
 
 ## The bank account object
 
@@ -40,16 +38,15 @@ Bank accounts are where the budgeting actually happens.
 | `updatedAt`              | timestamp               | When the record last changed.                                                                                                                                                                                     |
 | `deletedAt`              | timestamp, nullable     | When the account was archived. Present only on archived accounts.                                                                                                                                                 |
 
-Balances don't use the sign flip that transaction amounts do. A positive `currentBalance`
-means you have money. See [Money](./overview#money) for the decimal places problem, which
-does apply here.
+Balances don't use the sign flip that transaction amounts do. A positive `currentBalance` means you have money. See
+[Money](./overview#money) for the decimal places problem, which does apply here.
 
 ## <Badge type="info">GET</Badge> List bank accounts
 
 Returns every bank account on your monetr account, across all links.
 
-**In the app:** The account switcher in the sidebar. Almost every screen needs to know
-which accounts exist, so this is one of the first calls the app makes.
+**In the app:** The account switcher in the sidebar. Almost every screen needs to know which accounts exist, so this is
+one of the first calls the app makes.
 
 ```http
 GET /api/bank_accounts
@@ -63,8 +60,8 @@ GET /api/bank_accounts
 | --------- | ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `link_id` | string (ulid) | No       | Only return accounts on this link. Snake case, unlike most of the API. This filter also includes archived accounts, where the unfiltered call leaves them out. A link with no accounts returns `null` here rather than an empty array. |
 
-Calling this with no parameters gives you live accounts. Calling it with `link_id` gives you everything that link has ever had,
-archived ones included, because the link details screen needs to show them.
+Calling this with no parameters gives you live accounts. Calling it with `link_id` gives you everything that link has
+ever had, archived ones included, because the link details screen needs to show them.
 
 ### Example
 
@@ -119,8 +116,8 @@ curl --request GET \
 
 Returns one bank account.
 
-**In the app:** Loading whichever account you currently have selected. The app shows the
-cached copy from the list immediately, then confirms it against this.
+**In the app:** Loading whichever account you currently have selected. The app shows the cached copy from the list
+immediately, then confirms it against this.
 
 ```http
 GET /api/bank_accounts/:bankAccountId
@@ -172,8 +169,8 @@ curl --request GET \
 
 ## <Badge type="info">GET</Badge> Get balances
 
-Returns the account's balances plus how that money is currently carved up between expenses,
-goals and what's left over. This is the endpoint behind the numbers at the top of the app.
+Returns the account's balances plus how that money is currently carved up between expenses, goals and what's left over.
+This is the endpoint behind the numbers at the top of the app.
 
 **In the app:** The free-to-use and limit figures at the top of the budgeting sidebar.
 
@@ -212,8 +209,8 @@ curl --request GET \
 
 ### Response attributes
 
-This is its own object, not the bank account. The same shape comes back on the transaction
-create, update and delete responses.
+This is its own object, not the bank account. The same shape comes back on the transaction create, update and delete
+responses.
 
 | Attribute       | Type          | Description                                                                                                                                                                          |
 | --------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -228,11 +225,10 @@ create, update and delete responses.
 
 ## <Badge type="tip">POST</Badge> Create a bank account
 
-Adds a bank account by hand. Only works on manual and Lunch Flow links, since Plaid links
-get their accounts from the bank.
+Adds a bank account by hand. Only works on manual and Lunch Flow links, since Plaid links get their accounts from the
+bank.
 
-**In the app:** Adding an account to a manual link, and both the manual and Lunch Flow
-setup flows.
+**In the app:** Adding an account to a manual link, and both the manual and Lunch Flow setup flows.
 
 ```http
 POST /api/bank_accounts
@@ -344,12 +340,11 @@ On a manual account, quite a bit more, since nothing is syncing these for you:
 
 On a Lunch Flow account, three: `name`, `currency` and `mask`.
 
-Note `status` is never editable, on any account type. monetr owns it, and archiving is what
-changes it.
+Note `status` is never editable, on any account type. monetr owns it, and archiving is what changes it.
 
-Every field here is optional, so send only what you're changing. But if you do send one of
-the non-nullable ones, you can't send null or an empty string for it. That's on purpose:
-an empty string would slip past the format checks and silently wipe the field.
+Every field here is optional, so send only what you're changing. But if you do send one of the non-nullable ones, you
+can't send null or an empty string for it. That's on purpose: an empty string would slip past the format checks and
+silently wipe the field.
 
 ### Example
 
@@ -395,9 +390,8 @@ curl --request PATCH \
 
 ## <Badge type="danger">DELETE</Badge> Archive a bank account
 
-Takes a bank account out of circulation. Despite the verb, this doesn't destroy anything: it
-sets `status` to `inactive` and stamps `deletedAt`. Transactions, spending objects and
-history all stay put.
+Takes a bank account out of circulation. Despite the verb, this doesn't destroy anything: it sets `status` to `inactive`
+and stamps `deletedAt`. Transactions, spending objects and history all stay put.
 
 **In the app:** Archiving an account from its settings page.
 
@@ -421,9 +415,8 @@ curl --request DELETE \
   --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
 ```
 
-Returns 200 with an empty body. To see the archived record afterwards,
-[list bank accounts](#list-bank-accounts) with the `link_id` filter, which is the only call
-that includes them.
+Returns 200 with an empty body. To see the archived record afterwards, [list bank accounts](#list-bank-accounts) with
+the `link_id` filter, which is the only call that includes them.
 
 ### Errors
 

@@ -7,20 +7,18 @@ import { Badge } from "@rspress/core/theme";
 
 # API Keys
 
-API keys are how anything that isn't a browser talks to monetr. A key has two halves: an ID
-that looks like any other monetr identifier, and a secret that's shown to you exactly once.
-Together they go over HTTP Basic auth, which is covered in the
-[overview](./overview#authenticating).
+API keys are how anything that isn't a browser talks to monetr. A key has two halves: an ID that looks like any other
+monetr identifier, and a secret that's shown to you exactly once. Together they go over HTTP Basic auth, which is
+covered in the [overview](./overview#authenticating).
 
 :::warning You can't manage keys with a key
-All three endpoints on this page reject API keys. Creating, listing and revoking keys are
-things you do signed in to the monetr web app, under **Settings** then **API**. A key that
-could mint more keys, or quietly revoke the key someone is watching, would make the whole
-credential a lot more dangerous than it needs to be.
+All three endpoints on this page reject API keys. Creating, listing and revoking keys are things you do signed in to the
+monetr web app, under **Settings** then **API**. A key that could mint more keys, or quietly revoke the key someone is
+watching, would make the whole credential a lot more dangerous than it needs to be.
 :::
 
-They're documented here anyway so you know the shape of what the app is doing, and so the
-list of what exists is complete.
+They're documented here anyway so you know the shape of what the app is doing, and so the list of what exists is
+complete.
 
 ## The API key object
 
@@ -33,8 +31,8 @@ list of what exists is complete.
 | `updatedAt` | timestamp     | When the record last changed.                                                                                               |
 | `deletedAt` | timestamp     | When the key was revoked. Absent on live keys.                                                                              |
 
-The secret is never in this object. monetr stores a public key derived from the secret and
-verifies against that, so it genuinely cannot give the secret back to you, even in principle.
+The secret is never in this object. monetr stores a public key derived from the secret and verifies against that, so it
+genuinely cannot give the secret back to you, even in principle.
 
 ## <Badge type="info">GET</Badge> List API keys
 
@@ -76,11 +74,9 @@ The second key is revoked. Live keys have no `deletedAt` key at all rather than 
 
 ## <Badge type="tip">POST</Badge> Create an API key
 
-Makes a new key and returns the secret. This is the only time the secret exists anywhere you
-can read it.
+Makes a new key and returns the secret. This is the only time the secret exists anywhere you can read it.
 
-**In the app:** The create key dialog under settings, which shows you the secret once and
-then can't get it back.
+**In the app:** The create key dialog under settings, which shows you the secret once and then can't get it back.
 
 ```http
 POST /api/keys
@@ -88,8 +84,8 @@ POST /api/keys
 
 **Auth:** Not available to API keys.
 
-Creating a key also needs an active subscription, where listing and revoking don't. That way
-someone whose subscription has lapsed can still clean up after themselves.
+Creating a key also needs an active subscription, where listing and revoking don't. That way someone whose subscription
+has lapsed can still clean up after themselves.
 
 ### Body
 
@@ -97,9 +93,8 @@ someone whose subscription has lapsed can still clean up after themselves.
 | --------- | ------ | -------- | ---------------------------------------- |
 | `name`    | string | Yes      | A label so you can tell your keys apart. |
 
-When proof of work is enabled on the server, the body also has to carry a solved challenge.
-That's part of the app's sign-up and key-creation flow, not something you'd assemble by
-hand.
+When proof of work is enabled on the server, the body also has to carry a solved challenge. That's part of the app's
+sign-up and key-creation flow, not something you'd assemble by hand.
 
 ### Response
 
@@ -120,9 +115,8 @@ An API key object with one extra field:
 }
 ```
 
-Take `apiKeyId` and `secret` and export them as `MONETR_API_KEY_ID` and
-`MONETR_API_KEY_SECRET`, and every example on this site works as written. The
-[quickstart](./quickstart) picks up from there.
+Take `apiKeyId` and `secret` and export them as `MONETR_API_KEY_ID` and `MONETR_API_KEY_SECRET`, and every example on
+this site works as written. The [quickstart](./quickstart) picks up from there.
 
 ### Errors
 
@@ -149,11 +143,10 @@ DELETE /api/keys/:apiKeyId
 | ---------- | ------------- | -------- | ------------------ |
 | `apiKeyId` | string (ulid) | Yes      | The key to revoke. |
 
-Returns 200 with an empty body. Revoking is a soft delete: the record stays, with `deletedAt`
-set, so a revoked key still shows up in the list.
+Returns 200 with an empty body. Revoking is a soft delete: the record stays, with `deletedAt` set, so a revoked key
+still shows up in the list.
 
-When proof of work is enabled, this takes a body carrying a solved challenge. When it isn't,
-it takes no body at all.
+When proof of work is enabled, this takes a body carrying a solved challenge. When it isn't, it takes no body at all.
 
 ### Errors
 

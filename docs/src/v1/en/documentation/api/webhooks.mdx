@@ -7,22 +7,22 @@ import { Badge } from "@rspress/core/theme";
 
 # Webhooks
 
-These two endpoints are the only ones in monetr's API that something else calls. Plaid uses
-one to say a bank has new transactions, Stripe uses the other to say a subscription changed.
+These two endpoints are the only ones in monetr's API that something else calls. Plaid uses one to say a bank has new
+transactions, Stripe uses the other to say a subscription changed.
 
-**You never call these.** They're documented for operators: what has to be configured for
-them to work, how monetr decides a request is genuine, and what actually happens when one
-lands. If you're building against the API, nothing on this page applies to you.
+**You never call these.** They're documented for operators: what has to be configured for them to work, how monetr
+decides a request is genuine, and what actually happens when one lands. If you're building against the API, nothing on
+this page applies to you.
 
-Both are unauthenticated in the sense that monetr's own auth doesn't apply. Neither takes a
-session or an API key. Instead each handler verifies the sender's own signature, and that
-verification is the entire security boundary. Get the configuration wrong and the endpoint
-either rejects everything or, worse, isn't reachable at all and your data goes stale quietly.
+Both are unauthenticated in the sense that monetr's own auth doesn't apply. Neither takes a session or an API key.
+Instead each handler verifies the sender's own signature, and that verification is the entire security boundary. Get the
+configuration wrong and the endpoint either rejects everything or, worse, isn't reachable at all and your data goes
+stale quietly.
 
 ## <Badge type="tip">POST</Badge> Plaid webhook
 
-Plaid calls this when something changes on a linked bank: new transactions to sync, a login
-that needs repairing, consent about to expire.
+Plaid calls this when something changes on a linked bank: new transactions to sync, a login that needs repairing,
+consent about to expire.
 
 ```http
 POST /api/plaid/webhook
@@ -32,27 +32,24 @@ POST /api/plaid/webhook
 
 ### What an operator has to configure
 
-Both `plaid.enabled` and `plaid.webhooksEnabled` have to be on, or the endpoint returns 404.
-You also need `plaid.webhooksDomain` set to an externally reachable domain, and Plaid
-requires HTTPS. See the [Plaid configuration page](../configure/plaid) for the details.
+Both `plaid.enabled` and `plaid.webhooksEnabled` have to be on, or the endpoint returns 404. You also need
+`plaid.webhooksDomain` set to an externally reachable domain, and Plaid requires HTTPS. See the [Plaid configuration
+page](../configure/plaid) for the details.
 
-If webhooks aren't set up, monetr falls back to syncing on a schedule. Things still work,
-they're less prompt.
+If webhooks aren't set up, monetr falls back to syncing on a schedule. Things still work, they're less prompt.
 
 ### How monetr verifies it
 
-Plaid signs each request with a JWT in the `Plaid-Verification` header, and monetr checks
-all of it:
+Plaid signs each request with a JWT in the `Plaid-Verification` header, and monetr checks all of it:
 
 - The header has to be present, or it's a 401 before anything is read.
-- The JWT has to be signed with ES256. Any other algorithm is rejected, which closes the
-  algorithm confusion attack where an attacker asks for `none`.
-- The `kid` from the header is exchanged with Plaid for a public key, and the signature is
-  verified against it.
-- The body is hashed with SHA-256 as it streams in, and that hash has to match the one in
-  the verified token. So a valid signature over a different body doesn't get you anywhere.
-- The body has to be exactly one JSON value. Trailing content is rejected, which stops a
-  signature being replayed against a payload with extra data stapled on.
+- The JWT has to be signed with ES256. Any other algorithm is rejected, which closes the algorithm confusion attack
+  where an attacker asks for `none`.
+- The `kid` from the header is exchanged with Plaid for a public key, and the signature is verified against it.
+- The body is hashed with SHA-256 as it streams in, and that hash has to match the one in the verified token. So a valid
+  signature over a different body doesn't get you anywhere.
+- The body has to be exactly one JSON value. Trailing content is rejected, which stops a signature being replayed
+  against a payload with extra data stapled on.
 
 Anything that fails is a 401 or a 400. There's no partial trust.
 
@@ -69,15 +66,14 @@ Dispatch is on `webhook_type` and `webhook_code`:
 | `ITEM`         | `PENDING_EXPIRATION`                                            | Marks the link `pending_expiration` and records when consent runs out. |
 | `ITEM`         | `USER_PERMISSION_REVOKED`, `USER_ACCOUNT_REVOKED`               | Marks the link `revoked`.                                              |
 
-Anything else is logged and ignored, so monetr doesn't sync twice for events that mean the
-same thing.
+Anything else is logged and ignored, so monetr doesn't sync twice for events that mean the same thing.
 
 Returns 200 with an empty body when it's handled.
 
 ## <Badge type="tip">POST</Badge> Stripe webhook
 
-Stripe calls this when a subscription is created, changed or canceled, and when a checkout
-completes. It's how an account's access actually turns on after someone pays.
+Stripe calls this when a subscription is created, changed or canceled, and when a checkout completes. It's how an
+account's access actually turns on after someone pays.
 
 ```http
 POST /api/stripe/webhook
@@ -87,20 +83,19 @@ POST /api/stripe/webhook
 
 ### What an operator has to configure
 
-Both `stripe.enabled` and `stripe.webhooksEnabled` have to be on, or it's a 404. You also
-need `stripe.webhookSecret` set to the signing secret from your Stripe dashboard, since
-that's what the signature is checked against.
+Both `stripe.enabled` and `stripe.webhooksEnabled` have to be on, or it's a 404. You also need `stripe.webhookSecret`
+set to the signing secret from your Stripe dashboard, since that's what the signature is checked against.
 
 Self-hosted instances with billing disabled don't need any of this.
 
 ### How monetr verifies it
 
-The `Stripe-Signature` header is checked against your webhook secret using Stripe's own
-library, with their default timestamp tolerance so old requests can't be replayed. The body
-is capped at 64KB before it's read. A missing or invalid signature is a 400.
+The `Stripe-Signature` header is checked against your webhook secret using Stripe's own library, with their default
+timestamp tolerance so old requests can't be replayed. The body is capped at 64KB before it's read. A missing or invalid
+signature is a 400.
 
-API version mismatches are deliberately ignored, so a Stripe account on a different API
-version than the library still works.
+API version mismatches are deliberately ignored, so a Stripe account on a different API version than the library still
+works.
 
 ### What monetr does with it
 
@@ -110,6 +105,5 @@ version than the library still works.
 | `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted` | Updates the stored subscription status and expiry. |
 | `customer.deleted`                                                                                | Clears the subscription from the account.          |
 
-Other events are accepted and ignored, which is the right answer for a webhook: Stripe
-retries anything that doesn't return a success status, so failing an event you don't
-care about only creates noise.
+Other events are accepted and ignored, which is the right answer for a webhook: Stripe retries anything that doesn't
+return a success status, so failing an event you don't care about only creates noise.

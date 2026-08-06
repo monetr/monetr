@@ -7,20 +7,19 @@ import { Badge } from "@rspress/core/theme";
 
 # Authentication API
 
-These are the endpoints behind monetr's sign-in screens. Registering, signing in, verifying
-an email address, resetting a forgotten password, and finishing a two-factor challenge.
+These are the endpoints behind monetr's sign-in screens. Registering, signing in, verifying an email address, resetting
+a forgotten password, and finishing a two-factor challenge.
 
 :::warning Not for API keys
-None of this works with an API key. These endpoints back the web app's sign-in screens, and
-they're here for operators wondering why sign-up returns a 404 on their instance. Everything
-you actually call is authenticated the way the [overview](./overview#authenticating)
-describes.
+None of this works with an API key. These endpoints back the web app's sign-in screens, and they're here for operators
+wondering why sign-up returns a 404 on their instance. Everything you actually call is authenticated the way the
+[overview](./overview#authenticating) describes.
 :::
 
 ## What's turned on depends on your config
 
-Most of these endpoints return 404 when the feature behind them is disabled, rather than
-existing and failing. Worth knowing before you go looking for a bug:
+Most of these endpoints return 404 when the feature behind them is disabled, rather than existing and failing. Worth
+knowing before you go looking for a bug:
 
 | Endpoint                                 | Returns 404 unless                           |
 | ---------------------------------------- | -------------------------------------------- |
@@ -30,15 +29,14 @@ existing and failing. Worth knowing before you go looking for a bug:
 | `POST /api/authentication/forgot`        | Password reset is allowed, which needs SMTP. |
 | `POST /api/authentication/challenge`     | Proof of work is enabled.                    |
 
-[Reset a password](#reset-a-password) is the exception. It stays available even without SMTP,
-because the reset token is what secures it, and an operator can mint one from the command
-line on a deployment that deliberately has no mail server.
+[Reset a password](#reset-a-password) is the exception. It stays available even without SMTP, because the reset token is
+what secures it, and an operator can mint one from the command line on a deployment that deliberately has no mail
+server.
 
 ## <Badge type="tip">POST</Badge> Sign in
 
-Exchanges an email and password for a session. What you get back depends on the state of the
-login: a working session, a demand for a TOTP code, a demand to verify your email, or a
-demand to change an expired password.
+Exchanges an email and password for a session. What you get back depends on the state of the login: a working session, a
+demand for a TOTP code, a demand to verify your email, or a demand to change an expired password.
 
 **In the app:** The login screen.
 
@@ -67,8 +65,8 @@ On success, 200:
 }
 ```
 
-`isActive` reflects the subscription, and a `nextUrl` of `/account/subscribe` comes along
-with it when the subscription has lapsed. With billing disabled, `isActive` is always true.
+`isActive` reflects the subscription, and a `nextUrl` of `/account/subscribe` comes along with it when the subscription
+has lapsed. With billing disabled, `isActive` is always true.
 
 The interesting responses all come back as 428, and each carries a `code`:
 
@@ -90,8 +88,7 @@ The interesting responses all come back as 428, and each carries a `code`:
 
 ## <Badge type="tip">POST</Badge> Finish two-factor sign-in
 
-Second step for a login with TOTP enabled. Turns the short lived pending session from sign-in
-into a real one.
+Second step for a login with TOTP enabled. Turns the short lived pending session from sign-in into a real one.
 
 **In the app:** The two-factor code screen you land on after the login screen.
 
@@ -99,8 +96,8 @@ into a real one.
 POST /api/authentication/multifactor
 ```
 
-**Auth:** MFA pending. Only reachable with the short lived session sign-in just handed you,
-which is why an API key can't touch it.
+**Auth:** MFA pending. Only reachable with the short lived session sign-in just handed you, which is why an API key
+can't touch it.
 
 ### Body
 
@@ -127,8 +124,8 @@ Ends the session.
 GET /api/authentication/logout
 ```
 
-**Auth:** None. It's a `GET` and it takes no body. Calling it without a session is fine, it
-does nothing and returns 200.
+**Auth:** None. It's a `GET` and it takes no body. Calling it without a session is fine, it does nothing and returns
+200.
 
 Returns 200 with an empty body.
 
@@ -254,8 +251,8 @@ POST /api/authentication/forgot
 
 Sets a new password using a reset token.
 
-**In the app:** The set-a-new-password form you reach from the reset email, and the same
-form after a sign-in that demanded a password change.
+**In the app:** The set-a-new-password form you reach from the reset email, and the same form after a sign-in that
+demanded a password change.
 
 ```http
 POST /api/authentication/reset
@@ -270,9 +267,9 @@ POST /api/authentication/reset
 | `password` | string | Yes      | The new password, at least 8 characters after trimming.                                                                                                            |
 | `token`    | string | Yes      | A reset token. Either from the reset email, or the `resetToken` handed back by a `PASSWORD_CHANGE_REQUIRED` sign-in. Tokens scoped for anything else are rejected. |
 
-Unlike the other email-driven endpoints, this one stays available even when SMTP is off. The
-token is the security control, and an operator can generate one with the
-`login:reset-password` CLI command on a deployment that deliberately can't send mail.
+Unlike the other email-driven endpoints, this one stays available even when SMTP is off. The token is the security
+control, and an operator can generate one with the `login:reset-password` CLI command on a deployment that deliberately
+can't send mail.
 
 ### Errors
 

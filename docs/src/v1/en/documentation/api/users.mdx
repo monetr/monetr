@@ -9,20 +9,19 @@ import { Badge } from "@rspress/core/theme";
 
 monetr keeps three things apart that people often expect to be one thing.
 
-A **login** is a set of credentials: an email address, a password, and optionally TOTP. An
-**account** is the budget, with its own timezone, locale and subscription. A **user** joins
-one login to one account, with a role. One login can have users on more than one account,
-which is how a shared budget works.
+A **login** is a set of credentials: an email address, a password, and optionally TOTP. An **account** is the collection
+of budgets and data, with its own timezone, locale and subscription. A **user** joins one login to one account, with a
+role. One login can have users on more than one account, which is how a shared budget works.
 
 When you authenticate with an API key, you're acting as the user who created that key.
 
 ## <Badge type="info">GET</Badge> Get the current user
 
-Returns who you are, plus the state of the account you're on. This is the call the app makes
-first, before it decides what to show you.
+Returns who you are, plus the state of the account you're on. This is the call the app makes first, before it decides
+what to show you.
 
-**In the app:** Loaded on startup, before anything else renders. It's what decides whether
-you land on your budget, the setup wizard, or the subscribe page.
+**In the app:** Loaded on startup, before anything else renders. It's what decides whether you land on your budget, the
+setup wizard, or the subscribe page.
 
 ```http
 GET /api/users/me
@@ -30,8 +29,8 @@ GET /api/users/me
 
 **Auth:** API key.
 
-Note this one doesn't need an active subscription, so it works even when billing has lapsed.
-It has to, since it's how a client finds out that billing has lapsed.
+Note this one doesn't need an active subscription, so it works even when billing has lapsed. It has to, since it's how a
+client finds out that billing has lapsed.
 
 ### Example
 
@@ -94,22 +93,21 @@ curl --request GET \
 | `activeUntil`     | timestamp, nullable | When the subscription lapses. Always null with billing disabled.                                                                                                                                                            |
 | `trialingUntil`   | timestamp, nullable | When the trial runs out. Always null with billing disabled.                                                                                                                                                                 |
 
-The `user.login` object never includes the password hash, the TOTP secret, or the recovery
-codes. `totpEnabledAt` being non-null is how you tell TOTP is on.
+The `user.login` object never includes the password hash, the TOTP secret, or the recovery codes. `totpEnabledAt` being
+non-null is how you tell TOTP is on.
 
 :::info Self-hosting with billing off
-Every subscription field above is hardcoded to the "everything is fine forever" answer when
-Stripe isn't configured. `isActive` is true, `isTrialing` is false, and the three timestamps
-are null. Don't read them as real subscription state on a self-hosted instance.
+Every subscription field above is hardcoded to the "everything is fine forever" answer when Stripe isn't configured.
+`isActive` is true, `isTrialing` is false, and the three timestamps are null. Don't read them as real subscription state
+on a self-hosted instance.
 :::
 
 ## <Badge type="info">GET</Badge> Get a user
 
-Returns one user on your account by ID. Use it to turn a `createdBy` into a name, since most
-objects in monetr record who made them as a bare user ID.
+Returns one user on your account by ID. Use it to turn a `createdBy` into a name, since most objects in monetr record
+who made them as a bare user ID.
 
-**In the app:** The API keys table under settings, resolving the `createdBy` on each key into
-the person who created it.
+**In the app:** The API keys table under settings, resolving the `createdBy` on each key into the person who created it.
 
 ```http
 GET /api/users/:userId
@@ -117,10 +115,9 @@ GET /api/users/:userId
 
 **Auth:** Not available to API keys.
 
-Awkwardly, the objects that carry a `createdBy` worth resolving are reachable with a key while
-this endpoint isn't. If you're scripting and you need to attribute something, carry your own
-mapping of user IDs to people, or read your own from
-[Get the current user](#get-the-current-user), which does accept a key.
+Awkwardly, the objects that carry a `createdBy` worth resolving are reachable with a key while this endpoint isn't. If
+you're scripting and you need to attribute something, carry your own mapping of user IDs to people, or read your own
+from [Get the current user](#get-the-current-user), which does accept a key.
 
 ### Path parameters
 
@@ -167,11 +164,10 @@ PUT /api/users/security/password
 
 ## <Badge type="tip">POST</Badge> Start TOTP setup
 
-Generates a TOTP secret and a set of recovery codes. This doesn't turn TOTP on: it's step
-one of two, and the code isn't required at login until you confirm it.
+Generates a TOTP secret and a set of recovery codes. This doesn't turn TOTP on: it's step one of two, and the code isn't
+required at login until you confirm it.
 
-**In the app:** The enable two-factor dialog under security settings, which turns the
-returned URI into a QR code.
+**In the app:** The enable two-factor dialog under security settings, which turns the returned URI into a QR code.
 
 ```http
 POST /api/users/security/totp/setup
@@ -196,11 +192,10 @@ Calling this on a login that already has TOTP enabled fails. Turn it off first.
 
 ## <Badge type="tip">POST</Badge> Confirm TOTP setup
 
-Finishes turning on TOTP by proving your authenticator is working. After this, signing in
-needs a code.
+Finishes turning on TOTP by proving your authenticator is working. After this, signing in needs a code.
 
-**In the app:** The second step of the enable two-factor dialog, where you type in the code
-your authenticator is showing.
+**In the app:** The second step of the enable two-factor dialog, where you type in the code your authenticator is
+showing.
 
 ```http
 POST /api/users/security/totp/confirm
