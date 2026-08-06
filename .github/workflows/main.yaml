@@ -288,7 +288,7 @@ jobs:
       - name: Set up QEMU
         uses: step-security/setup-qemu-action@fe44c529aab16157fc475f4991a7f926aa9a02a2 # v4.1.0
       - name: Set up Docker Buildx
-        uses: step-security/setup-buildx-action@6997872a55d77391e51b87609556578131f44402 # v4.1.0
+        uses: step-security/setup-buildx-action@a4709e2865773e1792246433e8eb922f9743a875 # v4.2.0
       - name: Build
         run: |
           git config --global --add safe.directory ${PWD}
@@ -313,7 +313,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up Docker Buildx
-        uses: step-security/setup-buildx-action@6997872a55d77391e51b87609556578131f44402 # v4.1.0
+        uses: step-security/setup-buildx-action@a4709e2865773e1792246433e8eb922f9743a875 # v4.2.0
       - name: Save Tag Variable
         id: tag
         run: |
