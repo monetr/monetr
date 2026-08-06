@@ -42,7 +42,7 @@ Returns every key on your account, including revoked ones.
 
 **In the app:** The API keys table under settings.
 
-```
+```http
 GET /api/keys
 ```
 
@@ -82,7 +82,7 @@ can read it.
 **In the app:** The create key dialog under settings, which shows you the secret once and
 then can't get it back.
 
-```
+```http
 POST /api/keys
 ```
 
@@ -137,7 +137,7 @@ Turns off a key. Anything using it starts failing with a 401 immediately.
 
 **In the app:** The revoke button in the API keys table.
 
-```
+```http
 DELETE /api/keys/:apiKeyId
 ```
 

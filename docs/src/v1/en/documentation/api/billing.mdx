@@ -40,7 +40,7 @@ Creates a Stripe checkout session and returns where to send the browser.
 
 **In the app:** The subscribe button on the "your subscription isn't active" screen.
 
-```
+```http
 POST /api/billing/create_checkout
 ```
 
@@ -67,7 +67,7 @@ actually went through and updates the account, then tells the client where to go
 **In the app:** The page Stripe redirects to after checkout, which reads the answer and
 either lets you in or sends you back to subscribe.
 
-```
+```http
 GET /api/billing/checkout/:checkoutSessionId
 ```
 
@@ -117,7 +117,7 @@ or cancel.
 
 **In the app:** The manage subscription button on the subscription settings page.
 
-```
+```http
 GET /api/billing/portal
 ```
 
