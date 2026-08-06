@@ -23,14 +23,16 @@ import (
 // this file.
 const apiDocsDirectory = "../../docs/src/v1/en/documentation/api"
 
-// requestLinePattern matches how a documented endpoint declares itself:
-// `GET /api/bank_accounts/:bankAccountId/transactions` inside a ```http fence.
-// API_STYLE.md requires that format so it can be parsed here.
+// requestLinePattern matches how a documented endpoint declares itself: `GET
+// /api/bank_accounts/:bankAccountId/transactions` inside a ```http fence. The
+// API documentation guide in documentation.mdx requires that format so it can
+// be parsed here.
 var requestLinePattern = regexp.MustCompile(`^(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS) (/\S*)$`)
 
-// TestApiDocumentationCoverage turns the build red when a route is added without
-// docs, or deleted while its page stays behind. To fix a failure: document the
-// endpoint following docs/API_STYLE.md, or delete the stale request line.
+// TestApiDocumentationCoverage turns the build red when a route is added
+// without docs, or deleted while its page stays behind. To fix a failure:
+// document the endpoint following the API documentation guide in
+// documentation.mdx, or delete the stale request line.
 //
 // Internal endpoints still have to appear, they just get a terse entry.
 func TestApiDocumentationCoverage(t *testing.T) {
