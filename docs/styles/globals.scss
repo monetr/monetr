@@ -899,6 +899,61 @@
   }
 }
 
+/* Same specificity fight as the sidebar above, but for the two spots content
+   scrolls sideways instead of down: a wide code block and a wide table.
+   rspress puts .rp-scrollbar on both (.rp-codeblock__content__scroll-container
+   and .rp-table-scroll-container), and its thin 4px webkit bar out-specifies
+   the page-wide rules the same way. Reset the standard props so Chromium drops
+   the native bar, then repaint with the page's own thumb. These scroll
+   horizontally, so `height` is the thickness axis here, not `width`. */
+.rp-dark .rp-codeblock__content__scroll-container.rp-scrollbar {
+  scrollbar-width: auto;
+  scrollbar-color: auto;
+
+  &::-webkit-scrollbar {
+    height: 16px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: inherit;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--mtr-line);
+    background-clip: content-box;
+    border: 6px solid transparent;
+    border-radius: 20px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: var(--mtr-faint);
+  }
+}
+
+.rp-dark .rp-table-scroll-container.rp-scrollbar {
+  scrollbar-width: auto;
+  scrollbar-color: auto;
+
+  &::-webkit-scrollbar {
+    height: 16px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: inherit;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--mtr-line);
+    background-clip: content-box;
+    border: 6px solid transparent;
+    border-radius: 20px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: var(--mtr-faint);
+  }
+}
+
 .monetr {
   border-radius: 1em !important;
 }
