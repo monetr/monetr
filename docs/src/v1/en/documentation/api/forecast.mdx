@@ -7,22 +7,20 @@ import { Badge } from "@rspress/core/theme";
 
 # Forecast API
 
-Forecasting answers the question monetr exists to answer: given what I've committed to and
-when I get paid, what does the next few months look like? It walks forward day by day,
-firing your funding schedules and your spending due dates in order, and reports the balance
-at each step.
+Forecasting answers the question monetr exists to answer: given what I've committed to and when I get paid, what does
+the next few months look like? It walks forward day by day, firing your funding schedules and your spending due dates in
+order, and reports the balance at each step.
 
-Nothing here writes anything. All three endpoints are pure calculation, including the two
-that are POSTs. They're POSTs because they take a body describing a hypothetical, not
-because they change anything.
+Nothing here writes anything. All three endpoints are pure calculation, including the two that are POSTs. They're POSTs
+because they take a body describing a hypothetical, not because they change anything.
 
-Forecasting can be slow on an account with a lot of spending objects, so the handlers have
-their own timeouts. Exceed them and you get a 408 rather than a hung request.
+Forecasting can be slow on an account with a lot of spending objects, so the handlers have their own timeouts. Exceed
+them and you get a 408 rather than a hung request.
 
 ## <Badge type="info">GET</Badge> Get a forecast
 
-Projects the account's balance forward from now, returning an event for each day something
-happens. This is what draws the timeline charts in the app.
+Projects the account's balance forward from now, returning an event for each day something happens. This is what draws
+the timeline charts in the app.
 
 **In the app:** The timeline charts on the funding and goals pages.
 
@@ -46,9 +44,8 @@ GET /api/bank_accounts/:bankAccountId/forecast
 
 ### Example
 
-This account has two envelopes: a Coffee expense with 1315 in it, due on the 1st, and a New
-Laptop goal with 45000 in it. One funding schedule pays every other Friday, next on August
-30th.
+This account has two envelopes: a Coffee expense with 1315 in it, due on the 1st, and a New Laptop goal with 45000 in
+it. One funding schedule pays every other Friday, next on August 30th.
 
 ```bash
 curl --request GET \
@@ -132,15 +129,13 @@ curl --request GET \
 }
 ```
 
-Two events: payday, where both envelopes get filled, and the 1st, where the Coffee envelope
-empties because that's when it comes due. The goal doesn't appear in the second event because
-nothing happened to it that day.
+Two events: payday, where both envelopes get filled, and the 1st, where the Coffee envelope empties because that's when
+it comes due. The goal doesn't appear in the second event because nothing happened to it that day.
 
 :::warning `startingBalance` is not your bank balance
-It's the total currently sitting in your expenses and goals, `1315 + 45000` here. Paused
-spending objects are left out of the sum entirely. The forecast projects how allocated money
-moves, not how much is in the account, so plotting these numbers against the balances from
-[Get balances](./bank_accounts#get-balances) will not line up.
+It's the total currently sitting in your expenses and goals, `1315 + 45000` here. Paused spending objects are left out
+of the sum entirely. The forecast projects how allocated money moves, not how much is in the account, so plotting these
+numbers against the balances from [Get balances](./bank_accounts#get-balances) will not line up.
 :::
 
 ### Response attributes
@@ -194,11 +189,10 @@ Each spending event:
 
 ## <Badge type="tip">POST</Badge> Estimate the cost of a new spending object
 
-Answers "if I added this expense, what would it cost me per paycheck?" without creating
-anything. Use it to show someone the damage before they commit.
+Answers "if I added this expense, what would it cost me per paycheck?" without creating anything. Use it to show someone
+the damage before they commit.
 
-**In the app:** Nothing in the app uses this today. The new expense and goal forms work
-out their estimate another way.
+**In the app:** Nothing in the app uses this today. The new expense and goal forms work out their estimate another way.
 
 ```http
 POST /api/bank_accounts/:bankAccountId/forecast/spending
@@ -223,12 +217,10 @@ POST /api/bank_accounts/:bankAccountId/forecast/spending
 | `recurrenceRule`    | string        | No       | The recurrence rule. Required if `spendingType` is `expense`, rejected if it's `goal`. |
 | `spendingType`      | string        | No       | `expense` or `goal`.                                                                   |
 
-The rule field is called `recurrenceRule` here, not `ruleset` like it is everywhere else on
-[spending](./spending). Same format, different key. It's an inconsistency in the API, not a
-typo in these docs.
+The rule field is called `recurrenceRule` here, not `ruleset` like it is everywhere else on [spending](./spending). Same
+format, different key. It's an inconsistency in the API, not a typo in these docs.
 
-This endpoint doesn't run the shared validation, so mistakes come back as plain messages
-rather than a `problems` tree.
+This endpoint doesn't run the shared validation, so mistakes come back as plain messages rather than a `problems` tree.
 
 ### Example
 
@@ -253,14 +245,13 @@ curl --request POST \
 }
 ```
 
-`estimatedCost` is how much a single funding event would need to put aside, in the currency's
-smallest unit. Here that's $40.00 per paycheck to cover an $80 monthly expense, which checks
-out: this schedule pays every other Friday, so roughly two paychecks cover each month.
+`estimatedCost` is how much a single funding event would need to put aside, in the currency's smallest unit. Here that's
+$40.00 per paycheck to cover an $80 monthly expense, which checks out: this schedule pays every other Friday, so roughly
+two paychecks cover each month.
 
-Despite what the underlying function is called, this is the **most common** per-event
-contribution over the next two years, not the mean. Contributions vary from period to period,
-and the mode is the number you would actually quote someone, where an average would land
-between two amounts that never occur.
+Despite what the underlying function is called, this is the **most common** per-event contribution over the next two
+years, not the mean. Contributions vary from period to period, and the mode is the number you would actually quote
+someone, where an average would land between two amounts that never occur.
 
 ### Errors
 
@@ -271,11 +262,10 @@ between two amounts that never occur.
 
 ## <Badge type="tip">POST</Badge> Estimate the next contribution
 
-Answers "how much of my next paycheck is already spoken for?" It adds up what every spending
-object on one funding schedule will take at its next funding event.
+Answers "how much of my next paycheck is already spoken for?" It adds up what every spending object on one funding
+schedule will take at its next funding event.
 
-**In the app:** The committed amount shown next to each funding schedule in the funding
-list.
+**In the app:** The committed amount shown next to each funding schedule in the funding list.
 
 ```http
 POST /api/bank_accounts/:bankAccountId/forecast/next_funding
@@ -313,7 +303,8 @@ curl --request POST \
 }
 ```
 
-Compare that against the schedule's `estimatedDeposit` from [Get a funding schedule](./funding_schedules#get-a-funding-schedule) to work out what's left over.
+Compare that against the schedule's `estimatedDeposit` from [Get a funding
+schedule](./funding_schedules#get-a-funding-schedule) to work out what's left over.
 
 ### Errors
 

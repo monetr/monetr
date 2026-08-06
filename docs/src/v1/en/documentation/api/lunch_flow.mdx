@@ -7,28 +7,27 @@ import { Badge } from "@rspress/core/theme";
 
 # Lunch Flow API
 
-Lunch Flow is an alternative way to get bank data into monetr without going through Plaid.
-You point monetr at a Lunch Flow instance with an API key, monetr pulls the list of accounts
-it has, you pick the ones you want, and from then on transactions sync in the background.
+Lunch Flow is an alternative way to get bank data into monetr without going through Plaid. You point monetr at a Lunch
+Flow instance with an API key, monetr pulls the list of accounts it has, you pick the ones you want, and from then on
+transactions sync in the background.
 
 :::info Self-hosted only
-These endpoints only exist when `LunchFlow.Enabled` is set in your configuration. On
-monetr's hosted service they return 404 with "Lunch Flow is not enabled on this server."
+These endpoints only exist when `LunchFlow.Enabled` is set in your configuration. On monetr's hosted service they return
+404 with "Lunch Flow is not enabled on this server."
 :::
 
-Setting one up takes several calls in order, because there are two objects involved: the
-**Lunch Flow link**, which holds the connection details, and the ordinary monetr
-[link](./links) that owns the bank accounts. The sequence is:
+Setting one up takes several calls in order, because there are two objects involved: the **Lunch Flow link**, which
+holds the connection details, and the ordinary monetr [link](./links) that owns the bank accounts. The sequence is:
 
-1. [Create a Lunch Flow connection](#create-a-lunch-flow-connection) to store the URL and API
-   key. The connection starts `pending`.
-2. [Refresh available bank accounts](#refresh-available-bank-accounts) to pull the account
-   list, which doubles as a check that the credentials work.
+1. [Create a Lunch Flow connection](#create-a-lunch-flow-connection) to store the URL and API key. The connection starts
+   `pending`.
+2. [Refresh available bank accounts](#refresh-available-bank-accounts) to pull the account list, which doubles as a
+   check that the credentials work.
 3. [List available bank accounts](#list-available-bank-accounts) to see what's there.
-4. [Create a manual link](./links#create-a-manual-link) with `lunchFlowLinkId` to make the
-   real monetr link. This flips the connection to `active`.
-5. [Create a bank account](./bank_accounts#create-a-bank-account) once per account you want,
-   each with its `lunchFlowBankAccountId`.
+4. [Create a manual link](./links#create-a-manual-link) with `lunchFlowLinkId` to make the real monetr link. This flips
+   the connection to `active`.
+5. [Create a bank account](./bank_accounts#create-a-bank-account) once per account you want, each with its
+   `lunchFlowBankAccountId`.
 
 After that, syncing happens on its own.
 
@@ -48,8 +47,7 @@ After that, syncing happens on its own.
 | `createdBy`            | string (ulid)       | The user who set it up.                                                                     |
 | `deletedAt`            | timestamp           | When it was removed. Absent on live connections.                                            |
 
-The API key is never in the response. It goes into monetr's secret storage on the way in and
-doesn't come back out.
+The API key is never in the response. It goes into monetr's secret storage on the way in and doesn't come back out.
 
 ### Statuses
 
@@ -62,8 +60,8 @@ doesn't come back out.
 
 ## The Lunch Flow bank account object
 
-These are the accounts monetr found on your Lunch Flow instance. They aren't monetr bank
-accounts yet, they're candidates.
+These are the accounts monetr found on your Lunch Flow instance. They aren't monetr bank accounts yet, they're
+candidates.
 
 | Attribute                | Type          | Description                                                                                                                |
 | ------------------------ | ------------- | -------------------------------------------------------------------------------------------------------------------------- |
@@ -82,15 +80,14 @@ accounts yet, they're candidates.
 | `updatedAt`              | timestamp     | When the record last changed.                                                                                              |
 | `deletedAt`              | timestamp     | When it was removed. Absent normally.                                                                                      |
 
-Two status fields on one object is confusing at first. `lunchFlowStatus` is what the
-upstream thinks, `status` is whether monetr is using it.
+Two status fields on one object is confusing at first. `lunchFlowStatus` is what the upstream thinks, `status` is
+whether monetr is using it.
 
 ## <Badge type="info">GET</Badge> List Lunch Flow connections
 
 Returns every Lunch Flow connection on your account.
 
-**In the app:** The Lunch Flow section of the setup flow, listing connections you've already
-made.
+**In the app:** The Lunch Flow section of the setup flow, listing connections you've already made.
 
 ```http
 GET /api/lunch_flow/link
@@ -127,8 +124,7 @@ curl --request GET \
 
 Returns one connection.
 
-**In the app:** The Lunch Flow setup screens, checking the connection's status as you work
-through them.
+**In the app:** The Lunch Flow setup screens, checking the connection's status as you work through them.
 
 ```http
 GET /api/lunch_flow/link/:lunchFlowLinkId
@@ -151,9 +147,8 @@ GET /api/lunch_flow/link/:lunchFlowLinkId
 
 ## <Badge type="tip">POST</Badge> Create a Lunch Flow connection
 
-Stores the URL and API key for a Lunch Flow instance. This is step one, and it doesn't talk
-to Lunch Flow at all, it stores the credentials. Refresh the accounts next to find out
-whether they work.
+Stores the URL and API key for a Lunch Flow instance. This is step one, and it doesn't talk to Lunch Flow at all, it
+stores the credentials. Refresh the accounts next to find out whether they work.
 
 **In the app:** The form where you enter your Lunch Flow instance URL and API key.
 
@@ -174,11 +169,11 @@ POST /api/lunch_flow/link
 The URL is validated against four rules:
 
 - It has to be `http` or `https`. Any other scheme is rejected.
-- It can't have query parameters, because monetr strips them when it makes requests and a
-  URL that silently loses part of itself is worse than one that's rejected.
+- It can't have query parameters, because monetr strips them when it makes requests and a URL that silently loses part
+  of itself is worse than one that's rejected.
 - It can't have credentials embedded in it. Put the key in `apiKey`.
-- It has to be on the server's allow list, set with `lunchFlow.allowedAPIURLs`. A URL that's
-  otherwise perfectly valid is still a 400 if the operator hasn't allowed it.
+- It has to be on the server's allow list, set with `lunchFlow.allowedAPIURLs`. A URL that's otherwise perfectly valid
+  is still a 400 if the operator hasn't allowed it.
 
 The new connection comes back with status `pending`.
 
@@ -220,12 +215,10 @@ curl --request POST \
 
 ## <Badge type="tip">POST</Badge> Refresh available bank accounts
 
-Asks your Lunch Flow instance what accounts it has and reconciles that against what monetr
-already knows. New accounts get added. Existing ones are left alone, and nothing is ever
-removed.
+Asks your Lunch Flow instance what accounts it has and reconciles that against what monetr already knows. New accounts
+get added. Existing ones are left alone, and nothing is ever removed.
 
-This is also the call that proves your credentials work, so run it right after creating a
-connection.
+This is also the call that proves your credentials work, so run it right after creating a connection.
 
 **In the app:** The account discovery step of Lunch Flow setup.
 
@@ -253,8 +246,7 @@ Returns **204** with no body. To see what it found, [list the bank accounts](#li
 
 ## <Badge type="info">GET</Badge> List available bank accounts
 
-Returns the accounts monetr found on a Lunch Flow connection, whether or not you've added
-them to your budget yet.
+Returns the accounts monetr found on a Lunch Flow connection, whether or not you've added them to your budget yet.
 
 **In the app:** The list of accounts you tick during Lunch Flow setup.
 
@@ -298,14 +290,13 @@ curl --request GET \
 ]
 ```
 
-Take `lunchFlowBankAccountId` from here and pass it to
-[create a bank account](./bank_accounts#create-a-bank-account) along with the `linkId` of
-the monetr link, which flips this account's `status` to `active`.
+Take `lunchFlowBankAccountId` from here and pass it to [create a bank account](./bank_accounts#create-a-bank-account)
+along with the `linkId` of the monetr link, which flips this account's `status` to `active`.
 
 ## <Badge type="tip">POST</Badge> Trigger a manual sync
 
-Forces a sync now instead of waiting for the scheduled one. Useful right after setup, or
-when you know something changed upstream.
+Forces a sync now instead of waiting for the scheduled one. Useful right after setup, or when you know something changed
+upstream.
 
 **In the app:** The sync now button on a Lunch Flow link.
 
@@ -315,8 +306,8 @@ POST /api/lunch_flow/link/sync
 
 **Auth:** API key, subscription required.
 
-Note this one takes the **monetr** link ID in the body, not the Lunch Flow link ID, and it
-isn't in the path. That's different from every other endpoint on this page.
+Note this one takes the **monetr** link ID in the body, not the Lunch Flow link ID, and it isn't in the path. That's
+different from every other endpoint on this page.
 
 ### Body
 
@@ -324,12 +315,12 @@ isn't in the path. That's different from every other endpoint on this page.
 | --------- | ------------- | -------- | ------------------------------------------------------- |
 | `linkId`  | string (ulid) | Yes      | The monetr link to sync. Has to be a `lunch_flow` link. |
 
-Returns **202** with no body. The sync runs in the background, so a 202 means it started, not
-that it finished. Either [watch the progress socket](#watch-sync-progress) or
-[re-read the connection](#get-a-lunch-flow-connection) and check `lastSuccessfulUpdate`.
+Returns **202** with no body. The sync runs in the background, so a 202 means it started, not that it finished. Either
+[watch the progress socket](#watch-sync-progress) or [re-read the connection](#get-a-lunch-flow-connection) and check
+`lastSuccessfulUpdate`.
 
-**Manual syncs are rate limited to one every 30 minutes**, measured from `lastManualSync`.
-Asking again too soon is a 425. Handle it, it is a normal answer rather than a mistake.
+**Manual syncs are rate limited to one every 30 minutes**, measured from `lastManualSync`. Asking again too soon is a
+425. Handle it, it is a normal answer rather than a mistake.
 
 ### Errors
 
@@ -344,8 +335,8 @@ Asking again too soon is a 425. Handle it, it is a normal answer rather than a m
 Streams progress for one bank account during a sync.
 
 :::warning This is a WebSocket
-Like the [transaction upload progress endpoint](./uploads#watch-an-uploads-progress), this
-upgrades to a WebSocket despite being a `GET`. curl won't do anything useful with it.
+Like the [transaction upload progress endpoint](./uploads#watch-an-uploads-progress), this upgrades to a WebSocket
+despite being a `GET`. curl won't do anything useful with it.
 :::
 
 **In the app:** The per-account progress shown while a Lunch Flow sync runs.
@@ -363,9 +354,8 @@ GET /api/lunch_flow/link/sync/:linkId/bank_account/:bankAccountId/progress
 | `linkId`        | string (ulid) | Yes      | The monetr link being synced. Must be a Lunch Flow link.                                     |
 | `bankAccountId` | string (ulid) | Yes      | The bank account to watch. One socket per account, so syncing several means several sockets. |
 
-Messages carry the account and its current status. The socket gives up after **5 minutes**,
-which is longer than the upload socket's 2 minutes because a Lunch Flow sync pulls a lot
-more history.
+Messages carry the account and its current status. The socket gives up after **5 minutes**, which is longer than the
+upload socket's 2 minutes because a Lunch Flow sync pulls a lot more history.
 
 ### Errors
 
