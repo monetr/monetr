@@ -256,8 +256,8 @@ importers:
         specifier: 5.4.5
         version: 5.4.5(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react-plaid-link:
-        specifier: 4.2.0
-        version: 4.2.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        specifier: 5.0.0
+        version: 5.0.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react-qr-code:
         specifier: 2.2.0
         version: 2.2.0(react@19.2.8)
@@ -3150,8 +3150,8 @@ packages:
       react: ^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
-  react-plaid-link@4.2.0:
-    resolution: {integrity: sha512-qt+ZZUeGukBY5ru5XFOySUApfCNhs8H15+YyQSUPvBsZs5s3zyNlUx6E3Eiwr6C/xmra+NqMoqzKcpm2kmU6pg==}
+  react-plaid-link@5.0.0:
+    resolution: {integrity: sha512-DZ/6C7hf+xhEIG9ElCqjk1lty/z+y+wQuV/A29EUx4fxiPLPe7CXN811C3MrCzI7grV45LD7NRS0Do0ma8KIBg==}
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18 || ^19
       react-dom: ^16.8.0 || ^17 || ^18 || ^19
@@ -7258,7 +7258,7 @@ snapshots:
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
 
-  react-plaid-link@4.2.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+  react-plaid-link@5.0.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
       prop-types: 15.8.1
       react: 19.2.8
