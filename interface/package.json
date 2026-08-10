@@ -58,7 +58,7 @@
     "wouter": "3.10.0"
   },
   "devDependencies": {
-    "@imagemagick/magick-wasm": "0.0.41",
+    "@imagemagick/magick-wasm": "0.0.42",
     "@rsbuild/core": "2.1.9",
     "@rsbuild/plugin-babel": "2.0.1",
     "@rsbuild/plugin-react": "2.1.0",
