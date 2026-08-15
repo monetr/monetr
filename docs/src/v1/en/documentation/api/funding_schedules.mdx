@@ -1,0 +1,347 @@
+---
+title: "Funding Schedules API"
+description: "Funding schedule endpoints in monetr's API. Create the paycheck schedules that decide when money moves into your budgeted expenses and goals."
+---
+
+import { Badge } from "@rspress/core/theme";
+
+# Funding Schedules API
+
+A funding schedule is your payday. It's the recurring event where money shows up, and it's when monetr moves money into
+your [expenses and goals](./spending). Every spending object points at one, and the schedule is what makes
+`nextContributionAmount` mean anything: monetr counts how many funding events happen between now and a due date, then
+splits the shortfall across them.
+
+Most people have one funding schedule. If you get paid twice a month you have one schedule with a rule that fires twice
+a month, not two schedules.
+
+## The funding schedule object
+
+| Attribute                | Type                | Description                                                                                                                                                                     |
+| ------------------------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fundingScheduleId`      | string (ulid)       | Identifies the funding schedule.                                                                                                                                                |
+| `bankAccountId`          | string (ulid)       | The bank account this belongs to.                                                                                                                                               |
+| `name`                   | string              | What you call it, like "Paycheck". Has to be unique per bank account.                                                                                                           |
+| `description`            | string              | Your own note. Absent when you haven't set one.                                                                                                                                 |
+| `ruleset`                | string              | The recurrence rule as an RFC 5545 string.                                                                                                                                      |
+| `excludeWeekends`        | boolean             | When the rule lands on a Saturday or Sunday, move it back to the preceding Friday. Most payrolls work this way.                                                                 |
+| `waitForDeposit`         | boolean             | Whether monetr should hold off on contributing until it actually sees a deposit land.                                                                                           |
+| `autoCreateTransaction`  | boolean             | Whether monetr should write a deposit transaction on its own each time this fires. Manual links only, and it needs `estimatedDeposit` set.                                      |
+| `estimatedDeposit`       | integer, nullable   | Roughly how much you expect to be paid, in the currency's smallest unit. Used for forecasting and required if `autoCreateTransaction` is on. Null when you haven't told monetr. |
+| `lastRecurrence`         | timestamp, nullable | The previous funding event. Null until it's fired at least once.                                                                                                                |
+| `nextRecurrence`         | timestamp           | The next funding event, as midnight in your account's timezone. This already has the weekend adjustment applied.                                                                |
+| `nextRecurrenceOriginal` | timestamp           | The next event before the weekend adjustment. Same as `nextRecurrence` unless a weekend was avoided, which is how you can tell one happened.                                    |
+
+## <Badge type="info">GET</Badge> List funding schedules
+
+Returns every funding schedule on a bank account. Returns an empty array rather than null when there aren't any.
+
+**In the app:** The funding page, and the schedule picker you use when creating an expense or goal.
+
+```http
+GET /api/bank_accounts/:bankAccountId/funding_schedules
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute       | Type          | Required | Description                                |
+| --------------- | ------------- | -------- | ------------------------------------------ |
+| `bankAccountId` | string (ulid) | Yes      | The bank account whose schedules you want. |
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/funding_schedules" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+[
+  {
+    "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
+    "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+    "name": "Paycheck",
+    "description": "Every other Friday",
+    "ruleset": "DTSTART:20220107T060000Z\nRRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=FR",
+    "excludeWeekends": true,
+    "waitForDeposit": false,
+    "autoCreateTransaction": false,
+    "estimatedDeposit": 204300,
+    "lastRecurrence": "2024-08-16T05:00:00Z",
+    "nextRecurrence": "2024-08-30T05:00:00Z",
+    "nextRecurrenceOriginal": "2024-08-30T05:00:00Z"
+  }
+]
+```
+
+## <Badge type="info">GET</Badge> Get a funding schedule
+
+Returns one funding schedule.
+
+**In the app:** The funding and goal timeline charts.
+
+```http
+GET /api/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute           | Type          | Required | Description                     |
+| ------------------- | ------------- | -------- | ------------------------------- |
+| `bankAccountId`     | string (ulid) | Yes      | The bank account it belongs to. |
+| `fundingScheduleId` | string (ulid) | Yes      | The schedule you want.          |
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/funding_schedules/fund_01fpwx4xhvr8gs2fpsafd7nvpz" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+{
+  "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
+  "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+  "name": "Paycheck",
+  "description": "Every other Friday",
+  "ruleset": "DTSTART:20220107T060000Z\nRRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=FR",
+  "excludeWeekends": true,
+  "waitForDeposit": false,
+  "autoCreateTransaction": false,
+  "estimatedDeposit": 204300,
+  "lastRecurrence": "2024-08-16T05:00:00Z",
+  "nextRecurrence": "2024-08-30T05:00:00Z",
+  "nextRecurrenceOriginal": "2024-08-30T05:00:00Z"
+}
+```
+
+### Errors
+
+| Status | When                                           |
+| ------ | ---------------------------------------------- |
+| 400    | Either ID is malformed.                        |
+| 404    | No such funding schedule on that bank account. |
+
+## <Badge type="tip">POST</Badge> Create a funding schedule
+
+Adds a funding schedule. You'll want one of these before you create any expenses or goals, since both require one.
+
+**In the app:** The new funding schedule form, and first-time setup.
+
+```http
+POST /api/bank_accounts/:bankAccountId/funding_schedules
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute       | Type          | Required | Description                       |
+| --------------- | ------------- | -------- | --------------------------------- |
+| `bankAccountId` | string (ulid) | Yes      | The bank account to create it on. |
+
+### Body
+
+| Attribute               | Type              | Required | Description                                                                                                                          |
+| ----------------------- | ----------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`                  | string            | Yes      | What to call it. Unique per bank account.                                                                                            |
+| `ruleset`               | string            | Yes      | The recurrence rule as an RFC 5545 string. See the [cookbook](./recurrence_rules#cookbook) for one per pay frequency.                |
+| `autoCreateTransaction` | boolean           | No       | Write a deposit transaction automatically each time it fires. Manual links only, and requires `estimatedDeposit`. Defaults to false. |
+| `description`           | string            | No       | A note to yourself.                                                                                                                  |
+| `estimatedDeposit`      | integer, nullable | No       | Roughly what you get paid, in the smallest unit. Can't be negative.                                                                  |
+| `excludeWeekends`       | boolean           | No       | Shift weekend occurrences back to Friday. Defaults to false.                                                                         |
+| `nextRecurrence`        | timestamp         | No       | When the next event should be. Leave it off and monetr works it out from the rule, relative to now.                                  |
+
+`nextRecurrence` is more forgiving here than it is on spending objects. If you leave it off, or send something already
+in the past, monetr calculates the next occurrence from your rule instead of rejecting it. That's deliberate, since
+picking today in a date picker usually means midnight today, which is already gone.
+
+### Example
+
+```bash
+curl --request POST \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/funding_schedules" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "name": "Paycheck",
+    "description": "Every other Friday",
+    "ruleset": "DTSTART:20220107T060000Z\nRRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=FR",
+    "excludeWeekends": true,
+    "estimatedDeposit": 204300
+  }'
+```
+
+```json
+{
+  "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
+  "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+  "name": "Paycheck",
+  "description": "Every other Friday",
+  "ruleset": "DTSTART:20220107T060000Z\nRRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=FR",
+  "excludeWeekends": true,
+  "waitForDeposit": false,
+  "autoCreateTransaction": false,
+  "estimatedDeposit": 204300,
+  "lastRecurrence": null,
+  "nextRecurrence": "2024-08-30T05:00:00Z",
+  "nextRecurrenceOriginal": "2024-08-30T05:00:00Z"
+}
+```
+
+### Errors
+
+| Status | When                                                                                                                                                                                       |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 400    | `name` or `ruleset` missing, `ruleset` isn't a valid rule, `estimatedDeposit` is negative, or `autoCreateTransaction` is on without a positive `estimatedDeposit` or on a non-manual link. |
+| 404    | The bank account isn't yours.                                                                                                                                                              |
+
+## <Badge type="warning">PATCH</Badge> Update a funding schedule
+
+Changes a funding schedule. Moving the schedule changes when every expense and goal attached to it gets funded, so
+monetr recalculates all of them and hands them back to you.
+
+**In the app:** Editing a funding schedule from its details page.
+
+```http
+PATCH /api/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute           | Type          | Required | Description                     |
+| ------------------- | ------------- | -------- | ------------------------------- |
+| `bankAccountId`     | string (ulid) | Yes      | The bank account it belongs to. |
+| `fundingScheduleId` | string (ulid) | Yes      | The schedule to change.         |
+
+### Body
+
+Everything is optional, send what you're changing.
+
+| Attribute               | Type      | Required | Description                                                   |
+| ----------------------- | --------- | -------- | ------------------------------------------------------------- |
+| `autoCreateTransaction` | boolean   | No       | Manual links only, requires a positive `estimatedDeposit`.    |
+| `description`           | string    | No       | A note to yourself.                                           |
+| `estimatedDeposit`      | integer   | No       | Roughly what you get paid. Can't be negative.                 |
+| `excludeWeekends`       | boolean   | No       | Shift weekend occurrences back to Friday.                     |
+| `name`                  | string    | No       | Rename it. Can't be blanked out.                              |
+| `nextRecurrence`        | timestamp | No       | Move the next event. Must be in the future, unlike on create. |
+| `ruleset`               | string    | No       | A new recurrence rule. Can't be blanked out.                  |
+
+Changing `nextRecurrence`, `ruleset` or `excludeWeekends` triggers the recalculation. Changing the name, description or
+estimated deposit doesn't.
+
+:::warning A stale schedule can't be patched at all
+The "must be in the future" check runs against the merged object, not against what you sent. So if a schedule's stored
+`nextRecurrence` has already passed, every PATCH fails with "Next recurrence must be in the future", even one that only
+changes the name. Send a new `nextRecurrence` along with whatever else you're changing to get out of it.
+:::
+
+### Example
+
+```bash
+curl --request PATCH \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/funding_schedules/fund_01fpwx4xhvr8gs2fpsafd7nvpz" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "excludeWeekends": false
+  }'
+```
+
+```json
+{
+  "fundingSchedule": {
+    "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
+    "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+    "name": "Paycheck",
+    "description": "Every other Friday",
+    "ruleset": "DTSTART:20220107T060000Z\nRRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=FR",
+    "excludeWeekends": false,
+    "waitForDeposit": false,
+    "autoCreateTransaction": false,
+    "estimatedDeposit": 204300,
+    "lastRecurrence": "2024-08-16T05:00:00Z",
+    "nextRecurrence": "2024-08-30T05:00:00Z",
+    "nextRecurrenceOriginal": "2024-08-30T05:00:00Z"
+  },
+  "spending": [
+    {
+      "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
+      "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+      "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
+      "spendingType": "expense",
+      "name": "Coffee",
+      "targetAmount": 8000,
+      "currentAmount": 1315,
+      "usedAmount": 0,
+      "ruleset": "DTSTART:20240801T050000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1",
+      "lastSpentFrom": null,
+      "lastRecurrence": "2024-08-01T05:00:00Z",
+      "nextRecurrence": "2024-09-01T05:00:00Z",
+      "nextContributionAmount": 6685,
+      "isBehind": false,
+      "isPaused": false,
+      "autoCreateTransaction": false,
+      "createdAt": "2022-01-14T18:32:11.044Z"
+    }
+  ]
+}
+```
+
+The response wraps the schedule in a `fundingSchedule` key rather than returning it at the top level, which is different
+from create and get on this same resource. `spending` holds every spending object that got recalculated, and it's an
+empty array when nothing needed to change.
+
+### Errors
+
+| Status | When                                                                                                                                                                                       |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 400    | `nextRecurrence` is in the past, `name` or `ruleset` sent but blank, `estimatedDeposit` negative, or `autoCreateTransaction` without a positive estimated deposit or on a non-manual link. |
+| 404    | No such funding schedule.                                                                                                                                                                  |
+
+## <Badge type="danger">DELETE</Badge> Delete a funding schedule
+
+Removes a funding schedule. It has to be unused first: if any expense or goal still points at it, the call fails and
+nothing happens. [Move those to another schedule](./spending#update-a-spending-object) or [delete
+them](./spending#delete-a-spending-object), then try again.
+
+**In the app:** Deleting a funding schedule from its details page.
+
+```http
+DELETE /api/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute           | Type          | Required | Description                     |
+| ------------------- | ------------- | -------- | ------------------------------- |
+| `bankAccountId`     | string (ulid) | Yes      | The bank account it belongs to. |
+| `fundingScheduleId` | string (ulid) | Yes      | The schedule to delete.         |
+
+### Example
+
+```bash
+curl --request DELETE \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/funding_schedules/fund_01fpwx4xhvr8gs2fpsafd7nvpz" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+Returns 200 with an empty body.
+
+### Errors
+
+| Status | When                                             |
+| ------ | ------------------------------------------------ |
+| 400    | Expenses or goals are still using this schedule. |
+| 404    | No such funding schedule on that bank account.   |

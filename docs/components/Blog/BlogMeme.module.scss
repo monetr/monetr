@@ -9,10 +9,10 @@
   width: 66.666667%;
 
   @media (min-width: variables.$mediumScreen) {
-    width: 50%;
+    width: 66.666667%;
   }
 
   @media (min-width: variables.$largeScreen) {
-    width: 25%;
+    width: 50%;
   }
 }

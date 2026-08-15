@@ -1,0 +1,109 @@
+---
+title: "Health and Reference Data"
+description: "Point an uptime monitor at monetr's unauthenticated health endpoint, and list the currencies a monetr instance knows how to format money in."
+---
+
+import { Badge } from "@rspress/core/theme";
+
+# Health and Reference Data
+
+Two small things that don't belong to any resource. Health is for whatever is watching your instance, and the currency
+list is reference data you'd use when creating a bank account.
+
+## Check server health
+
+Reports whether the API is up and whether it can reach its database. This is what you point an uptime monitor at.
+
+**In the app:** Nothing in the app calls this. It's for monitoring, container health checks,
+and load balancer probes.
+
+```http
+GET /api/health
+```
+
+```http
+HEAD /api/health
+```
+
+**Auth:** None. This is the only endpoint that skips authentication entirely, and it also sits outside monetr's normal
+request handling, so it doesn't open a database transaction or get traced. HEAD exists so uptime checkers that use it
+don't fill your logs with errors.
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/health"
+```
+
+```json
+{
+  "dbHealthy": true,
+  "apiHealthy": true,
+  "revision": "e3efd6c4b1a9f0d7c82b4e5a6f3d1c9b8a7e6f5d",
+  "buildTime": "2024-08-27T04:11:52Z",
+  "serverTime": "2024-08-29T18:22:07.441Z",
+  "release": "v0.19.4"
+}
+```
+
+### Response attributes
+
+| Attribute    | Type             | Description                                                                                                                                  |
+| ------------ | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dbHealthy`  | boolean          | Whether monetr could ping PostgreSQL just now. This is the field that actually tells you something.                                          |
+| `apiHealthy` | boolean          | Always true. If the API weren't healthy you wouldn't be getting a response at all.                                                           |
+| `release`    | string, nullable | The release version. Null on builds made outside the release process, like local ones.                                                       |
+| `revision`   | string           | The git commit the running binary was built from.                                                                                            |
+| `buildTime`  | string           | When the running binary was built.                                                                                                           |
+| `serverTime` | timestamp        | The server's current time in UTC. Handy for spotting clock drift, which matters here because TOTP and recurrence rules both care about time. |
+
+**Watch the status code, not only the body.** When the database ping fails you get a **500**, with `dbHealthy` set to
+false. A monitor checking only for 200 will catch that, but one parsing the body should check both.
+
+## <Badge type="info">GET</Badge> List currencies
+
+Returns every currency the server can format amounts for, which comes from the operating system's locale data rather
+than a list monetr maintains.
+
+**In the app:** The currency picker when you create or edit a bank account.
+
+```http
+GET /api/locale/currency
+```
+
+**Auth:** API key, subscription required.
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/locale/currency" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+[
+  "AED",
+  "AFN",
+  "ALL",
+  "AMD",
+  "ANG",
+  "AOA",
+  "ARS",
+  "AUD",
+  "EUR",
+  "GBP",
+  "JPY",
+  "USD"
+]
+```
+
+A flat array of ISO 4217 codes, nothing more. The real list is much longer, this is a sample.
+
+Because the list comes from the host's locale data, two instances on different base images can hand back different sets.
+If a currency you expect is missing, that's a locale package on the server rather than something monetr decided. A code
+missing here can still be a perfectly valid currency, monetr has no formatting information for it.
+
+The codes here are what you pass as `currency` when [creating a bank account](./bank_accounts#create-a-bank-account),
+and they decide how many decimal places an amount implies. See [Money](./overview#money).
