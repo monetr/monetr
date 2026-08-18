@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/stripe/stripe-go/v81/webhook"
+	"github.com/stripe/stripe-go/v86/webhook"
 )
 
 func TestHandleStripeWebhook(t *testing.T) {
