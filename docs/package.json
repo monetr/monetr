@@ -17,7 +17,7 @@
     "@rspress/plugin-rss": "2.0.18",
     "@rspress/plugin-sitemap": "2.0.18",
     "@rspress/shared": "2.0.18",
-    "@shikijs/transformers": "4.3.0",
+    "@shikijs/transformers": "4.4.3",
     "@tanstack/react-query": "5.101.4",
     "class-variance-authority": "0.7.1",
     "date-fns": "4.4.0",
