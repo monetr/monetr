@@ -323,11 +323,11 @@ importers:
         specifier: 1.102.0
         version: 1.102.0
       sass-embedded-linux-arm64:
-        specifier: 1.100.0
-        version: 1.100.0
+        specifier: 1.102.0
+        version: 1.102.0
       sass-embedded-linux-x64:
-        specifier: 1.101.0
-        version: 1.101.0
+        specifier: 1.102.0
+        version: 1.102.0
       typescript:
         specifier: 7.0.2
         version: 7.0.2
@@ -3458,6 +3458,13 @@ packages:
     os: [linux]
     libc: glibc
 
+  sass-embedded-linux-arm64@1.102.0:
+    resolution: {integrity: sha512-Yg3Ga1deV+igVqjyK5gHMKbC6fdtKkVYBnzkPVbn/W2/DeActR2JFBfMwVtZJdLpNneMye3dRzOVO2QFegsTbQ==}
+    engines: {node: '>=14.0.0'}
+    cpu: [arm64]
+    os: [linux]
+    libc: glibc
+
   sass-embedded-linux-arm@1.100.0:
     resolution: {integrity: sha512-9Ul7O1eKrc5YlhwWjkp8tZPSe3UEwSZ1uwUZOQom1HL0pRlBA6F/IlGZYFTLwnHMIP1fc77MMNaBRfc05mKMpw==}
     engines: {node: '>=14.0.0'}
@@ -3507,8 +3514,8 @@ packages:
     os: [linux]
     libc: glibc
 
-  sass-embedded-linux-x64@1.101.0:
-    resolution: {integrity: sha512-bvqMTAhZREeUjFny9QijQlL8pzsjqLf3dgrEVk9WEvx6UMqhUM+DkNy3+UgAD6J2S/KxVSrHcGv4FWs4OBOqFQ==}
+  sass-embedded-linux-x64@1.102.0:
+    resolution: {integrity: sha512-CxfhMwwbQFBCTjGysByvOw4PIOCYZ/jtz9uBU0UR5sfHtQvqqnsNyb1fVCIUsZ7piimxQAwcLV5H3Skj96QiVg==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [linux]
@@ -7733,7 +7740,10 @@ snapshots:
   sass-embedded-darwin-x64@1.100.0:
     optional: true
 
-  sass-embedded-linux-arm64@1.100.0: {}
+  sass-embedded-linux-arm64@1.100.0:
+    optional: true
+
+  sass-embedded-linux-arm64@1.102.0: {}
 
   sass-embedded-linux-arm@1.100.0:
     optional: true
@@ -7756,7 +7766,7 @@ snapshots:
   sass-embedded-linux-x64@1.100.0:
     optional: true
 
-  sass-embedded-linux-x64@1.101.0: {}
+  sass-embedded-linux-x64@1.102.0: {}
 
   sass-embedded-unknown-all@1.100.0:
     dependencies:

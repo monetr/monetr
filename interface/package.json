@@ -76,8 +76,8 @@
     "@types/react-dom": "19.2.4",
     "babel-plugin-react-compiler": "1.0.0",
     "sass": "1.102.0",
-    "sass-embedded-linux-arm64": "1.100.0",
-    "sass-embedded-linux-x64": "1.101.0",
+    "sass-embedded-linux-arm64": "1.102.0",
+    "sass-embedded-linux-x64": "1.102.0",
     "typescript": "7.0.2"
   }
 }
