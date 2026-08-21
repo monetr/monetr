@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/monetr/monetr/server/internal/calc"
+	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
 )
@@ -478,4 +479,72 @@ func TestFFTRoundTrip(t *testing.T) {
 	fmt.Printf("Energy in reconstructed time domain: %.6f\n", reconstructedEnergy)
 
 	assert.InDeltaf(t, timeDomain, reconstructedEnergy, 1e-6, "must validate Parseval's theorem for the inverse as well")
+}
+
+func BenchmarkFastFourierTransform(b *testing.B) {
+	rules := []*models.RuleSet{
+		// Every 3 months
+		testutils.Must(b, models.NewRuleSet, "DTSTART:20220101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=1"),
+		// Every other month
+		testutils.Must(b, models.NewRuleSet, "DTSTART:20220101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=2;BYMONTHDAY=1"),
+		// Every month
+		testutils.Must(b, models.NewRuleSet, "DTSTART:20220101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1"),
+		// 15th and last of every month
+		testutils.Must(b, models.NewRuleSet, "DTSTART:20230228T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1"),
+		// Weird?
+		testutils.Must(b, models.NewRuleSet, "DTSTART:20230228T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=2,4,12,15,-1"),
+		// Every other friday
+		testutils.Must(b, models.NewRuleSet, "DTSTART:20230401T050000Z\nRRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=FR"),
+		// Every friday
+		testutils.Must(b, models.NewRuleSet, "DTSTART:20230401T050000Z\nRRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=FR"),
+		// Every other day
+		testutils.Must(b, models.NewRuleSet, "DTSTART:20230401T050000Z\nRRULE:FREQ=DAILY;INTERVAL=2"),
+	}
+
+	for _, rule := range rules {
+		b.Run(rule.String(), func(b *testing.B) {
+			numberOfTransactions := 10
+			size := 4096
+			individualMagnitude := 1024
+			date := rule.After(time.Now().AddDate(-1, 0, 0), false)
+			transactions := make([]models.Transaction, numberOfTransactions)
+			for i := range transactions {
+				transactions[i] = models.Transaction{
+					TransactionId: models.ID[models.Transaction](fmt.Sprintf("txn_%d", i)),
+					Amount:        int64(individualMagnitude),
+					Date:          date,
+				}
+				date = rule.After(date, false)
+			}
+			padding := 2 // Number of days to have on each end of the series.
+			// Get the start date with the padding placed before it.
+			start := transactions[0].Date.AddDate(0, 0, -padding)
+			// And the end date with the padding placed after it.
+			end := transactions[len(transactions)-1].Date.AddDate(0, 0, padding)
+			// How many seconds between the start and end?
+			window := int64(end.Sub(start).Seconds())
+			// How many seconds elapse for each point in the series.
+			segment := float64(window) / float64(size)
+
+			series := make([]complex128, size)
+			for i := range transactions {
+				txn := transactions[i]
+				// Calculate the index by taking the number of seconds after the start
+				// timestamp. Multiplying that by our segment size, and rounding down to
+				// get our index.
+				secondsSinceStart := float64(txn.Date.Sub(start).Seconds())
+				// Then we can divide the number of seconds by our segment size; this will
+				// tell us the index we want to use.
+				index := int(math.Round(secondsSinceStart / segment))
+				// Store the transaction and its amount at that index in the series.
+				series[index] = complex(float64(individualMagnitude), 0)
+			}
+
+			b.ResetTimer()
+			for b.Loop() {
+				_ = calc.FastFourierTransform(series)
+			}
+		})
+	}
+
 }
