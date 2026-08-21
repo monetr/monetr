@@ -137,10 +137,16 @@ var fixedFourierTables = sync.OnceValue(func() fourierTables {
 	return tables
 })
 
-// fastFourierTransformGo is the plain Go version of the fixed size
-// transform. It is the fallback for hosts without the right SIMD instructions,
-// and it is deliberately written as the exact same algorithm the assembly runs
-// so the two can be compared against each other directly.
+// fastFourierTransformGo is the plain Go version of the fixed size transform.
+// It is the fallback for hosts without the right SIMD instructions, and it is
+// the readable statement of what the assembly is doing.
+//
+// It is kept in the radix-2 form on purpose. The assembly folds every pair of
+// stages into a radix-4 pass, which is worth a good deal of speed but makes the
+// arithmetic much harder to follow, and none of that helps a reader trying to
+// understand the algorithm or a host that is running this path because it has
+// no AVX512. The two agree to within a few units in the last place, which is
+// all a different association order costs, and there is a test that says so.
 func fastFourierTransformGo(dst, src []complex128) {
 	tables := fixedFourierTables()
 

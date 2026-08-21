@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"math/bits"
 	"os"
 	"path/filepath"
 )
@@ -31,12 +32,16 @@ func main() {
 	log.SetFlags(0)
 	log.SetPrefix("gen: ")
 
-	size := flag.Int("size", 4096, "number of points the transform is built for, must be a power of two")
+	size := flag.Int("size", 4096, "number of points the transform is built for, must be a power of four")
 	output := flag.String("output", "fourier_twiddles_amd64.s", "path of the assembly file to write")
 	flag.Parse()
 
-	if *size < 8 || *size&(*size-1) != 0 {
-		log.Fatalf("size must be a power of two that is at least 8, got %d", *size)
+	// The assembly runs everything as radix-4, so the size has to be a power of
+	// four rather than merely a power of two. It also has to be at least 16,
+	// because the first pass reads four points at a time out of each quarter of
+	// the input. 4096 is 4^6: one radix-4 first pass and five more after it.
+	if *size < 16 || *size&(*size-1) != 0 || bits.TrailingZeros(uint(*size))%2 != 0 {
+		log.Fatalf("size must be a power of four that is at least 16, got %d", *size)
 	}
 
 	file, err := os.Create(*output)
@@ -75,35 +80,58 @@ func writeHeader(out *bufio.Writer, size int) {
 // reversal, and their twiddle factors are all either 1 or -i, so they do not
 // need a table at all.
 //
-// A stage whose half width is h reads h entries starting at index h-4. That
-// falls out of the fact that the halves double every stage: 4 + 8 + ... + h/2
-// is exactly h-4. The assembly relies on it so it never needs a table of table
-// offsets, it just subtracts a constant from the byte width of the stage.
+// The assembly runs these as radix-4 passes, each one covering two radix-2
+// stages at once. That is worth doing because on Zen 4 a 512 bit store only
+// retires every other cycle, so the transform is limited by how many times it
+// walks the buffer rather than by arithmetic. Folding two stages into one pass
+// halves both the loads and the stores.
+//
+// A pass with parameter h needs three twiddle factors per butterfly:
+//
+//	w1 = W(2h)^j      for the first of the two folded stages
+//	w2 = W(4h)^j      for the lower pair of the second stage
+//	w3 = W(4h)^(j+h)  for the upper pair of the second stage
+//
+// Only the first two are stored. The third is always exactly -i times the
+// second, and multiplying by -i is free in registers: it is a swap of the real
+// and imaginary halves plus a sign flip, so the assembly derives it rather than
+// reading it. That is what keeps this table down to two entries per butterfly.
 func writeTwiddles(out *bufio.Writer, size int) int {
 	symbol := fmt.Sprintf("·fourierTwiddles%d", size)
 
 	writeHeader(out, size)
 	_, _ = fmt.Fprintf(out, "\n")
-	_, _ = fmt.Fprintf(out, "// %s holds the complex roots of unity for the radix-2\n", symbol[len("·"):])
-	_, _ = fmt.Fprintf(out, "// stages, stored as interleaved (real, imaginary) float64 pairs exactly the way\n")
-	_, _ = fmt.Fprintf(out, "// Go lays out a complex128. A stage whose half width is h reads h entries\n")
-	_, _ = fmt.Fprintf(out, "// beginning at entry h-4, which is why the table is packed smallest stage first.\n")
+	_, _ = fmt.Fprintf(out, "// %s holds the complex roots of unity for the radix-4\n", symbol[len("·"):])
+	_, _ = fmt.Fprintf(out, "// passes, stored as interleaved (real, imaginary) float64 pairs exactly the way\n")
+	_, _ = fmt.Fprintf(out, "// Go lays out a complex128. Each pass contributes h copies of W(2h)^j followed\n")
+	_, _ = fmt.Fprintf(out, "// by h copies of W(4h)^j, and the passes are packed smallest first so the\n")
+	_, _ = fmt.Fprintf(out, "// assembly can just walk a cursor forward by 2h entries after each one.\n")
 
 	offset := 0
-	for half := 4; half <= size/2; half <<= 1 {
-		length := half * 2
+	emit := func(value float64) {
+		_, _ = fmt.Fprintf(out, "DATA %s+%d(SB)/8, $0x%016x\n", symbol, offset, math.Float64bits(value))
+		offset += 8
+	}
+
+	for h := 4; h*4 <= size; h *= 4 {
 		_, _ = fmt.Fprintf(out, "\n")
 		_, _ = fmt.Fprintf(
 			out,
-			"// Stage %d, %d twiddle factors of the form e^(-2*pi*i*j/%d) for j in [0, %d).\n",
-			length, half, length, half,
+			"// Radix-4 pass h=%d, covering the %d and %d point stages.\n",
+			h, 2*h, 4*h,
 		)
-		for j := 0; j < half; j++ {
-			sin, cos := math.Sincos(-2 * math.Pi * float64(j) / float64(length))
-			_, _ = fmt.Fprintf(out, "DATA %s+%d(SB)/8, $0x%016x\n", symbol, offset, math.Float64bits(cos))
-			offset += 8
-			_, _ = fmt.Fprintf(out, "DATA %s+%d(SB)/8, $0x%016x\n", symbol, offset, math.Float64bits(sin))
-			offset += 8
+		_, _ = fmt.Fprintf(out, "// First %d entries are W(%d)^j, the twiddle for the folded first stage.\n", h, 2*h)
+		for j := 0; j < h; j++ {
+			sin, cos := math.Sincos(-2 * math.Pi * float64(j) / float64(2*h))
+			emit(cos)
+			emit(sin)
+		}
+		_, _ = fmt.Fprintf(out, "// Next %d entries are W(%d)^j for the folded second stage. Its partner\n", h, 4*h)
+		_, _ = fmt.Fprintf(out, "// W(%d)^(j+%d) is -i times this and is derived in registers.\n", 4*h, h)
+		for j := 0; j < h; j++ {
+			sin, cos := math.Sincos(-2 * math.Pi * float64(j) / float64(4*h))
+			emit(cos)
+			emit(sin)
 		}
 	}
 	_, _ = fmt.Fprintf(out, "\nGLOBL %s(SB), (RODATA+NOPTR), $%d\n", symbol, offset)
