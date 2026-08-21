@@ -364,6 +364,11 @@ TEXT ·__fastFourierTransform_AVX512(SB), NOSPLIT, $0-48
     CMPQ R12,         DX
     JLS  PASS4            // Keep going while the pass still fits in the transform.
 
+  // Clear the dirty upper halves before handing control back. Go's ABI wrapper
+  // runs a legacy SSE xorps on XMM15 the moment this returns, and reaching that
+  // with the upper bits live costs a merge penalty on Intel parts and keeps the
+  // core in its AVX512 frequency licence longer than it needs to be.
+  VZEROUPPER
   RET // The transform is finished and sitting in dst.
 
 // const_negate_imaginary_y is the 256 bit form of const_negate_imaginary. It

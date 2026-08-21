@@ -11,6 +11,24 @@ import (
 
 const FourierSize = 4096
 
+// The assembly implementations look up their twiddle factors and their bit
+// reversal offsets in tables that are generated for one specific size and named
+// after it, and they take the number of points to transform from the length of
+// the slice they are handed. Those two facts have to agree. If FourierSize ever
+// changes without the go:generate line above changing to match and the assembly
+// being pointed at the new symbols, the transform would walk off the end of the
+// tables and start writing at whatever offsets it found there.
+//
+// This makes that a compile error instead. Changing the size means changing
+// this line, the generate directive, and the symbol names in fourier_amd64.s
+// together, which is exactly the set of things that have to move at once.
+// A negative constant does not convert to uint, so these two together pin
+// FourierSize to exactly 4096, one catching each direction.
+const (
+	_ = uint(FourierSize - 4096)
+	_ = uint(4096 - FourierSize)
+)
+
 // FastFourierTransformSlow is a recursive implementation of the fast Fourier
 // transform.
 func FastFourierTransformSlow(a []complex128) []complex128 {
@@ -77,15 +95,17 @@ func complexExponential(theta float64) complex128 {
 // distance and vector normalization implementations do.
 var fastFourierTransform func(dst, src []complex128) = fastFourierTransformGo
 
-// FastFourierTransform is a non-recursive forward fast Fourier transform
-// for exactly FourierSize points. It does the same thing as
-// FastFourierTransform but it can only ever do it at the one size, which is
+// FastFourierTransform is a non-recursive forward fast Fourier transform for
+// exactly FourierSize points. It does the same thing as
+// FastFourierTransformSlow but it can only ever do it at the one size, which is
 // what lets every root of unity and every bit reversal offset be worked out
 // ahead of time instead of during the transform.
 //
-// On a CPU with AVX512 this runs entirely in hand written SIMD assembly against
-// tables that were computed at build time and baked into the binary as read
-// only data. Everywhere else it falls back to the equivalent Go below.
+// On amd64 this runs in hand written SIMD assembly against tables that were
+// computed at build time and baked into the binary as read only data. There are
+// three of those, picked by CPU feature in init(): AVX512, AVX with fused
+// multiply-add, and plain AVX. Anything else, including every other
+// architecture, falls back to the equivalent Go below.
 func FastFourierTransform(a []complex128) []complex128 {
 	if len(a) != FourierSize {
 		panic("length of the input must be exactly FourierSize for the fixed size transform")
@@ -110,9 +130,16 @@ type fourierTables struct {
 }
 
 // fixedFourierTables are only ever built if something actually asks for them.
-// Any host running the assembly implementation reads these same tables out of
+// A host running one of the assembly implementations gets its tables out of
 // read only data in a generated .s file instead, so nothing is computed at
 // runtime there and this never gets called.
+//
+// Those generated tables are not laid out the same way as these. The assembly
+// runs the stages in radix-4 pairs, so its table is grouped per pass as h
+// copies of W(2h)^j followed by h copies of W(4h)^j, and its permutation is
+// stored as byte offsets. These are grouped per radix-2 stage and the
+// permutation is stored as element indices. The two describe the same
+// transform, but do not expect one to be checkable against the other.
 var fixedFourierTables = sync.OnceValue(func() fourierTables {
 	tables := fourierTables{
 		twiddles: make([]complex128, 0, FourierSize),
