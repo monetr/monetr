@@ -2,14 +2,18 @@ package calc
 
 import (
 	"math"
+	"math/bits"
 	"math/cmplx"
+	"sync"
 )
+
+//go:generate go run ./gen -size 4096 -output fourier_twiddles_amd64.s
 
 const FourierSize = 4096
 
-// FastFourierTransform is a recursive implementation of the fast Fourier
+// FastFourierTransformSlow is a recursive implementation of the fast Fourier
 // transform.
-func FastFourierTransform(a []complex128) []complex128 {
+func FastFourierTransformSlow(a []complex128) []complex128 {
 	n := len(a)
 	if n <= 1 {
 		return a
@@ -28,8 +32,8 @@ func FastFourierTransform(a []complex128) []complex128 {
 		odd[i] = a[i*2+1]
 	}
 
-	fftEven := FastFourierTransform(even)
-	fftOdd := FastFourierTransform(odd)
+	fftEven := FastFourierTransformSlow(even)
+	fftOdd := FastFourierTransformSlow(odd)
 
 	result := make([]complex128, n)
 	for k := 0; k < n/2; k++ {
@@ -52,7 +56,7 @@ func InverseFastFourierTransform(a []complex128) []complex128 {
 	}
 
 	// Apply FFT to the conjugated input
-	fftConjugated := FastFourierTransform(conjugated)
+	fftConjugated := FastFourierTransformSlow(conjugated)
 
 	// Conjugate the result and scale by 1/n
 	for i := range fftConjugated {
@@ -65,4 +69,117 @@ func InverseFastFourierTransform(a []complex128) []complex128 {
 // Compute complex exponential (Euler's formula)
 func complexExponential(theta float64) complex128 {
 	return complex(math.Cos(theta), math.Sin(theta))
+}
+
+// fastFourierTransform is whichever implementation of the fixed size
+// transform the host CPU can actually run. Platforms that have a hand written
+// one swap this out from their own init function, the same way the euclidean
+// distance and vector normalization implementations do.
+var fastFourierTransform func(dst, src []complex128) = fastFourierTransformGo
+
+// FastFourierTransform is a non-recursive forward fast Fourier transform
+// for exactly FourierSize points. It does the same thing as
+// FastFourierTransform but it can only ever do it at the one size, which is
+// what lets every root of unity and every bit reversal offset be worked out
+// ahead of time instead of during the transform.
+//
+// On a CPU with AVX512 this runs entirely in hand written SIMD assembly against
+// tables that were computed at build time and baked into the binary as read
+// only data. Everywhere else it falls back to the equivalent Go below.
+func FastFourierTransform(a []complex128) []complex128 {
+	if len(a) != FourierSize {
+		panic("length of the input must be exactly FourierSize for the fixed size transform")
+	}
+	result := make([]complex128, FourierSize)
+	fastFourierTransform(result, a)
+	return result
+}
+
+// fourierTables holds everything about a fixed size transform that only depends
+// on the size, which means all of it can be worked out once and then reused
+// forever.
+type fourierTables struct {
+	// twiddles are the complex roots of unity for every radix-2 stage, packed
+	// end to end smallest stage first. A stage whose half width is h reads h
+	// entries starting at entry h-4, which works because the halves double
+	// every stage and 4 + 8 + ... + h/2 comes out to exactly h-4.
+	twiddles []complex128
+	// scatter is the bit reversal permutation, stored as the index in the
+	// output that each group of four results from the first pass belongs at.
+	scatter []int
+}
+
+// fixedFourierTables are only ever built if something actually asks for them.
+// Any host running the assembly implementation reads these same tables out of
+// read only data in a generated .s file instead, so nothing is computed at
+// runtime there and this never gets called.
+var fixedFourierTables = sync.OnceValue(func() fourierTables {
+	tables := fourierTables{
+		twiddles: make([]complex128, 0, FourierSize),
+		scatter:  make([]int, FourierSize/4),
+	}
+
+	for half := 4; half <= FourierSize/2; half <<= 1 {
+		length := half * 2
+		for j := 0; j < half; j++ {
+			sin, cos := math.Sincos(-2 * math.Pi * float64(j) / float64(length))
+			tables.twiddles = append(tables.twiddles, complex(cos, sin))
+		}
+	}
+
+	// The first pass produces four outputs at a time and the group they land in
+	// is the bit reversal of the group they came from.
+	width := bits.Len(uint(FourierSize/4)) - 1
+	for q := range tables.scatter {
+		tables.scatter[q] = int(bits.Reverse64(uint64(q))>>(64-width)) * 4
+	}
+
+	return tables
+})
+
+// fastFourierTransformGo is the plain Go version of the fixed size
+// transform. It is the fallback for hosts without the right SIMD instructions,
+// and it is deliberately written as the exact same algorithm the assembly runs
+// so the two can be compared against each other directly.
+func fastFourierTransformGo(dst, src []complex128) {
+	tables := fixedFourierTables()
+
+	// The first pass does the bit reversal permutation and the first two radix-2
+	// stages in one go, as a single radix-4 butterfly. Those two stages only ever
+	// multiply by 1 or by -i so there is nothing to look up, and permuting on the
+	// way out of src means no scratch buffer is needed.
+	const quarter = FourierSize / 4
+	for q := range quarter {
+		a0 := src[q]
+		a1 := src[q+FourierSize/2]
+		a2 := src[q+quarter]
+		a3 := src[q+quarter*3]
+
+		b0, b1 := a0+a1, a0-a1
+		b2, b3 := a2+a3, a2-a3
+
+		// Multiplying a complex number by -i is (x + iy) * -i = y - ix, so it is
+		// a swap of the two halves and a sign flip rather than a multiply.
+		b3 = complex(imag(b3), -real(b3))
+
+		group := tables.scatter[q]
+		dst[group+0] = b0 + b2
+		dst[group+1] = b1 + b3
+		dst[group+2] = b0 - b2
+		dst[group+3] = b1 - b3
+	}
+
+	// Then every remaining radix-2 stage in place, from eight points wide all
+	// the way up to the full transform.
+	for half := 4; half <= FourierSize/2; half <<= 1 {
+		twiddles := tables.twiddles[half-4 : half-4+half]
+		for block := 0; block < FourierSize; block += half * 2 {
+			for j := 0; j < half; j++ {
+				u := dst[block+j]
+				t := twiddles[j] * dst[block+j+half]
+				dst[block+j] = u + t
+				dst[block+j+half] = u - t
+			}
+		}
+	}
 }

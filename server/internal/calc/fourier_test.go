@@ -29,7 +29,7 @@ func TestFourierImplementation(t *testing.T) {
 		for x := range input {
 			series[x] = complex(input[x], 0)
 		}
-		result := calc.FastFourierTransform(series)
+		result := calc.FastFourierTransformSlow(series)
 		assert.EqualValues(t, expected, result)
 		fmt.Println(result)
 	})
@@ -72,7 +72,7 @@ func TestFourierImplementation(t *testing.T) {
 			series[x] = complex(signal[x], 0)
 		}
 
-		result := calc.FastFourierTransform(series)
+		result := calc.FastFourierTransformSlow(series)
 
 		timeDomain := sumOfSquaresSignal(signal)
 		frequencyDomain := sumOfSquaresFrequency(result, len(series))
@@ -144,7 +144,7 @@ func TestFFTEvenDistribution(t *testing.T) {
 		fmt.Printf("[%02d/%04d] transaction %v\n", i, index, txn.Date)
 	}
 
-	result := calc.FastFourierTransform(series)
+	result := calc.FastFourierTransformSlow(series)
 
 	// for i := 0; i < numberOfTransactions+2; i++ {
 	// 	c := result[i]
@@ -252,7 +252,7 @@ func TestFFTReverse(t *testing.T) {
 		fmt.Printf("[%02d/%04d] transaction %v\n", i, index, txn.Date)
 	}
 
-	result := calc.FastFourierTransform(series)
+	result := calc.FastFourierTransformSlow(series)
 
 	// for i := 0; i < numberOfTransactions+2; i++ {
 	// 	c := result[i]
@@ -453,7 +453,7 @@ func TestFFTRoundTrip(t *testing.T) {
 		series[x] = complex(signal[x], 0)
 	}
 
-	result := calc.FastFourierTransform(series)
+	result := calc.FastFourierTransformSlow(series)
 
 	timeDomain := sumOfSquaresSignal(signal)
 	frequencyDomain := sumOfSquaresFrequency(result, len(series))
@@ -505,6 +505,80 @@ func BenchmarkFastFourierTransform(b *testing.B) {
 		b.Run(rule.String(), func(b *testing.B) {
 			numberOfTransactions := 10
 			size := 4096
+			individualMagnitude := 1024
+			date := rule.After(time.Now().AddDate(-1, 0, 0), false)
+			transactions := make([]models.Transaction, numberOfTransactions)
+			for i := range transactions {
+				transactions[i] = models.Transaction{
+					TransactionId: models.ID[models.Transaction](fmt.Sprintf("txn_%d", i)),
+					Amount:        int64(individualMagnitude),
+					Date:          date,
+				}
+				date = rule.After(date, false)
+			}
+			padding := 2 // Number of days to have on each end of the series.
+			// Get the start date with the padding placed before it.
+			start := transactions[0].Date.AddDate(0, 0, -padding)
+			// And the end date with the padding placed after it.
+			end := transactions[len(transactions)-1].Date.AddDate(0, 0, padding)
+			// How many seconds between the start and end?
+			window := int64(end.Sub(start).Seconds())
+			// How many seconds elapse for each point in the series.
+			segment := float64(window) / float64(size)
+
+			series := make([]complex128, size)
+			for i := range transactions {
+				txn := transactions[i]
+				// Calculate the index by taking the number of seconds after the start
+				// timestamp. Multiplying that by our segment size, and rounding down to
+				// get our index.
+				secondsSinceStart := float64(txn.Date.Sub(start).Seconds())
+				// Then we can divide the number of seconds by our segment size; this will
+				// tell us the index we want to use.
+				index := int(math.Round(secondsSinceStart / segment))
+				// Store the transaction and its amount at that index in the series.
+				series[index] = complex(float64(individualMagnitude), 0)
+			}
+
+			b.ResetTimer()
+			for b.Loop() {
+				_ = calc.FastFourierTransformSlow(series)
+			}
+		})
+	}
+
+}
+
+// BenchmarkFastFourierTransformFixed is deliberately the same benchmark as
+// BenchmarkFastFourierTransform above, over the same rules and the same 4096
+// point series, so the two can be compared directly. The only difference is
+// that this one goes through the fixed size implementation, which on a host
+// with AVX512 is the hand written assembly reading twiddle factors that were
+// computed at build time.
+func BenchmarkFastFourierTransformFixed(b *testing.B) {
+	rules := []*models.RuleSet{
+		// Every 3 months
+		testutils.Must(b, models.NewRuleSet, "DTSTART:20220101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=1"),
+		// Every other month
+		testutils.Must(b, models.NewRuleSet, "DTSTART:20220101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=2;BYMONTHDAY=1"),
+		// Every month
+		testutils.Must(b, models.NewRuleSet, "DTSTART:20220101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1"),
+		// 15th and last of every month
+		testutils.Must(b, models.NewRuleSet, "DTSTART:20230228T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1"),
+		// Weird?
+		testutils.Must(b, models.NewRuleSet, "DTSTART:20230228T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=2,4,12,15,-1"),
+		// Every other friday
+		testutils.Must(b, models.NewRuleSet, "DTSTART:20230401T050000Z\nRRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=FR"),
+		// Every friday
+		testutils.Must(b, models.NewRuleSet, "DTSTART:20230401T050000Z\nRRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=FR"),
+		// Every other day
+		testutils.Must(b, models.NewRuleSet, "DTSTART:20230401T050000Z\nRRULE:FREQ=DAILY;INTERVAL=2"),
+	}
+
+	for _, rule := range rules {
+		b.Run(rule.String(), func(b *testing.B) {
+			numberOfTransactions := 10
+			size := calc.FourierSize
 			individualMagnitude := 1024
 			date := rule.After(time.Now().AddDate(-1, 0, 0), false)
 			transactions := make([]models.Transaction, numberOfTransactions)

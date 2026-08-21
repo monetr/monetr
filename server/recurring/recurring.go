@@ -123,7 +123,7 @@ func DetectRecurringTransactions(
 		90, // Quarterly
 	}
 
-	result := calc.FastFourierTransform(series)
+	result := calc.FastFourierTransformSlow(series)
 
 	scores := make([]FrequencyScore, len(frequencies))
 	for f := range frequencies {
