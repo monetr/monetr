@@ -46,10 +46,10 @@ TEXT ·__fastFourierTransform_AVX512(SB), NOSPLIT, $0-48
 
   LEAQ ·fourierScatter4096(SB), BX // Point BX at the precomputed bit reversal offsets.
 
-  // The first pass reads four points that are each a quarter of the transform
-  // apart, so precompute those three distances in bytes. A complex128 is 16
-  // bytes wide, which is where the multipliers come from: n/4 points is n*4
-  // bytes, n/2 points is n*8 bytes and 3n/4 points is n*12 bytes.
+	// The first pass reads four points that are each a quarter of the transform
+	// apart, so precompute those three distances in bytes. A complex128 is 16
+	// bytes wide, which is where the multipliers come from: n/4 points is n*4
+	// bytes, n/2 points is n*8 bytes and 3n/4 points is n*12 bytes.
   MOVQ AX, R9
   SHLQ $2, R9   // R9 = n*4, the byte distance to the point a quarter of the way through src.
   MOVQ R9, R8
@@ -64,11 +64,12 @@ TEXT ·__fastFourierTransform_AVX512(SB), NOSPLIT, $0-48
   // finished groups of four outputs. Reading a0 through a3 with a stride of a
   // quarter of the transform is what the bit reversal actually asks for: the
   // low two bits of a destination index become the top two bits of the source
-  // index, which is exactly a quarter, a half and three quarters of the way in.
+	// index, which is exactly a quarter, a half and three quarters of the way
+	// in.
   PASS1:
-    VMOVUPD (SI),       Z0 // Load a0, four complex numbers from the start of src.
-    VMOVUPD (SI)(R8*1), Z1 // Load a1 from halfway through src.
-    VMOVUPD (SI)(R9*1), Z2 // Load a2 from a quarter of the way through src.
+    VMOVUPD (SI),        Z0 // Load a0, four complex numbers from the start of src.
+    VMOVUPD (SI)(R8*1),  Z1 // Load a1 from halfway through src.
+    VMOVUPD (SI)(R9*1),  Z2 // Load a2 from a quarter of the way through src.
     VMOVUPD (SI)(R10*1), Z3 // Load a3 from three quarters of the way through src.
 
     // The first radix-2 stage. Its twiddle factor is 1 for every butterfly so
@@ -78,22 +79,23 @@ TEXT ·__fastFourierTransform_AVX512(SB), NOSPLIT, $0-48
     VADDPD Z3, Z2, Z6 // b2 = a2 + a3
     VSUBPD Z3, Z2, Z7 // b3 = a2 - a3
 
-    // The second radix-2 stage needs the twiddle factors 1 and -i. Multiplying
-    // a complex number by -i is (x + iy) * -i = y - ix, which is a swap of the
-    // real and imaginary halves followed by negating the new imaginary half.
-    // Two instructions and no multiplier involved.
+		// The second radix-2 stage needs the twiddle factors 1 and -i. Multiplying
+		// a complex number by -i is (x + iy) * -i = y - ix, which is a swap of the
+		// real and imaginary halves followed by negating the new imaginary half.
+		// Two instructions and no multiplier involved.
     VPERMILPD $0x55, Z7, Z7 // Swap the real and imaginary halves of b3, giving (b3.imag, b3.real).
-    VPXORQ    Z16, Z7, Z7   // Flip the sign of the new imaginary half, giving (b3.imag, -b3.real), which is -i*b3.
+    VPXORQ    Z16,   Z7, Z7 // Flip the sign of the new imaginary half, giving (b3.imag, -b3.real), which is -i*b3.
 
     VADDPD Z6, Z4, Z8  // c0 = b0 + b2
     VADDPD Z7, Z5, Z9  // c1 = b1 + (-i * b3)
     VSUBPD Z6, Z4, Z10 // c2 = b0 - b2
     VSUBPD Z7, Z5, Z11 // c3 = b1 - (-i * b3)
 
-    // At this point Z8 through Z11 are laid out the wrong way round for storing.
-    // Each register holds one output slot for four different groups, but memory
-    // wants all four output slots of a single group contiguous. That is a 4x4
-    // transpose of 128-bit lanes, and VSHUFF64X2 does it in eight instructions.
+		// At this point Z8 through Z11 are laid out the wrong way round for
+		// storing. Each register holds one output slot for four different groups,
+		// but memory wants all four output slots of a single group contiguous.
+		// That is a 4x4 transpose of 128-bit lanes, and VSHUFF64X2 does it in
+		// eight instructions.
     VSHUFF64X2 $0x44, Z9,  Z8,  Z12 // t0 = c0 and c1 for the first two groups.
     VSHUFF64X2 $0xEE, Z9,  Z8,  Z13 // t1 = c0 and c1 for the last two groups.
     VSHUFF64X2 $0x44, Z11, Z10, Z14 // t2 = c2 and c3 for the first two groups.
@@ -103,9 +105,9 @@ TEXT ·__fastFourierTransform_AVX512(SB), NOSPLIT, $0-48
     VSHUFF64X2 $0x88, Z15, Z13, Z2  // The complete third group.
     VSHUFF64X2 $0xDD, Z15, Z13, Z3  // The complete fourth group.
 
-    // The four groups all belong at unrelated places in dst, so read where each
-    // one goes out of the precomputed table. Every store writes a full 64 byte
-    // group, which is one whole cache line when dst is aligned.
+		// The four groups all belong at unrelated places in dst, so read where
+		// each one goes out of the precomputed table. Every store writes a full 64
+		// byte group, which is one whole cache line when dst is aligned.
     MOVL 0(BX),  R11 // Byte offset of the first group.
     MOVL 4(BX),  R12 // Byte offset of the second group.
     MOVL 8(BX),  R13 // Byte offset of the third group.
@@ -117,85 +119,86 @@ TEXT ·__fastFourierTransform_AVX512(SB), NOSPLIT, $0-48
 
     ADDQ $64, SI // Advance src by four complex numbers.
     ADDQ $16, BX // Advance the offset table by four entries.
-    SUBQ $1, CX  // One less group of four to go.
-    JNZ  PASS1   // Keep going until the whole first quarter of src has been read.
+    SUBQ $1,  CX // One less group of four to go.
+    JNZ  PASS1   // Keep going until first quarter of src has been read.
 
   // Everything from here on happens in place in dst.
   //
-  // Every remaining stage is the same butterfly: the second half of each block
-  // gets multiplied by a twiddle factor, then the sum and the difference of the
-  // two halves are written back. The complex multiply is done as
+	// Every remaining stage is the same butterfly: the second half of each block
+	// gets multiplied by a twiddle factor, then the sum and the difference of
+	// the two halves are written back. The complex multiply is done as
   //
   //   t.real = v.real*w.real - v.imag*w.imag
   //   t.imag = v.imag*w.real + v.real*w.imag
   //
-  // which VFMADDSUB231PD does in a single instruction once the twiddle has been
-  // splatted into (w.real, w.real) and (w.imag, w.imag), because it subtracts on
-  // the even slots and adds on the odd ones. The twiddle factors are stored
-  // interleaved exactly like the data, so VMOVDDUP and VPERMILPD produce both
-  // splats out of the same 64 bytes without any extra loads.
+	// which VFMADDSUB231PD does in a single instruction once the twiddle has
+	// been splatted into (w.real, w.real) and (w.imag, w.imag), because it
+	// subtracts on the even slots and adds on the odd ones. The twiddle factors
+	// are stored interleaved exactly like the data, so VMOVDDUP and VPERMILPD
+	// produce both splats out of the same 64 bytes without any extra loads.
   LEAQ ·fourierTwiddles4096(SB), BX // Point BX at the base of the twiddle table.
-  MOVQ dst_len+8(FP), DX
-  SHLQ $4, DX         // DX = n*16, the total size of the buffer in bytes.
-  LEAQ (DI)(DX*1), AX // AX = one byte past the end of the buffer, the stopping point for every block loop.
-  SHRQ $1, DX         // DX = n*8, the half width of the final stage and so the bound for the stage loop.
 
-  // The eight point stage gets its own loop. Its half is only four complex
-  // numbers, which is a single register, so the generic loop below would spend
-  // more instructions setting up each block than doing work in it. It also uses
-  // the same four twiddle factors for every one of its blocks, so they can be
-  // hoisted into registers once and the whole stage becomes a flat walk over
-  // the buffer, two blocks at a time.
-  VMOVDDUP  (BX), Z7        // (w.real, w.real) for the four twiddle factors of the eight point stage.
+  MOVQ dst_len+8(FP), DX
+  SHLQ $4,            DX // DX = n*16, the total size of the buffer in bytes.
+  LEAQ (DI)(DX*1),    AX // AX = one byte past the end of the buffer, the stopping point for every block loop.
+  SHRQ $1,            DX // DX = n*8, the half width of the final stage and so the bound for the stage loop.
+
+	// The eight point stage gets its own loop. Its half is only four complex
+	// numbers, which is a single register, so the generic loop below would spend
+	// more instructions setting up each block than doing work in it. It also
+	// uses the same four twiddle factors for every one of its blocks, so they
+	// can be hoisted into registers once and the whole stage becomes a flat walk
+	// over the buffer, two blocks at a time.
+  VMOVDDUP  (BX),  Z7       // (w.real, w.real) for the four twiddle factors of the eight point stage.
   VPERMILPD $0xFF, (BX), Z8 // (w.imag, w.imag) for the same four.
-  MOVQ DI, R8               // R8 walks the buffer.
+  MOVQ      DI,    R8       // R8 walks the buffer.
 
   STAGE8:
-    VMOVUPD        64(R8), Z1     // v for the first block.
-    VMOVUPD        192(R8), Z11   // v for the second block.
-    VPERMILPD      $0x55, Z1, Z2  // (v.imag, v.real) for the first block.
-    VPERMILPD      $0x55, Z11, Z12 // (v.imag, v.real) for the second block.
-    VMULPD         Z8, Z2, Z2     // (v.imag*w.imag, v.real*w.imag)
-    VMULPD         Z8, Z12, Z12
-    VFMADDSUB231PD Z7, Z1, Z2     // t = v*w for the first block.
-    VFMADDSUB231PD Z7, Z11, Z12   // t = v*w for the second block.
-    VMOVUPD        (R8), Z0       // u for the first block.
-    VMOVUPD        128(R8), Z10   // u for the second block.
-    VADDPD         Z2, Z0, Z5     // u + t
-    VADDPD         Z12, Z10, Z15
-    VSUBPD         Z2, Z0, Z6     // u - t
-    VSUBPD         Z12, Z10, Z16
-    VMOVUPD        Z5, (R8)
-    VMOVUPD        Z15, 128(R8)
-    VMOVUPD        Z6, 64(R8)
-    VMOVUPD        Z16, 192(R8)
+    VMOVUPD        64(R8),  Z1       // v for the first block.
+    VMOVUPD        192(R8), Z11      // v for the second block.
+    VPERMILPD      $0x55,   Z1,  Z2  // (v.imag, v.real) for the first block.
+    VPERMILPD      $0x55,   Z11, Z12 // (v.imag, v.real) for the second block.
+    VMULPD         Z8,      Z2,  Z2  // (v.imag*w.imag, v.real*w.imag)
+    VMULPD         Z8,      Z12, Z12
+    VFMADDSUB231PD Z7,      Z1,  Z2  // t = v*w for the first block.
+    VFMADDSUB231PD Z7,      Z11, Z12 // t = v*w for the second block.
+    VMOVUPD        (R8),    Z0       // u for the first block.
+    VMOVUPD        128(R8), Z10      // u for the second block.
+    VADDPD         Z2,      Z0,  Z5  // u + t
+    VADDPD         Z12,     Z10, Z15
+    VSUBPD         Z2,      Z0,  Z6  // u - t
+    VSUBPD         Z12,     Z10, Z16
+    VMOVUPD        Z5,      (R8)
+    VMOVUPD        Z15,     128(R8)
+    VMOVUPD        Z6,      64(R8)
+    VMOVUPD        Z16,     192(R8)
     ADDQ $256, R8 // Two blocks of eight points each.
     CMPQ R8, AX
     JCS  STAGE8
 
-  // And now every stage from sixteen points wide up to the whole transform.
-  // From here on a half is at least eight complex numbers, so the butterfly
-  // loop always runs an even number of registers and can be unrolled two at a
-  // time with no leftovers to clean up afterwards.
+	// And now every stage from sixteen points wide up to the whole transform.
+	// From here on a half is at least eight complex numbers, so the butterfly
+	// loop always runs an even number of registers and can be unrolled two at a
+	// time with no leftovers to clean up afterwards.
   MOVQ $128, R12 // The half of the sixteen point stage is eight complex numbers, or 128 bytes.
 
   STAGE:
-    // A stage whose half is h entries reads h twiddle factors starting at entry
-    // h-4, because the halves double every stage and 4 + 8 + ... + h/2 is h-4.
-    // In bytes that is just the byte width of the stage's half minus one
-    // register, so there is no table of table offsets to keep around.
+		// A stage whose half is h entries reads h twiddle factors starting at
+		// entry h-4, because the halves double every stage and 4 + 8 + ... + h/2
+		// is h-4. In bytes that is just the byte width of the stage's half minus
+		// one register, so there is no table of table offsets to keep around.
     LEAQ -64(BX)(R12*1), R13 // R13 = where this stage's twiddle factors start.
-    MOVQ DI, R8              // R8 walks the start of each block in the buffer.
+    MOVQ DI,             R8  // R8 walks the start of each block in the buffer.
 
     BLOCK:
-      MOVQ R13, R9          // The twiddle cursor restarts at the top for every block.
-      MOVQ R8,  R10         // R10 walks the first half of the block.
+      MOVQ R13,         R9  // The twiddle cursor restarts at the top for every block.
+      MOVQ R8,          R10 // R10 walks the first half of the block.
       LEAQ (R8)(R12*1), R11 // R11 walks the second half of the block.
-      MOVQ R12, SI          // SI counts down the bytes of butterflies left in this block.
+      MOVQ R12,         SI  // SI counts down the bytes of butterflies left in this block.
 
       BUTTERFLY:
-        // Two independent butterflies per iteration. They share nothing, so the
-        // CPU can overlap them and hide the latency of the multiplies.
+				// Two independent butterflies per iteration. They share nothing, so
+				// the CPU can overlap them and hide the latency of the multiplies.
         VMOVUPD        (R11), Z1        // v, four complex numbers from the second half of the block.
         VMOVUPD        64(R11), Z11     // The next four.
         VPERMILPD      $0x55, Z1, Z2    // (v.imag, v.real), the swapped copy the imaginary term needs.
