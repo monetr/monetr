@@ -37,3 +37,5 @@ RUN ln -s ../lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm && \
 # to our pin, and pnpm-workspace.yaml's trustPolicy: no-downgrade rejects it
 # because pnpm dropped npm provenance attestations as of 10.34.0.
 RUN npm install -g pnpm@10.34.5
+
+USER node
