@@ -1,3 +1,5 @@
+FROM --platform=$BUILDPLATFORM node:22.23.2-trixie-slim@sha256:7b8a0c89c54499bee567618f96578e1a12a800f062fbdbfd1fb6a443fa6f6284 AS node
+
 FROM --platform=$BUILDPLATFORM golang:1.26.4-trixie@sha256:68b7145ec43d1820b9a56704554b53d1520aa2a15cb5233e374188a31b2a1bce AS base_builder
 WORKDIR /monetr
 RUN apt-get update && \
@@ -16,14 +18,23 @@ RUN apt-get update && \
       libc6-dev-arm64-cross=2.41-11cross1 \
       # renovate: datasource=deb depName=git versioning=deb
       git=1:2.47.3-0+deb13u1 \
-      # renovate: datasource=deb depName=nodejs versioning=deb
-      nodejs=20.19.2+dfsg-1+deb13u2 \
-      # renovate: datasource=deb depName=npm versioning=deb
-      npm=9.2.0~ds1-3 \
+      # Node links against libatomic on arm64.
+      # renovate: datasource=deb depName=libatomic1 versioning=deb
+      libatomic1=14.2.0-19 \
       # renovate: datasource=deb depName=wget versioning=deb
       wget=1.25.0-2 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+# Node comes out of the official image rather than apt so that we can pin an
+# exact version, Debian trixie only ever ships Node 20 and cmake/FindPnpm.cmake
+# already had to work around that. The upstream image verified the nodejs.org
+# tarball against the Node release GPG keys and its SHA256 before unpacking it,
+# so we inherit that. Same approach as compose/monetr-frontend.Dockerfile.
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN ln -s ../lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm && \
+    ln -s ../lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
 
 RUN git config --global --add safe.directory /monetr
 
