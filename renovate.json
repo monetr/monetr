@@ -113,6 +113,26 @@
       ]
     },
     {
+      "groupName": "node",
+      "groupSlug": "node",
+      "semanticCommitScope": "containers",
+      "matchDatasources": [
+        "docker",
+        "node-version"
+      ],
+      "matchPackageNames": [
+        "node"
+      ]
+    },
+    {
+      "groupName": "pnpm",
+      "groupSlug": "pnpm",
+      "semanticCommitScope": "ui",
+      "matchPackageNames": [
+        "pnpm"
+      ]
+    },
+    {
       "groupName": "golang.org/x",
       "groupSlug": "golang-x",
       "matchPackageNames": [
@@ -230,10 +250,18 @@
     },
     {
       "customType": "regex",
-      "description": "Update pinned Debian apt package versions in the Dockerfile",
-      "fileMatch": ["(^|/)Dockerfile$"],
+      "description": "Update pinned Debian apt package versions in Dockerfiles",
+      "fileMatch": ["(^|/)Dockerfile$", "\\.Dockerfile$"],
       "matchStrings": ["# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\s+\\S+=(?<currentValue>\\S+)"],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}deb{{/if}}"
+    },
+    {
+      "customType": "regex",
+      "description": "Update the pnpm version pinned in container files, must track package.json packageManager",
+      "fileMatch": ["(^|/)Dockerfile$", "\\.Dockerfile$"],
+      "matchStrings": ["npm install -g pnpm@(?<currentValue>\\d+\\.\\d+\\.\\d+)"],
+      "depNameTemplate": "pnpm",
+      "datasourceTemplate": "npm"
     }
   ]
 }
