@@ -13,6 +13,18 @@ jobs:
         with:
           egress-policy: audit
 
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Fix dumb git issue
+        run: |
+          git config --global --add safe.directory ${PWD}
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: '.nvmrc'
+
       - id: go-cache-paths
         name: Install pnpm and configure cache
         run: |
@@ -20,13 +32,6 @@ jobs:
           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
           echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
           echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
-
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-      - name: Fix dumb git issue
-        run: |
-          git config --global --add safe.directory ${PWD}
 
       - name: Go Build Cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -88,6 +93,16 @@ jobs:
         with:
           egress-policy: audit
 
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Fix dumb git issue
+        run: |
+          git config --global --add safe.directory ${PWD}
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: '.nvmrc'
+
       - name: Install locales-all (Linux only)
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y locales-all
@@ -99,11 +114,6 @@ jobs:
           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
           echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
           echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
-
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Fix dumb git issue
-        run: |
-          git config --global --add safe.directory ${PWD}
 
       # Cache go build cache, used to speedup go test
       - name: Go Build Cache
@@ -169,6 +179,18 @@ jobs:
         with:
           egress-policy: audit
 
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Fix dumb git issue
+        run: |
+          git config --global --add safe.directory ${PWD}
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: '.nvmrc'
+
       - id: go-cache-paths
         name: Install pnpm and configure cache
         run: |
@@ -176,13 +198,6 @@ jobs:
           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
           echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
           echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
-
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-      - name: Fix dumb git issue
-        run: |
-          git config --global --add safe.directory ${PWD}
 
       - name: Go Build Cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -224,6 +239,12 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: '.nvmrc'
+
       - name: Set up QEMU
         uses: step-security/setup-qemu-action@1d653f731ddc90c553742100d15205c94b792314 # v4.2.0
       - name: Set up Docker Buildx
@@ -242,6 +263,19 @@ jobs:
         with:
           egress-policy: audit
 
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Fix dumb git issue
+        run: |
+          git config --global --add safe.directory ${PWD}
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: '.nvmrc'
+
       - id: go-cache-paths
         name: Install pnpm and configure cache
         run: |
@@ -249,13 +283,6 @@ jobs:
           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
           echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
           echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
-
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-      - name: Fix dumb git issue
-        run: |
-          git config --global --add safe.directory ${PWD}
 
       # Cache go build cache, used to speedup go test
       - name: Go Build Cache
@@ -307,6 +334,11 @@ jobs:
       - name: Fix dumb git issue
         run: |
           git config --global --add safe.directory ${PWD}
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: '.nvmrc'
 
       - name: Build
         run: make docs
