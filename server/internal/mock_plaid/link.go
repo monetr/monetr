@@ -10,7 +10,6 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/plaid/plaid-go/v45/plaid"
 	"github.com/stretchr/testify/require"
 )
@@ -74,8 +73,8 @@ func MockCreateLinkTokenFailure(t *testing.T) {
 			return plaid.PlaidError{
 				ErrorType:      "API_ERROR",
 				ErrorCode:      "INTERNAL_SERVER_ERROR",
-				DisplayMessage: *plaid.NewNullableString(myownsanity.StringP("Something went wrong.")),
-				RequestId:      myownsanity.StringP(gofakeit.UUID()),
+				DisplayMessage: *plaid.NewNullableString(new("Something went wrong.")),
+				RequestId:      new(gofakeit.UUID()),
 			}, http.StatusInternalServerError
 		},
 		PlaidHeaders,

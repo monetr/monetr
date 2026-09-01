@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/plaid/plaid-go/v45/plaid"
 	"github.com/stretchr/testify/assert"
 )
@@ -20,8 +19,8 @@ func TestNewPlaidBankAccountBalances(t *testing.T) {
 			Available:              *plaid.NewNullableFloat64(&available),
 			Current:                *plaid.NewNullableFloat64(&current),
 			Limit:                  *plaid.NewNullableFloat64(&limit),
-			IsoCurrencyCode:        *plaid.NewNullableString(myownsanity.StringP("USD")),
-			UnofficialCurrencyCode: *plaid.NewNullableString(myownsanity.StringP("USD")),
+			IsoCurrencyCode:        *plaid.NewNullableString(new("USD")),
+			UnofficialCurrencyCode: *plaid.NewNullableString(new("USD")),
 			LastUpdatedDatetime:    plaid.NullableTime{}, // Leave this be so that is has no value.
 			AdditionalProperties:   map[string]any{},
 		}
@@ -61,9 +60,9 @@ func TestNewPlaidBankAccount(t *testing.T) {
 		plaidBank := plaid.AccountBase{
 			AccountId:    gofakeit.UUID(),
 			Balances:     plaid.AccountBalance{},
-			Mask:         *plaid.NewNullableString(myownsanity.StringP("1234")),
+			Mask:         *plaid.NewNullableString(new("1234")),
 			Name:         "Checking Account",
-			OfficialName: *plaid.NewNullableString(myownsanity.StringP("CHECKING - 1234")),
+			OfficialName: *plaid.NewNullableString(new("CHECKING - 1234")),
 			Type:         plaid.ACCOUNTTYPE_DEPOSITORY,
 			Subtype:      *plaid.NewNullableAccountSubtype(&subType),
 		}

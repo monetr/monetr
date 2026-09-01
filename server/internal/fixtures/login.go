@@ -98,10 +98,10 @@ func GivenIHaveAnAccount(t *testing.T, clock clock.Clock, login models.Login) mo
 			gofakeit.TimeZoneRegion(),
 		),
 		Locale:                       "en_US",
-		StripeCustomerId:             myownsanity.StringP(mock_stripe.FakeStripeCustomerId(t)),
-		StripeSubscriptionId:         myownsanity.StringP(mock_stripe.FakeStripeSubscriptionId(t)),
-		StripeWebhookLatestTimestamp: myownsanity.TimeP(clock.Now().Add(-4 * time.Minute)),
-		SubscriptionActiveUntil:      myownsanity.TimeP(clock.Now().Add(10 * time.Minute)),
+		StripeCustomerId:             new(mock_stripe.FakeStripeCustomerId(t)),
+		StripeSubscriptionId:         new(mock_stripe.FakeStripeSubscriptionId(t)),
+		StripeWebhookLatestTimestamp: new(clock.Now().Add(-4 * time.Minute)),
+		SubscriptionActiveUntil:      new(clock.Now().Add(10 * time.Minute)),
 		SubscriptionStatus:           &subStatus,
 		TrialEndsAt:                  nil,
 	}
@@ -147,7 +147,7 @@ func GivenIHaveATrialingAccount(t *testing.T, clock clock.Clock, login models.Lo
 		StripeWebhookLatestTimestamp: nil,
 		SubscriptionActiveUntil:      nil,
 		SubscriptionStatus:           nil,
-		TrialEndsAt:                  myownsanity.TimeP(clock.Now().AddDate(0, 0, 30)),
+		TrialEndsAt:                  new(clock.Now().AddDate(0, 0, 30)),
 	}
 	err := repo.CreateAccountV2(context.Background(), &account)
 	require.NoError(t, err, "must be able to seed basic account")

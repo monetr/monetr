@@ -44,7 +44,6 @@ import (
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
@@ -109,7 +108,7 @@ func (p *postgresContext) RunInTransaction(ctx context.Context, callback func(ct
 			processorClone := *p.postgresProcessor
 			processorClone.db = tx
 			// Used to prevent sending multiple wake signals inside a transaction.
-			processorClone.notify = myownsanity.Pointer(false)
+			processorClone.notify = new(false)
 
 			// Build a new context pointing at the cloned processor.
 			clone := postgresContext{
@@ -422,7 +421,7 @@ func (p *postgresProcessor) EnqueueAt(
 		// If we are in a transaction, let subsequent enqueues know that we already
 		// sent the wake signal.
 		if p.notify != nil {
-			p.notify = myownsanity.Pointer(true)
+			p.notify = new(true)
 		}
 	}
 

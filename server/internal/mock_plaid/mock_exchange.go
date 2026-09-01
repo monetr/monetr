@@ -7,7 +7,6 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/plaid/plaid-go/v45/plaid"
 	"github.com/stretchr/testify/require"
 )
@@ -35,8 +34,8 @@ func MockExchangePublicToken(t *testing.T) string {
 					ErrorType:      "INVALID_REQUEST",
 					ErrorCode:      "1234",
 					ErrorMessage:   "public_token is not valid",
-					DisplayMessage: *plaid.NewNullableString(myownsanity.Pointer("public_token is not valid")),
-					Status:         *plaid.NewNullableInt32(myownsanity.Pointer[int32](http.StatusBadRequest)),
+					DisplayMessage: *plaid.NewNullableString(new("public_token is not valid")),
+					Status:         *plaid.NewNullableInt32(new(int32(http.StatusBadRequest))),
 				}, http.StatusBadRequest
 			}
 

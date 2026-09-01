@@ -8,7 +8,6 @@ import (
 	"log/slog"
 
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/pkg/errors"
 	"github.com/stripe/stripe-go/v81"
 )
@@ -43,7 +42,7 @@ func (b *baseBilling) HandleStripeWebhook(ctx context.Context, event stripe.Even
 			return errors.Wrap(err, "failed to extract subscription from json")
 		}
 
-		validUntil := myownsanity.TimeP(time.Unix(subscription.CurrentPeriodEnd, 0))
+		validUntil := new(time.Unix(subscription.CurrentPeriodEnd, 0))
 
 		if err := b.UpdateSubscription(
 			span.Context(),

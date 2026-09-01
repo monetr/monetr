@@ -6,7 +6,6 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
@@ -74,7 +73,7 @@ func GivenIHaveABankAccount(
 			AvailableBalance: available,
 			CurrentBalance:   current,
 			Currency:         "USD",
-			Mask:             myownsanity.Pointer(gofakeit.Generate("####")),
+			Mask:             new(gofakeit.Generate("####")),
 			Name:             "E-ACCOUNT",
 			AccountType:      accountType,
 			AccountSubType:   subType,
@@ -139,7 +138,7 @@ func GivenIHaveAPlaidBankAccount(
 		PlaidBankAccount:   &plaidBankAccount,
 		AvailableBalance:   available,
 		CurrentBalance:     current,
-		Mask:               myownsanity.Pointer(gofakeit.Generate("####")),
+		Mask:               new(gofakeit.Generate("####")),
 		Name:               "E-ACCOUNT",
 		AccountType:        accountType,
 		AccountSubType:     subType,
@@ -211,7 +210,7 @@ func GivenIHaveALunchFlowBankAccount(
 		LunchFlowBankAccount:   &lunchFlowBankAccount,
 		AvailableBalance:       available,
 		CurrentBalance:         current,
-		Mask:                   myownsanity.Pointer(gofakeit.Generate("####")),
+		Mask:                   new(gofakeit.Generate("####")),
 		Name:                   "E-ACCOUNT",
 		AccountType:            models.DepositoryBankAccountType,
 		AccountSubType:         models.CheckingBankAccountSubType,

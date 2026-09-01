@@ -70,7 +70,7 @@ func (b *baseBilling) CreateBillingPortal(
 		FlowData:      nil,
 		Locale:        nil,
 		OnBehalfOf:    nil,
-		ReturnURL:     stripe.String(b.config.Server.GetBaseURL().String()),
+		ReturnURL:     new(b.config.Server.GetBaseURL().String()),
 	}
 
 	log.DebugContext(span.Context(), "creating a stripe billing portal")

@@ -13,7 +13,6 @@ import (
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/datasources/plaid/plaid_jobs"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
@@ -371,7 +370,7 @@ func (c *Controller) updatePlaidTokenCallback(ctx *echo.Context) error {
 				CurrentBalance:     plaidAccount.GetBalances().GetCurrent(),
 				LimitBalance:       plaidAccount.GetBalances().GetLimit(),
 				Name:               plaidAccount.GetName(),
-				Mask:               myownsanity.Pointer(plaidAccount.GetMask()),
+				Mask:               new(plaidAccount.GetMask()),
 				AccountType:        BankAccountType(plaidAccount.GetType()),
 				AccountSubType:     BankAccountSubType(plaidAccount.GetSubType()),
 				Currency:           plaidAccount.GetCurrencyCode(),
@@ -531,7 +530,7 @@ func (c *Controller) postPlaidTokenCallback(ctx *echo.Context) error {
 			CurrentBalance:     plaidAccount.GetBalances().GetCurrent(),
 			LimitBalance:       plaidAccount.GetBalances().GetLimit(),
 			Name:               plaidAccount.GetName(),
-			Mask:               myownsanity.Pointer(plaidAccount.GetMask()),
+			Mask:               new(plaidAccount.GetMask()),
 			AccountType:        BankAccountType(plaidAccount.GetType()),
 			AccountSubType:     BankAccountSubType(plaidAccount.GetSubType()),
 			Currency:           plaidAccount.GetCurrencyCode(),
@@ -672,7 +671,7 @@ func (c *Controller) postPlaidLinkSync(ctx *echo.Context) error {
 		return c.returnError(ctx, http.StatusTooEarly, "link has been manually synced too recently")
 	}
 
-	plaidLink.LastManualSync = myownsanity.Pointer(c.Clock.Now().UTC())
+	plaidLink.LastManualSync = new(c.Clock.Now().UTC())
 	if err := repo.UpdatePlaidLink(c.getContext(ctx), plaidLink); err != nil {
 		return c.wrapPgError(ctx, err, "could not manually sync link")
 	}

@@ -55,7 +55,7 @@ func NewAWSKMS(ctx context.Context, config AWSKMSConfig) (KeyManagement, error) 
 
 	client := kms.NewFromConfig(cfg, func(o *kms.Options) {
 		if config.Endpoint != nil && *config.Endpoint != "" {
-			o.BaseEndpoint = aws.String(*config.Endpoint)
+			o.BaseEndpoint = new(*config.Endpoint)
 		}
 	})
 
@@ -78,7 +78,7 @@ func (a *AWSKMS) Encrypt(ctx context.Context, input string) (keyId, version *str
 	request := &kms.EncryptInput{
 		EncryptionAlgorithm: types.EncryptionAlgorithmSpecSymmetricDefault,
 		GrantTokens:         []string{},
-		KeyId:               aws.String(a.config.KeyID),
+		KeyId:               new(a.config.KeyID),
 		Plaintext:           []byte(input),
 	}
 

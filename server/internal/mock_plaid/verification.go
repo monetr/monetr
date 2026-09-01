@@ -39,7 +39,7 @@ func MockGetWebhookVerificationKey(t *testing.T, clk clock.Clock, kid string, pu
 					X:         x,
 					Y:         y,
 					CreatedAt: int32(clk.Now().Unix()),
-					ExpiredAt: *plaid.NewNullableInt32(myownsanity.Pointer(int32(clk.Now().Add(30 * time.Minute).Unix()))),
+					ExpiredAt: *plaid.NewNullableInt32(new(int32(clk.Now().Add(30 * time.Minute).Unix()))),
 				},
 				RequestId:            gofakeit.UUID(),
 				AdditionalProperties: nil,
@@ -60,8 +60,8 @@ func MockGetWebhookVerificationKeyFailure(t *testing.T) {
 			return plaid.PlaidError{
 				ErrorType:      "API_ERROR",
 				ErrorCode:      "INTERNAL_SERVER_ERROR",
-				DisplayMessage: *plaid.NewNullableString(myownsanity.Pointer("Something went wrong.")),
-				RequestId:      myownsanity.Pointer(gofakeit.UUID()),
+				DisplayMessage: *plaid.NewNullableString(new("Something went wrong.")),
+				RequestId:      new(gofakeit.UUID()),
 			}, http.StatusInternalServerError
 		},
 		PlaidHeaders,

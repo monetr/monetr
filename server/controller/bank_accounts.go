@@ -8,7 +8,6 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/consts"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/schemas"
 	"github.com/pkg/errors"
@@ -256,7 +255,7 @@ func (c *Controller) deleteBankAccount(ctx *echo.Context) error {
 		// the future but this seems fine for now since we have this same behavior
 		// for manual links.
 		existingBankAccount.LunchFlowBankAccount.Status = LunchFlowBankAccountStatusInactive
-		existingBankAccount.LunchFlowBankAccount.DeletedAt = myownsanity.Pointer(c.Clock.Now())
+		existingBankAccount.LunchFlowBankAccount.DeletedAt = new(c.Clock.Now())
 		if err := repo.UpdateLunchFlowBankAccount(
 			c.getContext(ctx),
 			existingBankAccount.LunchFlowBankAccount,
@@ -266,7 +265,7 @@ func (c *Controller) deleteBankAccount(ctx *echo.Context) error {
 	}
 
 	existingBankAccount.Status = BankAccountStatusInactive
-	existingBankAccount.DeletedAt = myownsanity.Pointer(c.Clock.Now())
+	existingBankAccount.DeletedAt = new(c.Clock.Now())
 	if err = repo.UpdateBankAccount(
 		c.getContext(ctx),
 		existingBankAccount,

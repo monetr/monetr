@@ -16,7 +16,6 @@ import (
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/round"
@@ -164,7 +163,7 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 
 	var redirectUri *string
 	if p.config.OAuthDomain != "" {
-		redirectUri = myownsanity.Pointer(fmt.Sprintf("https://%s/plaid/oauth-return", p.config.OAuthDomain))
+		redirectUri = new(fmt.Sprintf("https://%s/plaid/oauth-return", p.config.OAuthDomain))
 	}
 
 	var webhooksUrl *string
@@ -172,7 +171,7 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 		if p.config.WebhooksDomain == "" {
 			crumbs.Warn(span.Context(), "BUG: Plaid webhook domain is not present but webhooks are enabled.", "bug", nil)
 		} else {
-			webhooksUrl = myownsanity.Pointer(p.config.GetWebhooksURL())
+			webhooksUrl = new(p.config.GetWebhooksURL())
 		}
 	}
 
@@ -205,7 +204,7 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 			IncomeVerification:    nil,
 			Auth:                  nil,
 			Transactions: &plaid.LinkTokenTransactions{
-				DaysRequested: myownsanity.Pointer[int32](2 * 365), // 2 years
+				DaysRequested: new(int32(2 * 365)), // 2 years
 			},
 		})
 
@@ -303,10 +302,10 @@ func (p *Plaid) GetInstitution(ctx context.Context, institutionId string) (*plai
 			InstitutionId: institutionId,
 			CountryCodes:  p.config.CountryCodes,
 			Options: &plaid.InstitutionsGetByIdRequestOptions{
-				IncludeOptionalMetadata:          myownsanity.BoolP(true),
-				IncludeStatus:                    myownsanity.BoolP(true),
-				IncludeAuthMetadata:              myownsanity.BoolP(false),
-				IncludePaymentInitiationMetadata: myownsanity.BoolP(false),
+				IncludeOptionalMetadata:          new(true),
+				IncludeStatus:                    new(true),
+				IncludeAuthMetadata:              new(false),
+				IncludePaymentInitiationMetadata: new(false),
 			},
 		})
 

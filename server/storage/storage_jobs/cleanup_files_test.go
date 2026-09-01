@@ -8,7 +8,6 @@ import (
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mockgen"
 	"github.com/monetr/monetr/server/internal/mockqueue"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/storage/storage_jobs"
@@ -69,7 +68,7 @@ func TestCleanupFilesCron(t *testing.T) {
 			Size:        uint64(100),
 			CreatedBy:   user.UserId,
 			CreatedAt:   clock.Now().UTC(),
-			ExpiresAt:   myownsanity.Pointer(clock.Now().Add(-1 * time.Hour)),
+			ExpiresAt:   new(clock.Now().Add(-1 * time.Hour)),
 		})
 
 		enqueuer := mockgen.NewMockProcessor(ctrl)
@@ -119,7 +118,7 @@ func TestCleanupFilesCron(t *testing.T) {
 			Size:        uint64(100),
 			CreatedBy:   user.UserId,
 			CreatedAt:   clock.Now().UTC(),
-			ExpiresAt:   myownsanity.Pointer(clock.Now().Add(24 * time.Hour)),
+			ExpiresAt:   new(clock.Now().Add(24 * time.Hour)),
 		})
 
 		enqueuer := mockgen.NewMockProcessor(ctrl)
@@ -166,8 +165,8 @@ func TestCleanupFilesCron(t *testing.T) {
 			Size:         uint64(100),
 			CreatedBy:    user.UserId,
 			CreatedAt:    clock.Now().UTC(),
-			ExpiresAt:    myownsanity.Pointer(clock.Now().Add(-1 * time.Hour)),
-			ReconciledAt: myownsanity.Pointer(clock.Now()),
+			ExpiresAt:    new(clock.Now().Add(-1 * time.Hour)),
+			ReconciledAt: new(clock.Now()),
 		})
 
 		enqueuer := mockgen.NewMockProcessor(ctrl)
@@ -214,7 +213,7 @@ func TestCleanupFilesCron(t *testing.T) {
 			Size:        uint64(100),
 			CreatedBy:   user.UserId,
 			CreatedAt:   clock.Now().UTC(),
-			ExpiresAt:   myownsanity.Pointer(clock.Now().Add(-1 * time.Hour)),
+			ExpiresAt:   new(clock.Now().Add(-1 * time.Hour)),
 		})
 
 		// Create a file that has not expired -- should NOT be enqueued.
@@ -226,7 +225,7 @@ func TestCleanupFilesCron(t *testing.T) {
 			Size:        uint64(100),
 			CreatedBy:   user.UserId,
 			CreatedAt:   clock.Now().UTC(),
-			ExpiresAt:   myownsanity.Pointer(clock.Now().Add(24 * time.Hour)),
+			ExpiresAt:   new(clock.Now().Add(24 * time.Hour)),
 		})
 
 		// Create an expired but already reconciled file -- should NOT be enqueued.
@@ -238,8 +237,8 @@ func TestCleanupFilesCron(t *testing.T) {
 			Size:         uint64(100),
 			CreatedBy:    user.UserId,
 			CreatedAt:    clock.Now().UTC(),
-			ExpiresAt:    myownsanity.Pointer(clock.Now().Add(-2 * time.Hour)),
-			ReconciledAt: myownsanity.Pointer(clock.Now()),
+			ExpiresAt:    new(clock.Now().Add(-2 * time.Hour)),
+			ReconciledAt: new(clock.Now()),
 		})
 
 		enqueuer := mockgen.NewMockProcessor(ctrl)

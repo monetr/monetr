@@ -12,7 +12,6 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 	"github.com/xlzd/gotp"
@@ -260,7 +259,7 @@ func (b *baseSecurityRepository) EnableTOTP(
 		return err
 	}
 
-	login.TOTPEnabledAt = myownsanity.TimeP(b.clock.Now())
+	login.TOTPEnabledAt = new(b.clock.Now())
 
 	_, err = b.db.ModelContext(span.Context(), &login).
 		Set(`"totp_enabled_at" = ?`, login.TOTPEnabledAt).

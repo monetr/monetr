@@ -359,8 +359,8 @@ func (s *stripeBase) CancelSubscription(ctx context.Context, id string) error {
 
 	span.Status = sentry.SpanStatusOK
 	_, err := s.client.Subscriptions.Cancel(id, &stripe.SubscriptionCancelParams{
-		InvoiceNow: stripe.Bool(true),
-		Prorate:    stripe.Bool(false),
+		InvoiceNow: new(true),
+		Prorate:    new(false),
 		Params: stripe.Params{
 			Context: span.Context(),
 		},

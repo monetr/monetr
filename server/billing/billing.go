@@ -9,7 +9,6 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/pubsub"
@@ -282,7 +281,7 @@ func (b *baseBilling) UpdateCustomerSubscription(
 	// pass before Stripe has processed the renewal. Causing (usually) around an
 	// hour or more of time where monetr believed the subscription to not be
 	// active anymore.
-	account.SubscriptionActiveUntil = myownsanity.Pointer(
+	account.SubscriptionActiveUntil = new(
 		activeUntil.AddDate(0, 0, SubscriptionPaddingDays),
 	)
 	account.StripeWebhookLatestTimestamp = &timestamp

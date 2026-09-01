@@ -11,7 +11,6 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/build"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 	"github.com/stripe/stripe-go/v81"
@@ -122,23 +121,23 @@ func (b *baseBilling) CreateCheckout(
 	result, err := b.stripe.NewCheckoutSession(span.Context(), &stripe.CheckoutSessionParams{
 		Params: params,
 		AutomaticTax: &stripe.CheckoutSessionAutomaticTaxParams{
-			Enabled: stripe.Bool(taxesEnabled),
+			Enabled: new(taxesEnabled),
 		},
-		AllowPromotionCodes: stripe.Bool(true),
+		AllowPromotionCodes: new(true),
 		SuccessURL:          &successUrl,
 		CancelURL:           &cancelUrl,
 		Customer:            account.StripeCustomerId,
 		Discounts:           nil,
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
 			{
-				Quantity: stripe.Int64(1),
+				Quantity: new(int64(1)),
 				Price:    &b.config.Stripe.InitialPlan.StripePriceId,
 			},
 		},
-		PaymentMethodTypes: stripe.StringSlice([]string{
-			"card",
-		}),
-		Mode: stripe.String(string(stripe.CheckoutSessionModeSubscription)),
+		PaymentMethodTypes: []*string{
+			new("card"),
+		},
+		Mode: new(string(stripe.CheckoutSessionModeSubscription)),
 		SubscriptionData: &stripe.CheckoutSessionSubscriptionDataParams{
 			DefaultTaxRates: nil,
 			Metadata: map[string]string{
@@ -243,7 +242,7 @@ func (b *baseBilling) AfterCheckout(
 		return false, errors.Wrap(err, "failed to retrieve subscription from checkout session")
 	}
 
-	validUntil := myownsanity.TimeP(time.Unix(subscription.CurrentPeriodEnd, 0))
+	validUntil := new(time.Unix(subscription.CurrentPeriodEnd, 0))
 	if err := b.UpdateCustomerSubscription(
 		span.Context(),
 		account,

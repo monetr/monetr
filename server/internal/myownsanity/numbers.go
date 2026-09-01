@@ -2,21 +2,6 @@ package myownsanity
 
 import "math"
 
-// Deprecated: Use Pointer instead.
-func Float32P(value float32) *float32 {
-	return &value
-}
-
-// Deprecated: Use Pointer instead.
-func Float64P(value float64) *float64 {
-	return &value
-}
-
-// Deprecated: Use Pointer instead.
-func Int32P(value int32) *int32 {
-	return &value
-}
-
 type Number interface {
 	int | int32 | int64
 }

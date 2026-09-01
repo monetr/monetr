@@ -807,7 +807,7 @@ func SyncPlaid(ctx queue.Context, args SyncPlaidArguments) error {
 
 			// If we received nothing to insert/update/remove then do nothing
 			if len(syncData.New)+len(syncData.Updated)+len(syncData.Deleted) == 0 {
-				plaidLink.LastAttemptedUpdate = myownsanity.Pointer(ctx.Clock().Now().UTC())
+				plaidLink.LastAttemptedUpdate = new(ctx.Clock().Now().UTC())
 				if err = s.repo.UpdatePlaidLink(ctx, plaidLink); err != nil {
 					s.log.ErrorContext(ctx, "failed to update link with last attempt timestamp", "err", err)
 					return err

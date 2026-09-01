@@ -5,7 +5,6 @@ import (
 
 	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/links/link_jobs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
@@ -224,7 +223,7 @@ func (c *Controller) deleteLink(ctx *echo.Context) error {
 		}
 	} else if link.LunchFlowLink != nil {
 		link.LunchFlowLink.Status = LunchFlowLinkStatusDeactivated
-		link.LunchFlowLink.DeletedAt = myownsanity.Pointer(c.Clock.Now())
+		link.LunchFlowLink.DeletedAt = new(c.Clock.Now())
 		if err := repo.UpdateLunchFlowLink(
 			c.getContext(ctx),
 			link.LunchFlowLink,

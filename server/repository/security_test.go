@@ -9,7 +9,6 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/fixtures"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
@@ -210,7 +209,7 @@ func TestBaseSecurityRepository_SetupTOTP(t *testing.T) {
 		}
 
 		{ // Enable the TOTP
-			login.TOTPEnabledAt = myownsanity.TimeP(clock.Now())
+			login.TOTPEnabledAt = new(clock.Now())
 			testutils.MustDBUpdate(t, &login)
 		}
 

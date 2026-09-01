@@ -295,7 +295,7 @@ func (c *Controller) postLunchFlowLinkSync(ctx *echo.Context) error {
 		return c.returnError(ctx, http.StatusTooEarly, "Link has been manually synced too recently")
 	}
 
-	lunchFlowLink.LastManualSync = myownsanity.Pointer(c.Clock.Now())
+	lunchFlowLink.LastManualSync = new(c.Clock.Now())
 	if err := repo.UpdateLunchFlowLink(c.getContext(ctx), lunchFlowLink); err != nil {
 		return c.wrapPgError(ctx, err, "could not manually sync link")
 	}

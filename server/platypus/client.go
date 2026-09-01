@@ -10,7 +10,6 @@ import (
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	"github.com/plaid/plaid-go/v45/plaid"
@@ -245,7 +244,7 @@ func (p *PlaidClient) UpdateItem(
 		// Normally we would substitute the configured protocol, but Plaid
 		// _requires_ that we use HTTPS for oauth callbacks. So if the monetr server
 		// is not configured for TLS that sucks because this won't work.
-		redirectUri = myownsanity.Pointer(fmt.Sprintf(
+		redirectUri = new(fmt.Sprintf(
 			"https://%s/plaid/oauth-return", p.config.OAuthDomain,
 		))
 		log = log.With("redirectUri", *redirectUri)
@@ -256,7 +255,7 @@ func (p *PlaidClient) UpdateItem(
 		if p.config.WebhooksDomain == "" {
 			crumbs.Warn(span.Context(), "BUG: Plaid webhook domain is not present but webhooks are enabled.", "bug", nil)
 		} else {
-			webhooksUrl = myownsanity.Pointer(p.config.GetWebhooksURL())
+			webhooksUrl = new(p.config.GetWebhooksURL())
 			log = log.With("webhooksUrl", *webhooksUrl)
 		}
 	}
@@ -278,7 +277,7 @@ func (p *PlaidClient) UpdateItem(
 			LinkCustomizationName: nil,
 			RedirectUri:           redirectUri,
 			Update: &plaid.LinkTokenCreateRequestUpdate{
-				AccountSelectionEnabled: myownsanity.BoolP(updateAccountSelection),
+				AccountSelectionEnabled: new(updateAccountSelection),
 			},
 		})
 
@@ -374,7 +373,7 @@ func (p *PlaidClient) UpdateWebhook(ctx context.Context) error {
 
 	var webhookUrl *string = nil
 	if p.config.WebhooksEnabled {
-		webhookUrl = myownsanity.Pointer(p.config.GetWebhooksURL())
+		webhookUrl = new(p.config.GetWebhooksURL())
 	}
 
 	log := p.getLog(span).With(

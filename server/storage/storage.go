@@ -90,7 +90,7 @@ func GetStorage(
 
 		client := s3.NewFromConfig(cfg, func(o *s3.Options) {
 			if endpoint := s3Config.Endpoint; endpoint != nil && *endpoint != "" {
-				o.BaseEndpoint = aws.String(*endpoint)
+				o.BaseEndpoint = new(*endpoint)
 			}
 
 			o.UsePathStyle = s3Config.ForcePathStyle

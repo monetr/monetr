@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/plaid/plaid-go/v45/plaid"
 )
@@ -36,16 +35,16 @@ func (p *PlaidClient) Sync(ctx context.Context, cursor *string) (*SyncResult, er
 		TransactionsSyncRequest(plaid.TransactionsSyncRequest{
 			AccessToken: p.accessToken,
 			Cursor:      cursor,
-			Count:       myownsanity.Pointer[int32](500),
+			Count:       new(int32(500)),
 			Options: &plaid.TransactionsSyncRequestOptions{
 				// Why does the constructor for the nullable bool return a pointer to a
 				// nullable wrapper type? What the fuck? Absolutely fucking garbage
 				// openapi code generator.
-				IncludeOriginalDescription: *plaid.NewNullableBool(myownsanity.BoolP(true)),
+				IncludeOriginalDescription: *plaid.NewNullableBool(new(true)),
 				// Why the fuck is this a boolean pointer, but the field above is a
 				// nullable boolean.
-				IncludePersonalFinanceCategory: myownsanity.BoolP(true),
-				IncludeLogoAndCounterpartyBeta: myownsanity.BoolP(true),
+				IncludePersonalFinanceCategory: new(true),
+				IncludeLogoAndCounterpartyBeta: new(true),
 			},
 		})
 

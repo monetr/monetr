@@ -15,7 +15,6 @@ import (
 	"github.com/MicahParks/jwkset"
 	keyfunc "github.com/MicahParks/keyfunc/v3"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/v45/plaid"
@@ -50,7 +49,7 @@ func NewWebhookVerificationKeyFromPlaid(input plaid.JWKPublicKey) (WebhookVerifi
 		X:         input.GetX(),
 		Y:         input.GetY(),
 		CreatedAt: input.GetCreatedAt(),
-		ExpiredAt: myownsanity.Pointer(input.GetExpiredAt()),
+		ExpiredAt: new(input.GetExpiredAt()),
 	}, nil
 }
 

@@ -7,7 +7,6 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/fixtures"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/repository"
@@ -37,7 +36,7 @@ func TestBilling_GetHasSubscription(t *testing.T) {
 
 		account := user.Account
 		canceledStatus := stripe.SubscriptionStatusCanceled
-		account.SubscriptionActiveUntil = myownsanity.TimeP(clock.Now().Add(-1 * time.Hour))
+		account.SubscriptionActiveUntil = new(clock.Now().Add(-1 * time.Hour))
 		account.SubscriptionStatus = &canceledStatus
 
 		err = accountRepo.UpdateAccount(t.Context(), account)
@@ -63,7 +62,7 @@ func TestBilling_GetHasSubscription(t *testing.T) {
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		account := user.Account
 		subscriptionStatus := stripe.SubscriptionStatusPastDue
-		account.SubscriptionActiveUntil = myownsanity.TimeP(clock.Now().Add(7 * 24 * time.Hour))
+		account.SubscriptionActiveUntil = new(clock.Now().Add(7 * 24 * time.Hour))
 		account.SubscriptionStatus = &subscriptionStatus
 
 		err := accountRepo.UpdateAccount(t.Context(), account)
@@ -89,7 +88,7 @@ func TestBilling_GetHasSubscription(t *testing.T) {
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		account := user.Account
 		subscriptionStatus := stripe.SubscriptionStatusCanceled
-		account.SubscriptionActiveUntil = myownsanity.TimeP(clock.Now().Add(-7 * 24 * time.Hour))
+		account.SubscriptionActiveUntil = new(clock.Now().Add(-7 * 24 * time.Hour))
 		account.SubscriptionStatus = &subscriptionStatus
 
 		err := accountRepo.UpdateAccount(t.Context(), account)

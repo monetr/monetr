@@ -9,7 +9,6 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/plaid/plaid-go/v45/plaid"
 	"github.com/stretchr/testify/require"
@@ -58,15 +57,15 @@ func BankAccountFixture(t *testing.T) plaid.AccountBase {
 	return plaid.AccountBase{
 		AccountId: gofakeit.Generate("????????????????"),
 		Balances: plaid.AccountBalance{
-			Available:              *plaid.NewNullableFloat64(myownsanity.Float64P(available)),
-			Current:                *plaid.NewNullableFloat64(myownsanity.Float64P(current)),
-			Limit:                  *plaid.NewNullableFloat64(myownsanity.Float64P(limit)),
-			IsoCurrencyCode:        *plaid.NewNullableString(myownsanity.StringP(currencyCode)),
-			UnofficialCurrencyCode: *plaid.NewNullableString(myownsanity.StringP(currencyCode)),
+			Available:              *plaid.NewNullableFloat64(new(available)),
+			Current:                *plaid.NewNullableFloat64(new(current)),
+			Limit:                  *plaid.NewNullableFloat64(new(limit)),
+			IsoCurrencyCode:        *plaid.NewNullableString(new(currencyCode)),
+			UnofficialCurrencyCode: *plaid.NewNullableString(new(currencyCode)),
 		},
-		Mask:         *plaid.NewNullableString(myownsanity.StringP(mask)),
+		Mask:         *plaid.NewNullableString(new(mask)),
 		Name:         fmt.Sprintf("Personal Account - %s", mask),
-		OfficialName: *plaid.NewNullableString(myownsanity.StringP(fmt.Sprintf("%s - %s", strings.ToUpper(accountType), mask))),
+		OfficialName: *plaid.NewNullableString(new(fmt.Sprintf("%s - %s", strings.ToUpper(accountType), mask))),
 		Type:         plaid.AccountType(accountType),
 		Subtype:      *plaid.NewNullableAccountSubtype(&accountSubType),
 	}

@@ -8,7 +8,6 @@ import (
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mockgen"
 	"github.com/monetr/monetr/server/internal/mockqueue"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
@@ -86,7 +85,7 @@ func TestSyncPlaidAccountsCron(t *testing.T) {
 		)
 
 		{ // Set a timestamp on the last account sync and store it.
-			plaidLink.PlaidLink.LastAccountSync = myownsanity.Pointer(clock.Now())
+			plaidLink.PlaidLink.LastAccountSync = new(clock.Now())
 			testutils.MustDBUpdate(t, plaidLink.PlaidLink)
 		}
 

@@ -13,7 +13,6 @@ import (
 	"github.com/monetr/monetr/server/internal/mock_stripe"
 	"github.com/monetr/monetr/server/internal/mockgen"
 	"github.com/monetr/monetr/server/internal/mockqueue"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stripe/stripe-go/v81"
@@ -31,7 +30,7 @@ func TestNotificationTrialExpiryCron(t *testing.T) {
 		login, _ := fixtures.GivenIHaveLogin(t, clock)
 		{ // Mark the login's email as verified
 			login.IsEmailVerified = true
-			login.EmailVerifiedAt = myownsanity.Pointer(clock.Now())
+			login.EmailVerifiedAt = new(clock.Now())
 			testutils.MustDBUpdate(t, &login)
 		}
 		user := fixtures.GivenIHaveATrialingAccount(t, clock, login)
@@ -96,7 +95,7 @@ func TestNotificationTrialExpiryCron(t *testing.T) {
 		}
 
 		// Now update the account to show that the notification has been sent.
-		user.Account.TrialExpiryNotificationSentAt = myownsanity.Pointer(clock.Now())
+		user.Account.TrialExpiryNotificationSentAt = new(clock.Now())
 		testutils.MustDBUpdate(t, user.Account)
 
 		// And run the cron again, this time we should not do anything because the
@@ -219,10 +218,10 @@ func TestNotificationTrialExpiryCron(t *testing.T) {
 
 		// After 24 hours the user decided to subscribe early. Update the account.
 		status := stripe.SubscriptionStatusActive
-		user.Account.SubscriptionActiveUntil = myownsanity.Pointer(clock.Now().AddDate(0, 0, 30))
+		user.Account.SubscriptionActiveUntil = new(clock.Now().AddDate(0, 0, 30))
 		user.Account.SubscriptionStatus = &status
-		user.Account.StripeCustomerId = myownsanity.Pointer(mock_stripe.FakeStripeCustomerId(t))
-		user.Account.StripeSubscriptionId = myownsanity.Pointer(mock_stripe.FakeStripeSubscriptionId(t))
+		user.Account.StripeCustomerId = new(mock_stripe.FakeStripeCustomerId(t))
+		user.Account.StripeSubscriptionId = new(mock_stripe.FakeStripeSubscriptionId(t))
 		testutils.MustDBUpdate(t, user.Account)
 
 		{
@@ -287,10 +286,10 @@ func TestNotificationTrialExpiryCron(t *testing.T) {
 
 		// Setup the user as subscribed at the 90 day mark.
 		status := stripe.SubscriptionStatusActive
-		user.Account.SubscriptionActiveUntil = myownsanity.Pointer(clock.Now().AddDate(0, 0, 30))
+		user.Account.SubscriptionActiveUntil = new(clock.Now().AddDate(0, 0, 30))
 		user.Account.SubscriptionStatus = &status
-		user.Account.StripeCustomerId = myownsanity.Pointer(mock_stripe.FakeStripeCustomerId(t))
-		user.Account.StripeSubscriptionId = myownsanity.Pointer(mock_stripe.FakeStripeSubscriptionId(t))
+		user.Account.StripeCustomerId = new(mock_stripe.FakeStripeCustomerId(t))
+		user.Account.StripeSubscriptionId = new(mock_stripe.FakeStripeSubscriptionId(t))
 		testutils.MustDBUpdate(t, user.Account)
 
 		{
@@ -406,7 +405,7 @@ func TestNotificationTrialExpiry(t *testing.T) {
 		assert.Nil(t, user.Account.TrialExpiryNotificationSentAt, "trial notification email should be unsent")
 
 		// Set the timestamp as if we have already sent the notification.
-		user.Account.TrialExpiryNotificationSentAt = myownsanity.Pointer(clock.Now())
+		user.Account.TrialExpiryNotificationSentAt = new(clock.Now())
 		testutils.MustDBUpdate(t, user.Account)
 
 		email.EXPECT().

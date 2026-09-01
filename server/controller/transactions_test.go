@@ -7,7 +7,6 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/fixtures"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
@@ -1118,7 +1117,7 @@ func TestPatchTransaction(t *testing.T) {
 
 			// Set an initial spending amount on the transaction directly to simulate
 			// a transaction that was already spent from an expense.
-			originalTransaction.SpendingAmount = myownsanity.Pointer(int64(500))
+			originalTransaction.SpendingAmount = new(int64(500))
 			testutils.MustDBUpdate(t, &originalTransaction)
 
 			token = GivenILogin(t, e, user.Login.Email, password)

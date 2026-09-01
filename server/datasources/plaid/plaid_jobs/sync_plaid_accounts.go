@@ -6,7 +6,6 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
@@ -309,7 +308,7 @@ func SyncPlaidAccounts(ctx queue.Context, args SyncPlaidAccountsArguments) error
 		}
 
 		log.Log(ctx, logging.LevelTrace, "updating plaid link's last account sync timestamp")
-		plaidLink.LastAccountSync = myownsanity.Pointer(ctx.Clock().Now())
+		plaidLink.LastAccountSync = new(ctx.Clock().Now())
 		if err := j.repo.UpdatePlaidLink(ctx, plaidLink); err != nil {
 			log.ErrorContext(ctx, "failed to update plaid link's last account sync timestamp", "err", err)
 			return err

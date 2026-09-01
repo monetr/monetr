@@ -7,7 +7,6 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/fixtures"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
@@ -75,7 +74,7 @@ func TestJobRepository_GetLinksForExpiredAccounts(t *testing.T) {
 		}
 
 		account := user.Account
-		account.SubscriptionActiveUntil = myownsanity.TimeP(clock.Now())
+		account.SubscriptionActiveUntil = new(clock.Now())
 		testutils.MustDBUpdate(t, account)
 
 		{ // After gaining a subscription, we should still not remove the account.
@@ -109,7 +108,7 @@ func TestJobRepository_GetLinksForExpiredAccounts(t *testing.T) {
 		account.SubscriptionStatus = nil
 		account.StripeCustomerId = nil
 		account.StripeSubscriptionId = nil
-		account.TrialEndsAt = myownsanity.TimeP(clock.Now().AddDate(0, 0, 30))
+		account.TrialEndsAt = new(clock.Now().AddDate(0, 0, 30))
 		testutils.MustDBUpdate(t, account)
 
 		{ // Then check to make sure that we don't consider this an expired account.
@@ -151,7 +150,7 @@ func TestJobRepository_GetLinksForExpiredAccounts(t *testing.T) {
 		account.SubscriptionStatus = nil
 		account.StripeCustomerId = nil
 		account.StripeSubscriptionId = nil
-		account.TrialEndsAt = myownsanity.TimeP(clock.Now().AddDate(0, 0, 30))
+		account.TrialEndsAt = new(clock.Now().AddDate(0, 0, 30))
 		testutils.MustDBUpdate(t, account)
 
 		// When the account is first created and still trialing, we don't want to
@@ -172,7 +171,7 @@ func TestJobRepository_GetLinksForExpiredAccounts(t *testing.T) {
 
 		// On the 31st day the account becomes a subscriber. So we push their active
 		// until date out 30 days.
-		account.SubscriptionActiveUntil = myownsanity.TimeP(clock.Now().AddDate(0, 0, 30))
+		account.SubscriptionActiveUntil = new(clock.Now().AddDate(0, 0, 30))
 
 		// We are now 62 days after the account was originally created. We should
 		// still not remove the account, even though their subscrition just expired
@@ -259,7 +258,7 @@ func TestJobRepository_GetLunchFlowAccountsToSync(t *testing.T) {
 		}
 
 		// Once an attempt is made recently, it should not be returned.
-		link.LunchFlowLink.LastAttemptedUpdate = myownsanity.Pointer(clock.Now())
+		link.LunchFlowLink.LastAttemptedUpdate = new(clock.Now())
 		testutils.MustDBUpdate(t, link.LunchFlowLink)
 
 		{
