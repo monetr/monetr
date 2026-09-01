@@ -13,6 +13,7 @@ const (
 	// while we were paginating through it with a stored cursor. Per Plaid's
 	// documentation the remediation is to restart pagination from a null cursor.
 	ErrorCodeTransactionsSyncMutationDuringPagination = "TRANSACTIONS_SYNC_MUTATION_DURING_PAGINATION"
+	ErrorCodeItemNotFound                             = "ITEM_NOT_FOUND"
 )
 
 var (

@@ -8,6 +8,7 @@ import (
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/links/link_jobs"
 	. "github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/schemas"
 )
 
@@ -193,13 +194,33 @@ func (c *Controller) deleteLink(ctx *echo.Context) error {
 		}
 
 		if err = client.RemoveItem(c.getContext(ctx)); err != nil {
-			crumbs.Error(c.getContext(ctx), "Failed to remove item", "plaid", map[string]any{
-				"linkId":   link.LinkId,
-				"itemId":   link.PlaidLink.PlaidId,
-				"secretId": secret.SecretId,
-				"error":    err.Error(),
-			})
-			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to remove item from Plaid")
+			switch {
+			case platypus.IsPlaidErrorCode(err, platypus.ErrorCodeItemNotFound):
+				crumbs.Warn(
+					c.getContext(ctx),
+					"Failed to remove item, but ignoring error",
+					"plaid",
+					map[string]any{
+						"linkId":   link.LinkId,
+						"itemId":   link.PlaidLink.PlaidId,
+						"secretId": secret.SecretId,
+						"error":    err.Error(),
+					},
+				)
+			default:
+				crumbs.Error(
+					c.getContext(ctx),
+					"Failed to remove item",
+					"plaid",
+					map[string]any{
+						"linkId":   link.LinkId,
+						"itemId":   link.PlaidLink.PlaidId,
+						"secretId": secret.SecretId,
+						"error":    err.Error(),
+					},
+				)
+				return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to remove item from Plaid")
+			}
 		}
 	} else if link.LunchFlowLink != nil {
 		link.LunchFlowLink.Status = LunchFlowLinkStatusDeactivated

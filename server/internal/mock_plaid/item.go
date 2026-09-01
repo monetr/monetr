@@ -27,3 +27,25 @@ func MockDeactivateItemTokenSuccess(t *testing.T) {
 		PlaidHeaders,
 	)
 }
+
+func MockDeactivateItemTokenError(t *testing.T, plaidError plaid.PlaidError) {
+	mock_http_helper.NewHttpMockJsonResponder(
+		t,
+		"POST", Path(t, "/item/remove"),
+		func(t *testing.T, request *http.Request) (any, int) {
+			ValidatePlaidAuthentication(t, request, RequireAccessToken)
+			var itemRemoveRequest plaid.ItemRemoveRequest
+			require.NoError(t, json.NewDecoder(request.Body).Decode(&itemRemoveRequest), "must decode request")
+
+			var status int
+			if s := plaidError.Status.Get(); s != nil {
+				status = int(*s)
+			} else {
+				status = http.StatusInternalServerError
+			}
+
+			return plaidError, status
+		},
+		PlaidHeaders,
+	)
+}

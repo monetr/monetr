@@ -13,6 +13,7 @@ import (
 	"github.com/monetr/monetr/server/internal/mockqueue"
 	"github.com/monetr/monetr/server/links/link_jobs"
 	"github.com/monetr/monetr/server/models"
+	"github.com/plaid/plaid-go/v45/plaid"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
@@ -992,6 +993,72 @@ func TestDeleteLink(t *testing.T) {
 		}
 
 		mock_plaid.MockDeactivateItemTokenSuccess(t)
+
+		app.Queue.EXPECT().
+			WithTransaction(
+				gomock.Any(),
+			).
+			Return(app.Queue)
+		app.Queue.EXPECT().
+			EnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(link_jobs.RemoveLink),
+				gomock.Any(),
+				gomock.Eq(link_jobs.RemoveLinkArguments{
+					AccountId: link.AccountId,
+					LinkId:    link.LinkId,
+				}),
+			).
+			MaxTimes(1).
+			Return(nil)
+
+		{ // Try to delete it.
+			response := e.DELETE("/api/links/{linkId}").
+				WithPath("linkId", link.LinkId).
+				WithCookie(TestCookieName, token).
+				WithTimeout(5 * time.Second).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.NoContent()
+		}
+
+		{ // Try to retrieve the link after it's been deleted.
+			response := e.GET("/api/links/{linkId}").
+				WithPath("linkId", link.LinkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.deletedAt").NotNull()
+			response.JSON().Path("$.plaidLink.status").IsEqual(models.PlaidLinkStatusDeactivated)
+			response.JSON().Path("$.plaidLink.deletedAt").NotNull()
+		}
+
+		assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
+			"POST https://sandbox.plaid.com/item/remove": 1,
+		}, "must match expected Plaid API calls")
+	})
+
+	t.Run("remove plaid link that is already gone at plaid", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		clock := clock.New()
+		app, e := NewTestApplication(t)
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, clock)
+		token := GivenILogin(t, e, user.Login.Email, password)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+
+		// Plaid no longer knows about this item, maybe it was already removed or
+		// the user revoked our access to it. We should still delete the link on
+		// our side.
+		mock_plaid.MockDeactivateItemTokenError(t, plaid.PlaidError{
+			ErrorType:    "ITEM_ERROR",
+			ErrorCode:    "ITEM_NOT_FOUND",
+			ErrorMessage: "The Item you requested cannot be found. This Item does not exist, has been previously removed via /item/remove, or has had access removed by the user.",
+		})
 
 		app.Queue.EXPECT().
 			WithTransaction(
