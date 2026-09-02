@@ -1,0 +1,288 @@
+---
+title: "API Quickstart"
+description: "Build a working monetr budget from scratch over the REST API in six calls: a link, a bank account, a paycheck schedule, an envelope and a transaction."
+---
+
+# Quickstart
+
+Six calls, start to finish. By the end you'll have a bank account monetr is tracking, a paycheck schedule filling an
+envelope, and a transaction spent out of that envelope, all created over the API.
+
+Everything here uses a **manual link**, which is the kind you maintain yourself. Plaid links are created through a
+browser handshake an API key can't drive, so a manual link is the only way to build an account from scratch over the
+API. It's also the honest way to try things without connecting a real bank.
+
+You'll need an API key. Make one in the app under **Settings** then **API**, then:
+
+```bash
+export MONETR_API_KEY_ID="key_01hy4rfqk8z4xv1c2v44cf6abc"
+export MONETR_API_KEY_SECRET="the-secret-you-copied-when-you-made-the-key"
+```
+
+## The order matters
+
+This is the part that isn't guessable, so it's worth having up front. Each thing needs the one above it to exist first:
+
+```
+link
+ └── bank account
+      ├── funding schedule  (when you get paid)
+      └── spending object   (needs a funding schedule to point at)
+           └── transaction  (optionally points at a spending object)
+```
+
+Try to create an expense before a funding schedule exists and you'll get a 400, because
+[`fundingScheduleId`](./spending#create-a-spending-object) is required and has to already be on the same bank account.
+
+## 1. Find your timezone
+
+Not strictly a setup step, but you need it before step 4 and getting it wrong is the most common way this goes sideways.
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/users/me" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+Look for `user.account.timezone`. The rest of this guide assumes `America/Chicago`. Every due date you send has to be
+midnight in **your** account's timezone, so if yours differs, adjust the times below. See
+[Timestamps](./overview#timestamps) for why.
+
+**Full reference:** [Get the current user](./users#get-the-current-user)
+
+## 2. Create a manual link
+
+A link is one financial institution. On a manual link, that's whatever you want to call it.
+
+**Full reference:** [Create a manual link](./links#create-a-manual-link)
+
+```bash
+curl --request POST \
+  --url "https://my.monetr.local/api/links" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{ "institutionName": "Lakeside Credit Union" }'
+```
+
+```json
+{
+  "linkId": "link_01j2n8xqvr4kd9wt3m7hbzc5pf",
+  "linkType": "manual",
+  "institutionName": "Lakeside Credit Union",
+  "description": null,
+  "createdAt": "2024-08-28T10:02:19.441Z",
+  "createdBy": "user_01fpwx3sdm7kb1s0jbrbvbdw4c",
+  "updatedAt": "2024-08-28T10:02:19.441Z",
+  "deletedAt": null
+}
+```
+
+Keep the `linkId`.
+
+## 3. Create a bank account
+
+Bank accounts hang off a link, and they're where the budgeting actually happens.
+
+**Full reference:** [Create a bank account](./bank_accounts#create-a-bank-account)
+
+```bash
+curl --request POST \
+  --url "https://my.monetr.local/api/bank_accounts" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "linkId": "link_01j2n8xqvr4kd9wt3m7hbzc5pf",
+    "name": "Joint Checking",
+    "accountType": "depository",
+    "accountSubType": "checking",
+    "currentBalance": 310000,
+    "availableBalance": 310000
+  }'
+```
+
+`310000` is $3,100.00. Amounts are integers in the currency's smallest unit, and that trips up more people than anything
+else in this API. Read [Money](./overview#money) once before you go further.
+
+```json
+{
+  "bankAccountId": "bac_01j6b4nqx8ws5rt2m9pked7hvc",
+  "linkId": "link_01j2n8xqvr4kd9wt3m7hbzc5pf",
+  "lunchFlowBankAccountId": null,
+  "currency": "USD",
+  "availableBalance": 310000,
+  "currentBalance": 310000,
+  "limitBalance": 0,
+  "mask": null,
+  "name": "Joint Checking",
+  "originalName": "",
+  "accountType": "depository",
+  "accountSubType": "checking",
+  "status": "active",
+  "lastUpdated": "2024-08-28T10:04:52.117Z",
+  "createdAt": "2024-08-28T10:04:52.117Z",
+  "updatedAt": "2024-08-28T10:04:52.117Z"
+}
+```
+
+Everything from here hangs off this `bankAccountId`, not off the link.
+
+## 4. Create a funding schedule
+
+This is payday. monetr uses it to work out how much to put aside each time you're paid.
+
+**Full reference:** [Create a funding schedule](./funding_schedules#create-a-funding-schedule)
+
+```bash
+curl --request POST \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01j6b4nqx8ws5rt2m9pked7hvc/funding_schedules" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "name": "Paycheck",
+    "ruleset": "DTSTART:20240830T050000Z\nRRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=FR",
+    "excludeWeekends": true,
+    "estimatedDeposit": 204300
+  }'
+```
+
+That `ruleset` says every other Friday. It's an [RFC 5545](https://datatracker.ietf.org/doc/html/rfc5545) recurrence
+rule, and monetr is fussy about them in ways that aren't obvious, so if you get `"Ruleset must be valid"` back go read
+[Recurrence Rules](./recurrence_rules). The [cookbook](./recurrence_rules#cookbook) has a copy-paste rule for every
+schedule the app itself offers.
+
+```json
+{
+  "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
+  "bankAccountId": "bac_01j6b4nqx8ws5rt2m9pked7hvc",
+  "name": "Paycheck",
+  "ruleset": "DTSTART:20240830T050000Z\nRRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=FR",
+  "excludeWeekends": true,
+  "waitForDeposit": false,
+  "autoCreateTransaction": false,
+  "estimatedDeposit": 204300,
+  "lastRecurrence": null,
+  "nextRecurrence": "2024-08-30T05:00:00Z",
+  "nextRecurrenceOriginal": "2024-08-30T05:00:00Z"
+}
+```
+
+You didn't send `nextRecurrence` and monetr worked it out from the rule. That's specific to funding schedules; the next
+step is stricter.
+
+## 5. Create an expense
+
+An expense is an envelope that repeats. This one is $80 a month for coffee, due on the 1st.
+
+**Full reference:** [Create a spending object](./spending#create-a-spending-object)
+
+```bash
+curl --request POST \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01j6b4nqx8ws5rt2m9pked7hvc/spending" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "spendingType": "expense",
+    "name": "Coffee",
+    "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
+    "targetAmount": 8000,
+    "ruleset": "DTSTART:20240901T050000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1",
+    "nextRecurrence": "2024-09-01T05:00:00Z"
+  }'
+```
+
+:::warning `nextRecurrence` is the fussiest field in the API
+It has to be **midnight in your account's timezone**, and it has to be in the **future**. Midnight today has already
+happened, so the earliest value that works is midnight tomorrow. `2024-09-01T05:00:00Z` is midnight in `America/Chicago`
+during daylight saving; in winter the same wall clock time is `T06:00:00Z`. Convert through the timezone rather than
+using a hardcoded offset.
+:::
+
+```json
+{
+  "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
+  "bankAccountId": "bac_01j6b4nqx8ws5rt2m9pked7hvc",
+  "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
+  "spendingType": "expense",
+  "name": "Coffee",
+  "targetAmount": 8000,
+  "currentAmount": 0,
+  "usedAmount": 0,
+  "ruleset": "DTSTART:20240901T050000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1",
+  "lastSpentFrom": null,
+  "lastRecurrence": null,
+  "nextRecurrence": "2024-09-01T05:00:00Z",
+  "nextContributionAmount": 8000,
+  "isBehind": false,
+  "isPaused": false,
+  "autoCreateTransaction": false,
+  "createdAt": "2024-08-28T10:09:33.026Z"
+}
+```
+
+`nextContributionAmount` came back calculated: one payday falls before the 1st, so that payday has to cover the whole
+8000.
+
+## 6. Record a transaction against it
+
+**Full reference:** [Create a transaction](./transactions#create-a-transaction)
+
+```bash
+curl --request POST \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01j6b4nqx8ws5rt2m9pked7hvc/transactions" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "name": "Ruby Coffee Roasters",
+    "merchantName": "Ruby Coffee Roasters",
+    "amount": 685,
+    "date": "2024-08-28T05:00:00Z",
+    "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
+    "adjustsBalance": true
+  }'
+```
+
+Two things worth knowing here. A **positive** amount is money leaving the account, which is backwards from a bank
+statement. And `date` should be midnight in your timezone like every other date in monetr, because nothing normalizes it
+for you: send a wall clock time and it's stored exactly as sent.
+
+The response carries the transaction, the account's recalculated balances, and the envelope that got debited, so you
+don't need a follow up call. The [full response is described here](./transactions#create-a-transaction).
+
+## 7. Check the balances
+
+**Full reference:** [Get balances](./bank_accounts#get-balances)
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01j6b4nqx8ws5rt2m9pked7hvc/balances" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+{
+  "bankAccountId": "bac_01j6b4nqx8ws5rt2m9pked7hvc",
+  "currency": "USD",
+  "current": 309315,
+  "available": 309315,
+  "limit": 0,
+  "free": 309315,
+  "expenses": 0,
+  "goals": 0
+}
+```
+
+`expenses` is still 0 because payday hasn't happened yet, so nothing has been put into the Coffee envelope. Come back
+after the 30th and `expenses` will be 8000 with `free` lower to match. `free` is what you can spend without raiding an
+envelope, and it's the number the app calls free-to-use.
+
+## What to read next
+
+- [Money](./overview#money), if you skipped it. It's the one that causes silent bugs.
+- [Recurrence Rules](./recurrence_rules#cookbook) for schedules beyond every-other-Friday.
+- [List transactions](./transactions#list-transactions) to read the feed back, and [Update a
+  transaction](./transactions#update-a-transaction) to move one between envelopes.
+- [Transfer between spending objects](./spending#transfer-between-spending-objects) when you need to move money you've
+  already allocated.
+- [Get a forecast](./forecast#get-a-forecast) to project this forward, and [Estimate the cost of a new spending
+  object](./forecast#estimate-the-cost-of-a-new-spending-object) to price something before you commit to it.
+- [Errors](./overview#errors) when something comes back 400, especially the `problems` tree.

@@ -1,0 +1,225 @@
+---
+title: monetr REST API
+description: The complete REST API reference for monetr, the self-hosted envelope budgeting app. Authenticate with an API key and automate budgets, transactions and forecasts.
+---
+
+import { Cards } from '@monetr/docs/components/Cards';
+import { Rocket, KeyRound, Repeat, ShoppingCart } from 'lucide-react';
+
+# monetr REST API
+
+Everything the monetr app does, it does through this API. There's no second, private set of
+endpoints that the app gets and you don't, so anything you can do by clicking, you can do
+from a script.
+
+You authenticate with an API key over HTTP Basic auth. Amounts are integers in the currency's
+smallest unit, and on transactions a positive number means money leaving your account. Those
+two facts cause more confusion than everything else combined, so the
+[overview](/documentation/api/overview) covers them before anything else.
+
+<Cards>
+  <Cards.Card
+    icon={ <Rocket /> }
+    title="Quickstart"
+    description="Build a working budget from scratch in six calls: a link, an account, a paycheck schedule, an envelope and a transaction."
+    href="/documentation/api/quickstart"
+  />
+  <Cards.Card
+    icon={ <KeyRound /> }
+    title="Overview"
+    description="Authentication, the error envelope, and how IDs, timestamps and money are represented."
+    href="/documentation/api/overview"
+  />
+  <Cards.Card
+    icon={ <ShoppingCart /> }
+    title="Transactions"
+    description="List, create, update and delete transactions, and assign them to budget envelopes."
+    href="/documentation/api/transactions"
+  />
+  <Cards.Card
+    icon={ <Repeat /> }
+    title="Recurrence Rules"
+    description="Write the recurrence rules funding schedules and expenses need, with a copy-paste cookbook."
+    href="/documentation/api/recurrence_rules"
+  />
+</Cards>
+
+## Every endpoint
+
+Grouped by the page that documents it.
+
+### [Overview](/documentation/api/overview)
+
+Cross-cutting behavior. Read this first.
+
+### [Quickstart](/documentation/api/quickstart) and [Recurrence Rules](/documentation/api/recurrence_rules)
+
+Guides rather than reference.
+
+### [Links](/documentation/api/links)
+
+| Method | Path |
+| --- | --- |
+| `GET` | `/api/links` |
+| `POST` | `/api/links` |
+| `GET` | `/api/links/:linkId` |
+| `PATCH` | `/api/links/:linkId` |
+| `DELETE` | `/api/links/:linkId` |
+
+### [Bank Accounts](/documentation/api/bank_accounts)
+
+| Method | Path |
+| --- | --- |
+| `GET` | `/api/bank_accounts` |
+| `POST` | `/api/bank_accounts` |
+| `GET` | `/api/bank_accounts/:bankAccountId` |
+| `PATCH` | `/api/bank_accounts/:bankAccountId` |
+| `DELETE` | `/api/bank_accounts/:bankAccountId` |
+| `GET` | `/api/bank_accounts/:bankAccountId/balances` |
+
+### [Transactions](/documentation/api/transactions)
+
+| Method | Path |
+| --- | --- |
+| `GET` | `/api/bank_accounts/:bankAccountId/transactions` |
+| `POST` | `/api/bank_accounts/:bankAccountId/transactions` |
+| `GET` | `/api/bank_accounts/:bankAccountId/transactions/:transactionId` |
+| `PATCH` | `/api/bank_accounts/:bankAccountId/transactions/:transactionId` |
+| `DELETE` | `/api/bank_accounts/:bankAccountId/transactions/:transactionId` |
+| `GET` | `/api/bank_accounts/:bankAccountId/transactions/:transactionId/similar` |
+
+### [Spending](/documentation/api/spending)
+
+| Method | Path |
+| --- | --- |
+| `GET` | `/api/bank_accounts/:bankAccountId/spending` |
+| `POST` | `/api/bank_accounts/:bankAccountId/spending` |
+| `GET` | `/api/bank_accounts/:bankAccountId/spending/:spendingId` |
+| `PUT` | `/api/bank_accounts/:bankAccountId/spending/:spendingId` |
+| `PATCH` | `/api/bank_accounts/:bankAccountId/spending/:spendingId` |
+| `DELETE` | `/api/bank_accounts/:bankAccountId/spending/:spendingId` |
+| `POST` | `/api/bank_accounts/:bankAccountId/spending/transfer` |
+| `GET` | `/api/bank_accounts/:bankAccountId/spending/:spendingId/transactions` |
+
+### [Funding Schedules](/documentation/api/funding_schedules)
+
+| Method | Path |
+| --- | --- |
+| `GET` | `/api/bank_accounts/:bankAccountId/funding_schedules` |
+| `POST` | `/api/bank_accounts/:bankAccountId/funding_schedules` |
+| `GET` | `/api/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId` |
+| `PATCH` | `/api/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId` |
+| `DELETE` | `/api/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId` |
+
+### [Forecast](/documentation/api/forecast)
+
+| Method | Path |
+| --- | --- |
+| `GET` | `/api/bank_accounts/:bankAccountId/forecast` |
+| `POST` | `/api/bank_accounts/:bankAccountId/forecast/spending` |
+| `POST` | `/api/bank_accounts/:bankAccountId/forecast/next_funding` |
+
+### [Uploads and Files](/documentation/api/uploads)
+
+| Method | Path |
+| --- | --- |
+| `POST` | `/api/bank_accounts/:bankAccountId/transactions/upload` |
+| `GET` | `/api/bank_accounts/:bankAccountId/transactions/upload/:transactionUploadId` |
+| `GET` | `/api/bank_accounts/:bankAccountId/transactions/upload/:transactionUploadId/progress` |
+| `GET` | `/api/files` |
+
+### [Lunch Flow](/documentation/api/lunch_flow)
+
+Self-hosted only.
+
+| Method | Path |
+| --- | --- |
+| `GET` | `/api/lunch_flow/link` |
+| `POST` | `/api/lunch_flow/link` |
+| `GET` | `/api/lunch_flow/link/:lunchFlowLinkId` |
+| `GET` | `/api/lunch_flow/link/:lunchFlowLinkId/bank_accounts` |
+| `POST` | `/api/lunch_flow/link/:lunchFlowLinkId/bank_accounts/refresh` |
+| `POST` | `/api/lunch_flow/link/sync` |
+| `GET` | `/api/lunch_flow/link/sync/:linkId/bank_account/:bankAccountId/progress` |
+
+### [Users](/documentation/api/users)
+
+| Method | Path |
+| --- | --- |
+| `GET` | `/api/users/me` |
+| `GET` | `/api/users/:userId` |
+| `PUT` | `/api/users/security/password` |
+| `POST` | `/api/users/security/totp/setup` |
+| `POST` | `/api/users/security/totp/confirm` |
+
+### [API Keys](/documentation/api/api_keys)
+
+| Method | Path |
+| --- | --- |
+| `GET` | `/api/keys` |
+| `POST` | `/api/keys` |
+| `DELETE` | `/api/keys/:apiKeyId` |
+
+### [Authentication](/documentation/api/authentication)
+
+The web app's sign-in flow. Not reachable with an API key.
+
+| Method | Path |
+| --- | --- |
+| `POST` | `/api/authentication/login` |
+| `POST` | `/api/authentication/multifactor` |
+| `GET` | `/api/authentication/logout` |
+| `POST` | `/api/authentication/register` |
+| `POST` | `/api/authentication/verify` |
+| `POST` | `/api/authentication/verify/resend` |
+| `POST` | `/api/authentication/forgot` |
+| `POST` | `/api/authentication/reset` |
+
+### [Billing](/documentation/api/billing)
+
+Hosted only.
+
+| Method | Path |
+| --- | --- |
+| `POST` | `/api/billing/create_checkout` |
+| `GET` | `/api/billing/checkout/:checkoutSessionId` |
+| `GET` | `/api/billing/portal` |
+
+### [Health and Reference](/documentation/api/utility)
+
+| Method | Path |
+| --- | --- |
+| `GET` | `/api/health` |
+| `HEAD` | `/api/health` |
+| `GET` | `/api/locale/currency` |
+
+### [Webhooks](/documentation/api/webhooks)
+
+Inbound only. You never call these.
+
+| Method | Path |
+| --- | --- |
+| `POST` | `/api/plaid/webhook` |
+| `POST` | `/api/stripe/webhook` |
+
+### [Internal Endpoints](/documentation/api/internal)
+
+These serve the monetr app and can change without notice.
+
+| Method | Path |
+| --- | --- |
+| `GET` | `/api/config` |
+| `POST` | `/api/authentication/challenge` |
+| `POST` | `/api/icons/search` |
+| `GET` | `/api/institutions/:institutionId` |
+| `GET` | `/api/plaid/link/token/new` |
+| `POST` | `/api/plaid/link/token/callback` |
+| `PUT` | `/api/plaid/link/update/:linkId` |
+| `POST` | `/api/plaid/link/update/callback` |
+| `GET` | `/api/plaid/link/setup/wait/:linkId` |
+| `POST` | `/api/plaid/link/sync` |
+| `GET` | `/api/mappings` |
+| `POST` | `/api/mappings` |
+| `POST` | `/api/bank_accounts/:bankAccountId/transactions/import` |
+| `GET` | `/api/bank_accounts/:bankAccountId/transactions/import/:transactionImportId` |
+| `PATCH` | `/api/bank_accounts/:bankAccountId/transactions/import/:transactionImportId` |
