@@ -13,7 +13,7 @@
     "@rsbuild/plugin-sass": "2.0.1",
     "@types/html-to-text": "9.0.4",
     "@types/react": "19.2.18",
-    "@types/react-dom": "19.2.4",
+    "@types/react-dom": "19.2.5",
     "@types/webpack-env": "1.18.8",
     "cheerio": "1.2.0",
     "html-to-text": "10.0.0",
