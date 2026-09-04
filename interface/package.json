@@ -73,7 +73,7 @@
     "@testing-library/user-event": "14.6.1",
     "@types/node": "24.13.3",
     "@types/react": "19.2.18",
-    "@types/react-dom": "19.2.4",
+    "@types/react-dom": "19.2.5",
     "babel-plugin-react-compiler": "1.0.0",
     "sass": "1.103.1",
     "sass-embedded-linux-arm64": "1.103.1",
