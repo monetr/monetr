@@ -1,0 +1,278 @@
+---
+title: "Authentication API"
+description: "monetr's sign-in, registration, email verification and password reset endpoints, what self-hosted config enables, and why API keys can't use them."
+---
+
+import { Badge } from "@rspress/core/theme";
+
+# Authentication API
+
+These are the endpoints behind monetr's sign-in screens. Registering, signing in, verifying an email address, resetting
+a forgotten password, and finishing a two-factor challenge.
+
+:::warning Not for API keys
+None of this works with an API key. These endpoints back the web app's sign-in screens, and they're here for operators
+wondering why sign-up returns a 404 on their instance. Everything you actually call is authenticated the way the
+[overview](./overview#authenticating) describes.
+:::
+
+## What's turned on depends on your config
+
+Most of these endpoints return 404 when the feature behind them is disabled, rather than existing and failing. Worth
+knowing before you go looking for a bug:
+
+| Endpoint                                 | Returns 404 unless                           |
+| ---------------------------------------- | -------------------------------------------- |
+| `POST /api/authentication/register`      | `AllowSignUp` is on.                         |
+| `POST /api/authentication/verify`        | Email verification is on, which needs SMTP.  |
+| `POST /api/authentication/verify/resend` | Same.                                        |
+| `POST /api/authentication/forgot`        | Password reset is allowed, which needs SMTP. |
+| `POST /api/authentication/challenge`     | Proof of work is enabled.                    |
+
+[Reset a password](#reset-a-password) is the exception. It stays available even without SMTP, because the reset token is
+what secures it, and an operator can mint one from the command line on a deployment that deliberately has no mail
+server.
+
+## <Badge type="tip">POST</Badge> Sign in
+
+Exchanges an email and password for a session. What you get back depends on the state of the login: a working session, a
+demand for a TOTP code, a demand to verify your email, or a demand to change an expired password.
+
+**In the app:** The login screen.
+
+```http
+POST /api/authentication/login
+```
+
+**Auth:** None.
+
+### Body
+
+| Attribute   | Type    | Required                | Description                                                                                                                     |
+| ----------- | ------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `email`     | string  | Yes                     | Must be lower case and a valid address. monetr rejects mixed case rather than normalizing it.                                   |
+| `password`  | string  | Yes                     | Between 8 and 72 characters.                                                                                                    |
+| `challenge` | string  | Only with proof of work | A challenge from the [proof of work endpoint](./internal#proof-of-work-challenge). Rejected outright when proof of work is off. |
+| `nonce`     | integer | Only with proof of work | The solution to that challenge.                                                                                                 |
+
+### Responses
+
+On success, 200:
+
+```json
+{
+  "isActive": true
+}
+```
+
+`isActive` reflects the subscription, and a `nextUrl` of `/account/subscribe` comes along with it when the subscription
+has lapsed. With billing disabled, `isActive` is always true.
+
+The interesting responses all come back as 428, and each carries a `code`:
+
+| Code                       | Meaning                                                                                                                                                             |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MFA_REQUIRED`             | The login has TOTP enabled. Finish at [Finish two-factor sign-in](#finish-two-factor-sign-in). You have 5 minutes.                                                  |
+| `EMAIL_NOT_VERIFIED`       | The email address hasn't been verified and this server requires it.                                                                                                 |
+| `PASSWORD_CHANGE_REQUIRED` | The password has to be changed before signing in. The response includes a `resetToken` good for 5 minutes, which you hand to [Reset a password](#reset-a-password). |
+
+### Errors
+
+| Status | When                                                                                                |
+| ------ | --------------------------------------------------------------------------------------------------- |
+| 400    | The email isn't valid or lower case, or the password is outside 8 to 72 characters.                 |
+| 401    | Wrong email or password. Deliberately doesn't say which.                                            |
+| 406    | The password needs changing but this server has password reset disabled, so there's no way forward. |
+| 428    | One of the three codes above.                                                                       |
+| 500    | The login has no users on any account.                                                              |
+
+## <Badge type="tip">POST</Badge> Finish two-factor sign-in
+
+Second step for a login with TOTP enabled. Turns the short lived pending session from sign-in into a real one.
+
+**In the app:** The two-factor code screen you land on after the login screen.
+
+```http
+POST /api/authentication/multifactor
+```
+
+**Auth:** MFA pending. Only reachable with the short lived session sign-in just handed you, which is why an API key
+can't touch it.
+
+### Body
+
+| Attribute | Type   | Required | Description                                                            |
+| --------- | ------ | -------- | ---------------------------------------------------------------------- |
+| `totp`    | string | Yes      | The current code from the authenticator, or one of the recovery codes. |
+
+Returns the same shape as a successful sign-in.
+
+### Errors
+
+| Status | When                                                                            |
+| ------ | ------------------------------------------------------------------------------- |
+| 400    | `totp` is missing or blank.                                                     |
+| 401    | The code is wrong, or the pending session has expired. It only lasts 5 minutes. |
+
+## <Badge type="info">GET</Badge> Sign out
+
+Ends the session.
+
+**In the app:** The sign out button.
+
+```http
+GET /api/authentication/logout
+```
+
+**Auth:** None. It's a `GET` and it takes no body. Calling it without a session is fine, it does nothing and returns
+200.
+
+Returns 200 with an empty body.
+
+## <Badge type="tip">POST</Badge> Register
+
+Creates a login, an account, and the user joining them.
+
+**In the app:** The sign-up form.
+
+```http
+POST /api/authentication/register
+```
+
+**Auth:** None.
+
+### Body
+
+| Attribute   | Type             | Required                    | Description                                                                                                       |
+| ----------- | ---------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `email`     | string           | Yes                         | Must be lower case and valid.                                                                                     |
+| `firstName` | string           | Yes                         | Used to address emails.                                                                                           |
+| `password`  | string           | Yes                         | Between 8 and 72 characters.                                                                                      |
+| `betaCode`  | string, nullable | Only when beta codes are on | An invite code. Required when the server has beta codes enabled.                                                  |
+| `challenge` | string           | Only with proof of work     | A challenge from the challenge endpoint.                                                                          |
+| `lastName`  | string           | No                          |                                                                                                                   |
+| `locale`    | string           | No                          | Sets the account's locale, which decides the default currency.                                                    |
+| `nonce`     | integer          | Only with proof of work     | The solution to the challenge.                                                                                    |
+| `timezone`  | string           | No                          | The account's timezone. This matters more than it looks: it's what "midnight" means for every due date in monetr. |
+
+### Errors
+
+| Status | When                                                                              |
+| ------ | --------------------------------------------------------------------------------- |
+| 400    | Invalid email or password, a bad or missing beta code, or a failed proof of work. |
+| 404    | Sign-up is disabled on this server.                                               |
+| 428    | The email is already in use, with code `EMAIL_IN_USE`.                            |
+
+## <Badge type="tip">POST</Badge> Verify an email address
+
+Confirms an email address using the token from the verification email.
+
+**In the app:** The page you land on from the link in the verification email.
+
+```http
+POST /api/authentication/verify
+```
+
+**Auth:** None. The token is the credential.
+
+### Body
+
+| Attribute | Type   | Required | Description                                                                                                      |
+| --------- | ------ | -------- | ---------------------------------------------------------------------------------------------------------------- |
+| `token`   | string | Yes      | The token from the verification email. It only works for verifying email, tokens for anything else are rejected. |
+
+```json
+{
+  "nextUrl": "/login",
+  "message": "Your email is now verified. Please login."
+}
+```
+
+### Errors
+
+| Status | When                                                                                           |
+| ------ | ---------------------------------------------------------------------------------------------- |
+| 400    | The token is blank, malformed, expired, or scoped for something other than email verification. |
+| 404    | Email verification isn't enabled on this server.                                               |
+
+## <Badge type="tip">POST</Badge> Resend a verification email
+
+Sends the verification email again.
+
+**In the app:** The resend link on the "check your email" screen.
+
+```http
+POST /api/authentication/verify/resend
+```
+
+**Auth:** None.
+
+### Body
+
+| Attribute   | Type    | Required                | Description                              |
+| ----------- | ------- | ----------------------- | ---------------------------------------- |
+| `email`     | string  | Yes                     | The address to resend to.                |
+| `challenge` | string  | Only with proof of work | A challenge from the challenge endpoint. |
+| `nonce`     | integer | Only with proof of work | The solution to that challenge.          |
+
+### Errors
+
+| Status | When                                             |
+| ------ | ------------------------------------------------ |
+| 404    | Email verification isn't enabled on this server. |
+
+## <Badge type="tip">POST</Badge> Request a password reset
+
+Emails a reset link to an address.
+
+**In the app:** The forgot password form.
+
+```http
+POST /api/authentication/forgot
+```
+
+**Auth:** None.
+
+### Body
+
+| Attribute   | Type    | Required                | Description                              |
+| ----------- | ------- | ----------------------- | ---------------------------------------- |
+| `email`     | string  | Yes                     | The address to send the reset link to.   |
+| `challenge` | string  | Only with proof of work | A challenge from the challenge endpoint. |
+| `nonce`     | integer | Only with proof of work | The solution to that challenge.          |
+
+### Errors
+
+| Status | When                                                                     |
+| ------ | ------------------------------------------------------------------------ |
+| 404    | Password reset isn't enabled, which usually means SMTP isn't configured. |
+
+## <Badge type="tip">POST</Badge> Reset a password
+
+Sets a new password using a reset token.
+
+**In the app:** The set-a-new-password form you reach from the reset email, and the same form after a sign-in that
+demanded a password change.
+
+```http
+POST /api/authentication/reset
+```
+
+**Auth:** None. The token is the credential.
+
+### Body
+
+| Attribute  | Type   | Required | Description                                                                                                                                                        |
+| ---------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `password` | string | Yes      | The new password, at least 8 characters after trimming.                                                                                                            |
+| `token`    | string | Yes      | A reset token. Either from the reset email, or the `resetToken` handed back by a `PASSWORD_CHANGE_REQUIRED` sign-in. Tokens scoped for anything else are rejected. |
+
+Unlike the other email-driven endpoints, this one stays available even when SMTP is off. The token is the security
+control, and an operator can generate one with the `login:reset-password` CLI command on a deployment that deliberately
+can't send mail.
+
+### Errors
+
+| Status | When                                                                                                         |
+| ------ | ------------------------------------------------------------------------------------------------------------ |
+| 400    | The token is blank, malformed, expired, or scoped for something else, or the password is under 8 characters. |

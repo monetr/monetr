@@ -1,0 +1,315 @@
+---
+title: "Forecast API"
+description: "Project a monetr bank account's allocations forward with the forecast API, and estimate what a new expense or savings goal costs you per paycheck."
+---
+
+import { Badge } from "@rspress/core/theme";
+
+# Forecast API
+
+Forecasting answers the question monetr exists to answer: given what I've committed to and when I get paid, what does
+the next few months look like? It walks forward day by day, firing your funding schedules and your spending due dates in
+order, and reports the balance at each step.
+
+Nothing here writes anything. All three endpoints are pure calculation, including the two that are POSTs. They're POSTs
+because they take a body describing a hypothetical, not because they change anything.
+
+Forecasting can be slow on an account with a lot of spending objects, so the handlers have their own timeouts. Exceed
+them and you get a 408 rather than a hung request.
+
+## <Badge type="info">GET</Badge> Get a forecast
+
+Projects the account's balance forward from now, returning an event for each day something happens. This is what draws
+the timeline charts in the app.
+
+**In the app:** The timeline charts on the funding and goals pages.
+
+```http
+GET /api/bank_accounts/:bankAccountId/forecast
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute       | Type          | Required | Description                   |
+| --------------- | ------------- | -------- | ----------------------------- |
+| `bankAccountId` | string (ulid) | Yes      | The bank account to forecast. |
+
+### Query parameters
+
+| Attribute | Type      | Required | Description                                                                                                     |
+| --------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------- |
+| `end`     | timestamp | No       | How far to project, RFC 3339. Defaults to 90 days out. Has to be in the future and no more than 12 months away. |
+
+### Example
+
+This account has two envelopes: a Coffee expense with 1315 in it, due on the 1st, and a New Laptop goal with 45000 in
+it. One funding schedule pays every other Friday, next on August 30th.
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/forecast?end=2024-09-02T05%3A00%3A00Z" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+{
+  "startingTime": "2024-08-28T14:03:11.882Z",
+  "endingTime": "2024-09-02T05:00:00Z",
+  "startingBalance": 46315,
+  "endingBalance": 59642,
+  "events": [
+    {
+      "date": "2024-08-30T05:00:00Z",
+      "delta": 21327,
+      "contribution": 21327,
+      "transaction": 0,
+      "balance": 67642,
+      "spending": [
+        {
+          "date": "2024-08-30T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 6685,
+          "rollingAllocation": 8000,
+          "funding": [
+            {
+              "date": "2024-08-30T05:00:00Z",
+              "originalDate": "2024-08-30T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz"
+            }
+          ],
+          "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe"
+        },
+        {
+          "date": "2024-08-30T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 14642,
+          "rollingAllocation": 59642,
+          "funding": [
+            {
+              "date": "2024-08-30T05:00:00Z",
+              "originalDate": "2024-08-30T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz"
+            }
+          ],
+          "spendingId": "spnd_01j3d7k2vwqrx8m5t9pnbeh4cz"
+        }
+      ],
+      "funding": [
+        {
+          "date": "2024-08-30T05:00:00Z",
+          "originalDate": "2024-08-30T05:00:00Z",
+          "weekendAvoided": false,
+          "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz"
+        }
+      ]
+    },
+    {
+      "date": "2024-09-01T05:00:00Z",
+      "delta": -8000,
+      "contribution": 0,
+      "transaction": 8000,
+      "balance": 59642,
+      "spending": [
+        {
+          "date": "2024-09-01T05:00:00Z",
+          "transactionAmount": 8000,
+          "contributionAmount": 0,
+          "rollingAllocation": 0,
+          "funding": [],
+          "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe"
+        }
+      ],
+      "funding": []
+    }
+  ]
+}
+```
+
+Two events: payday, where both envelopes get filled, and the 1st, where the Coffee envelope empties because that's when
+it comes due. The goal doesn't appear in the second event because nothing happened to it that day.
+
+:::warning `startingBalance` is not your bank balance
+It's the total currently sitting in your expenses and goals, `1315 + 45000` here. Paused spending objects are left out
+of the sum entirely. The forecast projects how allocated money moves, not how much is in the account, so plotting these
+numbers against the balances from [Get balances](./bank_accounts#get-balances) will not line up.
+:::
+
+### Response attributes
+
+| Attribute         | Type      | Description                                                                                                                                 |
+| ----------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `startingTime`    | timestamp | When the projection starts, which is the moment you made the request, on the server's clock.                                                |
+| `endingTime`      | timestamp | Where the projection stops, either your `end` or 90 days out.                                                                               |
+| `startingBalance` | integer   | The total allocated across every unpaused expense and goal at the moment you asked. See the warning above, this is not the account balance. |
+| `endingBalance`   | integer   | The projected total allocated at the end, which is always the last event's `balance`. Equal to `startingBalance` when there are no events.  |
+| `events`          | array     | One entry per day something happens. Days where nothing happens are skipped, so these aren't evenly spaced.                                 |
+
+Each event:
+
+| Attribute      | Type      | Description                                                                                                                                          |
+| -------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `date`         | timestamp | The day. Every spending event inside shares this date, because events are grouped by it.                                                             |
+| `delta`        | integer   | `contribution` minus `transaction`. Positive means more got allocated than spent that day, which is the opposite of the transaction sign convention. |
+| `contribution` | integer   | The sum of `contributionAmount` across this day's spending events.                                                                                   |
+| `transaction`  | integer   | The sum of `transactionAmount` across this day's spending events.                                                                                    |
+| `balance`      | integer   | The running total after this day, so the previous event's `balance` plus this one's `delta`.                                                         |
+| `spending`     | array     | The spending events on this day. Never empty, since an event only exists because a spending event landed on that date.                               |
+| `funding`      | array     | The funding events that fired on this day.                                                                                                           |
+
+Each funding event:
+
+| Attribute           | Type          | Description                                                      |
+| ------------------- | ------------- | ---------------------------------------------------------------- |
+| `fundingScheduleId` | string (ulid) | Which schedule fired.                                            |
+| `date`              | timestamp     | When the funding actually happens, after any weekend adjustment. |
+| `originalDate`      | timestamp     | When the rule said it would happen, before adjustment.           |
+| `weekendAvoided`    | boolean       | Whether the date got moved because it landed on a weekend.       |
+
+Each spending event:
+
+| Attribute            | Type          | Description                                                   |
+| -------------------- | ------------- | ------------------------------------------------------------- |
+| `spendingId`         | string (ulid) | Which spending object this is for.                            |
+| `date`               | timestamp     | When the spending object comes due.                           |
+| `transactionAmount`  | integer       | How much comes out when it's due.                             |
+| `contributionAmount` | integer       | How much goes into the envelope at this point.                |
+| `rollingAllocation`  | integer       | How much is expected to be in the envelope when it comes due. |
+| `funding`            | array         | The funding events that will fill this before it's due.       |
+
+### Errors
+
+| Status | When                                                                       |
+| ------ | -------------------------------------------------------------------------- |
+| 400    | `end` isn't valid RFC 3339, is in the past, or is more than 12 months out. |
+| 408    | The forecast took longer than 15 seconds.                                  |
+
+## <Badge type="tip">POST</Badge> Estimate the cost of a new spending object
+
+Answers "if I added this expense, what would it cost me per paycheck?" without creating anything. Use it to show someone
+the damage before they commit.
+
+**In the app:** Nothing in the app uses this today. The new expense and goal forms work out their estimate another way.
+
+```http
+POST /api/bank_accounts/:bankAccountId/forecast/spending
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute       | Type          | Required | Description                                               |
+| --------------- | ------------- | -------- | --------------------------------------------------------- |
+| `bankAccountId` | string (ulid) | Yes      | The bank account whose funding schedules to plan against. |
+
+### Body
+
+| Attribute           | Type          | Required | Description                                                                            |
+| ------------------- | ------------- | -------- | -------------------------------------------------------------------------------------- |
+| `fundingScheduleId` | string (ulid) | Yes      | Which [funding schedule](./funding_schedules#list-funding-schedules) would pay for it. |
+| `targetAmount`      | integer       | Yes      | How much you'd need, in the smallest unit. Must be greater than zero.                  |
+| `currentAmount`     | integer       | No       | How much you'd start with. Defaults to 0, can't be negative.                           |
+| `nextRecurrence`    | timestamp     | No       | When it would first be due.                                                            |
+| `recurrenceRule`    | string        | No       | The recurrence rule. Required if `spendingType` is `expense`, rejected if it's `goal`. |
+| `spendingType`      | string        | No       | `expense` or `goal`.                                                                   |
+
+The rule field is called `recurrenceRule` here, not `ruleset` like it is everywhere else on [spending](./spending). Same
+format, different key. It's an inconsistency in the API, not a typo in these docs.
+
+This endpoint doesn't run the shared validation, so mistakes come back as plain messages rather than a `problems` tree.
+
+### Example
+
+```bash
+curl --request POST \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/forecast/spending" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
+    "spendingType": "expense",
+    "targetAmount": 8000,
+    "currentAmount": 0,
+    "nextRecurrence": "2024-09-01T05:00:00Z",
+    "recurrenceRule": "DTSTART:20240901T050000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1"
+  }'
+```
+
+```json
+{
+  "estimatedCost": 4000
+}
+```
+
+`estimatedCost` is how much a single funding event would need to put aside, in the currency's smallest unit. Here that's
+$40.00 per paycheck to cover an $80 monthly expense, which checks out: this schedule pays every other Friday, so roughly
+two paychecks cover each month.
+
+Despite what the underlying function is called, this is the **most common** per-event contribution over the next two
+years, not the mean. Contributions vary from period to period, and the mode is the number you would actually quote
+someone, where an average would land between two amounts that never occur.
+
+### Errors
+
+| Status | When                                                                                                                                                                   |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 400    | `targetAmount` is zero or negative, `currentAmount` is negative, `fundingScheduleId` is missing, or the recurrence rule is missing on an expense or present on a goal. |
+| 408    | The forecast took longer than 25 seconds.                                                                                                                              |
+
+## <Badge type="tip">POST</Badge> Estimate the next contribution
+
+Answers "how much of my next paycheck is already spoken for?" It adds up what every spending object on one funding
+schedule will take at its next funding event.
+
+**In the app:** The committed amount shown next to each funding schedule in the funding list.
+
+```http
+POST /api/bank_accounts/:bankAccountId/forecast/next_funding
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute       | Type          | Required | Description                               |
+| --------------- | ------------- | -------- | ----------------------------------------- |
+| `bankAccountId` | string (ulid) | Yes      | The bank account the schedule belongs to. |
+
+### Body
+
+| Attribute           | Type          | Required | Description                     |
+| ------------------- | ------------- | -------- | ------------------------------- |
+| `fundingScheduleId` | string (ulid) | Yes      | The funding schedule to add up. |
+
+### Example
+
+```bash
+curl --request POST \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/forecast/next_funding" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz"
+  }'
+```
+
+```json
+{
+  "nextContribution": 21327
+}
+```
+
+Compare that against the schedule's `estimatedDeposit` from [Get a funding
+schedule](./funding_schedules#get-a-funding-schedule) to work out what's left over.
+
+### Errors
+
+| Status | When                                           |
+| ------ | ---------------------------------------------- |
+| 400    | `fundingScheduleId` is missing or malformed.   |
+| 404    | No such funding schedule on that bank account. |
+| 408    | The forecast took longer than 25 seconds.      |

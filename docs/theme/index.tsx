@@ -71,10 +71,9 @@ function Footer() {
   );
 }
 
-// DocMeta renders the LedgerMeta row at the top of documentation pages. It is
-// wired into the doc layout's beforeDocContent slot so pages get the row without
-// any per-MDX additions. Scoped to the /documentation tree so policy/blog/custom
-// pages are left alone.
+// DocMeta renders the LedgerMeta row at the top of documentation pages. It is wired into the doc layout's
+// beforeDocContent slot so pages get the row without any per-MDX additions. Scoped to the /documentation tree so
+// policy/blog/custom pages are left alone.
 function DocMeta() {
   const { page } = usePage();
   if (!page.routePath?.includes('/documentation')) {

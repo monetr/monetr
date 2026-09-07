@@ -1,0 +1,311 @@
+@use '@monetr/docs/styles/variables';
+@use '@monetr/docs/styles/mixins';
+
+/*
+The three inputs to a PATCH sitting side by side, merged result underneath. The
+sheets stack into a column on mobile.
+
+Tone rides on data-tone so every element keeps a single class. Cyan wrote,
+violet unset, pink unreachable, muted nothing happened.
+*/
+
+.root {
+  margin: 8 * variables.$size 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3 * variables.$size;
+}
+
+.sheets {
+  display: flex;
+  flex-direction: column;
+  gap: 3 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    flex-direction: row;
+    gap: 2 * variables.$size;
+    align-items: stretch;
+  }
+}
+
+.sheet,
+.result {
+  background: var(--mtr-surface);
+  border: 1px solid var(--mtr-line);
+  border-radius: var(--rp-radius);
+  padding: 4 * variables.$size;
+  box-shadow: 0 2 * variables.$size 6 * variables.$size rgba(0, 0, 0, 0.28);
+}
+
+.sheet {
+  @media (min-width: variables.$mediumScreen) {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+
+.title {
+  @include mixins.text-small;
+  margin: 0;
+  font-family: var(--mtr-font-body);
+  font-weight: var(--semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mtr-text);
+}
+
+.subtitle {
+  @include mixins.text-extra-small;
+  margin: 0.5 * variables.$size 0 0;
+  color: var(--mtr-muted);
+
+  .sheet[data-kind='prose'] & {
+    font-family: var(--mtr-font-mono);
+  }
+}
+
+.fields {
+  margin: 3 * variables.$size 0 0;
+  padding: 3 * variables.$size 0 0;
+  border-top: 1px solid var(--mtr-line-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 2.5 * variables.$size;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5 * variables.$size;
+  min-width: 0;
+}
+
+.fieldName {
+  @include mixins.text-extra-small;
+  color: var(--mtr-faint);
+  font-family: var(--mtr-font-body);
+}
+
+.fieldValue {
+  @include mixins.text-small;
+  margin: 0;
+  font-family: var(--mtr-font-mono);
+  color: var(--mtr-text);
+  overflow-wrap: anywhere;
+
+  .sheet[data-kind='prose'] & {
+    font-family: var(--mtr-font-body);
+  }
+
+  &[data-tone='updated'] {
+    color: var(--mtr-cyan);
+  }
+
+  &[data-tone='cleared'] {
+    color: var(--mtr-violet);
+  }
+
+  &[data-tone='rejected'] {
+    color: var(--mtr-pink);
+  }
+}
+
+// An absent key is an empty slot. Nothing was sent, so there is nothing to
+// read.
+.absent {
+  @include mixins.text-extra-small;
+  margin: 0;
+  padding: 0.75 * variables.$size 2 * variables.$size;
+  border: 1px dashed var(--mtr-line);
+  border-radius: 1 * variables.$size;
+  color: var(--mtr-faint);
+  font-style: italic;
+  align-self: flex-start;
+}
+
+.chevrons {
+  display: none;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    justify-items: center;
+
+    span {
+      width: 2 * variables.$size;
+      height: 2 * variables.$size;
+      border-right: 1.5px solid var(--mtr-faint);
+      border-bottom: 1.5px solid var(--mtr-faint);
+      transform: rotate(45deg);
+    }
+  }
+}
+
+.band {
+  @include mixins.text-small;
+  margin: 0;
+  padding: 2 * variables.$size 4 * variables.$size;
+  text-align: center;
+  color: var(--mtr-muted);
+  background: var(--mtr-surface-2);
+  border: 1px solid var(--mtr-line-soft);
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+
+// Scoped through .result. Prose styles reach into bare th and td, the extra
+// class wins that without !important.
+.result .outcomes {
+  width: 100%;
+  margin: 3 * variables.$size 0 0;
+  padding-top: 3 * variables.$size;
+  border-top: 1px solid var(--mtr-line-soft);
+  border-collapse: collapse;
+  // Fixed layout so the widths below hold. Cells ellipsis instead of shoving
+  // the badge off the card.
+  table-layout: fixed;
+
+  tr {
+    border: none;
+    background: none;
+  }
+
+  td,
+  th {
+    border: none;
+    background: none;
+    padding: 1.5 * variables.$size 0;
+    text-align: left;
+    vertical-align: middle;
+  }
+}
+
+// Safety net, not the plan. Both cells carry a title with the full text.
+.result .outcomeName,
+.result .outcomeValue {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 2 * variables.$size;
+}
+
+.result .outcomeName {
+  @include mixins.text-small;
+  font-family: var(--mtr-font-mono);
+  font-weight: var(--normal);
+  color: var(--mtr-muted);
+  width: 36%;
+}
+
+.result .outcomeValue {
+  @include mixins.text-small;
+  font-family: var(--mtr-font-mono);
+  color: var(--mtr-text);
+  width: 28%;
+
+  [data-tone='updated'] & {
+    color: var(--mtr-cyan);
+  }
+
+  [data-tone='cleared'] & {
+    color: var(--mtr-violet);
+  }
+}
+
+.result .outcomeBadgeCell {
+  width: 36%;
+  padding-right: 2 * variables.$size;
+}
+
+.badge {
+  @include mixins.text-extra-small;
+  display: inline-block;
+  padding: 0.75 * variables.$size 2.5 * variables.$size;
+  border-radius: 999px;
+  font-weight: var(--semibold);
+  white-space: nowrap;
+  color: var(--mtr-muted);
+  background: rgba(156, 146, 184, 0.12);
+
+  [data-tone='updated'] & {
+    color: var(--mtr-cyan);
+    background: var(--mtr-cyan-dim);
+  }
+
+  [data-tone='cleared'] & {
+    color: var(--mtr-violet);
+    background: var(--mtr-violet-dim);
+  }
+
+  [data-tone='rejected'] & {
+    color: var(--mtr-pink);
+    background: var(--mtr-pink-dim);
+  }
+}
+
+// The note is commentary. First thing to go.
+.result .outcomeNote {
+  @include mixins.text-extra-small;
+  color: var(--mtr-faint);
+  display: none;
+}
+
+// Note is back, the others give up room.
+@media (min-width: variables.$largeScreen) {
+  .result .outcomeNote {
+    display: table-cell;
+    width: 38%;
+  }
+
+  .result .outcomeName {
+    width: 22%;
+  }
+
+  .result .outcomeValue {
+    width: 18%;
+  }
+
+  .result .outcomeBadgeCell {
+    width: 22%;
+  }
+}
+
+// Three columns do not fit on a phone, the badge hangs off the card. Two lines
+// per row instead, so nothing truncates where it would hurt most.
+@media (max-width: #{variables.$smallScreen - 1px}) {
+  .result .outcomes,
+  .result .outcomes tbody,
+  .result .outcomes tr {
+    display: block;
+  }
+
+  .result .outcomes tr {
+    padding: 1.5 * variables.$size 0;
+  }
+
+  .result .outcomes th,
+  .result .outcomes td {
+    padding: 0;
+  }
+
+  .result .outcomeName {
+    display: block;
+    width: auto;
+    margin-bottom: 1 * variables.$size;
+  }
+
+  .result .outcomeValue {
+    display: inline-block;
+    width: auto;
+    max-width: 60%;
+    vertical-align: middle;
+  }
+
+  .result .outcomeBadgeCell {
+    display: inline-block;
+    width: auto;
+    padding-right: 0;
+    margin-left: 1.5 * variables.$size;
+    vertical-align: middle;
+  }
+}

@@ -1,0 +1,107 @@
+---
+title: "Recurrence Rules"
+description: "Write the RFC 5545 recurrence rules monetr's API needs for funding schedules and expenses, with a cookbook of common schedules that are known to work."
+---
+
+# Recurrence Rules
+
+Funding schedules and expenses both repeat, and monetr describes "repeats" with a recurrence rule. It's the `ruleset`
+field on [funding schedules](./funding_schedules) and on expense [spending objects](./spending), and it's the field most
+likely to hand you a 400 the first time you try.
+
+The format is [RFC 5545](https://datatracker.ietf.org/doc/html/rfc5545), the same standard calendar invites use. monetr
+accepts a useful subset of it rather than the whole thing, and the rules it rejects aren't obvious, so this page is the
+short version of what actually works.
+
+If you only want something that runs, skip to the [cookbook](#cookbook). Every rule there is verified against monetr's
+validator.
+
+## The shape
+
+A ruleset is two lines joined by a newline. In JSON that's an escaped `\n`, since it's one string:
+
+```
+DTSTART:20240105T060000Z
+RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=FR
+```
+
+```json
+{
+  "ruleset": "DTSTART:20240105T060000Z\nRRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=FR"
+}
+```
+
+`DTSTART` is when the pattern begins, in UTC, formatted `YYYYMMDDTHHMMSSZ`. `RRULE` is the pattern itself.
+
+## Three rules that will catch you
+
+:::warning Every rejection returns the same message
+Whatever you get wrong, the response is `"Ruleset must be valid"`. It doesn't say which part broke. So if a rule is
+rejected, work through these three before anything else.
+:::
+
+**`DTSTART` is required.** Most rrule libraries will happily hand you a bare `RRULE:` line, and monetr rejects it.
+Without an explicit start the underlying library falls back to a zero time, and every date calculation downstream comes
+out wrong, so monetr would rather you say when the schedule begins.
+
+**`BYHOUR`, `BYMINUTE` and `BYSECOND` are rejected.** monetr works in whole days. Nothing in a budget cares what time of
+day rent is due, and a rule that fires 3600 times a day is a good way to hang a forecast. If your library adds these
+automatically, strip them.
+
+**The time in `DTSTART` should be midnight in your account's timezone**, expressed as UTC. For `America/Chicago` that's
+`T060000Z` in winter and `T050000Z` in summer, because the offset moves with daylight saving. This one won't fail
+validation, but getting it wrong shifts every occurrence onto the wrong day. See [Timestamps](./overview#timestamps).
+
+## Cookbook
+
+Every rule below is checked against monetr's validator. Change the `DTSTART` date to the first occurrence you actually
+want, keeping the time at midnight in your timezone.
+
+These are the same patterns the app's own funding schedule picker offers.
+
+| What you want                    | Rule                                                                   |
+| -------------------------------- | ---------------------------------------------------------------------- |
+| Every week on Friday             | `DTSTART:20240105T060000Z\nRRULE:FREQ=WEEKLY;BYDAY=FR`                 |
+| Every other week on Friday       | `DTSTART:20240105T060000Z\nRRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=FR`      |
+| Monthly on the 1st               | `DTSTART:20240101T060000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1`            |
+| Monthly on the 15th              | `DTSTART:20240115T060000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=15`           |
+| Monthly on the last day          | `DTSTART:20240131T060000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=-1`           |
+| 1st and 15th of every month      | `DTSTART:20240101T060000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1,15`         |
+| 15th and last day of every month | `DTSTART:20240115T060000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=15,-1`        |
+| Every other month                | `DTSTART:20240101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=2;BYMONTHDAY=1` |
+| Quarterly                        | `DTSTART:20240101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=1` |
+| Every six months                 | `DTSTART:20240101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=6;BYMONTHDAY=1` |
+| Yearly                           | `DTSTART:20240101T060000Z\nRRULE:FREQ=YEARLY`                          |
+
+`BYMONTHDAY=-1` counts backwards from the end of the month, so it lands on the 28th, 30th or 31st as appropriate. That's
+how you say "last day of the month" without special-casing February.
+
+## Where rules are used
+
+**Funding schedules** always need one. It's when you get paid.
+
+**Expenses** always need one. It's when the thing comes due, and it's what empties the envelope and starts it filling
+again.
+
+**Goals never take one.** A goal happens once, so sending a `ruleset` with `"spendingType": "goal"` is rejected with
+"Ruleset cannot be specified for goals". Goals use `nextRecurrence` on its own for the target date.
+
+The [forecast](./forecast) endpoints take the same format under a different key, `recurrenceRule`. That inconsistency is
+in the API, not in these docs.
+
+## The rule and the next date are separate
+
+Both funding schedules and spending objects carry a `ruleset` **and** a `nextRecurrence`, and they're not derived from
+each other at write time. `nextRecurrence` is the actual next occurrence, and the rule is what generates the one after
+that.
+
+So you can have a rule that says "the 1st of every month" and a `nextRecurrence` of the 15th, if that's genuinely when
+the next one falls. monetr will use the 15th, then go back to the 1st afterwards. Useful when you're setting up
+mid-cycle, and confusing if you assumed the rule alone decided everything.
+
+The two endpoints differ in how forgiving they are about `nextRecurrence`:
+
+- [Funding schedules](./funding_schedules#create-a-funding-schedule) will work it out from the rule if you leave it off
+  or send something in the past.
+- [Spending objects](./spending#create-a-spending-object) reject anything not in the future, and midnight today already
+  counts as past.

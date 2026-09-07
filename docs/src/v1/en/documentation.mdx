@@ -3,7 +3,7 @@ title: Documentation
 description: Explore the monetr documentation to learn how to get started, host the application, and contribute to development. Find all the resources you need to effectively manage your finances with monetr.
 ---
 
-import { BookOpen, Server, Wrench } from 'lucide-react';
+import { BookOpen, Code, Server, Wrench } from 'lucide-react';
 import { Cards } from '@monetr/docs/components/Cards';
 
 # Introduction
@@ -35,6 +35,12 @@ Ready to dive in? Explore the guides below to see how monetr can work for you:
     title="Self-Hosting"
     description="Set up monetr on your own server and take full control."
     href="/documentation/install"
+  />
+  <Cards.Card
+    icon={ <Code /> }
+    title="REST API"
+    description="Automate monetr from scripts and other tools using the same API the app itself uses."
+    href="/documentation/api"
   />
   <Cards.Card
     icon={ <Wrench /> }
