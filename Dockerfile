@@ -1,6 +1,6 @@
 FROM --platform=$BUILDPLATFORM node:24.20.0-trixie-slim@sha256:50c3b2f6988dfc307b86e5301d69611af31f4789bdf232863b07d3b02fe55ae0 AS node
 
-FROM --platform=$BUILDPLATFORM golang:1.26.4-trixie@sha256:68b7145ec43d1820b9a56704554b53d1520aa2a15cb5233e374188a31b2a1bce AS base_builder
+FROM --platform=$BUILDPLATFORM golang:1.27.1-trixie@sha256:9baa6b4187bbb98d240372a8a235ac0bb6b5ddd52bba1431dc2f7c0705862728 AS base_builder
 WORKDIR /monetr
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
