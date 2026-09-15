@@ -106,8 +106,8 @@ importers:
         specifier: 0.29.0
         version: 0.29.0
       spellchecker-cli:
-        specifier: 7.0.3
-        version: 7.0.3
+        specifier: 7.0.4
+        version: 7.0.4
       typescript:
         specifier: 7.0.2
         version: 7.0.2
@@ -2597,8 +2597,8 @@ packages:
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
 
-  js-yaml@4.1.1:
-    resolution: {integrity: sha512-qQKT4zQxXl8lLwBtHMWwaTcGfFOZviOJet3Oy/xmGk2gZH677CJM9EvtfdSkgWcATZhj/55JZ0rmy3myCT5lsA==}
+  js-yaml@4.3.2:
+    resolution: {integrity: sha512-SFNOvSJ+Dgf/9An904Yx+CgSlIPCkIpao4qo51lpee25TIRejdH3rhR4EZMGoNx3/TP3O+wzWuiTFl4sqbltzA==}
     hasBin: true
 
   jsdom@26.1.0:
@@ -2673,8 +2673,8 @@ packages:
   lodash@4.17.21:
     resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
 
-  lodash@4.17.23:
-    resolution: {integrity: sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==}
+  lodash@4.18.1:
+    resolution: {integrity: sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==}
 
   longest-streak@3.1.0:
     resolution: {integrity: sha512-9Ri+o0JYgehTaVBBDoMqIl8GXtbWg711O3srftcHhZ0dqnETqLaoIK0x17fUw9rFSlK/0NlsKe0Ahhyl5pXE2g==}
@@ -3622,8 +3622,8 @@ packages:
   space-separated-tokens@2.0.2:
     resolution: {integrity: sha512-PEGlAwrG8yXGXRjW32fGbg66JAlOAwbObuqVoJpv/mRgoWDQfgH1wDPvtzWyUSNAXBGSk8h755YDbbcEy3SH2Q==}
 
-  spellchecker-cli@7.0.3:
-    resolution: {integrity: sha512-bgb41O3EtE5QmVTI5lgjcM/IZvTX3qHsOX7KV9JTMwx0WNl11ON6Kj60A4tDzS7bXv6uOcrVA/yPCyGhZvP5wQ==}
+  spellchecker-cli@7.0.4:
+    resolution: {integrity: sha512-iwvY4ifoWu+WM8vVSoveGL6Tepzm8ZnMt5PctB4NOK3Kz9xulaiKpjBrd/n/xQLqChZ/3cE4pyTop522B+2TmA==}
     hasBin: true
 
   string-width@6.1.0:
@@ -3715,8 +3715,9 @@ packages:
   toggle-selection@1.0.6:
     resolution: {integrity: sha512-BiZS+C1OS8g/q2RRbJmy59xpyghNBqrr6k5L/uKBGRsTfxmu3ffiRnd8mlGPUVayg8pvfi5urfnu8TU7DVOkLQ==}
 
-  toml@3.0.0:
-    resolution: {integrity: sha512-y/mWCZinnvxjTKYhJ+pYxwD0mRLVvOtdS2Awbgxln6iEnt4rk0yBxeSBHkGJcPucRiG0e55mwWp+g/05rsrd6w==}
+  toml@5.0.0:
+    resolution: {integrity: sha512-bsqEd+g7fzlrw7LEynQ6W6aOK/lTOlepz5x1sJyIV9fTZVJS2Q76nuju6FK+gZhW5bUpvB7mCEqdR0u4WziMFw==}
+    engines: {node: '>=20'}
 
   tough-cookie@5.1.2:
     resolution: {integrity: sha512-FVDYdxtnj0G6Qm/DhNPSb8Ju59ULcup3tuJxkFb5K8Bv2pUXILbf0xZWU8PX8Ov19OXljbUyveOFwRMwkXzO+A==}
@@ -6313,7 +6314,7 @@ snapshots:
 
   js-tokens@4.0.0: {}
 
-  js-yaml@4.1.1:
+  js-yaml@4.3.2:
     dependencies:
       argparse: 2.0.1
 
@@ -6377,7 +6378,7 @@ snapshots:
 
   junit-report-builder@5.1.1:
     dependencies:
-      lodash: 4.17.23
+      lodash: 4.18.1
       make-dir: 3.1.0
       xmlbuilder: 15.1.1
 
@@ -6414,7 +6415,7 @@ snapshots:
 
   lodash@4.17.21: {}
 
-  lodash@4.17.23: {}
+  lodash@4.18.1: {}
 
   longest-streak@3.1.0: {}
 
@@ -6761,8 +6762,8 @@ snapshots:
   micromark-extension-frontmatter@2.0.0:
     dependencies:
       fault: 2.0.1
-      micromark-util-character: 2.1.0
-      micromark-util-symbol: 2.0.0
+      micromark-util-character: 2.1.1
+      micromark-util-symbol: 2.0.1
       micromark-util-types: 2.0.2
 
   micromark-extension-gfm-autolink-literal@2.1.0:
@@ -7884,7 +7885,7 @@ snapshots:
 
   space-separated-tokens@2.0.2: {}
 
-  spellchecker-cli@7.0.3:
+  spellchecker-cli@7.0.4:
     dependencies:
       chalk: 5.6.2
       command-line-args: 6.0.1
@@ -7897,10 +7898,10 @@ snapshots:
       dictionary-vi: 3.0.0
       fs-extra: 11.3.4
       globby: 16.1.1
-      js-yaml: 4.1.1
+      js-yaml: 4.3.2
       jsonc: 2.0.0
       junit-report-builder: 5.1.1
-      lodash: 4.17.23
+      lodash: 4.18.1
       pkg-dir: 9.0.0
       rehype: 13.0.2
       rehype-retext: 5.0.1
@@ -7914,7 +7915,7 @@ snapshots:
       retext-spell: 6.1.0
       retext-syntax-mentions: 4.0.0
       retext-syntax-urls: 4.0.0
-      toml: 3.0.0
+      toml: 5.0.0
       unist-util-visit: 5.1.0
       vfile: 6.0.3
       vfile-reporter: 8.1.1
@@ -8008,7 +8009,7 @@ snapshots:
 
   toggle-selection@1.0.6: {}
 
-  toml@3.0.0: {}
+  toml@5.0.0: {}
 
   tough-cookie@5.1.2:
     dependencies:

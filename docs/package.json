@@ -40,7 +40,7 @@
     "@types/react-dom": "19.2.4",
     "sass": "1.103.1",
     "satori": "0.29.0",
-    "spellchecker-cli": "7.0.3",
+    "spellchecker-cli": "7.0.4",
     "typescript": "7.0.2"
   }
 }
