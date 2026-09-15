@@ -56,11 +56,11 @@ FROM debian:13-slim@sha256:d7e12182ce18b85b93007c1dedf31f2d29e01ccf3182cc4017c70
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       # renovate: datasource=deb depName=tzdata versioning=deb
-      tzdata=2026b-0+deb13u1 \
+      tzdata=2026c-0+deb13u1 \
       # renovate: datasource=deb depName=ca-certificates versioning=deb
       ca-certificates=20250419 \
       # renovate: datasource=deb depName=locales-all versioning=deb
-      locales-all=2.41-12+deb13u3 \
+      locales-all=2.41-12+deb13u4 \
     && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
