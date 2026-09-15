@@ -113,6 +113,16 @@
       ]
     },
     {
+      "description": "Keep the go directive in go.mod in sync with the rest of the golang group",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchDatasources": [
+        "golang-version"
+      ],
+      "rangeStrategy": "bump"
+    },
+    {
       "groupName": "node",
       "groupSlug": "node",
       "semanticCommitScope": "containers",
