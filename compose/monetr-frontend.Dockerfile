@@ -15,7 +15,7 @@ RUN apt-get update && \
       ca-certificates=20250419 \
       # The ui service's compose healthcheck shells out to curl.
       # renovate: datasource=deb depName=curl versioning=deb
-      curl=8.14.1-2+deb13u4 \
+      curl=8.14.1-2+deb13u5 \
       # Node links against libatomic on arm64.
       # renovate: datasource=deb depName=libatomic1 versioning=deb
       libatomic1=14.2.0-19 && \
