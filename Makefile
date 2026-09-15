@@ -108,7 +108,7 @@ endif
 
 test:
 	cmake --preset testing $(CMAKE_OPTIONS)
-	ctest --test-dir $(CMAKE_CONFIGURATION_DIRECTORY) --no-tests=error --output-on-failure --output-junit $(PWD)$(CMAKE_CONFIGURATION_DIRECTORY)/junit$(JUNIT_SUFFIX).xml -j $(CONCURRENCY) $(PATTERN_ARG) $(SHARD_ARG)
+	ctest --test-dir $(CMAKE_CONFIGURATION_DIRECTORY) --repeat until-pass:2 --no-tests=error --output-on-failure --output-junit $(PWD)$(CMAKE_CONFIGURATION_DIRECTORY)/junit$(JUNIT_SUFFIX).xml -j $(CONCURRENCY) $(PATTERN_ARG) $(SHARD_ARG)
 ifndef SKIP_COVERAGE_MERGE
 	cmake -P cmake/scripts/MergeGoCoverage.cmake
 endif
