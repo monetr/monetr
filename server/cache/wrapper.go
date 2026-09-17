@@ -48,20 +48,6 @@ func NewCache(log *slog.Logger, client *redis.Pool) Cache {
 	}
 }
 
-func (r *redisCache) send(ctx context.Context, commandName string, args ...any) error {
-	conn, err := r.client.GetContext(ctx)
-	if err != nil {
-		return errors.Wrap(err, "failed to retrieve connection from pool")
-	}
-	defer func() {
-		if err := conn.Close(); err != nil {
-			r.log.WarnContext(ctx, "failed to close/release redis connection", "err", err)
-		}
-	}()
-
-	return conn.Send(commandName, args...)
-}
-
 func (r *redisCache) do(ctx context.Context, commandName string, args ...any) (any, error) {
 	conn, err := r.client.GetContext(ctx)
 	if err != nil {
@@ -87,12 +73,9 @@ func (r *redisCache) Set(ctx context.Context, key string, value []byte) error {
 	span.SetData("cache.key", []string{key})
 	span.SetData("cache.item_size", len(value))
 
-	if err := errors.Wrap(
-		r.send(span.Context(), "SET", key, value),
-		"failed to store item in cache",
-	); err != nil {
+	if _, err := r.do(span.Context(), "SET", key, value); err != nil {
 		span.SetData("cache.success", false)
-		return err
+		return errors.Wrap(err, "failed to store item in cache")
 	}
 
 	span.SetData("cache.success", true)
@@ -111,15 +94,12 @@ func (r *redisCache) SetTTL(ctx context.Context, key string, value []byte, lifet
 	span.SetData("cache.item_size", len(value))
 	span.SetData("cache.ttl", int64(lifetime.Seconds()))
 
-	if err := errors.Wrap(
-		r.send(
-			span.Context(),
-			"SET", key, value, "EXAT", time.Now().Add(lifetime).Unix(),
-		),
-		"failed to store item in cache",
+	if _, err := r.do(
+		span.Context(),
+		"SET", key, value, "EXAT", time.Now().Add(lifetime).Unix(),
 	); err != nil {
 		span.SetData("cache.success", false)
-		return err
+		return errors.Wrap(err, "failed to store item in cache")
 	}
 
 	span.SetData("cache.success", true)
@@ -280,9 +260,9 @@ func (r *redisCache) Delete(ctx context.Context, key string) error {
 	span.SetData("db.system", "redis")
 	span.SetData("cache.key", []string{key})
 
-	if err := errors.Wrap(r.send(span.Context(), "DEL", key), "failed to delete item from cache"); err != nil {
+	if _, err := r.do(span.Context(), "DEL", key); err != nil {
 		span.SetData("cache.success", false)
-		return err
+		return errors.Wrap(err, "failed to delete item from cache")
 	}
 
 	span.SetData("cache.success", true)

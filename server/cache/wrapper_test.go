@@ -82,6 +82,48 @@ func TestRedisCache_Set(t *testing.T) {
 	})
 }
 
+// Writes have to wait for their reply the same way reads do, otherwise a
+// failure never reaches the caller. redigo's Send only buffers a command and
+// the reply is not read until the connection is released back to the pool, so a
+// write that redis rejected came back as a nil error while nothing had actually
+// been stored. Anything that assumes a successful write means the key exists
+// (the proof of work replay marker especially) then reads back a missing key
+// and blames the caller for it.
+func TestRedisCache_WritesSurfaceErrors(t *testing.T) {
+	const redisIsUnhappy = "LOADING Redis is loading the dataset in memory"
+
+	t.Run("set", func(t *testing.T) {
+		memoryCache, miniRedis := NewTestCacheWithRedis(t)
+		miniRedis.SetError(redisIsUnhappy)
+
+		err := memoryCache.Set(t.Context(), "test:data", TestValue)
+		assert.Error(t, err, "must return the error redis replied with")
+
+		// Prove the write really did not land, which is what makes a nil error here
+		// so dangerous.
+		miniRedis.SetError("")
+		value, err := memoryCache.Get(t.Context(), "test:data")
+		assert.NoError(t, err, "should be able to read the key back now")
+		assert.Empty(t, value, "nothing should have been stored")
+	})
+
+	t.Run("set ttl", func(t *testing.T) {
+		memoryCache, miniRedis := NewTestCacheWithRedis(t)
+		miniRedis.SetError(redisIsUnhappy)
+
+		err := memoryCache.SetTTL(t.Context(), "test:data", TestValue, time.Minute)
+		assert.Error(t, err, "must return the error redis replied with")
+	})
+
+	t.Run("delete", func(t *testing.T) {
+		memoryCache, miniRedis := NewTestCacheWithRedis(t)
+		miniRedis.SetError(redisIsUnhappy)
+
+		err := memoryCache.Delete(t.Context(), "test:data")
+		assert.Error(t, err, "must return the error redis replied with")
+	})
+}
+
 func TestRedisCache_CompareAndSwap(t *testing.T) {
 	t.Run("swaps when the current value matches", func(t *testing.T) {
 		memoryCache := NewTestCache(t)
