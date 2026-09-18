@@ -1,0 +1,174 @@
+---
+title: "Internal Endpoints"
+description: "The endpoints monetr's own web app calls: Plaid Link, proof of work, icon search and transaction imports. Listed so you know they exist, not to build on."
+---
+
+import { Badge } from "@rspress/core/theme";
+
+# Internal Endpoints
+
+:::warning Internal
+Everything on this page exists to serve the monetr app and can change in any release without notice. It's documented so
+you know it's there, not so you can build on it.
+:::
+
+These endpoints get a request line, an auth line, and one sentence. No parameter tables, no examples. Withholding the
+full template is deliberate: a documented request and response shape reads as a promise, and these don't come with one.
+
+If you want to know what one of these does, read the handler in `server/controller/`. That's the only thing that's
+current. Everything not on this page is covered by the [support posture](./overview#whats-supported-and-what-isnt).
+
+## <Badge type="info">GET</Badge> App configuration
+
+Tells the web app what this server has turned on: whether sign-up is allowed, whether Plaid is configured, which
+features exist, and what build is running.
+
+```http
+GET /api/config
+```
+
+**Auth:** None.
+
+The response struct is declared inline in the handler and changes whenever the app needs something new from it.
+
+## <Badge type="tip">POST</Badge> Proof of work challenge
+
+Issues a challenge that the browser has to solve before it's allowed to submit sign-in, registration, password reset or
+API key creation. Returns 404 when proof of work is off.
+
+```http
+POST /api/authentication/challenge
+```
+
+**Auth:** None.
+
+Only meaningful paired with the solver in the web app, which is why the endpoints that consume its output are the ones
+you'd otherwise reach for.
+
+## <Badge type="tip">POST</Badge> Icon search
+
+Looks up a merchant icon by name for the app's icon picker. Returns 204 when there's no match and 404 when icons weren't
+compiled into the build.
+
+```http
+POST /api/icons/search
+```
+
+**Auth:** API key, subscription required.
+
+## <Badge type="info">GET</Badge> Institution details
+
+Proxies Plaid's institution lookup so the app can show a bank's name and logo. The response is Plaid's shape, passed
+through unchanged, so monetr isn't in a position to promise anything about it.
+
+```http
+GET /api/institutions/:institutionId
+```
+
+**Auth:** Not available to API keys.
+
+## Plaid Link
+
+These six are one conversation, not six endpoints. Plaid's browser SDK holds the other half of it, and the whole
+exchange only makes sense in a browser that can run it. This is the archetype for everything on this page.
+
+All six return 406 on a server without Plaid configured.
+
+Get a link token to hand to Plaid's SDK to start connecting a bank:
+
+```http
+GET /api/plaid/link/token/new
+```
+
+**Auth:** Not available to API keys.
+
+Exchange the public token the SDK gives you back for a real connection:
+
+```http
+POST /api/plaid/link/token/callback
+```
+
+**Auth:** Not available to API keys.
+
+Start the re-authentication flow for a link whose credentials went stale:
+
+```http
+PUT /api/plaid/link/update/:linkId
+```
+
+**Auth:** Not available to API keys.
+
+Finish that re-authentication flow:
+
+```http
+POST /api/plaid/link/update/callback
+```
+
+**Auth:** Not available to API keys.
+
+Long poll while monetr sets up a newly connected link, so the app can show a spinner rather than an empty budget:
+
+```http
+GET /api/plaid/link/setup/wait/:linkId
+```
+
+**Auth:** Not available to API keys.
+
+Trigger a manual sync of a Plaid link:
+
+```http
+POST /api/plaid/link/sync
+```
+
+**Auth:** Not available to API keys.
+
+## Transaction imports and mappings
+
+An unfinished feature. These five endpoints only register when `Features.TransactionImports` is enabled, and nothing in
+the monetr app calls any of them yet. There's a TypeScript model for import mappings in the frontend and no code using
+it.
+
+Documenting them with the full template would describe a contract that isn't settled. When the feature ships they'll
+move onto a real page.
+
+If you want to import transactions today, use the [file upload flow](./uploads), which is finished and does work.
+
+List the saved column mappings used to interpret an import file:
+
+```http
+GET /api/mappings
+```
+
+**Auth:** API key, subscription required.
+
+Save a new column mapping:
+
+```http
+POST /api/mappings
+```
+
+**Auth:** API key, subscription required.
+
+Start an import on a bank account:
+
+```http
+POST /api/bank_accounts/:bankAccountId/transactions/import
+```
+
+**Auth:** API key, subscription required.
+
+Check on an import:
+
+```http
+GET /api/bank_accounts/:bankAccountId/transactions/import/:transactionImportId
+```
+
+**Auth:** API key, subscription required.
+
+Update an in-progress import:
+
+```http
+PATCH /api/bank_accounts/:bankAccountId/transactions/import/:transactionImportId
+```
+
+**Auth:** API key, subscription required.

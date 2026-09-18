@@ -331,7 +331,7 @@ func TestPostTransactionUpload(t *testing.T) {
 			WithPath("bankAccountId", "bac_fake").
 			WithMultipart().
 			WithFileBytes("data", "transactions.ofx", fixtures.LoadFile(t, "sample-part-one.ofx")).
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
@@ -390,7 +390,7 @@ func TestGetTransactionUpload(t *testing.T) {
 		response := e.GET("/api/bank_accounts/{bankAccountId}/transactions/upload/{transactionUploadId}").
 			WithPath("bankAccountId", "bac_fake").
 			WithPath("transactionUploadId", "txup_fake").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
@@ -467,7 +467,7 @@ func TestGetTransactionUploadProgress(t *testing.T) {
 		response := e.GET("/api/bank_accounts/{bankAccountId}/transactions/upload/{transactionUploadId}/progress").
 			WithPath("bankAccountId", "bac_fake").
 			WithPath("transactionUploadId", "txup_fake").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 
 		response.Status(http.StatusUnauthorized)

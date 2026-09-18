@@ -13,10 +13,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-const (
-	ApiKeySecretPrefix = "monetr_secret_"
-)
-
 // apiKeySecretEncoding is just base32 without padding because i think trailing
 // equal signs looks ugly
 var apiKeySecretEncoding = base32.StdEncoding.WithPadding(base32.NoPadding)
@@ -68,12 +64,12 @@ func (o *ApiKey) BeforeUpdate(ctx context.Context) (context.Context, error) {
 // validate it against this [ApiKey]. It simply returns true or false indicating
 // whether or not the credentials are valid for this specific record.
 func (o *ApiKey) Verify(keyId ID[ApiKey], secret string) bool {
-	if o.ApiKeyId != keyId || !strings.HasPrefix(secret, ApiKeySecretPrefix) {
+	if o.ApiKeyId != keyId {
 		return false
 	}
 
 	// I miss clojure :(
-	encoded := strings.ToUpper(strings.TrimPrefix(secret, ApiKeySecretPrefix))
+	encoded := strings.ToUpper(secret)
 	seed, err := apiKeySecretEncoding.DecodeString(encoded)
 	if err != nil || len(seed) != ed25519.SeedSize {
 		return false
@@ -101,5 +97,5 @@ func NewApiKey() (*ApiKey, string, error) {
 
 	return &ApiKey{
 		PublicKey: public,
-	}, ApiKeySecretPrefix + strings.ToLower(secret), nil
+	}, strings.ToLower(secret), nil
 }

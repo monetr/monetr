@@ -128,7 +128,7 @@ describe('api keys settings page', () => {
       createdBy: 'user_01hy4rbb1gjdek7h2xmgy5pnwk',
       updatedAt: '2023-07-02T04:22:52.48118Z',
       deletedAt: null,
-      secret: 'monetr_secret_aebagbafaydqqcikbmga2dqpcaireeyuculbogazdinryhi6d4qa',
+      secret: 'aebagbafaydqqcikbmga2dqpcaireeyuculbogazdinryhi6d4qa',
     });
 
     const world = testRenderer(<SettingsAPIKeys />, { initialRoute: '/settings/api' });
@@ -145,7 +145,7 @@ describe('api keys settings page', () => {
     // Once the key is created the modal should move to the secret step, showing the key id and the secret.
     await waitFor(() => expect(world.getByTestId('create-api-key-secret')).toBeVisible());
     expect(world.getByText('key_01hy4rfqk8z4xv1c2v44cf6abc')).toBeVisible();
-    expect(world.getByText('monetr_secret_aebagbafaydqqcikbmga2dqpcaireeyuculbogazdinryhi6d4qa')).toBeVisible();
+    expect(world.getByText('aebagbafaydqqcikbmga2dqpcaireeyuculbogazdinryhi6d4qa')).toBeVisible();
 
     // Proof of work is disabled in the config above, so the only thing that should go over the wire is the name.
     const postHistory = mockFetch.history.post;

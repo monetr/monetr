@@ -40,7 +40,7 @@ func TestGetForecast(t *testing.T) {
 
 		response := e.GET(`/api/bank_accounts/{bankAccountId}/forecast`).
 			WithPath("bankAccountId", "bac_"+gofakeit.UUID()).
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 		response.Status(http.StatusUnauthorized)
 	})
@@ -86,7 +86,7 @@ func TestPostForecastNewSpending(t *testing.T) {
 
 		response := e.POST(`/api/bank_accounts/{bankAccountId}/forecast/spending`).
 			WithPath("bankAccountId", "bac_"+gofakeit.UUID()).
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			WithJSON(map[string]any{
 				"fundingScheduleId": "fund_" + gofakeit.UUID(),
 				"spendingType":      models.SpendingTypeGoal,
@@ -131,7 +131,7 @@ func TestPostForecastNextFunding(t *testing.T) {
 
 		response := e.POST(`/api/bank_accounts/{bankAccountId}/forecast/next_funding`).
 			WithPath("bankAccountId", "bac_"+gofakeit.UUID()).
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			WithJSON(map[string]any{
 				"fundingScheduleId": "fund_" + gofakeit.UUID(),
 			}).

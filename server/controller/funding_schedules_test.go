@@ -392,7 +392,7 @@ func TestPostFundingSchedules(t *testing.T) {
 
 		response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
 			WithPath("bankAccountId", "bac_fake").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			WithJSON(map[string]any{
 				"name":        "Payday",
 				"description": "15th and the Last day of every month",
@@ -933,7 +933,7 @@ func TestPatchFundingSchedule(t *testing.T) {
 		response := e.PATCH("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
 			WithPath("bankAccountId", "bac_fake").
 			WithPath("fundingScheduleId", "fund_fake").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			WithJSON(map[string]any{
 				"name": "This is an updated name",
 			}).
@@ -1122,7 +1122,7 @@ func TestDeleteFundingSchedules(t *testing.T) {
 		response := e.DELETE("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
 			WithPath("bankAccountId", "bac_fake").
 			WithPath("fundingScheduleId", "fund_fake").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
@@ -1280,7 +1280,7 @@ func TestGetFundingSchedulesByID(t *testing.T) {
 		response := e.GET("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
 			WithPath("bankAccountId", "bac_fake").
 			WithPath("fundingScheduleId", "fund_fake").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
@@ -1315,7 +1315,7 @@ func TestGetFundingSchedules(t *testing.T) {
 
 		response := e.GET("/api/bank_accounts/{bankAccountId}/funding_schedules").
 			WithPath("bankAccountId", "bac_fake").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 
 		response.Status(http.StatusUnauthorized)

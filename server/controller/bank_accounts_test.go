@@ -985,7 +985,7 @@ func TestPostBankAccount(t *testing.T) {
 		// unauthorized.
 		_, e := NewTestApplication(t)
 		response := e.POST("/api/bank_accounts").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			WithJSON(map[string]any{
 				"linkId": "link_01hy4rbb1gjdek7h2xmgy5pnwk",
 				"name":   "Checking Account",
@@ -1924,7 +1924,7 @@ func TestPatchBankAccount(t *testing.T) {
 		_, e := NewTestApplication(t)
 		response := e.PATCH("/api/bank_accounts/{bankAccountId}").
 			WithPath("bankAccountId", "bac_"+gofakeit.UUID()).
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			WithJSON(map[string]any{
 				"name": "My New Name",
 			}).
@@ -2233,7 +2233,7 @@ func TestDeleteBankAccount(t *testing.T) {
 		_, e := NewTestApplication(t)
 		response := e.DELETE("/api/bank_accounts/{bankAccountId}").
 			WithPath("bankAccountId", "bac_"+gofakeit.UUID()).
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 		response.Status(http.StatusUnauthorized)
 	})
@@ -2268,7 +2268,7 @@ func TestGetBankAccounts(t *testing.T) {
 		// call comes back unauthorized.
 		_, e := NewTestApplication(t)
 		response := e.GET("/api/bank_accounts").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 		response.Status(http.StatusUnauthorized)
 	})
@@ -2302,7 +2302,7 @@ func TestGetBankAccount(t *testing.T) {
 		_, e := NewTestApplication(t)
 		response := e.GET("/api/bank_accounts/{bankAccountId}").
 			WithPath("bankAccountId", "bac_"+gofakeit.UUID()).
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 		response.Status(http.StatusUnauthorized)
 	})
@@ -2340,7 +2340,7 @@ func TestGetBankAccountBalances(t *testing.T) {
 		_, e := NewTestApplication(t)
 		response := e.GET("/api/bank_accounts/{bankAccountId}/balances").
 			WithPath("bankAccountId", "bac_"+gofakeit.UUID()).
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 		response.Status(http.StatusUnauthorized)
 	})

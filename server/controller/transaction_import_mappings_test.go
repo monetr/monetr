@@ -254,7 +254,7 @@ func TestPostTransactionImportMapping(t *testing.T) {
 		_, e := NewTestApplication(t)
 
 		response := e.POST("/api/mappings").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			WithJSON(map[string]any{
 				"mapping": map[string]any{
 					"id":      map[string]any{"kind": "native", "fields": []any{map[string]any{"name": "Id"}}},
@@ -533,7 +533,7 @@ func TestGetTransactionImportMappings(t *testing.T) {
 		_, e := NewTestApplication(t)
 
 		response := e.GET("/api/mappings").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 
 		response.Status(http.StatusUnauthorized)

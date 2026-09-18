@@ -149,7 +149,7 @@ func TestGetTransactions(t *testing.T) {
 		// bogus.
 		response := e.GET("/api/bank_accounts/{bankAccountId}/transactions").
 			WithPath("bankAccountId", "bac_fake").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
@@ -190,7 +190,7 @@ func TestGetTransaction(t *testing.T) {
 		response := e.GET("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
 			WithPath("bankAccountId", "bac_fake").
 			WithPath("transactionId", "txn_fake").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
@@ -242,7 +242,7 @@ func TestGetSimilarTransactions(t *testing.T) {
 		response := e.GET("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}/similar").
 			WithPath("bankAccountId", "bac_fake").
 			WithPath("transactionId", "txn_fake").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
@@ -775,7 +775,7 @@ func TestPostTransactions(t *testing.T) {
 		// key must be rejected even with a bogus bank account Id in the path.
 		response := e.POST("/api/bank_accounts/{bankAccountId}/transactions").
 			WithPath("bankAccountId", "bac_fake").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			WithJSON(map[string]any{
 				"amount":    100,
 				"isPending": false,
@@ -2142,7 +2142,7 @@ func TestPatchTransaction(t *testing.T) {
 		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
 			WithPath("bankAccountId", "bac_fake").
 			WithPath("transactionId", "txn_fake").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			WithJSON(map[string]any{
 				"name": "A More Friendly Name",
 			}).
@@ -2825,7 +2825,7 @@ func TestDeleteTransactions(t *testing.T) {
 		response := e.DELETE("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
 			WithPath("bankAccountId", "bac_fake").
 			WithPath("transactionId", "txn_fake").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 
 		response.Status(http.StatusUnauthorized)

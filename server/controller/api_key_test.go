@@ -306,7 +306,7 @@ func TestApiKeyAuthentication(t *testing.T) {
 		e.GET("/api/files").
 			WithBasicAuth(
 				models.NewID[models.ApiKey]().String(),
-				"monetr_secret_"+gofakeit.UUID(),
+				gofakeit.UUID(),
 			).
 			Expect().
 			Status(http.StatusUnauthorized)
@@ -322,7 +322,7 @@ func TestApiKeyAuthentication(t *testing.T) {
 		e.GET("/api/files").
 			WithBasicAuth(
 				models.NewID[models.ApiKey]().String(),
-				"monetr_secret_"+gofakeit.UUID(),
+				gofakeit.UUID(),
 			).
 			Expect().
 			Status(http.StatusInternalServerError)

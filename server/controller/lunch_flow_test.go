@@ -61,7 +61,7 @@ func TestPostLunchFlowLink(t *testing.T) {
 		// middleware before the request ever reaches the handler.
 		_, e := NewTestApplication(t)
 		response := e.POST("/api/lunch_flow/link").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			WithJSON(map[string]any{
 				"name":         "US Bank",
 				"lunchFlowURL": "https://www.lunchflow.app/api/v1",
@@ -444,7 +444,7 @@ func TestPostLunchFlowLinkBankAccountsRefresh(t *testing.T) {
 		_, e := NewTestApplication(t)
 		response := e.POST("/api/lunch_flow/link/{lunchFlowLinkId}/bank_accounts/refresh").
 			WithPath("lunchFlowLinkId", "lfx_bogusbogusbogusbogusbo").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
@@ -651,7 +651,7 @@ func TestGetLunchFlowLinks(t *testing.T) {
 	t.Run("with an invalid api key", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 		response := e.GET("/api/lunch_flow/link").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
@@ -746,7 +746,7 @@ func TestPostLunchFlowLinkSync(t *testing.T) {
 	t.Run("with an invalid api key", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 		response := e.POST("/api/lunch_flow/link/sync").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			WithJSON(map[string]any{
 				"linkId": "link_bogusbogusbogusbogusbo",
 			}).
@@ -935,7 +935,7 @@ func TestGetLunchFlowLink(t *testing.T) {
 		_, e := NewTestApplication(t)
 		response := e.GET("/api/lunch_flow/link/{lunchFlowLinkId}").
 			WithPath("lunchFlowLinkId", "lfx_bogusbogusbogusbogusbo").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
@@ -980,7 +980,7 @@ func TestGetLunchFlowLinkBankAccounts(t *testing.T) {
 		_, e := NewTestApplication(t)
 		response := e.GET("/api/lunch_flow/link/{lunchFlowLinkId}/bank_accounts").
 			WithPath("lunchFlowLinkId", "lfx_bogusbogusbogusbogusbo").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
@@ -1020,7 +1020,7 @@ func TestGetLunchFlowLinkSyncProgress(t *testing.T) {
 		response := e.GET("/api/lunch_flow/link/sync/{linkId}/bank_account/{bankAccountId}/progress").
 			WithPath("linkId", "link_bogusbogusbogusbogusbo").
 			WithPath("bankAccountId", "bac_bogusbogusbogusbogusbo").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
