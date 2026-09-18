@@ -246,17 +246,31 @@ func getViper(configFilePath []string) *viper.Viper {
 	setupDefaults(v)
 	setupEnv(v)
 
-	switch len(FilePath) {
+	switch len(configFilePath) {
 	case 0:
+		// No config file was specified, so look in the default locations. These are
+		// directories, viper will look for a config.yaml inside each one in the
+		// order they are added here.
+		v.SetConfigName("config")
+
 		{ // If we can determine the user's home directory, then look there.
 			homeDir, err := os.UserHomeDir()
 			if err == nil {
-				v.AddConfigPath(path.Join(homeDir, "/.monetr/config.yaml"))
+				v.AddConfigPath(path.Join(homeDir, ".monetr"))
 			}
 		}
 
-		v.AddConfigPath("/etc/monetr/config.yaml")
-		v.AddConfigPath("config.yaml")
+		v.AddConfigPath("/etc/monetr")
+		v.AddConfigPath(".")
+
+		// Not having a config file at all is completely valid, monetr can run on
+		// its defaults plus environment variables. But if a config file is there
+		// and we cannot read it then something is actually wrong.
+		if err := v.ReadInConfig(); err != nil {
+			if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+				log.Fatalf("failed to read config: %+v", err)
+			}
+		}
 	default:
 		for i := range configFilePath {
 			path := configFilePath[i]
