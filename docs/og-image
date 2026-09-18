@@ -117,7 +117,7 @@ async function generateOg() {
                       fontSize: 32,
                       opacity: 0.85,
                     },
-                    children: `monetr now has API credentials, built on ed25519 keypairs instead of hashes, plus a lot of rambling about PATCH mechanics in Golang.`,
+                    children: `monetr now has API credentials, built on ed25519 keypairs, plus a lot of rambling about PATCH mechanics in Golang.`,
                   },
                 },
               ],

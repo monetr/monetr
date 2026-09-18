@@ -19,12 +19,10 @@ func TestNewApiKey(t *testing.T) {
 		require.NotNil(t, key, "generated key must not be nil")
 
 		assert.Len(t, key.PublicKey, ed25519.PublicKeySize, "the stored key should be an ed25519 public key")
-		assert.True(t, strings.HasPrefix(secret, ApiKeySecretPrefix), "the secret must have the secret prefix")
 
 		// The secret is the base32 encoded private key seed, and it should be lower
 		// case so that it is easier to read and copy.
-		encoded := strings.TrimPrefix(secret, ApiKeySecretPrefix)
-		assert.Equal(t, strings.ToLower(encoded), encoded, "the encoded secret should be lower case")
+		assert.Equal(t, strings.ToLower(secret), secret, "the encoded secret should be lower case")
 		assert.NotContains(t, secret, "=", "the secret should not contain base32 padding characters")
 
 		// A freshly generated key does not have an Id or timestamps yet, those are
@@ -64,12 +62,6 @@ func TestApiKey_Verify(t *testing.T) {
 		assert.False(t, key.Verify(NewID[ApiKey](), secret), "a secret must not verify against the wrong key Id")
 	})
 
-	t.Run("secret without the prefix", func(t *testing.T) {
-		key, secret := newKey(t)
-		stripped := strings.TrimPrefix(secret, ApiKeySecretPrefix)
-		assert.False(t, key.Verify(key.ApiKeyId, stripped), "a secret missing the prefix must not verify")
-	})
-
 	t.Run("secret from a different key", func(t *testing.T) {
 		key, _ := newKey(t)
 		_, otherSecret := newKey(t)
@@ -81,20 +73,15 @@ func TestApiKey_Verify(t *testing.T) {
 		assert.False(t, key.Verify(key.ApiKeyId, ""), "an empty secret must not verify")
 	})
 
-	t.Run("only the prefix", func(t *testing.T) {
-		key, _ := newKey(t)
-		assert.False(t, key.Verify(key.ApiKeyId, ApiKeySecretPrefix), "a secret that is only the prefix must not verify")
-	})
-
 	t.Run("secret is not valid base32", func(t *testing.T) {
 		key, _ := newKey(t)
-		secret := ApiKeySecretPrefix + "this is not base32!"
+		secret := "this is not base32!"
 		assert.False(t, key.Verify(key.ApiKeyId, secret), "a secret that is not valid base32 must not verify")
 	})
 
 	t.Run("uppercase secret still verifies", func(t *testing.T) {
 		key, secret := newKey(t)
-		shouty := ApiKeySecretPrefix + strings.ToUpper(strings.TrimPrefix(secret, ApiKeySecretPrefix))
+		shouty := strings.ToUpper(secret)
 		assert.True(t, key.Verify(key.ApiKeyId, shouty), "the secret should be case insensitive")
 	})
 
@@ -107,12 +94,11 @@ func TestApiKey_Verify(t *testing.T) {
 		const alphabet = "abcdefghijklmnopqrstuvwxyz234567"
 
 		key, secret := newKey(t)
-		encoded := strings.TrimPrefix(secret, ApiKeySecretPrefix)
-		require.Len(t, encoded, 52, "an encoded ed25519 seed should be 52 base32 characters")
+		require.Len(t, secret, 52, "an encoded ed25519 seed should be 52 base32 characters")
 
 		verified := make([]string, 0, 1)
 		for _, char := range alphabet {
-			candidate := ApiKeySecretPrefix + encoded[:len(encoded)-1] + string(char)
+			candidate := secret[:len(secret)-1] + string(char)
 			if key.Verify(key.ApiKeyId, candidate) {
 				verified = append(verified, candidate)
 			}
@@ -126,7 +112,7 @@ func TestApiKey_Verify(t *testing.T) {
 		// A perfectly valid (unpadded) base32 string, but it decodes to 16 bytes
 		// instead of the 32 byte ed25519 seed size.
 		shortSeed := base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(make([]byte, 16))
-		secret := ApiKeySecretPrefix + strings.ToLower(shortSeed)
+		secret := strings.ToLower(shortSeed)
 		assert.False(t, key.Verify(key.ApiKeyId, secret), "a seed that is not the ed25519 seed size must not verify")
 	})
 }

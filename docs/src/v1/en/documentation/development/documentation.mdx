@@ -67,7 +67,7 @@ endpoints page rather than the full treatment.
 ### Writing a page
 
 Read the Go code first: the route registration in `routes.go` (its middleware group tells you the auth line), the
-handler, the request and response structs with their json tags, and the handler's tests. Never document from a handler
+handler, the request and response structs with their `json` tags, and the handler's tests. Never document from a handler
 name, and never invent a field or behavior you can't confirm from the code, leave a `{/* TODO(docs): ... */}` instead.
 
 Every endpoint follows the same shape:

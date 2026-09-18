@@ -49,7 +49,7 @@ func TestSearchIcon(t *testing.T) {
 
 		// A well formed but unknown API key must be rejected.
 		response := e.POST("/api/icons/search").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			WithJSON(map[string]any{
 				"name": "amazon",
 			}).

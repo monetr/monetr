@@ -78,7 +78,7 @@ func TestPostSpending(t *testing.T) {
 		_, e := NewTestApplication(t)
 		response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 			WithPath("bankAccountId", "bac_fake").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 		response.Status(http.StatusUnauthorized)
 	})
@@ -945,7 +945,7 @@ func TestGetSpending(t *testing.T) {
 		_, e := NewTestApplication(t)
 		response := e.GET("/api/bank_accounts/{bankAccountId}/spending").
 			WithPath("bankAccountId", "bac_fake").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 		response.Status(http.StatusUnauthorized)
 	})
@@ -1146,7 +1146,7 @@ func TestGetSpendingByID(t *testing.T) {
 		response := e.GET("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
 			WithPath("bankAccountId", "bac_fake").
 			WithPath("spendingId", "spnd_fake").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 		response.Status(http.StatusUnauthorized)
 	})
@@ -1454,7 +1454,7 @@ func TestGetSpendingTransactions(t *testing.T) {
 		response := e.GET("/api/bank_accounts/{bankAccountId}/spending/{spendingId}/transactions").
 			WithPath("bankAccountId", "bac_fake").
 			WithPath("spendingId", "spnd_fake").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 		response.Status(http.StatusUnauthorized)
 	})
@@ -1770,7 +1770,7 @@ func TestPostSpendingTransfer(t *testing.T) {
 		_, e := NewTestApplication(t)
 		response := e.POST("/api/bank_accounts/{bankAccountId}/spending/transfer").
 			WithPath("bankAccountId", "bac_fake").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 		response.Status(http.StatusUnauthorized)
 	})
@@ -2444,7 +2444,7 @@ func TestPatchSpending(t *testing.T) {
 		response := e.PATCH("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
 			WithPath("bankAccountId", "bac_fake").
 			WithPath("spendingId", "spnd_fake").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 		response.Status(http.StatusUnauthorized)
 	})
@@ -4534,7 +4534,7 @@ func TestDeleteSpending(t *testing.T) {
 		response := e.DELETE("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
 			WithPath("bankAccountId", "bac_fake").
 			WithPath("spendingId", "spnd_fake").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 		response.Status(http.StatusUnauthorized)
 	})

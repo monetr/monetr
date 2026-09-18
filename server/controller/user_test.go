@@ -130,7 +130,7 @@ func TestMe(t *testing.T) {
 
 		// A well formed but unknown API key must be rejected.
 		response := e.GET(`/api/users/me`).
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 
 		response.Status(http.StatusUnauthorized)

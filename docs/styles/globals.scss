@@ -69,11 +69,8 @@
   --mtr-font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo,
     Consolas, monospace;
 
-  /* Reading measure. At 15.5px Inter, 640px is ~80 characters a line, 600px
-     for a tighter 73. Wide is the escape hatch for diagrams and tables.
-     Scrollbar matches ::-webkit-scrollbar below, 100vw counts it and we do
-     not. */
-  --mtr-measure: 640px;
+  /* make the body wider a bit for reasier reading */
+  --mtr-measure: 720px;
   --mtr-measure-wide: 1080px;
   --mtr-scrollbar: 16px;
 }
@@ -1103,4 +1100,19 @@ mark {
   font-size: 10px;
   line-height: 16px;
   vertical-align: middle;
+}
+
+/* rspress-plugin-mermaid wraps the SVG in a bare div, and mermaid caps it with
+ * an inline max-width, so narrow diagrams sat against the left edge. */
+svg[role~='graphics-document'] {
+  display: block;
+  margin-inline: auto;
+  /* Same card as MergeDiagram's sheets. Colors inside the diagram come from
+   * themeVariables in rspress.config.ts. */
+  box-sizing: border-box;
+  padding: 16px;
+  background: var(--mtr-surface);
+  border: 1px solid var(--mtr-line);
+  border-radius: var(--rp-radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
 }
