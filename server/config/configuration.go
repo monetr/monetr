@@ -128,8 +128,7 @@ type PostgreSQL struct {
 // without slowing real users (the work runs in a background web worker).
 type ProofOfWork struct {
 	// Active when true. When disabled the challenge endpoint 404s and the auth
-	// endpoints skip the check. Disabled by default for now, set
-	// MONETR_PROOF_OF_WORK_ENABLED=true to turn it on.
+	// endpoints skip the check.
 	Enabled bool `yaml:"enabled"`
 	// Leading zero bits the solution must have; each extra bit doubles the work.
 	// 16 is roughly 1 second on a desktop, 2 to 4 on a low end phone.
@@ -383,9 +382,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("KeyManagement.Provider", "plaintext")
 	v.SetDefault("Plaid.Enabled", true)
 	v.SetDefault("Plaid.CountryCodes", []plaid.CountryCode{plaid.COUNTRYCODE_US})
-	// Disabled by default for the first release so existing deployments opt in;
-	// likely flips to true in a later release once announced.
-	v.SetDefault("ProofOfWork.Enabled", false)
+	v.SetDefault("ProofOfWork.Enabled", true)
 	v.SetDefault("ProofOfWork.Difficulty", 16)
 	v.SetDefault("ProofOfWork.Lifetime", 5*time.Minute)
 	v.SetDefault("PostgreSQL.Address", "localhost")
