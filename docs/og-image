@@ -150,7 +150,7 @@ async function generateOg() {
   const pngData = resvg.render().asPng();
 
   const outputPaths = [
-    'docs/src/public/v1/en/blog/2026-08-07-api-credentials/preview.png',
+    'docs/src/public/v1/en/blog/2026-09-24-api-credentials/preview.png',
   ];
   outputPaths.forEach(outputPath => {
     fs.writeFileSync(outputPath, pngData);
