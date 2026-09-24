@@ -81,7 +81,7 @@ export default defineConfig({
   performance: {
     preload: {
       type: 'all-assets',
-      include: [/inter-latin-wght-normal.*\.woff2$/],
+      include: [/inter-latin-wght-normal.*\.woff2$/, /jetbrains-mono-latin-\d+-normal.*\.woff2$/],
     },
   },
   output: {
