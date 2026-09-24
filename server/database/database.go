@@ -40,15 +40,16 @@ func GetDatabase(
 		// the old behavior, long running things like migrations rely on it.
 		pgdriver.WithReadTimeout(0),
 		pgdriver.WithWriteTimeout(0),
-		// No TLS unless a CA certificate is configured below, same as go-pg.
+		// No TLS unless it is enabled below.
 		pgdriver.WithInsecure(true),
 	}
 
-	// TODO Make it so that the TLS config will work even when a CA certificate is
-	// not being provided. This would be ideal for something where the PostgreSQL
-	// TLS certificate is a well know certificate already included in the
-	// certificate authority bundle on the OS.
-	if configuration.PostgreSQL.CACertificatePath != "" {
+	// If no CA certificate is provided then the server certificate is verified
+	// against the system certificate authorities instead.
+	if configuration.PostgreSQL.TLS ||
+		configuration.PostgreSQL.CACertificatePath != "" ||
+		configuration.PostgreSQL.CertificatePath != "" ||
+		configuration.PostgreSQL.KeyPath != "" {
 		certificates, err := certs.NewFileSource(log, certs.Options{
 			CACertificatePath:  configuration.PostgreSQL.CACertificatePath,
 			CertificatePath:    configuration.PostgreSQL.CertificatePath,

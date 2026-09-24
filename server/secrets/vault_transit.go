@@ -75,18 +75,22 @@ func NewVaultTransit(
 		usingCustomTLS: config.TLSCAPath != "",
 	}
 
-	trip := round.NewObservabilityRoundTripper(&http.Transport{
+	transport := &http.Transport{
 		IdleConnTimeout: config.IdleConnTimeout,
-	}, func(ctx context.Context, request *http.Request, _ *http.Response, err error) {
-		logEntry := log.With(slog.Group("vault",
-			"method", request.Method,
-			"url", request.URL.String(),
-		))
-		if err != nil {
-			logEntry = logEntry.With("err", err)
-		}
-		logEntry.Log(ctx, logging.LevelTrace, "making request to vault API")
-	})
+	}
+	trip := round.NewObservabilityRoundTripper(
+		transport,
+		func(ctx context.Context, request *http.Request, _ *http.Response, err error) {
+			logEntry := log.With(slog.Group("vault",
+				"method", request.Method,
+				"url", request.URL.String(),
+			))
+			if err != nil {
+				logEntry = logEntry.With("err", err)
+			}
+			logEntry.Log(ctx, logging.LevelTrace, "making request to vault API")
+		},
+	)
 
 	vaultConfig := &vault.Config{
 		Address: config.Address,
@@ -120,10 +124,9 @@ func NewVaultTransit(
 			return nil, errors.Wrap(err, "failed to configure TLS")
 		}
 		helper.certificates.Start()
-		vaultConfig.HttpClient.Transport = &http.Transport{
-			TLSClientConfig: helper.certificates.ClientConfig(),
-			IdleConnTimeout: config.IdleConnTimeout,
-		}
+		// Set the TLS config on the inner transport so requests still go through
+		// the observability round tripper.
+		transport.TLSClientConfig = helper.certificates.ClientConfig()
 	}
 
 	helper.client, err = vault.NewClient(vaultConfig)

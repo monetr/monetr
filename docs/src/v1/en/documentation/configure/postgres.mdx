@@ -16,6 +16,7 @@ postgresql:
   username: "monetr"
   password: "..."
   database: "monetr"
+  tls: false
   insecureSkipVerify: false
   caCertificatePath: "</tls/ca.cert>"
   keyPath: "</tls/tls.key>"
@@ -29,6 +30,7 @@ postgresql:
 | `username`           | String   | `postgres`  | Username that monetr should use to authenticate the PostgreSQL server.                                                                                                                                |
 | `password`           | String   |             | Password that monetr should use to authenticate the PostgreSQL server.                                                                                                                                |
 | `database`           | String   | `postgres`  | Database that monetr should use, monetr may attempt to run migrations on startup. The user monetr is using should have permissions to create tables and extensions.                                   |
+| `tls`                | Boolean  | `false`     | If true then monetr will connect to PostgreSQL using TLS. TLS is also used if any of the certificate paths below are provided.                                                                        |
 | `insecureSkipVerify` | Boolean  | `false`     | If you are using TLS with PostgreSQL but are not distributing a certificate authority file, then you may need to skip TLS verification.                                                               |
 | `caCertificatePath`  | String   |             | Path to the certificate authority certificate file. If you are verifying your TLS connection then this is required or the server certificate must be among the hosts certificate authorities already. |
 | `keyPath`            | String   |             | Path to the client TLS key that monetr should use to connect to the PostgreSQL server.                                                                                                                |
@@ -36,8 +38,9 @@ postgresql:
 | `migrate`            | Boolean  | `true`      | Automatically apply database migrations on startup.                                                                                                                                                   |
 
 :::info
-monetr does watch for certificate changes on the filesystem to facilitate certificate rotation without needing to
-restart the server. However this functionality does not always work and should not be relied on at this time.
+monetr watches the certificate files for changes, so certificates can be rotated without restarting the server. New
+connections to PostgreSQL will use the new certificates right away, and existing connections are replaced with new ones
+within a few minutes.
 :::
 
 The following environment variables map to the following configuration file fields. Each field is documented below.
@@ -49,6 +52,7 @@ The following environment variables map to the following configuration file fiel
 | `MONETR_PG_USERNAME`             | `postgresql.username`           |
 | `MONETR_PG_PASSWORD`             | `postgresql.password`           |
 | `MONETR_PG_DATABASE`             | `postgresql.database`           |
+| `MONETR_PG_TLS`                  | `postgresql.tls`                |
 | `MONETR_PG_INSECURE_SKIP_VERIFY` | `postgresql.insecureSkipVerify` |
 | `MONETR_PG_CA_PATH`              | `postgresql.caCertificatePath`  |
 | `MONETR_PG_KEY_PATH`             | `postgresql.keyPath`            |

@@ -71,10 +71,11 @@ func NewOpenBaoTransit(
 		usingCustomTLS: config.TLSCAPath != "",
 	}
 
+	transport := &http.Transport{
+		IdleConnTimeout: config.IdleConnTimeout,
+	}
 	trip := round.NewObservabilityRoundTripper(
-		&http.Transport{
-			IdleConnTimeout: config.IdleConnTimeout,
-		},
+		transport,
 		func(
 			ctx context.Context,
 			request *http.Request,
@@ -124,10 +125,9 @@ func NewOpenBaoTransit(
 			return nil, errors.Wrap(err, "failed to configure TLS")
 		}
 		helper.certificates.Start()
-		openbaoConfig.HttpClient.Transport = &http.Transport{
-			TLSClientConfig: helper.certificates.ClientConfig(),
-			IdleConnTimeout: config.IdleConnTimeout,
-		}
+		// Set the TLS config on the inner transport so requests still go through
+		// the observability round tripper.
+		transport.TLSClientConfig = helper.certificates.ClientConfig()
 	}
 
 	helper.client, err = openbao.NewClient(openbaoConfig)
