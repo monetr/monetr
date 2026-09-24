@@ -4,6 +4,7 @@ import { ErrorBoundary } from '@sentry/react';
 import MQueryClient from '@monetr/interface/components/MQueryClient';
 import MSnackbarProvider from '@monetr/interface/components/MSnackbarProvider';
 import PullToRefresh from '@monetr/interface/components/PullToRefresh';
+import ScrollToTopOnNavigate from '@monetr/interface/components/ScrollToTopOnNavigate';
 import { TooltipProvider } from '@monetr/interface/components/Tooltip';
 import Monetr from '@monetr/interface/monetr';
 
@@ -15,6 +16,7 @@ export default function Root(): React.JSX.Element {
           <TooltipProvider>
             <NiceModal.Provider>
               <PullToRefresh />
+              <ScrollToTopOnNavigate />
               <Monetr />
             </NiceModal.Provider>
           </TooltipProvider>
