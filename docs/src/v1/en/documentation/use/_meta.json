@@ -8,6 +8,7 @@
   { "type": "file", "name": "forecasting", "label": "Forecasting" },
   { "type": "dir", "name": "security", "label": "Security" },
   { "type": "file", "name": "billing", "label": "Billing" },
+  { "type": "file", "name": "api_keys", "label": "API Keys" },
   { "type": "section-header", "label": "Integrations" },
   { "type": "file", "name": "plaid", "label": "Plaid" },
   { "type": "file", "name": "lunch_flow", "label": "Lunch Flow" }

@@ -244,7 +244,7 @@ func TestPostTransactionImport(t *testing.T) {
 			WithPath("bankAccountId", "bac_unauthorized_test").
 			WithMultipart().
 			WithFileBytes("data", "transactions.csv", []byte("Date,Description,Amount\n2026-01-15,COFFEE,-4.50\n")).
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
@@ -517,7 +517,7 @@ func TestGetTransactionImport(t *testing.T) {
 		response := e.GET("/api/bank_accounts/{bankAccountId}/transactions/import/{transactionImportId}").
 			WithPath("bankAccountId", "bac_unauthorized_test").
 			WithPath("transactionImportId", "txim_unauthorized_test").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
@@ -1106,7 +1106,7 @@ func TestPatchTransactionImport(t *testing.T) {
 		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/import/{transactionImportId}").
 			WithPath("bankAccountId", "bac_unauthorized_test").
 			WithPath("transactionImportId", "txim_unauthorized_test").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			WithJSON(map[string]any{
 				"status": TransactionImportStatusPendingPreview,
 			}).

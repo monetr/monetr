@@ -328,7 +328,7 @@ func TestPostLink(t *testing.T) {
 		// A well formed but completely unknown API key must be rejected by the auth
 		// middleware before the request body is ever considered.
 		response := e.POST("/api/links").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			WithJSON(map[string]any{
 				"institutionName": "U.S. Bank",
 				"description":     "My personal link",
@@ -562,7 +562,7 @@ func TestGetLink(t *testing.T) {
 
 		// A well formed but unknown API key must not be able to list any links.
 		response := e.GET("/api/links").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
@@ -608,7 +608,7 @@ func TestGetLink(t *testing.T) {
 		// fine here; the unknown key is what gets rejected.
 		response := e.GET("/api/links/{linkId}").
 			WithPath("linkId", "link_bogus").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
@@ -873,7 +873,7 @@ func TestPatchLink(t *testing.T) {
 		// ever applied.
 		response := e.PATCH("/api/links/{linkId}").
 			WithPath("linkId", "link_bogus").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			WithJSON(map[string]any{
 				"institutionName": "My Own Name",
 			}).
@@ -1277,7 +1277,7 @@ func TestDeleteLink(t *testing.T) {
 		// retrieve or delete anything.
 		response := e.DELETE("/api/links/{linkId}").
 			WithPath("linkId", "link_bogus").
-			WithBasicAuth("key_"+gofakeit.UUID(), "monetr_secret_"+gofakeit.UUID()).
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			WithTimeout(5 * time.Second).
 			Expect()
 

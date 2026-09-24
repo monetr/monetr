@@ -19,9 +19,11 @@ export default function Header(): React.JSX.Element {
         </Typography>
       </div>
       <div className={styles.headerRowAction}>
-        <Button variant='outlined'>
-          <Book />
-          API Docs
+        <Button asChild variant='outlined'>
+          <a href='https://monetr.app/documentation/use/api_keys' rel='noopener noreferrer' target='_blank'>
+            <Book />
+            API Docs
+          </a>
         </Button>
         <Button data-testid='api-keys-create' onClick={showCreateAPIKeyModal}>
           <Plus />

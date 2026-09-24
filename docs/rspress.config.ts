@@ -9,6 +9,7 @@ import { pluginSitemap } from '@rspress/plugin-sitemap';
 import { transformerNotationHighlight } from '@shikijs/transformers';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
+import mermaid from 'rspress-plugin-mermaid';
 import readingTimePlugin from 'rspress-plugin-reading-time';
 
 const envName = process.env.NODE_ENV ?? 'development';
@@ -144,6 +145,44 @@ export default defineConfig({
     }),
     trailingSlashRedirects({ siteUrl: 'https://monetr.app' }),
     readingTimeDataPlugin,
+    mermaid({
+      // Colors mirror the --mtr-* tokens in styles/globals.scss so diagrams
+      // match the MergeDiagram cards. They have to be literal hex: mermaid
+      // derives shades from them and can't resolve CSS variables, and its
+      // inline styles are id-scoped so a stylesheet can't override them.
+      mermaidConfig: {
+        theme: 'base',
+        themeVariables: {
+          darkMode: true,
+          fontFamily: "'Inter Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          background: '#191324', // surface
+          primaryColor: '#201A2E', // surface-2
+          primaryBorderColor: '#2B2340', // line
+          primaryTextColor: '#EAE5F4', // text
+          lineColor: '#9C92B8', // muted
+          textColor: '#EAE5F4', // text
+          actorBkg: '#201A2E', // surface-2
+          actorBorder: '#2B2340', // line
+          actorTextColor: '#EAE5F4', // text
+          actorLineColor: '#6E6488', // faint
+          signalColor: '#9C92B8', // muted
+          signalTextColor: '#EAE5F4', // text
+          noteBkgColor: '#201A2E', // surface-2
+          noteBorderColor: '#221B33', // line-soft
+          noteTextColor: '#9C92B8', // muted
+          labelBoxBkgColor: '#201A2E', // surface-2
+          labelBoxBorderColor: '#2B2340', // line
+          labelTextColor: '#9C92B8', // muted
+          loopTextColor: '#9C92B8', // muted
+          activationBkgColor: '#201A2E', // surface-2
+          activationBorderColor: '#2B2340', // line
+          sequenceNumberColor: '#120E1A', // ink
+        },
+        sequence: {
+          wrap: true,
+        },
+      },
+    }),
   ],
   builderConfig: {
     plugins: [pluginSass()],
