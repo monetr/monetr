@@ -3407,6 +3407,8 @@ func TestPatchSpending(t *testing.T) {
 		// paused spending objects, so while the expense is paused its next
 		// recurrence will fall into the past.
 		app.Clock.Add(40 * 24 * time.Hour)
+		// Our token will have expired by now, so login again.
+		token = GivenILogin(t, e, user.Login.Email, password)
 
 		{ // Unpause the expense. Unpausing forces a recalculation, which should bump
 			// the stale next recurrence forward to the next one after now.
