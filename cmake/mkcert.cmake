@@ -18,10 +18,10 @@
 # from https://github.com/monetr/mkcert/releases and add a line for it.
 include(ExternalProject)
 set(MKCERT_REPOSITORY "monetr/mkcert")
-set(MKCERT_linux_amd64   "v1.4.5" "f4d838294e56d3a4a8f36633cbf93d972b7ad2229f9feddea922ef1278119bad")
-set(MKCERT_linux_arm64   "v1.4.5" "953b747e12f590af80be146100c0b3b02179a21737dec9cc643e2dfa6d57a508")
-set(MKCERT_darwin_amd64  "v1.4.5" "2a42fc7c684707d64a3cbb52b05901a1f28d12b16955feb9675ed676f7c92e94")
-set(MKCERT_darwin_arm64  "v1.4.5" "fa8d6cfd28bc3499e3db833a6935936106218ee289d36f28c6977444a91d43dc")
+set(MKCERT_linux_amd64   "v1.4.6" "139bb7138c942b8d4c00252c8da02d155fcc44ff2862038d8a5887483c5b2a33")
+set(MKCERT_linux_arm64   "v1.4.6" "263fe8e3713891be2be3076434c5cde5f1cac6de8e3059a93aad2d2e81a36405")
+set(MKCERT_darwin_amd64  "v1.4.6" "77c042aa6be8fcc0f349ef0ff73020b2ad2666940cabfa458b8df2aa56ad1c97")
+set(MKCERT_darwin_arm64  "v1.4.6" "011ae2b83da1c6a14c4ff5e06b7f0342d714f48b008d240a2aa2707c66c0d14f")
 
 # Figure out which pinned binary matches the host that cmake is running on. The
 # release assets use Go's GOOS/GOARCH naming so we have to translate cmake's
