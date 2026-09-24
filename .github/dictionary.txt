@@ -60,6 +60,7 @@ PricingPage
 QFX
 RADOSGW
 ReCAPTCHA
+RustFS
 S3
 S3-compatible
 SDK
