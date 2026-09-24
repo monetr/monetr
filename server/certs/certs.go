@@ -119,7 +119,7 @@ func NewFileSource(log *slog.Logger, options Options) (Source, error) {
 }
 
 func (f *fileSource) ClientConfig() *tls.Config {
-	return &tls.Config{
+	manuallyVerifiedConfig := &tls.Config{
 		MinVersion: tls.VersionTLS12,
 		ServerName: f.options.ServerName,
 		// Go does not provide a way to change RootCAs on a config that is already
@@ -129,6 +129,8 @@ func (f *fileSource) ClientConfig() *tls.Config {
 		GetClientCertificate: f.getClientCertificate,
 		VerifyConnection:     f.verifyConnection,
 	}
+
+	return manuallyVerifiedConfig
 }
 
 func (f *fileSource) getClientCertificate(
