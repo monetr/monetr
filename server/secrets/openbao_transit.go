@@ -2,13 +2,9 @@ package secrets
 
 import (
 	"context"
-	"crypto/rand"
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/base64"
 	"fmt"
 	"math"
-	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -18,7 +14,7 @@ import (
 
 	"log/slog"
 
-	"github.com/fsnotify/fsnotify"
+	"github.com/monetr/monetr/server/certs"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/round"
@@ -53,10 +49,7 @@ type OpenBaoTransit struct {
 	log             *slog.Logger
 	client          *openbao.Client
 	usingCustomTLS  bool
-	tlsWatch        sync.Once
-	lock            sync.RWMutex
-	tls             *tls.Config
-	closer          chan chan error
+	certificates    certs.Source
 }
 
 func NewOpenBaoTransit(
@@ -76,8 +69,6 @@ func NewOpenBaoTransit(
 		log:            log,
 		client:         nil,
 		usingCustomTLS: config.TLSCAPath != "",
-		tls:            nil,
-		closer:         nil,
 	}
 
 	trip := round.NewObservabilityRoundTripper(
@@ -121,13 +112,20 @@ func NewOpenBaoTransit(
 	// custom TLS certificates too. We need to watch the certificate files to see
 	// if they change at all.
 	if helper.usingCustomTLS {
-		if err = helper.reloadTLS(); err != nil {
+		helper.certificates, err = certs.NewFileSource(log, certs.Options{
+			CACertificatePath:  config.TLSCAPath,
+			CertificatePath:    config.TLSCertificatePath,
+			KeyPath:            config.TLSKeyPath,
+			ServerName:         helper.host,
+			InsecureSkipVerify: config.InsecureSkipVerify,
+		})
+		if err != nil {
 			log.ErrorContext(ctx, "failed to configure TLS", "err", err)
-			return nil, err
+			return nil, errors.Wrap(err, "failed to configure TLS")
 		}
-		helper.watchCertificates()
+		helper.certificates.Start()
 		openbaoConfig.HttpClient.Transport = &http.Transport{
-			DialTLSContext:  helper.dialTLS,
+			TLSClientConfig: helper.certificates.ClientConfig(),
 			IdleConnTimeout: config.IdleConnTimeout,
 		}
 	}
@@ -146,154 +144,6 @@ func NewOpenBaoTransit(
 	helper.authenticationWorker()
 
 	return helper, nil
-}
-
-// dialTLS is a middleware function that is added to allow monetr to easily
-// rotate the TLS certificates for the OpenBao server without downtime.
-func (o *OpenBaoTransit) dialTLS(
-	_ context.Context,
-	network, addr string,
-) (net.Conn, error) {
-	o.lock.RLock()
-	defer o.lock.RUnlock()
-
-	return tls.Dial(network, addr, o.tls)
-}
-
-// This function sets up a file system watcher to monitor changes in TLS
-// certificate files. When changes are detected, it calls reloadTLS which
-// atomically swaps the TLS config that is used to establish new connections to
-// the OpenBao server.
-//
-//	watchCertificates()
-//	├── Uses sync.Once to ensure the watcher setup runs only once
-//	│   └── tlsWatch.Do()
-//	│       └── go routine for asynchronous execution
-//	│           ├── Initializes the logger and file watcherimport openbao "github.com/openbao/openbao/api/v2"
-//	│           ├── Sets up a channel for closing the watcher
-//	│           ├── Defines paths to be watched:
-//	│           │   ├── TLSCertificatePath
-//	│           │   ├── TLSKeyPath
-//	│           │   └── TLSCAPath
-//	│           ├── Adds paths to the watcher
-//	│           └── Event loop:
-//	│               ├── Handles errors from watcher.Errors
-//	│               ├── Handles events from watcher.Events
-//	│               │   └── Calls reloadTLS() on file changes
-//	│               └── Handles closure of the watcher via o.closer channel
-//
-// This function is called when the client is initialized and runs until Close()
-// is called on the client.
-func (o *OpenBaoTransit) watchCertificates() {
-	o.tlsWatch.Do(func() {
-		go func() {
-			log := o.log
-			watcher, err := fsnotify.NewWatcher()
-			if err != nil {
-				log.ErrorContext(context.Background(), "failed to create file system watcher, openbao TLS certificates cannot be auto rotated", "err", err)
-				return
-			}
-
-			o.closer = make(chan chan error, 1)
-
-			paths := []string{
-				o.config.TLSCertificatePath,
-				o.config.TLSKeyPath,
-				o.config.TLSCAPath,
-			}
-			for _, path := range paths {
-				log.Log(context.Background(), logging.LevelTrace, "watching file for changes for openbao TLS", "file", path)
-				if err = watcher.Add(o.config.TLSCertificatePath); err != nil {
-					log.ErrorContext(context.Background(), "failed to watch file for openbao TLS", "file", path, "err", err)
-				}
-			}
-
-			for {
-				select {
-				case err = <-watcher.Errors:
-					log.WarnContext(context.Background(), "error watching file for openbao TLS", "err", err)
-				case event := <-watcher.Events:
-					log.Log(context.Background(), logging.LevelTrace, "observed changed in openbao TLS file", "file", event.Name)
-					if err = o.reloadTLS(); err != nil {
-						log.ErrorContext(context.Background(), "failed to reload openbao TLS", "err", err)
-					}
-				case promise := <-o.closer:
-					log.InfoContext(context.Background(), "closing openbao helper TLS watcher")
-					promise <- watcher.Close()
-					return
-				}
-			}
-		}()
-	})
-}
-
-// This function reloads the TLS configuration by reading the certificate files
-// and updating the TLS configuration to be used for subsequent requests.
-//
-//	reloadTLS()
-//	├── Reads CA certificate from file
-//	│   ├── Adds CA certificate to a new cert pool
-//	├── Configures tls.Config with:
-//	│   ├── CA certificate pool
-//	│   ├── InsecureSkipVerify from config
-//	│   ├── ServerName from host
-//	│   └── Renegotiation setting
-//	├── If key and certificate paths are provided:
-//	│   ├── Loads TLS key pair
-//	│   └── Adds key pair to tls.Config
-//	├── Acquires lock on o.lock
-//	│   └── Updates o.tls with new tls.Config
-//	└── Returns nil if successful, otherwise an error
-//
-// This function is called when the OpenBao client is initialized and every time
-// a certificate change is detected.
-func (o *OpenBaoTransit) reloadTLS() error {
-	log := o.log
-	log.DebugContext(context.Background(), "reloading openbao TLS config")
-
-	caCert, err := os.ReadFile(o.config.TLSCAPath)
-	if err != nil {
-		log.ErrorContext(context.Background(), "failed to read CA for openbao TLS", "file", o.config.TLSCAPath)
-		return errors.Wrap(err, "failed to read CA for openbao TLS")
-	}
-
-	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
-
-	tlsConfig := &tls.Config{
-		Rand:               rand.Reader,
-		InsecureSkipVerify: o.config.InsecureSkipVerify,
-		RootCAs:            caCertPool,
-		ServerName:         o.host,
-		Renegotiation:      tls.RenegotiateFreelyAsClient,
-		MinVersion:         tls.VersionTLS12,
-	}
-
-	if o.config.TLSKeyPath != "" || o.config.TLSCertificatePath != "" {
-		tlsKeyPair, err := tls.LoadX509KeyPair(
-			o.config.TLSCertificatePath,
-			o.config.TLSKeyPath,
-		)
-		if err != nil {
-			log.ErrorContext(context.Background(), "failed to load TLS key pair for openbao",
-				"certPath", o.config.TLSCertificatePath,
-				"keyPath", o.config.TLSKeyPath,
-				"err", err,
-			)
-			return errors.Wrap(err, "failed to load TLS key pair for openbao")
-		}
-
-		tlsConfig.Certificates = []tls.Certificate{
-			tlsKeyPair,
-		}
-	}
-
-	o.lock.Lock()
-	defer o.lock.Unlock()
-
-	o.tls = tlsConfig
-
-	return nil
 }
 
 // This function sets up a worker that periodically checks the expiration status
@@ -607,11 +457,8 @@ func (o *OpenBaoTransit) Encrypt(
 // TODO Add a timeout to closing this, and test it
 func (o *OpenBaoTransit) Close() error {
 	var err error
-	if o.closer != nil {
-		promise := make(chan error)
-		o.closer <- promise
-
-		err = <-promise
+	if o.certificates != nil {
+		err = o.certificates.Stop()
 		if err != nil {
 			o.log.ErrorContext(context.Background(), "failed to close TLS worker", "err", err)
 		}
@@ -619,7 +466,7 @@ func (o *OpenBaoTransit) Close() error {
 
 	if o.tokenCloser != nil {
 		promise := make(chan error)
-		o.closer <- promise
+		o.tokenCloser <- promise
 
 		err = <-promise
 		if err != nil {

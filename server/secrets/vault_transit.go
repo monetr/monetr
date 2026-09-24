@@ -2,13 +2,9 @@ package secrets
 
 import (
 	"context"
-	"crypto/rand"
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/base64"
 	"fmt"
 	"math"
-	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -18,8 +14,8 @@ import (
 
 	"log/slog"
 
-	"github.com/fsnotify/fsnotify"
 	vault "github.com/hashicorp/vault/api"
+	"github.com/monetr/monetr/server/certs"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/round"
@@ -57,10 +53,7 @@ type VaultTransit struct {
 	log             *slog.Logger
 	client          *vault.Client
 	usingCustomTLS  bool
-	tlsWatch        sync.Once
-	lock            sync.RWMutex
-	tls             *tls.Config
-	closer          chan chan error
+	certificates    certs.Source
 }
 
 func NewVaultTransit(
@@ -80,8 +73,6 @@ func NewVaultTransit(
 		log:            log,
 		client:         nil,
 		usingCustomTLS: config.TLSCAPath != "",
-		tls:            nil,
-		closer:         nil,
 	}
 
 	trip := round.NewObservabilityRoundTripper(&http.Transport{
@@ -117,13 +108,20 @@ func NewVaultTransit(
 	// custom TLS certificates too. We need to watch the certificate files to see
 	// if they change at all.
 	if helper.usingCustomTLS {
-		if err = helper.reloadTLS(); err != nil {
+		helper.certificates, err = certs.NewFileSource(log, certs.Options{
+			CACertificatePath:  config.TLSCAPath,
+			CertificatePath:    config.TLSCertificatePath,
+			KeyPath:            config.TLSKeyPath,
+			ServerName:         helper.host,
+			InsecureSkipVerify: config.InsecureSkipVerify,
+		})
+		if err != nil {
 			log.ErrorContext(ctx, "failed to configure TLS", "err", err)
-			return nil, err
+			return nil, errors.Wrap(err, "failed to configure TLS")
 		}
-		helper.watchCertificates()
+		helper.certificates.Start()
 		vaultConfig.HttpClient.Transport = &http.Transport{
-			DialTLSContext:  helper.dialTLS,
+			TLSClientConfig: helper.certificates.ClientConfig(),
 			IdleConnTimeout: config.IdleConnTimeout,
 		}
 	}
@@ -142,154 +140,6 @@ func NewVaultTransit(
 	helper.authenticationWorker()
 
 	return helper, nil
-}
-
-// dialTLS is a middleware function that is added to allow monetr to easily
-// rotate the TLS certificates for the vault server without downtime.
-func (v *VaultTransit) dialTLS(
-	_ context.Context,
-	network, addr string,
-) (net.Conn, error) {
-	v.lock.RLock()
-	defer v.lock.RUnlock()
-
-	return tls.Dial(network, addr, v.tls)
-}
-
-// This function sets up a file system watcher to monitor changes in TLS
-// certificate files. When changes are detected, it calls reloadTLS which
-// atomically swaps the TLS config that is used to establish new connections to
-// the vault server.
-//
-//	watchCertificates()
-//	├── Uses sync.Once to ensure the watcher setup runs only once
-//	│   └── tlsWatch.Do()
-//	│       └── go routine for asynchronous execution
-//	│           ├── Initializes the logger and file watcher
-//	│           ├── Sets up a channel for closing the watcher
-//	│           ├── Defines paths to be watched:
-//	│           │   ├── TLSCertificatePath
-//	│           │   ├── TLSKeyPath
-//	│           │   └── TLSCAPath
-//	│           ├── Adds paths to the watcher
-//	│           └── Event loop:
-//	│               ├── Handles errors from watcher.Errors
-//	│               ├── Handles events from watcher.Events
-//	│               │   └── Calls reloadTLS() on file changes
-//	│               └── Handles closure of the watcher via v.closer channel
-//
-// This function is called when the client is initialized and runs until Close()
-// is called on the client.
-func (v *VaultTransit) watchCertificates() {
-	v.tlsWatch.Do(func() {
-		go func() {
-			log := v.log
-			watcher, err := fsnotify.NewWatcher()
-			if err != nil {
-				log.ErrorContext(context.Background(), "failed to create file system watcher, vault TLS certificates cannot be auto rotated", "err", err)
-				return
-			}
-
-			v.closer = make(chan chan error, 1)
-
-			paths := []string{
-				v.config.TLSCertificatePath,
-				v.config.TLSKeyPath,
-				v.config.TLSCAPath,
-			}
-			for _, path := range paths {
-				log.Log(context.Background(), logging.LevelTrace, "watching file for changes for vault TLS", "file", path)
-				if err = watcher.Add(v.config.TLSCertificatePath); err != nil {
-					log.ErrorContext(context.Background(), "failed to watch file for vault TLS", "file", path, "err", err)
-				}
-			}
-
-			for {
-				select {
-				case err = <-watcher.Errors:
-					log.WarnContext(context.Background(), "error watching file for vault TLS", "err", err)
-				case event := <-watcher.Events:
-					log.Log(context.Background(), logging.LevelTrace, "observed changed in vault TLS file", "file", event.Name)
-					if err = v.reloadTLS(); err != nil {
-						log.ErrorContext(context.Background(), "failed to reload vault TLS", "err", err)
-					}
-				case promise := <-v.closer:
-					log.InfoContext(context.Background(), "closing vault helper TLS watcher")
-					promise <- watcher.Close()
-					return
-				}
-			}
-		}()
-	})
-}
-
-// This function reloads the TLS configuration by reading the certificate files
-// and updating the TLS configuration to be used for subsequent requests.
-//
-//	reloadTLS()
-//	├── Reads CA certificate from file
-//	│   ├── Adds CA certificate to a new cert pool
-//	├── Configures tls.Config with:
-//	│   ├── CA certificate pool
-//	│   ├── InsecureSkipVerify from config
-//	│   ├── ServerName from host
-//	│   └── Renegotiation setting
-//	├── If key and certificate paths are provided:
-//	│   ├── Loads TLS key pair
-//	│   └── Adds key pair to tls.Config
-//	├── Acquires lock on v.lock
-//	│   └── Updates v.tls with new tls.Config
-//	└── Returns nil if successful, otherwise an error
-//
-// This function is called when the vault client is initialized and every time a
-// certificate change is detected.
-func (v *VaultTransit) reloadTLS() error {
-	log := v.log
-	log.DebugContext(context.Background(), "reloading vault TLS config")
-
-	caCert, err := os.ReadFile(v.config.TLSCAPath)
-	if err != nil {
-		log.ErrorContext(context.Background(), "failed to read CA for vault TLS", "file", v.config.TLSCAPath)
-		return errors.Wrap(err, "failed to read CA for vault TLS")
-	}
-
-	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
-
-	tlsConfig := &tls.Config{
-		Rand:               rand.Reader,
-		InsecureSkipVerify: v.config.InsecureSkipVerify,
-		RootCAs:            caCertPool,
-		ServerName:         v.host,
-		Renegotiation:      tls.RenegotiateFreelyAsClient,
-		MinVersion:         tls.VersionTLS12,
-	}
-
-	if v.config.TLSKeyPath != "" || v.config.TLSCertificatePath != "" {
-		tlsKeyPair, err := tls.LoadX509KeyPair(
-			v.config.TLSCertificatePath,
-			v.config.TLSKeyPath,
-		)
-		if err != nil {
-			log.ErrorContext(context.Background(), "failed to load TLS key pair for vault",
-				"certPath", v.config.TLSCertificatePath,
-				"keyPath", v.config.TLSKeyPath,
-				"err", err,
-			)
-			return errors.Wrap(err, "failed to load TLS key pair for vault")
-		}
-
-		tlsConfig.Certificates = []tls.Certificate{
-			tlsKeyPair,
-		}
-	}
-
-	v.lock.Lock()
-	defer v.lock.Unlock()
-
-	v.tls = tlsConfig
-
-	return nil
 }
 
 // This function sets up a worker that periodically checks the expiration status
@@ -588,11 +438,8 @@ func (v *VaultTransit) Encrypt(
 // TODO Add a timeout to closing this, and test it
 func (v *VaultTransit) Close() error {
 	var err error
-	if v.closer != nil {
-		promise := make(chan error)
-		v.closer <- promise
-
-		err = <-promise
+	if v.certificates != nil {
+		err = v.certificates.Stop()
 		if err != nil {
 			v.log.ErrorContext(context.Background(), "failed to close TLS worker", "err", err)
 		}
@@ -600,7 +447,7 @@ func (v *VaultTransit) Close() error {
 
 	if v.tokenCloser != nil {
 		promise := make(chan error)
-		v.closer <- promise
+		v.tokenCloser <- promise
 
 		err = <-promise
 		if err != nil {

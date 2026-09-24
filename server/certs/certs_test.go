@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/monetr/monetr/server/internal/testutils"
+	"github.com/monetr/monetr/server/internal/testutils/testlog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -159,7 +159,7 @@ func TestFileSource(t *testing.T) {
 		_, _, server := ca.issue(t, "postgres.monetr.local")
 		writeFile(t, filepath.Join(directory, "ca.crt"), ca.pem)
 
-		source, err := NewFileSource(testutils.GetLog(t), Options{
+		source, err := NewFileSource(testlog.GetLog(t), Options{
 			CACertificatePath: filepath.Join(directory, "ca.crt"),
 			ServerName:        "postgres.monetr.local",
 		})
@@ -177,7 +177,7 @@ func TestFileSource(t *testing.T) {
 		_, _, server := other.issue(t, "postgres.monetr.local")
 		writeFile(t, filepath.Join(directory, "ca.crt"), ca.pem)
 
-		source, err := NewFileSource(testutils.GetLog(t), Options{
+		source, err := NewFileSource(testlog.GetLog(t), Options{
 			CACertificatePath: filepath.Join(directory, "ca.crt"),
 			ServerName:        "postgres.monetr.local",
 		})
@@ -194,7 +194,7 @@ func TestFileSource(t *testing.T) {
 		_, _, server := ca.issue(t, "evil.monetr.local")
 		writeFile(t, filepath.Join(directory, "ca.crt"), ca.pem)
 
-		source, err := NewFileSource(testutils.GetLog(t), Options{
+		source, err := NewFileSource(testlog.GetLog(t), Options{
 			CACertificatePath: filepath.Join(directory, "ca.crt"),
 			ServerName:        "postgres.monetr.local",
 		})
@@ -212,7 +212,7 @@ func TestFileSource(t *testing.T) {
 		_, _, server := other.issue(t, "postgres.monetr.local")
 		writeFile(t, filepath.Join(directory, "ca.crt"), ca.pem)
 
-		source, err := NewFileSource(testutils.GetLog(t), Options{
+		source, err := NewFileSource(testlog.GetLog(t), Options{
 			CACertificatePath:  filepath.Join(directory, "ca.crt"),
 			ServerName:         "postgres.monetr.local",
 			InsecureSkipVerify: true,
@@ -233,7 +233,7 @@ func TestFileSource(t *testing.T) {
 		writeFile(t, filepath.Join(directory, "tls.crt"), clientCert)
 		writeFile(t, filepath.Join(directory, "tls.key"), clientKey)
 
-		source, err := NewFileSource(testutils.GetLog(t), Options{
+		source, err := NewFileSource(testlog.GetLog(t), Options{
 			CACertificatePath: filepath.Join(directory, "ca.crt"),
 			CertificatePath:   filepath.Join(directory, "tls.crt"),
 			KeyPath:           filepath.Join(directory, "tls.key"),
@@ -252,7 +252,7 @@ func TestFileSource(t *testing.T) {
 
 	t.Run("missing files", func(t *testing.T) {
 		directory := t.TempDir()
-		source, err := NewFileSource(testutils.GetLog(t), Options{
+		source, err := NewFileSource(testlog.GetLog(t), Options{
 			CACertificatePath: filepath.Join(directory, "ca.crt"),
 			ServerName:        "postgres.monetr.local",
 		})
@@ -261,7 +261,7 @@ func TestFileSource(t *testing.T) {
 	})
 
 	t.Run("certificate without key", func(t *testing.T) {
-		source, err := NewFileSource(testutils.GetLog(t), Options{
+		source, err := NewFileSource(testlog.GetLog(t), Options{
 			CertificatePath: "/tmp/tls.crt",
 		})
 		assert.ErrorContains(t, err, "certificate path and key path must both be provided")
@@ -275,7 +275,7 @@ func TestFileSource(t *testing.T) {
 		_, _, server := newCA.issue(t, "postgres.monetr.local")
 		writeFile(t, filepath.Join(directory, "ca.crt"), oldCA.pem)
 
-		source, err := NewFileSource(testutils.GetLog(t), Options{
+		source, err := NewFileSource(testlog.GetLog(t), Options{
 			CACertificatePath: filepath.Join(directory, "ca.crt"),
 			ServerName:        "postgres.monetr.local",
 		})
@@ -299,7 +299,7 @@ func TestFileSource(t *testing.T) {
 		_, _, server := ca.issue(t, "postgres.monetr.local")
 		writeFile(t, filepath.Join(directory, "ca.crt"), ca.pem)
 
-		source, err := NewFileSource(testutils.GetLog(t), Options{
+		source, err := NewFileSource(testlog.GetLog(t), Options{
 			CACertificatePath: filepath.Join(directory, "ca.crt"),
 			ServerName:        "postgres.monetr.local",
 		})
@@ -323,7 +323,7 @@ func TestFileSource(t *testing.T) {
 		writeFile(t, filepath.Join(directory, "tls.crt"), oldCert)
 		writeFile(t, filepath.Join(directory, "tls.key"), oldKey)
 
-		source, err := NewFileSource(testutils.GetLog(t), Options{
+		source, err := NewFileSource(testlog.GetLog(t), Options{
 			CACertificatePath: filepath.Join(directory, "ca.crt"),
 			CertificatePath:   filepath.Join(directory, "tls.crt"),
 			KeyPath:           filepath.Join(directory, "tls.key"),
@@ -362,7 +362,7 @@ func TestFileSource(t *testing.T) {
 		_, _, server := newCA.issue(t, "postgres.monetr.local")
 		writeFile(t, filepath.Join(directory, "ca.crt"), oldCA.pem)
 
-		source, err := NewFileSource(testutils.GetLog(t), Options{
+		source, err := NewFileSource(testlog.GetLog(t), Options{
 			CACertificatePath: filepath.Join(directory, "ca.crt"),
 			ServerName:        "postgres.monetr.local",
 			PollInterval:      50 * time.Millisecond,
@@ -388,7 +388,7 @@ func TestFileSource(t *testing.T) {
 		ca := newTestAuthority(t)
 		writeFile(t, filepath.Join(directory, "ca.crt"), ca.pem)
 
-		source, err := NewFileSource(testutils.GetLog(t), Options{
+		source, err := NewFileSource(testlog.GetLog(t), Options{
 			CACertificatePath: filepath.Join(directory, "ca.crt"),
 			ServerName:        "postgres.monetr.local",
 		})
