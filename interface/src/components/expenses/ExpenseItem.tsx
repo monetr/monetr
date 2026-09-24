@@ -49,6 +49,13 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): React.JSX.E
     ? format(nextRecurrence, 'MMM do')
     : format(nextRecurrence, 'MMM do, yyyy');
 
+  // By default the contribution string should simply be the amount that will be added to this expense per funding
+  // schedule it is associated with. But if the expense is paused then indicate that instead.
+  let contributionString = `${locale.formatAmount(spending.nextContributionAmount, AmountType.Stored)} / ${fundingSchedule?.name}`;
+  if (spending.isPaused) {
+    contributionString = 'Paused';
+  }
+
   return (
     <li className={styles.root}>
       <Link className={styles.mobileLink} to={detailsPath} />
@@ -67,17 +74,13 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): React.JSX.E
             {/* This block only shows on desktop screens */}
             <span className={styles.ruleText}>{capitalize(rule.toText())}</span>
             {/* This block only shows on mobile screens */}
-            <span className={styles.mobileContribution}>
-              {locale.formatAmount(spending.nextContributionAmount, AmountType.Stored)} / {fundingSchedule?.name}
-            </span>
+            <span className={styles.mobileContribution}>{contributionString}</span>
           </div>
         </div>
 
         {/* This block only shows on desktop screens */}
         <div className={styles.desktopContribution}>
-          <span className={styles.contributionValue}>
-            {locale.formatAmount(spending.nextContributionAmount, AmountType.Stored)} / {fundingSchedule?.name}
-          </span>
+          <span className={styles.contributionValue}>{contributionString}</span>
         </div>
 
         {/* This block only shows on mobile screens */}

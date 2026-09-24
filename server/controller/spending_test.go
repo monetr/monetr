@@ -3344,7 +3344,7 @@ func TestPatchSpending(t *testing.T) {
 		}
 	})
 
-	t.Run("cannot pause an expense", func(t *testing.T) {
+	t.Run("can pause and unpause an expense", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
@@ -3369,7 +3369,7 @@ func TestPatchSpending(t *testing.T) {
 		).After(app.Clock.Now(), false)
 
 		var spendingId ID[Spending]
-		{ // Create an expense
+		{ // Create an expense that is not paused
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
@@ -3384,11 +3384,11 @@ func TestPatchSpending(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
+			response.JSON().Path("$.isPaused").Boolean().IsFalse()
 			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
 		}
 
-		{ // isPaused only makes sense for goals, so the expense schema does not
-			// even have the field and rejects it as an unexpected key.
+		{ // Pause the expense.
 			response := e.PATCH("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithPath("spendingId", spendingId).
@@ -3398,10 +3398,84 @@ func TestPatchSpending(t *testing.T) {
 				}).
 				Expect()
 
-			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("Invalid request")
-			response.JSON().Path("$.problems.isPaused").String().NotEmpty()
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.isPaused").Boolean().IsTrue()
+			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
 		}
+
+		// Move past the next recurrence of the expense. The spending job skips
+		// paused spending objects, so while the expense is paused its next
+		// recurrence will fall into the past.
+		app.Clock.Add(40 * 24 * time.Hour)
+
+		{ // Unpause the expense. Unpausing forces a recalculation, which should bump
+			// the stale next recurrence forward to the next one after now.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spendingId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"isPaused": false,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.isPaused").Boolean().IsFalse()
+			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).Gt(app.Clock.Now())
+		}
+
+		{ // Make sure the expense is actually stored as unpaused.
+			response := e.GET("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spendingId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.isPaused").Boolean().IsFalse()
+		}
+	})
+
+	t.Run("can create a paused expense", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		fundingScheduleId := ID[FundingSchedule](e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":    "Payday",
+				"ruleset": FifthteenthAndLastDayOfEveryMonth,
+			}).
+			Expect().
+			Status(http.StatusOK).
+			JSON().Path("$.fundingScheduleId").String().Raw())
+
+		nextRecurrence := testutils.RuleSetInTimezone(
+			t,
+			testutils.MustEz(t, user.Account.GetTimezone),
+			FirstDayOfEveryMonth,
+		).After(app.Clock.Now(), false)
+
+		response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":              "Some Monthly Expense",
+				"ruleset":           FirstDayOfEveryMonth,
+				"fundingScheduleId": fundingScheduleId,
+				"targetAmount":      1000,
+				"spendingType":      SpendingTypeExpense,
+				"nextRecurrence":    nextRecurrence,
+				"isPaused":          true,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.isPaused").Boolean().IsTrue()
 	})
 
 	t.Run("rejects a zero target amount", func(t *testing.T) {

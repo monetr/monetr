@@ -45,6 +45,7 @@ interface ExpenseValues {
   fundingScheduleId: ID<FundingSchedule>;
   ruleset: string;
   autoCreateTransaction: boolean;
+  isPaused: boolean;
 }
 
 export default function ExpenseDetails(): React.JSX.Element | null {
@@ -139,6 +140,7 @@ export default function ExpenseDetails(): React.JSX.Element | null {
       // Auto create transaction is only supported on manual links; force it off otherwise so the API will not reject
       // the update.
       autoCreateTransaction: isManual && values.autoCreateTransaction,
+      isPaused: values.isPaused,
     })
       .then(
         () =>
@@ -164,6 +166,7 @@ export default function ExpenseDetails(): React.JSX.Element | null {
     fundingScheduleId: spending.fundingScheduleId,
     ruleset: spending.ruleset ?? '',
     autoCreateTransaction: spending.autoCreateTransaction,
+    isPaused: spending.isPaused,
   };
 
   const progress = ((Math.min(spending?.currentAmount, spending?.targetAmount) / spending?.targetAmount) * 100).toFixed(
@@ -247,6 +250,13 @@ export default function ExpenseDetails(): React.JSX.Element | null {
                 name='autoCreateTransaction'
               />
             )}
+            <FormCheckbox
+              className={layoutVariants({ width: 'full' })}
+              data-testid='expense-details-paused'
+              description='Pause this expense to temporarily stop contributions to it.'
+              label='Paused?'
+              name='isPaused'
+            />
             <div className={styles.formButtons}>
               <Button
                 onClick={() => showTransferModal({ initialToSpendingId: spending?.spendingId })}

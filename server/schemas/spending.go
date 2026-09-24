@@ -40,6 +40,9 @@ var (
 			validation.Key("autoCreateTransaction",
 				Boolean(),
 			).Required(Optional),
+			validation.Key("isPaused",
+				Boolean(),
+			).Required(Optional),
 		),
 		// Goal schema
 		validation.Map(
@@ -97,6 +100,9 @@ var (
 			validation.Required,
 		).Required(Optional),
 		validation.Key("autoCreateTransaction",
+			Boolean(),
+		).Required(Optional),
+		validation.Key("isPaused",
 			Boolean(),
 		).Required(Optional),
 	)

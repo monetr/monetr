@@ -274,6 +274,7 @@ Shared by both types:
 | `spendingType`      | string        | Yes      | `expense` or `goal`.                                                                                                                                                                            |
 | `targetAmount`      | integer       | Yes      | How much you need by the due date, in the smallest unit. Must be greater than zero.                                                                                                             |
 | `currentAmount`     | integer       | No       | How much is already in it. Leave the key out and it starts at 0. Sending `0` explicitly is rejected with "Current amount must be greater than zero", so omit it rather than serializing a zero. |
+| `isPaused`          | boolean       | No       | Start it paused.                                                                                                                                                                                |
 
 Expenses also take:
 
@@ -281,12 +282,6 @@ Expenses also take:
 | ----------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | `ruleset`               | string  | Yes      | The recurrence rule as an RFC 5545 string. Required on expenses, rejected on goals. See the [cookbook](./recurrence_rules#cookbook). |
 | `autoCreateTransaction` | boolean | No       | Have monetr write the transaction itself when this comes due. Manual links only.                                                     |
-
-Goals also take:
-
-| Attribute  | Type    | Required | Description                                                                    |
-| ---------- | ------- | -------- | ------------------------------------------------------------------------------ |
-| `isPaused` | boolean | No       | Start it paused. Only accepted on goals, expenses can't be paused at creation. |
 
 `nextRecurrence` has two rules that catch people.
 
@@ -378,6 +373,7 @@ On both:
 | `name`              | string        | No       | Rename it.                                                      |
 | `nextRecurrence`    | timestamp     | No       | Change the due date. Gets snapped to midnight in your timezone. |
 | `targetAmount`      | integer       | No       | Change the target. Must be greater than zero.                   |
+| `isPaused`          | boolean       | No       | Stop or resume contributions.                                   |
 
 Expenses only:
 
@@ -385,12 +381,6 @@ Expenses only:
 | ----------------------- | ------- | -------- | ---------------------- |
 | `autoCreateTransaction` | boolean | No       | Manual links only.     |
 | `ruleset`               | string  | No       | A new recurrence rule. |
-
-Goals only:
-
-| Attribute  | Type    | Required | Description                   |
-| ---------- | ------- | -------- | ----------------------------- |
-| `isPaused` | boolean | No       | Stop or resume contributions. |
 
 Changing `targetAmount`, `fundingScheduleId`, `nextRecurrence` or `ruleset` makes monetr recalculate
 `nextContributionAmount`. So does unpausing. Pausing doesn't, since the number would be stale by the time you unpause
