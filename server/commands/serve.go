@@ -19,6 +19,7 @@ import (
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/build"
 	"github.com/monetr/monetr/server/cache"
+	"github.com/monetr/monetr/server/certs"
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/controller"
@@ -404,20 +405,31 @@ func ServeCommand(parent *cobra.Command) {
 				},
 			}
 
+			if configuration.Server.TLSCertificate != "" && configuration.Server.TLSKey != "" {
+				log.Info("server will start a TLS listener")
+				certificates, err := certs.NewFileSource(log, certs.Options{
+					CertificatePath: configuration.Server.TLSCertificate,
+					KeyPath:         configuration.Server.TLSKey,
+				})
+				if err != nil {
+					log.Error("failed to load TLS certificates", "err", err)
+					return errors.Wrap(err, "failed to load TLS certificates")
+				}
+				// The certificates are watched while the server is running, new
+				// connections will pick up rotated certificates without restarting the
+				// listener.
+				certificates.Start()
+				defer certificates.Stop()
+
+				// Echo wraps its listener in TLS whenever a TLS config is provided, so
+				// Start is used instead of StartTLS. StartTLS only reads the
+				// certificate once.
+				start.TLSConfig = certificates.ServerConfig()
+			}
+
 			serverErr := make(chan error, 1)
 			go func() {
-				var err error
-				if configuration.Server.TLSCertificate != "" && configuration.Server.TLSKey != "" {
-					log.Info("server will start a TLS listener")
-					err = start.StartTLS(
-						serverCtx,
-						app,
-						configuration.Server.TLSCertificate,
-						configuration.Server.TLSKey,
-					)
-				} else {
-					err = start.Start(serverCtx, app)
-				}
+				err := start.Start(serverCtx, app)
 				if err != nil && err != http.ErrServerClosed {
 					log.Error("failed to start the server", "err", err)
 				}
