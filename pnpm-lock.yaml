@@ -268,8 +268,8 @@ importers:
         specifier: 2.8.1
         version: 2.8.1
       wouter:
-        specifier: 3.10.0
-        version: 3.10.0(react@19.3.0)
+        specifier: 3.11.0
+        version: 3.11.0(react@19.3.0)
     devDependencies:
       '@imagemagick/magick-wasm':
         specifier: 0.0.43
@@ -3267,9 +3267,6 @@ packages:
   minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
 
-  mitt@3.0.1:
-    resolution: {integrity: sha512-vKivATfr97l2/QBCYAkXYDbrIWPM2IIKEl7YPhjCvKlG3kE2gm+uBo6nEXK3M5/Ffh/FLpKExzOQ3JJoJGFKBw==}
-
   mkdirp@0.5.6:
     resolution: {integrity: sha512-FP+p8RB8OWpF3YZBCrP5gtADmtXApB5AMLn+vdyA+PyxCjrCs00mjyUozssO33cwDeT3wNGdLxJ5M//YqtHAJw==}
     hasBin: true
@@ -4244,8 +4241,8 @@ packages:
     resolution: {integrity: sha512-0yweIbkINJodk27gX9LBGMzyQdBDan3s/dEAiwBOj+Mf0PPyWL6/rikalkv8EeD0E8jm4o5RXEOrFTP3NXbhJg==}
     engines: {node: '>=12.17'}
 
-  wouter@3.10.0:
-    resolution: {integrity: sha512-zTfddD80zc2/J5l8JKcdvzOK6AwP0kpyHEI3DxRN2bn8U1oJPnrSVm8v+X3WwDamvLAOxTO7ZvkxkpRWlyeJ1Q==}
+  wouter@3.11.0:
+    resolution: {integrity: sha512-xyMLHhytdGhIjXVRcSjeYbXd7TR1lrxVTPLGBWmmyW52ZuWVQ1jXmsgoJ4G5s4tjloJCq7h4i2eREljWUQ4+/A==}
     peerDependencies:
       react: '>=16.8.0'
 
@@ -7815,8 +7812,6 @@ snapshots:
 
   minimist@1.2.8: {}
 
-  mitt@3.0.1: {}
-
   mkdirp@0.5.6:
     dependencies:
       minimist: 1.2.8
@@ -9027,9 +9022,8 @@ snapshots:
 
   wordwrapjs@5.1.1: {}
 
-  wouter@3.10.0(react@19.3.0):
+  wouter@3.11.0(react@19.3.0):
     dependencies:
-      mitt: 3.0.1
       react: 19.3.0
       regexparam: 3.0.0
       use-sync-external-store: 1.5.0(react@19.3.0)
