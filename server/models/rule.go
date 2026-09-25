@@ -1,20 +1,21 @@
 package models
 
 import (
+	"database/sql"
+	"database/sql/driver"
 	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/go-pg/pg/v10/types"
 	"github.com/pkg/errors"
 	"github.com/teambition/rrule-go"
 )
 
 var (
-	_ types.ValueAppender = &RuleSet{}
-	_ types.ValueScanner  = &RuleSet{}
-	_ json.Marshaler      = &RuleSet{}
-	_ json.Unmarshaler    = &RuleSet{}
+	_ driver.Valuer    = &RuleSet{}
+	_ sql.Scanner      = &RuleSet{}
+	_ json.Marshaler   = &RuleSet{}
+	_ json.Unmarshaler = &RuleSet{}
 )
 
 type RuleSet struct {
@@ -32,30 +33,32 @@ func NewRuleSet(input string) (*RuleSet, error) {
 	}, nil
 }
 
-// AppendValue implements types.ValueAppender.
-func (r *RuleSet) AppendValue(b []byte, flags int) ([]byte, error) {
-	if flags == 1 {
-		b = append(b, '\'')
+// Value implements driver.Valuer.
+func (r *RuleSet) Value() (driver.Value, error) {
+	if r == nil {
+		return nil, nil
 	}
-	b = append(b, []byte(r.Set.String())...)
-	if flags == 1 {
-		b = append(b, '\'')
-	}
-	return b, nil
+	return r.Set.String(), nil
 }
 
-// ScanValue implements types.ValueScanner.
-func (r *RuleSet) ScanValue(rd types.Reader, n int) error {
-	if n <= 0 {
+// Scan implements sql.Scanner.
+func (r *RuleSet) Scan(src any) error {
+	var input string
+	switch value := src.(type) {
+	case nil:
+		return nil
+	case string:
+		input = value
+	case []byte:
+		input = string(value)
+	default:
+		return errors.Errorf("cannot scan %T into a RuleSet", src)
+	}
+	if input == "" {
 		return nil
 	}
 
-	tmp, err := rd.ReadFullTemp()
-	if err != nil {
-		return err
-	}
-
-	set, err := rrule.StrToRRuleSet(string(tmp))
+	set, err := rrule.StrToRRuleSet(input)
 	if err != nil {
 		return errors.Wrap(err, "failed to parse ruleset")
 	}

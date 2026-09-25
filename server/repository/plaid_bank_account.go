@@ -19,7 +19,7 @@ func (r *repositoryBase) CreatePlaidBankAccount(
 	bankAccount.CreatedAt = r.clock.Now().UTC()
 	bankAccount.CreatedBy = r.UserId()
 
-	_, err := r.txn.ModelContext(span.Context(), bankAccount).Insert(bankAccount)
+	_, err := r.txn.NewInsert().Model(bankAccount).Returning("*").Exec(span.Context())
 
 	return errors.Wrap(err, "failed to create plaid bank account")
 }
@@ -33,9 +33,9 @@ func (r *repositoryBase) UpdatePlaidBankAccount(
 
 	bankAccount.AccountId = r.AccountId()
 
-	_, err := r.txn.ModelContext(span.Context(), bankAccount).
+	_, err := r.txn.NewUpdate().Model(bankAccount).
 		WherePK().
-		Update(bankAccount)
+		Exec(span.Context())
 
 	return errors.Wrap(err, "failed to update plaid bank account")
 }

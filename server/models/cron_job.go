@@ -1,12 +1,16 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/uptrace/bun"
+)
 
 type CronJob struct {
-	tableName string `pg:"cron_jobs"`
+	bun.BaseModel `bun:"table:cron_jobs,alias:cron_job"`
 
-	Queue        string     `json:"-" pg:"queue,notnull,pk"`
-	CronSchedule string     `json:"-" pg:"cron_schedule,notnull"`
-	LastRunAt    *time.Time `json:"-" pg:"last_run_at"`
-	NextRunAt    time.Time  `json:"-" pg:"next_run_at"`
+	Queue        string     `json:"-" bun:"queue,notnull,pk"`
+	CronSchedule string     `json:"-" bun:"cron_schedule,notnull,nullzero"`
+	LastRunAt    *time.Time `json:"-" bun:"last_run_at"`
+	NextRunAt    time.Time  `json:"-" bun:"next_run_at,nullzero"`
 }

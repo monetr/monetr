@@ -15,16 +15,16 @@ func CleanupJobsCron(ctx queue.Context) error {
 
 	now := ctx.Clock().Now()
 	cutoff := now.Add(-15 * 24 * time.Hour)
-	result, err := ctx.DB().ModelContext(ctx, &models.Job{}).
+	result, err := ctx.DB().NewDelete().Model(&models.Job{}).
 		Where(`"job"."created_at" < ?`, cutoff).
 		Where(`NOT ("job"."status" = ? AND "job"."priority" > ?)`, models.PendingJobStatus, now.Unix()).
-		Delete()
+		Exec(ctx)
 	if err = errors.Wrap(err, "failed to cleanup old jobs from the jobs table"); err != nil {
 		log.ErrorContext(ctx, "failed to cleanup", "err", err)
 		return err
 	}
 
-	if affected := result.RowsAffected(); affected > 0 {
+	if affected, _ := result.RowsAffected(); affected > 0 {
 		log.InfoContext(ctx, fmt.Sprintf("deleted %d old jobs from the jobs table", affected))
 
 		if _, err := ctx.DB().ExecContext(ctx, `VACUUM jobs;`); err != nil {

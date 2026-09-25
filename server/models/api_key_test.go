@@ -10,6 +10,7 @@ import (
 	. "github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/uptrace/bun"
 )
 
 func TestNewApiKey(t *testing.T) {
@@ -122,7 +123,7 @@ func TestApiKey_BeforeInsert(t *testing.T) {
 		key := &ApiKey{}
 		require.True(t, key.ApiKeyId.IsZero(), "the key should not have an Id before insert")
 
-		_, err := key.BeforeInsert(t.Context())
+		err := key.BeforeAppendModel(t.Context(), (*bun.InsertQuery)(nil))
 		require.NoError(t, err, "before insert should not return an error")
 
 		assert.False(t, key.ApiKeyId.IsZero(), "an Id should have been assigned")
@@ -139,7 +140,7 @@ func TestApiKey_BeforeInsert(t *testing.T) {
 			CreatedAt: existingCreatedAt,
 		}
 
-		_, err := key.BeforeInsert(t.Context())
+		err := key.BeforeAppendModel(t.Context(), (*bun.InsertQuery)(nil))
 		require.NoError(t, err, "before insert should not return an error")
 
 		assert.Equal(t, existingId, key.ApiKeyId, "an already assigned Id should be preserved")
@@ -153,7 +154,7 @@ func TestApiKey_BeforeUpdate(t *testing.T) {
 		key := &ApiKey{}
 		require.True(t, key.UpdatedAt.IsZero(), "updated at should be zero before update")
 
-		_, err := key.BeforeUpdate(t.Context())
+		err := key.BeforeAppendModel(t.Context(), (*bun.UpdateQuery)(nil))
 		require.NoError(t, err, "before update should not return an error")
 
 		assert.False(t, key.UpdatedAt.IsZero(), "updated at should have been set")

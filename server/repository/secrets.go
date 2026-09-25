@@ -6,12 +6,12 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/pkg/errors"
+	"github.com/uptrace/bun"
 )
 
 type SecretData struct {
@@ -30,7 +30,7 @@ type baseSecretsRepository struct {
 	accountId ID[Account]
 	clock     clock.Clock
 	log       *slog.Logger
-	db        pg.DBI
+	db        bun.IDB
 	kms       secrets.KeyManagement
 }
 
@@ -41,7 +41,7 @@ func (b *baseSecretsRepository) AccountId() ID[Account] {
 func NewSecretsRepository(
 	log *slog.Logger,
 	clock clock.Clock,
-	db pg.DBI,
+	db bun.IDB,
 	kms secrets.KeyManagement,
 	accountId ID[Account],
 ) SecretsRepository {
@@ -67,12 +67,13 @@ func (b *baseSecretsRepository) Store(ctx context.Context, secret *SecretData) e
 	var item Secret
 	if !secret.SecretId.IsZero() {
 		log = log.With("secretId", secret.SecretId)
-		err := b.db.ModelContext(span.Context(), &item).
+		err := b.db.NewSelect().
+			Model(&item).
 			Where(`"secret"."account_id" = ?`, b.AccountId()).
 			Where(`"secret"."secret_id" = ?`, secret.SecretId).
 			Limit(1).
 			For(`UPDATE`).
-			Select(&item)
+			Scan(span.Context())
 		if err != nil {
 			log.ErrorContext(span.Context(), "failed to read an existing secret for update", "err", err)
 			return errors.Wrap(err, "failed to retrieve secretfor update")
@@ -102,11 +103,17 @@ func (b *baseSecretsRepository) Store(ctx context.Context, secret *SecretData) e
 	item.Version = version
 	item.Secret = encrypted
 
-	query := b.db.ModelContext(span.Context(), &item)
 	if item.SecretId.IsZero() {
-		_, err = query.Insert(&item)
+		_, err = b.db.NewInsert().
+			Model(&item).
+			Returning("*").
+			Exec(span.Context())
 	} else {
-		_, err = query.WherePK().Update(&item)
+		_, err = b.db.NewUpdate().
+			Model(&item).
+			WherePK().
+			Returning("*").
+			Exec(span.Context())
 	}
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
@@ -130,11 +137,12 @@ func (b *baseSecretsRepository) Read(
 	defer span.Finish()
 
 	var item Secret
-	err := b.db.ModelContext(span.Context(), &item).
+	err := b.db.NewSelect().
+		Model(&item).
 		Where(`"secret"."account_id" = ?`, b.AccountId()).
 		Where(`"secret"."secret_id" = ?`, secretId).
 		Limit(1).
-		Select(&item)
+		Scan(span.Context())
 	if err != nil {
 		// TODO Add proper returning of the ErrNotFound here.
 		span.Status = sentry.SpanStatusInternalError
@@ -163,9 +171,10 @@ func (b *baseSecretsRepository) Delete(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	_, err := b.db.ModelContext(span.Context(), new(Secret)).
+	_, err := b.db.NewDelete().
+		Model(new(Secret)).
 		Where(`"secret"."account_id" = ?`, b.AccountId()).
 		Where(`"secret"."secret_id" = ?`, secretId).
-		Delete()
+		Exec(span.Context())
 	return errors.Wrap(err, "failed to delete secret")
 }

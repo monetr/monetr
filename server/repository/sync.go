@@ -2,9 +2,9 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
@@ -20,16 +20,17 @@ func (r *repositoryBase) GetLastPlaidSync(ctx context.Context, plaidLinkId ID[Pl
 	}
 
 	var sync PlaidSync
-	err := r.txn.ModelContext(span.Context(), &sync).
+	err := r.txn.NewSelect().
+		Model(&sync).
 		Where(`"plaid_sync"."plaid_link_id" = ?`, plaidLinkId).
 		Where(`"plaid_sync"."account_id" = ?`, r.AccountId()).
 		Order(`timestamp DESC`).
 		Limit(1).
-		Select(&sync)
+		Scan(span.Context())
 	switch err {
 	case nil:
 		return &sync, nil
-	case pg.ErrNoRows:
+	case sql.ErrNoRows:
 		// If we didn't receive anything then that means there has not been a sync yet.
 		return nil, nil
 	default:
@@ -62,8 +63,10 @@ func (r *repositoryBase) RecordPlaidSync(
 		Removed:     removed,
 	}
 
-	_, err := r.txn.ModelContext(span.Context(), &item).
-		Insert(&item)
+	_, err := r.txn.NewInsert().
+		Model(&item).
+		Returning("*").
+		Exec(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to record plaid sync")

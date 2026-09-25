@@ -22,12 +22,12 @@ func (r *repositoryBase) GetFiles(ctx context.Context) ([]File, error) {
 	span.SetData("accountId", r.AccountId())
 
 	items := make([]File, 0)
-	err := r.txn.ModelContext(span.Context(), &items).
+	err := r.txn.NewSelect().Model(&items).
 		Where(`"account_id" = ?`, r.AccountId()).
 		Where(`"deleted_at" IS NULL`).
 		Limit(100).
 		Order(`file_id DESC`).
-		Select(&items)
+		Scan(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve files")
@@ -47,8 +47,9 @@ func (r *repositoryBase) CreateFile(ctx context.Context, file *File) error {
 	file.CreatedAt = r.clock.Now().UTC()
 	file.CreatedBy = r.UserId()
 
-	_, err := r.txn.ModelContext(span.Context(), file).
-		Insert(file)
+	_, err := r.txn.NewInsert().Model(file).
+		Returning("*").
+		Exec(span.Context())
 	if err != nil {
 		return errors.Wrap(err, "failed to create file record")
 	}
@@ -68,11 +69,11 @@ func (r *repositoryBase) GetFile(
 	span.SetData("accountId", r.AccountId())
 
 	var file File
-	err := r.txn.ModelContext(span.Context(), &file).
+	err := r.txn.NewSelect().Model(&file).
 		Where(`"account_id" = ?`, r.AccountId()).
 		Where(`"file_id" = ?`, fileId).
 		Limit(1).
-		Select(&file)
+		Scan(span.Context())
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve file record")
 	}
@@ -90,6 +91,6 @@ func (r *repositoryBase) UpdateFile(
 
 	file.AccountId = r.AccountId()
 
-	_, err := r.txn.ModelContext(span.Context(), file).WherePK().Update(file)
+	_, err := r.txn.NewUpdate().Model(file).WherePK().Returning("*").Exec(span.Context())
 	return errors.Wrap(err, "failed to update file")
 }

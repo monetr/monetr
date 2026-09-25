@@ -5,9 +5,9 @@ import (
 	"log/slog"
 
 	"github.com/benbjohnson/clock"
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
+	"github.com/uptrace/bun"
 )
 
 type BaseRepository interface {
@@ -121,7 +121,7 @@ type BaseRepository interface {
 	) (updated []TransactionCluster, err error)
 	// GetTransactionClusterByMember will return a transaction cluster that
 	// contains the specified transaction ID as a member for the specified bank.
-	// If no cluster can be found then nil and pg.NoRows will be returned
+	// If no cluster can be found then nil and sql.ErrNoRows will be returned
 	// (wrapped).
 	GetTransactionClusterByMember(ctx context.Context, bankAccountId ID[BankAccount], transactionId ID[Transaction]) (*TransactionCluster, error)
 
@@ -234,7 +234,7 @@ func NewRepositoryFromSession(
 	clock clock.Clock,
 	userId ID[User],
 	accountId ID[Account],
-	database pg.DBI,
+	database bun.IDB,
 	log *slog.Logger,
 ) Repository {
 	return &repositoryBase{
@@ -248,7 +248,7 @@ func NewRepositoryFromSession(
 
 func NewUnauthenticatedRepository(
 	clock clock.Clock,
-	txn pg.DBI,
+	txn bun.IDB,
 ) UnauthenticatedRepository {
 	return &unauthenticatedRepo{
 		txn:   txn,
@@ -276,8 +276,8 @@ func (r *repositoryBase) GetIsSetup(ctx context.Context) (bool, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	return r.txn.ModelContext(span.Context(), &Link{}).
+	return r.txn.NewSelect().Model(&Link{}).
 		Where(`"link"."account_id" = ?`, r.accountId).
 		Where(`"link"."deleted_at" IS NULL`).
-		Exists()
+		Exists(span.Context())
 }

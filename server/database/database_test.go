@@ -9,11 +9,12 @@ import (
 	"github.com/monetr/monetr/server/database"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/uptrace/bun/driver/pgdriver"
 )
 
 func TestGetDatabase(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
-		options := testutils.GetPgOptions(t)
+		options := pgdriver.NewConnector(testutils.GetPgOptions(t)...).Config()
 		log := testutils.GetLog(t)
 
 		parts := strings.SplitN(options.Addr, ":", 2)
@@ -33,7 +34,7 @@ func TestGetDatabase(t *testing.T) {
 
 		db, err := database.GetDatabase(log, config, nil)
 		assert.NoError(t, err, "must be able to connect to database")
-		assert.NoError(t, db.Ping(t.Context()), "must be able to ping database")
+		assert.NoError(t, db.PingContext(t.Context()), "must be able to ping database")
 		assert.NoError(t, db.Close(), "must be able to close db connection")
 	})
 }

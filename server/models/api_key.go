@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-pg/pg/v10"
 	"github.com/pkg/errors"
+	"github.com/uptrace/bun"
 )
 
 // apiKeySecretEncoding is just base32 without padding because i think trailing
@@ -18,18 +18,18 @@ import (
 var apiKeySecretEncoding = base32.StdEncoding.WithPadding(base32.NoPadding)
 
 type ApiKey struct {
-	tableName string `pg:"api_keys"`
+	bun.BaseModel `bun:"table:api_keys,alias:api_key"`
 
-	ApiKeyId      ID[ApiKey]  `json:"apiKeyId" pg:"api_key_id,notnull,pk"`
-	AccountId     ID[Account] `json:"-" pg:"account_id,notnull"`
-	Account       *Account    `json:"-" pg:"rel:has-one"`
-	Name          string      `json:"name" pg:"name,notnull"`
-	PublicKey     []byte      `json:"-" pg:"public_key,notnull"`
-	CreatedAt     time.Time   `json:"createdAt" pg:"created_at,notnull"`
-	CreatedBy     ID[User]    `json:"createdBy" pg:"created_by,notnull"`
-	CreatedByUser *User       `json:"-" pg:"rel:has-one,fk:created_by"`
-	UpdatedAt     time.Time   `json:"updatedAt" pg:"updated_at,notnull"`
-	DeletedAt     *time.Time  `json:"deletedAt,omitempty" pg:"deleted_at"`
+	ApiKeyId      ID[ApiKey]  `json:"apiKeyId" bun:"api_key_id,notnull,pk"`
+	AccountId     ID[Account] `json:"-" bun:"account_id,notnull,nullzero"`
+	Account       *Account    `json:"-" bun:"rel:belongs-to,join:account_id=account_id"`
+	Name          string      `json:"name" bun:"name,notnull,nullzero"`
+	PublicKey     []byte      `json:"-" bun:"public_key,notnull,nullzero"`
+	CreatedAt     time.Time   `json:"createdAt" bun:"created_at,notnull,nullzero"`
+	CreatedBy     ID[User]    `json:"createdBy" bun:"created_by,notnull,nullzero"`
+	CreatedByUser *User       `json:"-" bun:"rel:belongs-to,join:created_by=user_id"`
+	UpdatedAt     time.Time   `json:"updatedAt" bun:"updated_at,notnull,nullzero"`
+	DeletedAt     *time.Time  `json:"deletedAt,omitempty" bun:"deleted_at"`
 }
 
 func (ApiKey) IdentityPrefix() string {
@@ -37,27 +37,26 @@ func (ApiKey) IdentityPrefix() string {
 }
 
 var (
-	_ pg.BeforeInsertHook = (*ApiKey)(nil)
-	_ pg.BeforeUpdateHook = (*ApiKey)(nil)
+	_ bun.BeforeAppendModelHook = (*ApiKey)(nil)
 )
 
-func (o *ApiKey) BeforeInsert(ctx context.Context) (context.Context, error) {
-	if o.ApiKeyId.IsZero() {
-		o.ApiKeyId = NewID[ApiKey]()
+func (o *ApiKey) BeforeAppendModel(ctx context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		if o.ApiKeyId.IsZero() {
+			o.ApiKeyId = NewID[ApiKey]()
+		}
+
+		now := time.Now()
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = now
+		}
+		o.UpdatedAt = now
+	case *bun.UpdateQuery:
+		o.UpdatedAt = time.Now()
 	}
 
-	now := time.Now()
-	if o.CreatedAt.IsZero() {
-		o.CreatedAt = now
-	}
-	o.UpdatedAt = now
-
-	return ctx, nil
-}
-
-func (o *ApiKey) BeforeUpdate(ctx context.Context) (context.Context, error) {
-	o.UpdatedAt = time.Now()
-	return ctx, nil
+	return nil
 }
 
 // Verify will take they username (keyId) and secret provided by the client and

@@ -48,7 +48,8 @@ func updateUploadStatus(
 		"transactionUploadId", args.TransactionUploadId,
 	)
 
-	query := ctx.DB().ModelContext(ctx, &models.TransactionUpload{}).
+	query := ctx.DB().NewUpdate().
+		Model(&models.TransactionUpload{}).
 		Where(`"account_id" = ?`, args.AccountId).
 		Where(`"bank_account_id" = ?`, args.BankAccountId).
 		Where(`"transaction_upload_id" = ?`, args.TransactionUploadId).
@@ -75,7 +76,7 @@ func updateUploadStatus(
 		"status", status,
 	)
 
-	_, err := query.Update()
+	_, err := query.Exec(ctx)
 	if err != nil {
 		return errors.Wrap(err, "failed to update upload status")
 	}

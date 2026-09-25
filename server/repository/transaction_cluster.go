@@ -3,12 +3,11 @@ package repository
 import (
 	"context"
 
-	"github.com/go-pg/pg/v10"
-	"github.com/go-pg/pg/v10/types"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
+	"github.com/uptrace/bun"
 )
 
 func (r *repositoryBase) WriteTransactionClusters(
@@ -21,17 +20,17 @@ func (r *repositoryBase) WriteTransactionClusters(
 
 	// Build an array of signature + centroid pairs that we want to keep. We will
 	// delete verything that isn't in this dataset.
-	var keysToKeep []types.ValueAppender
+	var keysToKeep [][]string
 	for i := range clusters {
 		cluster := clusters[i]
 		cluster.AccountId = r.AccountId()
 		cluster.BankAccountId = bankAccountId
 
 		if cluster.Centroid != nil {
-			keysToKeep = append(keysToKeep, pg.InMulti([]string{
+			keysToKeep = append(keysToKeep, []string{
 				cluster.Signature,
 				string(*cluster.Centroid),
-			}))
+			})
 		}
 		clusters[i] = cluster
 	}
@@ -44,12 +43,13 @@ func (r *repositoryBase) WriteTransactionClusters(
 	// merged into a newer larger cluster based on updated information. Either way
 	// the old cluster needs to be removed. This might be volatile for accounts
 	// with less data, but becomes very stable the more data the accounts have.
-	cleanResult, err := r.txn.ModelContext(span.Context(), &TransactionCluster{}).
+	cleanResult, err := r.txn.NewDelete().
+		Model(&TransactionCluster{}).
 		Where(`"account_id" = ?`, r.AccountId()).
 		Where(`"bank_account_id" = ?`, bankAccountId).
-		WhereIn(`("signature", "centroid") NOT IN (?)`, keysToKeep).
+		Where(`("signature", "centroid") NOT IN (?)`, bun.In(keysToKeep)).
 		Returning("*").
-		Delete(&deleted)
+		Exec(span.Context(), &deleted)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to clean up outdated transaction clusters")
 	}
@@ -57,8 +57,9 @@ func (r *repositoryBase) WriteTransactionClusters(
 	// Then we can insert all the transaction clusters we have calculated. But if
 	// we get a conflict on our unique index then we will instead just update the
 	// existing cluster.
-	result, err := r.txn.ModelContext(span.Context(), &clusters).
-		OnConflict(`("account_id", "bank_account_id", "signature", "centroid") DO UPDATE`).
+	result, err := r.txn.NewInsert().
+		Model(&clusters).
+		On(`CONFLICT ("account_id", "bank_account_id", "signature", "centroid") DO UPDATE`).
 		Set(`"members" = EXCLUDED.members`).
 		Set(`"debug" = EXCLUDED.debug`).
 		Set(`"merchant" = EXCLUDED.merchant`).
@@ -72,7 +73,7 @@ func (r *repositoryBase) WriteTransactionClusters(
 		// freshly inserted or were updated by this upsert. Rows that are identical
 		// to existing data are not returned here.
 		Returning(`"transaction_cluster".*`).
-		Insert(&clusters)
+		Exec(span.Context())
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to insert the new transaction clusters")
 	}
@@ -87,12 +88,13 @@ func (r *repositoryBase) WriteTransactionClusters(
 		)
 	}
 
+	cleaned, _ := cleanResult.RowsAffected()
+	affected, _ := result.RowsAffected()
 	r.log.DebugContext(
 		span.Context(),
 		"upserted transaction clusters",
-		"cleaned", cleanResult.RowsAffected(),
-		"returned", result.RowsReturned(),
-		"affected", result.RowsAffected(),
+		"cleaned", cleaned,
+		"affected", affected,
 	)
 
 	return clusters, nil
@@ -107,12 +109,13 @@ func (r *repositoryBase) GetTransactionClusterByMember(
 	defer span.Finish()
 
 	var cluster TransactionCluster
-	err := r.txn.ModelContext(span.Context(), &cluster).
+	err := r.txn.NewSelect().
+		Model(&cluster).
 		Where(`"account_id" = ?`, r.AccountId()).
 		Where(`"bank_account_id" = ?`, bankAccountId).
 		Where(`? = ANY ("members")`, transactionId).
 		Limit(1).
-		Select(&cluster)
+		Scan(span.Context())
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to find cluster containing transaction")
 	}

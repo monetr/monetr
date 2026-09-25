@@ -167,10 +167,12 @@ func GivenIHaveATrialingAccount(t *testing.T, clock clock.Clock, login models.Lo
 
 func GivenAccountIsInTimezone(t *testing.T, account *models.Account, location *time.Location) {
 	db := testutils.GetPgDatabase(t)
-	result, err := db.Model(account).
+	result, err := db.NewUpdate().Model(account).
 		WherePK().
 		Set(`"timezone" = ?`, location.String()).
-		UpdateNotZero(account)
+		Exec(context.Background())
 	require.NoError(t, err, "must be able to set timezone")
-	require.EqualValues(t, 1, result.RowsAffected(), "must have updated a single row")
+	affected, err := result.RowsAffected()
+	require.NoError(t, err, "must be able to read rows affected")
+	require.EqualValues(t, 1, affected, "must have updated a single row")
 }

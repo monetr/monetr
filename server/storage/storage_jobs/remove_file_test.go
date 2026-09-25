@@ -121,7 +121,7 @@ func TestRemoveFileJob_Run(t *testing.T) {
 				FileId:    "file_bogus",
 			},
 		)
-		assert.EqualError(t, err, "failed to retrieve file record: pg: no rows in result set")
+		assert.EqualError(t, err, "failed to retrieve file record: sql: no rows in result set")
 	})
 
 	t.Run("storage error rolls back so file can be retried", func(t *testing.T) {

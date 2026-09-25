@@ -9,7 +9,7 @@ import (
 
 func (c *Controller) handleHealth(ctx *echo.Context) error {
 	status := http.StatusOK
-	err := c.DB.Ping(ctx.Request().Context())
+	err := c.DB.PingContext(ctx.Request().Context())
 	if err != nil {
 		c.getLog(ctx).WarnContext(c.getContext(ctx), "failed to ping database", "err", err)
 		status = http.StatusInternalServerError

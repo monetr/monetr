@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
-	"github.com/go-pg/pg/v10"
 	"github.com/pkg/errors"
+	"github.com/uptrace/bun"
 )
 
 var (
@@ -51,43 +51,46 @@ type Uploadable interface {
 }
 
 var (
-	_ pg.BeforeInsertHook = (*File)(nil)
-	_ Identifiable        = File{}
+	_ bun.BeforeAppendModelHook = (*File)(nil)
+	_ Identifiable              = File{}
 )
 
 type File struct {
-	tableName string `pg:"files"`
+	bun.BaseModel `bun:"table:files,alias:file"`
 
-	FileId        ID[File]    `json:"fileId" pg:"file_id,notnull,pk"`
-	AccountId     ID[Account] `json:"-" pg:"account_id,notnull,pk"`
-	Account       *Account    `json:"-" pg:"rel:has-one"`
-	Kind          string      `json:"kind" pg:"kind,notnull"`
-	Name          string      `json:"name" pg:"name,notnull"`
-	ContentType   ContentType `json:"contentType" pg:"content_type,notnull"`
-	Size          uint64      `json:"size" pg:"size,notnull"`
-	CreatedAt     time.Time   `json:"createdAt" pg:"created_at,notnull"`
-	CreatedBy     ID[User]    `json:"createdBy" pg:"created_by,notnull"`
-	CreatedByUser *User       `json:"-" pg:"rel:has-one,fk:created_by"`
-	ExpiresAt     *time.Time  `json:"expiresAt" pg:"expires_at"`
-	DeletedAt     *time.Time  `json:"deletedAt" pg:"deleted_at"`
-	ReconciledAt  *time.Time  `json:"-" pg:"reconciled_at"`
+	FileId        ID[File]    `json:"fileId" bun:"file_id,notnull,pk"`
+	AccountId     ID[Account] `json:"-" bun:"account_id,notnull,pk"`
+	Account       *Account    `json:"-" bun:"rel:belongs-to,join:account_id=account_id"`
+	Kind          string      `json:"kind" bun:"kind,notnull,nullzero"`
+	Name          string      `json:"name" bun:"name,notnull,nullzero"`
+	ContentType   ContentType `json:"contentType" bun:"content_type,notnull,nullzero"`
+	Size          uint64      `json:"size" bun:"size,notnull,nullzero"`
+	CreatedAt     time.Time   `json:"createdAt" bun:"created_at,notnull,nullzero"`
+	CreatedBy     ID[User]    `json:"createdBy" bun:"created_by,notnull,nullzero"`
+	CreatedByUser *User       `json:"-" bun:"rel:belongs-to,join:created_by=user_id"`
+	ExpiresAt     *time.Time  `json:"expiresAt" bun:"expires_at"`
+	DeletedAt     *time.Time  `json:"deletedAt" bun:"deleted_at"`
+	ReconciledAt  *time.Time  `json:"-" bun:"reconciled_at"`
 }
 
 func (File) IdentityPrefix() string {
 	return "file"
 }
 
-func (o *File) BeforeInsert(ctx context.Context) (context.Context, error) {
-	if o.FileId.IsZero() {
-		o.FileId = NewID[File]()
+func (o *File) BeforeAppendModel(ctx context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		if o.FileId.IsZero() {
+			o.FileId = NewID[File]()
+		}
+
+		// Fixes weird bug in tests where the time gets truncated by the database
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = time.Now()
+		}
 	}
 
-	// Fixes weird bug in tests where the time gets truncated by the database
-	if o.CreatedAt.IsZero() {
-		o.CreatedAt = time.Now()
-	}
-
-	return ctx, nil
+	return nil
 }
 
 func (o *File) GetStorePath() (string, error) {

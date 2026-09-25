@@ -1,11 +1,11 @@
 package repository_test
 
 import (
+	"database/sql"
 	"testing"
 	"time"
 
 	"github.com/benbjohnson/clock"
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/datasources/table"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/testutils"
@@ -119,7 +119,7 @@ func TestRepositoryBase_GetTransactionImportMapping(t *testing.T) {
 
 		got, err := repoB.GetTransactionImportMapping(t.Context(), mapping.TransactionImportMappingId)
 		require.Error(t, err, "must not return another account's mapping")
-		assert.True(t, errors.Is(err, pg.ErrNoRows), "must surface a not-found error")
+		assert.True(t, errors.Is(err, sql.ErrNoRows), "must surface a not-found error")
 		assert.Nil(t, got, "must not return a record across accounts")
 	})
 }

@@ -4,26 +4,26 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-pg/pg/v10"
+	"github.com/uptrace/bun"
 )
 
 type LunchFlowTransaction struct {
-	tableName string `pg:"lunch_flow_transactions"`
+	bun.BaseModel `bun:"table:lunch_flow_transactions,alias:lunch_flow_transaction"`
 
-	LunchFlowTransactionId ID[LunchFlowTransaction] `json:"lunchFlowTransactionId" pg:"lunch_flow_transaction_id,notnull,pk"`
-	AccountId              ID[Account]              `json:"-" pg:"account_id,notnull,pk"`
-	Account                *Account                 `json:"-" pg:"rel:has-one"`
-	LunchFlowBankAccountId ID[LunchFlowBankAccount] `json:"-" pg:"lunch_flow_bank_account_id,notnull,unique:per_bank_account"`
-	LunchFlowBankAccount   *LunchFlowBankAccount    `json:"-" pg:"rel:has-one"`
-	LunchFlowId            string                   `json:"-" pg:"lunch_flow_id,notnull,unique:per_bank_account"`
-	Merchant               string                   `json:"merchant" pg:"merchant"`
-	Description            string                   `json:"description" pg:"description"`
-	Date                   time.Time                `json:"date" pg:"date,notnull"`
-	Currency               string                   `json:"currency" pg:"currency,notnull"`
-	Amount                 int64                    `json:"amount" pg:"amount,notnull,use_zero"`
-	IsPending              bool                     `json:"isPending" pg:"is_pending,notnull,use_zero"`
-	CreatedAt              time.Time                `json:"createdAt" pg:"created_at,notnull,default:now()"`
-	DeletedAt              *time.Time               `json:"deletedAt,omitempty" pg:"deleted_at"`
+	LunchFlowTransactionId ID[LunchFlowTransaction] `json:"lunchFlowTransactionId" bun:"lunch_flow_transaction_id,notnull,pk"`
+	AccountId              ID[Account]              `json:"-" bun:"account_id,notnull,pk"`
+	Account                *Account                 `json:"-" bun:"rel:belongs-to,join:account_id=account_id"`
+	LunchFlowBankAccountId ID[LunchFlowBankAccount] `json:"-" bun:"lunch_flow_bank_account_id,notnull,unique:per_bank_account,nullzero"`
+	LunchFlowBankAccount   *LunchFlowBankAccount    `json:"-" bun:"rel:belongs-to,join:lunch_flow_bank_account_id=lunch_flow_bank_account_id,join:account_id=account_id"`
+	LunchFlowId            string                   `json:"-" bun:"lunch_flow_id,notnull,unique:per_bank_account,nullzero"`
+	Merchant               string                   `json:"merchant" bun:"merchant,nullzero"`
+	Description            string                   `json:"description" bun:"description,nullzero"`
+	Date                   time.Time                `json:"date" bun:"date,notnull,nullzero"`
+	Currency               string                   `json:"currency" bun:"currency,notnull,nullzero"`
+	Amount                 int64                    `json:"amount" bun:"amount,notnull"`
+	IsPending              bool                     `json:"isPending" bun:"is_pending,notnull"`
+	CreatedAt              time.Time                `json:"createdAt" bun:"created_at,notnull,default:now(),nullzero"`
+	DeletedAt              *time.Time               `json:"deletedAt,omitempty" bun:"deleted_at"`
 }
 
 func (LunchFlowTransaction) IdentityPrefix() string {
@@ -31,18 +31,21 @@ func (LunchFlowTransaction) IdentityPrefix() string {
 }
 
 var (
-	_ pg.BeforeInsertHook = (*PlaidTransaction)(nil)
+	_ bun.BeforeAppendModelHook = (*LunchFlowTransaction)(nil)
 )
 
-func (o *LunchFlowTransaction) BeforeInsert(ctx context.Context) (context.Context, error) {
-	if o.LunchFlowTransactionId.IsZero() {
-		o.LunchFlowTransactionId = NewID[LunchFlowTransaction]()
+func (o *LunchFlowTransaction) BeforeAppendModel(ctx context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		if o.LunchFlowTransactionId.IsZero() {
+			o.LunchFlowTransactionId = NewID[LunchFlowTransaction]()
+		}
+
+		now := time.Now()
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = now
+		}
 	}
 
-	now := time.Now()
-	if o.CreatedAt.IsZero() {
-		o.CreatedAt = now
-	}
-
-	return ctx, nil
+	return nil
 }

@@ -25,7 +25,7 @@ func TestRepositoryBase_GetAccount(t *testing.T) {
 			log,
 		)
 		account, err := repo.GetAccount(t.Context())
-		assert.EqualError(t, err, "failed to retrieve account: pg: no rows in result set")
+		assert.EqualError(t, err, "failed to retrieve account: sql: no rows in result set")
 		assert.Nil(t, account, "should not return an account")
 	})
 
@@ -70,20 +70,24 @@ func TestRepositoryBase_GetAccount(t *testing.T) {
 
 		// Then delete the account from the database.
 		{
-			result, err := db.ModelContext(t.Context(), &models.User{
+			result, err := db.NewDelete().Model(&models.User{
 				UserId:    user.UserId,
 				AccountId: user.AccountId,
 			}).
 				WherePK().
-				Delete()
+				Exec(t.Context())
 			assert.NoError(t, err, "must successfully delete the account to test the cache")
-			assert.Equal(t, 1, result.RowsAffected(), "should only delete the one account")
+			affected, err := result.RowsAffected()
+			assert.NoError(t, err, "must be able to read rows affected")
+			assert.EqualValues(t, 1, affected, "should only delete the one account")
 
-			result, err = db.ModelContext(t.Context(), &models.Account{AccountId: user.AccountId}).
+			result, err = db.NewDelete().Model(&models.Account{AccountId: user.AccountId}).
 				WherePK().
-				Delete()
+				Exec(t.Context())
 			assert.NoError(t, err, "must successfully delete the account to test the cache")
-			assert.Equal(t, 1, result.RowsAffected(), "should only delete the one account")
+			affected, err = result.RowsAffected()
+			assert.NoError(t, err, "must be able to read rows affected")
+			assert.EqualValues(t, 1, affected, "should only delete the one account")
 		}
 
 		// Calling get account again should still return the account as it is cached.

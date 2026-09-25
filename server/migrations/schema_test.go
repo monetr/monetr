@@ -1,6 +1,7 @@
 package migrations
 
 import (
+	"database/sql"
 	"fmt"
 	"hash/fnv"
 	"net"
@@ -10,46 +11,56 @@ import (
 	"testing/fstest"
 	"time"
 
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils/testlog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/uptrace/bun"
+	"github.com/uptrace/bun/dialect/pgdialect"
+	"github.com/uptrace/bun/driver/pgdriver"
 )
 
 // These tests live in-package because they need to touch unexported helpers
-// like applyMigrations and newPgExecutor. That's also why the database setup
+// like applyMigrations and newBunExecutor. That's also why the database setup
 // is duplicated here instead of pulled in from server/internal/testutils,
 // testutils itself imports server/migrations and would form a cycle. The
 // log helpers do come from testutils/testlog, which sits in its own sub-
 // package precisely to keep itself cycle-free.
 
-func testPgOptions(_ *testing.T) *pg.Options {
+func testPgOptions(_ *testing.T) []pgdriver.Option {
 	// Precedence runs monetr's own vars first, then the POSTGRES_* names our
 	// compose files set, then the standard libpq PG* vars that psql itself
 	// honors (https://www.postgresql.org/docs/current/libpq-envars.html), then
 	// a sensible default. That last libpq tier means a shell already pointed at
 	// a database via psql can run these tests without any extra setup.
-	return &pg.Options{
-		Network: "tcp",
-		Addr: net.JoinHostPort(
+	return []pgdriver.Option{
+		pgdriver.WithNetwork("tcp"),
+		pgdriver.WithAddr(net.JoinHostPort(
 			myownsanity.CoalesceStrings(os.Getenv("MONETR_PG_ADDRESS"), os.Getenv("POSTGRES_HOST"), os.Getenv("PGHOST"), "localhost"),
 			myownsanity.CoalesceStrings(os.Getenv("MONETR_PG_PORT"), os.Getenv("POSTGRES_PORT"), os.Getenv("PGPORT"), "5432"),
-		),
-		User:            myownsanity.CoalesceStrings(os.Getenv("MONETR_PG_USERNAME"), os.Getenv("POSTGRES_USER"), os.Getenv("PGUSER"), "postgres"),
-		Password:        myownsanity.CoalesceStrings(os.Getenv("MONETR_PG_PASSWORD"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("PGPASSWORD")),
-		Database:        myownsanity.CoalesceStrings(os.Getenv("MONETR_PG_DATABASE"), os.Getenv("POSTGRES_DB"), os.Getenv("PGDATABASE"), "postgres"),
-		ApplicationName: "monetr - migrations - tests",
+		)),
+		pgdriver.WithUser(myownsanity.CoalesceStrings(os.Getenv("MONETR_PG_USERNAME"), os.Getenv("POSTGRES_USER"), os.Getenv("PGUSER"), "postgres")),
+		pgdriver.WithPassword(myownsanity.CoalesceStrings(os.Getenv("MONETR_PG_PASSWORD"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("PGPASSWORD"))),
+		pgdriver.WithDatabase(myownsanity.CoalesceStrings(os.Getenv("MONETR_PG_DATABASE"), os.Getenv("POSTGRES_DB"), os.Getenv("PGDATABASE"), "postgres")),
+		pgdriver.WithApplicationName("monetr - migrations - tests"),
+		pgdriver.WithReadTimeout(0),
+		pgdriver.WithWriteTimeout(0),
+		pgdriver.WithInsecure(true),
 	}
+}
+
+func connectTestDatabase(options ...pgdriver.Option) *bun.DB {
+	sqldb := sql.OpenDB(pgdriver.NewConnector(options...))
+	return bun.NewDB(sqldb, pgdialect.New())
 }
 
 // newCleanDatabase spins up a fresh Postgres database for the test with
 // nothing in it yet, no migrations applied. Cleanup drops the database when
 // the test ends.
-func newCleanDatabase(t *testing.T) *pg.DB {
+func newCleanDatabase(t *testing.T) *bun.DB {
 	parentOpts := testPgOptions(t)
-	parent := pg.Connect(parentOpts)
-	require.NoError(t, parent.Ping(t.Context()))
+	parent := connectTestDatabase(parentOpts...)
+	require.NoError(t, parent.PingContext(t.Context()))
 
 	// Postgres truncates identifiers at 63 bytes. An FNV-1a 64-bit hash is 16
 	// hex chars, so monetr_test_<hash> stays well under the cap while staying
@@ -62,10 +73,9 @@ func newCleanDatabase(t *testing.T) *pg.DB {
 	_, err = parent.Exec(fmt.Sprintf(`CREATE DATABASE %q`, dbName))
 	require.NoError(t, err)
 
-	childOpts := *parentOpts
-	childOpts.Database = dbName
-	child := pg.Connect(&childOpts)
-	require.NoError(t, child.Ping(t.Context()))
+	childOpts := append(testPgOptions(t), pgdriver.WithDatabase(dbName))
+	child := connectTestDatabase(childOpts...)
+	require.NoError(t, child.PingContext(t.Context()))
 
 	t.Cleanup(func() {
 		_ = child.Close()
@@ -76,27 +86,33 @@ func newCleanDatabase(t *testing.T) *pg.DB {
 	return child
 }
 
-func readSchemaVersions(t *testing.T, db *pg.DB) []int64 {
+func readSchemaVersions(t *testing.T, db *bun.DB) []int64 {
 	var raw []int64
-	_, err := db.QueryContext(
-		t.Context(),
-		&raw,
+	err := db.NewRaw(
 		`SELECT version FROM schema_migrations ORDER BY version`,
-	)
+	).Scan(t.Context(), &raw)
 	require.NoError(t, err)
 	return raw
+}
+
+// pinnedExecutor returns an Executor bound to a single pooled connection, plus
+// a cleanup that releases it. ensureSchemaTable and applyMigrations take the
+// session-scoped advisory lock, so they have to share a pinned connection
+// rather than borrow pool connections that might never release the lock.
+func pinnedExecutor(t *testing.T, db *bun.DB) Executor {
+	conn, err := db.Conn(t.Context())
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		_ = conn.Close()
+	})
+	return newBunExecutor(conn)
 }
 
 func TestApplyMigrations_TxRollbackOnFailure(t *testing.T) {
 	db := newCleanDatabase(t)
 	log := testlog.GetLog(t)
 
-	// ensureSchemaTable takes the session-scoped advisory lock, so it has to
-	// share the pinned connection with applyMigrations rather than borrow a
-	// pool connection that might never release the lock.
-	conn := db.Conn()
-	defer conn.Close()
-	pinned := newPgExecutor(conn)
+	pinned := pinnedExecutor(t, db)
 	require.NoError(t, ensureSchemaTable(t.Context(), log, pinned))
 
 	fsys := fstest.MapFS{
@@ -112,17 +128,17 @@ SELECT this_function_does_not_exist();`),
 	require.Error(t, err)
 
 	var exists bool
-	_, err = db.QueryOneContext(t.Context(), pg.Scan(&exists),
+	err = db.NewRaw(
 		`SELECT EXISTS (SELECT 1 FROM information_schema.tables
 		 WHERE table_schema = current_schema() AND table_name = 'rollback_marker')`,
-	)
+	).Scan(t.Context(), &exists)
 	require.NoError(t, err)
 	assert.False(t, exists, "tx-wrapped failure must roll back the CREATE TABLE")
 
 	var count int
-	_, err = db.QueryOneContext(t.Context(), pg.Scan(&count),
+	err = db.NewRaw(
 		`SELECT COUNT(*) FROM schema_migrations WHERE version = 2030010100`,
-	)
+	).Scan(t.Context(), &count)
 	require.NoError(t, err)
 	assert.Equal(t, 0, count, "failed tx must not record a version")
 }
@@ -131,12 +147,7 @@ func TestApplyMigrations_NonTxApplied(t *testing.T) {
 	db := newCleanDatabase(t)
 	log := testlog.GetLog(t)
 
-	// ensureSchemaTable takes the session-scoped advisory lock, so it has to
-	// share the pinned connection with applyMigrations rather than borrow a
-	// pool connection that might never release the lock.
-	conn := db.Conn()
-	defer conn.Close()
-	pinned := newPgExecutor(conn)
+	pinned := pinnedExecutor(t, db)
 	require.NoError(t, ensureSchemaTable(t.Context(), log, pinned))
 
 	fsys := fstest.MapFS{
@@ -153,17 +164,17 @@ func TestApplyMigrations_NonTxApplied(t *testing.T) {
 	assert.Equal(t, int64(2030010200), newV)
 
 	var exists bool
-	_, err = db.QueryOneContext(t.Context(), pg.Scan(&exists),
+	err = db.NewRaw(
 		`SELECT EXISTS (SELECT 1 FROM information_schema.tables
 		 WHERE table_schema = current_schema() AND table_name = 'nontx_marker')`,
-	)
+	).Scan(t.Context(), &exists)
 	require.NoError(t, err)
 	assert.True(t, exists, "non-tx migration must apply its body")
 
 	var count int
-	_, err = db.QueryOneContext(t.Context(), pg.Scan(&count),
+	err = db.NewRaw(
 		`SELECT COUNT(*) FROM schema_migrations WHERE version = 2030010200`,
-	)
+	).Scan(t.Context(), &count)
 	require.NoError(t, err)
 	assert.Equal(t, 1, count, "non-tx migration must record its version")
 }
@@ -172,12 +183,7 @@ func TestApplyMigrations_GapWarn(t *testing.T) {
 	db := newCleanDatabase(t)
 	log, hook := testlog.GetTestLog(t)
 
-	// ensureSchemaTable takes the session-scoped advisory lock, so it has to
-	// share the pinned connection with applyMigrations rather than borrow a
-	// pool connection that might never release the lock.
-	conn := db.Conn()
-	defer conn.Close()
-	pinned := newPgExecutor(conn)
+	pinned := pinnedExecutor(t, db)
 	require.NoError(t, ensureSchemaTable(t.Context(), log, pinned))
 
 	_, err := db.Exec(`INSERT INTO schema_migrations (version) VALUES (99999999999)`)
@@ -221,15 +227,15 @@ func TestNewMigrationsManager_SeedFromGopgMigrations(t *testing.T) {
 	require.NotNil(t, m)
 
 	type row struct {
-		Version   int64     `pg:"version"`
-		AppliedAt time.Time `pg:"applied_at"`
+		Version   int64     `bun:"version"`
+		AppliedAt time.Time `bun:"applied_at"`
 	}
 	var got []row
-	_, err = db.QueryContext(t.Context(), &got,
+	err = db.NewRaw(
 		`SELECT version, applied_at FROM schema_migrations
          WHERE version IN (2021041100, 2021050999, 2023060100)
          ORDER BY version`,
-	)
+	).Scan(t.Context(), &got)
 	require.NoError(t, err)
 
 	require.Len(t, got, 2, "2021050999 (deleted test migration) must be filtered out")
@@ -244,7 +250,7 @@ func TestNewMigrationsManager_SeedFromGopgMigrations(t *testing.T) {
 	)
 
 	var still bool
-	_, err = db.QueryOneContext(t.Context(), pg.Scan(&still), gopgExistsSQL)
+	err = db.NewRaw(gopgExistsSQL).Scan(t.Context(), &still)
 	require.NoError(t, err)
 	assert.True(t, still, "gopg_migrations must remain after seed")
 
@@ -252,10 +258,10 @@ func TestNewMigrationsManager_SeedFromGopgMigrations(t *testing.T) {
 	require.NoError(t, err)
 
 	var rowCount int
-	_, err = db.QueryOneContext(t.Context(), pg.Scan(&rowCount),
+	err = db.NewRaw(
 		`SELECT COUNT(*) FROM schema_migrations
          WHERE version IN (2021041100, 2021050999, 2023060100)`,
-	)
+	).Scan(t.Context(), &rowCount)
 	require.NoError(t, err)
 	assert.Equal(t, 2, rowCount, "second seed call must not duplicate rows")
 }

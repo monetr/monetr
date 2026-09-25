@@ -29,7 +29,7 @@ func TestSecretsRepository_Store(t *testing.T) {
 			Kind:  models.SecretKindPlaid,
 			Value: gofakeit.UUID(),
 		})
-		assert.EqualError(t, err, `failed to store secret: ERROR #23503 insert or update on table "secrets" violates foreign key constraint "fk_secrets_account"`)
+		assert.EqualError(t, err, `failed to store secret: ERROR: insert or update on table "secrets" violates foreign key constraint "fk_secrets_account" (SQLSTATE=23503)`)
 	})
 
 	t.Run("first write", func(t *testing.T) {

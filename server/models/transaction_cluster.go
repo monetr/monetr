@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-pg/pg/v10"
+	"github.com/uptrace/bun"
 )
 
 type TransactionClusterDebugItem struct {
@@ -17,24 +17,24 @@ type TransactionClusterDebugItem struct {
 }
 
 type TransactionCluster struct {
-	tableName string `pg:"transaction_clusters"`
+	bun.BaseModel `bun:"table:transaction_clusters,alias:transaction_cluster"`
 
-	TransactionClusterId ID[TransactionCluster]        `json:"transactionClusterId" pg:"transaction_cluster_id,notnull,pk"`
-	AccountId            ID[Account]                   `json:"-" pg:"account_id,notnull,pk"`
-	Account              *Account                      `json:"-" pg:"rel:has-one"`
-	BankAccountId        ID[BankAccount]               `json:"bankAccountId" pg:"bank_account_id,notnull"`
-	BankAccount          *BankAccount                  `json:"-" pg:"rel:has-one"`
-	Signature            string                        `json:"signature" pg:"signature"`
-	Centroid             *ID[Transaction]              `json:"centroid" pg:"centroid"`
-	Name                 string                        `json:"name" pg:"name,notnull"`
-	OriginalName         string                        `json:"originalName" pg:"original_name,notnull"`
-	Members              []ID[Transaction]             `json:"members" pg:"members,notnull,type:'varchar(32)[]'"`
-	Debug                []TransactionClusterDebugItem `json:"debug" pg:"debug,type:'jsonb'"`
-	Merchant             []TransactionClusterDebugItem `json:"merchant" pg:"merchant,type:'jsonb'"`
-	CreatedAt            time.Time                     `json:"createdAt" pg:"created_at,notnull,default:now()"`
-	UpdatedAt            time.Time                     `json:"updatedAt" pg:"updated_at,notnull,default:now()"`
+	TransactionClusterId ID[TransactionCluster]        `json:"transactionClusterId" bun:"transaction_cluster_id,notnull,pk"`
+	AccountId            ID[Account]                   `json:"-" bun:"account_id,notnull,pk"`
+	Account              *Account                      `json:"-" bun:"rel:belongs-to,join:account_id=account_id"`
+	BankAccountId        ID[BankAccount]               `json:"bankAccountId" bun:"bank_account_id,notnull,nullzero"`
+	BankAccount          *BankAccount                  `json:"-" bun:"rel:belongs-to,join:bank_account_id=bank_account_id,join:account_id=account_id"`
+	Signature            string                        `json:"signature" bun:"signature,nullzero"`
+	Centroid             *ID[Transaction]              `json:"centroid" bun:"centroid"`
+	Name                 string                        `json:"name" bun:"name,notnull,nullzero"`
+	OriginalName         string                        `json:"originalName" bun:"original_name,notnull,nullzero"`
+	Members              []ID[Transaction]             `json:"members" bun:"members,notnull,array,nullzero"`
+	Debug                []TransactionClusterDebugItem `json:"debug" bun:"debug,type:jsonb,nullzero"`
+	Merchant             []TransactionClusterDebugItem `json:"merchant" bun:"merchant,type:jsonb,nullzero"`
+	CreatedAt            time.Time                     `json:"createdAt" bun:"created_at,notnull,default:now(),nullzero"`
+	UpdatedAt            time.Time                     `json:"updatedAt" bun:"updated_at,notnull,default:now(),nullzero"`
 
-	TransactionRules []TransactionRule `json:"rules,omitempty" pg:"rel:has-many"`
+	TransactionRules []TransactionRule `json:"rules,omitempty" bun:"rel:has-many,join:transaction_cluster_id=transaction_cluster_id,join:account_id=account_id"`
 }
 
 func (TransactionCluster) IdentityPrefix() string {
@@ -42,20 +42,23 @@ func (TransactionCluster) IdentityPrefix() string {
 }
 
 var (
-	_ pg.BeforeInsertHook = (*TransactionCluster)(nil)
+	_ bun.BeforeAppendModelHook = (*TransactionCluster)(nil)
 )
 
-func (o *TransactionCluster) BeforeInsert(ctx context.Context) (context.Context, error) {
-	if o.TransactionClusterId.IsZero() {
-		o.TransactionClusterId = NewID[TransactionCluster]()
+func (o *TransactionCluster) BeforeAppendModel(ctx context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		if o.TransactionClusterId.IsZero() {
+			o.TransactionClusterId = NewID[TransactionCluster]()
+		}
+
+		now := time.Now()
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = now
+		}
+
+		o.UpdatedAt = now
 	}
 
-	now := time.Now()
-	if o.CreatedAt.IsZero() {
-		o.CreatedAt = now
-	}
-
-	o.UpdatedAt = now
-
-	return ctx, nil
+	return nil
 }

@@ -4,17 +4,17 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-pg/pg/v10"
+	"github.com/uptrace/bun"
 )
 
 type Beta struct {
-	tableName string `pg:"betas"`
+	bun.BaseModel `bun:"table:betas,alias:beta"`
 
-	BetaId       ID[Beta]  `json:"betaId" pg:"beta_id,notnull,pk"`
-	CodeHash     string    `json:"-" pg:"code_hash,notnull,unique"`
-	UsedByUserId *uint64   `json:"usedByUserId" pg:"used_by"`
-	UsedByUser   *User     `json:"-" pg:"rel:has-one,fk:used_by"`
-	ExpiresAt    time.Time `json:"expiresAt" pg:"expires_at,notnull"`
+	BetaId       ID[Beta]  `json:"betaId" bun:"beta_id,notnull,pk"`
+	CodeHash     string    `json:"-" bun:"code_hash,notnull,unique,nullzero"`
+	UsedByUserId *uint64   `json:"usedByUserId" bun:"used_by"`
+	UsedByUser   *User     `json:"-" bun:"rel:belongs-to,join:used_by=user_id"`
+	ExpiresAt    time.Time `json:"expiresAt" bun:"expires_at,notnull,nullzero"`
 }
 
 func (Beta) IdentityPrefix() string {
@@ -22,13 +22,16 @@ func (Beta) IdentityPrefix() string {
 }
 
 var (
-	_ pg.BeforeInsertHook = (*Beta)(nil)
+	_ bun.BeforeAppendModelHook = (*Beta)(nil)
 )
 
-func (o *Beta) BeforeInsert(ctx context.Context) (context.Context, error) {
-	if o.BetaId.IsZero() {
-		o.BetaId = NewID[Beta]()
+func (o *Beta) BeforeAppendModel(ctx context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		if o.BetaId.IsZero() {
+			o.BetaId = NewID[Beta]()
+		}
 	}
 
-	return ctx, nil
+	return nil
 }

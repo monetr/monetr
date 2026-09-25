@@ -21,8 +21,10 @@ func (r *repositoryBase) CreateTransactionImportMapping(
 	mapping.CreatedAt = r.clock.Now().UTC()
 	mapping.UpdatedAt = r.clock.Now().UTC()
 
-	_, err := r.txn.ModelContext(span.Context(), mapping).
-		Insert(mapping)
+	_, err := r.txn.NewInsert().
+		Model(mapping).
+		Returning("*").
+		Exec(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to create transaction import mapping")
@@ -42,11 +44,12 @@ func (r *repositoryBase) GetTransactionImportMapping(
 	defer span.Finish()
 
 	var item TransactionImportMapping
-	err := r.txn.ModelContext(span.Context(), &item).
+	err := r.txn.NewSelect().
+		Model(&item).
 		Where(`"account_id" = ?`, r.AccountId()).
 		Where(`"transaction_import_mapping_id" = ?`, mappingId).
 		Limit(1).
-		Select(&item)
+		Scan(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve transaction import mapping")
@@ -65,12 +68,13 @@ func (r *repositoryBase) GetTransactionImportMappings(
 	defer span.Finish()
 
 	result := make([]TransactionImportMapping, 0)
-	err := r.txn.ModelContext(span.Context(), &result).
+	err := r.txn.NewSelect().
+		Model(&result).
 		Where(`"account_id" = ?`, r.AccountId()).
 		Limit(limit).
 		Offset(offset).
 		Order("created_at DESC").
-		Select(&result)
+		Scan(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve transaction import mappings")
@@ -90,13 +94,14 @@ func (r *repositoryBase) GetTransactionImportMappingsBySignature(
 	defer span.Finish()
 
 	result := make([]TransactionImportMapping, 0)
-	err := r.txn.ModelContext(span.Context(), &result).
+	err := r.txn.NewSelect().
+		Model(&result).
 		Where(`"account_id" = ?`, r.AccountId()).
 		Where(`"signature" = ?`, signature).
 		Limit(limit).
 		Offset(offset).
 		Order("created_at DESC").
-		Select(&result)
+		Scan(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve transaction import mappings by signature")

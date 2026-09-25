@@ -23,10 +23,10 @@ func (r *repositoryBase) GetFundingSchedules(
 	span.SetData("bankAccountId", bankAccountId)
 
 	result := make([]FundingSchedule, 0)
-	err := r.txn.ModelContext(span.Context(), &result).
+	err := r.txn.NewSelect().Model(&result).
 		Where(`"funding_schedule"."account_id" = ?`, r.AccountId()).
 		Where(`"funding_schedule"."bank_account_id" = ?`, bankAccountId).
-		Select(&result)
+		Scan(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve funding schedules")
@@ -49,12 +49,12 @@ func (r *repositoryBase) GetFundingSchedule(
 	span.SetData("fundingScheduleId", fundingScheduleId)
 
 	var result FundingSchedule
-	err := r.txn.ModelContext(span.Context(), &result).
+	err := r.txn.NewSelect().Model(&result).
 		Where(`"funding_schedule"."account_id" = ?`, r.AccountId()).
 		Where(`"funding_schedule"."bank_account_id" = ?`, bankAccountId).
 		Where(`"funding_schedule"."funding_schedule_id" = ?`, fundingScheduleId).
 		Limit(1).
-		Select(&result)
+		Scan(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "could not retrieve funding schedule")
@@ -76,10 +76,10 @@ func (r *repositoryBase) CreateFundingSchedule(
 
 	fundingSchedule.AccountId = r.AccountId()
 
-	if _, err := r.txn.ModelContext(
-		span.Context(),
-		fundingSchedule,
-	).Insert(fundingSchedule); err != nil {
+	if _, err := r.txn.NewInsert().
+		Model(fundingSchedule).
+		Returning("*").
+		Exec(span.Context()); err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to create funding schedule")
 	}
@@ -98,13 +98,25 @@ func (r *repositoryBase) UpdateFundingSchedule(ctx context.Context, fundingSched
 
 	fundingSchedule.AccountId = r.AccountId()
 
-	result, err := r.txn.ModelContext(span.Context(), fundingSchedule).
+	result, err := r.txn.NewUpdate().Model(fundingSchedule).
 		WherePK().
-		UpdateNotZero(&fundingSchedule)
+		// go-pg's UpdateNotZero skipped zero-valued fields EXCEPT those tagged
+		// use_zero. bun's OmitZero has no such override, so the formerly-use_zero
+		// boolean columns are forced through with explicit values; without this a
+		// PATCH turning e.g. excludeWeekends off would silently not persist.
+		OmitZero().
+		Value("exclude_weekends", "?", fundingSchedule.ExcludeWeekends).
+		Value("wait_for_deposit", "?", fundingSchedule.WaitForDeposit).
+		Value("auto_create_transaction", "?", fundingSchedule.AutoCreateTransaction).
+		Returning("*").
+		Exec(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to update funding schedule")
-	} else if result.RowsAffected() != 1 {
+	} else if affected, err := result.RowsAffected(); err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return errors.Wrap(err, "failed to update funding schedule")
+	} else if affected != 1 {
 		span.Status = sentry.SpanStatusNotFound
 		return errors.New("no rows updated")
 	}
@@ -122,15 +134,18 @@ func (r *repositoryBase) DeleteFundingSchedule(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	result, err := r.txn.ModelContext(span.Context(), &FundingSchedule{}).
+	result, err := r.txn.NewDelete().Model(&FundingSchedule{}).
 		Where(`"funding_schedule"."account_id" = ?`, r.AccountId()).
 		Where(`"funding_schedule"."bank_account_id" = ?`, bankAccountId).
 		Where(`"funding_schedule"."funding_schedule_id" = ?`, fundingScheduleId).
-		Delete()
+		Exec(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to remove funding schedule")
-	} else if result.RowsAffected() == 0 {
+	} else if affected, err := result.RowsAffected(); err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return errors.Wrap(err, "failed to remove funding schedule")
+	} else if affected == 0 {
 		span.Status = sentry.SpanStatusNotFound
 		return errors.WithStack(ErrFundingScheduleNotFound)
 	}

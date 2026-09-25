@@ -115,6 +115,7 @@ type PostgreSQL struct {
 	Username           string `yaml:"username"`
 	Password           string `yaml:"password"`
 	Database           string `yaml:"database"`
+	TLS                bool   `yaml:"tls"`
 	InsecureSkipVerify bool   `yaml:"insecureSkipVerify"`
 	CACertificatePath  string `yaml:"caCertificatePath"`
 	KeyPath            string `yaml:"keyPath"`
@@ -448,6 +449,7 @@ func setupEnv(v *viper.Viper) {
 	v.MustBindEnv("PostgreSQL.Username", "MONETR_PG_USERNAME")
 	v.MustBindEnv("PostgreSQL.Password", "MONETR_PG_PASSWORD")
 	v.MustBindEnv("PostgreSQL.Database", "MONETR_PG_DATABASE")
+	v.MustBindEnv("PostgreSQL.TLS", "MONETR_PG_TLS")
 	v.MustBindEnv("PostgreSQL.InsecureSkipVerify", "MONETR_PG_INSECURE_SKIP_VERIFY")
 	v.MustBindEnv("PostgreSQL.CACertificatePath", "MONETR_PG_CA_PATH")
 	v.MustBindEnv("PostgreSQL.CertificatePath", "MONETR_PG_CERT_PATH")

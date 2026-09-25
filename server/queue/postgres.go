@@ -30,6 +30,7 @@ package queue
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log/slog"
 	"runtime/debug"
@@ -39,7 +40,6 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/config"
@@ -52,6 +52,8 @@ import (
 	"github.com/monetr/monetr/server/storage"
 	"github.com/pkg/errors"
 	"github.com/robfig/cron"
+	"github.com/uptrace/bun"
+	"github.com/uptrace/bun/driver/pgdriver"
 )
 
 var (
@@ -97,7 +99,7 @@ type postgresContext struct {
 // transactional.
 func (p *postgresContext) RunInTransaction(ctx context.Context, callback func(ctx Context) error) error {
 	return errors.WithStack(
-		p.DB().RunInTransaction(ctx, func(tx *pg.Tx) error {
+		p.DB().RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
 			span := sentry.StartSpan(ctx, "db.transaction")
 			defer span.Finish()
 
@@ -142,7 +144,7 @@ func (p *postgresContext) Billing() billing.Billing {
 }
 
 // DB implements [Context].
-func (p *postgresContext) DB() pg.DBI {
+func (p *postgresContext) DB() bun.IDB {
 	return p.db
 }
 
@@ -216,7 +218,7 @@ type postgresProcessor struct {
 	log           *slog.Logger
 	clock         clock.Clock
 	configuration config.Configuration
-	db            pg.DBI
+	db            bun.IDB
 	publisher     pubsub.Publisher
 	plaidPlatypus platypus.Platypus
 	kms           secrets.KeyManagement
@@ -287,7 +289,7 @@ func NewPostgresQueue(
 	clock clock.Clock,
 	log *slog.Logger,
 	configuration config.Configuration,
-	db pg.DBI,
+	db bun.IDB,
 	publisher pubsub.Publisher,
 	plaidPlatypus platypus.Platypus,
 	kms secrets.KeyManagement,
@@ -353,7 +355,7 @@ func (p *postgresProcessor) EnqueueAt(
 	job := models.Job{
 		Queue:         queue,
 		Signature:     signature,
-		Priority:      uint64(timestamp.Unix()),
+		Priority:      int64(timestamp.Unix()),
 		Input:         string(encodedArgs),
 		Output:        "",
 		Status:        models.PendingJobStatus,
@@ -369,9 +371,10 @@ func (p *postgresProcessor) EnqueueAt(
 	// Actually insert the job into the queue, but if the job fails to insert due
 	// to a conflict on the signature column, then log a trace message and do
 	// nothing.
-	_, err = p.db.ModelContext(span.Context(), &job).Insert(&job)
+	_, err = p.db.NewInsert().Model(&job).Returning("*").Exec(span.Context())
 	if err != nil {
-		if pgErr, ok := err.(pg.Error); ok && pgErr.Field(67) == "23505" {
+		var pgErr pgdriver.Error
+		if errors.As(err, &pgErr) && pgErr.Field('C') == "23505" {
 			// Do nothing. It is a duplicate enqueue.
 			log.Log(
 				span.Context(),
@@ -519,16 +522,17 @@ func (p *postgresProcessor) hydrateCronJobTable() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	return p.db.RunInTransaction(ctx, func(txn *pg.Tx) error {
+	return p.db.RunInTx(ctx, nil, func(ctx context.Context, txn bun.Tx) error {
 		{ // Clean up cron jobs that are no longer registered.
 			// TODO If there are no cron job queues registered then this breaks, but
 			// should it instead just remove all of the cron jobs?
-			result, err := txn.ModelContext(ctx, new(models.CronJob)).
-				WhereIn(`"queue" NOT IN (?)`, p.cronJobQueues).
-				Delete()
+			result, err := txn.NewDelete().
+				Model(new(models.CronJob)).
+				Where(`"queue" NOT IN (?)`, bun.In(p.cronJobQueues)).
+				Exec(ctx)
 			if err != nil {
 				return errors.Wrap(err, "failed to clean up old cron jobs")
-			} else if affected := result.RowsAffected(); affected > 0 {
+			} else if affected, _ := result.RowsAffected(); affected > 0 {
 				p.log.InfoContext(
 					ctx,
 					"removed outdated cron job(s) from postgres",
@@ -552,8 +556,9 @@ func (p *postgresProcessor) hydrateCronJobTable() error {
 		}
 
 		{ // Upsert/merge the cron rows with the table
-			result, err := txn.ModelContext(ctx, &crons).
-				OnConflict(`("queue") DO UPDATE`).
+			result, err := txn.NewInsert().
+				Model(&crons).
+				On(`CONFLICT ("queue") DO UPDATE`).
 				Set(`"cron_schedule" = EXCLUDED.cron_schedule`).
 				// If a cron schedule is updated such that it should execute sooner,
 				// then update the next run at to be that sooner timestamp. Otherwise
@@ -564,12 +569,12 @@ func (p *postgresProcessor) hydrateCronJobTable() error {
 				Where(`"cron_job"."next_run_at" != least(EXCLUDED."next_run_at", "cron_job"."next_run_at")`).
 				WhereOr(`"cron_job"."cron_schedule" != EXCLUDED.cron_schedule`).
 				Returning("NULL").
-				Insert()
+				Exec(ctx)
 			if err != nil {
 				return errors.Wrap(err, "failed to provision cron jobs")
 			}
 
-			if affected := result.RowsAffected(); affected == 0 {
+			if affected, _ := result.RowsAffected(); affected == 0 {
 				p.log.DebugContext(ctx, "no cron jobs required updating")
 			} else {
 				p.log.InfoContext(ctx, "updated cron jobs", "updated", affected)
@@ -594,7 +599,7 @@ func (p *postgresProcessor) JobContext(ctx context.Context, job *models.Job) Con
 	}
 }
 
-func (p *postgresProcessor) WithTransaction(db pg.DBI) Enqueuer {
+func (p *postgresProcessor) WithTransaction(db bun.IDB) Enqueuer {
 	clone := *p
 	clone.db = db
 	return &clone
@@ -789,32 +794,34 @@ func (p *postgresProcessor) consumeJobMaybe() (*models.Job, error) {
 	defer cancel()
 
 	var job models.Job
-	result, err := p.db.ModelContext(ctx, &job).
+	result, err := p.db.NewUpdate().
+		Model(&job).
 		Set(`"status" = ?`, models.ProcessingJobStatus).
 		Set(`"started_at" = ?`, p.clock.Now()).
 		Where(`"job_id" = (?)`,
-			p.db.Model(new(models.Job)).
+			p.db.NewSelect().
+				Model(new(models.Job)).
 				Column("job_id").
 				// Only get jobs that are pending.
 				Where(`"status" = ?`, models.PendingJobStatus).
 				// Only get jobs that have a priority that is now or in the past.
 				Where(`"priority" <= ?`, p.clock.Now().Unix()).
 				// Only consume jobs we recognize.
-				WhereIn(`"queue" IN (?)`, p.queues).
+				Where(`"queue" IN (?)`, bun.In(p.queues)).
 				Order(`job_id ASC`).
 				For(`UPDATE SKIP LOCKED`).
 				Limit(1),
 		).
 		Returning("*; /* NO LOG */").
-		Update(&job)
+		Exec(ctx)
 	if err != nil {
-		if err == pg.ErrNoRows {
+		if err == sql.ErrNoRows {
 			return nil, nil
 		}
 		return nil, errors.Wrap(err, "failed to consume job")
 	}
 
-	if result.RowsAffected() == 0 {
+	if affected, _ := result.RowsAffected(); affected == 0 {
 		// Do nothing, there either isn't a job or we didn't get one.
 		return nil, nil
 	}
@@ -839,7 +846,8 @@ func (p *postgresProcessor) consumeCronMaybe(
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	subQuery := p.db.ModelContext(ctx, new(models.CronJob)).
+	subQuery := p.db.NewSelect().
+		Model(new(models.CronJob)).
 		Column("queue").
 		Where(`"queue" = ?`, queue).
 		Where(`"next_run_at" < ?`, next).
@@ -847,16 +855,21 @@ func (p *postgresProcessor) consumeCronMaybe(
 		Limit(1)
 
 	var cronJob models.CronJob
-	result, err := p.db.ModelContext(ctx, &cronJob).
+	result, err := p.db.NewUpdate().
+		Model(&cronJob).
 		Set(`"last_run_at" = "next_run_at"`).
 		Set(`"next_run_at" = ?`, next).
 		Where(`"queue" = (?)`, subQuery).
-		Update(&cronJob)
+		Returning("*").
+		Exec(ctx)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
 		return nil, errors.Wrap(err, "failed to consume job")
 	}
 
-	if result.RowsAffected() == 0 {
+	if affected, _ := result.RowsAffected(); affected == 0 {
 		return nil, nil
 	}
 
@@ -1037,7 +1050,13 @@ func (p *postgresProcessor) jobConsumer(shutdown chan chan struct{}, ready chan 
 	ticker := time.NewTicker(baseInterval)
 	// Unsafe cast here, if this breaks then someone is doing something REALLY
 	// wrong.
-	listener := p.db.(*pg.DB).Listen(context.Background(), "queue:wake")
+	listener := pgdriver.NewListener(p.db.(*bun.DB))
+	if err := listener.Listen(context.Background(), "queue:wake"); err != nil {
+		p.log.Error("failed to listen for job notifications", "err", err)
+	}
+	// Close releases the listener's dedicated connection; Unlisten alone leaves
+	// it open (it is not part of the *sql.DB pool, so db.Close() won't reap it).
+	defer listener.Close()
 	defer listener.Unlisten(context.Background(), "queue:wake")
 	// Tell Start() that LISTEN is registered so it is safe to return to the
 	// caller. See the comment in Start() for why this barrier matters.
@@ -1275,12 +1294,13 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 
 			// If we panic during the job then just mark the job as failed and don't
 			// retry.
-			if _, err := p.db.ModelContext(span.Context(), job).
+			if _, err := p.db.NewUpdate().
+				Model(job).
 				Set(`"status" = ?`, models.FailedJobStatus).
 				Set(`"completed_at" = ?`, now).
 				Set(`"updated_at" = ?`, now).
 				WherePK().
-				Update(); err != nil {
+				Exec(span.Context()); err != nil {
 				log.ErrorContext(span.Context(), "failed to mark job as failed", "err", err)
 			}
 		} else if err != nil {
@@ -1300,14 +1320,15 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 					"err", err,
 					"attempt", job.Attempt,
 				)
-				if _, err := p.db.ModelContext(span.Context(), job).
+				if _, err := p.db.NewUpdate().
+					Model(job).
 					Set(`"attempt" = ?`, job.Attempt+1).
 					Set(`"priority" = ?`, now.Add(attemptBackoff*time.Duration(job.Attempt)).Unix()).
 					Set(`"status" = ?`, models.PendingJobStatus).
 					Set(`"started_at" = NULL`).
 					Set(`"updated_at" = ?`, now).
 					WherePK().
-					Update(); err != nil {
+					Exec(span.Context()); err != nil {
 					log.ErrorContext(span.Context(), "failed to bump job for retry", "err", err)
 				}
 			} else {
@@ -1317,24 +1338,26 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 					"err", err,
 					"attempt", job.Attempt,
 				)
-				if _, err := p.db.ModelContext(span.Context(), job).
+				if _, err := p.db.NewUpdate().
+					Model(job).
 					Set(`"status" = ?`, models.FailedJobStatus).
 					Set(`"completed_at" = ?`, now).
 					Set(`"updated_at" = ?`, now).
 					WherePK().
-					Update(); err != nil {
+					Exec(span.Context()); err != nil {
 					log.ErrorContext(span.Context(), "failed to mark job as failed", "err", err)
 				}
 			}
 		} else {
 			// If the job succeeded then mark the job as completed and we don't need
 			// to do anything else.
-			if _, err := p.db.ModelContext(span.Context(), job).
+			if _, err := p.db.NewUpdate().
+				Model(job).
 				Set(`"status" = ?`, models.CompletedJobStatus).
 				Set(`"completed_at" = ?`, now).
 				Set(`"updated_at" = ?`, now).
 				WherePK().
-				Update(); err != nil {
+				Exec(span.Context()); err != nil {
 				log.ErrorContext(span.Context(), "failed to mark job as complete", "err", err)
 			}
 

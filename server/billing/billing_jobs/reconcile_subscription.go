@@ -26,14 +26,14 @@ func ReconcileSubscriptionCron(ctx queue.Context) error {
 
 	var accounts []models.Account
 	cutoff := ctx.Clock().Now().Add(-12 * time.Hour)
-	err := ctx.DB().ModelContext(ctx, &accounts).
+	err := ctx.DB().NewSelect().Model(&accounts).
 		Where(`"account"."stripe_customer_id" IS NOT NULL`).
 		Where(`"account"."stripe_subscription_id" IS NOT NULL`).
 		Where(`"account"."subscription_active_until" < now()`).
 		Where(`"account"."subscription_status" = ?`, stripe.SubscriptionStatusActive).
 		Where(`"account"."stripe_webhook_latest_timestamp" < ?`, cutoff).
 		Limit(100).
-		Select(&accounts)
+		Scan(ctx)
 	if err != nil {
 		return errors.Wrap(err, "failed to query accounts who may have missed stripe webhooks")
 	}

@@ -49,11 +49,12 @@ func adminPlaidRefresh(parent *cobra.Command) {
 
 			log.Info("retrieving link from database")
 			var link models.Link
-			if err := db.Model(&link).
+			if err := db.NewSelect().
+				Model(&link).
 				Relation("PlaidLink").
 				Where(`"link"."link_id" = ?`, arguments.LinkID).
 				Limit(1).
-				Select(&link); err != nil {
+				Scan(context.Background()); err != nil {
 				log.Error("failed to retrieve link specified", "err", err)
 				return err
 			}

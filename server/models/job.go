@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-pg/pg/v10"
+	"github.com/uptrace/bun"
 )
 
 type JobStatus string
@@ -17,22 +17,22 @@ const (
 )
 
 type Job struct {
-	tableName string `pg:"jobs"`
+	bun.BaseModel `bun:"table:jobs,alias:job"`
 
-	JobId         ID[Job]    `json:"-" pg:"job_id,notnull,pk"`
-	Priority      uint64     `json:"-" pg:"priority,notnull"`
-	Queue         string     `json:"-" pg:"queue,notnull"`
-	Signature     string     `json:"-" pg:"signature,notnull"`
-	Input         string     `json:"-" pg:"input"`
-	Output        string     `json:"-" pg:"output"`
-	Status        JobStatus  `json:"-" pg:"status,notnull"`
-	SentryTraceId *string    `json:"-" pg:"sentry_trace_id"`
-	SentryBaggage *string    `json:"-" pg:"sentry_baggage"`
-	Attempt       int        `json:"-" pg:"attempt"`
-	CreatedAt     time.Time  `json:"-" pg:"created_at,notnull"`
-	UpdatedAt     time.Time  `json:"-" pg:"updated_at,notnull"`
-	StartedAt     *time.Time `json:"-" pg:"started_at"`
-	CompletedAt   *time.Time `json:"-" pg:"completed_at"`
+	JobId         ID[Job]    `json:"-" bun:"job_id,notnull,pk"`
+	Priority      int64      `json:"-" bun:"priority,notnull,nullzero"`
+	Queue         string     `json:"-" bun:"queue,notnull,nullzero"`
+	Signature     string     `json:"-" bun:"signature,notnull,nullzero"`
+	Input         string     `json:"-" bun:"input,nullzero"`
+	Output        string     `json:"-" bun:"output,nullzero"`
+	Status        JobStatus  `json:"-" bun:"status,notnull,nullzero"`
+	SentryTraceId *string    `json:"-" bun:"sentry_trace_id"`
+	SentryBaggage *string    `json:"-" bun:"sentry_baggage"`
+	Attempt       int        `json:"-" bun:"attempt,nullzero"`
+	CreatedAt     time.Time  `json:"-" bun:"created_at,notnull,nullzero"`
+	UpdatedAt     time.Time  `json:"-" bun:"updated_at,notnull,nullzero"`
+	StartedAt     *time.Time `json:"-" bun:"started_at"`
+	CompletedAt   *time.Time `json:"-" bun:"completed_at"`
 }
 
 func (Job) IdentityPrefix() string {
@@ -40,22 +40,25 @@ func (Job) IdentityPrefix() string {
 }
 
 var (
-	_ pg.BeforeInsertHook = (*Job)(nil)
+	_ bun.BeforeAppendModelHook = (*Job)(nil)
 )
 
-func (o *Job) BeforeInsert(ctx context.Context) (context.Context, error) {
-	if o.JobId.IsZero() {
-		o.JobId = NewID[Job]()
+func (o *Job) BeforeAppendModel(ctx context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		if o.JobId.IsZero() {
+			o.JobId = NewID[Job]()
+		}
+
+		now := time.Now()
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = now
+		}
+
+		if o.UpdatedAt.IsZero() {
+			o.UpdatedAt = now
+		}
 	}
 
-	now := time.Now()
-	if o.CreatedAt.IsZero() {
-		o.CreatedAt = now
-	}
-
-	if o.UpdatedAt.IsZero() {
-		o.UpdatedAt = now
-	}
-
-	return ctx, nil
+	return nil
 }

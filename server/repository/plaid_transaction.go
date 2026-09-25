@@ -20,6 +20,6 @@ func (r *repositoryBase) CreatePlaidTransactions(
 		transactions[i].CreatedAt = r.clock.Now().UTC()
 	}
 
-	_, err := r.txn.ModelContext(span.Context(), &transactions).Insert(&transactions)
+	_, err := r.txn.NewInsert().Model(&transactions).Returning("*").Exec(span.Context())
 	return errors.Wrap(err, "failed to insert plaid transactions")
 }

@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/sha256"
 	"fmt"
@@ -54,7 +55,7 @@ func adminRegisterCode(parent *cobra.Command) {
 				ExpiresAt: expires,
 			}
 
-			if _, err := db.Model(&beta).Insert(&beta); err != nil {
+			if _, err := db.NewInsert().Model(&beta).Returning("*").Exec(context.Background()); err != nil {
 				log.Error("failed to generate beta code", "err", err)
 				return errors.Wrap(err, "failed to generate beta code")
 			}

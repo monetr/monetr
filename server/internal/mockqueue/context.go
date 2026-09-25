@@ -7,7 +7,6 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/config"
@@ -18,6 +17,7 @@ import (
 	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/storage"
+	"github.com/uptrace/bun"
 	"go.uber.org/mock/gomock"
 )
 
@@ -27,7 +27,7 @@ var (
 
 type mockContext struct {
 	context *mockgen.MockContext
-	db      pg.DBI
+	db      bun.IDB
 }
 
 func NewMockContext(ctx *mockgen.MockContext) queue.Context {
@@ -35,6 +35,7 @@ func NewMockContext(ctx *mockgen.MockContext) queue.Context {
 	ctx.EXPECT().Value(gomock.Any()).AnyTimes()
 	ctx.EXPECT().Done().AnyTimes()
 	ctx.EXPECT().Deadline().AnyTimes()
+	ctx.EXPECT().Err().AnyTimes()
 	return &mockContext{
 		context: ctx,
 	}
@@ -61,7 +62,7 @@ func (m *mockContext) Clock() clock.Clock {
 }
 
 // DB implements [queue.Context].
-func (m *mockContext) DB() pg.DBI {
+func (m *mockContext) DB() bun.IDB {
 	if m.db != nil {
 		return m.db
 	}
@@ -119,7 +120,7 @@ func (m *mockContext) RunInTransaction(ctx context.Context, callback func(ctx qu
 		return err
 	}
 
-	return m.context.DB().RunInTransaction(ctx, func(tx *pg.Tx) error {
+	return m.context.DB().RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
 		// TODO this currently doesnt propagate properly
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()

@@ -20,7 +20,7 @@ func (r *repositoryBase) CreateLunchFlowLink(
 	link.CreatedAt = now
 	link.UpdatedAt = now
 	link.CreatedBy = r.UserId()
-	_, err := r.txn.ModelContext(span.Context(), link).Insert(link)
+	_, err := r.txn.NewInsert().Model(link).Returning("*").Exec(span.Context())
 	return errors.Wrap(err, "failed to create Lunch Flow link")
 }
 
@@ -33,9 +33,9 @@ func (r *repositoryBase) UpdateLunchFlowLink(
 
 	link.AccountId = r.AccountId()
 	link.UpdatedAt = r.clock.Now().UTC()
-	_, err := r.txn.ModelContext(span.Context(), link).
+	_, err := r.txn.NewUpdate().Model(link).
 		WherePK().
-		Update(link)
+		Exec(span.Context())
 	return errors.Wrap(err, "failed to update Lunch Flow link")
 }
 
@@ -48,21 +48,21 @@ func (r *repositoryBase) RemoveLunchFlowLink(
 
 	// Update the link record to indicate that it is no longer a Lunch Flow link
 	// but instead a manual one. This way some data is still preserved.
-	_, err := r.txn.ModelContext(span.Context(), &Link{}).
+	_, err := r.txn.NewUpdate().Model(&Link{}).
 		Set(`"link_type" = ?`, ManualLinkType).
 		Set(`"lunch_flow_link_id" = NULL`).
 		Where(`"link"."account_id" = ?`, r.AccountId()).
 		Where(`"link"."lunch_flow_link_id" = ?`, id).
-		Update()
+		Exec(span.Context())
 	if err != nil {
 		return errors.Wrap(err, "failed to clean Lunch Flow link prior to removal")
 	}
 
 	// Then delete the Plaid link itself.
-	_, err = r.txn.ModelContext(span.Context(), &LunchFlowLink{}).
+	_, err = r.txn.NewDelete().Model(&LunchFlowLink{}).
 		Where(`"lunch_flow_link"."account_id" = ?`, r.AccountId()).
 		Where(`"lunch_flow_link"."lunch_flow_link_id" = ?`, id).
-		Delete()
+		Exec(span.Context())
 	return errors.Wrap(err, "failed to delete Lunch Flow link")
 }
 
@@ -73,11 +73,11 @@ func (r *repositoryBase) GetLunchFlowLinks(
 	defer span.Finish()
 
 	result := make([]LunchFlowLink, 0)
-	err := r.txn.ModelContext(span.Context(), &result).
+	err := r.txn.NewSelect().Model(&result).
 		Where(`"lunch_flow_link"."account_id" = ?`, r.AccountId()).
 		Where(`"lunch_flow_link"."deleted_at" IS NULL`).
 		Order(`lunch_flow_link_id DESC`).
-		Select(&result)
+		Scan(span.Context(), &result)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve Lunch Flow links")
 	}
@@ -93,11 +93,11 @@ func (r *repositoryBase) GetLunchFlowLink(
 	defer span.Finish()
 
 	var link LunchFlowLink
-	err := r.txn.ModelContext(span.Context(), &link).
+	err := r.txn.NewSelect().Model(&link).
 		Where(`"lunch_flow_link"."account_id" = ?`, r.AccountId()).
 		Where(`"lunch_flow_link"."lunch_flow_link_id" = ?`, id).
 		Limit(1).
-		Select(&link)
+		Scan(span.Context(), &link)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve Lunch Flow link")
 	}

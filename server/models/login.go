@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-pg/pg/v10"
 	"github.com/pkg/errors"
+	"github.com/uptrace/bun"
 	"github.com/xlzd/gotp"
 )
 
@@ -15,21 +15,21 @@ var (
 )
 
 type Login struct {
-	tableName string `pg:"logins"`
+	bun.BaseModel `bun:"table:logins,alias:login"`
 
-	LoginId           ID[Login]  `json:"loginId" pg:"login_id,notnull,pk"`
-	Email             string     `json:"email" pg:"email,notnull,unique"`
-	FirstName         string     `json:"firstName" pg:"first_name,notnull"`
-	LastName          string     `json:"lastName" pg:"last_name"`
-	PasswordResetAt   *time.Time `json:"passwordResetAt" pg:"password_reset_at"`
-	IsEnabled         bool       `json:"-" pg:"is_enabled,notnull,use_zero"`
-	IsEmailVerified   bool       `json:"isEmailVerified" pg:"is_email_verified,notnull,use_zero"`
-	EmailVerifiedAt   *time.Time `json:"emailVerifiedAt" pg:"email_verified_at"`
-	TOTP              string     `json:"-" pg:"totp"`
-	TOTPRecoveryCodes []string   `json:"-" pg:"totp_recovery_codes,type:'text[]'"`
-	TOTPEnabledAt     *time.Time `json:"totpEnabledAt" pg:"totp_enabled_at"`
+	LoginId           ID[Login]  `json:"loginId" bun:"login_id,notnull,pk"`
+	Email             string     `json:"email" bun:"email,notnull,unique,nullzero"`
+	FirstName         string     `json:"firstName" bun:"first_name,notnull,nullzero"`
+	LastName          string     `json:"lastName" bun:"last_name,nullzero"`
+	PasswordResetAt   *time.Time `json:"passwordResetAt" bun:"password_reset_at"`
+	IsEnabled         bool       `json:"-" bun:"is_enabled,notnull"`
+	IsEmailVerified   bool       `json:"isEmailVerified" bun:"is_email_verified,notnull"`
+	EmailVerifiedAt   *time.Time `json:"emailVerifiedAt" bun:"email_verified_at"`
+	TOTP              string     `json:"-" bun:"totp,nullzero"`
+	TOTPRecoveryCodes []string   `json:"-" bun:"totp_recovery_codes,array,nullzero"`
+	TOTPEnabledAt     *time.Time `json:"totpEnabledAt" bun:"totp_enabled_at"`
 
-	Users []User `json:"-" pg:"rel:has-many"`
+	Users []User `json:"-" bun:"rel:has-many,join:login_id=login_id"`
 }
 
 func (Login) IdentityPrefix() string {
@@ -77,10 +77,10 @@ func (l Login) Name() string {
 }
 
 type LoginWithHash struct {
-	tableName string `pg:"logins"`
+	bun.BaseModel `bun:"table:logins,alias:login_with_hash"`
 
 	Login
-	Crypt []byte `json:"-" pg:"crypt"`
+	Crypt []byte `json:"-" bun:"crypt,nullzero"`
 }
 
 func (l Login) GetEmailIsVerified() bool {
@@ -88,13 +88,16 @@ func (l Login) GetEmailIsVerified() bool {
 }
 
 var (
-	_ pg.BeforeInsertHook = (*LoginWithHash)(nil)
+	_ bun.BeforeAppendModelHook = (*LoginWithHash)(nil)
 )
 
-func (o *LoginWithHash) BeforeInsert(ctx context.Context) (context.Context, error) {
-	if o.LoginId.IsZero() {
-		o.LoginId = NewID[Login]()
+func (o *LoginWithHash) BeforeAppendModel(ctx context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		if o.LoginId.IsZero() {
+			o.LoginId = NewID[Login]()
+		}
 	}
 
-	return ctx, nil
+	return nil
 }

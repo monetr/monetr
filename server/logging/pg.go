@@ -2,34 +2,19 @@ package logging
 
 import (
 	"context"
-	"fmt"
-	"log/slog"
 	"strings"
 	"time"
 
+	"log/slog"
+
 	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
-	"github.com/go-pg/pg/v10/orm"
 	"github.com/monetr/monetr/server/metrics"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/uptrace/bun"
 )
 
-type PGLogger struct {
-	log *slog.Logger
-}
-
-func (l *PGLogger) Printf(ctx context.Context, format string, v ...any) {
-	// I'm making an assumption here that go-pg is only going to log something if
-	// there is a problem, generally its a pretty quiet library.
-	l.log.WarnContext(ctx, fmt.Sprintf(format, v...), "logger", "go-pg")
-}
-
-func NewPGLogger(log *slog.Logger) *PGLogger {
-	return &PGLogger{log}
-}
-
 var (
-	_ pg.QueryHook = &PostgresHooks{}
+	_ bun.QueryHook = &PostgresHooks{}
 )
 
 type PostgresHooks struct {
@@ -37,63 +22,46 @@ type PostgresHooks struct {
 	stats *metrics.Stats
 }
 
-func NewPostgresHooks(log *slog.Logger, stats *metrics.Stats) pg.QueryHook {
+func NewPostgresHooks(log *slog.Logger, stats *metrics.Stats) bun.QueryHook {
 	return &PostgresHooks{
 		log:   log,
 		stats: stats,
 	}
 }
 
-func (h *PostgresHooks) BeforeQuery(ctx context.Context, event *pg.QueryEvent) (context.Context, error) {
-	query, err := event.FormattedQuery()
-	if err != nil {
-		return ctx, nil
-	}
-	cleanedQuery := strings.TrimSpace(strings.ToLower(string(query)))
+func (h *PostgresHooks) BeforeQuery(ctx context.Context, event *bun.QueryEvent) context.Context {
+	query := event.Query
+	cleanedQuery := strings.TrimSpace(strings.ToLower(query))
 	if cleanedQuery != "select 1" && !strings.HasSuffix(cleanedQuery, "/* no log */") {
-		h.log.Log(ctx, LevelTrace, strings.TrimSpace(string(query)))
+		h.log.Log(ctx, LevelTrace, strings.TrimSpace(query))
 	}
 
-	return ctx, nil
+	return ctx
 }
 
-func (h *PostgresHooks) AfterQuery(ctx context.Context, event *pg.QueryEvent) error {
+func (h *PostgresHooks) AfterQuery(ctx context.Context, event *bun.QueryEvent) {
 	endTime := time.Now()
+	query := strings.TrimSpace(event.Query)
+	query = strings.ReplaceAll(query, "\n", " ")
+
+	// Don't do anything with health check queries.
+	if strings.ToLower(query) == "select 1" {
+		return
+	}
+
 	var queryType string
-	switch query := event.Query.(type) {
-	case string:
-		query = strings.TrimSpace(query)
-		query = strings.ReplaceAll(query, "\n", " ")
-
-		// Don't do anything with health check queries.
-		if strings.ToLower(query) == "select 1" {
-			return nil
-		}
-
-		switch strings.ToUpper(query) {
-		case "BEGIN", "COMMIT", "ROLLBACK":
-			// Do nothing we don't want to count these.
-			return nil
-		default:
-			firstSpace := strings.IndexRune(query, ' ')
-			queryType = strings.ToUpper(query[:firstSpace])
-		}
-	case *orm.SelectQuery:
-		queryType = "SELECT"
-	case *orm.InsertQuery:
-		queryType = "INSERT"
-	case *orm.UpdateQuery:
-		queryType = "UPDATE"
-	case *orm.DeleteQuery:
-		queryType = "DELETE"
+	switch strings.ToUpper(query) {
+	case "BEGIN", "COMMIT", "ROLLBACK":
+		// Do nothing we don't want to count these.
+		return
 	default:
-		queryType = "UNKNOWN"
+		queryType = event.Operation()
 	}
 
 	if hub := sentry.GetHubFromContext(ctx); hub != nil {
-		unformattedQuery, err := event.UnformattedQuery()
-		if err == nil && len(unformattedQuery) > 0 {
-			queryString := string(unformattedQuery)
+		unformattedQuery := event.QueryTemplate
+		if len(unformattedQuery) > 0 {
+			queryString := unformattedQuery
 			queryTime := endTime.Sub(event.StartTime)
 
 			if event.Err == nil {
@@ -143,6 +111,4 @@ func (h *PostgresHooks) AfterQuery(ctx context.Context, event *pg.QueryEvent) er
 			"stmt": queryType,
 		}).Inc()
 	}
-
-	return nil
 }

@@ -16,7 +16,6 @@ import (
 	time "time"
 
 	clock "github.com/benbjohnson/clock"
-	pg "github.com/go-pg/pg/v10"
 	billing "github.com/monetr/monetr/server/billing"
 	communication "github.com/monetr/monetr/server/communication"
 	config "github.com/monetr/monetr/server/config"
@@ -26,6 +25,7 @@ import (
 	queue "github.com/monetr/monetr/server/queue"
 	secrets "github.com/monetr/monetr/server/secrets"
 	storage "github.com/monetr/monetr/server/storage"
+	bun "github.com/uptrace/bun"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -96,10 +96,10 @@ func (mr *MockContextMockRecorder) Configuration() *gomock.Call {
 }
 
 // DB mocks base method.
-func (m *MockContext) DB() pg.DBI {
+func (m *MockContext) DB() bun.IDB {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DB")
-	ret0, _ := ret[0].(pg.DBI)
+	ret0, _ := ret[0].(bun.IDB)
 	return ret0
 }
 
@@ -331,7 +331,7 @@ func (mr *MockEnqueuerMockRecorder) EnqueueAt(ctx, arg1, at, args any) *gomock.C
 }
 
 // WithTransaction mocks base method.
-func (m *MockEnqueuer) WithTransaction(db pg.DBI) queue.Enqueuer {
+func (m *MockEnqueuer) WithTransaction(db bun.IDB) queue.Enqueuer {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "WithTransaction", db)
 	ret0, _ := ret[0].(queue.Enqueuer)
@@ -453,7 +453,7 @@ func (mr *MockProcessorMockRecorder) Start() *gomock.Call {
 }
 
 // WithTransaction mocks base method.
-func (m *MockProcessor) WithTransaction(db pg.DBI) queue.Enqueuer {
+func (m *MockProcessor) WithTransaction(db bun.IDB) queue.Enqueuer {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "WithTransaction", db)
 	ret0, _ := ret[0].(queue.Enqueuer)

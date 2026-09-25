@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
 	"github.com/labstack/echo/v5"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
@@ -13,6 +12,7 @@ import (
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
+	"github.com/uptrace/bun"
 )
 
 // cleanString takes the current request context, the name of a field and the
@@ -159,8 +159,8 @@ func (c *Controller) mustGetAccountId(ctx *echo.Context) ID[Account] {
 	return accountId
 }
 
-func (*Controller) mustGetDatabase(ctx *echo.Context) pg.DBI {
-	txn, ok := ctx.Get(databaseContextKey).(*pg.Tx)
+func (*Controller) mustGetDatabase(ctx *echo.Context) bun.IDB {
+	txn, ok := ctx.Get(databaseContextKey).(bun.Tx)
 	if !ok {
 		panic("no database on context")
 	}
@@ -173,7 +173,7 @@ func (*Controller) mustGetDatabase(ctx *echo.Context) pg.DBI {
 // interface is not specific to a single tenant. If the interface cannot be
 // created due then this method will panic.
 func (c *Controller) mustGetSecurityRepository(ctx *echo.Context) repository.SecurityRepository {
-	db, ok := ctx.Get(databaseContextKey).(pg.DBI)
+	db, ok := ctx.Get(databaseContextKey).(bun.IDB)
 	if !ok {
 		panic("failed to retrieve database object from controller context")
 	}
@@ -182,7 +182,7 @@ func (c *Controller) mustGetSecurityRepository(ctx *echo.Context) repository.Sec
 }
 
 func (c *Controller) getUnauthenticatedRepository(ctx *echo.Context) (repository.UnauthenticatedRepository, error) {
-	txn, ok := ctx.Get(databaseContextKey).(pg.DBI)
+	txn, ok := ctx.Get(databaseContextKey).(bun.IDB)
 	if !ok {
 		return nil, errors.Errorf("no transaction for request")
 	}
@@ -212,7 +212,7 @@ func (c *Controller) getAuthenticatedRepository(
 		return nil, errors.Wrap(err, "you are not authenticated to an account")
 	}
 
-	txn, ok := ctx.Get(databaseContextKey).(pg.DBI)
+	txn, ok := ctx.Get(databaseContextKey).(bun.IDB)
 	if !ok {
 		return nil, errors.Errorf("no transaction for request")
 	}
@@ -241,7 +241,7 @@ func (c *Controller) getSecretsRepository(ctx *echo.Context) (repository.Secrets
 		return nil, errors.Wrap(err, "you are not authenticated to an account")
 	}
 
-	txn, ok := ctx.Get(databaseContextKey).(pg.DBI)
+	txn, ok := ctx.Get(databaseContextKey).(bun.IDB)
 	if !ok {
 		return nil, errors.Errorf("no transaction for request")
 	}

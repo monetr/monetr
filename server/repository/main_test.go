@@ -17,7 +17,7 @@ func GetTestAuthenticatedRepository(t *testing.T, clock clock.Clock) repository.
 
 	user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 
-	txn, err := db.Begin()
+	txn, err := db.BeginTx(t.Context(), nil)
 	require.NoError(t, err, "failed to begin transaction")
 
 	t.Cleanup(func() {

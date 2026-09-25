@@ -570,7 +570,8 @@ func SyncPlaidCron(ctx queue.Context) error {
 
 	links := make([]models.Link, 0)
 	cutoff := ctx.Clock().Now().Add(-48 * time.Hour)
-	err := ctx.DB().ModelContext(ctx, &links).
+	err := ctx.DB().NewSelect().
+		Model(&links).
 		Join(`INNER JOIN "plaid_links" AS "plaid_link"`).
 		JoinOn(`"plaid_link"."plaid_link_id" = "link"."plaid_link_id"`).
 		Where(`"plaid_link"."status" = ?`, models.PlaidLinkStatusSetup).
@@ -578,7 +579,7 @@ func SyncPlaidCron(ctx queue.Context) error {
 		Where(`"plaid_link"."deleted_at" IS NULL`).
 		Where(`"link"."link_type" = ?`, models.PlaidLinkType).
 		Where(`"link"."deleted_at" IS NULL`).
-		Select(&links)
+		Scan(ctx)
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve links that need to by synced with plaid")
 	}

@@ -7,13 +7,13 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
+	"github.com/uptrace/bun"
 )
 
 type RemoveLinkArguments struct {
@@ -24,7 +24,7 @@ type RemoveLinkArguments struct {
 type removeLinkJob struct {
 	args      RemoveLinkArguments
 	log       *slog.Logger
-	db        pg.DBI
+	db        bun.IDB
 	publisher pubsub.Publisher
 	clock     clock.Clock
 }
@@ -62,11 +62,11 @@ func RemoveLink(ctx queue.Context, args RemoveLinkArguments) error {
 
 		bankAccountIds := make([]models.ID[models.BankAccount], 0)
 		{
-			err = ctx.DB().ModelContext(ctx, &models.BankAccount{}).
+			err = ctx.DB().NewSelect().Model(&models.BankAccount{}).
 				Where(`"bank_account"."account_id" = ?`, accountId).
 				Where(`"bank_account"."link_id" = ?`, linkId).
 				Column("bank_account_id").
-				Select(&bankAccountIds)
+				Scan(ctx, &bankAccountIds)
 			if err != nil {
 				log.ErrorContext(ctx, "failed to retrieve bank account Ids for link", "err", err)
 				return errors.Wrap(err, "failed to retrieve bank account Ids for link")
@@ -147,16 +147,17 @@ func (r *removeLinkJob) removeTransactionClusters(
 	if len(bankAccountIds) == 0 {
 		return
 	}
-	result, err := r.db.ModelContext(ctx, &models.TransactionCluster{}).
+	result, err := r.db.NewDelete().Model(&models.TransactionCluster{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
-		WhereIn(`"bank_account_id" IN (?)`, bankAccountIds).
-		Delete()
+		Where(`"bank_account_id" IN (?)`, bun.In(bankAccountIds)).
+		Exec(ctx)
 	if err != nil {
 		r.log.ErrorContext(ctx, "failed to remove transaction clusters for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove transaction clusters for link"))
 	}
 
-	r.log.InfoContext(ctx, "removed transaction cluster(s)", "removed", result.RowsAffected())
+	affected, _ := result.RowsAffected()
+	r.log.InfoContext(ctx, "removed transaction cluster(s)", "removed", affected)
 }
 
 func (r *removeLinkJob) removeTransactionUploads(
@@ -166,16 +167,17 @@ func (r *removeLinkJob) removeTransactionUploads(
 	if len(bankAccountIds) == 0 {
 		return
 	}
-	result, err := r.db.ModelContext(ctx, &models.TransactionUpload{}).
+	result, err := r.db.NewDelete().Model(&models.TransactionUpload{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
-		WhereIn(`"bank_account_id" IN (?)`, bankAccountIds).
-		Delete()
+		Where(`"bank_account_id" IN (?)`, bun.In(bankAccountIds)).
+		Exec(ctx)
 	if err != nil {
 		r.log.ErrorContext(ctx, "failed to remove transaction uploads for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove transaction uploads for link"))
 	}
 
-	r.log.InfoContext(ctx, "removed transaction upload(s)", "removed", result.RowsAffected())
+	affected, _ := result.RowsAffected()
+	r.log.InfoContext(ctx, "removed transaction upload(s)", "removed", affected)
 }
 
 func (r *removeLinkJob) removeTransactions(
@@ -185,23 +187,24 @@ func (r *removeLinkJob) removeTransactions(
 	if len(bankAccountIds) == 0 {
 		return
 	}
-	result, err := r.db.ModelContext(ctx, &models.Transaction{}).
+	result, err := r.db.NewDelete().Model(&models.Transaction{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
-		WhereIn(`"bank_account_id" IN (?)`, bankAccountIds).
-		Delete()
+		Where(`"bank_account_id" IN (?)`, bun.In(bankAccountIds)).
+		Exec(ctx)
 	if err != nil {
 		r.log.ErrorContext(ctx, "failed to remove transactions for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove transactions for link"))
 	}
 
-	r.log.InfoContext(ctx, "removed transaction(s)", "removed", result.RowsAffected())
+	affected, _ := result.RowsAffected()
+	r.log.InfoContext(ctx, "removed transaction(s)", "removed", affected)
 }
 
 func (r *removeLinkJob) getLunchFlowTransactionsToRemove(
 	ctx context.Context,
 ) []models.ID[models.LunchFlowTransaction] {
 	ids := make([]models.ID[models.LunchFlowTransaction], 0)
-	err := r.db.ModelContext(ctx, &models.LunchFlowTransaction{}).
+	err := r.db.NewSelect().Model(&models.LunchFlowTransaction{}).
 		Join(`INNER JOIN "lunch_flow_bank_accounts" AS "lunch_flow_bank_account"`).
 		JoinOn(`"lunch_flow_bank_account"."lunch_flow_bank_account_id" = "lunch_flow_transaction"."lunch_flow_bank_account_id"`).
 		JoinOn(`"lunch_flow_bank_account"."account_id" = "lunch_flow_transaction"."account_id"`).
@@ -214,7 +217,7 @@ func (r *removeLinkJob) getLunchFlowTransactionsToRemove(
 		Where(`"lunch_flow_transaction"."account_id" = ?`, r.args.AccountId).
 		Where(`"link"."link_id" = ?`, r.args.LinkId).
 		Column("lunch_flow_transaction.lunch_flow_transaction_id").
-		Select(&ids)
+		Scan(ctx, &ids)
 	if err != nil {
 		panic(errors.Wrap(err, "failed to find Lunch Flow transactions to be removed"))
 	}
@@ -230,16 +233,17 @@ func (r *removeLinkJob) removeLunchFlowTransactions(
 		return
 	}
 
-	result, err := r.db.ModelContext(ctx, &models.LunchFlowTransaction{}).
+	result, err := r.db.NewDelete().Model(&models.LunchFlowTransaction{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
-		WhereIn(`"lunch_flow_transaction_id" IN (?)`, ids).
-		Delete()
+		Where(`"lunch_flow_transaction_id" IN (?)`, bun.In(ids)).
+		Exec(ctx)
 	if err != nil {
 		r.log.ErrorContext(ctx, "failed to remove Lunch Flow transactions for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove Lunch Flow transactions for link"))
 	}
 
-	r.log.InfoContext(ctx, "removed Lunch Flow transaction(s)", "removed", result.RowsAffected())
+	affected, _ := result.RowsAffected()
+	r.log.InfoContext(ctx, "removed Lunch Flow transaction(s)", "removed", affected)
 }
 
 func (r *removeLinkJob) getPlaidTransactionsToRemove(
@@ -250,7 +254,7 @@ func (r *removeLinkJob) getPlaidTransactionsToRemove(
 		return nil
 	}
 	plaidTransactionIds := make([]models.ID[models.PlaidTransaction], 0)
-	err := r.db.ModelContext(ctx, &models.PlaidTransaction{}).
+	err := r.db.NewSelect().Model(&models.PlaidTransaction{}).
 		Join(`INNER JOIN "plaid_bank_accounts" AS "plaid_bank_account"`).
 		JoinOn(`"plaid_bank_account"."plaid_bank_account_id" = "plaid_transaction"."plaid_bank_account_id"`).
 		JoinOn(`"plaid_bank_account"."account_id" = "plaid_transaction"."account_id"`).
@@ -258,9 +262,9 @@ func (r *removeLinkJob) getPlaidTransactionsToRemove(
 		JoinOn(`"bank_account"."plaid_bank_account_id" = "plaid_bank_account"."plaid_bank_account_id"`).
 		JoinOn(`"bank_account"."account_id" = "plaid_bank_account"."account_id"`).
 		Where(`"plaid_transaction"."account_id" = ?`, r.args.AccountId).
-		WhereIn(`"bank_account"."bank_account_id" IN (?)`, bankAccountIds).
+		Where(`"bank_account"."bank_account_id" IN (?)`, bun.In(bankAccountIds)).
 		Column("plaid_transaction.plaid_transaction_id").
-		Select(&plaidTransactionIds)
+		Scan(ctx, &plaidTransactionIds)
 	if err != nil {
 		panic(errors.Wrap(err, "failed to find plaid transactions to be removed"))
 	}
@@ -276,16 +280,17 @@ func (r *removeLinkJob) removePlaidTransactions(
 		return
 	}
 
-	result, err := r.db.ModelContext(ctx, &models.PlaidTransaction{}).
+	result, err := r.db.NewDelete().Model(&models.PlaidTransaction{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
-		WhereIn(`"plaid_transaction_id" IN (?)`, ids).
-		Delete()
+		Where(`"plaid_transaction_id" IN (?)`, bun.In(ids)).
+		Exec(ctx)
 	if err != nil {
 		r.log.ErrorContext(ctx, "failed to remove plaid transactions for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove plaid transactions for link"))
 	}
 
-	r.log.InfoContext(ctx, "removed plaid transaction(s)", "removed", result.RowsAffected())
+	affected, _ := result.RowsAffected()
+	r.log.InfoContext(ctx, "removed plaid transaction(s)", "removed", affected)
 }
 
 func (r *removeLinkJob) removeSpending(
@@ -296,16 +301,17 @@ func (r *removeLinkJob) removeSpending(
 		return
 	}
 
-	result, err := r.db.ModelContext(ctx, &models.Spending{}).
+	result, err := r.db.NewDelete().Model(&models.Spending{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
-		WhereIn(`"bank_account_id" IN (?)`, bankAccountIds).
-		Delete()
+		Where(`"bank_account_id" IN (?)`, bun.In(bankAccountIds)).
+		Exec(ctx)
 	if err != nil {
 		r.log.ErrorContext(ctx, "failed to remove spending for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove spending for link"))
 	}
 
-	r.log.InfoContext(ctx, "removed spending(s)", "removed", result.RowsAffected())
+	affected, _ := result.RowsAffected()
+	r.log.InfoContext(ctx, "removed spending(s)", "removed", affected)
 }
 
 func (r *removeLinkJob) removeFundingSchedules(
@@ -316,16 +322,17 @@ func (r *removeLinkJob) removeFundingSchedules(
 		return
 	}
 
-	result, err := r.db.ModelContext(ctx, &models.FundingSchedule{}).
+	result, err := r.db.NewDelete().Model(&models.FundingSchedule{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
-		WhereIn(`"bank_account_id" IN (?)`, bankAccountIds).
-		Delete()
+		Where(`"bank_account_id" IN (?)`, bun.In(bankAccountIds)).
+		Exec(ctx)
 	if err != nil {
 		r.log.ErrorContext(ctx, "failed to remove funding schedules for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove funding schedules for link"))
 	}
 
-	r.log.InfoContext(ctx, "removed funding schedule(s)", "removed", result.RowsAffected())
+	affected, _ := result.RowsAffected()
+	r.log.InfoContext(ctx, "removed funding schedule(s)", "removed", affected)
 }
 
 func (r *removeLinkJob) getPlaidSyncsToRemove(
@@ -336,7 +343,7 @@ func (r *removeLinkJob) getPlaidSyncsToRemove(
 		return nil
 	}
 	ids := make([]models.ID[models.PlaidSync], 0)
-	err := r.db.ModelContext(ctx, &models.PlaidSync{}).
+	err := r.db.NewSelect().Model(&models.PlaidSync{}).
 		Join(`INNER JOIN "links" AS "link"`).
 		JoinOn(`"plaid_sync"."plaid_link_id" = "link"."plaid_link_id"`).
 		JoinOn(`"plaid_sync"."account_id" = "link"."account_id"`).
@@ -344,9 +351,9 @@ func (r *removeLinkJob) getPlaidSyncsToRemove(
 		JoinOn(`"link"."link_id" = "bank_account"."link_id"`).
 		JoinOn(`"link"."account_id" = "bank_account"."account_id"`).
 		Where(`"plaid_sync"."account_id" = ?`, r.args.AccountId).
-		WhereIn(`"bank_account"."bank_account_id" IN (?)`, bankAccountIds).
+		Where(`"bank_account"."bank_account_id" IN (?)`, bun.In(bankAccountIds)).
 		Column("plaid_sync_id").
-		Select(&ids)
+		Scan(ctx, &ids)
 	if err != nil {
 		panic(errors.Wrap(err, "failed to find plaid syncs to remove"))
 	}
@@ -362,23 +369,24 @@ func (r *removeLinkJob) removePlaidSyncs(
 		return
 	}
 
-	result, err := r.db.ModelContext(ctx, &models.PlaidSync{}).
+	result, err := r.db.NewDelete().Model(&models.PlaidSync{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
-		WhereIn(`"plaid_sync_id" IN (?)`, ids).
-		Delete()
+		Where(`"plaid_sync_id" IN (?)`, bun.In(ids)).
+		Exec(ctx)
 	if err != nil {
 		r.log.ErrorContext(ctx, "failed to remove plaid syncs for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove plaid syncs for link"))
 	}
 
-	r.log.InfoContext(ctx, "removed plaid sync(s)", "removed", result.RowsAffected())
+	affected, _ := result.RowsAffected()
+	r.log.InfoContext(ctx, "removed plaid sync(s)", "removed", affected)
 }
 
 func (r *removeLinkJob) getLunchFlowBankAccountsToRemove(
 	ctx context.Context,
 ) []models.ID[models.LunchFlowBankAccount] {
 	ids := make([]models.ID[models.LunchFlowBankAccount], 0)
-	err := r.db.ModelContext(ctx, &models.LunchFlowBankAccount{}).
+	err := r.db.NewSelect().Model(&models.LunchFlowBankAccount{}).
 		Join(`INNER JOIN "links" AS "link"`).
 		JoinOn(`"link"."lunch_flow_link_id" = "lunch_flow_bank_account"."lunch_flow_link_id"`).
 		JoinOn(`"link"."account_id" = "lunch_flow_bank_account"."account_id"`).
@@ -386,7 +394,7 @@ func (r *removeLinkJob) getLunchFlowBankAccountsToRemove(
 		Where(`"link"."account_id" = ?`, r.args.AccountId).
 		Where(`"link"."link_id" = ?`, r.args.LinkId).
 		Column("lunch_flow_bank_account.lunch_flow_bank_account_id").
-		Select(&ids)
+		Scan(ctx, &ids)
 	if err != nil {
 		panic(errors.Wrap(err, "failed to find lunch_flow bank accounts to remove"))
 	}
@@ -402,16 +410,17 @@ func (r *removeLinkJob) removeLunchFlowBankAccounts(
 		return
 	}
 
-	result, err := r.db.ModelContext(ctx, &models.LunchFlowBankAccount{}).
+	result, err := r.db.NewDelete().Model(&models.LunchFlowBankAccount{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
-		WhereIn(`"lunch_flow_bank_account_id" IN (?)`, ids).
-		Delete()
+		Where(`"lunch_flow_bank_account_id" IN (?)`, bun.In(ids)).
+		Exec(ctx)
 	if err != nil {
 		r.log.ErrorContext(ctx, "failed to remove Lunch Flow bank accounts for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove Lunch Flow bank accounts for link"))
 	}
 
-	r.log.InfoContext(ctx, "removed Lunch Flow bank account(s)", "removed", result.RowsAffected())
+	affected, _ := result.RowsAffected()
+	r.log.InfoContext(ctx, "removed Lunch Flow bank account(s)", "removed", affected)
 }
 
 func (r *removeLinkJob) getPlaidBankAccountsToRemove(
@@ -422,14 +431,14 @@ func (r *removeLinkJob) getPlaidBankAccountsToRemove(
 		return nil
 	}
 	ids := make([]models.ID[models.PlaidBankAccount], 0)
-	err := r.db.ModelContext(ctx, &models.PlaidBankAccount{}).
+	err := r.db.NewSelect().Model(&models.PlaidBankAccount{}).
 		Join(`INNER JOIN "bank_accounts" AS "bank_account"`).
 		JoinOn(`"plaid_bank_account"."plaid_bank_account_id" = "bank_account"."plaid_bank_account_id"`).
 		JoinOn(`"plaid_bank_account"."account_id" = "bank_account"."account_id"`).
 		Where(`"plaid_bank_account"."account_id" = ?`, r.args.AccountId).
-		WhereIn(`"bank_account"."bank_account_id" IN (?)`, bankAccountIds).
+		Where(`"bank_account"."bank_account_id" IN (?)`, bun.In(bankAccountIds)).
 		Column("plaid_bank_account.plaid_bank_account_id").
-		Select(&ids)
+		Scan(ctx, &ids)
 	if err != nil {
 		panic(errors.Wrap(err, "failed to find plaid bank accounts to remove"))
 	}
@@ -445,30 +454,31 @@ func (r *removeLinkJob) removePlaidBankAccounts(
 		return
 	}
 
-	result, err := r.db.ModelContext(ctx, &models.PlaidBankAccount{}).
+	result, err := r.db.NewDelete().Model(&models.PlaidBankAccount{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
-		WhereIn(`"plaid_bank_account_id" IN (?)`, ids).
-		Delete()
+		Where(`"plaid_bank_account_id" IN (?)`, bun.In(ids)).
+		Exec(ctx)
 	if err != nil {
 		r.log.ErrorContext(ctx, "failed to remove plaid bank accounts for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove plaid bank accounts for link"))
 	}
 
-	r.log.InfoContext(ctx, "removed plaid bank account(s)", "removed", result.RowsAffected())
+	affected, _ := result.RowsAffected()
+	r.log.InfoContext(ctx, "removed plaid bank account(s)", "removed", affected)
 }
 
 func (r *removeLinkJob) getPlaidLinksToRemove(
 	ctx context.Context,
 ) []models.ID[models.PlaidLink] {
 	ids := make([]models.ID[models.PlaidLink], 0)
-	err := r.db.ModelContext(ctx, &models.PlaidLink{}).
+	err := r.db.NewSelect().Model(&models.PlaidLink{}).
 		Join(`INNER JOIN "links" AS "link"`).
 		JoinOn(`"plaid_link"."plaid_link_id" = "link"."plaid_link_id"`).
 		JoinOn(`"plaid_link"."account_id" = "link"."account_id"`).
 		Where(`"plaid_link"."account_id" = ?`, r.args.AccountId).
 		Where(`"link"."link_id" = ?`, r.args.LinkId).
 		Column("plaid_link.plaid_link_id").
-		Select(&ids)
+		Scan(ctx, &ids)
 	if err != nil {
 		panic(errors.Wrap(err, "failed to find plaid links to remove"))
 	}
@@ -484,30 +494,31 @@ func (r *removeLinkJob) removePlaidLinks(
 		return
 	}
 
-	result, err := r.db.ModelContext(ctx, &models.PlaidLink{}).
+	result, err := r.db.NewDelete().Model(&models.PlaidLink{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
-		WhereIn(`"plaid_link_id" IN (?)`, ids).
-		Delete()
+		Where(`"plaid_link_id" IN (?)`, bun.In(ids)).
+		Exec(ctx)
 	if err != nil {
 		r.log.ErrorContext(ctx, "failed to remove plaid links for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove plaid links for link"))
 	}
 
-	r.log.InfoContext(ctx, "removed plaid link(s)", "removed", result.RowsAffected())
+	affected, _ := result.RowsAffected()
+	r.log.InfoContext(ctx, "removed plaid link(s)", "removed", affected)
 }
 
 func (r *removeLinkJob) getLunchFlowLinksToRemove(
 	ctx context.Context,
 ) []models.ID[models.LunchFlowLink] {
 	ids := make([]models.ID[models.LunchFlowLink], 0)
-	err := r.db.ModelContext(ctx, &models.LunchFlowLink{}).
+	err := r.db.NewSelect().Model(&models.LunchFlowLink{}).
 		Join(`INNER JOIN "links" AS "link"`).
 		JoinOn(`"lunch_flow_link"."lunch_flow_link_id" = "link"."lunch_flow_link_id"`).
 		JoinOn(`"lunch_flow_link"."account_id" = "link"."account_id"`).
 		Where(`"lunch_flow_link"."account_id" = ?`, r.args.AccountId).
 		Where(`"link"."link_id" = ?`, r.args.LinkId).
 		Column("lunch_flow_link.lunch_flow_link_id").
-		Select(&ids)
+		Scan(ctx, &ids)
 	if err != nil {
 		panic(errors.Wrap(err, "failed to find Lunch Flow links to remove"))
 	}
@@ -523,23 +534,24 @@ func (r *removeLinkJob) removeLunchFlowLinks(
 		return
 	}
 
-	result, err := r.db.ModelContext(ctx, &models.LunchFlowLink{}).
+	result, err := r.db.NewDelete().Model(&models.LunchFlowLink{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
-		WhereIn(`"lunch_flow_link_id" IN (?)`, ids).
-		Delete()
+		Where(`"lunch_flow_link_id" IN (?)`, bun.In(ids)).
+		Exec(ctx)
 	if err != nil {
 		r.log.ErrorContext(ctx, "failed to remove Lunch Flow links for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove Lunch Flow links for link"))
 	}
 
-	r.log.InfoContext(ctx, "removed Lunch Flow link(s)", "removed", result.RowsAffected())
+	affected, _ := result.RowsAffected()
+	r.log.InfoContext(ctx, "removed Lunch Flow link(s)", "removed", affected)
 }
 
 func (r *removeLinkJob) getSecretsToRemove(
 	ctx context.Context,
 ) []models.ID[models.Secret] {
 	ids := make([]models.ID[models.Secret], 0)
-	err := r.db.ModelContext(ctx, &models.Secret{}).
+	err := r.db.NewSelect().Model(&models.Secret{}).
 		// The secret can be associated with either a Plaid link or a Lunch Flow
 		// link. But must be associated with the desired link from the arguments!
 		Join(`LEFT JOIN "plaid_links" as "plaid_link"`).
@@ -553,7 +565,7 @@ func (r *removeLinkJob) getSecretsToRemove(
 		Where(`"link"."account_id" = ?`, r.args.AccountId).
 		Where(`"link"."link_id" = ?`, r.args.LinkId).
 		Column("secret.secret_id").
-		Select(&ids)
+		Scan(ctx, &ids)
 	if err != nil {
 		panic(errors.Wrap(err, "failed to find secrets to remove"))
 	}
@@ -569,16 +581,17 @@ func (r *removeLinkJob) removeSecrets(
 		return
 	}
 
-	result, err := r.db.ModelContext(ctx, &models.Secret{}).
+	result, err := r.db.NewDelete().Model(&models.Secret{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
-		WhereIn(`"secret_id" IN (?)`, ids).
-		Delete()
+		Where(`"secret_id" IN (?)`, bun.In(ids)).
+		Exec(ctx)
 	if err != nil {
 		r.log.ErrorContext(ctx, "failed to remove secrets for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove secrets for link"))
 	}
 
-	r.log.InfoContext(ctx, "removed secret(s)", "removed", result.RowsAffected())
+	affected, _ := result.RowsAffected()
+	r.log.InfoContext(ctx, "removed secret(s)", "removed", affected)
 }
 
 func (r *removeLinkJob) removeBankAccounts(
@@ -589,29 +602,31 @@ func (r *removeLinkJob) removeBankAccounts(
 		return
 	}
 
-	result, err := r.db.ModelContext(ctx, &models.BankAccount{}).
+	result, err := r.db.NewDelete().Model(&models.BankAccount{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
-		WhereIn(`"bank_account_id" IN (?)`, bankAccountIds).
-		Delete()
+		Where(`"bank_account_id" IN (?)`, bun.In(bankAccountIds)).
+		Exec(ctx)
 	if err != nil {
 		r.log.ErrorContext(ctx, "failed to remove bank accounts for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove bank accounts for link"))
 	}
 
-	r.log.InfoContext(ctx, "removed bank account(s)", "removed", result.RowsAffected())
+	affected, _ := result.RowsAffected()
+	r.log.InfoContext(ctx, "removed bank account(s)", "removed", affected)
 }
 
 func (r *removeLinkJob) removeLink(
 	ctx context.Context,
 ) {
-	result, err := r.db.ModelContext(ctx, &models.Link{}).
+	result, err := r.db.NewDelete().Model(&models.Link{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
 		Where(`"link_id" = ?`, r.args.LinkId).
-		Delete()
+		Exec(ctx)
 	if err != nil {
 		r.log.ErrorContext(ctx, "failed to remove link", "err", err)
 		panic(errors.Wrap(err, "failed to remove link"))
 	}
 
-	r.log.InfoContext(ctx, "removed link", "removed", result.RowsAffected())
+	affected, _ := result.RowsAffected()
+	r.log.InfoContext(ctx, "removed link", "removed", affected)
 }

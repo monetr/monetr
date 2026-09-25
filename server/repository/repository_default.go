@@ -4,15 +4,15 @@ import (
 	"log/slog"
 
 	"github.com/benbjohnson/clock"
-	"github.com/go-pg/pg/v10"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/secrets"
+	"github.com/uptrace/bun"
 )
 
 type repositoryBase struct {
 	userId    ID[User]
 	accountId ID[Account]
-	txn       pg.DBI
+	txn       bun.IDB
 	account   *Account
 	kms       secrets.KeyManagement
 	clock     clock.Clock

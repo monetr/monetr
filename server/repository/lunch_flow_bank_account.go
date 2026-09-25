@@ -21,7 +21,7 @@ func (r *repositoryBase) CreateLunchFlowBankAccount(
 	bankAccount.UpdatedAt = now
 	bankAccount.CreatedBy = r.UserId()
 
-	_, err := r.txn.ModelContext(span.Context(), bankAccount).Insert(bankAccount)
+	_, err := r.txn.NewInsert().Model(bankAccount).Returning("*").Exec(span.Context())
 	return errors.Wrap(err, "failed to create Lunch Flow Bank Account")
 }
 
@@ -33,11 +33,11 @@ func (r *repositoryBase) GetLunchFlowBankAccount(
 	defer span.Finish()
 
 	var bankAccount LunchFlowBankAccount
-	err := r.txn.ModelContext(span.Context(), &bankAccount).
+	err := r.txn.NewSelect().Model(&bankAccount).
 		Where(`"lunch_flow_bank_account"."account_id" = ?`, r.AccountId()).
 		Where(`"lunch_flow_bank_account"."lunch_flow_bank_account_id" = ?`, id).
 		Limit(1).
-		Select(&bankAccount)
+		Scan(span.Context(), &bankAccount)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -54,13 +54,13 @@ func (r *repositoryBase) GetLunchFlowBankAccountForLunchFlowLink(
 	defer span.Finish()
 
 	var bankAccount LunchFlowBankAccount
-	err := r.txn.ModelContext(span.Context(), &bankAccount).
+	err := r.txn.NewSelect().Model(&bankAccount).
 		Where(`"lunch_flow_bank_account"."account_id" = ?`, r.AccountId()).
 		Where(`"lunch_flow_bank_account"."lunch_flow_link_id" = ?`, linkId).
 		Where(`"lunch_flow_bank_account"."lunch_flow_bank_account_id" = ?`, id).
 		Where(`"lunch_flow_bank_account"."deleted_at" IS NULL`).
 		Limit(1).
-		Select(&bankAccount)
+		Scan(span.Context(), &bankAccount)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -77,9 +77,9 @@ func (r *repositoryBase) UpdateLunchFlowBankAccount(
 
 	bankAccount.AccountId = r.AccountId()
 	bankAccount.UpdatedAt = r.clock.Now()
-	_, err := r.txn.ModelContext(span.Context(), bankAccount).
+	_, err := r.txn.NewUpdate().Model(bankAccount).
 		WherePK().
-		Update(bankAccount)
+		Exec(span.Context())
 	return errors.WithStack(err)
 }
 
@@ -90,12 +90,12 @@ func (r *repositoryBase) GetLunchFlowBankAccountsByLunchFlowLink(
 	defer span.Finish()
 
 	result := make([]LunchFlowBankAccount, 0)
-	err := r.txn.ModelContext(span.Context(), &result).
+	err := r.txn.NewSelect().Model(&result).
 		Where(`"lunch_flow_bank_account"."account_id" = ?`, r.AccountId()).
 		Where(`"lunch_flow_bank_account"."lunch_flow_link_id" = ?`, id).
 		Where(`"lunch_flow_bank_account"."deleted_at" IS NULL`).
 		Order(`lunch_flow_bank_account_id DESC`).
-		Select(&result)
+		Scan(span.Context(), &result)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve Lunch Flow bank account")
 	}

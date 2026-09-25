@@ -23,12 +23,13 @@ import (
 func GetTxnByUploadIdentifier(t *testing.T, bankAccount BankAccount, uploadId string) *Transaction {
 	db := testutils.GetPgDatabase(t)
 	var txn Transaction
-	err := db.ModelContext(t.Context(), &txn).
+	err := db.NewSelect().
+		Model(&txn).
 		Where(`"account_id" = ?`, bankAccount.AccountId).
 		Where(`"bank_account_id" = ?`, bankAccount.BankAccountId).
 		Where(`"upload_identifier" = ?`, uploadId).
 		Limit(1).
-		Select(&txn)
+		Scan(t.Context())
 	require.NoError(t, err, "must be able to find transaction by upload identifier: %s", uploadId)
 	require.NotEmpty(t, txn.TransactionId, "must be able to find transaction by upload identifier: %s", uploadId)
 	return &txn

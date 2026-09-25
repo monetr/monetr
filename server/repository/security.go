@@ -3,17 +3,19 @@ package repository
 import (
 	"context"
 	"crypto/rand"
+	"database/sql"
 	"encoding/base32"
 	"math/big"
 	"strings"
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
+	"github.com/uptrace/bun"
+	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/xlzd/gotp"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -73,11 +75,11 @@ var (
 )
 
 type baseSecurityRepository struct {
-	db    pg.DBI
+	db    bun.IDB
 	clock clock.Clock
 }
 
-func NewSecurityRepository(db pg.DBI, clock clock.Clock) SecurityRepository {
+func NewSecurityRepository(db bun.IDB, clock clock.Clock) SecurityRepository {
 	return &baseSecurityRepository{
 		db:    db,
 		clock: clock,
@@ -91,15 +93,16 @@ func (b *baseSecurityRepository) Login(ctx context.Context, email, password stri
 	requiresPasswordChange := false
 
 	var login LoginWithHash
-	err := b.db.ModelContext(span.Context(), &login).
+	err := b.db.NewSelect().
+		Model(&login).
 		Relation("Users").
 		Relation("Users.Account").
 		Where(`"login_with_hash"."email" = ?`, strings.ToLower(email)).
 		Limit(1).
-		Select(&login)
+		Scan(span.Context())
 	switch err {
 	case nil:
-	case pg.ErrNoRows:
+	case sql.ErrNoRows:
 		span.Status = sentry.SpanStatusNotFound
 		return nil, requiresPasswordChange, errors.WithStack(ErrInvalidCredentials)
 	default:
@@ -120,10 +123,11 @@ func (b *baseSecurityRepository) ChangePassword(ctx context.Context, loginId ID[
 	defer span.Finish()
 
 	var login LoginWithHash
-	err := b.db.ModelContext(span.Context(), &login).
+	err := b.db.NewSelect().
+		Model(&login).
 		Where(`"login_id" = ?`, loginId).
 		Limit(1).
-		Select(&login)
+		Scan(span.Context())
 	if err != nil {
 		return crumbs.WrapError(span.Context(), err, "failed to find login record to change password")
 	}
@@ -137,10 +141,12 @@ func (b *baseSecurityRepository) ChangePassword(ctx context.Context, loginId ID[
 		return crumbs.WrapError(span.Context(), err, "failed to encrypt new password for change")
 	}
 
-	_, err = b.db.ModelContext(span.Context(), &login).
+	_, err = b.db.NewUpdate().
+		Model(&login).
 		Set(`"crypt" = ?`, newPasswordHash).
 		Where(`"login_id" = ?`, loginId).
-		Update(&login)
+		Returning("*").
+		Exec(span.Context())
 	if err != nil {
 		return crumbs.WrapError(span.Context(), err, "failed to update password")
 	}
@@ -156,9 +162,10 @@ func (b *baseSecurityRepository) SetupTOTP(
 	defer span.Finish()
 
 	var login Login
-	err = b.db.ModelContext(span.Context(), &login).
+	err = b.db.NewSelect().
+		Model(&login).
 		Where(`"login"."login_id" = ?`, loginId).
-		Select(&login)
+		Scan(span.Context())
 	if err != nil {
 		return "", nil, crumbs.WrapError(span.Context(), err, "failed to retrieve login details")
 	}
@@ -204,12 +211,17 @@ func (b *baseSecurityRepository) SetupTOTP(
 
 	// Store this data on the login itself, that way when the user confirms it we
 	// can simply set the enabled at date.
-	_, err = b.db.ModelContext(span.Context(), &login).
+	_, err = b.db.NewUpdate().
+		Model(&login).
 		Set(`"totp" = ?`, login.TOTP).
-		Set(`"totp_recovery_codes" = ?`, pg.Array(login.TOTPRecoveryCodes)).
+		Set(`"totp_recovery_codes" = ?`, pgdialect.Array(login.TOTPRecoveryCodes)).
 		Set(`"totp_enabled_at" = ?`, login.TOTPEnabledAt).
 		WherePK().
-		Update(&login)
+		// No RETURNING here; the logins table has a "crypt" column that the Login
+		// model deliberately does not carry, and bun (unlike go-pg) refuses to
+		// discard unknown returned columns. Every updated value is already set on
+		// the struct anyway.
+		Exec(span.Context())
 	if err != nil {
 		return "", nil, errors.Wrap(err, "failed to save TOTP settings")
 	}
@@ -238,10 +250,11 @@ func (b *baseSecurityRepository) EnableTOTP(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 	var login Login
-	err := b.db.ModelContext(span.Context(), &login).
+	err := b.db.NewSelect().
+		Model(&login).
 		Where(`"login"."login_id" = ?`, loginId).
 		Limit(1).
-		Select(&login)
+		Scan(span.Context())
 	if err != nil {
 		return errors.Wrap(err, "failed to retrive login to enable TOTP")
 	}
@@ -261,10 +274,13 @@ func (b *baseSecurityRepository) EnableTOTP(
 
 	login.TOTPEnabledAt = new(b.clock.Now())
 
-	_, err = b.db.ModelContext(span.Context(), &login).
+	_, err = b.db.NewUpdate().
+		Model(&login).
 		Set(`"totp_enabled_at" = ?`, login.TOTPEnabledAt).
 		WherePK().
-		Update(&login)
+		// No RETURNING; see SetupTOTP for why the Login model must not scan
+		// RETURNING * from the logins table.
+		Exec(span.Context())
 	if err != nil {
 		return errors.Wrap(err, "failed to enable TOTP")
 	}

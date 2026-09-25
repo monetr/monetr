@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/cache"
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
+	"github.com/uptrace/bun"
 )
 
 func buildAccountCacheKey(accountId ID[Account]) string {
@@ -36,13 +36,13 @@ var (
 type accountsRepositoryBase struct {
 	log   *slog.Logger
 	cache cache.Cache
-	db    pg.DBI
+	db    bun.IDB
 }
 
 func NewAccountRepository(
 	log *slog.Logger,
 	cacheClient cache.Cache,
-	db pg.DBI,
+	db bun.IDB,
 ) AccountsRepository {
 	return &accountsRepositoryBase{
 		log:   log,
@@ -76,10 +76,10 @@ func (p *accountsRepositoryBase) GetAccount(
 		return &account, nil
 	}
 
-	if err := p.db.ModelContext(span.Context(), &account).
+	if err := p.db.NewSelect().Model(&account).
 		Where(`"account"."account_id" = ?`, accountId).
 		Limit(1).
-		Select(&account); err != nil {
+		Scan(span.Context()); err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve account by Id")
 	}
@@ -104,10 +104,10 @@ func (p *accountsRepositoryBase) GetAccountByCustomerId(
 	defer span.Finish()
 
 	var account Account
-	if err := p.db.ModelContext(span.Context(), &account).
+	if err := p.db.NewSelect().Model(&account).
 		Where(`"account"."stripe_customer_id" = ?`, stripeCustomerId).
 		Limit(1).
-		Select(&account); err != nil {
+		Scan(span.Context()); err != nil {
 
 		span.Status = sentry.SpanStatusInternalError
 		span.SetData("stripeCustomerId", stripeCustomerId)
@@ -126,9 +126,10 @@ func (p *accountsRepositoryBase) UpdateAccount(ctx context.Context, account *Acc
 
 	log.DebugContext(span.Context(), "updating account")
 
-	_, err := p.db.ModelContext(span.Context(), account).
+	_, err := p.db.NewUpdate().Model(account).
 		Where(`"account"."account_id" = ?`, account.AccountId).
-		Update(account)
+		Returning("*").
+		Exec(span.Context())
 	if err != nil {
 		log.ErrorContext(span.Context(), "failed to update account", "err", err)
 		return errors.Wrap(err, "failed to update account")
@@ -155,10 +156,10 @@ func (r *repositoryBase) GetAccount(ctx context.Context) (*Account, error) {
 	defer span.Finish()
 
 	var account Account
-	err := r.txn.ModelContext(span.Context(), &account).
+	err := r.txn.NewSelect().Model(&account).
 		Where(`"account"."account_id" = ?`, r.AccountId()).
 		Limit(1).
-		Select(&account)
+		Scan(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve account")

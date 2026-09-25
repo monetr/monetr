@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-pg/pg/v10"
+	"github.com/uptrace/bun"
 )
 
 type SecretKind string
@@ -15,17 +15,17 @@ const (
 )
 
 type Secret struct {
-	tableName string `pg:"secrets"`
+	bun.BaseModel `bun:"table:secrets,alias:secret"`
 
-	SecretId  ID[Secret]  `json:"-" pg:"secret_id,pk,notnull"`
-	AccountId ID[Account] `json:"-" pg:"account_id,notnull,pk"`
-	Account   *Account    `json:"-" pg:"rel:has-one"`
-	Kind      SecretKind  `json:"-" pg:"kind,notnull"`
-	KeyID     *string     `json:"-" pg:"key_id"`
-	Version   *string     `json:"-" pg:"version"`
-	Secret    string      `json:"-" pg:"secret,notnull"`
-	UpdatedAt time.Time   `json:"-" pg:"updated_at,notnull"`
-	CreatedAt time.Time   `json:"-" pg:"created_at,notnull"`
+	SecretId  ID[Secret]  `json:"-" bun:"secret_id,pk,notnull"`
+	AccountId ID[Account] `json:"-" bun:"account_id,notnull,pk"`
+	Account   *Account    `json:"-" bun:"rel:belongs-to,join:account_id=account_id"`
+	Kind      SecretKind  `json:"-" bun:"kind,notnull,nullzero"`
+	KeyID     *string     `json:"-" bun:"key_id"`
+	Version   *string     `json:"-" bun:"version"`
+	Secret    string      `json:"-" bun:"secret,notnull,nullzero"`
+	UpdatedAt time.Time   `json:"-" bun:"updated_at,notnull,nullzero"`
+	CreatedAt time.Time   `json:"-" bun:"created_at,notnull,nullzero"`
 }
 
 func (Secret) IdentityPrefix() string {
@@ -33,22 +33,25 @@ func (Secret) IdentityPrefix() string {
 }
 
 var (
-	_ pg.BeforeInsertHook = (*Secret)(nil)
+	_ bun.BeforeAppendModelHook = (*Secret)(nil)
 )
 
-func (o *Secret) BeforeInsert(ctx context.Context) (context.Context, error) {
-	if o.SecretId.IsZero() {
-		o.SecretId = NewID[Secret]()
+func (o *Secret) BeforeAppendModel(ctx context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		if o.SecretId.IsZero() {
+			o.SecretId = NewID[Secret]()
+		}
+
+		now := time.Now()
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = now
+		}
+
+		if o.UpdatedAt.IsZero() {
+			o.UpdatedAt = now
+		}
 	}
 
-	now := time.Now()
-	if o.CreatedAt.IsZero() {
-		o.CreatedAt = now
-	}
-
-	if o.UpdatedAt.IsZero() {
-		o.UpdatedAt = now
-	}
-
-	return ctx, nil
+	return nil
 }

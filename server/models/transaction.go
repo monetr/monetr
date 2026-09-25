@@ -6,8 +6,8 @@ import (
 
 	"log/slog"
 
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/uptrace/bun"
 )
 
 type TransactionSource string
@@ -20,52 +20,52 @@ const (
 )
 
 type Transaction struct {
-	tableName string `pg:"transactions"`
+	bun.BaseModel `bun:"table:transactions,alias:transaction"`
 
-	TransactionId             ID[Transaction]           `json:"transactionId" pg:"transaction_id,notnull,pk"`
-	AccountId                 ID[Account]               `json:"-" pg:"account_id,notnull,pk"`
-	Account                   *Account                  `json:"-" pg:"rel:has-one"`
-	BankAccountId             ID[BankAccount]           `json:"bankAccountId" pg:"bank_account_id,notnull,pk,unique:per_bank_account"`
-	BankAccount               *BankAccount              `json:"-" pg:"rel:has-one"`
-	PlaidTransactionId        *ID[PlaidTransaction]     `json:"-" pg:"plaid_transaction_id"`
-	PlaidTransaction          *PlaidTransaction         `json:"plaidTransaction" pg:"rel:has-one"`
-	PendingPlaidTransactionId *ID[PlaidTransaction]     `json:"-" pg:"pending_plaid_transaction_id"`
-	PendingPlaidTransaction   *PlaidTransaction         `json:"pendingPlaidTransaction" pg:"rel:has-one,fk:pending_"` // fk: is the prefix of the column we want to use to join on in a multikey join.
-	LunchFlowTransactionId    *ID[LunchFlowTransaction] `json:"-" pg:"lunch_flow_transaction_id"`
-	LunchFlowTransaction      *LunchFlowTransaction     `json:"lunchFlowTransaction,omitempty" pg:"rel:has-one"`
-	Amount                    int64                     `json:"amount" pg:"amount,notnull,use_zero"`
-	SpendingId                *ID[Spending]             `json:"spendingId" pg:"spending_id,on_delete:SET NULL"`
-	Spending                  *Spending                 `json:"spending,omitempty" pg:"rel:has-one"`
+	TransactionId             ID[Transaction]           `json:"transactionId" bun:"transaction_id,notnull,pk"`
+	AccountId                 ID[Account]               `json:"-" bun:"account_id,notnull,pk"`
+	Account                   *Account                  `json:"-" bun:"rel:belongs-to,join:account_id=account_id"`
+	BankAccountId             ID[BankAccount]           `json:"bankAccountId" bun:"bank_account_id,notnull,pk,unique:per_bank_account"`
+	BankAccount               *BankAccount              `json:"-" bun:"rel:belongs-to,join:bank_account_id=bank_account_id,join:account_id=account_id"`
+	PlaidTransactionId        *ID[PlaidTransaction]     `json:"-" bun:"plaid_transaction_id"`
+	PlaidTransaction          *PlaidTransaction         `json:"plaidTransaction" bun:"rel:belongs-to,join:plaid_transaction_id=plaid_transaction_id,join:account_id=account_id"`
+	PendingPlaidTransactionId *ID[PlaidTransaction]     `json:"-" bun:"pending_plaid_transaction_id"`
+	PendingPlaidTransaction   *PlaidTransaction         `json:"pendingPlaidTransaction" bun:"rel:belongs-to,join:pending_plaid_transaction_id=plaid_transaction_id,join:account_id=account_id"` // fk: is the prefix of the column we want to use to join on in a multikey join.
+	LunchFlowTransactionId    *ID[LunchFlowTransaction] `json:"-" bun:"lunch_flow_transaction_id"`
+	LunchFlowTransaction      *LunchFlowTransaction     `json:"lunchFlowTransaction,omitempty" bun:"rel:belongs-to,join:lunch_flow_transaction_id=lunch_flow_transaction_id,join:account_id=account_id"`
+	Amount                    int64                     `json:"amount" bun:"amount,notnull"`
+	SpendingId                *ID[Spending]             `json:"spendingId" bun:"spending_id"`
+	Spending                  *Spending                 `json:"spending,omitempty" bun:"rel:belongs-to,join:spending_id=spending_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
 	// SpendingAmount is the amount deducted from the expense this transaction was
 	// spent from. This is used when a transaction is more than the expense
 	// currently has allocated. If the transaction were to be deleted or changed
 	// we want to make sure we return the correct amount to the expense.
-	SpendingAmount *int64 `json:"spendingAmount,omitempty" pg:"spending_amount,use_zero"`
+	SpendingAmount *int64 `json:"spendingAmount,omitempty" bun:"spending_amount"`
 	// CreatedBySpendingId is set when the transaction was auto-created by the
 	// ProcessSpending job for an expense with AutoCreateTransaction enabled. It
 	// points at the spending that caused the transaction to be created and is
 	// not user-mutable. This is distinct from SpendingId, which may be changed
 	// by the user to re-allocate a transaction.
-	CreatedBySpendingId *ID[Spending] `json:"createdBySpendingId" pg:"created_by_spending_id,on_delete:SET NULL"`
-	CreatedBySpending   *Spending     `json:"-" pg:"rel:has-one,fk:created_by_"`
+	CreatedBySpendingId *ID[Spending] `json:"createdBySpendingId" bun:"created_by_spending_id"`
+	CreatedBySpending   *Spending     `json:"-" bun:"rel:belongs-to,join:created_by_spending_id=spending_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
 	// CreatedByFundingScheduleId is set when the transaction was auto-created
 	// by the ProcessFundingSchedule job for a funding schedule with
 	// AutoCreateTransaction enabled. It points at the funding schedule that
 	// caused the transaction to be created and is not user-mutable.
-	CreatedByFundingScheduleId *ID[FundingSchedule] `json:"createdByFundingScheduleId" pg:"created_by_funding_schedule_id,on_delete:SET NULL"`
-	CreatedByFundingSchedule   *FundingSchedule     `json:"-" pg:"rel:has-one,fk:created_by_"`
-	Categories                 []string             `json:"categories" pg:"categories,type:'text[]'"`
-	Category                   *string              `json:"category" pg:"category"`
-	Date                       time.Time            `json:"date" pg:"date,notnull"`
-	Name                       string               `json:"name,omitempty" pg:"name"`
-	OriginalName               string               `json:"originalName" pg:"original_name,notnull"`
-	MerchantName               string               `json:"merchantName,omitempty" pg:"merchant_name"`
-	OriginalMerchantName       string               `json:"originalMerchantName" pg:"original_merchant_name"`
-	IsPending                  bool                 `json:"isPending" pg:"is_pending,notnull,use_zero"`
-	UploadIdentifier           *string              `json:"uploadIdentifier" pg:"upload_identifier"`
-	Source                     TransactionSource    `json:"source" pg:"source"`
-	CreatedAt                  time.Time            `json:"createdAt" pg:"created_at,notnull,default:now()"`
-	DeletedAt                  *time.Time           `json:"deletedAt" pg:"deleted_at"`
+	CreatedByFundingScheduleId *ID[FundingSchedule] `json:"createdByFundingScheduleId" bun:"created_by_funding_schedule_id"`
+	CreatedByFundingSchedule   *FundingSchedule     `json:"-" bun:"rel:belongs-to,join:created_by_funding_schedule_id=funding_schedule_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
+	Categories                 []string             `json:"categories" bun:"categories,array,nullzero"`
+	Category                   *string              `json:"category" bun:"category"`
+	Date                       time.Time            `json:"date" bun:"date,notnull,nullzero"`
+	Name                       string               `json:"name,omitempty" bun:"name,nullzero"`
+	OriginalName               string               `json:"originalName" bun:"original_name,notnull,nullzero"`
+	MerchantName               string               `json:"merchantName,omitempty" bun:"merchant_name,nullzero"`
+	OriginalMerchantName       string               `json:"originalMerchantName" bun:"original_merchant_name,nullzero"`
+	IsPending                  bool                 `json:"isPending" bun:"is_pending,notnull"`
+	UploadIdentifier           *string              `json:"uploadIdentifier" bun:"upload_identifier"`
+	Source                     TransactionSource    `json:"source" bun:"source,nullzero"`
+	CreatedAt                  time.Time            `json:"createdAt" bun:"created_at,notnull,default:now(),nullzero"`
+	DeletedAt                  *time.Time           `json:"deletedAt" bun:"deleted_at"`
 }
 
 func (Transaction) IdentityPrefix() string {
@@ -73,20 +73,23 @@ func (Transaction) IdentityPrefix() string {
 }
 
 var (
-	_ pg.BeforeInsertHook = (*Transaction)(nil)
+	_ bun.BeforeAppendModelHook = (*Transaction)(nil)
 )
 
-func (o *Transaction) BeforeInsert(ctx context.Context) (context.Context, error) {
-	if o.TransactionId.IsZero() {
-		o.TransactionId = NewID[Transaction]()
+func (o *Transaction) BeforeAppendModel(ctx context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		if o.TransactionId.IsZero() {
+			o.TransactionId = NewID[Transaction]()
+		}
+
+		now := time.Now()
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = now
+		}
 	}
 
-	now := time.Now()
-	if o.CreatedAt.IsZero() {
-		o.CreatedAt = now
-	}
-
-	return ctx, nil
+	return nil
 }
 
 func (t Transaction) IsAddition() bool {

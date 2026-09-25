@@ -17,12 +17,12 @@ func (r *repositoryBase) GetBankAccounts(
 	span.SetData("accountId", r.AccountId())
 
 	result := make([]BankAccount, 0)
-	err := r.txn.ModelContext(span.Context(), &result).
+	err := r.txn.NewSelect().Model(&result).
 		Relation("PlaidBankAccount").
 		Relation("LunchFlowBankAccount").
 		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."deleted_at" IS NULL`).
-		Select(&result)
+		Scan(span.Context())
 	return result, errors.Wrap(err, "failed to retrieve bank accounts")
 }
 
@@ -40,10 +40,10 @@ func (r *repositoryBase) CreateBankAccounts(
 			bankAccounts[i].Status = BankAccountStatusActive
 		}
 	}
-	if _, err := r.txn.ModelContext(
-		span.Context(),
-		&bankAccounts,
-	).Insert(&bankAccounts); err != nil {
+	if _, err := r.txn.NewInsert().
+		Model(&bankAccounts).
+		Returning("*").
+		Exec(span.Context()); err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to insert bank accounts")
 	}
@@ -63,12 +63,12 @@ func (r *repositoryBase) GetBankAccountsByLinkId(
 	span.SetData("linkId", linkId)
 
 	var result []BankAccount
-	err := r.txn.ModelContext(span.Context(), &result).
+	err := r.txn.NewSelect().Model(&result).
 		Relation("PlaidBankAccount").
 		Relation("LunchFlowBankAccount").
 		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."link_id" = ? `, linkId).
-		Select(&result)
+		Scan(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve bank accounts by Id")
@@ -89,12 +89,12 @@ func (r *repositoryBase) GetBankAccountsWithPlaidByLinkId(
 	span.SetData("linkId", linkId)
 
 	var result []BankAccount
-	err := r.txn.ModelContext(span.Context(), &result).
+	err := r.txn.NewSelect().Model(&result).
 		Relation(`PlaidBankAccount`).
 		Where(`"bank_account"."plaid_bank_account_id" IS NOT NULL`).
 		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."link_id" = ? `, linkId).
-		Select(&result)
+		Scan(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve bank accounts by Id")
@@ -115,12 +115,12 @@ func (r *repositoryBase) GetPlaidBankAccountsByLinkId(
 	span.SetData("linkId", linkId)
 
 	var result []PlaidBankAccount
-	err := r.txn.ModelContext(span.Context(), &result).
+	err := r.txn.NewSelect().Model(&result).
 		Join(`INNER JOIN "links" AS "link"`).
 		JoinOn(`"link"."account_id" = "plaid_bank_account"."account_id" AND "link"."plaid_link_id" = "plaid_bank_account"."plaid_link_id"`).
 		Where(`"plaid_bank_account"."account_id" = ?`, r.AccountId()).
 		Where(`"link"."link_id" = ? `, linkId).
-		Select(&result)
+		Scan(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve bank accounts by Id")
@@ -141,12 +141,12 @@ func (r *repositoryBase) GetBankAccount(
 	span.SetData("bankAccountId", bankAccountId)
 
 	var result BankAccount
-	err := r.txn.ModelContext(span.Context(), &result).
+	err := r.txn.NewSelect().Model(&result).
 		Relation("PlaidBankAccount").
 		Relation("LunchFlowBankAccount").
 		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."bank_account_id" = ? `, bankAccountId).
-		Select(&result)
+		Scan(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve bank account")
@@ -169,14 +169,15 @@ func (r *repositoryBase) UpdateBankAccount(
 	bankAccount.AccountId = r.AccountId()
 	bankAccount.UpdatedAt = r.clock.Now()
 
-	// NOTE We do a full update here instead of UpdateNotZero on purpose. Every
+	// NOTE We do a full update here instead of OmitZero on purpose. Every
 	// caller of UpdateBankAccount loads the complete bank account first and then
-	// mutates it, so writing every column back is safe. UpdateNotZero would skip
+	// mutates it, so writing every column back is safe. OmitZero would skip
 	// zero/nil fields which means we could never persist an intentional zero (a
 	// balance that nets to zero) or clear a nullable field like the mask.
-	_, err := r.txn.ModelContext(span.Context(), bankAccount).
+	_, err := r.txn.NewUpdate().Model(bankAccount).
 		WherePK().
-		Update(bankAccount)
+		Returning("*").
+		Exec(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to update bank account")

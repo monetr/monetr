@@ -2,12 +2,12 @@ package commands
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"os"
 	"strings"
 
 	"github.com/benbjohnson/clock"
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/database"
@@ -17,6 +17,7 @@ import (
 	"github.com/monetr/monetr/server/security"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"github.com/uptrace/bun"
 )
 
 func adminLoginResetPassword(parent *cobra.Command) {
@@ -168,14 +169,14 @@ func adminLoginResetPassword(parent *cobra.Command) {
 
 func resolveLoginForReset(
 	ctx context.Context,
-	db pg.DBI,
+	db bun.IDB,
 	repo repository.UnauthenticatedRepository,
 	loginIDArg, emailArg string,
 ) (*models.Login, error) {
 	if emailArg != "" {
 		login, err := repo.GetLoginForEmail(ctx, emailArg)
 		if err != nil {
-			if errors.Is(err, pg.ErrNoRows) {
+			if errors.Is(err, sql.ErrNoRows) {
 				return nil, errors.Errorf("no login found for email %q", emailArg)
 			}
 			return nil, errors.Wrap(err, "failed to find login by email")
@@ -189,12 +190,13 @@ func resolveLoginForReset(
 	}
 
 	var login models.Login
-	err = db.ModelContext(ctx, &login).
+	err = db.NewSelect().
+		Model(&login).
 		Where(`"login"."login_id" = ?`, loginId).
 		Limit(1).
-		Select(&login)
+		Scan(ctx)
 	if err != nil {
-		if errors.Is(err, pg.ErrNoRows) {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errors.Errorf("no login found for login id %q", loginIDArg)
 		}
 		return nil, errors.Wrap(err, "failed to find login by id")

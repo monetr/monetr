@@ -2,9 +2,9 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
@@ -18,13 +18,13 @@ func (r *repositoryBase) GetApiKeyById(
 	defer span.Finish()
 
 	var result models.ApiKey
-	err := r.txn.ModelContext(span.Context(), &result).
+	err := r.txn.NewSelect().Model(&result).
 		Relation("CreatedByUser").
 		Relation("CreatedByUser.Login").
 		Where(`"api_key"."api_key_id" = ?`, id).
 		Where(`"api_key"."account_id" = ?`, r.AccountId()).
 		Limit(1).
-		Select(&result)
+		Scan(span.Context())
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve api key")
 	}
@@ -39,11 +39,11 @@ func (r *repositoryBase) GetApiKeys(
 	defer span.Finish()
 
 	result := make([]models.ApiKey, 0)
-	err := r.txn.ModelContext(span.Context(), &result).
+	err := r.txn.NewSelect().Model(&result).
 		Where(`"api_key"."account_id" = ?`, r.AccountId()).
 		Where(`"api_key"."deleted_at" IS NULL`).
 		Order(`api_key_id DESC`).
-		Select(&result)
+		Scan(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve api keys")
@@ -64,10 +64,10 @@ func (r *repositoryBase) CreateApiKey(
 	key.AccountId = r.AccountId()
 	key.CreatedBy = r.UserId()
 
-	if _, err := r.txn.ModelContext(
-		span.Context(),
-		key,
-	).Insert(key); err != nil {
+	if _, err := r.txn.NewInsert().
+		Model(key).
+		Returning("*").
+		Exec(span.Context()); err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to create api key")
 	}
@@ -81,17 +81,19 @@ func (r *repositoryBase) DeleteApiKey(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	result, err := r.txn.ModelContext(span.Context(), new(models.ApiKey)).
+	result, err := r.txn.NewUpdate().Model(new(models.ApiKey)).
 		Set(`"deleted_at" = ?`, r.clock.Now()).
 		Where(`"api_key"."api_key_id" = ?`, id).
 		Where(`"api_key"."account_id" = ?`, r.AccountId()).
 		Where(`"api_key"."deleted_at" IS NULL`).
-		Update()
+		Exec(span.Context())
 	if err != nil {
 		return errors.Wrap(err, "failed to delete api key")
-	} else if result.RowsAffected() == 0 {
+	} else if affected, err := result.RowsAffected(); err != nil {
+		return errors.Wrap(err, "failed to delete api key")
+	} else if affected == 0 {
 		// Return this error so our upstream wrapPgError handles it properly
-		return errors.Wrap(pg.ErrNoRows, "invalid api key specified")
+		return errors.Wrap(sql.ErrNoRows, "invalid api key specified")
 	}
 
 	return nil

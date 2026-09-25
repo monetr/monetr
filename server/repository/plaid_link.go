@@ -3,10 +3,10 @@ package repository
 import (
 	"context"
 
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
+	"github.com/uptrace/bun"
 )
 
 func (r *repositoryBase) CreatePlaidLink(ctx context.Context, link *PlaidLink) error {
@@ -16,7 +16,7 @@ func (r *repositoryBase) CreatePlaidLink(ctx context.Context, link *PlaidLink) e
 	link.AccountId = r.AccountId()
 	link.CreatedAt = r.clock.Now().UTC()
 	link.CreatedBy = r.UserId()
-	_, err := r.txn.ModelContext(span.Context(), link).Insert(link)
+	_, err := r.txn.NewInsert().Model(link).Returning("*").Exec(span.Context())
 	return errors.Wrap(err, "failed to create plaid link")
 }
 
@@ -27,9 +27,9 @@ func (r *repositoryBase) UpdatePlaidLink(ctx context.Context, link *PlaidLink) e
 	span.SetTag("accountId", r.AccountIdStr())
 	span.SetTag("plaidItemId", link.PlaidId)
 
-	_, err := r.txn.ModelContext(span.Context(), link).
+	_, err := r.txn.NewUpdate().Model(link).
 		WherePK().
-		Update(link)
+		Exec(span.Context())
 	return errors.Wrap(err, "failed to update Plaid link")
 }
 
@@ -42,23 +42,23 @@ func (r *repositoryBase) DeletePlaidLink(
 
 	// Update the link record to indicate that it is no longer a Plaid link but
 	// instead a manual one. This way some data is still preserved.
-	_, err := r.txn.ModelContext(span.Context(), &Link{}).
+	_, err := r.txn.NewUpdate().Model(&Link{}).
 		Set(`"link_type" = ?`, ManualLinkType).
 		Where(`"link"."account_id" = ?`, r.AccountId()).
 		Where(`"link"."plaid_link_id" = ?`, plaidLinkId).
 		Where(`"link"."link_type" = ?`, PlaidLinkType).
-		Update()
+		Exec(span.Context())
 	if err != nil {
 		return errors.Wrap(err, "failed to clean Plaid link prior to removal")
 	}
 
 	// Then delete the Plaid link itself.
-	_, err = r.txn.ModelContext(span.Context(), &PlaidLink{}).
+	_, err = r.txn.NewUpdate().Model(&PlaidLink{}).
 		Set(`"status" = ?`, PlaidLinkStatusDeactivated).
 		Set(`"deleted_at" = ?`, r.clock.Now().UTC()).
 		Where(`"plaid_link"."account_id" = ?`, r.AccountId()).
 		Where(`"plaid_link"."plaid_link_id" = ?`, plaidLinkId).
-		Update()
+		Exec(span.Context())
 	return errors.Wrap(err, "failed to delete Plaid link")
 }
 
@@ -67,14 +67,14 @@ type PlaidRepository interface {
 	GetLink(ctx context.Context, accountId ID[Account], linkId ID[Link]) (*Link, error)
 }
 
-func NewPlaidRepository(db pg.DBI) PlaidRepository {
+func NewPlaidRepository(db bun.IDB) PlaidRepository {
 	return &plaidRepositoryBase{
 		txn: db,
 	}
 }
 
 type plaidRepositoryBase struct {
-	txn pg.DBI
+	txn bun.IDB
 }
 
 func (r *plaidRepositoryBase) GetLinkByItemId(ctx context.Context, itemId string) (*Link, error) {
@@ -85,11 +85,11 @@ func (r *plaidRepositoryBase) GetLinkByItemId(ctx context.Context, itemId string
 	}
 
 	var link Link
-	err := r.txn.ModelContext(span.Context(), &link).
+	err := r.txn.NewSelect().Model(&link).
 		Relation("PlaidLink").
 		Where(`"plaid_link"."item_id" = ?`, itemId).
 		Limit(1).
-		Select(&link)
+		Scan(span.Context(), &link)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve link by item Id")
 	}
@@ -107,12 +107,12 @@ func (r *plaidRepositoryBase) GetLink(ctx context.Context, accountId ID[Account]
 	}
 
 	var link Link
-	err := r.txn.ModelContext(span.Context(), &link).
+	err := r.txn.NewSelect().Model(&link).
 		Relation("PlaidLink").
 		Where(`"link"."account_id" = ?`, accountId).
 		Where(`"link"."link_id" = ?`, linkId).
 		Limit(1).
-		Select(&link)
+		Scan(span.Context(), &link)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve link")
 	}
