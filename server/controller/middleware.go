@@ -56,13 +56,36 @@ func (c *Controller) databaseRepositoryMiddleware(next echo.HandlerFunc) echo.Ha
 
 			cleanup = func() {
 				panicErr := recover()
+				// If the request context was cancelled (client disconnected or deadline
+				// exceeded) then database/sql has already rolled back the transaction
+				// and commit/rollback will return ErrTxDone or the context error.
 				if handlerError != nil || panicErr != nil {
 					if err := txn.Rollback(); err != nil {
-						c.Log.ErrorContext(c.getContext(ctx), "failed to rollback request", "err", err)
+						if c.getContext(ctx).Err() != nil {
+							c.Log.WarnContext(
+								c.getContext(ctx),
+								"request cancelled, transaction was rolled back",
+								"err", err,
+							)
+						} else {
+							c.Log.ErrorContext(
+								c.getContext(ctx),
+								"failed to rollback request",
+								"err", err,
+							)
+						}
 					}
 				} else {
 					if err := txn.Commit(); err != nil {
-						panic(err)
+						if c.getContext(ctx).Err() != nil {
+							c.Log.WarnContext(
+								c.getContext(ctx),
+								"request cancelled, transaction was rolled back",
+								"err", err,
+							)
+						} else {
+							panic(err)
+						}
 					}
 				}
 				if panicErr != nil {
