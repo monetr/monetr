@@ -2,6 +2,9 @@ package queue
 
 import (
 	"context"
+	"database/sql"
+	"net"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -12,6 +15,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/uptrace/bun"
+	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
 )
 
@@ -1142,5 +1147,79 @@ func TestPostgresProcessor_WakeNotification(t *testing.T) {
 			require.Fail(t, "received a wake notification after a rolled back transaction")
 		case <-time.After(500 * time.Millisecond):
 		}
+	})
+}
+
+func TestPostgresProcessor_ListenFailure(t *testing.T) {
+	t.Run("recovers notifications after the initial LISTEN fails", func(t *testing.T) {
+		// Create and migrate an isolated database, then connect to it ourselves so
+		// that we control the dialer.
+		isolated := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+		var databaseName string
+		require.NoError(t, isolated.QueryRowContext(t.Context(), `SELECT current_database()`).Scan(&databaseName))
+
+		var failDials atomic.Bool
+		connector := pgdriver.NewConnector(append(testutils.GetPgOptions(t), pgdriver.WithDatabase(databaseName))...)
+		dialer := &net.Dialer{Timeout: 5 * time.Second}
+		connector.Config().Dialer = func(ctx context.Context, network, addr string) (net.Conn, error) {
+			if failDials.Load() {
+				return nil, errors.New("forcing a bad connection")
+			}
+			return dialer.DialContext(ctx, network, addr)
+		}
+		db := bun.NewDB(sql.OpenDB(connector), pgdialect.New())
+		t.Cleanup(func() {
+			require.NoError(t, db.Close(), "must close the database")
+		})
+		// Open a pooled connection up front. The processor's own queries reuse it,
+		// so the only new connection attempted while dials are failing is the
+		// listener's dedicated one.
+		require.NoError(t, db.PingContext(t.Context()), "must ping database")
+
+		log, hook := testutils.GetTestLog(t)
+		processor := NewPostgresQueue(
+			t.Context(),
+			clock.New(),
+			log,
+			config.Configuration{},
+			db,
+			nil, nil, nil, nil, nil, nil,
+		)
+		require.NoError(t, Register(t.Context(), processor, testNoopJob))
+
+		failDials.Store(true)
+		require.NoError(t, processor.Start(), "must start even though LISTEN fails")
+		defer processor.Close()
+		testutils.MustHaveLogMessage(t, hook, "failed to listen for job notifications")
+
+		// Let the listener reconnect. Once it does it re-issues LISTEN for every
+		// channel it was asked to listen on, "queue:wake" first and then bun's ping
+		// channel, so seeing the ping channel means "queue:wake" is live.
+		failDials.Store(false)
+		require.Eventually(t, func() bool {
+			var listening bool
+			err := db.QueryRowContext(t.Context(), `
+				SELECT EXISTS (
+					SELECT 1 FROM pg_stat_activity
+					WHERE datname = current_database()
+					  AND pid <> pg_backend_pid()
+					  AND state = 'idle'
+					  AND query LIKE '%"bun:ping"'
+				)
+			`).Scan(&listening)
+			return err == nil && listening
+		}, 10*time.Second, 100*time.Millisecond, "listener must reconnect and re-issue LISTEN")
+
+		require.NoError(t, Enqueue(t.Context(), processor, testNoopJob, testJobArgs{Value: "hello"}))
+
+		// The consumer's polling ticker is at least 10 seconds, so completing well
+		// inside that means the job was picked up by the notification.
+		require.Eventually(t, func() bool {
+			count, err := db.NewSelect().
+				Model(new(models.Job)).
+				Where(`"status" = ?`, models.CompletedJobStatus).
+				Count(t.Context())
+			return err == nil && count > 0
+		}, 5*time.Second, 100*time.Millisecond, "job must be picked up by notification, not the polling ticker")
 	})
 }
