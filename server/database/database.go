@@ -73,6 +73,7 @@ func GetDatabase(
 	sqldb := sql.OpenDB(connector)
 	// Mirror go-pg's connection pool defaults.
 	sqldb.SetMaxOpenConns(10 * runtime.NumCPU())
+	sqldb.SetMaxIdleConns(10 * runtime.NumCPU())
 	sqldb.SetConnMaxIdleTime(5 * time.Minute)
 	sqldb.SetConnMaxLifetime(9 * time.Minute)
 
