@@ -1,5 +1,42 @@
 # Changelog
 
+## [1.17.0](https://github.com/monetr/monetr/compare/v1.16.0...v1.17.0) (2026-09-25)
+
+
+### Features
+
+* **api:** Adding new TLS certificate rotation hings ([5899934](https://github.com/monetr/monetr/commit/5899934132e13be95b1774fab29eeb462cdf78b7))
+* **api:** Migrate entirely to bun ([#3518](https://github.com/monetr/monetr/issues/3518)) ([5899934](https://github.com/monetr/monetr/commit/5899934132e13be95b1774fab29eeb462cdf78b7))
+
+
+### Bug Fixes
+
+* Allow expenses to be paused ([22df9ca](https://github.com/monetr/monetr/commit/22df9ca5f552c2e8c84f234cef254ce64f934eb8))
+* **api:** Allow expenses to be paused via the REST API ([22df9ca](https://github.com/monetr/monetr/commit/22df9ca5f552c2e8c84f234cef254ce64f934eb8))
+* **api:** Fixing panic when request is canceled ([5899934](https://github.com/monetr/monetr/commit/5899934132e13be95b1774fab29eeb462cdf78b7))
+* **test:** Fixed failing test from pausing expenses ([9bc463a](https://github.com/monetr/monetr/commit/9bc463a2c504dd379d7093ddd2003b96c87b39c0))
+* **ui:** Adding tooltip to pending transactions ([ab91bad](https://github.com/monetr/monetr/commit/ab91bad6bdf8d7d9d62d0b9d85769fc179e06780))
+* **ui:** Allow expensesd to be paused via the UI ([22df9ca](https://github.com/monetr/monetr/commit/22df9ca5f552c2e8c84f234cef254ce64f934eb8))
+* **ui:** Fixing scroll position on forward navigation ([9323fb8](https://github.com/monetr/monetr/commit/9323fb826ebccf074cbd3ae56304d7e5196895a0))
+* **ui:** Make pull to refresh icon rotate correctly ([429a797](https://github.com/monetr/monetr/commit/429a7973ec1920cb481387792cb397d3311e5967))
+* **ui:** Preload the monospace font to prevent flashes ([32eaa14](https://github.com/monetr/monetr/commit/32eaa14205aeed94a398c9ca21a221bfceae78ac))
+
+
+### Miscellaneous
+
+* **deps:** Bump github.com/gorilla/websocket from 1.5.0 to 1.5.3 ([#3496](https://github.com/monetr/monetr/issues/3496)) ([9699f2b](https://github.com/monetr/monetr/commit/9699f2b79d3ccd9fa0a4c81aa733a8d24a670e1d))
+* Removing go scorecard from readme ([8740bd6](https://github.com/monetr/monetr/commit/8740bd690e80b48c7fb57e6f085d7de56b07784e))
+
+
+### Dependencies
+
+* **api:** update aws ([#3524](https://github.com/monetr/monetr/issues/3524)) ([ca3d2c1](https://github.com/monetr/monetr/commit/ca3d2c195090f8d7da4a26e5a54658cf8ebb5ca1))
+* **ui:** update dependency @imagemagick/magick-wasm to v0.0.43 ([#3504](https://github.com/monetr/monetr/issues/3504)) ([d2da848](https://github.com/monetr/monetr/commit/d2da848a9294cc54894b2a21d03522da75b38c22))
+* **ui:** update dependency @tanstack/react-query to v5.103.1 ([#3525](https://github.com/monetr/monetr/issues/3525)) ([9fbd93c](https://github.com/monetr/monetr/commit/9fbd93c049e00f90061177c95f3ee46fbc63e429))
+* **ui:** update react monorepo to v19.3.0 ([#3505](https://github.com/monetr/monetr/issues/3505)) ([6e36177](https://github.com/monetr/monetr/commit/6e36177e0deeb71f0f3a6468c43280f4fc925657))
+* **ui:** update rstest to v0.12.0 ([#3513](https://github.com/monetr/monetr/issues/3513)) ([3e2acd1](https://github.com/monetr/monetr/commit/3e2acd1d34621bc59132e4bce47c37f8b7e66e34))
+* **ui:** update testing-library monorepo ([#3477](https://github.com/monetr/monetr/issues/3477)) ([99142a9](https://github.com/monetr/monetr/commit/99142a924fef6e0431c49a355a91621ab5ba05e7))
+
 ## [1.16.0](https://github.com/monetr/monetr/compare/v1.15.3...v1.16.0) (2026-09-24)
 
 
