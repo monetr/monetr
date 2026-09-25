@@ -55,7 +55,7 @@
     "react-plaid-link": "4.2.0",
     "react-qr-code": "2.2.0",
     "rrule": "2.8.1",
-    "wouter": "3.10.0"
+    "wouter": "3.11.0"
   },
   "devDependencies": {
     "@imagemagick/magick-wasm": "0.0.43",
