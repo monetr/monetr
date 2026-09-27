@@ -12,4 +12,11 @@ type Redis struct {
 	Database int    `yaml:"database"`
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
+	// TLS will enable TLS for the connection to the redis server. TLS is also
+	// used if any of the certificate paths are provided.
+	TLS                bool   `yaml:"tls"`
+	InsecureSkipVerify bool   `yaml:"insecureSkipVerify"`
+	CACertificatePath  string `yaml:"caCertificatePath"`
+	KeyPath            string `yaml:"keyPath"`
+	CertificatePath    string `yaml:"certificatePath"`
 }

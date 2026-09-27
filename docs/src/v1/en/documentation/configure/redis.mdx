@@ -22,30 +22,46 @@ redis:
   database: 0
   username: ""
   password: ""
+  tls: false
+  insecureSkipVerify: false
+  caCertificatePath: "</tls/ca.cert>"
+  keyPath: "</tls/tls.key>"
+  certificatePath: "</tls/tls.cert>"
 ```
 
-| **Name**   | **Type** | **Default** | **Description**                                                                                                 |
-| ---        | ---      | ---         | ---                                                                                                             |
-| `enabled`  | Boolean  | `false`     | Enable a dedicated cache server, if this is set to `false` then an embedded miniredis instance is used instead. |
-| `address`  | String   |             | The IP, or DNS resolvable address of your Redis-compatible cache server.                                        |
-| `port`     | Number   | `6379`      | Port that the Redis-compatible cache server can be reached at.                                                  |
-| `database` | Number   | `0`         | Database number that you want monetr to use for caching. Defaults to `0`.                                       |
-| `username` | String   |             | Username used to authenticate to the Redis-compatible server, defaults to an empty string.                      |
-| `password` | String   |             | Password used to authenticate to the Redis-compatible server, defaults to an empty string.                      |
+| **Name**             | **Type** | **Default** | **Description**                                                                                                                                                                                       |
+| ---                  | ---      | ---         | ---                                                                                                                                                                                                   |
+| `enabled`            | Boolean  | `false`     | Enable a dedicated cache server, if this is set to `false` then an embedded miniredis instance is used instead.                                                                                       |
+| `address`            | String   |             | The IP, or DNS resolvable address of your Redis-compatible cache server.                                                                                                                              |
+| `port`               | Number   | `6379`      | Port that the Redis-compatible cache server can be reached at.                                                                                                                                        |
+| `database`           | Number   | `0`         | Database number that you want monetr to use for caching. Defaults to `0`.                                                                                                                             |
+| `username`           | String   |             | Username used to authenticate to the Redis-compatible server, defaults to an empty string.                                                                                                            |
+| `password`           | String   |             | Password used to authenticate to the Redis-compatible server, defaults to an empty string.                                                                                                            |
+| `tls`                | Boolean  | `false`     | If true then monetr will connect to the cache server using TLS. TLS is also used if any of the certificate paths below are provided.                                                                  |
+| `insecureSkipVerify` | Boolean  | `false`     | If you are using TLS with the cache server but are not distributing a certificate authority file, then you may need to skip TLS verification.                                                         |
+| `caCertificatePath`  | String   |             | Path to the certificate authority certificate file. If you are verifying your TLS connection then this is required or the server certificate must be among the hosts certificate authorities already. |
+| `keyPath`            | String   |             | Path to the client TLS key that monetr should use to connect to the cache server.                                                                                                                     |
+| `certificatePath`    | String   |             | Path to the client TLS certificate that monetr should use to connect to the cache server.                                                                                                             |
 
 :::info
-monetr does not support TLS for this cache server at this time. Sensitive information is never cached on this server and
-the use of the cache is purely for performance.
+monetr watches the certificate files for changes, so certificates can be rotated without restarting the server. New
+connections to the cache server will use the new certificates right away. The TLS settings are ignored when `enabled` is
+`false`.
 :::
 
 The following environment variables map to the following configuration file fields. Each field is documented below.
 
-| Variable                | Config File Field |
-| ---                     | ---               |
-| `MONETR_REDIS_ENABLED`  | `redis.enabled`   |
-| `MONETR_REDIS_ADDRESS`  | `redis.address`   |
-| `MONETR_REDIS_PORT`     | `redis.port`      |
-| `MONETR_REDIS_DATABASE` | `redis.database`  |
-| `MONETR_REDIS_USERNAME` | `redis.username`  |
-| `MONETR_REDIS_PASSWORD` | `redis.password`  |
+| Variable                            | Config File Field          |
+| ---                                 | ---                        |
+| `MONETR_REDIS_ENABLED`              | `redis.enabled`            |
+| `MONETR_REDIS_ADDRESS`              | `redis.address`            |
+| `MONETR_REDIS_PORT`                 | `redis.port`               |
+| `MONETR_REDIS_DATABASE`             | `redis.database`           |
+| `MONETR_REDIS_USERNAME`             | `redis.username`           |
+| `MONETR_REDIS_PASSWORD`             | `redis.password`           |
+| `MONETR_REDIS_TLS`                  | `redis.tls`                |
+| `MONETR_REDIS_INSECURE_SKIP_VERIFY` | `redis.insecureSkipVerify` |
+| `MONETR_REDIS_CA_PATH`              | `redis.caCertificatePath`  |
+| `MONETR_REDIS_KEY_PATH`             | `redis.keyPath`            |
+| `MONETR_REDIS_CERT_PATH`            | `redis.certificatePath`    |
 

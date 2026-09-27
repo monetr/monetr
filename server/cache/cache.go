@@ -10,14 +10,16 @@ import (
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/gomodule/redigo/redis"
+	"github.com/monetr/monetr/server/certs"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/pkg/errors"
 )
 
 type RedisController struct {
-	mini *miniredis.Miniredis
-	pool *redis.Pool
+	mini         *miniredis.Miniredis
+	pool         *redis.Pool
+	certificates certs.Source
 }
 
 func NewRedisCache(
@@ -27,9 +29,44 @@ func NewRedisCache(
 	controller := &RedisController{}
 	var redisAddress string
 	var err error
+	dialOptions := []redis.DialOption{
+		redis.DialUsername(conf.Username),
+		redis.DialPassword(conf.Password),
+		redis.DialDatabase(conf.Database),
+	}
 	if conf.Enabled {
 		redisAddress = net.JoinHostPort(conf.Address, strconv.Itoa(conf.Port))
 		log.DebugContext(context.Background(), fmt.Sprintf("connecting to redis at: %s", redisAddress))
+
+		// If no CA certificate is provided then the server certificate is
+		// verified against the system certificate authorities instead.
+		if conf.TLS ||
+			conf.CACertificatePath != "" ||
+			conf.CertificatePath != "" ||
+			conf.KeyPath != "" {
+			controller.certificates, err = certs.NewFileSource(log, certs.Options{
+				CACertificatePath:  conf.CACertificatePath,
+				CertificatePath:    conf.CertificatePath,
+				KeyPath:            conf.KeyPath,
+				ServerName:         conf.Address,
+				InsecureSkipVerify: conf.InsecureSkipVerify,
+			})
+			if err != nil {
+				log.ErrorContext(context.Background(), "failed to load redis TLS certificates", "err", err)
+				return nil, errors.Wrap(err, "failed to load redis TLS certificates")
+			}
+			// The certificates are watched for the lifetime of the controller, new
+			// connections will pick up rotated certificates without swapping the
+			// TLS config.
+			if err = controller.certificates.Start(); err != nil {
+				return nil, errors.Wrap(err, "failed to watch redis TLS certificates")
+			}
+
+			dialOptions = append(dialOptions,
+				redis.DialUseTLS(true),
+				redis.DialTLSConfig(controller.certificates.ClientConfig()),
+			)
+		}
 	} else {
 		controller.mini, err = miniredis.Run()
 		if err != nil {
@@ -54,13 +91,7 @@ func NewRedisCache(
 		Dial: func() (redis.Conn, error) {
 			// TODO (elliotcourant) Eventually support other networks besides
 			//  tcp? Can redis even run on a unix socket?
-			return redis.Dial(
-				"tcp",
-				redisAddress,
-				redis.DialUsername(conf.Username),
-				redis.DialPassword(conf.Password),
-				redis.DialDatabase(conf.Database),
-			)
+			return redis.Dial("tcp", redisAddress, dialOptions...)
 		},
 	}
 
@@ -100,6 +131,9 @@ func (r *RedisController) Close() error {
 	err := r.pool.Close()
 	if r.mini != nil {
 		r.mini.Close()
+	}
+	if r.certificates != nil {
+		r.certificates.Stop()
 	}
 	return errors.Wrap(err, "failed to close pool gracefully")
 }
