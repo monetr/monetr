@@ -18,7 +18,10 @@
     ".": {
       "package-name": "monetr",
       "component": "",
-      "version-file": "version.txt"
+      "version-file": "version.txt",
+      "extra-files": [
+        { "type": "generic", "path": "docker-compose.yaml" }
+      ]
     }
   }
 }
