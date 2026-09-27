@@ -152,6 +152,56 @@ func handshake(
 	return serverSide.peer, serverSide.err
 }
 
+// serverHandshake performs a TLS handshake between a client trusting the
+// provided roots and a server using the provided config. Returns the server
+// certificate the client saw.
+func serverHandshake(
+	t *testing.T,
+	server *tls.Config,
+	roots *x509.CertPool,
+	serverName string,
+) (*x509.Certificate, error) {
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err, "must listen")
+	defer listener.Close()
+
+	clientConn, err := net.Dial("tcp", listener.Addr().String())
+	require.NoError(t, err, "must dial")
+	defer clientConn.Close()
+	serverConn, err := listener.Accept()
+	require.NoError(t, err, "must accept")
+	defer serverConn.Close()
+
+	deadline := time.Now().Add(5 * time.Second)
+	clientConn.SetDeadline(deadline)
+	serverConn.SetDeadline(deadline)
+
+	serverResult := make(chan error, 1)
+	go func() {
+		err := tls.Server(serverConn, server).Handshake()
+		// Unblock the client if the server fails first.
+		serverConn.Close()
+		serverResult <- err
+	}()
+
+	conn := tls.Client(clientConn, &tls.Config{
+		RootCAs:    roots,
+		ServerName: serverName,
+	})
+	clientErr := conn.Handshake()
+	var peer *x509.Certificate
+	if certificates := conn.ConnectionState().PeerCertificates; len(certificates) > 0 {
+		peer = certificates[0]
+	}
+	clientConn.Close()
+	serverErr := <-serverResult
+	if clientErr != nil {
+		return nil, clientErr
+	}
+
+	return peer, serverErr
+}
+
 func TestFileSource(t *testing.T) {
 	t.Run("verifies server against ca", func(t *testing.T) {
 		directory := t.TempDir()
@@ -379,6 +429,84 @@ func TestFileSource(t *testing.T) {
 			_, err := handshake(t, config, server, nil)
 			return err == nil
 		}, 5*time.Second, 50*time.Millisecond, "should trust the new ca")
+
+		assert.NoError(t, source.Stop(), "must stop")
+	})
+
+	t.Run("serves certificate", func(t *testing.T) {
+		directory := t.TempDir()
+		ca := newTestAuthority(t)
+		serverCert, serverKey, _ := ca.issue(t, "my.monetr.local")
+		writeFile(t, filepath.Join(directory, "tls.crt"), serverCert)
+		writeFile(t, filepath.Join(directory, "tls.key"), serverKey)
+
+		source, err := NewFileSource(testlog.GetLog(t), Options{
+			CertificatePath: filepath.Join(directory, "tls.crt"),
+			KeyPath:         filepath.Join(directory, "tls.key"),
+		})
+		require.NoError(t, err, "must create source")
+		defer source.Stop()
+
+		roots := x509.NewCertPool()
+		roots.AddCert(ca.certificate)
+		peer, err := serverHandshake(t, source.ServerConfig(), roots, "my.monetr.local")
+		require.NoError(t, err, "handshake should succeed")
+		assert.Equal(t, "my.monetr.local", peer.Subject.CommonName)
+	})
+
+	t.Run("server without certificate", func(t *testing.T) {
+		directory := t.TempDir()
+		ca := newTestAuthority(t)
+		writeFile(t, filepath.Join(directory, "ca.crt"), ca.pem)
+
+		source, err := NewFileSource(testlog.GetLog(t), Options{
+			CACertificatePath: filepath.Join(directory, "ca.crt"),
+		})
+		require.NoError(t, err, "must create source")
+		defer source.Stop()
+
+		_, err = serverHandshake(t, source.ServerConfig(), nil, "my.monetr.local")
+		assert.Error(t, err, "handshake should fail without a server certificate")
+	})
+
+	t.Run("serves rotated certificate", func(t *testing.T) {
+		directory := t.TempDir()
+		oldCA := newTestAuthority(t)
+		newCA := newTestAuthority(t)
+		oldCert, oldKey, _ := oldCA.issue(t, "my.monetr.local")
+		newCert, newKey, _ := newCA.issue(t, "my.monetr.local")
+		writeFile(t, filepath.Join(directory, "tls.crt"), oldCert)
+		writeFile(t, filepath.Join(directory, "tls.key"), oldKey)
+
+		source, err := NewFileSource(testlog.GetLog(t), Options{
+			CertificatePath: filepath.Join(directory, "tls.crt"),
+			KeyPath:         filepath.Join(directory, "tls.key"),
+		})
+		require.NoError(t, err, "must create source")
+		source.(*fileSource).debounce = 100 * time.Millisecond
+		require.NoError(t, source.Start(), "must start")
+
+		oldRoots := x509.NewCertPool()
+		oldRoots.AddCert(oldCA.certificate)
+		newRoots := x509.NewCertPool()
+		newRoots.AddCert(newCA.certificate)
+		config := source.ServerConfig()
+
+		_, err = serverHandshake(t, config, oldRoots, "my.monetr.local")
+		require.NoError(t, err, "handshake should succeed with the old certificate")
+
+		// Write the certificate and key separately, the reload should wait for
+		// both instead of failing on a mismatched pair.
+		writeFile(t, filepath.Join(directory, "tls.crt"), newCert)
+		time.Sleep(20 * time.Millisecond)
+		writeFile(t, filepath.Join(directory, "tls.key"), newKey)
+
+		// The certificates are issued by different authorities so the client can
+		// only verify the new certificate once it is being served.
+		assert.Eventually(t, func() bool {
+			_, err := serverHandshake(t, config, newRoots, "my.monetr.local")
+			return err == nil
+		}, 5*time.Second, 50*time.Millisecond, "should serve the new certificate")
 
 		assert.NoError(t, source.Stop(), "must stop")
 	})

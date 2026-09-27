@@ -48,6 +48,10 @@ type Source interface {
 	// ClientConfig returns a TLS config for clients connecting to a server using
 	// these certificates. The same config can be shared by multiple clients.
 	ClientConfig() *tls.Config
+	// ServerConfig returns a TLS config for a server presenting the certificate
+	// and key from these options. The same config can be shared by multiple
+	// listeners.
+	ServerConfig() *tls.Config
 	// Reload reads the certificates from disk. If the certificates fail to load
 	// then the previously loaded certificates are kept.
 	Reload() error
@@ -131,6 +135,27 @@ func (f *fileSource) ClientConfig() *tls.Config {
 	}
 
 	return manuallyVerifiedConfig
+}
+
+func (f *fileSource) ServerConfig() *tls.Config {
+	return &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		NextProtos: []string{"h2", "http/1.1"},
+		// Certificates is left empty so the certificate always comes from
+		// GetCertificate. Go falls back to Certificates when a client does not send
+		// SNI, which would keep serving the certificate from startup.
+		GetCertificate: f.getCertificate,
+	}
+}
+
+func (f *fileSource) getCertificate(
+	_ *tls.ClientHelloInfo,
+) (*tls.Certificate, error) {
+	if certificate := f.material.Load().certificate; certificate != nil {
+		return certificate, nil
+	}
+
+	return nil, errors.New("no server certificate is configured")
 }
 
 func (f *fileSource) getClientCertificate(
