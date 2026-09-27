@@ -64,6 +64,7 @@ func (r *repositoryBase) UpsertTransactionClusters(
 		Model(&clusters).
 		On(`CONFLICT ("transaction_cluster_id", "account_id", "bank_account_id") DO UPDATE`).
 		Set(`"original_name" = EXCLUDED."original_name"`).
+		Set(`"original_memo" = EXCLUDED."original_memo"`).
 		Set(`"signature" = EXCLUDED."signature"`).
 		Set(`"centroid" = EXCLUDED."centroid"`).
 		Set(`"members" = EXCLUDED."members"`).

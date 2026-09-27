@@ -29,6 +29,7 @@ type TransactionCluster struct {
 	Centroid     *ID[Transaction]              `json:"centroid" bun:"centroid"`
 	Name         string                        `json:"name" bun:"name,notnull,nullzero"`
 	OriginalName string                        `json:"originalName" bun:"original_name,notnull,nullzero"`
+	OriginalMemo string                        `json:"originalMemo" bun:"original_memo,nullzero"`
 	Members      []ID[Transaction]             `json:"-" bun:"members,notnull,array,nullzero"`
 	Debug        []TransactionClusterDebugItem `json:"debug" bun:"debug,type:jsonb,nullzero"`
 	Merchant     []TransactionClusterDebugItem `json:"merchant" bun:"merchant,type:jsonb,nullzero"`
