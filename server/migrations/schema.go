@@ -4,5 +4,5 @@ import (
 	"embed"
 )
 
-//go:embed schema/*.sql
+//go:embed schema/pg/*.sql
 var embeddedMigrations embed.FS

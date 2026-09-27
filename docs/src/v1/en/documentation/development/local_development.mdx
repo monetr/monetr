@@ -358,6 +358,17 @@ make develop-email
 This will start the react email development server, allowing you to preview the email templates in your browser with
 some preset values (instead of the go template placeholders).
 
+### Database Migrations
+
+If you want to add a new database migration you can simply run:
+
+```shell title="Shell"
+make new-pg-migration
+```
+
+This will prompt you for a migration name, which must be space-less and only contain letters and numbers. It will then
+generate a migration file in the correct format and open the file in your `$EDITOR`.
+
 ## Cleaning Up
 
 Once you have finished your work and you want to take the local development environment down you have a few options.
