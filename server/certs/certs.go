@@ -138,7 +138,7 @@ func (f *fileSource) ClientConfig() *tls.Config {
 }
 
 func (f *fileSource) ServerConfig() *tls.Config {
-	return &tls.Config{
+	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
 		NextProtos: []string{"h2", "http/1.1"},
 		// Certificates is left empty so the certificate always comes from
@@ -146,6 +146,26 @@ func (f *fileSource) ServerConfig() *tls.Config {
 		// SNI, which would keep serving the certificate from startup.
 		GetCertificate: f.getCertificate,
 	}
+
+	// Client certificates are only required when a CA is provided. Without one
+	// the server behaves like a normal TLS server, like when using certificates
+	// from a public CA.
+	if f.options.CACertificatePath == "" {
+		return config
+	}
+
+	// Like the client config, ClientCAs cannot be changed on a config that is
+	// already in use. So every handshake gets a copy of the config with the
+	// currently loaded roots.
+	config.GetConfigForClient = func(_ *tls.ClientHelloInfo) (*tls.Config, error) {
+		handshakeConfig := config.Clone()
+		handshakeConfig.GetConfigForClient = nil
+		handshakeConfig.ClientAuth = tls.RequireAndVerifyClientCert
+		handshakeConfig.ClientCAs = f.material.Load().roots
+		return handshakeConfig, nil
+	}
+
+	return config
 }
 
 func (f *fileSource) getCertificate(

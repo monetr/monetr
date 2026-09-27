@@ -407,9 +407,13 @@ func ServeCommand(parent *cobra.Command) {
 
 			if configuration.Server.TLSCertificate != "" && configuration.Server.TLSKey != "" {
 				log.Info("server will start a TLS listener")
+				if configuration.Server.TLSClientCertificateAuthority != "" {
+					log.Info("server will require client certificates signed by the configured certificate authority")
+				}
 				certificates, err := certs.NewFileSource(log, certs.Options{
-					CertificatePath: configuration.Server.TLSCertificate,
-					KeyPath:         configuration.Server.TLSKey,
+					CertificatePath:   configuration.Server.TLSCertificate,
+					KeyPath:           configuration.Server.TLSKey,
+					CACertificatePath: configuration.Server.TLSClientCertificateAuthority,
 				})
 				if err != nil {
 					log.Error("failed to load TLS certificates", "err", err)
