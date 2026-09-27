@@ -203,6 +203,7 @@ func TestGetSimilarTransactions(t *testing.T) {
 		var token string
 		var bank BankAccount
 		var transaction Transaction
+		var cluster TransactionCluster
 
 		{ // Seed the data for the test.
 			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
@@ -213,7 +214,7 @@ func TestGetSimilarTransactions(t *testing.T) {
 			// Seed a transaction cluster that includes our transaction as a member so
 			// the endpoint returns the cluster with a 200 OK instead of a 204 No
 			// Content.
-			testutils.MustInsert(t, TransactionCluster{
+			cluster = testutils.MustInsert(t, TransactionCluster{
 				AccountId:     bank.AccountId,
 				BankAccountId: bank.BankAccountId,
 				Name:          transaction.Name,
@@ -233,7 +234,8 @@ func TestGetSimilarTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.members").Array().NotEmpty()
+		response.JSON().Path("$.transactionClusterId").String().IsEqual(cluster.TransactionClusterId.String())
+		response.JSON().Object().NotContainsKey("members")
 	})
 
 	t.Run("with an invalid api key", func(t *testing.T) {
