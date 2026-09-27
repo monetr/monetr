@@ -361,13 +361,13 @@ Instead of using Persistent Volumes, you can run an Object Storage system inside
 
 - [Rook](https://rook.io/) and specifically [radosgw](https://docs.ceph.com/en/squid/radosgw/) is what monetr is using
   in production and is the recommended object storage provider for running multiple instances of monetr.
-- [minio](https://min.io/) is probably the easiest to get up and running.
+- [RustFS](https://github.com/rustfs/rustfs) is probably the easiest to get up and running.
 
 ### Ingress
 
-Ingress-Nginx Controller is what is used in monetr's production environment.
+HAProxy Kubernetes Ingress Controller is what is used in monetr's production environment.
 
-- [Ingress-Nginx Controller](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/)
+- [HAProxy Kubernetes Ingress Controller](https://www.haproxy.com/documentation/kubernetes-ingress/)
 
 ### Certificates
 
