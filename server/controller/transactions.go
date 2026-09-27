@@ -71,6 +71,8 @@ func (c *Controller) getTransactionById(ctx *echo.Context) error {
 	return ctx.JSON(http.StatusOK, transaction)
 }
 
+// Deprecated: Use getSimilarTransactionCluster with the transaction's cluster ID
+// instead.
 func (c *Controller) getSimilarTransactionsById(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {

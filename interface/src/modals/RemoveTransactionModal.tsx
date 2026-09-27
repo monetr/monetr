@@ -85,7 +85,7 @@ function RemoveTransactionModal(props: RemoveTransactionModalProps): React.JSX.E
             <div className={styles.options}>
               <Typography size='inherit'>Are you sure you want to remove this transaction?</Typography>
               <ul>
-                <SimilarTransactionItem disableNavigate transactionId={transaction.transactionId} />
+                <SimilarTransactionItem disableNavigate transaction={transaction} />
               </ul>
               <Typography size='inherit'>You will not be able to undo this action.</Typography>
               <SwitchCard

@@ -1,6 +1,6 @@
 ---
 title: "Transactions API"
-description: "List, create, update and delete transactions with monetr's REST API, assign them to budget envelopes, and find similar ones, with curl examples."
+description: "List, create, update and delete transactions with monetr's REST API and assign them to budget envelopes, with curl examples."
 ---
 
 import { Badge } from "@rspress/core/theme";
@@ -25,6 +25,7 @@ rewrite history it didn't write.
 | `plaidTransaction`           | object, nullable           | The raw Plaid record behind this transaction. Only filled in by [Get a transaction](#get-a-transaction); the list endpoint always returns null. Also null for manual, uploaded and Lunch Flow transactions.   |
 | `pendingPlaidTransaction`    | object, nullable           | The pending Plaid record this was matched against, if it started life as a pending charge.                                                                                                                    |
 | `lunchFlowTransaction`       | object                     | The upstream Lunch Flow record. Only present on Lunch Flow transactions.                                                                                                                                      |
+| `transactionClusterId`       | string (ulid), nullable    | The [similar transactions](./similar_transactions#the-similar-transaction-object) cluster this one is in. Null until the background job gets to it, and for anything that doesn't look like anything else.    |
 | `amount`                     | integer                    | What the transaction was for, in the currency's smallest unit. Positive means money left the account, negative means it came in. See [Money](./overview#money) before you do arithmetic on this.              |
 | `spendingId`                 | string (ulid), nullable    | The [spending object](./spending#the-spending-object) this transaction is spent from. Null means it came out of free-to-use. This is the field you change to re-budget something.                             |
 | `spending`                   | object                     | The spending object this is assigned to. Only appears on the create and update responses, which return the envelope they touched so you don't have to re-fetch it. Never present when you read a transaction. |
@@ -43,6 +44,14 @@ rewrite history it didn't write.
 | `source`                     | string                     | Where it came from. One of `plaid`, `upload`, `manual` or `lunch_flow`.                                                                                                                                       |
 | `createdAt`                  | timestamp                  | When monetr first stored the transaction, which is not when it happened. Use `date` for that.                                                                                                                 |
 | `deletedAt`                  | timestamp, nullable        | When the transaction was soft deleted. Null on everything you'll normally see.                                                                                                                                |
+
+:::details History
+
+**[v1.17.0](https://github.com/monetr/monetr/releases/tag/v1.17.0)**
+
+- Added `transactionClusterId`.
+
+:::
 
 ## <Badge type="info">GET</Badge> List transactions
 
@@ -85,6 +94,7 @@ curl --request GET \
     "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
     "plaidTransaction": null,
     "pendingPlaidTransaction": null,
+    "transactionClusterId": "tcl_01j6a2mkxw5rt8p9e3vqn7hd4c",
     "amount": 685,
     "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
     "spendingAmount": 685,
@@ -108,6 +118,7 @@ curl --request GET \
     "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
     "plaidTransaction": null,
     "pendingPlaidTransaction": null,
+    "transactionClusterId": "tcl_01j5x8r2kd4mzq7w3bnv6tpe9h",
     "amount": -204300,
     "spendingId": null,
     "createdBySpendingId": null,
@@ -182,6 +193,7 @@ curl --request GET \
     "deletedAt": null
   },
   "pendingPlaidTransaction": null,
+  "transactionClusterId": "tcl_01j6a2mkxw5rt8p9e3vqn7hd4c",
   "amount": 685,
   "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
   "spendingAmount": 685,
@@ -213,77 +225,6 @@ Flow transactions have nothing to fill in and return `null` on both.
 | ------ | ------------------------------------------------- |
 | 400    | Either ID is malformed.                           |
 | 404    | No transaction with that ID on that bank account. |
-
-## <Badge type="info">GET</Badge> Find similar transactions
-
-Returns the cluster of transactions that look like the one you asked about, which is how monetr spots recurring
-spending. Clusters are built by a background job, so a brand new transaction won't be in one yet.
-
-**In the app:** The similar transactions panel on the transaction details page.
-
-```http
-GET /api/bank_accounts/:bankAccountId/transactions/:transactionId/similar
-```
-
-**Auth:** API key, subscription required.
-
-### Path parameters
-
-| Attribute       | Type          | Required | Description                                  |
-| --------------- | ------------- | -------- | -------------------------------------------- |
-| `bankAccountId` | string (ulid) | Yes      | The bank account the transaction belongs to. |
-| `transactionId` | string (ulid) | Yes      | The transaction to find relatives of.        |
-
-### Example
-
-```bash
-curl --request GET \
-  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions/txn_01j68vszqeq30t7jz7atk9yd9r/similar" \
-  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
-```
-
-```json
-{
-  "transactionClusterId": "tcl_01j6a2mkxw5rt8p9e3vqn7hd4c",
-  "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
-  "signature": "ruby coffee roasters",
-  "centroid": "txn_01j68vszqeq30t7jz7atk9yd9r",
-  "name": "Ruby Coffee Roasters",
-  "originalName": "SQ *RUBY COFFEE ROASTERS",
-  "members": [
-    "txn_01j68vszqeq30t7jz7atk9yd9r",
-    "txn_01j61k7dp3wc8xm2r9tzs4bnhy",
-    "txn_01j5tq9wr6vj0k4h8bxdm2ncfe"
-  ],
-  "debug": [
-    {
-      "word": "ruby",
-      "sanitized": "ruby",
-      "order": 0,
-      "value": 0.48,
-      "rank": 1,
-      "count": 3
-    }
-  ],
-  "merchant": [],
-  "createdAt": "2024-08-27T03:15:02.881Z",
-  "updatedAt": "2024-08-27T03:15:02.881Z"
-}
-```
-
-`members` includes the transaction you asked about. `centroid` is whichever member the clustering picked as most
-representative, and it can be null. `debug` and `merchant` are the term weights the clustering worked from, which are
-there for diagnosing bad groupings and aren't worth reading otherwise.
-
-The `TransactionCluster` model has a `rules` field, but nothing loads that relation, so it's always omitted from this
-response.
-
-### Errors
-
-| Status | When                                                                                                                                     |
-| ------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| 204    | No cluster. Normal for anything one-off, and the most common response here. The body is empty, and it is a success rather than an error. |
-| 400    | Either ID is malformed.                                                                                                                  |
 
 ## <Badge type="tip">POST</Badge> Create a transaction
 
@@ -353,6 +294,7 @@ curl --request POST \
     "bankAccountId": "bac_01j6b4nqx8ws5rt2m9pked7hvc",
     "plaidTransaction": null,
     "pendingPlaidTransaction": null,
+    "transactionClusterId": null,
     "amount": 84200,
     "spendingId": null,
     "createdBySpendingId": null,
@@ -464,6 +406,7 @@ curl --request PATCH \
     "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
     "plaidTransaction": null,
     "pendingPlaidTransaction": null,
+    "transactionClusterId": "tcl_01j6a2mkxw5rt8p9e3vqn7hd4c",
     "amount": 685,
     "spendingId": null,
     "createdBySpendingId": null,

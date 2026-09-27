@@ -198,6 +198,9 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) enrichClusters(
 			// frequently or if it can also be used in combination with the signature
 			// to create a strong consistent identifier.
 			group.Centroid = &centroid.ID
+			// Keep the raw name of the centroid around so we can compare it to the
+			// calculated name
+			group.OriginalMemo = centroid.Transaction.OriginalName
 		}
 
 		// Post processing steps for the similar transaction cluster...
@@ -298,7 +301,7 @@ func calculatedMerchantName(group *models.TransactionCluster) {
 		panic(fmt.Sprintf("Transaction cluster does not contain valuable words?\n%s", string(j)))
 	}
 	maximum, minimum := group.Debug[0].Rank, group.Debug[len(group.Debug)-1].Rank
-	var cutoff float32 = 0.75 // I want values in the top 75% of rankings
+	var cutoff float32 = 0.60 // I want values in the top 75% of rankings
 	threshold := minimum + (maximum-minimum)*cutoff
 	// If the maximum equals the minimum that means all of the "tokens" are
 	// valuable to the cluster. So just set the threshold to be beloww the minimum

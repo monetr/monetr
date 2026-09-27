@@ -3,101 +3,146 @@ package repository
 import (
 	"context"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
-	"github.com/pkg/errors"
 	"github.com/uptrace/bun"
 )
 
-func (r *repositoryBase) WriteTransactionClusters(
+func (r *repositoryBase) GetClusteredTransactions(
 	ctx context.Context,
 	bankAccountId ID[BankAccount],
-	clusters []TransactionCluster,
-) (updated []TransactionCluster, err error) {
+) ([]Transaction, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	// Build an array of signature + centroid pairs that we want to keep. We will
-	// delete verything that isn't in this dataset.
-	var keysToKeep [][]string
-	for i := range clusters {
-		cluster := clusters[i]
-		cluster.AccountId = r.AccountId()
-		cluster.BankAccountId = bankAccountId
-
-		if cluster.Centroid != nil {
-			keysToKeep = append(keysToKeep, []string{
-				cluster.Signature,
-				string(*cluster.Centroid),
-			})
-		}
-		clusters[i] = cluster
-	}
-
-	var deleted []TransactionCluster
-	// Because transaction clusters are calculated using the entire bank accounts
-	// transaction dataset. If any clusters exist right now that don't have the
-	// same signature/centroid pair then we can safely remove them. Either those
-	// transactions were part of a lower quality cluster, or the transactions were
-	// merged into a newer larger cluster based on updated information. Either way
-	// the old cluster needs to be removed. This might be volatile for accounts
-	// with less data, but becomes very stable the more data the accounts have.
-	cleanResult, err := r.txn.NewDelete().
-		Model(&TransactionCluster{}).
-		Where(`"account_id" = ?`, r.AccountId()).
-		Where(`"bank_account_id" = ?`, bankAccountId).
-		Where(`("signature", "centroid") NOT IN (?)`, bun.In(keysToKeep)).
-		Returning("*").
-		Exec(span.Context(), &deleted)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to clean up outdated transaction clusters")
-	}
-
-	// Then we can insert all the transaction clusters we have calculated. But if
-	// we get a conflict on our unique index then we will instead just update the
-	// existing cluster.
-	result, err := r.txn.NewInsert().
-		Model(&clusters).
-		On(`CONFLICT ("account_id", "bank_account_id", "signature", "centroid") DO UPDATE`).
-		Set(`"members" = EXCLUDED.members`).
-		Set(`"debug" = EXCLUDED.debug`).
-		Set(`"merchant" = EXCLUDED.merchant`).
-		// TODO It is possible for a cluster to be recalculated with no changes
-		// whatsoever. When this happens it does not exactly make sense to update
-		// the updated_at timestamp here. But it would involve pulling that clusters
-		// data from the database and comparing it in someway.
-		Set(`"updated_at" = now()`).
-		Where(`"transaction_cluster"."members" != EXCLUDED.members`).
-		// Return rows that we touched. This will only return rows that were either
-		// freshly inserted or were updated by this upsert. Rows that are identical
-		// to existing data are not returned here.
-		Returning(`"transaction_cluster".*`).
-		Exec(span.Context())
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to insert the new transaction clusters")
-	}
-
-	if len(deleted) > 0 {
-		r.log.Log(
+	// Include soft deleted transactions on purpose, that way the clustering job
+	// can pull them out of their cluster
+	var result []Transaction
+	if err := r.txn.NewSelect().
+		Model(&result).
+		Column(
+			"transaction_id",
+			"account_id",
+			"bank_account_id",
+			"transaction_cluster_id",
+		).
+		Where(`"transaction"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction"."transaction_cluster_id" IS NOT NULL`).
+		Scan(span.Context()); err != nil {
+		return nil, crumbs.WrapError(
 			span.Context(),
-			logging.LevelTrace,
-			"cleaned outdated transaction clusters",
-			"removed", deleted,
-			"upserted", clusters,
+			err,
+			"failed to retrieve clustered transactions",
 		)
 	}
 
-	cleaned, _ := cleanResult.RowsAffected()
-	affected, _ := result.RowsAffected()
-	r.log.DebugContext(
-		span.Context(),
-		"upserted transaction clusters",
-		"cleaned", cleaned,
-		"affected", affected,
-	)
+	return result, nil
+}
 
-	return clusters, nil
+func (r *repositoryBase) UpsertTransactionClusters(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	clusters []TransactionCluster,
+) error {
+	if len(clusters) == 0 {
+		return nil
+	}
+
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	now := r.clock.Now()
+	for i := range clusters {
+		clusters[i].AccountId = r.AccountId()
+		clusters[i].BankAccountId = bankAccountId
+		clusters[i].UpdatedAt = now
+	}
+
+	_, err := r.txn.NewInsert().
+		Model(&clusters).
+		On(`CONFLICT ("transaction_cluster_id", "account_id", "bank_account_id") DO UPDATE`).
+		Set(`"original_name" = EXCLUDED."original_name"`).
+		Set(`"original_memo" = EXCLUDED."original_memo"`).
+		Set(`"signature" = EXCLUDED."signature"`).
+		Set(`"centroid" = EXCLUDED."centroid"`).
+		Set(`"members" = EXCLUDED."members"`).
+		Set(`"debug" = EXCLUDED."debug"`).
+		Set(`"merchant" = EXCLUDED."merchant"`).
+		Set(`"updated_at" = EXCLUDED."updated_at"`).
+		Exec(span.Context())
+	if err != nil {
+		return crumbs.WrapError(
+			span.Context(),
+			err,
+			"failed to upsert transaction clusters",
+		)
+	}
+
+	return nil
+}
+
+func (r *repositoryBase) DeleteTransactionClusters(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	clusterIds []ID[TransactionCluster],
+) error {
+	if len(clusterIds) == 0 {
+		return nil
+	}
+
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	_, err := r.txn.NewDelete().
+		Model(&TransactionCluster{}).
+		Where(`"transaction_cluster"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction_cluster"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction_cluster"."transaction_cluster_id" IN (?)`, bun.In(clusterIds)).
+		Exec(span.Context())
+	if err != nil {
+		return crumbs.WrapError(
+			span.Context(),
+			err,
+			"failed to delete obsolete transaction clusters",
+		)
+	}
+
+	return nil
+}
+
+func (r *repositoryBase) UpdateTransactionClusterIds(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	transactions []Transaction,
+) error {
+	if len(transactions) == 0 {
+		return nil
+	}
+
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	for i := range transactions {
+		transactions[i].AccountId = r.AccountId()
+		transactions[i].BankAccountId = bankAccountId
+	}
+
+	_, err := r.txn.NewUpdate().
+		Model(&transactions).
+		Column("transaction_cluster_id").
+		Bulk().
+		Exec(span.Context())
+	if err != nil {
+		return crumbs.WrapError(
+			span.Context(),
+			err,
+			"failed to update transaction cluster ids",
+		)
+	}
+
+	return nil
 }
 
 func (r *repositoryBase) GetTransactionClusterByMember(
@@ -111,14 +156,93 @@ func (r *repositoryBase) GetTransactionClusterByMember(
 	var cluster TransactionCluster
 	err := r.txn.NewSelect().
 		Model(&cluster).
-		Where(`"account_id" = ?`, r.AccountId()).
-		Where(`"bank_account_id" = ?`, bankAccountId).
-		Where(`? = ANY ("members")`, transactionId).
+		Where(`"transaction_cluster"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction_cluster"."bank_account_id" = ?`, bankAccountId).
+		Where(`? = ANY ("transaction_cluster"."members")`, transactionId).
 		Limit(1).
 		Scan(span.Context())
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to find cluster containing transaction")
+		return nil, crumbs.WrapError(
+			span.Context(),
+			err,
+			"failed to find cluster containing transaction",
+		)
 	}
 
 	return &cluster, nil
+}
+
+func (r *repositoryBase) GetTransactionCluster(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	transactionClusterId ID[TransactionCluster],
+) (*TransactionCluster, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	span.Data = map[string]any{
+		"accountId":            r.AccountId(),
+		"bankAccountId":        bankAccountId,
+		"transactionClusterId": transactionClusterId,
+	}
+
+	var result TransactionCluster
+	err := r.txn.NewSelect().
+		Model(&result).
+		Where(`"transaction_cluster"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction_cluster"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction_cluster"."transaction_cluster_id" = ?`, transactionClusterId).
+		Scan(span.Context())
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, crumbs.WrapError(
+			span.Context(),
+			err,
+			"failed to retrieve transaction cluster",
+		)
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return &result, nil
+}
+
+func (r *repositoryBase) GetTransactionsByCluster(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	transactionClusterId ID[TransactionCluster],
+	limit, offset int,
+) ([]Transaction, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	span.Data = map[string]any{
+		"accountId":            r.AccountId(),
+		"bankAccountId":        bankAccountId,
+		"transactionClusterId": transactionClusterId,
+		"limit":                limit,
+		"offset":               offset,
+	}
+
+	items := make([]Transaction, 0)
+	err := r.txn.NewSelect().
+		Model(&items).
+		Where(`"transaction"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction"."transaction_cluster_id" = ?`, transactionClusterId).
+		Where(`"transaction"."deleted_at" IS NULL`).
+		Limit(limit).
+		Offset(offset).
+		Order(`date DESC`).
+		Order(`transaction_id DESC`).
+		Scan(span.Context())
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, crumbs.WrapError(span.Context(), err, "failed to retrieve transactions")
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return items, nil
+
 }

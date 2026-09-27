@@ -1,7 +1,10 @@
+import { idPrefix } from '@monetr/interface/models/ID';
 import type { WithJsonValues } from '@monetr/interface/util/json';
 import parseDate from '@monetr/interface/util/parseDate';
 
 export default class TransactionCluster {
+  readonly [idPrefix] = 'tcl';
+
   transactionClusterId: string;
   bankAccountId: string;
   name: string;

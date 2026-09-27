@@ -67,6 +67,15 @@ type BaseRepository interface {
 	GetSpendingExists(ctx context.Context, bankAccountId ID[BankAccount], spendingId ID[Spending]) (bool, error)
 	GetTransaction(ctx context.Context, bankAccountId ID[BankAccount], transactionId ID[Transaction]) (*Transaction, error)
 	GetTransactions(ctx context.Context, bankAccountId ID[BankAccount], limit, offset int) ([]Transaction, error)
+	// GetTransactionsForSimilarity will return all of the non-deleted
+	// transactions for an account in date ascending order. This is the opposite
+	// of what [BaseRepository.GetTransactions] does, and this function also does
+	// not take any pagination parameters and returns all of the data in a single
+	// chunk. This is intended only for use within similarity calculations.
+	GetTransactionsForSimilarity(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+	) ([]Transaction, error)
 	// GetPendingTransactions is the same as GetTransactions but will only return
 	// transactions that are currently in a pending state. It will not return
 	// transactions that have been deleted.
@@ -109,21 +118,59 @@ type BaseRepository interface {
 	// doing a bulk update, so if data is missing it has the potential to overwrite a transaction incorrectly.
 	UpdateTransactions(ctx context.Context, transactions []*Transaction) error
 
-	// WriteTransactionClusters will take the array of transaction clusters
-	// provided and persist them to the trnasaction clusters table but will also
-	// delete any existing transaction clusters for the bank account specified.
-	// This is because clusters are meant to be regenerated each time new
-	// transactions come in.
-	WriteTransactionClusters(
+	// GetClusteredTransactions returns every transaction in the bank account
+	// that currently belongs to a cluster, including soft deleted ones. Only the
+	// primary key and the cluster ID are populated.
+	GetClusteredTransactions(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+	) ([]Transaction, error)
+	// UpsertTransactionClusters will insert or update the provided clusters by
+	// their primary key. It doesn't delete anything, use DeleteTransactionClusters
+	// for that. The name on an existing cluster is never overwritten since that's
+	// for the user to set.
+	UpsertTransactionClusters(
 		ctx context.Context,
 		bankAccountId ID[BankAccount],
 		clusters []TransactionCluster,
-	) (updated []TransactionCluster, err error)
+	) error
+	// DeleteTransactionClusters removes the specified clusters by their IDs.
+	// Transactions referencing these clusters will have their cluster ID set to
+	// null.
+	DeleteTransactionClusters(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		clusterIds []ID[TransactionCluster],
+	) error
+	// UpdateTransactionClusterIds sets the cluster ID on each of the provided
+	// transactions by their primary key. A nil cluster ID removes the
+	// transaction from whatever cluster it was in. No other columns are written.
+	UpdateTransactionClusterIds(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		transactions []Transaction,
+	) error
 	// GetTransactionClusterByMember will return a transaction cluster that
 	// contains the specified transaction ID as a member for the specified bank.
 	// If no cluster can be found then nil and sql.ErrNoRows will be returned
 	// (wrapped).
-	GetTransactionClusterByMember(ctx context.Context, bankAccountId ID[BankAccount], transactionId ID[Transaction]) (*TransactionCluster, error)
+	// Deprecated: You should simply read the cluster ID on the transaction instead.
+	GetTransactionClusterByMember(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		transactionId ID[Transaction],
+	) (*TransactionCluster, error)
+	GetTransactionCluster(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		transactionClusterId ID[TransactionCluster],
+	) (*TransactionCluster, error)
+	GetTransactionsByCluster(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		transactionClusterId ID[TransactionCluster],
+		limit, offset int,
+	) ([]Transaction, error)
 
 	GetTransactionUpload(
 		ctx context.Context,

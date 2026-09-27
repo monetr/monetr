@@ -1,0 +1,255 @@
+---
+title: "Similar Transactions API"
+description: "Look up groups of similar transactions with monetr's REST API, see which cluster a transaction is in, and page through everything in it, with curl examples."
+---
+
+import { Badge } from "@rspress/core/theme";
+
+# Similar Transactions API
+
+monetr groups transactions that look alike into clusters. Every coffee from the same shop, every paycheck from the same
+employer, that kind of thing. It's how monetr spots recurring spending. A background job builds the clusters, so a
+brand new transaction won't be in one until that job gets to it.
+
+Each [transaction](./transactions#the-transaction-object) has a `transactionClusterId` that tells you which cluster it's
+in. It's null when the transaction isn't in one, which is normal for anything one-off.
+
+## The similar transaction object
+
+| Attribute              | Type                    | Description                                                                                                                                                                        |
+| ---------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `transactionClusterId` | string (ulid)           | Identifies the cluster. It sticks around between recalculations as long as enough of the same transactions stay in it.                                                             |
+| `bankAccountId`        | string (ulid)           | The bank account the cluster belongs to.                                                                                                                                           |
+| `name`                 | string                  | What the cluster is called. Set once, when monetr first spots the cluster, and recalculating never touches it again.                                                               |
+| `originalName`         | string                  | What monetr would call the cluster right now. This one gets refreshed every time the clusters are recalculated.                                                                    |
+| `originalMemo`         | string                  | The raw name of the `centroid` transaction, exactly as the bank or the file had it. Look here when you want to know what the bank actually sent. Empty when there's no `centroid`. |
+| `centroid`             | string (ulid), nullable | The member monetr picked as the most typical transaction in the cluster.                                                                                                           |
+| `debug`                | array of objects        | The term weights the clustering worked from. They're there for diagnosing bad groupings and aren't worth reading otherwise.                                                        |
+| `merchant`             | array of objects        | The subset of `debug` that went into the name. Same deal, only useful for diagnosing.                                                                                              |
+| `signature`            | string                  | <Badge type="warning">Deprecated</Badge> Left over from how clusters used to get matched up between recalculations. Don't rely on it, it'll go away.                               |
+| `createdAt`            | timestamp               | When monetr first found the cluster.                                                                                                                                               |
+| `updatedAt`            | timestamp               | When the clusters were last recalculated. This changes on every recalculation, even when nothing about this cluster did, so don't use it to spot changes.                          |
+
+If a cluster falls apart completely it gets deleted. Its ID stops working and the transactions that were in it go back
+to a null `transactionClusterId`.
+
+:::details History
+
+**[v1.17.0](https://github.com/monetr/monetr/releases/tag/v1.17.0)**
+
+- Removed `members`. Use [List similar transactions](#list-similar-transactions) to get the transactions in a cluster.
+- Added `originalMemo`.
+- Deprecated `signature`.
+- `originalName` is now refreshed every time the clusters are recalculated, instead of only when the cluster is created.
+- Cluster IDs now stay the same between recalculations as long as enough of the same transactions stay in the cluster.
+
+:::
+
+## <Badge type="info">GET</Badge> Get similar transactions
+
+Returns one cluster. You'll usually get the ID from a transaction's `transactionClusterId`.
+
+**In the app:** Nothing in the app calls this yet.
+
+```http
+GET /api/bank_accounts/:bankAccountId/similar/:transactionClusterId
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute              | Type          | Required | Description                              |
+| ---------------------- | ------------- | -------- | ---------------------------------------- |
+| `bankAccountId`        | string (ulid) | Yes      | The bank account the cluster belongs to. |
+| `transactionClusterId` | string (ulid) | Yes      | The cluster you want.                    |
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/similar/tcl_01j6a2mkxw5rt8p9e3vqn7hd4c" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+{
+  "transactionClusterId": "tcl_01j6a2mkxw5rt8p9e3vqn7hd4c",
+  "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+  "signature": "9f2c4e81b07a3d56c8e1f09a4b7d2e63a5c8f1b0d94e7a2c36b5f8e0a1d4c7b9",
+  "centroid": "txn_01j68vszqeq30t7jz7atk9yd9r",
+  "name": "RUBY COFFEE ROASTERS",
+  "originalName": "RUBY COFFEE ROASTERS",
+  "originalMemo": "SQ *RUBY COFFEE ROASTERS",
+  "debug": [
+    {
+      "word": "RUBY",
+      "sanitized": "ruby",
+      "order": 2,
+      "value": 0.48,
+      "rank": 1,
+      "count": 3
+    }
+  ],
+  "merchant": [],
+  "createdAt": "2024-08-27T03:15:02.881Z",
+  "updatedAt": "2024-08-30T03:15:04.127Z"
+}
+```
+
+### Errors
+
+| Status | When                                          |
+| ------ | --------------------------------------------- |
+| 400    | Either ID is malformed.                       |
+| 404    | No cluster with that ID on that bank account. |
+
+## <Badge type="info">GET</Badge> List similar transactions
+
+Returns the transactions in a cluster, newest first. This is how you get the transactions that look like one you already
+have: take its `transactionClusterId` and ask for the rest of the cluster.
+
+**In the app:** The similar transactions panel on the transaction details page. It only asks for the first 10.
+
+```http
+GET /api/bank_accounts/:bankAccountId/similar/:transactionClusterId/transactions
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute              | Type          | Required | Description                              |
+| ---------------------- | ------------- | -------- | ---------------------------------------- |
+| `bankAccountId`        | string (ulid) | Yes      | The bank account the cluster belongs to. |
+| `transactionClusterId` | string (ulid) | Yes      | The cluster whose transactions you want. |
+
+### Query parameters
+
+| Attribute | Type    | Required | Description                                                                                                                   |
+| --------- | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `limit`   | integer | No       | How many to return. Defaults to 10, not 25 like the main transaction list. Has to be between 1 and 100, outside that's a 400. |
+| `offset`  | integer | No       | How many to skip first. Defaults to 0. Negative is a 400.                                                                     |
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/similar/tcl_01j6a2mkxw5rt8p9e3vqn7hd4c/transactions?limit=2" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+[
+  {
+    "transactionId": "txn_01j68vszqeq30t7jz7atk9yd9r",
+    "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+    "plaidTransaction": null,
+    "pendingPlaidTransaction": null,
+    "transactionClusterId": "tcl_01j6a2mkxw5rt8p9e3vqn7hd4c",
+    "amount": 685,
+    "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
+    "spendingAmount": 685,
+    "createdBySpendingId": null,
+    "createdByFundingScheduleId": null,
+    "categories": ["Food and Drink", "Coffee Shop"],
+    "category": "FOOD_AND_DRINK_COFFEE",
+    "date": "2024-08-27T05:00:00Z",
+    "name": "Ruby Coffee Roasters",
+    "originalName": "SQ *RUBY COFFEE ROASTERS",
+    "merchantName": "Ruby Coffee Roasters",
+    "originalMerchantName": "Ruby Coffee Roasters",
+    "isPending": false,
+    "uploadIdentifier": null,
+    "source": "plaid",
+    "createdAt": "2024-08-27T02:49:28.059Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": "txn_01j61k7dp3wc8xm2r9tzs4bnhy",
+    "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+    "plaidTransaction": null,
+    "pendingPlaidTransaction": null,
+    "transactionClusterId": "tcl_01j6a2mkxw5rt8p9e3vqn7hd4c",
+    "amount": 540,
+    "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
+    "spendingAmount": 540,
+    "createdBySpendingId": null,
+    "createdByFundingScheduleId": null,
+    "categories": ["Food and Drink", "Coffee Shop"],
+    "category": "FOOD_AND_DRINK_COFFEE",
+    "date": "2024-08-24T05:00:00Z",
+    "name": "Ruby Coffee Roasters",
+    "originalName": "SQ *RUBY COFFEE ROASTERS",
+    "merchantName": "Ruby Coffee Roasters",
+    "originalMerchantName": "Ruby Coffee Roasters",
+    "isPending": false,
+    "uploadIdentifier": null,
+    "source": "plaid",
+    "createdAt": "2024-08-24T03:12:40.517Z",
+    "deletedAt": null
+  }
+]
+```
+
+These are regular [transaction objects](./transactions#the-transaction-object). The transaction you started from is in
+here too, so skip it yourself if you only want the others. Soft deleted transactions are left out. Same as the main
+list, `plaidTransaction` is always null here, use [Get a transaction](./transactions#get-a-transaction) if you need it.
+
+A cluster ID that doesn't exist isn't an error here. You just get back an empty array.
+
+### Errors
+
+| Status | When                                                                              |
+| ------ | --------------------------------------------------------------------------------- |
+| 400    | `limit` is outside 1 to 100, `offset` is negative, or either ID isn't a valid ID. |
+
+## <Badge type="info">GET</Badge> Find similar transactions
+
+:::warning
+This endpoint is deprecated and will be removed in a future release. Use the transaction's `transactionClusterId` with
+[Get similar transactions](#get-similar-transactions) instead.
+:::
+
+Returns the cluster a transaction is in, looked up by the transaction instead of the cluster.
+
+**In the app:** Nothing in the app calls this.
+
+```http
+GET /api/bank_accounts/:bankAccountId/transactions/:transactionId/similar
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute       | Type          | Required | Description                                  |
+| --------------- | ------------- | -------- | -------------------------------------------- |
+| `bankAccountId` | string (ulid) | Yes      | The bank account the transaction belongs to. |
+| `transactionId` | string (ulid) | Yes      | The transaction to find relatives of.        |
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions/txn_01j68vszqeq30t7jz7atk9yd9r/similar" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+You get back a [similar transaction object](#the-similar-transaction-object), the same one [Get similar
+transactions](#get-similar-transactions) returns.
+
+:::details History
+
+**[v1.17.0](https://github.com/monetr/monetr/releases/tag/v1.17.0)**
+
+- Deprecated this endpoint in favor of [Get similar transactions](#get-similar-transactions).
+
+:::
+
+### Errors
+
+| Status | When                                                                                                                                     |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 204    | No cluster. Normal for anything one-off, and the most common response here. The body is empty, and it is a success rather than an error. |
+| 400    | Either ID is malformed.                                                                                                                  |

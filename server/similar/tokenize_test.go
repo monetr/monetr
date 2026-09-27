@@ -60,6 +60,25 @@ func TestTokenize(t *testing.T) {
 		fmt.Println(strings.Join(strs, " "))
 
 	})
+
+	t.Run("ampersand is a token and a separator", func(t *testing.T) {
+		for _, name := range []string{"chuck&dons", "chuck & dons"} {
+			tokens := similar.Tokenize(&models.Transaction{
+				OriginalName: name,
+			})
+
+			original := make([]string, 0, len(tokens))
+			final := make([]string, 0, len(tokens))
+			for _, token := range tokens {
+				assert.False(t, token.Excluded, "no token should be excluded for %q", name)
+				original = append(original, token.Original)
+				final = append(final, token.Final...)
+			}
+
+			assert.Equal(t, []string{"chuck", "&", "dons"}, original, "original tokens for %q", name)
+			assert.Equal(t, []string{"chuck", "&", "dons"}, final, "final tokens for %q", name)
+		}
+	})
 }
 
 func TestCleanNameRegex(t *testing.T) {

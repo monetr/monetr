@@ -152,7 +152,11 @@ func (r *repositoryBase) GetTransactonsByUploadIdentifier(
 	return result, nil
 }
 
-func (r *repositoryBase) GetTransactions(ctx context.Context, bankAccountId ID[BankAccount], limit, offset int) ([]Transaction, error) {
+func (r *repositoryBase) GetTransactions(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	limit, offset int,
+) ([]Transaction, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -177,6 +181,41 @@ func (r *repositoryBase) GetTransactions(ctx context.Context, bankAccountId ID[B
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, crumbs.WrapError(span.Context(), err, "failed to retrieve transactions")
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return items, nil
+}
+
+func (r *repositoryBase) GetTransactionsForSimilarity(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+) ([]Transaction, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	span.Data = map[string]any{
+		"accountId":     r.AccountId(),
+		"bankAccountId": bankAccountId,
+	}
+
+	items := make([]Transaction, 0)
+	err := r.txn.NewSelect().
+		Model(&items).
+		Where(`"transaction"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction"."deleted_at" IS NULL`).
+		Order(`date ASC`).
+		Order(`transaction_id ASC`).
+		Scan(span.Context())
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, crumbs.WrapError(
+			span.Context(),
+			err,
+			"failed to retrieve transactions",
+		)
 	}
 
 	span.Status = sentry.SpanStatusOK
@@ -260,7 +299,11 @@ func (r *repositoryBase) GetTransactionsForSpending(
 	return items, nil
 }
 
-func (r *repositoryBase) GetTransaction(ctx context.Context, bankAccountId ID[BankAccount], transactionId ID[Transaction]) (*Transaction, error) {
+func (r *repositoryBase) GetTransaction(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	transactionId ID[Transaction],
+) (*Transaction, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -323,6 +366,8 @@ func (r *repositoryBase) UpdateTransaction(ctx context.Context, bankAccountId ID
 
 	_, err := r.txn.NewUpdate().
 		Model(transaction).
+		// Only the clustering job should be writing this
+		ExcludeColumn("transaction_cluster_id").
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		WherePK().
@@ -354,6 +399,8 @@ func (r *repositoryBase) UpdateTransactions(
 
 	result, err := r.txn.NewUpdate().
 		Model(&transactions).
+		// Only the clustering job should be writing this
+		ExcludeColumn("transaction_cluster_id").
 		Bulk().
 		Exec(span.Context())
 	if err != nil {

@@ -10,7 +10,11 @@ export interface SimilarTransactionsProps {
 }
 
 export default function SimilarTransactions(props: SimilarTransactionsProps): React.JSX.Element | null {
-  const { data: similarData, isLoading, isError } = useSimilarTransactions(props.transaction);
+  const {
+    data: similarData,
+    isLoading,
+    isError,
+  } = useSimilarTransactions(props.transaction.transactionClusterId ?? undefined);
 
   if (isLoading) {
     return null;
@@ -20,15 +24,12 @@ export default function SimilarTransactions(props: SimilarTransactionsProps): Re
     return null;
   }
 
-  if (!similarData || similarData.members?.length === 0) {
+  if (!similarData || similarData.length === 0) {
     return null;
   }
 
-  const maxNumberOfSimilarTransactions = 10;
-  const items = similarData.members
-    .filter(item => item !== props.transaction.transactionId)
-    .slice(0, Math.min(maxNumberOfSimilarTransactions, similarData.members.length) - 1)
-    .map(item => <SimilarTransactionItem key={item} transactionId={item} />);
+  // TODO Doesn't exclude the current transaction.
+  const items = similarData.map(item => <SimilarTransactionItem key={item.transactionId} transaction={item} />);
 
   return (
     <div className={styles.root}>
