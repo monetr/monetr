@@ -4,38 +4,42 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-pg/pg/v10"
+	"github.com/uptrace/bun"
 )
 
 type TransactionClusterMember struct {
-	tableName string `pg:"transaction_cluster_members"`
+	bun.BaseModel `bun:"table:transaction_cluster_members,alias:transaction_cluster_member"`
 
-	TransactionId        ID[Transaction]        `json:"transactionId" pg:"transaction_id,notnull,pk"`
-	Transaction          *Transaction           `json:"-" pg:"rel:has-one"`
-	AccountId            ID[Account]            `json:"-" pg:"account_id,notnull,pk"`
-	Account              *Account               `json:"-" pg:"rel:has-one"`
-	BankAccountId        ID[BankAccount]        `json:"bankAccountId" pg:"bank_account_id,pk,notnull"`
-	BankAccount          *BankAccount           `json:"-" pg:"rel:has-one"`
-	TransactionClusterId ID[TransactionCluster] `json:"transactionClusterId" pg:"transaction_cluster_id,notnull"`
-	TransactionCluster   *TransactionCluster    `json:"-" pg:"rel:has-one"`
-	CreatedAt            time.Time              `json:"createdAt" pg:"created_at,notnull,default:now()"`
-	UpdatedAt            time.Time              `json:"updatedAt" pg:"updated_at,notnull,default:now()"`
+	TransactionId        ID[Transaction]        `json:"transactionId" bun:"transaction_id,notnull,pk"`
+	Transaction          *Transaction           `json:"-" bun:"rel:belongs-to,join:transaction_id=transaction_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
+	AccountId            ID[Account]            `json:"-" bun:"account_id,notnull,pk"`
+	Account              *Account               `json:"-" bun:"rel:belongs-to,join:account_id=account_id"`
+	BankAccountId        ID[BankAccount]        `json:"bankAccountId" bun:"bank_account_id,notnull,pk"`
+	BankAccount          *BankAccount           `json:"-" bun:"rel:belongs-to,join:bank_account_id=bank_account_id,join:account_id=account_id"`
+	TransactionClusterId ID[TransactionCluster] `json:"transactionClusterId" bun:"transaction_cluster_id,notnull"`
+	TransactionCluster   *TransactionCluster    `json:"-" bun:"rel:belongs-to,join:transaction_cluster_id=transaction_cluster_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
+	CreatedAt            time.Time              `json:"createdAt" bun:"created_at,notnull,default:now(),nullzero"`
+	UpdatedAt            time.Time              `json:"updatedAt" bun:"updated_at,notnull,default:now(),nullzero"`
 }
 
 var (
-	_ pg.BeforeInsertHook = (*TransactionClusterMember)(nil)
+	_ bun.BeforeAppendModelHook = (*TransactionClusterMember)(nil)
 )
 
-// BeforeInsert implements [orm.BeforeInsertHook].
-func (o *TransactionClusterMember) BeforeInsert(
+// BeforeAppendModel implements [bun.BeforeAppendModelHook].
+func (o *TransactionClusterMember) BeforeAppendModel(
 	ctx context.Context,
-) (context.Context, error) {
-	now := time.Now()
-	if o.CreatedAt.IsZero() {
-		o.CreatedAt = now
+	query bun.Query,
+) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		now := time.Now()
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = now
+		}
+
+		o.UpdatedAt = now
 	}
 
-	o.UpdatedAt = now
-
-	return ctx, nil
+	return nil
 }

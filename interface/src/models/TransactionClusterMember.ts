@@ -1,3 +1,4 @@
+import type { WithJsonValues } from '@monetr/interface/util/json';
 import parseDate from '@monetr/interface/util/parseDate';
 
 export default class TransactionClusterMember {
@@ -7,13 +8,11 @@ export default class TransactionClusterMember {
   createdAt: Date;
   updatedAt: Date;
 
-  constructor(data?: Partial<TransactionClusterMember>) {
-    if (data) {
-      Object.assign(this, {
-        ...data,
-        createdAt: Boolean(data?.createdAt) && parseDate(data.createdAt),
-        updatedAt: Boolean(data?.updatedAt) && parseDate(data.updatedAt),
-      });
-    }
+  constructor(data: WithJsonValues<TransactionClusterMember>) {
+    this.transactionId = data.transactionId;
+    this.bankAccountId = data.bankAccountId;
+    this.transactionClusterId = data.transactionClusterId;
+    this.createdAt = parseDate(data.createdAt);
+    this.updatedAt = parseDate(data.updatedAt);
   }
 }

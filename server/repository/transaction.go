@@ -202,13 +202,14 @@ func (r *repositoryBase) GetTransactionsForSimilarity(
 	}
 
 	items := make([]Transaction, 0)
-	err := r.txn.ModelContext(span.Context(), &items).
+	err := r.txn.NewSelect().
+		Model(&items).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction"."deleted_at" IS NULL`).
 		Order(`date ASC`).
 		Order(`transaction_id ASC`).
-		Select(&items)
+		Scan(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, crumbs.WrapError(

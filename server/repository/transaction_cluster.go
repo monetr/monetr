@@ -6,6 +6,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
+	"github.com/uptrace/bun"
 )
 
 func (r *repositoryBase) GetTransactionClusterMembersByBankAccount(
@@ -16,12 +17,11 @@ func (r *repositoryBase) GetTransactionClusterMembersByBankAccount(
 	defer span.Finish()
 
 	var result []TransactionClusterMember
-	if err := r.txn.ModelContext(
-		span.Context(),
-		&result,
-	).Where(`"transaction_cluster_member"."account_id" = ?`, r.AccountId()).
+	if err := r.txn.NewSelect().
+		Model(&result).
+		Where(`"transaction_cluster_member"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction_cluster_member"."bank_account_id" = ?`, bankAccountId).
-		Select(&result); err != nil {
+		Scan(span.Context()); err != nil {
 		return nil, crumbs.WrapError(
 			span.Context(),
 			err,
@@ -51,8 +51,9 @@ func (r *repositoryBase) UpsertTransactionClusters(
 		clusters[i].UpdatedAt = now
 	}
 
-	_, err := r.txn.ModelContext(span.Context(), &clusters).
-		OnConflict(`("transaction_cluster_id", "account_id", "bank_account_id") DO UPDATE`).
+	_, err := r.txn.NewInsert().
+		Model(&clusters).
+		On(`CONFLICT ("transaction_cluster_id", "account_id", "bank_account_id") DO UPDATE`).
 		Set(`"original_name" = EXCLUDED."original_name"`).
 		Set(`"signature" = EXCLUDED."signature"`).
 		Set(`"centroid" = EXCLUDED."centroid"`).
@@ -60,7 +61,7 @@ func (r *repositoryBase) UpsertTransactionClusters(
 		Set(`"debug" = EXCLUDED."debug"`).
 		Set(`"merchant" = EXCLUDED."merchant"`).
 		Set(`"updated_at" = EXCLUDED."updated_at"`).
-		Insert()
+		Exec(span.Context())
 	if err != nil {
 		return crumbs.WrapError(
 			span.Context(),
@@ -84,11 +85,12 @@ func (r *repositoryBase) DeleteTransactionClusters(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	_, err := r.txn.ModelContext(span.Context(), &TransactionCluster{}).
+	_, err := r.txn.NewDelete().
+		Model(&TransactionCluster{}).
 		Where(`"transaction_cluster"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction_cluster"."bank_account_id" = ?`, bankAccountId).
-		WhereIn(`"transaction_cluster"."transaction_cluster_id" IN (?)`, clusterIds).
-		Delete()
+		Where(`"transaction_cluster"."transaction_cluster_id" IN (?)`, bun.In(clusterIds)).
+		Exec(span.Context())
 	if err != nil {
 		return crumbs.WrapError(
 			span.Context(),
@@ -117,11 +119,12 @@ func (r *repositoryBase) UpsertTransactionClusterMembers(
 		members[i].UpdatedAt = now
 	}
 
-	_, err := r.txn.ModelContext(span.Context(), &members).
-		OnConflict(`("transaction_id", "account_id", "bank_account_id") DO UPDATE`).
+	_, err := r.txn.NewInsert().
+		Model(&members).
+		On(`CONFLICT ("transaction_id", "account_id", "bank_account_id") DO UPDATE`).
 		Set(`"transaction_cluster_id" = EXCLUDED."transaction_cluster_id"`).
 		Set(`"updated_at" = EXCLUDED."updated_at"`).
-		Insert()
+		Exec(span.Context())
 	if err != nil {
 		return crumbs.WrapError(
 			span.Context(),
@@ -145,11 +148,12 @@ func (r *repositoryBase) DeleteTransactionClusterMembers(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	_, err := r.txn.ModelContext(span.Context(), &TransactionClusterMember{}).
+	_, err := r.txn.NewDelete().
+		Model(&TransactionClusterMember{}).
 		Where(`"transaction_cluster_member"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction_cluster_member"."bank_account_id" = ?`, bankAccountId).
-		WhereIn(`"transaction_cluster_member"."transaction_id" IN (?)`, transactionIds).
-		Delete()
+		Where(`"transaction_cluster_member"."transaction_id" IN (?)`, bun.In(transactionIds)).
+		Exec(span.Context())
 	if err != nil {
 		return crumbs.WrapError(
 			span.Context(),
@@ -203,11 +207,12 @@ func (r *repositoryBase) GetTransactionCluster(
 	}
 
 	var result TransactionCluster
-	err := r.txn.ModelContext(span.Context(), &result).
+	err := r.txn.NewSelect().
+		Model(&result).
 		Where(`"transaction_cluster"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction_cluster"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction_cluster"."transaction_cluster_id" = ?`, transactionClusterId).
-		Select(&result)
+		Scan(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, crumbs.WrapError(
@@ -240,7 +245,8 @@ func (r *repositoryBase) GetTransactionsByCluster(
 	}
 
 	items := make([]Transaction, 0)
-	err := r.txn.ModelContext(span.Context(), &items).
+	err := r.txn.NewSelect().
+		Model(&items).
 		Join(`INNER JOIN "transaction_cluster_members" AS "transaction_cluster_member"`).
 		JoinOn(`"transaction_cluster_member"."transaction_id" = "transaction"."transaction_id"`).
 		JoinOn(`"transaction_cluster_member"."bank_account_id" = "transaction"."bank_account_id"`).
@@ -253,7 +259,7 @@ func (r *repositoryBase) GetTransactionsByCluster(
 		Offset(offset).
 		Order(`date DESC`).
 		Order(`transaction_id DESC`).
-		Select(&items)
+		Scan(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, crumbs.WrapError(span.Context(), err, "failed to retrieve transactions")
