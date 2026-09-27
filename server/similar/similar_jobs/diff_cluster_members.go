@@ -25,13 +25,16 @@ type MemberDiff struct {
 	UpsertClusters []models.TransactionCluster
 	// Existing clusters that dissolved entirely — no new cluster claimed them.
 	DeleteClusterIds []models.ID[models.TransactionCluster]
-	// Transactions that weren't in any cluster before.
-	InsertMembers []models.TransactionClusterMember
-	// Transactions that moved from one cluster to a different one.
-	UpdateMembers []models.TransactionClusterMember
+	// Transactions that weren't in any cluster before, with their new cluster ID
+	// set.
+	InsertMembers []models.Transaction
+	// Transactions that moved from one cluster to a different one, with their
+	// new cluster ID set.
+	UpdateMembers []models.Transaction
 	// DeleteMemberIds are transaction IDs that are no longer in any cluster and
-	// should be removed from the members table. This is different from delete
-	// cluster IDs because those will automatically cascade their member deletes.
+	// should have their cluster ID cleared. This is different from delete
+	// cluster IDs because deleting a cluster clears the cluster ID on its
+	// transactions automatically.
 	DeleteMemberIds []models.ID[models.Transaction]
 }
 
@@ -41,7 +44,7 @@ type MemberDiff struct {
 // incarnation via jaccard similarity so we can preserve their IDs.
 func DiffClusterMembers(
 	ctx context.Context,
-	existingMembers []models.TransactionClusterMember,
+	existingMembers []models.Transaction,
 	newClusters []models.TransactionCluster,
 	accountId models.ID[models.Account],
 	bankAccountId models.ID[models.BankAccount],
@@ -52,10 +55,10 @@ func DiffClusterMembers(
 	// We need the existing members grouped by cluster for the jaccard scoring.
 	existingByCluster := myownsanity.GroupByMapV(
 		existingMembers,
-		func(m models.TransactionClusterMember) models.ID[models.TransactionCluster] {
-			return m.TransactionClusterId
+		func(m models.Transaction) models.ID[models.TransactionCluster] {
+			return *m.TransactionClusterId
 		},
-		func(m models.TransactionClusterMember) models.ID[models.Transaction] {
+		func(m models.Transaction) models.ID[models.Transaction] {
 			return m.TransactionId
 		},
 	)
@@ -66,7 +69,7 @@ func DiffClusterMembers(
 		len(existingMembers),
 	)
 	for _, m := range existingMembers {
-		oldOwner[m.TransactionId] = m.TransactionClusterId
+		oldOwner[m.TransactionId] = *m.TransactionClusterId
 	}
 
 	// Score every (new, existing) cluster pair that shares at least one member.
@@ -164,11 +167,11 @@ func DiffClusterMembers(
 	diff.DeleteClusterIds = deleteClusterIds
 
 	for txnId, newClusterId := range newOwner {
-		member := models.TransactionClusterMember{
+		member := models.Transaction{
 			TransactionId:        txnId,
 			AccountId:            accountId,
 			BankAccountId:        bankAccountId,
-			TransactionClusterId: newClusterId,
+			TransactionClusterId: &newClusterId,
 		}
 		oldClusterId, existed := oldOwner[txnId]
 		if !existed {
@@ -179,7 +182,7 @@ func DiffClusterMembers(
 			diff.UpdateMembers = append(diff.UpdateMembers, member)
 		}
 		// If the transaction is in the same cluster as before then there is
-		// nothing to do for this member row.
+		// nothing to do for this transaction.
 	}
 
 	for txnId := range oldOwner {

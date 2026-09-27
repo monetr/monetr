@@ -9,23 +9,32 @@ import (
 	"github.com/uptrace/bun"
 )
 
-func (r *repositoryBase) GetTransactionClusterMembersByBankAccount(
+func (r *repositoryBase) GetClusteredTransactions(
 	ctx context.Context,
 	bankAccountId ID[BankAccount],
-) ([]TransactionClusterMember, error) {
+) ([]Transaction, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	var result []TransactionClusterMember
+	// Soft deleted transactions are included on purpose so that the clustering
+	// job can see them and remove them from their cluster.
+	var result []Transaction
 	if err := r.txn.NewSelect().
 		Model(&result).
-		Where(`"transaction_cluster_member"."account_id" = ?`, r.AccountId()).
-		Where(`"transaction_cluster_member"."bank_account_id" = ?`, bankAccountId).
+		Column(
+			"transaction_id",
+			"account_id",
+			"bank_account_id",
+			"transaction_cluster_id",
+		).
+		Where(`"transaction"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction"."transaction_cluster_id" IS NOT NULL`).
 		Scan(span.Context()); err != nil {
 		return nil, crumbs.WrapError(
 			span.Context(),
 			err,
-			"failed to retrieve all transaction cluster members",
+			"failed to retrieve clustered transactions",
 		)
 	}
 
@@ -102,63 +111,33 @@ func (r *repositoryBase) DeleteTransactionClusters(
 	return nil
 }
 
-func (r *repositoryBase) UpsertTransactionClusterMembers(
-	ctx context.Context,
-	members []TransactionClusterMember,
-) error {
-	if len(members) == 0 {
-		return nil
-	}
-
-	span := crumbs.StartFnTrace(ctx)
-	defer span.Finish()
-
-	now := r.clock.Now()
-	for i := range members {
-		members[i].AccountId = r.AccountId()
-		members[i].UpdatedAt = now
-	}
-
-	_, err := r.txn.NewInsert().
-		Model(&members).
-		On(`CONFLICT ("transaction_id", "account_id", "bank_account_id") DO UPDATE`).
-		Set(`"transaction_cluster_id" = EXCLUDED."transaction_cluster_id"`).
-		Set(`"updated_at" = EXCLUDED."updated_at"`).
-		Exec(span.Context())
-	if err != nil {
-		return crumbs.WrapError(
-			span.Context(),
-			err,
-			"failed to upsert transaction cluster members",
-		)
-	}
-
-	return nil
-}
-
-func (r *repositoryBase) DeleteTransactionClusterMembers(
+func (r *repositoryBase) UpdateTransactionClusterIds(
 	ctx context.Context,
 	bankAccountId ID[BankAccount],
-	transactionIds []ID[Transaction],
+	transactions []Transaction,
 ) error {
-	if len(transactionIds) == 0 {
+	if len(transactions) == 0 {
 		return nil
 	}
 
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	_, err := r.txn.NewDelete().
-		Model(&TransactionClusterMember{}).
-		Where(`"transaction_cluster_member"."account_id" = ?`, r.AccountId()).
-		Where(`"transaction_cluster_member"."bank_account_id" = ?`, bankAccountId).
-		Where(`"transaction_cluster_member"."transaction_id" IN (?)`, bun.In(transactionIds)).
+	for i := range transactions {
+		transactions[i].AccountId = r.AccountId()
+		transactions[i].BankAccountId = bankAccountId
+	}
+
+	_, err := r.txn.NewUpdate().
+		Model(&transactions).
+		Column("transaction_cluster_id").
+		Bulk().
 		Exec(span.Context())
 	if err != nil {
 		return crumbs.WrapError(
 			span.Context(),
 			err,
-			"failed to delete transaction cluster members",
+			"failed to update transaction cluster ids",
 		)
 	}
 
@@ -247,14 +226,10 @@ func (r *repositoryBase) GetTransactionsByCluster(
 	items := make([]Transaction, 0)
 	err := r.txn.NewSelect().
 		Model(&items).
-		Join(`INNER JOIN "transaction_cluster_members" AS "transaction_cluster_member"`).
-		JoinOn(`"transaction_cluster_member"."transaction_id" = "transaction"."transaction_id"`).
-		JoinOn(`"transaction_cluster_member"."bank_account_id" = "transaction"."bank_account_id"`).
-		JoinOn(`"transaction_cluster_member"."account_id" = "transaction"."account_id"`).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction"."transaction_cluster_id" = ?`, transactionClusterId).
 		Where(`"transaction"."deleted_at" IS NULL`).
-		Where(`"transaction_cluster_member"."transaction_cluster_id" = ?`, transactionClusterId).
 		Limit(limit).
 		Offset(offset).
 		Order(`date DESC`).

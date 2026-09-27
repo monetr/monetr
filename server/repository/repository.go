@@ -118,10 +118,13 @@ type BaseRepository interface {
 	// doing a bulk update, so if data is missing it has the potential to overwrite a transaction incorrectly.
 	UpdateTransactions(ctx context.Context, transactions []*Transaction) error
 
-	GetTransactionClusterMembersByBankAccount(
+	// GetClusteredTransactions returns every transaction in the bank account
+	// that currently belongs to a cluster, including soft deleted ones. Only the
+	// primary key and the cluster ID are populated.
+	GetClusteredTransactions(
 		ctx context.Context,
 		bankAccountId ID[BankAccount],
-	) ([]TransactionClusterMember, error)
+	) ([]Transaction, error)
 	// UpsertTransactionClusters will insert or update the provided clusters by
 	// their primary key. Unlike WriteTransactionClusters this method does not
 	// delete any existing clusters, it only inserts or updates.
@@ -131,31 +134,26 @@ type BaseRepository interface {
 		clusters []TransactionCluster,
 	) error
 	// DeleteTransactionClusters removes the specified clusters by their IDs.
-	// Member rows referencing these clusters will be cascade deleted.
+	// Transactions referencing these clusters will have their cluster ID set to
+	// null.
 	DeleteTransactionClusters(
 		ctx context.Context,
 		bankAccountId ID[BankAccount],
 		clusterIds []ID[TransactionCluster],
 	) error
-	// UpsertTransactionClusterMembers will insert new member rows or update
-	// existing ones if the transaction is already a member of a different
-	// cluster.
-	UpsertTransactionClusterMembers(
-		ctx context.Context,
-		members []TransactionClusterMember,
-	) error
-	// DeleteTransactionClusterMembers removes member rows for the specified
-	// transaction IDs within the given bank account.
-	DeleteTransactionClusterMembers(
+	// UpdateTransactionClusterIds sets the cluster ID on each of the provided
+	// transactions by their primary key. A nil cluster ID removes the
+	// transaction from whatever cluster it was in. No other columns are written.
+	UpdateTransactionClusterIds(
 		ctx context.Context,
 		bankAccountId ID[BankAccount],
-		transactionIds []ID[Transaction],
+		transactions []Transaction,
 	) error
 	// GetTransactionClusterByMember will return a transaction cluster that
 	// contains the specified transaction ID as a member for the specified bank.
 	// If no cluster can be found then nil and sql.ErrNoRows will be returned
 	// (wrapped).
-	// Deprecated: You should simply read the transaction member row instead.
+	// Deprecated: You should simply read the cluster ID on the transaction instead.
 	GetTransactionClusterByMember(
 		ctx context.Context,
 		bankAccountId ID[BankAccount],

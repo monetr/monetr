@@ -33,6 +33,8 @@ type Transaction struct {
 	PendingPlaidTransaction   *PlaidTransaction         `json:"pendingPlaidTransaction" bun:"rel:belongs-to,join:pending_plaid_transaction_id=plaid_transaction_id,join:account_id=account_id"` // fk: is the prefix of the column we want to use to join on in a multikey join.
 	LunchFlowTransactionId    *ID[LunchFlowTransaction] `json:"-" bun:"lunch_flow_transaction_id"`
 	LunchFlowTransaction      *LunchFlowTransaction     `json:"lunchFlowTransaction,omitempty" bun:"rel:belongs-to,join:lunch_flow_transaction_id=lunch_flow_transaction_id,join:account_id=account_id"`
+	TransactionClusterId      *ID[TransactionCluster]   `json:"transactionClusterId" bun:"transaction_cluster_id"`
+	TransactionCluster        *TransactionCluster       `json:"-" bun:"rel:belongs-to,join:transaction_cluster_id=transaction_cluster_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
 	Amount                    int64                     `json:"amount" bun:"amount,notnull"`
 	SpendingId                *ID[Spending]             `json:"spendingId" bun:"spending_id"`
 	Spending                  *Spending                 `json:"spending,omitempty" bun:"rel:belongs-to,join:spending_id=spending_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
@@ -66,8 +68,6 @@ type Transaction struct {
 	Source                     TransactionSource    `json:"source" bun:"source,nullzero"`
 	CreatedAt                  time.Time            `json:"createdAt" bun:"created_at,notnull,default:now(),nullzero"`
 	DeletedAt                  *time.Time           `json:"deletedAt" bun:"deleted_at"`
-
-	TransactionClusterMember *TransactionClusterMember `json:"transactionClusterMember,omitempty" bun:"rel:has-one,join:transaction_id=transaction_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
 }
 
 func (Transaction) IdentityPrefix() string {

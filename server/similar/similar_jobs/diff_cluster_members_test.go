@@ -42,24 +42,24 @@ func TestDiffClusterMembers(t *testing.T) {
 	})
 
 	t.Run("existing but no new clusters", func(t *testing.T) {
-		existing := []models.TransactionClusterMember{
+		existing := []models.Transaction{
 			{
 				TransactionId:        "txn_1",
 				AccountId:            "acct_test",
 				BankAccountId:        "bac_test",
-				TransactionClusterId: "tcl_old1",
+				TransactionClusterId: new(models.ID[models.TransactionCluster]("tcl_old1")),
 			},
 			{
 				TransactionId:        "txn_2",
 				AccountId:            "acct_test",
 				BankAccountId:        "bac_test",
-				TransactionClusterId: "tcl_old1",
+				TransactionClusterId: new(models.ID[models.TransactionCluster]("tcl_old1")),
 			},
 			{
 				TransactionId:        "txn_3",
 				AccountId:            "acct_test",
 				BankAccountId:        "bac_test",
-				TransactionClusterId: "tcl_old2",
+				TransactionClusterId: new(models.ID[models.TransactionCluster]("tcl_old2")),
 			},
 		}
 
@@ -74,24 +74,24 @@ func TestDiffClusterMembers(t *testing.T) {
 	})
 
 	t.Run("perfect match same membership", func(t *testing.T) {
-		existing := []models.TransactionClusterMember{
+		existing := []models.Transaction{
 			{
 				TransactionId:        "txn_1",
 				AccountId:            "acct_test",
 				BankAccountId:        "bac_test",
-				TransactionClusterId: "tcl_old1",
+				TransactionClusterId: new(models.ID[models.TransactionCluster]("tcl_old1")),
 			},
 			{
 				TransactionId:        "txn_2",
 				AccountId:            "acct_test",
 				BankAccountId:        "bac_test",
-				TransactionClusterId: "tcl_old1",
+				TransactionClusterId: new(models.ID[models.TransactionCluster]("tcl_old1")),
 			},
 			{
 				TransactionId:        "txn_3",
 				AccountId:            "acct_test",
 				BankAccountId:        "bac_test",
-				TransactionClusterId: "tcl_old2",
+				TransactionClusterId: new(models.ID[models.TransactionCluster]("tcl_old2")),
 			},
 		}
 		// Same members but the algorithm generates fresh IDs every time, so these
@@ -118,18 +118,18 @@ func TestDiffClusterMembers(t *testing.T) {
 	})
 
 	t.Run("cluster gains a new member", func(t *testing.T) {
-		existing := []models.TransactionClusterMember{
+		existing := []models.Transaction{
 			{
 				TransactionId:        "txn_1",
 				AccountId:            "acct_test",
 				BankAccountId:        "bac_test",
-				TransactionClusterId: "tcl_old1",
+				TransactionClusterId: new(models.ID[models.TransactionCluster]("tcl_old1")),
 			},
 			{
 				TransactionId:        "txn_2",
 				AccountId:            "acct_test",
 				BankAccountId:        "bac_test",
-				TransactionClusterId: "tcl_old1",
+				TransactionClusterId: new(models.ID[models.TransactionCluster]("tcl_old1")),
 			},
 		}
 		newClusters := []models.TransactionCluster{
@@ -151,24 +151,24 @@ func TestDiffClusterMembers(t *testing.T) {
 	})
 
 	t.Run("cluster loses a member", func(t *testing.T) {
-		existing := []models.TransactionClusterMember{
+		existing := []models.Transaction{
 			{
 				TransactionId:        "txn_1",
 				AccountId:            "acct_test",
 				BankAccountId:        "bac_test",
-				TransactionClusterId: "tcl_old1",
+				TransactionClusterId: new(models.ID[models.TransactionCluster]("tcl_old1")),
 			},
 			{
 				TransactionId:        "txn_2",
 				AccountId:            "acct_test",
 				BankAccountId:        "bac_test",
-				TransactionClusterId: "tcl_old1",
+				TransactionClusterId: new(models.ID[models.TransactionCluster]("tcl_old1")),
 			},
 			{
 				TransactionId:        "txn_3",
 				AccountId:            "acct_test",
 				BankAccountId:        "bac_test",
-				TransactionClusterId: "tcl_old1",
+				TransactionClusterId: new(models.ID[models.TransactionCluster]("tcl_old1")),
 			},
 		}
 		newClusters := []models.TransactionCluster{
@@ -191,36 +191,36 @@ func TestDiffClusterMembers(t *testing.T) {
 	})
 
 	t.Run("two clusters merge into one", func(t *testing.T) {
-		existing := []models.TransactionClusterMember{
+		existing := []models.Transaction{
 			{
 				TransactionId:        "txn_1",
 				AccountId:            "acct_test",
 				BankAccountId:        "bac_test",
-				TransactionClusterId: "tcl_A",
+				TransactionClusterId: new(models.ID[models.TransactionCluster]("tcl_A")),
 			},
 			{
 				TransactionId:        "txn_2",
 				AccountId:            "acct_test",
 				BankAccountId:        "bac_test",
-				TransactionClusterId: "tcl_A",
+				TransactionClusterId: new(models.ID[models.TransactionCluster]("tcl_A")),
 			},
 			{
 				TransactionId:        "txn_3",
 				AccountId:            "acct_test",
 				BankAccountId:        "bac_test",
-				TransactionClusterId: "tcl_A",
+				TransactionClusterId: new(models.ID[models.TransactionCluster]("tcl_A")),
 			},
 			{
 				TransactionId:        "txn_4",
 				AccountId:            "acct_test",
 				BankAccountId:        "bac_test",
-				TransactionClusterId: "tcl_B",
+				TransactionClusterId: new(models.ID[models.TransactionCluster]("tcl_B")),
 			},
 			{
 				TransactionId:        "txn_5",
 				AccountId:            "acct_test",
 				BankAccountId:        "bac_test",
-				TransactionClusterId: "tcl_B",
+				TransactionClusterId: new(models.ID[models.TransactionCluster]("tcl_B")),
 			},
 		}
 		newClusters := []models.TransactionCluster{
@@ -250,30 +250,30 @@ func TestDiffClusterMembers(t *testing.T) {
 	})
 
 	t.Run("one cluster splits into two", func(t *testing.T) {
-		existing := []models.TransactionClusterMember{
+		existing := []models.Transaction{
 			{
 				TransactionId:        "txn_1",
 				AccountId:            "acct_test",
 				BankAccountId:        "bac_test",
-				TransactionClusterId: "tcl_old",
+				TransactionClusterId: new(models.ID[models.TransactionCluster]("tcl_old")),
 			},
 			{
 				TransactionId:        "txn_2",
 				AccountId:            "acct_test",
 				BankAccountId:        "bac_test",
-				TransactionClusterId: "tcl_old",
+				TransactionClusterId: new(models.ID[models.TransactionCluster]("tcl_old")),
 			},
 			{
 				TransactionId:        "txn_3",
 				AccountId:            "acct_test",
 				BankAccountId:        "bac_test",
-				TransactionClusterId: "tcl_old",
+				TransactionClusterId: new(models.ID[models.TransactionCluster]("tcl_old")),
 			},
 			{
 				TransactionId:        "txn_4",
 				AccountId:            "acct_test",
 				BankAccountId:        "bac_test",
-				TransactionClusterId: "tcl_old",
+				TransactionClusterId: new(models.ID[models.TransactionCluster]("tcl_old")),
 			},
 		}
 		newClusters := []models.TransactionCluster{
@@ -309,20 +309,20 @@ func TestDiffClusterMembers(t *testing.T) {
 	t.Run("below similarity threshold treated as new", func(t *testing.T) {
 		// 100 member cluster with only 1 shared transaction. Jaccard ends up at
 		// ~0.0099 which is way below the 0.1 threshold, so it shouldn't match.
-		existingTxns := make([]models.TransactionClusterMember, 100)
+		existingTxns := make([]models.Transaction, 100)
 		for i := range existingTxns {
-			existingTxns[i] = models.TransactionClusterMember{
+			existingTxns[i] = models.Transaction{
 				TransactionId:        models.ID[models.Transaction](fmt.Sprintf("txn_old_%d", i)),
 				AccountId:            "acct_test",
 				BankAccountId:        "bac_test",
-				TransactionClusterId: "tcl_old",
+				TransactionClusterId: new(models.ID[models.TransactionCluster]("tcl_old")),
 			}
 		}
-		existingTxns[0] = models.TransactionClusterMember{
+		existingTxns[0] = models.Transaction{
 			TransactionId:        "txn_shared",
 			AccountId:            "acct_test",
 			BankAccountId:        "bac_test",
-			TransactionClusterId: "tcl_old",
+			TransactionClusterId: new(models.ID[models.TransactionCluster]("tcl_old")),
 		}
 
 		newClusters := []models.TransactionCluster{
@@ -357,6 +357,6 @@ func TestDiffClusterMembers(t *testing.T) {
 		assert.Equal(t, models.ID[models.Transaction]("txn_1"), m.TransactionId)
 		assert.Equal(t, models.ID[models.Account]("acct_test"), m.AccountId)
 		assert.Equal(t, models.ID[models.BankAccount]("bac_test"), m.BankAccountId)
-		assert.Equal(t, models.ID[models.TransactionCluster]("tcl_new"), m.TransactionClusterId)
+		assert.Equal(t, models.ID[models.TransactionCluster]("tcl_new"), *m.TransactionClusterId)
 	})
 }

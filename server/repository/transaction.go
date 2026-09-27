@@ -170,7 +170,6 @@ func (r *repositoryBase) GetTransactions(
 	items := make([]Transaction, 0)
 	err := r.txn.NewSelect().
 		Model(&items).
-		Relation("TransactionClusterMember").
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction"."deleted_at" IS NULL`).
@@ -319,7 +318,6 @@ func (r *repositoryBase) GetTransaction(
 		Relation("LunchFlowTransaction").
 		Relation("PlaidTransaction").
 		Relation("PendingPlaidTransaction").
-		Relation("TransactionClusterMember").
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction"."transaction_id" = ?`, transactionId).
@@ -368,6 +366,8 @@ func (r *repositoryBase) UpdateTransaction(ctx context.Context, bankAccountId ID
 
 	_, err := r.txn.NewUpdate().
 		Model(transaction).
+		// Cluster membership is only ever written by the clustering job.
+		ExcludeColumn("transaction_cluster_id").
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		WherePK().
@@ -399,6 +399,8 @@ func (r *repositoryBase) UpdateTransactions(
 
 	result, err := r.txn.NewUpdate().
 		Model(&transactions).
+		// Cluster membership is only ever written by the clustering job.
+		ExcludeColumn("transaction_cluster_id").
 		Bulk().
 		Exec(span.Context())
 	if err != nil {

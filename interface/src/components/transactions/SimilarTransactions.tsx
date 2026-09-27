@@ -14,7 +14,7 @@ export default function SimilarTransactions(props: SimilarTransactionsProps): Re
     data: similarData,
     isLoading,
     isError,
-  } = useSimilarTransactions(props.transaction.transactionClusterMember?.transactionClusterId);
+  } = useSimilarTransactions(props.transaction.transactionClusterId ?? undefined);
 
   if (isLoading) {
     return null;

@@ -35,8 +35,7 @@ type TransactionCluster struct {
 	CreatedAt    time.Time                     `json:"createdAt" bun:"created_at,notnull,default:now(),nullzero"`
 	UpdatedAt    time.Time                     `json:"updatedAt" bun:"updated_at,notnull,default:now(),nullzero"`
 
-	TransactionRules          []TransactionRule          `json:"rules,omitempty" bun:"rel:has-many,join:transaction_cluster_id=transaction_cluster_id,join:account_id=account_id"`
-	TransactionClusterMembers []TransactionClusterMember `json:"transactionClusterMembers,omitempty" bun:"rel:has-many,join:transaction_cluster_id=transaction_cluster_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
+	TransactionRules []TransactionRule `json:"rules,omitempty" bun:"rel:has-many,join:transaction_cluster_id=transaction_cluster_id,join:account_id=account_id"`
 }
 
 func (TransactionCluster) IdentityPrefix() string {

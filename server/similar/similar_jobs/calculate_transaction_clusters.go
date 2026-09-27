@@ -49,7 +49,7 @@ func CalculateTransactionClusters(ctx queue.Context, args CalculateTransactionCl
 
 		log.InfoContext(ctx, "similar transaction clusters detected", "clusters", len(result))
 
-		existingMembers, err := repo.GetTransactionClusterMembersByBankAccount(
+		existingMembers, err := repo.GetClusteredTransactions(
 			ctx,
 			args.BankAccountId,
 		)
@@ -73,9 +73,9 @@ func CalculateTransactionClusters(ctx queue.Context, args CalculateTransactionCl
 			"deleteMembers", len(diff.DeleteMemberIds),
 		)
 
-		// Execute the diff in FK-safe order. Clusters must exist before members
-		// can reference them, and members must be moved away from obsolete
-		// clusters before those clusters can be deleted.
+		// Execute the diff in FK-safe order. Clusters must exist before
+		// transactions can reference them. Obsolete clusters are deleted last,
+		// anything still pointing at them has its cluster ID cleared by the FK.
 		if err := repo.UpsertTransactionClusters(
 			ctx,
 			args.BankAccountId,
@@ -84,19 +84,26 @@ func CalculateTransactionClusters(ctx queue.Context, args CalculateTransactionCl
 			return errors.Wrap(err, "failed to upsert transaction clusters")
 		}
 
-		if err := repo.UpsertTransactionClusterMembers(
-			ctx,
-			append(diff.InsertMembers, diff.UpdateMembers...),
-		); err != nil {
-			return errors.Wrap(err, "failed to upsert transaction cluster members")
+		changedMembers := make(
+			[]models.Transaction,
+			0,
+			len(diff.InsertMembers)+len(diff.UpdateMembers)+len(diff.DeleteMemberIds),
+		)
+		changedMembers = append(changedMembers, diff.InsertMembers...)
+		changedMembers = append(changedMembers, diff.UpdateMembers...)
+		for _, transactionId := range diff.DeleteMemberIds {
+			changedMembers = append(changedMembers, models.Transaction{
+				TransactionId:        transactionId,
+				TransactionClusterId: nil,
+			})
 		}
 
-		if err := repo.DeleteTransactionClusterMembers(
+		if err := repo.UpdateTransactionClusterIds(
 			ctx,
 			args.BankAccountId,
-			diff.DeleteMemberIds,
+			changedMembers,
 		); err != nil {
-			return errors.Wrap(err, "failed to delete removed cluster members")
+			return errors.Wrap(err, "failed to update transaction cluster ids")
 		}
 
 		if err := repo.DeleteTransactionClusters(
@@ -128,7 +135,7 @@ func CalculateTransactionClusters(ctx queue.Context, args CalculateTransactionCl
 				ctx,
 				"placeholder, triggering similar transaction rules for transaction",
 				"transactionId", item.TransactionId,
-				"transactionClusterId", item.TransactionClusterId,
+				"transactionClusterId", *item.TransactionClusterId,
 			)
 		}
 
