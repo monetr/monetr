@@ -34,6 +34,7 @@ func init() {
 	commands.DevelopmentCommand(rootCommand)
 	commands.JobCommand(rootCommand)
 	commands.ServeCommand(rootCommand)
+	commands.StatusCommand(rootCommand)
 	commands.VersionCommand(rootCommand)
 }
 

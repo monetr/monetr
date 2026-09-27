@@ -16,21 +16,23 @@ server:
   uiCacheHours: 336 # 14 days in hours, determines cache headers for UI assets.
   tlsCertificate: </etc/monetr/tls.crt>
   tlsKey: </etc/monetr/tls.key>
+  tlsClientCertificateAuthority: </etc/monetr/ca.crt>
   cookies:
     sameSiteStrict: <true|false>
     secure: <true|false>
     name: M-Token
 ```
 
-| **Name**         | **Type** | **Default**                           | **Description**                                                                                                                                                                                                                                                                                                    |
-| ---              | ---      | ---                                   | ---                                                                                                                                                                                                                                                                                                                |
-| `listenPort`     | Number   | `4000`                                | The TCP port that monetr will listen for HTTP connections on.                                                                                                                                                                                                                                                      |
-| `listenAddress`  | String   | `0.0.0.0`                             | The TCP address that monetr will listen for HTTP connections on. Recommended to set to your computer's IP address or `0.0.0.0` if you want to access it from outside the host's system.                                                                                                                            |
-| `externalUrl`    | String   | `https://localhost:{{ Listen Port }}` | The actual external URL that monetr is accessible at, if you are exposing monetr to the internet or just your local network via a domain name you **must** specify this parameter. For example: `http://monetr.local:4000`. monetr uses this to determine how to set cookies as well as build URLs used in emails. |
-| `statsPort`      | Number   | `9000`                                | The TCP port that monetr will server Prometheus metrics on. **Note**: These metrics are not well maintained at the moment.                                                                                                                                                                                         |
-| `uiCacheHours`   | Number   | `336`                                 | Defines the number of hours that UI assets should be cached by clients, sets the cache headers on all UI asset HTTP responses.                                                                                                                                                                                     |
-| `tlsCertificate` | String   |                                       | Specify the TLS certificate that the monetr HTTP server should use.                                                                                                                                                                                                                                                |
-| `tlsKey`         | String   |                                       | Specify the TLS key that the monetr HTTP server should use.                                                                                                                                                                                                                                                        |
+| **Name**                        | **Type** | **Default**                           | **Description**                                                                                                                                                                                                                                                                                                    |
+| ---                             | ---      | ---                                   | ---                                                                                                                                                                                                                                                                                                                |
+| `listenPort`                    | Number   | `4000`                                | The TCP port that monetr will listen for HTTP connections on.                                                                                                                                                                                                                                                      |
+| `listenAddress`                 | String   | `0.0.0.0`                             | The TCP address that monetr will listen for HTTP connections on. Recommended to set to your computer's IP address or `0.0.0.0` if you want to access it from outside the host's system.                                                                                                                            |
+| `externalUrl`                   | String   | `https://localhost:{{ Listen Port }}` | The actual external URL that monetr is accessible at, if you are exposing monetr to the internet or just your local network via a domain name you **must** specify this parameter. For example: `http://monetr.local:4000`. monetr uses this to determine how to set cookies as well as build URLs used in emails. |
+| `statsPort`                     | Number   | `9000`                                | The TCP port that monetr will server Prometheus metrics on. **Note**: These metrics are not well maintained at the moment.                                                                                                                                                                                         |
+| `uiCacheHours`                  | Number   | `336`                                 | Defines the number of hours that UI assets should be cached by clients, sets the cache headers on all UI asset HTTP responses.                                                                                                                                                                                     |
+| `tlsCertificate`                | String   |                                       | Specify the TLS certificate that the monetr HTTP server should use.                                                                                                                                                                                                                                                |
+| `tlsKey`                        | String   |                                       | Specify the TLS key that the monetr HTTP server should use.                                                                                                                                                                                                                                                        |
+| `tlsClientCertificateAuthority` | String   |                                       | Specify a certificate authority that clients must present a certificate from. When this is set every client must present a valid client certificate, see [Client Certificates](#client-certificates) below.                                                                                                        |
 
 :::info
 The TLS certificate and key **do not affect the external URL**. If you specify `https://...` in the external URL and
@@ -39,8 +41,8 @@ termination.
 :::
 
 :::info
-TLS certificates are also not automatically rotated for the HTTP server either. The server must be restarted after
-certificates are changed. 
+TLS certificates are automatically reloaded when they change on disk, the server does not need to be restarted after
+certificates are rotated.
 :::
 
 The following environment variables map to the following configuration file fields. Each field is documented below.
@@ -48,6 +50,27 @@ The following environment variables map to the following configuration file fiel
 | Variable                     | Config File Field    |
 | ---                          | ---                  |
 | `MONETR_SERVER_EXTERNAL_URL` | `server.externalUrl` |
+
+## Client Certificates
+
+If all traffic to monetr comes from something you control, like an Nginx reverse proxy on an internal network, you can
+require clients to present a certificate by setting `tlsClientCertificateAuthority`. monetr will then reject any
+connection that does not present a certificate signed by that certificate authority. This requires `tlsCertificate` and
+`tlsKey` to be set as well.
+
+This is **not** the chain for your server's certificate. If you are using certificates from a public certificate
+authority like Let's Encrypt then leave this blank, otherwise browsers connecting directly to monetr will be rejected.
+
+Client certificates must include the `clientAuth` extended key usage. For Nginx the client certificate is provided using
+`proxy_ssl_certificate` and `proxy_ssl_certificate_key`.
+
+:::info
+Health checks that can't present a client certificate, like Kubernetes `httpGet` probes, will fail when client
+certificates are required. Use `monetr status` instead, which makes the health check request using the TLS
+certificates from your configuration. If the server certificate is used as the client certificate then it must include
+both the `serverAuth` and `clientAuth` extended key usages, otherwise you can provide a separate client certificate
+with `--tls-crt` and `--tls-key`.
+:::
 
 ## Cookies
 
