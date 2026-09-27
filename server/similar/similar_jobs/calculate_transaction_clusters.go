@@ -73,9 +73,9 @@ func CalculateTransactionClusters(ctx queue.Context, args CalculateTransactionCl
 			"deleteMembers", len(diff.DeleteMemberIds),
 		)
 
-		// Execute the diff in FK-safe order. Clusters must exist before
-		// transactions can reference them. Obsolete clusters are deleted last,
-		// anything still pointing at them has its cluster ID cleared by the FK.
+		// Order matters here because of the foreign keys. Clusters need to exist
+		// before transactions can point at them, and old clusters go last. If
+		// anything still points at an old cluster the FK will just null it out
 		if err := repo.UpsertTransactionClusters(
 			ctx,
 			args.BankAccountId,

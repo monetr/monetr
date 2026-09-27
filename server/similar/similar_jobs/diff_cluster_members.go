@@ -16,32 +16,28 @@ const (
 	minSimilarityThreshold = 0.1
 )
 
-// MemberDiff is the result of diffing existing cluster membership against a
-// freshly calculated set of clusters. Each field maps to a specific database
-// operation that the caller needs to execute in FK-safe order.
+// MemberDiff is everything that changed between the clusters we have stored and
+// the ones we just calculated. Keep in mind the order you write these in matters
+// because of the foreign keys.
 type MemberDiff struct {
-	// All new clusters with stable IDs assigned. Matched clusters keep their
-	// existing ID, brand new clusters keep the ID from the algorithm.
+	// Every new cluster. If it matched an old one then it keeps the old ID,
+	// otherwise it keeps the ID from the algorithm
 	UpsertClusters []models.TransactionCluster
-	// Existing clusters that dissolved entirely — no new cluster claimed them.
+	// Old clusters that didn't match anything new, these can just be deleted
 	DeleteClusterIds []models.ID[models.TransactionCluster]
-	// Transactions that weren't in any cluster before, with their new cluster ID
-	// set.
+	// Transactions that weren't in any cluster before.
 	InsertMembers []models.Transaction
-	// Transactions that moved from one cluster to a different one, with their
-	// new cluster ID set.
+	// Transactions that moved from one cluster to a different one.
 	UpdateMembers []models.Transaction
-	// DeleteMemberIds are transaction IDs that are no longer in any cluster and
-	// should have their cluster ID cleared. This is different from delete
-	// cluster IDs because deleting a cluster clears the cluster ID on its
-	// transactions automatically.
+	// Transactions that aren't in any cluster anymore. Only needed for clusters
+	// that still exist, if a cluster gets deleted then the FK clears the ID for us
 	DeleteMemberIds []models.ID[models.Transaction]
 }
 
-// DiffClusterMembers takes the existing cluster membership and a freshly
-// calculated set of clusters and figures out the minimal set of DB operations
-// to get from one state to the other. Clusters are matched to their previous
-// incarnation via jaccard similarity so we can preserve their IDs.
+// DiffClusterMembers figures out what needs to be written to get the database in
+// line with the clusters we just calculated. New clusters get matched up with
+// old ones based on how many members they share (jaccard), this way a cluster
+// can keep its ID between calculations.
 func DiffClusterMembers(
 	ctx context.Context,
 	existingMembers []models.Transaction,
@@ -95,13 +91,21 @@ func DiffClusterMembers(
 		}
 	}
 
-	// Best matches first.
+	// Best matches first. The matches came from a map so their order is random,
+	// if two scores tie we need to break it the same way every time or the ID
+	// could bounce between clusters. Lower existing ID wins, then whichever new
+	// cluster the algorithm returned first. Can't use the new cluster IDs since
+	// those are random
 	slices.SortFunc(matches, func(a, b scoredMatch) int {
-		return cmp.Compare(b.score, a.score)
+		return cmp.Or(
+			cmp.Compare(b.score, a.score),
+			cmp.Compare(a.existingId, b.existingId),
+			cmp.Compare(a.newIdx, b.newIdx),
+		)
 	})
 
-	// Greedy 1:1 assignment. Walk the sorted matches and claim each pair if
-	// neither side has been claimed yet.
+	// Walk the matches best to worst and pair them up, a cluster on either side
+	// can only be claimed once
 	claimedNew := make(map[int]struct{}, len(newClusters))
 	claimedExisting := make(
 		map[models.ID[models.TransactionCluster]]struct{},
@@ -110,7 +114,7 @@ func DiffClusterMembers(
 	matched := map[int]models.ID[models.TransactionCluster]{}
 
 	for _, m := range matches {
-		// Sorted descending, everything after this is below threshold.
+		// Sorted, so everything after this is below the threshold too
 		if m.score < minSimilarityThreshold {
 			break
 		}
@@ -181,8 +185,8 @@ func DiffClusterMembers(
 		} else if oldClusterId != newClusterId {
 			diff.UpdateMembers = append(diff.UpdateMembers, member)
 		}
-		// If the transaction is in the same cluster as before then there is
-		// nothing to do for this transaction.
+		// If the transaction is in the same cluster as before then there is nothing
+		// to do for this transaction.
 	}
 
 	for txnId := range oldOwner {

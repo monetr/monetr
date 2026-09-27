@@ -290,9 +290,8 @@ func TestDiffClusterMembers(t *testing.T) {
 		diff := DiffClusterMembers(context.Background(), existing, newClusters, "acct_test", "bac_test")
 
 		assert.Len(t, diff.UpsertClusters, 2)
-		// Both halves have equal overlap (2/4) so whichever wins the greedy
-		// match gets the old ID. Either way the old cluster is consumed — it
-		// shouldn't show up in deletes.
+		// Both halves overlap equally (2/4) so whichever wins gets the old ID.
+		// Either way the old cluster gets claimed so it shouldn't be in the deletes
 		assert.Empty(t, diff.DeleteClusterIds)
 		assignedIds := []models.ID[models.TransactionCluster]{
 			diff.UpsertClusters[0].TransactionClusterId,

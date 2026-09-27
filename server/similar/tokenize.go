@@ -76,6 +76,15 @@ func Tokenize(transaction *models.Transaction) []Token {
 			Original: word,
 			Index:    i,
 		}
+
+		// Keep & as its own token, otherwise it gets thrown out below for having no
+		// vowels
+		if word == "&" {
+			token.Equivalent = []string{word}
+			token.Final = []string{word}
+			tokens = append(tokens, token)
+			continue
+		}
 		equivalent := strings.ReplaceAll(word, "'", "")
 		equivalent = strings.ReplaceAll(equivalent, ".", "")
 

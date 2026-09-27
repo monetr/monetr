@@ -198,8 +198,8 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) enrichClusters(
 			// frequently or if it can also be used in combination with the signature
 			// to create a strong consistent identifier.
 			group.Centroid = &centroid.ID
-			// Keep the raw name of the centroid transaction around so the
-			// calculated name can always be compared against what the bank sent.
+			// Keep the raw name of the centroid around so we can compare it to the
+			// calculated name
 			group.OriginalMemo = centroid.Transaction.OriginalName
 		}
 

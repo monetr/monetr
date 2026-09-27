@@ -16,8 +16,8 @@ func (r *repositoryBase) GetClusteredTransactions(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	// Soft deleted transactions are included on purpose so that the clustering
-	// job can see them and remove them from their cluster.
+	// Include soft deleted transactions on purpose, that way the clustering job
+	// can pull them out of their cluster
 	var result []Transaction
 	if err := r.txn.NewSelect().
 		Model(&result).

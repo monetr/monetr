@@ -1,7 +1,7 @@
 ALTER TABLE "transaction_clusters" DROP CONSTRAINT "pk_transaction_clusters";
 ALTER TABLE "transaction_clusters" ADD CONSTRAINT "pk_transaction_clusters" PRIMARY KEY ("transaction_cluster_id", "account_id", "bank_account_id");
 
--- The raw name of the centroid transaction, refreshed on every calculation.
+-- Raw name of the centroid transaction, gets refreshed every calculation
 ALTER TABLE "transaction_clusters" ADD COLUMN "original_memo" TEXT;
 UPDATE "transaction_clusters" AS "txc"
 SET "original_memo" = "t"."original_name"
@@ -12,8 +12,8 @@ WHERE "t"."transaction_id" = "txc"."centroid"
 
 ALTER TABLE "transactions" ADD COLUMN "transaction_cluster_id" VARCHAR(32);
 
--- When a cluster is removed only the cluster ID is cleared on its transactions,
--- the account and bank account columns are part of this key too and must stay.
+-- Only null out the cluster ID when a cluster is deleted, account and bank
+-- account are part of this key too and need to stay
 ALTER TABLE "transactions" ADD CONSTRAINT "fk_transactions_transaction_cluster"
 FOREIGN KEY ("transaction_cluster_id", "account_id", "bank_account_id")
 REFERENCES "transaction_clusters" ("transaction_cluster_id", "account_id", "bank_account_id")

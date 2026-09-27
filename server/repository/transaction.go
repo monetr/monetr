@@ -366,7 +366,7 @@ func (r *repositoryBase) UpdateTransaction(ctx context.Context, bankAccountId ID
 
 	_, err := r.txn.NewUpdate().
 		Model(transaction).
-		// Cluster membership is only ever written by the clustering job.
+		// Only the clustering job should be writing this
 		ExcludeColumn("transaction_cluster_id").
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
@@ -399,7 +399,7 @@ func (r *repositoryBase) UpdateTransactions(
 
 	result, err := r.txn.NewUpdate().
 		Model(&transactions).
-		// Cluster membership is only ever written by the clustering job.
+		// Only the clustering job should be writing this
 		ExcludeColumn("transaction_cluster_id").
 		Bulk().
 		Exec(span.Context())
