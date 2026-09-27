@@ -206,9 +206,12 @@ A cluster ID that doesn't exist isn't an error here. You just get back an empty 
 
 ## <Badge type="info">GET</Badge> Find similar transactions
 
-Returns the cluster a transaction is in, looked up by the transaction instead of the cluster. If you already have the
-transaction, its `transactionClusterId` and [Get similar transactions](#get-similar-transactions) get you the same
-thing.
+:::warning
+This endpoint is deprecated and will be removed in a future release. Use the transaction's `transactionClusterId` with
+[Get similar transactions](#get-similar-transactions) instead.
+:::
+
+Returns the cluster a transaction is in, looked up by the transaction instead of the cluster.
 
 **In the app:** Nothing in the app calls this.
 
@@ -235,6 +238,14 @@ curl --request GET \
 
 You get back a [similar transaction object](#the-similar-transaction-object), the same one [Get similar
 transactions](#get-similar-transactions) returns.
+
+:::details History
+
+**[v1.17.0](https://github.com/monetr/monetr/releases/tag/v1.17.0)**
+
+- Deprecated this endpoint in favor of [Get similar transactions](#get-similar-transactions).
+
+:::
 
 ### Errors
 
