@@ -101,10 +101,10 @@ func TestParseMigrationFilename(t *testing.T) {
 
 func TestDiscoverMigrations_SortsAscending(t *testing.T) {
 	fsys := fstest.MapFS{
-		"schema/2024010100_Third.tx.up.sql":  &fstest.MapFile{Data: []byte("SELECT 1;")},
-		"schema/2021041100_First.up.sql":     &fstest.MapFile{Data: []byte("SELECT 1;")},
-		"schema/2023060100_Second.tx.up.sql": &fstest.MapFile{Data: []byte("SELECT 1;")},
-		"schema/2021041100_First.down.sql":   &fstest.MapFile{Data: []byte("SELECT 1;")},
+		"2024010100_Third.tx.up.sql":  &fstest.MapFile{Data: []byte("SELECT 1;")},
+		"2021041100_First.up.sql":     &fstest.MapFile{Data: []byte("SELECT 1;")},
+		"2023060100_Second.tx.up.sql": &fstest.MapFile{Data: []byte("SELECT 1;")},
+		"2021041100_First.down.sql":   &fstest.MapFile{Data: []byte("SELECT 1;")},
 	}
 	ups, err := discoverMigrations(fsys)
 	require.NoError(t, err)
@@ -116,8 +116,8 @@ func TestDiscoverMigrations_SortsAscending(t *testing.T) {
 
 func TestDiscoverMigrations_DuplicateUpVersionFails(t *testing.T) {
 	fsys := fstest.MapFS{
-		"schema/2024010100_First.tx.up.sql":  &fstest.MapFile{Data: []byte("SELECT 1;")},
-		"schema/2024010100_Second.tx.up.sql": &fstest.MapFile{Data: []byte("SELECT 1;")},
+		"2024010100_First.tx.up.sql":  &fstest.MapFile{Data: []byte("SELECT 1;")},
+		"2024010100_Second.tx.up.sql": &fstest.MapFile{Data: []byte("SELECT 1;")},
 	}
 	_, err := discoverMigrations(fsys)
 	require.Error(t, err)
@@ -126,8 +126,8 @@ func TestDiscoverMigrations_DuplicateUpVersionFails(t *testing.T) {
 
 func TestDiscoverMigrations_BadFilenameFails(t *testing.T) {
 	fsys := fstest.MapFS{
-		"schema/2024010100_OK.tx.up.sql": &fstest.MapFile{Data: []byte("SELECT 1;")},
-		"schema/junk.txt":                &fstest.MapFile{Data: []byte("nope")},
+		"2024010100_OK.tx.up.sql": &fstest.MapFile{Data: []byte("SELECT 1;")},
+		"junk.txt":                &fstest.MapFile{Data: []byte("nope")},
 	}
 	_, err := discoverMigrations(fsys)
 	require.Error(t, err)
@@ -136,7 +136,7 @@ func TestDiscoverMigrations_BadFilenameFails(t *testing.T) {
 
 func TestDiscoverMigrations_AllowsUpWithoutDown(t *testing.T) {
 	fsys := fstest.MapFS{
-		"schema/2024010100_NoReverse.tx.up.sql": &fstest.MapFile{Data: []byte("SELECT 1;")},
+		"2024010100_NoReverse.tx.up.sql": &fstest.MapFile{Data: []byte("SELECT 1;")},
 	}
 	ups, err := discoverMigrations(fsys)
 	require.NoError(t, err)
@@ -144,7 +144,7 @@ func TestDiscoverMigrations_AllowsUpWithoutDown(t *testing.T) {
 }
 
 func TestDiscoverMigrations_RealEmbed(t *testing.T) {
-	ups, err := discoverMigrations(embeddedMigrations)
+	ups, err := discoverMigrations(pgMigrations)
 	require.NoError(t, err)
 
 	// The production embed had 105 up files (99 .tx.up.sql + 6 .up.sql) when

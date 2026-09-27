@@ -1,10 +1,10 @@
 // Package migrations applies monetr's SQL schema migrations against
-// Postgres. The migration files themselves live in ./schema/ and are pulled
+// Postgres. The migration files themselves live in ./schema/pg/ and are pulled
 // in at build time via //go:embed.
 //
 // To add a new migration:
 //
-//  1. Drop a file into server/migrations/schema/ named
+//  1. Drop a file into server/migrations/schema/pg/ named
 //     YYYYMMDDNN_DescriptiveName.tx.up.sql, where YYYYMMDD is the date and
 //     NN is a two-digit sequence within that day (e.g.
 //     2026060100_AddFooColumn.tx.up.sql).

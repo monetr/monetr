@@ -112,11 +112,12 @@ func TestApplyMigrations_TxRollbackOnFailure(t *testing.T) {
 	db := newCleanDatabase(t)
 	log := testlog.GetLog(t)
 
+	m := &PGMigrationsManager{log: log}
 	pinned := pinnedExecutor(t, db)
-	require.NoError(t, ensureSchemaTable(t.Context(), log, pinned))
+	require.NoError(t, m.ensureSchemaTable(t.Context(), pinned))
 
 	fsys := fstest.MapFS{
-		"schema/2030010100_BadTx.tx.up.sql": &fstest.MapFile{
+		"2030010100_BadTx.tx.up.sql": &fstest.MapFile{
 			Data: []byte(`CREATE TABLE rollback_marker (id INT);
 SELECT this_function_does_not_exist();`),
 		},
@@ -124,7 +125,7 @@ SELECT this_function_does_not_exist();`),
 	files, err := discoverMigrations(fsys)
 	require.NoError(t, err)
 
-	_, _, err = applyMigrations(t.Context(), log, pinned, fsys, files)
+	_, _, err = m.applyMigrations(t.Context(), pinned, fsys, files)
 	require.Error(t, err)
 
 	var exists bool
@@ -147,18 +148,19 @@ func TestApplyMigrations_NonTxApplied(t *testing.T) {
 	db := newCleanDatabase(t)
 	log := testlog.GetLog(t)
 
+	m := &PGMigrationsManager{log: log}
 	pinned := pinnedExecutor(t, db)
-	require.NoError(t, ensureSchemaTable(t.Context(), log, pinned))
+	require.NoError(t, m.ensureSchemaTable(t.Context(), pinned))
 
 	fsys := fstest.MapFS{
-		"schema/2030010200_NonTx.up.sql": &fstest.MapFile{
+		"2030010200_NonTx.up.sql": &fstest.MapFile{
 			Data: []byte(`CREATE TABLE nontx_marker (id INT);`),
 		},
 	}
 	files, err := discoverMigrations(fsys)
 	require.NoError(t, err)
 
-	oldV, newV, err := applyMigrations(t.Context(), log, pinned, fsys, files)
+	oldV, newV, err := m.applyMigrations(t.Context(), pinned, fsys, files)
 	require.NoError(t, err)
 	assert.Equal(t, int64(0), oldV)
 	assert.Equal(t, int64(2030010200), newV)
@@ -183,16 +185,17 @@ func TestApplyMigrations_GapWarn(t *testing.T) {
 	db := newCleanDatabase(t)
 	log, hook := testlog.GetTestLog(t)
 
+	m := &PGMigrationsManager{log: log}
 	pinned := pinnedExecutor(t, db)
-	require.NoError(t, ensureSchemaTable(t.Context(), log, pinned))
+	require.NoError(t, m.ensureSchemaTable(t.Context(), pinned))
 
 	_, err := db.Exec(`INSERT INTO schema_migrations (version) VALUES (99999999999)`)
 	require.NoError(t, err)
 
-	ups, err := discoverMigrations(embeddedMigrations)
+	ups, err := discoverMigrations(pgMigrations)
 	require.NoError(t, err)
 
-	oldV, newV, err := applyMigrations(t.Context(), log, pinned, embeddedMigrations, ups)
+	oldV, newV, err := m.applyMigrations(t.Context(), pinned, pgMigrations, ups)
 	require.NoError(t, err)
 	assert.Equal(t, int64(99999999999), oldV)
 	assert.Equal(t, int64(99999999999), newV)
@@ -292,7 +295,7 @@ func TestUp_ConcurrentSafe(t *testing.T) {
 	require.NoError(t, err2)
 
 	versions := readSchemaVersions(t, db)
-	ups, err := discoverMigrations(embeddedMigrations)
+	ups, err := discoverMigrations(pgMigrations)
 	require.NoError(t, err)
 
 	require.Equal(t, len(ups), len(versions),
@@ -313,7 +316,7 @@ func TestUp_FreshFullEmbed(t *testing.T) {
 	assert.Equal(t, int64(2026071201), newV)
 
 	versions := readSchemaVersions(t, db)
-	ups, err := discoverMigrations(embeddedMigrations)
+	ups, err := discoverMigrations(pgMigrations)
 	require.NoError(t, err)
 	assert.Equal(t, len(ups), len(versions))
 
