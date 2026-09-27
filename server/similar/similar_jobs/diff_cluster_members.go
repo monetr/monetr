@@ -59,7 +59,8 @@ func DiffClusterMembers(
 		},
 	)
 
-	// Flat lookup of txnId -> clusterId for the current state in the database.
+	// Flat lookup of transaction ID to cluster ID for the current state in the
+	// database.
 	oldOwner := make(
 		map[models.ID[models.Transaction]]models.ID[models.TransactionCluster],
 		len(existingMembers),

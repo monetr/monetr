@@ -709,20 +709,35 @@
     }
   }
 
-  /* details stays a real disclosure widget, so give it a calm neutral look and
-     no chip (the summary keeps its marker). */
+  /* details is neutral with an expand or collapse chip. The title is display
+     flex so the summary loses its native marker, the chip is what tells you it
+     opens */
   .rp-callout--details {
     border-left-color: var(--mtr-faint);
 
     .rp-callout__title {
       color: var(--mtr-muted);
 
-      &::before {
-        display: none;
+      &::after {
+        content: '+ expand';
+        color: var(--mtr-muted);
+        background: var(--mtr-line-soft);
       }
+    }
+
+    &[open] > .rp-callout__title {
+      margin-bottom: 2.5 * variables.$size;
 
       &::after {
-        content: none;
+        content: '- collapse';
+      }
+    }
+
+    &:hover > .rp-callout__title {
+      color: var(--mtr-text);
+
+      &::after {
+        color: var(--mtr-text);
       }
     }
   }

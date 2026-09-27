@@ -333,7 +333,7 @@ func TestDiffClusterMembers(t *testing.T) {
 
 		diff := DiffClusterMembers(context.Background(), existingTxns, newClusters, "acct_test", "bac_test")
 
-		// 1 / (100 + 2 - 1) ~= 0.0099 - too low to match.
+		// 1 / (100 + 2 - 1) is about 0.0099, too low to match.
 		assert.Len(t, diff.UpsertClusters, 1)
 		assert.Equal(t, models.ID[models.TransactionCluster]("tcl_fresh"), diff.UpsertClusters[0].TransactionClusterId,
 			"keeps its fresh ID because it didn't match anything")
