@@ -1,6 +1,11 @@
 ALTER TABLE "transaction_clusters" DROP CONSTRAINT "pk_transaction_clusters";
 ALTER TABLE "transaction_clusters" ADD CONSTRAINT "pk_transaction_clusters" PRIMARY KEY ("transaction_cluster_id", "account_id", "bank_account_id");
 
+-- Signature + centroid can move between clusters in the middle of a
+-- recalculation, so only check it once the job commits
+ALTER TABLE "transaction_clusters" DROP CONSTRAINT "uq_transaction_cluster_persist";
+ALTER TABLE "transaction_clusters" ADD CONSTRAINT "uq_transaction_cluster_persist" UNIQUE ("account_id", "bank_account_id", "signature", "centroid") DEFERRABLE INITIALLY DEFERRED;
+
 -- Raw name of the centroid transaction, gets refreshed every calculation
 ALTER TABLE "transaction_clusters" ADD COLUMN "original_memo" TEXT;
 UPDATE "transaction_clusters" AS "txc"
