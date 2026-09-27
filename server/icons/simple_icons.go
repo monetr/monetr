@@ -73,6 +73,17 @@ func newSimpleIconsIndex() *simpleIconsIndex {
 		_ = json.Unmarshal(metadataBytes, &metadata)
 	}
 
+	// Index the colors by lowercase title up front, scanning the metadata for
+	// every icon is quadratic and was the bulk of the cost of building this
+	// index. Keep the first entry for a title to match the previous scan.
+	colorsByTitle := make(map[string]string, len(metadata))
+	for _, item := range metadata {
+		title := strings.ToLower(item.Title)
+		if _, ok := colorsByTitle[title]; !ok {
+			colorsByTitle[title] = item.Hex
+		}
+	}
+
 	icons := map[string]Icon{}
 	for title, slug := range nameToSlug {
 		iconFile, err := simpleIconsFiles.ReadFile(fmt.Sprintf("sources/simple-icons/icons/%s.svg", slug))
@@ -88,18 +99,9 @@ func newSimpleIconsIndex() *simpleIconsIndex {
 			SVG:     base64.StdEncoding.EncodeToString(iconFile),
 			Colors:  nil,
 		}
-		iconMetadata := func(name string) *Metadata {
-			for _, item := range metadata {
-				if strings.EqualFold(item.Title, name) {
-					return &item
-				}
-			}
-
-			return nil
-		}(title)
-		if iconMetadata != nil {
+		if hex, ok := colorsByTitle[strings.ToLower(title)]; ok {
 			data.Colors = []string{
-				iconMetadata.Hex,
+				hex,
 			}
 		}
 
@@ -122,10 +124,14 @@ func newSimpleIconsIndex() *simpleIconsIndex {
 }
 
 func init() {
-	simpleIcons := newSimpleIconsIndex()
-	if simpleIcons == nil {
-		return
-	}
+	registerIndex(func() IconIndex {
+		simpleIcons := newSimpleIconsIndex()
+		// Return an untyped nil, a nil *simpleIconsIndex would be a non-nil
+		// IconIndex.
+		if simpleIcons == nil {
+			return nil
+		}
 
-	indexes = append(indexes, simpleIcons)
+		return simpleIcons
+	})
 }

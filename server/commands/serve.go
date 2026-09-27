@@ -24,6 +24,7 @@ import (
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/controller"
 	"github.com/monetr/monetr/server/database"
+	"github.com/monetr/monetr/server/icons"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/source"
 	"github.com/monetr/monetr/server/jobs"
@@ -67,6 +68,19 @@ func ServeCommand(parent *cobra.Command) {
 			if configuration.Email.Enabled && len(configuration.Email.BlockedDomains) > 0 {
 				log.Info("blocked email domains loaded", "count", len(configuration.Email.BlockedDomains))
 			}
+
+			// Icon indexes are built lazily so that other commands don't pay for
+			// them. Start building them now in the background so it overlaps with the
+			// rest of the server setup instead of landing on the first request.
+			go func() {
+				start := time.Now()
+				icons.Load()
+				log.Debug(
+					"icon indexes loaded",
+					"indexes", icons.GetIconIndexes(),
+					"duration", time.Since(start),
+				)
+			}()
 
 			// As soon as we load the config try to validate it. In the future, other
 			// validation functions can be added here in order to prevent
