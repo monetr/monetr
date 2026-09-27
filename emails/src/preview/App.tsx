@@ -25,6 +25,15 @@ export function App() {
 
   const plainText = useMemo(() => toPlainText(renderedHtml), [renderedHtml]);
 
+  // The email renders a full <html> document, which React 19 would hoist onto the real page if mounted inline. Render
+  // it into an iframe instead, copying over the CSS module styles rsbuild injects into the preview page's head.
+  const previewDocument = useMemo(() => {
+    const styles = Array.from(document.head.querySelectorAll('style, link[rel="stylesheet"]'))
+      .map(node => node.outerHTML)
+      .join('');
+    return renderedHtml.replace('</head>', `${styles}</head>`);
+  }, [renderedHtml]);
+
   const viewModes: { key: ViewMode; label: string }[] = [
     { key: 'preview', label: 'Preview' },
     { key: 'text', label: 'Text' },
@@ -68,7 +77,7 @@ export function App() {
           </div>
 
           {viewMode === 'preview' && (
-            <div className={styles.previewContent}>{createElement(selected.component, selected.previewProps)}</div>
+            <iframe className={styles.previewContent} srcDoc={previewDocument} title={selected.name} />
           )}
           {viewMode === 'text' && <pre className={cx(styles.pre, styles.preText)}>{plainText}</pre>}
           {viewMode === 'html' && <pre className={cx(styles.pre, styles.preHtml)}>{renderedHtml}</pre>}

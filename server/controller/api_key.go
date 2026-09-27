@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v5"
+	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/powchallenge"
 	"github.com/monetr/monetr/server/schemas"
@@ -52,6 +53,42 @@ func (c *Controller) postApiKey(ctx *echo.Context) error {
 
 	if err := repo.CreateApiKey(c.getContext(ctx), key); err != nil {
 		return c.wrapPgError(ctx, err, "Failed to create API key")
+	}
+
+	// Always notify the account owner, even when another user on the account
+	// created the key. If the notification fails then the request fails and the
+	// key is rolled back, so a key is never created without the owner knowing.
+	if c.Configuration.Email.Enabled {
+		owner, err := repo.GetAccountOwner(c.getContext(ctx))
+		if err != nil {
+			return c.wrapPgError(ctx, err, "Failed to find account owner")
+		}
+
+		creator, err := repo.GetMe(c.getContext(ctx))
+		if err != nil {
+			return c.wrapPgError(ctx, err, "Failed to retrieve current user")
+		}
+
+		if err := c.Email.SendEmail(
+			c.getContext(ctx),
+			communication.ApiKeyCreatedParams{
+				BaseURL:        c.Configuration.Server.GetBaseURL().String(),
+				Email:          owner.Login.Email,
+				FirstName:      owner.Login.FirstName,
+				LastName:       owner.Login.LastName,
+				KeyName:        key.Name,
+				CreatedByName:  creator.Login.Name(),
+				CreatedByEmail: creator.Login.Email,
+				SupportEmail:   "support@monetr.app",
+			},
+		); err != nil {
+			return c.wrapAndReturnError(
+				ctx,
+				err,
+				http.StatusInternalServerError,
+				"Failed to send API key created notification",
+			)
+		}
 	}
 
 	var result struct {

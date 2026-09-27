@@ -136,3 +136,30 @@ func (TrialAboutToExpireParams) Template() string {
 func (TrialAboutToExpireParams) Subject() string {
 	return "Trial About To Expire"
 }
+
+type ApiKeyCreatedParams struct {
+	BaseURL        string
+	Email          string
+	FirstName      string
+	LastName       string
+	KeyName        string
+	CreatedByName  string
+	CreatedByEmail string
+	SupportEmail   string
+}
+
+func (p ApiKeyCreatedParams) EmailAddress() string {
+	return p.Email
+}
+
+func (p ApiKeyCreatedParams) Name() (firstName, lastName string) {
+	return p.FirstName, p.LastName
+}
+
+func (ApiKeyCreatedParams) Template() string {
+	return "ApiKeyCreated"
+}
+
+func (ApiKeyCreatedParams) Subject() string {
+	return "New API Key Created"
+}
