@@ -99,7 +99,7 @@ func (r *repositoryBase) DeleteTransactionClusters(
 		Model(&TransactionCluster{}).
 		Where(`"transaction_cluster"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction_cluster"."bank_account_id" = ?`, bankAccountId).
-		Where(`"transaction_cluster"."transaction_cluster_id" IN (?)`, bun.In(clusterIds)).
+		Where(`"transaction_cluster"."transaction_cluster_id" IN (?)`, bun.List(clusterIds)).
 		Exec(span.Context())
 	if err != nil {
 		return crumbs.WrapError(
