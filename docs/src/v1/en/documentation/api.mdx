@@ -56,6 +56,15 @@ Cross-cutting behavior. Read this first.
 
 Guides rather than reference.
 
+### [Currencies](/documentation/api/currencies)
+
+How amounts are represented, plus the currencies monetr supports.
+
+| Method | Path |
+| --- | --- |
+| `GET` | `/api/locale/currency` |
+| `GET` | `/api/locale/currency/:currencyCode` |
+
 ### [Links](/documentation/api/links)
 
 | Method | Path |
@@ -192,14 +201,12 @@ Hosted only.
 | `GET` | `/api/billing/checkout/:checkoutSessionId` |
 | `GET` | `/api/billing/portal` |
 
-### [Health and Reference](/documentation/api/utility)
+### [Health](/documentation/api/utility)
 
 | Method | Path |
 | --- | --- |
 | `GET` | `/api/health` |
 | `HEAD` | `/api/health` |
-| `GET` | `/api/locale/currency` |
-| `GET` | `/api/locale/currency/:currencyCode` |
 
 ### [Webhooks](/documentation/api/webhooks)
 

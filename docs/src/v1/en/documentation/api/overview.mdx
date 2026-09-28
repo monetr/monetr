@@ -214,12 +214,9 @@ anything late in the evening.
 
 ### Money
 
-**Amounts are integers in the currency's smallest unit.** Not decimals. `3446` in a USD account is $34.46.
-
-**How many decimal places that implies depends on the currency.** USD and EUR have two, so divide by 100. JPY has none,
-so `1234` is ¥1234. BHD has three, so `1234` is 1.234 BHD. There's no field telling you the exponent, you're expected to
-know it from the `currency` code on the bank account. A hardcoded divide by 100 is a bug waiting on your first
-non-dollar user.
+**Amounts are integers in the currency's smallest unit.** Not decimals. `3446` in a USD account is $34.46, but how many
+decimal places that implies depends on the currency. [Currencies](./currencies#how-monetr-stores-money) covers the
+details and how to look up the decimal places for any currency.
 
 **On transactions, a positive amount is money leaving your account.** A $34.46 coffee is `3446`. A paycheck landing is
 negative. Your bank statement prints it the other way around.
