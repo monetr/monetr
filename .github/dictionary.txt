@@ -22,6 +22,7 @@ BlogHeader
 BlogIndex
 BlogMeme
 BookOpen
+CLDR
 CLI
 CMake
 CORS

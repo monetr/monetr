@@ -28,12 +28,16 @@ func (c *Controller) getCurrency(ctx *echo.Context) error {
 }
 
 // getCurrencyLocale returns the locale that currency names and symbols should
-// be localized to. The locale query parameter takes priority over the
-// Accept-Language header when it is provided.
+// be localized to, the locale query param wins over the Accept-Language header
+// if they provided it
 func getCurrencyLocale(ctx *echo.Context) string {
-	if locale := strings.TrimSpace(ctx.QueryParam("locale")); locale != "" {
-		// Allow POSIX style locales like en_US as well as BCP 47 like en-US.
-		return currency.MatchLocale(strings.ReplaceAll(locale, "_", "-"))
+	if locale := ctx.QueryParam("locale"); locale != "" {
+		tag, err := currency.ParseLocale(locale)
+		if err != nil {
+			// If they gave us garbage then just fall back to the default
+			return currency.MatchLocale("")
+		}
+		return currency.MatchLocale(tag.String())
 	}
 	return currency.MatchLocale(ctx.Request().Header.Get("Accept-Language"))
 }

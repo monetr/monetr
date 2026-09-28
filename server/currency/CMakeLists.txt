@@ -3,16 +3,15 @@ include(GolangTestUtils)
 set(TEST_GO_TAGS "noui")
 provision_golang_tests(${CMAKE_CURRENT_SOURCE_DIR})
 
-# monetr only needs a small part of the CLDR dataset for currency data. So
-# rather than cloning the entire (very large) cldr-json repository, do a
-# shallow sparse clone that only pulls the files we need for the pinned version.
-# The per-locale currency names are then condensed into a single file by
-# cldrgen.
+# monetr only needs a tiny part of the CLDR dataset for currency stuff. So
+# instead of cloning all of cldr-json (its huge) do a shallow sparse clone of
+# just the files we need, then cldrgen squashes the per-locale data down into a
+# single file
 set(CLDR_VERSION "48.2.2")
 set(CLDR_SOURCES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/sources")
 set(CLDR_PREFIX_DIR "${CMAKE_CURRENT_BINARY_DIR}/cldr-json")
-# The download step runs from within the source dir, so the clone goes into a
-# folder beneath it that can be safely removed and recreated.
+# Clone into a folder under the source dir so it can just be deleted and
+# cloned again whenever the version changes
 set(CLDR_CHECKOUT_DIR "${CLDR_PREFIX_DIR}/checkout/repo")
 
 find_package(Git REQUIRED)
@@ -23,11 +22,14 @@ ExternalProject_Add(cldr-json
   DOWNLOAD_COMMAND
     ${CMAKE_COMMAND} -E rm -rf ${CLDR_CHECKOUT_DIR}
     COMMAND ${GIT_EXECUTABLE} -c advice.detachedHead=false clone --quiet --depth 1 --branch ${CLDR_VERSION} --filter=blob:none --sparse https://github.com/unicode-org/cldr-json.git ${CLDR_CHECKOUT_DIR}
-    # currencies.json only exists in the per-locale cldr-numbers-full folders.
+    # currencies.json and numbers.json only exist in the per-locale
+    # cldr-numbers-full folders so we don't need the full path
     COMMAND ${GIT_EXECUTABLE} -C ${CLDR_CHECKOUT_DIR} sparse-checkout set --no-cone
       /cldr-json/cldr-core/supplemental/currencyData.json
       /cldr-json/cldr-core/supplemental/likelySubtags.json
+      /cldr-json/cldr-core/supplemental/parentLocales.json
       currencies.json
+      numbers.json
   UPDATE_COMMAND ""
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ""
@@ -54,8 +56,8 @@ add_custom_command(
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   DEPENDS
     cldr-json
-    # The done stamp is touched whenever the checkout changes, like when the
-    # version is bumped, which will cause this to be regenerated.
+    # The done stamp gets touched whenever the checkout changes (like bumping
+    # the version) which makes this regenerate
     ${CLDR_STAMP_DIR}/cldr-json-done
     ${CMAKE_CURRENT_SOURCE_DIR}/internal/cldrgen/main.go
   VERBATIM

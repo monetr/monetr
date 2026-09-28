@@ -5,8 +5,8 @@ import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import type { Currency } from '@monetr/interface/hooks/useInstalledCurrencies';
 
 /**
- * useCurrency retrieves the details of a single currency by its ISO 4217 code. If the full currency list has already
- * been retrieved then that will be used as the initial data.
+ * useCurrency retrieves the details of a single currency by its ISO 4217 code, if we already have the full currency
+ * list then that gets used as the initial data
  */
 export function useCurrency(code?: string): UseQueryResult<Currency> {
   const { data } = useAuthentication();
@@ -21,7 +21,7 @@ export function useCurrency(code?: string): UseQueryResult<Currency> {
   );
   return useQuery<Currency>({
     queryKey: [`/api/locale/currency/${code}`],
-    // Only allowed to fetch currency and locale information if we are authenticated.
+    // Only allowed to fetch currency and locale information if we are authenticated
     enabled: Boolean(data?.user) && Boolean(code),
     initialData,
     initialDataUpdatedAt,

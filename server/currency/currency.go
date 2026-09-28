@@ -188,16 +188,11 @@ func ParseFloatToAmount[T float32 | float64](
 	return ParseFriendlyToAmount(fmt.Sprint(input), currency)
 }
 
-// Currency is the details of a single currency, with the name and symbol
-// localized for a specific locale.
+// Currency is a single currency with its name and symbol localized for a
+// specific locale
 type Currency struct {
-	// Code is the ISO 4217 currency code, like USD.
-	Code string `json:"code"`
-	// Name is the localized display name of the currency, like "US Dollar".
-	Name string `json:"name"`
-	// Symbol is the localized symbol for the currency, like "$" or "US$".
-	Symbol string `json:"symbol"`
-	// FractionalDigits is the number of digits after the decimal place that the
-	// currency uses. For example USD uses 2 and JPY uses 0.
-	FractionalDigits int64 `json:"fractionalDigits"`
+	Code             string `json:"code"`
+	Name             string `json:"name"`
+	Symbol           string `json:"symbol"`
+	FractionalDigits int64  `json:"fractionalDigits"`
 }

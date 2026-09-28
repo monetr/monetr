@@ -82,7 +82,7 @@ func (c *Controller) postBankAccounts(ctx *echo.Context) error {
 	// If we cannot determine what currencyCode we should default to based on the
 	// locale, then fallback to monetr's global default.
 	currencyCode := consts.DefaultCurrencyCode
-	// Try to retrieve currency information for the user's locale.
+	// Try to figure out the currency from the user's locale
 	if code, err := currency.GetCurrencyForLocale(account.Locale); err != nil {
 		log.WarnContext(c.getContext(ctx), "failed to get currency information for account's locale, application default currency will be used", "locale", account.Locale, "err", err)
 	} else {
