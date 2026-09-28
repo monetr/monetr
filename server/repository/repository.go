@@ -125,12 +125,6 @@ type BaseRepository interface {
 		ctx context.Context,
 		bankAccountId ID[BankAccount],
 	) ([]Transaction, error)
-	// GetTransactionClusterIds returns the ID of every cluster stored for the
-	// bank account, including ones that no transaction points at anymore.
-	GetTransactionClusterIds(
-		ctx context.Context,
-		bankAccountId ID[BankAccount],
-	) ([]ID[TransactionCluster], error)
 	// UpsertTransactionClusters will insert or update the provided clusters by
 	// their primary key. It doesn't delete anything, use DeleteTransactionClusters
 	// for that. The name on an existing cluster is never overwritten since that's

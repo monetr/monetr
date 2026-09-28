@@ -41,30 +41,6 @@ func (r *repositoryBase) GetClusteredTransactions(
 	return result, nil
 }
 
-func (r *repositoryBase) GetTransactionClusterIds(
-	ctx context.Context,
-	bankAccountId ID[BankAccount],
-) ([]ID[TransactionCluster], error) {
-	span := crumbs.StartFnTrace(ctx)
-	defer span.Finish()
-
-	var result []ID[TransactionCluster]
-	if err := r.txn.NewSelect().
-		Model(new(TransactionCluster)).
-		Column("transaction_cluster_id").
-		Where(`"transaction_cluster"."account_id" = ?`, r.AccountId()).
-		Where(`"transaction_cluster"."bank_account_id" = ?`, bankAccountId).
-		Scan(span.Context(), &result); err != nil {
-		return nil, crumbs.WrapError(
-			span.Context(),
-			err,
-			"failed to retrieve transaction cluster ids",
-		)
-	}
-
-	return result, nil
-}
-
 func (r *repositoryBase) UpsertTransactionClusters(
 	ctx context.Context,
 	bankAccountId ID[BankAccount],
