@@ -65,6 +65,30 @@ func CalculateTransactionClusters(ctx queue.Context, args CalculateTransactionCl
 			args.BankAccountId,
 		)
 
+		{ // The diff only knows about clusters that a transaction points at. A
+			// cluster nothing points at would never get deleted, and would block the
+			// same signature + centroid from being inserted under a new ID.
+			storedClusterIds, err := repo.GetTransactionClusterIds(
+				ctx,
+				args.BankAccountId,
+			)
+			if err != nil {
+				return errors.Wrap(err, "failed to read transaction cluster ids")
+			}
+			referenced := make(
+				map[models.ID[models.TransactionCluster]]struct{},
+				len(existingMembers),
+			)
+			for _, m := range existingMembers {
+				referenced[*m.TransactionClusterId] = struct{}{}
+			}
+			for _, clusterId := range storedClusterIds {
+				if _, ok := referenced[clusterId]; !ok {
+					diff.DeleteClusterIds = append(diff.DeleteClusterIds, clusterId)
+				}
+			}
+		}
+
 		log.InfoContext(ctx, "cluster membership diff calculated",
 			"upsertClusters", len(diff.UpsertClusters),
 			"deleteClusters", len(diff.DeleteClusterIds),

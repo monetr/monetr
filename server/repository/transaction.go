@@ -451,14 +451,40 @@ func (r *repositoryBase) DeleteTransaction(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
+	var transactionClusterIds []*ID[TransactionCluster]
 	_, err := r.txn.NewDelete().
 		Model(&Transaction{}).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction"."transaction_id" = ?`, transactionId).
+		Returning(`"transaction_cluster_id"`).
+		Exec(span.Context(), &transactionClusterIds)
+	if err != nil {
+		return errors.Wrap(err, "failed to delete transaction")
+	}
+
+	if len(transactionClusterIds) == 0 || transactionClusterIds[0] == nil {
+		return nil
+	}
+
+	// If that was the last transaction in its cluster then the cluster has to go
+	// too. Otherwise the clustering job can't see it and will fail trying to
+	// insert the same signature + centroid under a new ID
+	_, err = r.txn.NewDelete().
+		Model(&TransactionCluster{}).
+		Where(`"transaction_cluster"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction_cluster"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction_cluster"."transaction_cluster_id" = ?`, *transactionClusterIds[0]).
+		Where(`NOT EXISTS (?)`, r.txn.NewSelect().
+			Model(new(Transaction)).
+			ColumnExpr("1").
+			Where(`"transaction"."account_id" = "transaction_cluster"."account_id"`).
+			Where(`"transaction"."bank_account_id" = "transaction_cluster"."bank_account_id"`).
+			Where(`"transaction"."transaction_cluster_id" = "transaction_cluster"."transaction_cluster_id"`),
+		).
 		Exec(span.Context())
 
-	return errors.Wrap(err, "failed to delete transaction")
+	return errors.Wrap(err, "failed to delete empty transaction cluster")
 }
 
 func (r *repositoryBase) GetTransactionsByPlaidTransactionId(
