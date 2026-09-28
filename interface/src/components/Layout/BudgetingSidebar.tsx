@@ -1,3 +1,4 @@
+import { useContext } from 'react';
 import { CalendarSync, PiggyBank, Receipt, ShoppingCart } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
 
@@ -8,6 +9,7 @@ import BalanceAvailableAmount from '@monetr/interface/components/Layout/BalanceA
 import BalanceCurrentAmount from '@monetr/interface/components/Layout/BalanceCurrentAmount';
 import BalanceFreeToUseAmount from '@monetr/interface/components/Layout/BalanceFreeToUseAmount';
 import BalanceLimitAmount from '@monetr/interface/components/Layout/BalanceLimitAmount';
+import { MobileSidebarContext } from '@monetr/interface/components/Layout/MobileSidebarContextProvider';
 import PlaidBankStatusCard from '@monetr/interface/components/Layout/PlaidBankStatusCard';
 import PlaidLastUpdatedCard from '@monetr/interface/components/Layout/PlaidLastUpdatedCard';
 import SelectBankAccount from '@monetr/interface/components/Layout/SelectBankAccount';
@@ -99,9 +101,18 @@ interface NavigationItemProps {
 function NavigationItem(props: NavigationItemProps): React.JSX.Element {
   const [pathname] = useLocation();
   const active = pathname.endsWith(props.to.replaceAll('.', ''));
+  const { setIsOpen } = useContext(MobileSidebarContext);
+  // Clicking the page we're already on just closes the mobile sidebar. Skipping the navigation avoids
+  // scrolling back to the top of the page.
+  const onClick = (event: React.MouseEvent) => {
+    if (active) {
+      event.preventDefault();
+      setIsOpen(false);
+    }
+  };
 
   return (
-    <Link className={styles.navItem} data-active={active} to={props.to}>
+    <Link className={styles.navItem} data-active={active} onClick={onClick} to={props.to}>
       {props.children}
     </Link>
   );
