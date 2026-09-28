@@ -1,6 +1,11 @@
 import type React from 'react';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
-import { type UseComboboxSelectedItemChange, useCombobox } from 'downshift';
+import {
+  type UseComboboxSelectedItemChange,
+  type UseComboboxState,
+  type UseComboboxStateChangeOptions,
+  useCombobox,
+} from 'downshift';
 
 import { SelectSpendingOptionComponent } from '@monetr/interface/components/MSelectSpending';
 import { defaultFilterImplementation, SelectIndicator, type SelectOption } from '@monetr/interface/components/Select';
@@ -99,13 +104,36 @@ interface InnerSelectProps<T> {
 
 function InnerSelect({ id, value, options, onChange }: InnerSelectProps<SpendingOption>): React.JSX.Element {
   const inputWrapperRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [items, setItems] = useState<Array<SelectOption<SpendingOption>>>(options);
   const { isOpen, getMenuProps, getInputProps, getItemProps, openMenu, selectedItem } = useCombobox({
     selectedItem: value,
     // By default the highest item should be "highlighted" unless the user moves the highlight themselves.
     defaultHighlightedIndex: 0,
-    // But the initially highlighted item should be the one they have selected otherwise fallback to the first item.
-    initialHighlightedIndex: value ? options.indexOf(value) : 0,
+    stateReducer(
+      state: UseComboboxState<SelectOption<SpendingOption>>,
+      { type, changes }: UseComboboxStateChangeOptions<SelectOption<SpendingOption>>,
+    ): Partial<UseComboboxState<SelectOption<SpendingOption>>> {
+      // defaultHighlightedIndex always wins when the menu opens, so the selected item would never get highlighted and
+      // downshift would never scroll to it. So when we are opening and there is a selection, highlight that instead.
+      // Match on the spending ID rather than the object because the options get rebuilt whenever balances change.
+      if (changes.isOpen && !state.isOpen && changes.selectedItem) {
+        const selectedSpendingId = changes.selectedItem.value.spendingId;
+        const index = items.findIndex(item => item.value.spendingId === selectedSpendingId);
+        if (index >= 0) {
+          return { ...changes, highlightedIndex: index };
+        }
+      }
+
+      // Clicking the input opens the menu and then the click bubbles up to the wrapper which calls openMenu again, same
+      // with focus. openMenu recalculates the highlight even when we are already open, which would throw away the one
+      // we just picked above. So if we are already open just leave the highlight alone.
+      if (type === useCombobox.stateChangeTypes.FunctionOpenMenu && state.isOpen) {
+        return { ...changes, highlightedIndex: state.highlightedIndex };
+      }
+
+      return changes;
+    },
     onInputValueChange({ inputValue, isOpen }) {
       // Only filter items if we are open!
       if (isOpen) {
@@ -134,6 +162,15 @@ function InnerSelect({ id, value, options, onChange }: InnerSelectProps<Spending
       setItems(options);
     }
   }, [options, isOpen]);
+
+  // When the menu opens highlight all of the text in the input, that way if the user just starts typing it replaces the
+  // current value and starts filtering instead of appending to it. This has to happen after the click is done or the
+  // browser will move the cursor and undo it.
+  useEffect(() => {
+    if (isOpen) {
+      inputRef.current?.select();
+    }
+  }, [isOpen]);
 
   const renderStyles = useMemo(() => {
     // Controls the height of the menu that is rendered, makes sure that we dont render past the bottom of the page.
@@ -168,6 +205,7 @@ function InnerSelect({ id, value, options, onChange }: InnerSelectProps<Spending
               id,
               className: styles.selectSpendingInput,
               onFocus: openMenu,
+              ref: inputRef,
               spellCheck: false,
               'data-freetouse': value?.value.spendingId === FREE_TO_USE,
               autoComplete: 'off',
