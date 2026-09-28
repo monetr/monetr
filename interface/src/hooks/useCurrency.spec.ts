@@ -96,7 +96,7 @@ describe('use currency', () => {
       }),
       {
         initialRoute: '/settings',
-        initialProps: { code: undefined },
+        initialProps: { code: undefined } as { code?: string },
       },
     );
     await waitFor(() => expect(world.result.current.list.isSuccess).toBeTruthy());
@@ -104,7 +104,7 @@ describe('use currency', () => {
     world.rerender({ code: 'EUR' });
     expect(world.result.current.currency.data).toStrictEqual(euro);
     // The list is fresh so there should be no need to request the single currency
-    expect(mockFetch.history.get.map(item => item.url)).not.toContain('/api/locale/currency/EUR');
+    expect((mockFetch.history.get ?? []).map(item => item.url)).not.toContain('/api/locale/currency/EUR');
   });
 
   it('will not fetch without a currency code', () => {
