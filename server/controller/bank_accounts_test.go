@@ -451,6 +451,15 @@ func TestPostBankAccount(t *testing.T) {
 			token = GivenILogin(t, e, email, password)
 		}
 
+		{ // The default currency should come from the locale too
+			response := e.GET("/api/users/me").
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.defaultCurrency").String().IsEqual("JPY")
+		}
+
 		var linkId ID[Link]
 		{ // Create the manual link
 			response := e.POST("/api/links").

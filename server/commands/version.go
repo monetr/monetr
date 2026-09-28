@@ -5,8 +5,8 @@ import (
 	"runtime"
 	"strings"
 
-	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/monetr/monetr/server/build"
+	"github.com/monetr/monetr/server/currency"
 	"github.com/monetr/monetr/server/icons"
 	"github.com/monetr/monetr/server/ui"
 	"github.com/spf13/cobra"
@@ -36,7 +36,7 @@ func VersionCommand(parent *cobra.Command) {
 				"Embedded UI:     %t\n" +
 				"Embedded Icons:  %t\n" +
 				"  Icon Packs:    %s\n" +
-				"Locales:         %d\n" +
+				"CLDR Version:    %s\n" +
 				"Currencies:      %d\n" +
 				"Architecture:    %s\n" +
 				"OS:              %s\n" +
@@ -44,8 +44,7 @@ func VersionCommand(parent *cobra.Command) {
 				"Compiler:        %s\n" +
 				"Go Version:      %s\n"
 
-			locales := locale.GetInstalledLocales()
-			currencies := locale.GetInstalledCurrencies()
+			currencies := currency.GetCurrencies()
 
 			iconsEnabled := icons.GetIconsEnabled()
 			iconPacks := "<not enabled>"
@@ -75,7 +74,7 @@ func VersionCommand(parent *cobra.Command) {
 				ui.EmbeddedUI,
 				iconsEnabled,
 				iconPacks,
-				len(locales),
+				currency.GetCLDRVersion(),
 				len(currencies),
 				runtime.GOARCH,
 				runtime.GOOS,

@@ -1,14 +1,13 @@
 ---
-title: "Health and Reference Data"
-description: "Point an uptime monitor at monetr's unauthenticated health endpoint, and list the currencies a monetr instance knows how to format money in."
+title: "Health"
+description: "Point an uptime monitor at monetr's unauthenticated health endpoint."
 ---
 
 import { Badge } from "@rspress/core/theme";
 
-# Health and Reference Data
+# Health
 
-Two small things that don't belong to any resource. Health is for whatever is watching your instance, and the currency
-list is reference data you'd use when creating a bank account.
+This doesn't belong to any resource. It's for whatever is watching your instance.
 
 ## Check server health
 
@@ -60,50 +59,3 @@ curl --request GET \
 
 **Watch the status code, not only the body.** When the database ping fails you get a **500**, with `dbHealthy` set to
 false. A monitor checking only for 200 will catch that, but one parsing the body should check both.
-
-## <Badge type="info">GET</Badge> List currencies
-
-Returns every currency the server can format amounts for, which comes from the operating system's locale data rather
-than a list monetr maintains.
-
-**In the app:** The currency picker when you create or edit a bank account.
-
-```http
-GET /api/locale/currency
-```
-
-**Auth:** API key, subscription required.
-
-### Example
-
-```bash
-curl --request GET \
-  --url "https://my.monetr.local/api/locale/currency" \
-  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
-```
-
-```json
-[
-  "AED",
-  "AFN",
-  "ALL",
-  "AMD",
-  "ANG",
-  "AOA",
-  "ARS",
-  "AUD",
-  "EUR",
-  "GBP",
-  "JPY",
-  "USD"
-]
-```
-
-A flat array of ISO 4217 codes, nothing more. The real list is much longer, this is a sample.
-
-Because the list comes from the host's locale data, two instances on different base images can hand back different sets.
-If a currency you expect is missing, that's a locale package on the server rather than something monetr decided. A code
-missing here can still be a perfectly valid currency, monetr has no formatting information for it.
-
-The codes here are what you pass as `currency` when [creating a bank account](./bank_accounts#create-a-bank-account),
-and they decide how many decimal places an amount implies. See [Money](./overview#money).

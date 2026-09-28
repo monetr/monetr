@@ -1,5 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { type UseComboboxSelectedItemChange, useCombobox } from 'downshift';
+import {
+  type UseComboboxSelectedItemChange,
+  type UseComboboxState,
+  type UseComboboxStateChangeOptions,
+  useCombobox,
+} from 'downshift';
 import { ArrowDown, ArrowUp, LoaderCircle, PanelBottomClose, PanelBottomOpen } from 'lucide-react';
 
 import { Drawer, DrawerContent, DrawerTrigger, DrawerWrapper } from '@monetr/interface/components/Drawer';
@@ -89,6 +94,7 @@ export function SelectLoading<V>(props: SelectPropsLoading<V>): React.JSX.Elemen
 
 export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
   const inputWrapperRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [items, setItems] = useState<Array<SelectOption<V>>>(props.options);
   const filterImplementation = useMemo(() => {
     if (props.filterImpl) {
@@ -102,8 +108,30 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
     selectedItem: props.value,
     // By default the highest item should be "highlighted" unless the user moves the highlight themselves.
     defaultHighlightedIndex: 0,
-    // But the initially highlighted item should be the one they have selected otherwise fallback to the first item.
-    initialHighlightedIndex: props.value ? props.options.indexOf(props.value) : 0,
+    stateReducer(
+      state: UseComboboxState<SelectOption<V>>,
+      { type, changes }: UseComboboxStateChangeOptions<SelectOption<V>>,
+    ): Partial<UseComboboxState<SelectOption<V>>> {
+      // defaultHighlightedIndex always wins when the menu opens, so the selected item would never get highlighted and
+      // downshift would never scroll to it. So when we are opening and there is a selection, highlight that instead.
+      // Match on the value rather than the object because a lot of callers rebuild their options every render.
+      if (changes.isOpen && !state.isOpen && changes.selectedItem) {
+        const selectedValue = changes.selectedItem.value;
+        const index = items.findIndex(item => item.value === selectedValue);
+        if (index >= 0) {
+          return { ...changes, highlightedIndex: index };
+        }
+      }
+
+      // Clicking the input opens the menu and then the click bubbles up to the wrapper which calls openMenu again, same
+      // with focus. openMenu recalculates the highlight even when we are already open, which would throw away the one
+      // we just picked above. So if we are already open just leave the highlight alone.
+      if (type === useCombobox.stateChangeTypes.FunctionOpenMenu && state.isOpen) {
+        return { ...changes, highlightedIndex: state.highlightedIndex };
+      }
+
+      return changes;
+    },
     onInputValueChange({ inputValue, isOpen }) {
       // Only filter items if we are open!
       if (isOpen) {
@@ -136,6 +164,15 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
       setItems(props.options);
     }
   }, [props.options, isOpen]);
+
+  // When the menu opens highlight all of the text in the input, that way if the user just starts typing it replaces the
+  // current value and starts filtering instead of appending to it. This has to happen after the click is done or the
+  // browser will move the cursor and undo it.
+  useEffect(() => {
+    if (isOpen) {
+      inputRef.current?.select();
+    }
+  }, [isOpen]);
 
   // This effect gives the parent component some basic control over the state of the value of this combobox. Mainly this
   // makes it so that if the parent component (specifically select frequency) changes its value to null. Then we need to
@@ -188,6 +225,7 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
             placeholder: props.placeholder,
             className: selectStyles.input,
             onFocus: openMenu,
+            ref: inputRef,
             spellCheck: false,
             'data-1p-ingore': true,
           })}

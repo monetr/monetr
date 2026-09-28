@@ -20,3 +20,6 @@ add_custom_target(
   COMMENT "Performing database migrations"
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
+# go run compiles the whole server which embeds the CLDR dataset, so that needs
+# to be downloaded first
+add_dependencies(development.migrate download.cldr-json)

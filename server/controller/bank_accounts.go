@@ -1,13 +1,12 @@
 package controller
 
 import (
-	"bytes"
 	"database/sql"
 	"net/http"
 
-	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/consts"
+	"github.com/monetr/monetr/server/currency"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/schemas"
 	"github.com/pkg/errors"
@@ -83,14 +82,11 @@ func (c *Controller) postBankAccounts(ctx *echo.Context) error {
 	// If we cannot determine what currencyCode we should default to based on the
 	// locale, then fallback to monetr's global default.
 	currencyCode := consts.DefaultCurrencyCode
-	// Try to retrieve currency information for the user's locale from the
-	// operating system.
-	lconv, err := locale.GetLConv(account.Locale)
-	if err != nil || lconv == nil {
+	// Try to figure out the currency from the user's locale
+	if code, err := currency.GetCurrencyForLocale(account.Locale); err != nil {
 		log.WarnContext(c.getContext(ctx), "failed to get currency information for account's locale, application default currency will be used", "locale", account.Locale, "err", err)
 	} else {
-		// If it worked then clean up the code from the OS and use it.
-		currencyCode = string(bytes.TrimSpace(lconv.IntCurrSymbol))
+		currencyCode = code
 	}
 
 	// Pre-set the default values for these fields.

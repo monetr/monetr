@@ -242,6 +242,15 @@
     },
     {
       "customType": "regex",
+      "description": "Update CLDR version in CMake",
+      "fileMatch": ["server/currency/CMakeLists.txt"],
+      "matchStrings": ["set\\(CLDR_VERSION \"(?<currentValue>\\d+\\.\\d+\\.\\d+)\"\\)"],
+      "depNameTemplate": "unicode-org/cldr-json",
+      "datasourceTemplate": "github-tags",
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
       "description": "Update simple-icons version in CMake",
       "fileMatch": ["CMakeLists.txt"],
       "matchStrings": ["GIT_REPOSITORY .+simple-icons.+\n.+GIT_TAG (?<currentValue>.*?)\n"],

@@ -295,6 +295,7 @@ func (s *syncLunchFlowContext) syncTransactions(ctx queue.Context) error {
 			)
 		}
 
+		// TODO Change this to use [currency.ParseCurrency]
 		amount, err := currency.ParseFriendlyToAmount(
 			externalTransaction.Amount.String(),
 			s.bankAccount.Currency,

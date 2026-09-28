@@ -4,7 +4,7 @@ import (
 	"math"
 	"regexp"
 
-	locale "github.com/elliotcourant/go-lclocale"
+	"github.com/monetr/monetr/server/currency"
 	"github.com/monetr/validation"
 	"github.com/monetr/validation/is"
 )
@@ -57,7 +57,7 @@ func CurrencyCode(required OptionalOrRequire) *validation.KeyRules[string] {
 		"currency",
 		validation.Required.When(required).Error("Currency is required"),
 		validation.In(
-			locale.GetInstalledCurrencies()...,
+			currency.GetCurrencies()...,
 		).Error("Currency must be one supported by the server"),
 	).Required(required)
 }

@@ -318,9 +318,24 @@ if(BUILD_TESTING)
       COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} -t development.migrate
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     )
-    set_tests_properties(migrate.db PROPERTIES FIXTURES_SETUP DB)
+    # Migrations have to compile the server, which needs the CLDR dataset. This
+    # also keeps both of these from downloading it at the same time
+    set_tests_properties(migrate.db PROPERTIES FIXTURES_SETUP DB FIXTURES_REQUIRED cldr)
     set_property(
       TEST migrate.db
+      PROPERTY LABELS "bootstrap"
+    )
+
+    # The currency package embeds the CLDR dataset, so basically nothing in Go
+    # compiles until it's been downloaded
+    add_test(
+      NAME download.cldr-json
+      COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} -t download.cldr-json
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+    set_tests_properties(download.cldr-json PROPERTIES FIXTURES_SETUP cldr)
+    set_property(
+      TEST download.cldr-json
       PROPERTY LABELS "bootstrap"
     )
 

@@ -1,10 +1,31 @@
 import { waitFor } from '@testing-library/react';
 
+import { useCurrency } from '@monetr/interface/hooks/useCurrency';
 import { useInstalledCurrencies } from '@monetr/interface/hooks/useInstalledCurrencies';
 import FetchMock from '@monetr/interface/testutils/fetchMock';
 import testRenderHook from '@monetr/interface/testutils/hooks';
 
-describe('use installed currencies', () => {
+const euro = {
+  code: 'EUR',
+  name: 'Euro',
+  symbol: '€',
+  decimalSeparator: '.',
+  groupSeparator: ',',
+  minusSign: '-',
+  fractionalDigits: 2,
+};
+
+const yen = {
+  code: 'JPY',
+  name: 'Japanese Yen',
+  symbol: '¥',
+  decimalSeparator: '.',
+  groupSeparator: ',',
+  minusSign: '-',
+  fractionalDigits: 0,
+};
+
+describe('use currency', () => {
   let mockFetch: FetchMock;
 
   beforeEach(() => {
@@ -17,7 +38,7 @@ describe('use installed currencies', () => {
     mockFetch.restore();
   });
 
-  it('will fetch currencies if we are authenticated', async () => {
+  function givenIAmAuthenticated() {
     mockFetch.onGet('/api/users/me').reply(200, {
       activeUntil: '2024-09-26T00:31:38Z',
       hasSubscription: true,
@@ -51,66 +72,62 @@ describe('use installed currencies', () => {
         },
       },
     });
-    mockFetch.onGet('/api/locale/currency').reply(200, [
-      {
-        code: 'EUR',
-        name: 'Euro',
-        symbol: '€',
-        decimalSeparator: '.',
-        groupSeparator: ',',
-        minusSign: '-',
-        fractionalDigits: 2,
-      },
-      {
-        code: 'USD',
-        name: 'US Dollar',
-        symbol: '$',
-        decimalSeparator: '.',
-        groupSeparator: ',',
-        minusSign: '-',
-        fractionalDigits: 2,
-      },
-      // Having all of them doesn't matter, just testing
-    ]);
+  }
 
-    const world = testRenderHook(useInstalledCurrencies, {
+  it('will fetch a single currency', async () => {
+    givenIAmAuthenticated();
+    mockFetch.onGet('/api/locale/currency/JPY').reply(200, yen);
+
+    const world = testRenderHook(() => useCurrency('JPY'), {
+      initialRoute: '/settings',
+    });
+    await waitFor(() => expect(world.result.current.isSuccess).toBeTruthy());
+    expect(world.result.current.data).toStrictEqual(yen);
+  });
+
+  it('will use the currency list if it is already loaded', async () => {
+    givenIAmAuthenticated();
+    mockFetch.onGet('/api/locale/currency').reply(200, [euro, yen]);
+
+    const world = testRenderHook(
+      ({ code }: { code?: string }) => ({
+        list: useInstalledCurrencies(),
+        currency: useCurrency(code),
+      }),
+      {
+        initialRoute: '/settings',
+        initialProps: { code: undefined } as { code?: string },
+      },
+    );
+    await waitFor(() => expect(world.result.current.list.isSuccess).toBeTruthy());
+
+    world.rerender({ code: 'EUR' });
+    expect(world.result.current.currency.data).toStrictEqual(euro);
+    // The list is fresh so there should be no need to request the single currency
+    expect((mockFetch.history.get ?? []).map(item => item.url)).not.toContain('/api/locale/currency/EUR');
+  });
+
+  it('will not fetch without a currency code', () => {
+    givenIAmAuthenticated();
+
+    const world = testRenderHook(() => useCurrency(undefined), {
       initialRoute: '/settings',
     });
     expect(world.result.current.data).not.toBeDefined();
-    await waitFor(() => expect(world.result.current.isLoading).toBeFalsy());
-    await waitFor(() => expect(world.result.current.isSuccess).toBeTruthy());
-    expect(world.result.current.data).toStrictEqual([
-      {
-        code: 'EUR',
-        name: 'Euro',
-        symbol: '€',
-        decimalSeparator: '.',
-        groupSeparator: ',',
-        minusSign: '-',
-        fractionalDigits: 2,
-      },
-      {
-        code: 'USD',
-        name: 'US Dollar',
-        symbol: '$',
-        decimalSeparator: '.',
-        groupSeparator: ',',
-        minusSign: '-',
-        fractionalDigits: 2,
-      },
-    ]);
+    expect(world.result.current.isFetching).toBeFalsy();
+    expect(world.result.current.status).toBe('pending');
   });
 
   it('will not fetch currencies if we are not authenticated', () => {
     mockFetch.onGet('/api/users/me').reply(403, {
       error: 'unauthenticated',
     });
-    const world = testRenderHook(useInstalledCurrencies, {
+
+    const world = testRenderHook(() => useCurrency('JPY'), {
       initialRoute: '/login',
     });
     expect(world.result.current.data).not.toBeDefined();
     expect(world.result.current.isFetching).toBeFalsy();
-    // Since it cannot request anything because we are not logged in. Then it should stay in a pending state.
     expect(world.result.current.status).toBe('pending');
   });
 });

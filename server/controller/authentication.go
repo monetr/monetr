@@ -6,11 +6,11 @@ import (
 	"strings"
 	"time"
 
-	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/currency"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/powchallenge"
 	"github.com/monetr/monetr/server/repository"
@@ -456,7 +456,7 @@ func (c *Controller) postRegister(ctx *echo.Context) error {
 		return c.badRequest(ctx, "Locale must be specified to register")
 	}
 
-	if _, err := locale.GetLConv(registerRequest.Locale); err != nil {
+	if _, err := currency.GetCurrencyForLocale(registerRequest.Locale); err != nil {
 		log.WarnContext(
 			c.getContext(ctx),
 			"invalid locale in register request, falling back to global default",

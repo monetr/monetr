@@ -2,6 +2,7 @@
   { "type": "file", "name": "overview", "label": "Overview" },
   { "type": "file", "name": "quickstart", "label": "Quickstart" },
   { "type": "file", "name": "recurrence_rules", "label": "Recurrence Rules" },
+  { "type": "file", "name": "currencies", "label": "Currencies" },
   { "type": "section-header", "label": "Budgeting" },
   { "type": "file", "name": "links", "label": "Links" },
   { "type": "file", "name": "bank_accounts", "label": "Bank Accounts" },
@@ -19,7 +20,7 @@
   { "type": "file", "name": "authentication", "label": "Authentication" },
   { "type": "file", "name": "billing", "label": "Billing" },
   { "type": "section-header", "label": "Other" },
-  { "type": "file", "name": "utility", "label": "Health and Reference" },
+  { "type": "file", "name": "utility", "label": "Health" },
   { "type": "file", "name": "webhooks", "label": "Webhooks" },
   { "type": "file", "name": "internal", "label": "Internal Endpoints" }
 ]

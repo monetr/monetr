@@ -20,6 +20,8 @@ server/ui/static/*
 !server/ui/static/NOTICE
 server/icons/sources/*
 !server/icons/sources/README.md
+server/currency/sources/*
+!server/currency/sources/README.md
 server/internal/source/embed/*
 !server/internal/source/embed/README.md
 tmp

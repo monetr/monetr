@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/gavv/httpexpect/v2"
 )
 
 func TestListCurrencies(t *testing.T) {
@@ -27,6 +28,62 @@ func TestListCurrencies(t *testing.T) {
 		response.JSON().Array().NotEmpty()
 	})
 
+	t.Run("locale query param takes priority over accept language", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		response := e.GET(`/api/locale/currency`).
+			WithQuery("locale", "ja").
+			WithHeader("Accept-Language", "de").
+			WithCookie(TestCookieName, token).
+			Expect()
+		response.Status(http.StatusOK)
+		response.Header("Content-Language").IsEqual("ja")
+		jpy := response.JSON().Array().Filter(func(_ int, value *httpexpect.Value) bool {
+			return value.Object().Value("code").String().Raw() == "JPY"
+		})
+		jpy.Length().IsEqual(1)
+		jpy.Value(0).Object().Value("name").IsEqual("日本円")
+		jpy.Value(0).Object().Value("fractionalDigits").IsEqual(0)
+	})
+
+	t.Run("accept language is used without a locale query param", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		response := e.GET(`/api/locale/currency`).
+			WithHeader("Accept-Language", "de").
+			WithCookie(TestCookieName, token).
+			Expect()
+		response.Status(http.StatusOK)
+		response.Header("Content-Language").IsEqual("de")
+	})
+
+	t.Run("posix style locale query param", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		response := e.GET(`/api/locale/currency`).
+			WithQuery("locale", "de_CH").
+			WithCookie(TestCookieName, token).
+			Expect()
+		response.Status(http.StatusOK)
+		response.Header("Content-Language").IsEqual("de-CH")
+	})
+
+	t.Run("invalid locale query param falls back to english", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		response := e.GET(`/api/locale/currency`).
+			WithQuery("locale", "!!").
+			WithHeader("Accept-Language", "de").
+			WithCookie(TestCookieName, token).
+			Expect()
+		response.Status(http.StatusOK)
+		response.Header("Content-Language").IsEqual("en")
+	})
+
 	t.Run("with an invalid api key", func(t *testing.T) {
 		// A syntactically plausible but non-existent API key must be rejected before
 		// the handler runs.
@@ -36,5 +93,71 @@ func TestListCurrencies(t *testing.T) {
 			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
 			Expect()
 		response.Status(http.StatusUnauthorized)
+	})
+}
+
+func TestGetCurrency(t *testing.T) {
+	t.Run("locale query param takes priority over accept language", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		response := e.GET(`/api/locale/currency/jpy`).
+			WithQuery("locale", "ja").
+			WithHeader("Accept-Language", "de").
+			WithCookie(TestCookieName, token).
+			Expect()
+		response.Status(http.StatusOK)
+		response.Header("Content-Language").IsEqual("ja")
+		response.JSON().Object().IsEqual(map[string]any{
+			"code":             "JPY",
+			"name":             "日本円",
+			"symbol":           "￥",
+			"decimalSeparator": ".",
+			"groupSeparator":   ",",
+			"minusSign":        "-",
+			"fractionalDigits": 0,
+		})
+	})
+
+	t.Run("accept language is used without a locale query param", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		response := e.GET(`/api/locale/currency/EUR`).
+			WithHeader("Accept-Language", "de").
+			WithCookie(TestCookieName, token).
+			Expect()
+		response.Status(http.StatusOK)
+		response.Header("Content-Language").IsEqual("de")
+		response.Headers().Value("Vary").Array().ContainsAll("Accept-Language")
+		response.JSON().Path("$.code").String().IsEqual("EUR")
+		response.JSON().Path("$.name").String().IsEqual("Euro")
+		response.JSON().Path("$.decimalSeparator").String().IsEqual(",")
+		response.JSON().Path("$.groupSeparator").String().IsEqual(".")
+	})
+
+	t.Run("currency code is trimmed and upper cased", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		response := e.GET(`/api/locale/currency/{currencyCode}`).
+			WithPath("currencyCode", " usd ").
+			WithCookie(TestCookieName, token).
+			Expect()
+		response.Status(http.StatusOK)
+		response.Header("Content-Language").IsEqual("en")
+		response.JSON().Path("$.code").String().IsEqual("USD")
+	})
+
+	t.Run("unsupported currency", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		response := e.GET(`/api/locale/currency/DEM`).
+			WithQuery("locale", "ja").
+			WithCookie(TestCookieName, token).
+			Expect()
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").String().IsEqual("Currency is not supported")
 	})
 }
