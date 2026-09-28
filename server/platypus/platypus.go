@@ -20,7 +20,7 @@ import (
 	"github.com/monetr/monetr/server/round"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/v45/plaid"
+	"github.com/plaid/plaid-go/v47/plaid"
 	"github.com/uptrace/bun"
 )
 
