@@ -22,6 +22,7 @@ BlogHeader
 BlogIndex
 BlogMeme
 BookOpen
+CIDR
 CLDR
 CLI
 CMake
@@ -105,6 +106,7 @@ TODO
 TOTP
 TOTP-enabled
 Tomlinson
+Traefik
 UI
 ULID.*
 URI
