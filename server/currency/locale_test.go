@@ -151,6 +151,9 @@ func TestGetCurrency(t *testing.T) {
 			Code:             "USD",
 			Name:             "US Dollar",
 			Symbol:           "$",
+			DecimalSeparator: ".",
+			GroupSeparator:   ",",
+			MinusSign:        "-",
 			FractionalDigits: 2,
 		}, result)
 	})
@@ -162,6 +165,9 @@ func TestGetCurrency(t *testing.T) {
 			Code:             "JPY",
 			Name:             "日本円",
 			Symbol:           "￥",
+			DecimalSeparator: ".",
+			GroupSeparator:   ",",
+			MinusSign:        "-",
 			FractionalDigits: 0,
 		}, result)
 	})
@@ -184,6 +190,18 @@ func TestGetCurrency(t *testing.T) {
 		result, err = currency.GetCurrency("az", "AMD")
 		assert.NoError(t, err)
 		assert.Equal(t, "Ermənistan Dramı", result.Name)
+	})
+
+	t.Run("includes the separators", func(t *testing.T) {
+		result, err := currency.GetCurrency("de", "EUR")
+		assert.NoError(t, err)
+		assert.Equal(t, ",", result.DecimalSeparator)
+		assert.Equal(t, ".", result.GroupSeparator)
+
+		// Cape Verde's own currency has its own decimal separator
+		result, err = currency.GetCurrency("pt-CV", "CVE")
+		assert.NoError(t, err)
+		assert.Equal(t, "$", result.DecimalSeparator)
 	})
 
 	t.Run("unsupported currency", func(t *testing.T) {
@@ -234,6 +252,22 @@ func TestGetFractionalDigits(t *testing.T) {
 		digits, err := currency.GetFractionalDigits("DEM")
 		assert.EqualError(t, err, "currency not supported")
 		assert.Zero(t, digits)
+	})
+}
+
+func TestGetMinusSign(t *testing.T) {
+	t.Run("minus signs", func(t *testing.T) {
+		cases := map[string]string{
+			"en":    "-",
+			"de":    "-",
+			"fi":    "\u2212",
+			"hr":    "\u2212",
+			"ar-EG": "\u200e-",
+			"fa":    "\u200e\u2212",
+		}
+		for locale, expected := range cases {
+			assert.Equal(t, expected, currency.GetMinusSign(locale), "wrong minus sign for %s", locale)
+		}
 	})
 }
 

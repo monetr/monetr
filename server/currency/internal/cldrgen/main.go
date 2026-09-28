@@ -46,8 +46,9 @@ type localeNumbers struct {
 			// digits, but monetr only parses ASCII digits so always use the latin
 			// symbols
 			Symbols struct {
-				Decimal string `json:"decimal"`
-				Group   string `json:"group"`
+				Decimal   string `json:"decimal"`
+				Group     string `json:"group"`
+				MinusSign string `json:"minusSign"`
 			} `json:"symbols-numberSystem-latn"`
 		} `json:"numbers"`
 	} `json:"main"`
@@ -68,12 +69,13 @@ type likelySubtags struct {
 }
 
 // Output format, keyed by locale. Each locale has its CLDR parent, its decimal
-// and grouping separators and then its currencies keyed by code. Anything
-// blank gets inherited from the parent locale
+// and grouping separators, its minus sign and then its currencies keyed by
+// code. Anything blank gets inherited from the parent locale
 type currencyLocale struct {
 	Parent     string                        `json:"p,omitempty"`
 	Decimal    string                        `json:"d,omitempty"`
 	Group      string                        `json:"g,omitempty"`
+	Minus      string                        `json:"m,omitempty"`
 	Currencies map[string]currencyLocaleData `json:"c,omitempty"`
 }
 
@@ -171,6 +173,7 @@ func run(cldrPath, outputPath string) error {
 		rawSymbols[locale] = currencyLocale{
 			Decimal: numbers.Main[locale].Numbers.Symbols.Decimal,
 			Group:   numbers.Main[locale].Numbers.Symbols.Group,
+			Minus:   numbers.Main[locale].Numbers.Symbols.MinusSign,
 		}
 	}
 
@@ -220,6 +223,9 @@ func run(cldrPath, outputPath string) error {
 		}
 		if symbols := rawSymbols[locale]; symbols.Group != inherited.Group {
 			item.Group = symbols.Group
+		}
+		if symbols := rawSymbols[locale]; symbols.Minus != inherited.Minus {
+			item.Minus = symbols.Minus
 		}
 		result[locale] = item
 	}

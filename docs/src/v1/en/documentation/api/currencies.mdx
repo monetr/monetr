@@ -66,18 +66,27 @@ curl --request GET \
     "code": "EUR",
     "name": "Euro",
     "symbol": "€",
+    "decimalSeparator": ".",
+    "groupSeparator": ",",
+    "minusSign": "-",
     "fractionalDigits": 2
   },
   {
     "code": "JPY",
     "name": "Japanese Yen",
     "symbol": "¥",
+    "decimalSeparator": ".",
+    "groupSeparator": ",",
+    "minusSign": "-",
     "fractionalDigits": 0
   },
   {
     "code": "USD",
     "name": "US Dollar",
     "symbol": "$",
+    "decimalSeparator": ".",
+    "groupSeparator": ",",
+    "minusSign": "-",
     "fractionalDigits": 2
   }
 ]
@@ -92,6 +101,9 @@ The real list is much longer, this is a sample. It's sorted by `code`.
 | `code`             | string  | The ISO 4217 currency code.                                                                                                    |
 | `name`             | string  | The name of the currency in the language monetr picked.                                                                       |
 | `symbol`           | string  | The symbol for the currency in that language. Some languages don't have a symbol for every currency, so this can be the code. |
+| `decimalSeparator` | string  | What goes between the whole part and the decimals in that language, like `.` in English or `,` in German.                     |
+| `groupSeparator`   | string  | What separates the thousands in that language, like `,` in English or `.` in German. Can be a no-break space in some languages. |
+| `minusSign`        | string  | The minus sign for negative amounts in that language. Usually `-`, but some languages use a real minus sign `−` or put an invisible left-to-right mark in front of it. |
 | `fractionalDigits` | integer | How many decimal places the currency uses. USD uses 2, JPY uses 0.                                                             |
 
 A currency shows up here if at least one country still uses it as legal tender. Retired currencies like DEM are left
@@ -135,6 +147,9 @@ curl --request GET \
   "code": "JPY",
   "name": "日本円",
   "symbol": "￥",
+  "decimalSeparator": ".",
+  "groupSeparator": ",",
+  "minusSign": "-",
   "fractionalDigits": 0
 }
 ```

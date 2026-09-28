@@ -52,8 +52,24 @@ describe('use installed currencies', () => {
       },
     });
     mockFetch.onGet('/api/locale/currency').reply(200, [
-      { code: 'EUR', name: 'Euro', symbol: '€', fractionalDigits: 2 },
-      { code: 'USD', name: 'US Dollar', symbol: '$', fractionalDigits: 2 },
+      {
+        code: 'EUR',
+        name: 'Euro',
+        symbol: '€',
+        decimalSeparator: '.',
+        groupSeparator: ',',
+        minusSign: '-',
+        fractionalDigits: 2,
+      },
+      {
+        code: 'USD',
+        name: 'US Dollar',
+        symbol: '$',
+        decimalSeparator: '.',
+        groupSeparator: ',',
+        minusSign: '-',
+        fractionalDigits: 2,
+      },
       // Having all of them doesn't matter, just testing
     ]);
 
@@ -64,8 +80,24 @@ describe('use installed currencies', () => {
     await waitFor(() => expect(world.result.current.isLoading).toBeFalsy());
     await waitFor(() => expect(world.result.current.isSuccess).toBeTruthy());
     expect(world.result.current.data).toStrictEqual([
-      { code: 'EUR', name: 'Euro', symbol: '€', fractionalDigits: 2 },
-      { code: 'USD', name: 'US Dollar', symbol: '$', fractionalDigits: 2 },
+      {
+        code: 'EUR',
+        name: 'Euro',
+        symbol: '€',
+        decimalSeparator: '.',
+        groupSeparator: ',',
+        minusSign: '-',
+        fractionalDigits: 2,
+      },
+      {
+        code: 'USD',
+        name: 'US Dollar',
+        symbol: '$',
+        decimalSeparator: '.',
+        groupSeparator: ',',
+        minusSign: '-',
+        fractionalDigits: 2,
+      },
     ]);
   });
 

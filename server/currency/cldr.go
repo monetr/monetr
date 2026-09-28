@@ -62,6 +62,7 @@ type currencyLocale struct {
 	Parent     string                        `json:"p,omitempty"`
 	Decimal    string                        `json:"d,omitempty"`
 	Group      string                        `json:"g,omitempty"`
+	Minus      string                        `json:"m,omitempty"`
 	Currencies map[string]currencyLocaleData `json:"c,omitempty"`
 }
 
@@ -354,7 +355,24 @@ func GetCurrency(locale, code string) (Currency, error) {
 	if result.Symbol == "" {
 		result.Symbol = code
 	}
+	result.DecimalSeparator, result.GroupSeparator = GetSeparators(locale, code)
+	result.MinusSign = GetMinusSign(locale)
 	return result, nil
+}
+
+// GetMinusSign returns the minus sign used for negative amounts in the provided
+// locale. Most use a plain - but some use a real minus sign (− in fi) and some
+// have a left-to-right mark in front of it (ar). This is always the sign used
+// with latin (ASCII) digits, and the locale should be one that came from
+// [MatchLocale]
+func GetMinusSign(locale string) string {
+	for _, candidate := range append(localeChain(locale), defaultLocale) {
+		if minus := currencyNames[candidate].Minus; minus != "" {
+			return minus
+		}
+	}
+	// Root always has one so this shouldn't happen, but just in case
+	return "-"
 }
 
 // GetSeparators returns the decimal and grouping separators used when writing

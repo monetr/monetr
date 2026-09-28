@@ -180,12 +180,17 @@ func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx *echo.Context) err
 					joined.From.Currency,
 					consts.DefaultCurrencyCode,
 				)
-				currentBalance, err = currency.ParseCurrency(
-					balance.Amount.String(),
-					currencyCode,
-				)
+				// The balance is a JSON number so it always uses . for the decimal and
+				// never has grouping, which is what en gives us
+				var balanceCurrency currency.Currency
+				balanceCurrency, err = currency.GetCurrency("en", currencyCode)
 				if err != nil {
 					log.WarnContext(c.getContext(ctx), "failed to parse account balance, will default to 0", "err", err)
+				} else {
+					currentBalance, err = currency.ParseCurrency(
+						balance.Amount.String(),
+						balanceCurrency,
+					)
 				}
 			}
 

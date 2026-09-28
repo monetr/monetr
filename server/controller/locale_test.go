@@ -112,6 +112,9 @@ func TestGetCurrency(t *testing.T) {
 			"code":             "JPY",
 			"name":             "日本円",
 			"symbol":           "￥",
+			"decimalSeparator": ".",
+			"groupSeparator":   ",",
+			"minusSign":        "-",
 			"fractionalDigits": 0,
 		})
 	})

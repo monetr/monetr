@@ -6,6 +6,9 @@ export interface Currency {
   code: string;
   name: string;
   symbol: string;
+  decimalSeparator: string;
+  groupSeparator: string;
+  minusSign: string;
   fractionalDigits: number;
 }
 
