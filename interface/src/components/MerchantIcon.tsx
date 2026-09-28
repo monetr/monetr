@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback } from '@monetr/interface/components/Avatar';
 import { useIconSearch } from '@monetr/interface/hooks/useIconSearch';
+import avatarLetter from '@monetr/interface/util/avatarLetter';
 import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import avatarStyles from './Avatar.module.scss';
@@ -35,7 +36,7 @@ export default function MerchantIcon(props: MerchantIconProps): React.JSX.Elemen
   }
 
   // If we have no icon to work with then create an avatar with the first character of the transaction name.
-  const letter = props?.name?.toUpperCase().charAt(0) || '?';
+  const letter = avatarLetter(props?.name);
   return (
     <Avatar className={props.className}>
       <AvatarFallback>{letter}</AvatarFallback>

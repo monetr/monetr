@@ -5,6 +5,7 @@ import { Item, ItemContent } from '@monetr/interface/components/Item';
 import Typography from '@monetr/interface/components/Typography';
 import useLunchFlowLinkSyncProgress from '@monetr/interface/hooks/useLunchFlowLinkSyncProgress';
 import type BankAccount from '@monetr/interface/models/BankAccount';
+import avatarLetter from '@monetr/interface/util/avatarLetter';
 import capitalize from '@monetr/interface/util/capitalize';
 
 import styles from './LunchFlowSetupSyncItem.module.scss';
@@ -19,7 +20,7 @@ export default function LunchFlowSetupSyncItem({ bankAccount }: LunchFlowSetupSy
   return (
     <Item>
       <Avatar>
-        <AvatarFallback>{bankAccount.name.toUpperCase().charAt(0) || '?'}</AvatarFallback>
+        <AvatarFallback>{avatarLetter(bankAccount.name)}</AvatarFallback>
       </Avatar>
       <ItemContent align='default' flex='shrink' gap='none' justify='start' orientation='column' shrink='default'>
         <Typography ellipsis weight='medium'>

@@ -10,6 +10,7 @@ import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import type LunchFlowBankAccount from '@monetr/interface/models/LunchFlowBankAccount';
 import { LunchFlowBankAccountStatus } from '@monetr/interface/models/LunchFlowBankAccount';
 import { AmountType } from '@monetr/interface/util/amounts';
+import avatarLetter from '@monetr/interface/util/avatarLetter';
 
 export interface LunchFlowSetupAccountItemProps {
   data: LunchFlowBankAccount;
@@ -38,7 +39,7 @@ export default function LunchFlowSetupAccountItem(props: LunchFlowSetupAccountIt
   return (
     <Item>
       <Avatar>
-        <AvatarFallback>{props.data.name.toUpperCase().charAt(0) || '?'}</AvatarFallback>
+        <AvatarFallback>{avatarLetter(props.data.name)}</AvatarFallback>
       </Avatar>
       <ItemContent align='default' flex='shrink' gap='none' justify='start' orientation='column' shrink='default'>
         <Typography ellipsis weight='medium'>

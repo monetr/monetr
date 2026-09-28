@@ -10,6 +10,7 @@ import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useNextFundingForecast } from '@monetr/interface/hooks/useNextFundingForecast';
 import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { AmountType } from '@monetr/interface/util/amounts';
+import avatarLetter from '@monetr/interface/util/avatarLetter';
 import capitalize from '@monetr/interface/util/capitalize';
 
 import styles from './FundingItem.module.scss';
@@ -25,7 +26,7 @@ export default function FundingItem(props: FundingItemProps): React.JSX.Element 
   const { funding } = props;
   const contributionForecast = useNextFundingForecast(funding.fundingScheduleId);
   const rule = rrulestr(funding.ruleset);
-  const letter = funding.name.toUpperCase().charAt(0) || '?';
+  const letter = avatarLetter(funding.name);
 
   if (!locale || !localeCurrency) {
     return null;
