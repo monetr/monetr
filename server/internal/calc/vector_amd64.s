@@ -56,6 +56,7 @@ TEXT ·__normalizeVector64_AVX(SB), NOSPLIT, $24-0
     SUBQ    $4, DX     // Subtract 4 from the CX length register since we are going 4 at a time.
     JNZ     LOOP2      // If the DX register is not zero then jump to the beginning of the loop again.
 
+  VZEROUPPER // Clear the upper bits of the YMM/ZMM registers to avoid AVX-SSE transition penalties.
   RET // We are done, return.
 
 // func __normalizeVector64_AVX_FMA(input []float64)
@@ -104,6 +105,7 @@ TEXT ·__normalizeVector64_AVX_FMA(SB), NOSPLIT, $24-0
     SUBQ    $4, DX     // Subtract 4 from the CX length register since we are going 4 at a time.
     JNZ     LOOP2      // If the DX register is not zero then jump to the beginning of the loop again.
 
+  VZEROUPPER // Clear the upper bits of the YMM/ZMM registers to avoid AVX-SSE transition penalties.
   RET // We are done, return.
 
 // func __normalizeVector32_AVX(input []float32)
@@ -154,6 +156,7 @@ TEXT ·__normalizeVector32_AVX(SB), NOSPLIT, $24-0
     SUBQ    $8, DX     // Subtract 8 from the DX length register since we are going 8 at a time.
     JNZ     LOOP2      // If the DX register is not zero then jump to the beginning of the loop again.
 
+  VZEROUPPER // Clear the upper bits of the YMM/ZMM registers to avoid AVX-SSE transition penalties.
   RET // We are done, return.
 
 // func __normalizeVector32_AVX_FMA(input []float32)
@@ -202,6 +205,7 @@ TEXT ·__normalizeVector32_AVX_FMA(SB), NOSPLIT, $24-0
     SUBQ    $8, DX     // Subtract 8 from the DX length register since we are going 8 at a time.
     JNZ     LOOP2      // If the DX register is not zero then jump to the beginning of the loop again.
 
+  VZEROUPPER // Clear the upper bits of the YMM/ZMM registers to avoid AVX-SSE transition penalties.
   RET // We are done, return.
 
 // func __normalizeVector64_AVX512(input []float64)
@@ -256,6 +260,7 @@ TEXT ·__normalizeVector64_AVX512(SB), NOSPLIT, $24-0
     SUBQ    $8, DX     // Subtract 8 from the DX length register since we are going 8 at a time.
     JNZ     LOOP2      // If the DX register is not zero then jump to the beginning of the loop again.
 
+  VZEROUPPER // Clear the upper bits of the YMM/ZMM registers to avoid AVX-SSE transition penalties.
   RET // We are done, return.
 
 // func __normalizeVector64_AVX512_FMA(input []float64)
@@ -308,6 +313,7 @@ TEXT ·__normalizeVector64_AVX512_FMA(SB), NOSPLIT, $24-0
     SUBQ    $8, DX     // Subtract 8 from the DX length register since we are going 8 at a time.
     JNZ     LOOP2      // If the DX register is not zero then jump to the beginning of the loop again.
 
+  VZEROUPPER // Clear the upper bits of the YMM/ZMM registers to avoid AVX-SSE transition penalties.
   RET // We are done, return.
 
 // func __normalizeVector32_AVX512(input []float32)
@@ -360,6 +366,7 @@ TEXT ·__normalizeVector32_AVX512(SB), NOSPLIT, $24-0
     SUBQ    $16, DX    // Subtract 16 from the DX length register since we are going 16 at a time.
     JNZ     LOOP2      // If the DX register is not zero then jump to the beginning of the loop again.
 
+  VZEROUPPER // Clear the upper bits of the YMM/ZMM registers to avoid AVX-SSE transition penalties.
   RET // We are done, return.
 
 // func __normalizeVector32_AVX512_FMA(input []float32)
@@ -410,4 +417,5 @@ TEXT ·__normalizeVector32_AVX512_FMA(SB), NOSPLIT, $24-0
     SUBQ    $16, DX    // Subtract 16 from the DX length register since we are going 16 at a time.
     JNZ     LOOP2      // If the DX register is not zero then jump to the beginning of the loop again.
 
+  VZEROUPPER // Clear the upper bits of the YMM/ZMM registers to avoid AVX-SSE transition penalties.
   RET // We are done, return.

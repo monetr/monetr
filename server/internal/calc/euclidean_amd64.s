@@ -40,6 +40,7 @@ TEXT ·__euclideanDistance64_AVX(SB), NOSPLIT, $48-56
   VPERM2F128 $1, Y0, Y0, Y1 // Take the 7, 7 and move them into the lower 128 bits of the Y1 register.
   VADDPD Y0, Y1, Y0         // Add Y0 and Y1 (really just 3, 3 + 7, 7) and output to the Y0 register.
   MOVQ X0, ret+48(FP)       // Extract the lowest 64 bits of the Y0 register via the low X0 register.
+  VZEROUPPER                // Clear the upper bits of the YMM/ZMM registers to avoid AVX-SSE transition penalties.
   RET                       // Return the euclidean distance.
 
 // func __euclideanDistance64_AVX_FMA(a, b []float64) float64
@@ -81,6 +82,7 @@ TEXT ·__euclideanDistance64_AVX_FMA(SB), NOSPLIT, $48-56
   VPERM2F128 $1, Y0, Y0, Y1 // Take the 7, 7 and move them into the lower 128 bits of the Y1 register.
   VADDPD Y0, Y1, Y0         // Add Y0 and Y1 (really just 3, 3 + 7, 7) and output to the Y0 register.
   MOVQ X0, ret+48(FP)       // Extract the lowest 64 bits of the Y0 register via the low X0 register.
+  VZEROUPPER                // Clear the upper bits of the YMM/ZMM registers to avoid AVX-SSE transition penalties.
   RET                       // Return the euclidean distance.
 
 // func __euclideanDistance32_AVX(a, b []float32) float32
@@ -124,6 +126,7 @@ TEXT ·__euclideanDistance32_AVX(SB), NOSPLIT, $48-52
   VADDPS     X0, X1, X0     // Add the low 128 bits and the high 128 bits as pairs.
   HADDPS     X0, X0         // Add the horizontal pairs together to get 4 equal values.
   MOVL       X0, ret+48(FP) // Extract the lowest 32 bits of the Y0 register via the low X0 register.
+  VZEROUPPER                // Clear the upper bits of the YMM/ZMM registers to avoid AVX-SSE transition penalties.
   RET                       // Return the euclidean distance.
 
 // func __euclideanDistance32_AVX_FMA(a, b []float32) float32
@@ -165,6 +168,7 @@ TEXT ·__euclideanDistance32_AVX_FMA(SB), NOSPLIT, $48-52
   VADDPS     X0, X1, X0     // Add the low 128 bits and the high 128 bits as pairs.
   HADDPS     X0, X0         // Add the horizontal pairs together to get 4 equal values.
   MOVL       X0, ret+48(FP) // Extract the lowest 32 bits of the Y0 register via the low X0 register.
+  VZEROUPPER                // Clear the upper bits of the YMM/ZMM registers to avoid AVX-SSE transition penalties.
   RET                       // Return the euclidean distance.
 
 // func __euclideanDistance64_AVX512(a, b []float64) float64
@@ -211,6 +215,7 @@ TEXT ·__euclideanDistance64_AVX512(SB), NOSPLIT, $48-56
   VADDPD X0, X2, X0         // XMM0 += XMM2
   VADDPD X0, X3, X0         // XMM0 += XMM3
   MOVQ X0, ret+48(FP)       // Move the low 64 bits from YMM0 into the return address space.
+  VZEROUPPER                // Clear the upper bits of the YMM/ZMM registers to avoid AVX-SSE transition penalties.
   RET                       // Return
 
 // func __euclideanDistance64_AVX512_FMA(a, b []float64) float64
@@ -255,6 +260,7 @@ TEXT ·__euclideanDistance64_AVX512_FMA(SB), NOSPLIT, $48-56
   VADDPD X0, X2, X0         // XMM0 += XMM2
   VADDPD X0, X3, X0         // XMM0 += XMM3
   MOVQ X0, ret+48(FP)       // Move the low 64 bits from YMM0 into the return address space.
+  VZEROUPPER                // Clear the upper bits of the YMM/ZMM registers to avoid AVX-SSE transition penalties.
   RET                       // Return
 
 // func __euclideanDistance32_AVX512(a, b []float32) float32
@@ -302,6 +308,7 @@ TEXT ·__euclideanDistance32_AVX512(SB), NOSPLIT, $48-52
   VADDPS        X0, X3, X0     // XMM0 += XMM3
   VHADDPS       X0, X0, X0     // Add the 32-bit pairs. Now we will have all equal values
   MOVL          X0, ret+48(FP) // Move the low 32 bits from YMM0 into the return address space.
+  VZEROUPPER                   // Clear the upper bits of the YMM/ZMM registers to avoid AVX-SSE transition penalties.
   RET                          // Return
 
 // func __euclideanDistance32_AVX512_FMA(a, b []float32) float32
@@ -347,4 +354,5 @@ TEXT ·__euclideanDistance32_AVX512_FMA(SB), NOSPLIT, $48-52
   VADDPS        X0, X3, X0     // XMM0 += XMM3
   VHADDPS       X0, X0, X0     // Add the 32-bit pairs. Now we will have all equal values
   MOVL          X0, ret+48(FP) // Move the low 32 bits from YMM0 into the return address space.
+  VZEROUPPER                   // Clear the upper bits of the YMM/ZMM registers to avoid AVX-SSE transition penalties.
   RET                          // Return
