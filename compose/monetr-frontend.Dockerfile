@@ -6,7 +6,7 @@
 # release GPG keys and its SHA256 before unpacking it into /usr/local. Copying
 # that back out gives us the verified install without having to track the Node
 # release key roster ourselves.
-FROM node:24.20.0-trixie-slim@sha256:50c3b2f6988dfc307b86e5301d69611af31f4789bdf232863b07d3b02fe55ae0 AS node
+FROM node:24.21.0-trixie-slim@sha256:8ec5d7557396cfe32d21c3f9c13072355ceab22b584578ca4bb28af31120cffe AS node
 
 FROM debian:13-slim@sha256:d7e12182ce18b85b93007c1dedf31f2d29e01ccf3182cc4017c709b6259bc132
 RUN apt-get update && \
