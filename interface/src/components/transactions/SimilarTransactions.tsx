@@ -28,8 +28,13 @@ export default function SimilarTransactions(props: SimilarTransactionsProps): Re
     return null;
   }
 
-  // TODO Doesn't exclude the current transaction.
-  const items = similarData.map(item => <SimilarTransactionItem key={item.transactionId} transaction={item} />);
+  const items = similarData.map(item => (
+    <SimilarTransactionItem
+      current={item.transactionId === props.transaction.transactionId}
+      key={item.transactionId}
+      transaction={item}
+    />
+  ));
 
   return (
     <div className={styles.root}>

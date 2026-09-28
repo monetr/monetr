@@ -1,6 +1,7 @@
 import { ChevronRight } from 'lucide-react';
 import { Link } from 'wouter';
 
+import Badge from '@monetr/interface/components/Badge';
 import { flexVariants } from '@monetr/interface/components/Flex';
 import { Item, ItemContent } from '@monetr/interface/components/Item';
 import Typography from '@monetr/interface/components/Typography';
@@ -19,6 +20,10 @@ export interface SimilarTransactionItemProps {
    * disableNavigate will remove the arrow link or the click-ability of the similar transaction item.
    */
   disableNavigate?: boolean;
+  /**
+   * current indicates that this item is the transaction currently being viewed, and will show a badge to call that out.
+   */
+  current?: boolean;
 }
 
 export default function SimilarTransactionItem(props: SimilarTransactionItemProps): React.JSX.Element | null {
@@ -64,6 +69,11 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
           </Typography>
         </ItemContent>
         <ItemContent align='center' flex='grow' justify='end' shrink='none' width='fit'>
+          {props.current && (
+            <Badge size='xs' variant='info'>
+              This One
+            </Badge>
+          )}
           <TransactionAmount transaction={transaction} />
         </ItemContent>
       </Item>
@@ -83,6 +93,11 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
           </Typography>
         </ItemContent>
         <ItemContent align='center' flex='grow' justify='end' shrink='none' width='fit'>
+          {props.current && (
+            <Badge size='xs' variant='info'>
+              This One
+            </Badge>
+          )}
           <TransactionAmount transaction={transaction} />
           <Typography>
             <ChevronRight />
