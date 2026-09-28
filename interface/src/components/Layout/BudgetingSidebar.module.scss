@@ -41,6 +41,7 @@
   border-right: 1px solid var(--border);
   align-items: center;
   width: var(--budget-sidebar-width);
+  flex: 0 0 var(--budget-sidebar-width);
   height: 100dvh;
 
   padding-bottom: calc(4 * variables.$size + env(safe-area-inset-bottom));
