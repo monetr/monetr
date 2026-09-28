@@ -181,6 +181,9 @@ func (c *Controller) patchFundingSchedule(ctx *echo.Context) error {
 	var recalculateSpending bool
 	if !originalFundingSchedule.NextRecurrence.Equal(fundingSchedule.NextRecurrence) {
 		recalculateSpending = true
+		// The provided next recurrence is the date the user picked, so it is not
+		// adjusted for weekends. Keep the original in sync with it.
+		fundingSchedule.NextRecurrenceOriginal = fundingSchedule.NextRecurrence
 	}
 
 	if originalFundingSchedule.RuleSet.String() != fundingSchedule.RuleSet.String() {

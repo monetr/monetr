@@ -602,6 +602,48 @@ func TestPatchFundingSchedule(t *testing.T) {
 		}
 	})
 
+	t.Run("updating next recurrence resets the original", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		// Hack to fix the mock clock thing for now.
+		app.Clock.Add(time.Since(app.Clock.Now()))
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		// Move the next recurrence forward a day, the original should follow it
+		// rather than staying on the old date.
+		next := fundingSchedule.NextRecurrence.AddDate(0, 0, 1)
+
+		{ // Patch the next recurrence
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+				WithPath("bankAccountId", fundingSchedule.BankAccountId).
+				WithPath("fundingScheduleId", fundingSchedule.FundingScheduleId).
+				WithJSON(map[string]any{
+					"nextRecurrence": next,
+				}).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.fundingSchedule.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(next)
+			response.JSON().Path("$.fundingSchedule.nextRecurrenceOriginal").String().AsDateTime(time.RFC3339).IsEqual(next)
+		}
+
+		{ // Make sure the original was persisted too
+			response := e.GET("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+				WithPath("bankAccountId", fundingSchedule.BankAccountId).
+				WithPath("fundingScheduleId", fundingSchedule.FundingScheduleId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(next)
+			response.JSON().Path("$.nextRecurrenceOriginal").String().AsDateTime(time.RFC3339).IsEqual(next)
+		}
+	})
+
 	t.Run("cannot update bank account ID or other invalid field", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		// Hack to fix the mock clock thing for now.
