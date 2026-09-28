@@ -12,7 +12,7 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
-	"github.com/plaid/plaid-go/v45/plaid"
+	"github.com/plaid/plaid-go/v47/plaid"
 )
 
 //go:generate go run go.uber.org/mock/mockgen@v0.6.0 -source=client.go -package=mockgen -destination=../internal/mockgen/platypus_client.go Client

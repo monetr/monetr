@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/v45/plaid"
+	"github.com/plaid/plaid-go/v47/plaid"
 	"github.com/stretchr/testify/assert"
 )
 

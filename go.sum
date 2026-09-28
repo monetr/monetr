@@ -362,8 +362,8 @@ github.com/pingcap/errors v0.11.4/go.mod h1:Oi8TUi2kEtXXLMJk9l1cGmz20kV3TaQ0usTw
 github.com/pkg/diff v0.0.0-20200914180035-5b29258ca4f7/go.mod h1:zO8QMzTeZd5cpnIkz/Gn6iK0jDfGicM1nynOkkPIl28=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
-github.com/plaid/plaid-go/v45 v45.0.0 h1:d1GC1DqrYxRXvxbUxuaGCguuTdutLDm5/Rn2i0sjfN8=
-github.com/plaid/plaid-go/v45 v45.0.0/go.mod h1:jrWvh62kXzr3lzbiEYRQa+IV1XzSKHqI/+tVRq0DR7s=
+github.com/plaid/plaid-go/v47 v47.0.0 h1:p1shV1in4KajzcHw++oHNarDCmgB0FizeuCdgiOj7i4=
+github.com/plaid/plaid-go/v47 v47.0.0/go.mod h1:IRCQJUxnBOyXtNlFxkOI090SyeqcqvkUGbMppbPovyE=
 github.com/pmezard/go-difflib v0.0.0-20151028094244-d8ed2627bdf0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/prometheus/client_golang v1.24.1 h1:JnJkREXzWxUdCuPFpIWZiPispT9xVV59uiuyR2bPlnU=
