@@ -1,6 +1,6 @@
 ---
 title: "Health and Reference Data"
-description: "Point an uptime monitor at monetr's unauthenticated health endpoint, and list the currencies a monetr instance knows how to format money in."
+description: "Point an uptime monitor at monetr's unauthenticated health endpoint, and look up the currencies monetr supports."
 ---
 
 import { Badge } from "@rspress/core/theme";
@@ -63,8 +63,9 @@ false. A monitor checking only for 200 will catch that, but one parsing the body
 
 ## <Badge type="info">GET</Badge> List currencies
 
-Returns every currency the server can format amounts for, which comes from the operating system's locale data rather
-than a list monetr maintains.
+Returns every currency monetr supports, along with its name and symbol in your language and how many decimal places it
+uses. The data comes from the Unicode CLDR dataset that ships inside monetr, so every instance on the same version hands
+back the same list.
 
 **In the app:** The currency picker when you create or edit a bank account.
 
@@ -74,36 +75,100 @@ GET /api/locale/currency
 
 **Auth:** API key, subscription required.
 
+Names and symbols are localized using the `locale` query parameter if you pass one, otherwise the `Accept-Language`
+header. monetr picks the closest language it has data for, and falls back to English if nothing matches or neither is
+set. The language it picked comes back in the `Content-Language` response header.
+
+### Query parameters
+
+| Parameter | Type   | Description                                                                                                                                  |
+| --------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `locale`  | string | Optional. The language to localize names and symbols to, like `de-CH` or `de_CH`. Wins over `Accept-Language`. An invalid value gets English. |
+
 ### Example
 
 ```bash
 curl --request GET \
   --url "https://my.monetr.local/api/locale/currency" \
+  --header "Accept-Language: en-US" \
   --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
 ```
 
 ```json
 [
-  "AED",
-  "AFN",
-  "ALL",
-  "AMD",
-  "ANG",
-  "AOA",
-  "ARS",
-  "AUD",
-  "EUR",
-  "GBP",
-  "JPY",
-  "USD"
+  {
+    "code": "EUR",
+    "name": "Euro",
+    "symbol": "€",
+    "fractionalDigits": 2
+  },
+  {
+    "code": "JPY",
+    "name": "Japanese Yen",
+    "symbol": "¥",
+    "fractionalDigits": 0
+  },
+  {
+    "code": "USD",
+    "name": "US Dollar",
+    "symbol": "$",
+    "fractionalDigits": 2
+  }
 ]
 ```
 
-A flat array of ISO 4217 codes, nothing more. The real list is much longer, this is a sample.
+The real list is much longer, this is a sample. It's sorted by `code`.
 
-Because the list comes from the host's locale data, two instances on different base images can hand back different sets.
-If a currency you expect is missing, that's a locale package on the server rather than something monetr decided. A code
-missing here can still be a perfectly valid currency, monetr has no formatting information for it.
+### Response attributes
+
+| Attribute          | Type    | Description                                                                                                                    |
+| ------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `code`             | string  | The ISO 4217 currency code.                                                                                                    |
+| `name`             | string  | The name of the currency in the language picked from `Accept-Language`.                                                       |
+| `symbol`           | string  | The symbol for the currency in that language. Some languages don't have a symbol for every currency, so this can be the code. |
+| `fractionalDigits` | integer | How many decimal places the currency uses. USD uses 2, JPY uses 0.                                                             |
+
+A currency shows up here if at least one country still uses it as legal tender. Retired currencies like DEM are left
+out.
 
 The codes here are what you pass as `currency` when [creating a bank account](./bank_accounts#create-a-bank-account),
-and they decide how many decimal places an amount implies. See [Money](./overview#money).
+and `fractionalDigits` is how many decimal places an amount implies. See [Money](./overview#money).
+
+## <Badge type="info">GET</Badge> Retrieve a currency
+
+Returns a single currency by its code, in the same shape as the list.
+
+**In the app:** Nothing uses this directly yet, the picker loads the whole list.
+
+```http
+GET /api/locale/currency/:currencyCode
+```
+
+**Auth:** API key, subscription required.
+
+`currencyCode` isn't case sensitive, so `jpy` works as well as `JPY`. Localization works the same way as the list,
+including the `locale` query parameter.
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/locale/currency/JPY" \
+  --header "Accept-Language: ja" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+{
+  "code": "JPY",
+  "name": "日本円",
+  "symbol": "￥",
+  "fractionalDigits": 0
+}
+```
+
+### Errors
+
+| Status | When                                  |
+| ------ | ------------------------------------- |
+| 404    | monetr doesn't support that currency. |

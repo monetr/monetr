@@ -9,7 +9,7 @@ import (
 )
 
 func TestSupplementalCurrencyParsing(t *testing.T) {
-	currencyData, err := cldrDataset.Open("sources/cldr-core/supplemental/currencyData.json")
+	currencyData, err := cldrDataset.Open("sources/currencyData.json")
 	if err != nil {
 		fmt.Printf("Failed to load CLDR supplemental currency data: %+v\n", err)
 	}

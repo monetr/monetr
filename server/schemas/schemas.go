@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	locale "github.com/elliotcourant/go-lclocale"
+	"github.com/monetr/monetr/server/currency"
 	"github.com/monetr/monetr/server/merge"
 	"github.com/monetr/validation"
 	"github.com/monetr/validation/is"
@@ -120,7 +120,7 @@ func CurrencyCode() validation.Rule {
 		is.Alpha.Error("Currency must be alphabetical characters only"),
 		is.UpperCase.Error("Currency must be all upper case"),
 		validation.In(
-			locale.GetInstalledCurrencies()...,
+			currency.GetCurrencies()...,
 		).Error("Currency must be one supported by the server"),
 	)
 }

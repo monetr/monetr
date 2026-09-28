@@ -52,8 +52,8 @@ describe('use installed currencies', () => {
       },
     });
     mockFetch.onGet('/api/locale/currency').reply(200, [
-      'EUR',
-      'USD',
+      { code: 'EUR', name: 'Euro', symbol: '€', fractionalDigits: 2 },
+      { code: 'USD', name: 'US Dollar', symbol: '$', fractionalDigits: 2 },
       // Having all of them doesn't matter, just testing
     ]);
 
@@ -63,7 +63,10 @@ describe('use installed currencies', () => {
     expect(world.result.current.data).not.toBeDefined();
     await waitFor(() => expect(world.result.current.isLoading).toBeFalsy());
     await waitFor(() => expect(world.result.current.isSuccess).toBeTruthy());
-    expect(world.result.current.data).toStrictEqual(['EUR', 'USD']);
+    expect(world.result.current.data).toStrictEqual([
+      { code: 'EUR', name: 'Euro', symbol: '€', fractionalDigits: 2 },
+      { code: 'USD', name: 'US Dollar', symbol: '$', fractionalDigits: 2 },
+    ]);
   });
 
   it('will not fetch currencies if we are not authenticated', () => {

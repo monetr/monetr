@@ -243,11 +243,11 @@
     {
       "customType": "regex",
       "description": "Update CLDR version in CMake",
-      "fileMatch": ["CMakeLists.txt"],
+      "fileMatch": ["server/currency/CMakeLists.txt"],
       "matchStrings": ["set\\(CLDR_VERSION \"(?<currentValue>\\d+\\.\\d+\\.\\d+)\"\\)"],
-      "depNameTemplate": "cldr-json",
-      "packageNameTemplate": "https://github.com/unicode-org/cldr-json.git",
-      "datasourceTemplate": "git-refs"
+      "depNameTemplate": "unicode-org/cldr-json",
+      "datasourceTemplate": "github-tags",
+      "versioningTemplate": "semver"
     },
     {
       "customType": "regex",

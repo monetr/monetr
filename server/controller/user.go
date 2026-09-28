@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"strings"
 
-	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/consts"
+	"github.com/monetr/monetr/server/currency"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/security"
@@ -48,8 +48,8 @@ func (c *Controller) getMe(ctx *echo.Context) error {
 	}
 
 	// Include the default currency for the user's locale.
-	if lconv, err := locale.GetLConv(user.Account.Locale); err == nil {
-		me["defaultCurrency"] = strings.TrimSpace(strings.ToUpper(string(lconv.IntCurrSymbol)))
+	if code, err := currency.GetCurrencyForLocale(user.Account.Locale); err == nil {
+		me["defaultCurrency"] = code
 	}
 
 	// If the "me" endpoint was called after they authenticated, but they still

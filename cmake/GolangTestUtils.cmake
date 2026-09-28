@@ -68,7 +68,7 @@ macro(provision_golang_tests CURRENT_SOURCE_DIR)
         set_tests_properties(
           precompile/${PACKAGE}
           PROPERTIES
-          FIXTURES_REQUIRED go.mod
+          FIXTURES_REQUIRED "go.mod;cldr"
           FIXTURES_SETUP ${PACKAGE}
           RESOURCE_LOCK GO_BUILD_LOCK
           PROCESSORS 2

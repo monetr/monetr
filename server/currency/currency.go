@@ -8,7 +8,6 @@ import (
 	"strings"
 	"unicode"
 
-	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/pkg/errors"
 )
 
@@ -26,7 +25,7 @@ func ParseCurrency(input, currency string) (int64, error) {
 	// TODO This should be outside the parsing implementation, the parser should
 	// instead just receive this information from the caller.
 	// Retrieve the fractional digits for the currency we are parsing.
-	fractionalDigits, err := locale.GetCurrencyInternationalFractionalDigits(currency)
+	fractionalDigits, err := GetFractionalDigits(currency)
 	if err != nil {
 		return 0, errors.Wrapf(err, "failed to get currency information [%s]", currency)
 	}
@@ -142,7 +141,7 @@ func ParseFriendlyToAmount(
 	}
 
 	// Retrieve the fractional digits for the currency we are parsing.
-	fractionalDigits, err := locale.GetCurrencyInternationalFractionalDigits(currency)
+	fractionalDigits, err := GetFractionalDigits(currency)
 	if err != nil {
 		return 0, errors.Wrapf(err, "failed to get currency information [%s]", currency)
 	}
@@ -189,8 +188,16 @@ func ParseFloatToAmount[T float32 | float64](
 	return ParseFriendlyToAmount(fmt.Sprint(input), currency)
 }
 
+// Currency is the details of a single currency, with the name and symbol
+// localized for a specific locale.
 type Currency struct {
-	Code             string `json:"code"`
-	Name             string `json:"name"`
-	FractionalDigits int    `json:"fractionalDigits"`
+	// Code is the ISO 4217 currency code, like USD.
+	Code string `json:"code"`
+	// Name is the localized display name of the currency, like "US Dollar".
+	Name string `json:"name"`
+	// Symbol is the localized symbol for the currency, like "$" or "US$".
+	Symbol string `json:"symbol"`
+	// FractionalDigits is the number of digits after the decimal place that the
+	// currency uses. For example USD uses 2 and JPY uses 0.
+	FractionalDigits int64 `json:"fractionalDigits"`
 }

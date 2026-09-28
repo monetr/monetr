@@ -324,6 +324,19 @@ if(BUILD_TESTING)
       PROPERTY LABELS "bootstrap"
     )
 
+    # The currency package embeds the CLDR dataset, so every Go package that
+    # depends on it cannot compile until it has been downloaded.
+    add_test(
+      NAME download.cldr-json
+      COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} -t download.cldr-json
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+    set_tests_properties(download.cldr-json PROPERTIES FIXTURES_SETUP cldr)
+    set_property(
+      TEST download.cldr-json
+      PROPERTY LABELS "bootstrap"
+    )
+
     # If this test fails that means you need to run `go mod tidy`.
     add_test(
       NAME go.mod.tidy
