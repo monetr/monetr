@@ -40,15 +40,18 @@ services:
       # Make it so that monetr doesn't need any credentials to connect to PostgreSQL.
       POSTGRES_PASSWORD: ""
       POSTGRES_HOST_AUTH_METHOD: trust
-  nginx:
+  haproxy:
     tty: true
-    image: nginx:latest
+    image: haproxy:latest
+    # Run as the local user so haproxy can read the mkcert key, which is only
+    # readable by its owner.
+    user: "${UID:-1000}:${GID:-1000}"
     restart: unless-stopped
     ports:
-      - "@NGINX_PORT@:@NGINX_PORT@"
+      - "@HAPROXY_PORT@:@HAPROXY_PORT@"
     volumes:
-      - "@NGINX_CONFIG_FILE@:/etc/nginx/nginx.conf"
-      - "@LOCAL_CERTIFICATE_DIR@:/etc/nginx/tls"
+      - "@HAPROXY_CONFIG_FILE@:/usr/local/etc/haproxy/haproxy.cfg"
+      - "@LOCAL_CERTIFICATE_DIR@:/usr/local/etc/haproxy/tls"
     depends_on:
       - monetr
       - ui

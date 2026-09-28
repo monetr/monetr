@@ -1,0 +1,3 @@
+backend s3
+    http-request set-header X-Request-Id %[unique-id]
+    server s3 s3:9001

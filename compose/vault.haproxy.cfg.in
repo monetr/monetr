@@ -1,0 +1,3 @@
+backend vault
+    http-request set-header X-Request-Id %[unique-id]
+    server vault vault:80

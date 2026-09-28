@@ -1,0 +1,3 @@
+backend mail
+    timeout server 600s
+    server mail mail:8025

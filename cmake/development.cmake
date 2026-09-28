@@ -15,11 +15,11 @@ include(GolangUtils)
 # directory are eventually passed to the docker compose up command.
 set(COMPOSE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/development)
 file(MAKE_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY})
-# The nginx directory is a child of the development directory. This directory
-# contains stubs of templated nginx configuration as well as the final nginx
+# The haproxy directory is a child of the development directory. This directory
+# contains stubs of templated haproxy configuration as well as the final haproxy
 # configuration file.
-set(NGINX_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY}/nginx)
-file(MAKE_DIRECTORY ${NGINX_DIRECTORY})
+set(HAPROXY_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY}/haproxy)
+file(MAKE_DIRECTORY ${HAPROXY_DIRECTORY})
 
 # mkcert for local development. This sets MKCERT_EXECUTABLE and an `mkcert`
 # ExternalProject target that the certificates command below depends on.
@@ -58,18 +58,24 @@ else()
   set(CLOUD_MAGIC OFF)
 endif()
 
-# When we are running locally we want nginx to handle our TLS termination with a self-signed certificate. But if we are
+# When we are running locally we want haproxy to handle our TLS termination with a self-signed certificate. But if we are
 # using something like GitPod or Github workspaces then they will handle TLS termination for us.
-set(NGINX_PORT "443")
-set(NGINX_CONFIG_FILE "${COMPOSE_OUTPUT_DIRECTORY}/nginx/nginx.conf")
+set(HAPROXY_PORT "443")
+set(HAPROXY_CONFIG_FILE "${COMPOSE_OUTPUT_DIRECTORY}/haproxy/haproxy.cfg")
 if (CLOUD_MAGIC)
-  set(NGINX_PORT "80")
-  set(NGINX_CONFIG_FILE "${CMAKE_SOURCE_DIR}/compose/nginx-cloud.conf")
+  set(HAPROXY_PORT "80")
+  set(HAPROXY_CONFIG_FILE "${CMAKE_SOURCE_DIR}/compose/haproxy-cloud.cfg")
 endif()
 
 # Setup valkey too
 set(VALKEY_CONFIG_FILE "${COMPOSE_OUTPUT_DIRECTORY}/valkey.conf")
-string(RANDOM LENGTH 24 ALPHABET abcdefghijklmnopqrstuvwxyz1234567890 VALKEY_PASSWORD)
+# Keep the password in a file so it stays the same between cmake reconfigures.
+set(VALKEY_PASSWORD_FILE "${COMPOSE_OUTPUT_DIRECTORY}/valkey-password.txt")
+if(NOT EXISTS ${VALKEY_PASSWORD_FILE})
+  string(RANDOM LENGTH 24 ALPHABET abcdefghijklmnopqrstuvwxyz1234567890 VALKEY_PASSWORD)
+  file(WRITE ${VALKEY_PASSWORD_FILE} "${VALKEY_PASSWORD}")
+endif()
+file(READ ${VALKEY_PASSWORD_FILE} VALKEY_PASSWORD)
 configure_file("${CMAKE_SOURCE_DIR}/compose/valkey.conf.in" "${VALKEY_CONFIG_FILE}" @ONLY)
 
 set(LOCAL_CERTIFICATE_DIR ${CMAKE_CURRENT_BINARY_DIR}/certificates/${MONETR_LOCAL_DOMAIN})
@@ -114,9 +120,9 @@ add_dependencies(development.certificates mkcert)
 # are "merged" by docker at runtime, so this is a simple way of providing some customizability to local development.
 ########################################################################################################################
 
-# Will be a list of template files that we are using to build our final nginx config.
+# Will be a list of template files that we are using to build our final haproxy config.
 # This will always contain at least the mail config.
-set(NGINX_CONFIG_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/mail.nginx.conf.in)
+set(HAPROXY_CONFIG_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/mail.haproxy.cfg.in)
 
 set(COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.monetr.yaml.in)
 if (NGROK_AUTH OR DEFINED ENV{NGROK_AUTH} OR NGROK_ENABLED)
@@ -135,8 +141,8 @@ if (NGROK_AUTH OR DEFINED ENV{NGROK_AUTH} OR NGROK_ENABLED)
     message(STATUS "  Webhook domain: ${NGROK_HOSTNAME}")
   endif()
 
-  # If we have ngrok enabled then include it's nginx config in our final config.
-  list(APPEND NGINX_CONFIG_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/ngrok.nginx.conf.in)
+  # If we have ngrok enabled then include it's haproxy config in our final config.
+  list(APPEND HAPROXY_CONFIG_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/ngrok.haproxy.cfg.in)
   # and add the domain name.
   list(APPEND LOCAL_DOMAINS "ngrok.${MONETR_LOCAL_DOMAIN}")
 else()
@@ -166,7 +172,7 @@ elseif("${MONETR_KMS_PROVIDER}" STREQUAL "vault")
   configure_file("${CMAKE_SOURCE_DIR}/compose/vault-config.toml.in" "${COMPOSE_OUTPUT_DIRECTORY}/vault/config.toml" @ONLY)
   # And then add our vault container to our compose list.
   list(APPEND COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.vault-kms.yaml.in)
-  list(APPEND NGINX_CONFIG_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/vault.nginx.conf.in)
+  list(APPEND HAPROXY_CONFIG_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/vault.haproxy.cfg.in)
   list(APPEND LOCAL_DOMAINS "vault.${MONETR_LOCAL_DOMAIN}")
 elseif("${MONETR_KMS_PROVIDER}" STREQUAL "openbao")
   message(STATUS "OpenBao Transit (Local) will be used for local development as the KMS provider")
@@ -188,7 +194,7 @@ elseif("${MONETR_KMS_PROVIDER}" STREQUAL "openbao")
   configure_file("${CMAKE_SOURCE_DIR}/compose/openbao-config.toml.in" "${COMPOSE_OUTPUT_DIRECTORY}/openbao/config.toml" @ONLY)
   # And then add our openbao container to our compose list.
   list(APPEND COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.openbao-kms.yaml.in)
-  list(APPEND NGINX_CONFIG_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/openbao.nginx.conf.in)
+  list(APPEND HAPROXY_CONFIG_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/openbao.haproxy.cfg.in)
   list(APPEND LOCAL_DOMAINS "openbao.${MONETR_LOCAL_DOMAIN}")
 elseif("${MONETR_KMS_PROVIDER}" STREQUAL "")
   set(MONETR_KMS_PROVIDER "plaintext")
@@ -203,7 +209,7 @@ if("${MONETR_STORAGE_PROVIDER}" STREQUAL "s3")
   set(MONETR_STORAGE_ENABLED "true")
   message(STATUS "S3 storage will be used for local development")
   list(APPEND COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.s3-storage.yaml.in)
-  list(APPEND NGINX_CONFIG_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/s3.nginx.conf.in)
+  list(APPEND HAPROXY_CONFIG_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/s3.haproxy.cfg.in)
   list(APPEND LOCAL_DOMAINS "s3.${MONETR_LOCAL_DOMAIN}")
 elseif("${MONETR_STORAGE_PROVIDER}" STREQUAL "filesystem")
   set(MONETR_STORAGE_ENABLED "true")
@@ -229,42 +235,42 @@ foreach(COMPOSE_FILE_TEMPLATE ${COMPOSE_FILE_TEMPLATES})
 endforeach()
 
 
-# Take all of the nginx configs that we are using and template them out.
-foreach(NGINX_CONFIG_TEMPLATE ${NGINX_CONFIG_TEMPLATES})
-  get_filename_component(NGINX_CONFIG_TEMPLATE_OUTPUT "${NGINX_CONFIG_TEMPLATE}" NAME_WLE)
-  message(DEBUG "  Using nginx config part: ${NGINX_CONFIG_TEMPLATE_OUTPUT}")
-  configure_file("${NGINX_CONFIG_TEMPLATE}" "${NGINX_DIRECTORY}/${NGINX_CONFIG_TEMPLATE_OUTPUT}" @ONLY)
+# Take all of the haproxy configs that we are using and template them out.
+foreach(HAPROXY_CONFIG_TEMPLATE ${HAPROXY_CONFIG_TEMPLATES})
+  get_filename_component(HAPROXY_CONFIG_TEMPLATE_OUTPUT "${HAPROXY_CONFIG_TEMPLATE}" NAME_WLE)
+  message(DEBUG "  Using haproxy config part: ${HAPROXY_CONFIG_TEMPLATE_OUTPUT}")
+  configure_file("${HAPROXY_CONFIG_TEMPLATE}" "${HAPROXY_DIRECTORY}/${HAPROXY_CONFIG_TEMPLATE_OUTPUT}" @ONLY)
 endforeach()
 
-# And then find all of the nginx configs that we generated.
-set(S3_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/s3.nginx.conf")
-set(OPENBAO_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/openbao.nginx.conf")
-set(VAULT_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/vault.nginx.conf")
-set(NGROK_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/ngrok.nginx.conf")
-set(MAIL_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/mail.nginx.conf")
+# And then find all of the haproxy configs that we generated.
+set(S3_HAPROXY_CONFIG_FILE "${HAPROXY_DIRECTORY}/s3.haproxy.cfg")
+set(OPENBAO_HAPROXY_CONFIG_FILE "${HAPROXY_DIRECTORY}/openbao.haproxy.cfg")
+set(VAULT_HAPROXY_CONFIG_FILE "${HAPROXY_DIRECTORY}/vault.haproxy.cfg")
+set(NGROK_HAPROXY_CONFIG_FILE "${HAPROXY_DIRECTORY}/ngrok.haproxy.cfg")
+set(MAIL_HAPROXY_CONFIG_FILE "${HAPROXY_DIRECTORY}/mail.haproxy.cfg")
 
-if(EXISTS "${S3_NGINX_CONFIG_FILE}")
-  file(READ "${S3_NGINX_CONFIG_FILE}" S3_NGINX_CONFIG)
+if(EXISTS "${S3_HAPROXY_CONFIG_FILE}")
+  file(READ "${S3_HAPROXY_CONFIG_FILE}" S3_HAPROXY_CONFIG)
 endif()
 
-if(EXISTS "${OPENBAO_NGINX_CONFIG_FILE}")
-  file(READ "${OPENBAO_NGINX_CONFIG_FILE}" OPENBAO_NGINX_CONFIG)
+if(EXISTS "${OPENBAO_HAPROXY_CONFIG_FILE}")
+  file(READ "${OPENBAO_HAPROXY_CONFIG_FILE}" OPENBAO_HAPROXY_CONFIG)
 endif()
 
-if(EXISTS "${VAULT_NGINX_CONFIG_FILE}")
-  file(READ "${VAULT_NGINX_CONFIG_FILE}" VAULT_NGINX_CONFIG)
+if(EXISTS "${VAULT_HAPROXY_CONFIG_FILE}")
+  file(READ "${VAULT_HAPROXY_CONFIG_FILE}" VAULT_HAPROXY_CONFIG)
 endif()
 
-if(EXISTS "${NGROK_NGINX_CONFIG_FILE}")
-  file(READ "${NGROK_NGINX_CONFIG_FILE}" NGROK_NGINX_CONFIG)
+if(EXISTS "${NGROK_HAPROXY_CONFIG_FILE}")
+  file(READ "${NGROK_HAPROXY_CONFIG_FILE}" NGROK_HAPROXY_CONFIG)
 endif()
 
-if(EXISTS "${MAIL_NGINX_CONFIG_FILE}")
-  file(READ "${MAIL_NGINX_CONFIG_FILE}" MAIL_NGINX_CONFIG)
+if(EXISTS "${MAIL_HAPROXY_CONFIG_FILE}")
+  file(READ "${MAIL_HAPROXY_CONFIG_FILE}" MAIL_HAPROXY_CONFIG)
 endif()
 
 # And template them into the final config.
-configure_file("${CMAKE_SOURCE_DIR}/compose/nginx.conf.in" "${NGINX_CONFIG_FILE}" @ONLY)
+configure_file("${CMAKE_SOURCE_DIR}/compose/haproxy.cfg.in" "${HAPROXY_CONFIG_FILE}" @ONLY)
 
 ########################################################################################################################
 
@@ -335,7 +341,7 @@ add_custom_target(
     download.cldr-json
     dependencies.node_modules
     build.email
-    ${NGINX_CONFIG_FILE}
+    ${HAPROXY_CONFIG_FILE}
 )
 
 if(NOT CLOUD_MAGIC)
