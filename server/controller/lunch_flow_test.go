@@ -1,6 +1,7 @@
 package controller_test
 
 import (
+	"encoding/json"
 	"net/http"
 	"testing"
 
@@ -381,12 +382,88 @@ func TestPostLunchFlowLinkBankAccountsRefresh(t *testing.T) {
 			response.JSON().Path("$[0].provider").String().IsEqual("gocardless")
 			response.JSON().Path("$[0].lunchFlowStatus").String().IsEqual("ACTIVE")
 			response.JSON().Path("$[0].status").String().IsEqual("inactive")
+			response.JSON().Path("$[0].currency").String().IsEqual("USD")
+			response.JSON().Path("$[0].currentBalance").Number().IsEqual(123456)
 		}
 
 		assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
 			"GET https://www.lunchflow.app/api/v1/accounts":              1,
 			"GET https://www.lunchflow.app/api/v1/accounts/1234/balance": 1,
 		}, "must match Lunch Flow API calls")
+	})
+
+	t.Run("balance currencies", func(t *testing.T) {
+		cases := []struct {
+			name     string
+			amount   string
+			currency string
+			expected int64
+		}{
+			{name: "no decimal places", amount: "1234", currency: "JPY", expected: 1234},
+			{name: "three decimal places", amount: "1.234", currency: "BHD", expected: 1234},
+			// Unsupported currencies can't be parsed so the balance defaults to 0
+			{name: "unsupported currency", amount: "1234.56", currency: "ZZZ", expected: 0},
+		}
+		for _, item := range cases {
+			t.Run(item.name, func(t *testing.T) {
+				httpmock.Activate()
+				defer httpmock.DeactivateAndReset()
+
+				_, e := NewTestApplication(t)
+				token := GivenIHaveToken(t, e)
+
+				mock_lunch_flow.MockFetchAccounts(t, []lunch_flow.Account{
+					{
+						Id:              "1234",
+						Name:            "Main Account",
+						InstitutionName: "Finance",
+						Provider:        "gocardless",
+						Status:          "ACTIVE",
+					},
+				})
+
+				mock_lunch_flow.MockFetchBalance(t, "1234", lunch_flow.Balance{
+					Amount:   json.Number(item.amount),
+					Currency: item.currency,
+				})
+
+				var id ID[LunchFlowLink]
+				{
+					response := e.POST("/api/lunch_flow/link").
+						WithCookie(TestCookieName, token).
+						WithJSON(map[string]any{
+							"name":         "US Bank",
+							"lunchFlowURL": "https://www.lunchflow.app/api/v1",
+							"apiKey":       "foobar",
+						}).
+						Expect()
+
+					response.Status(http.StatusOK)
+					id = ID[LunchFlowLink](response.JSON().Path("$.lunchFlowLinkId").String().Raw())
+				}
+
+				{ // Refresh the accounts
+					response := e.POST("/api/lunch_flow/link/{lunchFlowLinkId}/bank_accounts/refresh").
+						WithPath("lunchFlowLinkId", id).
+						WithCookie(TestCookieName, token).
+						Expect()
+
+					response.Status(http.StatusNoContent)
+				}
+
+				{ // Check the balance that was parsed
+					response := e.GET("/api/lunch_flow/link/{lunchFlowLinkId}/bank_accounts").
+						WithPath("lunchFlowLinkId", id).
+						WithCookie(TestCookieName, token).
+						Expect()
+
+					response.Status(http.StatusOK)
+					response.JSON().Array().Length().IsEqual(1)
+					response.JSON().Path("$[0].currency").String().IsEqual(item.currency)
+					response.JSON().Path("$[0].currentBalance").Number().IsEqual(item.expected)
+				}
+			})
+		}
 	})
 
 	t.Run("with a valid api key", func(t *testing.T) {

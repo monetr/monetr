@@ -252,6 +252,40 @@ func TestParseCurrency(t *testing.T) {
 		assert.Zero(t, result)
 	})
 
+	t.Run("trailing negative", func(t *testing.T) {
+		usd := mustGetCurrency(t, "en", "USD")
+		for _, input := range []string{"5.00-", "5.00 -"} {
+			result, err := currency.ParseCurrency(input, usd)
+			assert.NoError(t, err, "should not return an error for %q", input)
+			assert.EqualValues(t, -500, result, "should return an exact int64 for %q", input)
+		}
+	})
+
+	t.Run("space after the negative", func(t *testing.T) {
+		usd := mustGetCurrency(t, "en", "USD")
+		for _, input := range []string{"- 5.00", "( 5.00 )"} {
+			result, err := currency.ParseCurrency(input, usd)
+			assert.NoError(t, err, "should not return an error for %q", input)
+			assert.EqualValues(t, -500, result, "should return an exact int64 for %q", input)
+		}
+	})
+
+	t.Run("extra decimal places are truncated", func(t *testing.T) {
+		result, err := currency.ParseCurrency("1.2349", mustGetCurrency(t, "en", "USD"))
+		assert.NoError(t, err, "should not return an error")
+		assert.EqualValues(t, 123, result, "should return an exact int64")
+	})
+
+	t.Run("extra decimal places round up", func(t *testing.T) {
+		result, err := currency.ParseCurrency("1.006", mustGetCurrency(t, "en", "USD"))
+		assert.NoError(t, err, "should not return an error")
+		assert.EqualValues(t, 101, result, "should return an exact int64")
+
+		result, err = currency.ParseCurrency("-1.006", mustGetCurrency(t, "en", "USD"))
+		assert.NoError(t, err, "should not return an error")
+		assert.EqualValues(t, -101, result, "should return an exact int64")
+	})
+
 	t.Run("garbage", func(t *testing.T) {
 		// This also used to spin forever instead of returning an error
 		result, err := currency.ParseCurrency("12abc", mustGetCurrency(t, "en", "USD"))

@@ -108,6 +108,13 @@ func TestGetCurrencyForLocale(t *testing.T) {
 		assert.Empty(t, code)
 	})
 
+	t.Run("macro region without a currency", func(t *testing.T) {
+		// 150 is Europe, which isn't a single country either
+		code, err := currency.GetCurrencyForLocale("en-150")
+		assert.EqualError(t, err, "no currency found for locale [en-150] region [150]")
+		assert.Empty(t, code)
+	})
+
 	t.Run("unknown language", func(t *testing.T) {
 		code, err := currency.GetCurrencyForLocale("xx")
 		assert.Error(t, err)
@@ -302,5 +309,11 @@ func TestGetSeparators(t *testing.T) {
 		// But other currencies in the same locale still use the normal ones
 		decimal, _ = currency.GetSeparators("pt-CV", "EUR")
 		assert.Equal(t, ",", decimal)
+	})
+}
+
+func TestGetCLDRVersion(t *testing.T) {
+	t.Run("has a version", func(t *testing.T) {
+		assert.NotEmpty(t, currency.GetCLDRVersion())
 	})
 }

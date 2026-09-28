@@ -119,6 +119,36 @@ func TestGetCurrency(t *testing.T) {
 		})
 	})
 
+	t.Run("accept language is used without a locale query param", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		response := e.GET(`/api/locale/currency/EUR`).
+			WithHeader("Accept-Language", "de").
+			WithCookie(TestCookieName, token).
+			Expect()
+		response.Status(http.StatusOK)
+		response.Header("Content-Language").IsEqual("de")
+		response.Headers().Value("Vary").Array().ContainsAll("Accept-Language")
+		response.JSON().Path("$.code").String().IsEqual("EUR")
+		response.JSON().Path("$.name").String().IsEqual("Euro")
+		response.JSON().Path("$.decimalSeparator").String().IsEqual(",")
+		response.JSON().Path("$.groupSeparator").String().IsEqual(".")
+	})
+
+	t.Run("currency code is trimmed and upper cased", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		response := e.GET(`/api/locale/currency/{currencyCode}`).
+			WithPath("currencyCode", " usd ").
+			WithCookie(TestCookieName, token).
+			Expect()
+		response.Status(http.StatusOK)
+		response.Header("Content-Language").IsEqual("en")
+		response.JSON().Path("$.code").String().IsEqual("USD")
+	})
+
 	t.Run("unsupported currency", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
