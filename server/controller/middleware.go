@@ -13,7 +13,6 @@ import (
 	"github.com/monetr/monetr/server/internal/sentryecho"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/security"
-	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
 	"github.com/uptrace/bun"
 )
@@ -235,7 +234,7 @@ func (c *Controller) maybeApiKeyMiddleware(next echo.HandlerFunc) echo.HandlerFu
 				hub.Scope().SetUser(sentry.User{
 					ID:        claims.AccountId,
 					Username:  claims.AccountId,
-					IPAddress: util.GetForwardedFor(ctx),
+					IPAddress: ctx.RealIP(),
 					Data: map[string]string{
 						"userId":  claims.UserId,
 						"loginId": claims.LoginId,
@@ -341,7 +340,7 @@ func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFun
 				hub.Scope().SetUser(sentry.User{
 					ID:        claims.AccountId,
 					Username:  claims.AccountId,
-					IPAddress: util.GetForwardedFor(ctx),
+					IPAddress: ctx.RealIP(),
 					Data: map[string]string{
 						"userId":  claims.UserId,
 						"loginId": claims.LoginId,

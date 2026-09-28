@@ -31,6 +31,7 @@ func ConfigureServer(server *http.Server) {
 
 func NewApp(configuration config.Configuration, controllers ...Controller) *echo.Echo {
 	app := echo.New()
+	app.IPExtractor = newIPExtractor(configuration.Server)
 
 	app.Use(sentryecho.New(sentryecho.Options{
 		Repanic:         false,

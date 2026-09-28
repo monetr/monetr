@@ -17,6 +17,9 @@ server:
   tlsCertificate: </etc/monetr/tls.crt>
   tlsKey: </etc/monetr/tls.key>
   tlsClientCertificateAuthority: </etc/monetr/ca.crt>
+  trustedProxies:
+    - <10.0.0.0/8>
+  clientIpHeader: X-Forwarded-For
   cookies:
     sameSiteStrict: <true|false>
     secure: <true|false>
@@ -33,6 +36,8 @@ server:
 | `tlsCertificate`                | String   |                                       | Specify the TLS certificate that the monetr HTTP server should use.                                                                                                                                                                                                                                                |
 | `tlsKey`                        | String   |                                       | Specify the TLS key that the monetr HTTP server should use.                                                                                                                                                                                                                                                        |
 | `tlsClientCertificateAuthority` | String   |                                       | Specify a certificate authority that clients must present a certificate from. When this is set every client must present a valid client certificate, see [Client Certificates](#client-certificates) below.                                                                                                        |
+| `trustedProxies`                | List     |                                       | CIDR ranges for the reverse proxies in front of monetr. monetr will only read the client's IP address from a header when this is set, see [Client IP Address](#client-ip-address) below.                                                                                                                          |
+| `clientIpHeader`                | String   | `X-Forwarded-For`                     | The header your reverse proxy puts the client's IP address in. Only used when `trustedProxies` is set, see [Client IP Address](#client-ip-address) below.                                                                                                                                                         |
 
 :::info
 The TLS certificate and key **do not affect the external URL**. If you specify `https://...` in the external URL and
@@ -47,9 +52,44 @@ certificates are rotated.
 
 The following environment variables map to the following configuration file fields. Each field is documented below.
 
-| Variable                     | Config File Field    |
-| ---                          | ---                  |
-| `MONETR_SERVER_EXTERNAL_URL` | `server.externalUrl` |
+| Variable                         | Config File Field       |
+| ---                              | ---                     |
+| `MONETR_SERVER_EXTERNAL_URL`     | `server.externalUrl`    |
+| `MONETR_SERVER_TRUSTED_PROXIES`  | `server.trustedProxies` |
+| `MONETR_SERVER_CLIENT_IP_HEADER` | `server.clientIpHeader` |
+
+`MONETR_SERVER_TRUSTED_PROXIES` takes a comma separated list, like `10.0.0.0/8,192.168.1.0/24`.
+
+## Client IP Address
+
+If monetr is behind a reverse proxy like Nginx, HAProxy, or Traefik, every connection monetr sees comes from the proxy
+and not from the actual person using monetr. Proxies usually pass the real address along in a header, but a client can
+put anything it wants in that same header. So by default monetr ignores those headers completely and just uses the
+address of the connection.
+
+To have monetr read the header, set `trustedProxies` to the ranges your proxy connects to monetr from. Only list ranges
+you actually control. If you list something too broad, like a whole public range, then anyone in it can pretend to be
+any IP address they want.
+
+By default monetr reads `X-Forwarded-For`. That header can have several addresses in it, one for each hop, so monetr
+starts from the hop closest to it and works back, skipping any address in `trustedProxies`. The first address that
+isn't one of your proxies is the client.
+
+If your proxy uses a different header, like `X-Real-IP`, set `clientIpHeader` to that header. Any header other than
+`X-Forwarded-For` is expected to hold just one address that your proxy set, and monetr only uses it when the connection
+actually came from one of your `trustedProxies`. If the header shows up more than once, monetr uses the last value,
+since that's the one your proxy added. It is best to have your proxy replace the header rather than add to it, for
+example with Nginx:
+
+```nginx
+proxy_set_header X-Real-IP $remote_addr;
+```
+
+Or with HAProxy:
+
+```
+http-request set-header X-Real-IP %[src]
+```
 
 ## Client Certificates
 

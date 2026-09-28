@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"net"
+	"net/http"
 	"net/url"
 	"strings"
 
@@ -57,6 +58,22 @@ type Server struct {
 	// `https://homelab.local/monetr` where monetr is on the same domain as
 	// potentially other applications, but is under a specific sub path.
 	ExternalURL string `yaml:"externalUrl"`
+	// TrustedProxies is a list of CIDR ranges for the reverse proxies that sit in
+	// front of monetr. When this is provided monetr will derive the client's IP
+	// address from the ClientIPHeader. When this is left blank that header is
+	// ignored entirely and the address of the connection itself is used instead,
+	// since the header can be set to anything by the client. Only list ranges
+	// you actually control.
+	TrustedProxies []string `yaml:"trustedProxies"`
+	// ClientIPHeader is the header your reverse proxy puts the client's IP
+	// address in, this is only used when TrustedProxies is provided. Defaults to
+	// X-Forwarded-For, which is treated as a chain of hops that is walked back
+	// from the nearest one, skipping any address inside TrustedProxies. Any
+	// other header (like X-Real-IP) is treated as holding a single address set
+	// by the proxy, and is only used when the connection itself comes from a
+	// trusted proxy. If the header shows up more than once the last value is
+	// used, since that is the one the proxy added.
+	ClientIPHeader string `yaml:"clientIpHeader"`
 	// TLS Client Certificate Authority is the CA used to verify client
 	// certificates on the TLS listener. If this is provided then every client
 	// must present a certificate signed by this CA, including browsers. This is
@@ -101,6 +118,43 @@ func (s Server) AssertExternalURLValid() error {
 	}
 
 	return nil
+}
+
+// GetTrustedProxies parses TrustedProxies into IP ranges. It returns an error
+// if any of the provided ranges are not valid CIDR notation.
+func (s Server) GetTrustedProxies() ([]*net.IPNet, error) {
+	ranges := make([]*net.IPNet, 0, len(s.TrustedProxies))
+	for _, item := range s.TrustedProxies {
+		item = strings.TrimSpace(item)
+		if item == "" {
+			continue
+		}
+		_, ipRange, err := net.ParseCIDR(item)
+		if err != nil {
+			return nil, errors.Wrapf(err, "trusted proxy (%s) is not a valid CIDR", item)
+		}
+		ranges = append(ranges, ipRange)
+	}
+
+	return ranges, nil
+}
+
+// GetClientIPHeader returns the canonical form of ClientIPHeader, or
+// X-Forwarded-For if one was not provided.
+func (s Server) GetClientIPHeader() string {
+	header := strings.TrimSpace(s.ClientIPHeader)
+	if header == "" {
+		return "X-Forwarded-For"
+	}
+
+	return http.CanonicalHeaderKey(header)
+}
+
+// ValidateConfig will return an error if the server configuration is not
+// valid.
+func (s Server) ValidateConfig() error {
+	_, err := s.GetTrustedProxies()
+	return err
 }
 
 // GetHostname will return the hostname derived from the ExternalURL, it will
