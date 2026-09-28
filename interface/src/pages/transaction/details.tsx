@@ -20,6 +20,7 @@ import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import Typography from '@monetr/interface/components/Typography';
 import RemoveTransactionButton from '@monetr/interface/components/transactions/RemoveTransactionButton';
 import SimilarTransactions from '@monetr/interface/components/transactions/SimilarTransactions';
+import TransactionMerchantIcon from '@monetr/interface/components/transactions/TransactionMerchantIcon';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { usePatchTransaction } from '@monetr/interface/hooks/usePatchTransaction';
@@ -206,7 +207,7 @@ export default function TransactionDetails(): React.JSX.Element {
         <div className={styles.columns}>
           <div className={styles.column}>
             <Flex justify='center'>
-              <MerchantIcon name={transaction?.name ?? undefined} />
+              <TransactionMerchantIcon name={transaction?.name ?? undefined} pending={transaction.isPending} />
             </Flex>
             <FormTextField
               autoComplete='off'
