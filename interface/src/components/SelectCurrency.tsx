@@ -37,7 +37,7 @@ export default function SelectCurrency(props: SelectCurrencyProps): React.JSX.El
   }
 
   const options = (currencies ?? []).map(currency => ({
-    label: `${currency.code} - ${currency.name}`,
+    label: `${currency.name} (${currency.code})`,
     value: currency.code,
   }));
   const value = options.find(option => option.value === formikContext.values[props.name]);
