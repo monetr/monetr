@@ -52,7 +52,7 @@ ENV GOFLAGS=$GOFLAGS
 COPY . /monetr
 RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} make release -B MONETR_BUILD_TYPE=container
 
-FROM debian:13-slim@sha256:d7e12182ce18b85b93007c1dedf31f2d29e01ccf3182cc4017c709b6259bc132
+FROM debian:13-slim@sha256:a99cfc517144bc59b1978475ec53b46ecabec7e43635402ee5b77cc54cd1b20a
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       # renovate: datasource=deb depName=tzdata versioning=deb
