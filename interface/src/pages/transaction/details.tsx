@@ -17,6 +17,7 @@ import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import MForm from '@monetr/interface/components/MForm';
 import MSelectSpending from '@monetr/interface/components/MSelectSpending';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import Select, { type SelectOption } from '@monetr/interface/components/Select';
 import Typography from '@monetr/interface/components/Typography';
 import RemoveTransactionButton from '@monetr/interface/components/transactions/RemoveTransactionButton';
 import SimilarTransactions from '@monetr/interface/components/transactions/SimilarTransactions';
@@ -33,6 +34,10 @@ import type { APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
 
 import styles from './details.module.scss';
+
+// Deposits are not spent from anything, but we still render a disabled select in place of the spending select so the
+// layout matches the loading skeleton and does not shift.
+const depositOption: SelectOption<null> = { label: 'Deposit', value: null };
 
 interface TransactionValues {
   name: string;
@@ -240,7 +245,16 @@ export default function TransactionDetails(): React.JSX.Element {
               label='Is Pending'
               name='isPending'
             />
-            {!transaction.getIsAddition() && (
+            {transaction.getIsAddition() ? (
+              <Select
+                className={layoutVariants({ width: 'full' })}
+                disabled
+                label='Spent From'
+                onChange={() => {}}
+                options={[depositOption]}
+                value={depositOption}
+              />
+            ) : (
               <MSelectSpending className={layoutVariants({ width: 'full' })} name='spendingId' />
             )}
             <div className={styles.formButtons}>
