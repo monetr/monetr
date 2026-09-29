@@ -28,7 +28,7 @@ services:
     networks:
       - monetr_network
   monetr:
-    image: ghcr.io/monetr/monetr:1.16.0 # x-release-please-version
+    image: ghcr.io/monetr/monetr:1.17.0 # x-release-please-version
     healthcheck:
       test: "timeout 5s bash -c ':> /dev/tcp/127.0.0.1/4000' || exit 1"
       interval: 30s
