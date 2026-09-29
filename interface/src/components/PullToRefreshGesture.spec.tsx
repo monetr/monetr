@@ -154,6 +154,18 @@ describe('pull to refresh', () => {
     expect(refetchSpy).not.toHaveBeenCalled();
   });
 
+  // When the browser is already scrolling on its own (like touching the screen mid fling) the touchmove cant be
+  // canceled, in that case we let the native bounce happen instead of fighting it.
+  it('will not start a pull when the browser is already scrolling', () => {
+    const world = testRenderer(<PullHarness />);
+    const page = world.getByTestId('page');
+
+    fireEvent.touchStart(page, touchAt(START_Y));
+    fireEvent.touchMove(page, { ...touchAt(START_Y + REFRESH_PULL), cancelable: false });
+    release(page, REFRESH_PULL);
+    expect(refetchSpy).not.toHaveBeenCalled();
+  });
+
   // Touch events keep getting sent to the element the finger first touched even after its removed from the page, and at
   // that point they dont bubble up anymore. This used to leave the page stuck pulled down forever.
   it('will still finish the pull if the touched element gets removed', () => {

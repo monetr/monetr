@@ -382,7 +382,12 @@ export default function PullToRefreshGesture(props: PullToRefreshGestureProps): 
         // would win. Moving mostly sideways or upwards means they arent pulling, so let the browser have it. scrollY
         // can also go negative on iOS while the page is bouncing, which is why this is <= and not ===.
         const isPullingDown = movedY > 0 && movedY >= Math.abs(movedX) && window.scrollY <= 0;
-        if (!isPullingDown) {
+        // If the touchmove cant be canceled then the browser is already scrolling on its own, like when they touch the
+        // screen while a fast fling is still going. We cant stop the native bounce at that point anyway so just let the
+        // browser have it instead of fighting it. This is also why we dont turn off overscroll for the whole page, the
+        // native bounce still works for flings and at the bottom of the page, and calling preventDefault on the first
+        // move is enough to stop the bounce (and the browsers own pull to refresh) when they are actually pulling.
+        if (!isPullingDown || !event.cancelable) {
           resetTouch();
           return;
         }
