@@ -92,8 +92,7 @@ export default function Transactions(): React.JSX.Element {
               You don&apos;t have any transactions yet...
             </Typography>
             <Typography align='center' color='subtle' size='lg'>
-              Transactions will show up here once we receive them from Plaid. Or the current account might not support
-              transaction data from Plaid.
+              <EmptyTransactionsMessage />
             </Typography>
           </div>
         </div>
@@ -149,6 +148,49 @@ export default function Transactions(): React.JSX.Element {
       </div>
     </Fragment>
   );
+}
+
+function EmptyTransactionsMessage(): React.JSX.Element {
+  const { data: config } = useAppConfiguration();
+  const { data: link } = useCurrentLink();
+
+  if (link?.getIsManual()) {
+    if (config?.uploadsEnabled) {
+      return (
+        <Fragment>
+          This is a manual account, so transactions won&apos;t sync automatically. Add one with the + button, or upload
+          a file exported from your bank to bring in a batch at once.
+        </Fragment>
+      );
+    }
+
+    return (
+      <Fragment>
+        This is a manual account, so transactions won&apos;t sync automatically. Add one with the + button to get
+        started.
+      </Fragment>
+    );
+  }
+
+  if (link?.getIsPlaid()) {
+    return (
+      <Fragment>
+        Transactions will show up here once Plaid sends them over, which can take a little while after you first connect
+        your bank. If nothing shows up after that, this account might not provide transaction data through Plaid.
+      </Fragment>
+    );
+  }
+
+  if (link?.getIsLunchFlow()) {
+    return (
+      <Fragment>
+        Transactions will show up here once Lunch Flow sends them over. If nothing shows up after the next sync, this
+        account might not provide transaction data through Lunch Flow.
+      </Fragment>
+    );
+  }
+
+  return <Fragment>Transactions will show up here once they&apos;ve been added or synced for this account.</Fragment>;
 }
 
 function AddTransactionButton(): React.JSX.Element | null {
