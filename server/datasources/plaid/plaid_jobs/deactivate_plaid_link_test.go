@@ -1,6 +1,7 @@
 package plaid_jobs_test
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -35,7 +36,7 @@ func TestDeactivateLinksCron(t *testing.T) {
 
 		// Make sure that if our plaid link is not old then we will not deactivate it
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(plaid_jobs.DeactivatePlaidLink),
 				gomock.Any(),
@@ -78,13 +79,15 @@ func TestDeactivateLinksCron(t *testing.T) {
 
 		// Make sure that if our plaid link is not old then we will not deactivate it
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(plaid_jobs.DeactivatePlaidLink),
 				gomock.Any(),
-				gomock.Eq(plaid_jobs.DeactivateLinksArguments{
-					AccountId: plaidLink.AccountId,
-					LinkId:    plaidLink.LinkId,
+				gomock.InAnyOrder([]any{
+					plaid_jobs.DeactivateLinksArguments{
+						AccountId: plaidLink.AccountId,
+						LinkId:    plaidLink.LinkId,
+					},
 				}),
 			).
 			Return(nil).
@@ -127,7 +130,7 @@ func TestDeactivateLinksCron(t *testing.T) {
 
 		// Make sure that if our plaid link is not old then we will not deactivate it
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(plaid_jobs.DeactivatePlaidLink),
 				gomock.Any(),
@@ -154,6 +157,49 @@ func TestDeactivateLinksCron(t *testing.T) {
 				mockqueue.NewMockContext(context),
 			)
 			assert.NoError(t, err, "should not return an error")
+		}
+	})
+
+	t.Run("returns an error when the enqueue fails", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		fixtures.GivenIHaveAPlaidLink(t, clock, user)
+
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(plaid_jobs.DeactivatePlaidLink),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Return(errors.New("database is on fire")).
+			Times(1)
+
+		// Move time forward 90 days and 1 hour
+		clock.Add(90*24*time.Hour + 1*time.Hour)
+
+		{
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).MinTimes(1)
+			context.EXPECT().DB().Return(db).MinTimes(1)
+			context.EXPECT().Enqueuer().Return(enqueuer).MinTimes(1)
+			context.EXPECT().Log().Return(log).MinTimes(1)
+			context.EXPECT().Configuration().Return(config.Configuration{
+				Stripe: config.Stripe{
+					Enabled: true,
+				},
+			}).Times(1)
+			err := plaid_jobs.DeactivatePlaidLinkCron(
+				mockqueue.NewMockContext(context),
+			)
+			assert.EqualError(t, err, "database is on fire")
 		}
 	})
 }

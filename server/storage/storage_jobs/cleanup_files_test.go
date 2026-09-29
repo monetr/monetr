@@ -1,6 +1,7 @@
 package storage_jobs_test
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -26,7 +27,7 @@ func TestCleanupFilesCron(t *testing.T) {
 
 		enqueuer := mockgen.NewMockProcessor(ctrl)
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				gomock.Any(),
 				gomock.Any(),
@@ -73,13 +74,15 @@ func TestCleanupFilesCron(t *testing.T) {
 
 		enqueuer := mockgen.NewMockProcessor(ctrl)
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(storage_jobs.RemoveFile),
 				gomock.Any(),
-				gomock.Eq(storage_jobs.RemoveFileArguments{
-					AccountId: expiredFile.AccountId,
-					FileId:    expiredFile.FileId,
+				gomock.InAnyOrder([]any{
+					storage_jobs.RemoveFileArguments{
+						AccountId: expiredFile.AccountId,
+						FileId:    expiredFile.FileId,
+					},
 				}),
 			).
 			Return(nil).
@@ -123,7 +126,7 @@ func TestCleanupFilesCron(t *testing.T) {
 
 		enqueuer := mockgen.NewMockProcessor(ctrl)
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				gomock.Any(),
 				gomock.Any(),
@@ -171,7 +174,7 @@ func TestCleanupFilesCron(t *testing.T) {
 
 		enqueuer := mockgen.NewMockProcessor(ctrl)
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				gomock.Any(),
 				gomock.Any(),
@@ -243,13 +246,15 @@ func TestCleanupFilesCron(t *testing.T) {
 
 		enqueuer := mockgen.NewMockProcessor(ctrl)
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(storage_jobs.RemoveFile),
 				gomock.Any(),
-				gomock.Eq(storage_jobs.RemoveFileArguments{
-					AccountId: expiredFile.AccountId,
-					FileId:    expiredFile.FileId,
+				gomock.InAnyOrder([]any{
+					storage_jobs.RemoveFileArguments{
+						AccountId: expiredFile.AccountId,
+						FileId:    expiredFile.FileId,
+					},
 				}),
 			).
 			Return(nil).
@@ -266,6 +271,52 @@ func TestCleanupFilesCron(t *testing.T) {
 				mockqueue.NewMockContext(context),
 			)
 			assert.NoError(t, err)
+		}
+	})
+
+	t.Run("returns an error when the enqueue fails", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+
+		testutils.MustInsert(t, models.File{
+			AccountId:   user.AccountId,
+			Name:        "expired-upload.ofx",
+			Kind:        "transactions/uploads",
+			ContentType: models.IntuitQFXContentType,
+			Size:        uint64(100),
+			CreatedBy:   user.UserId,
+			CreatedAt:   clock.Now().UTC(),
+			ExpiresAt:   new(clock.Now().Add(-1 * time.Hour)),
+		})
+
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(storage_jobs.RemoveFile),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Return(errors.New("database is on fire")).
+			Times(1)
+
+		{
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).AnyTimes()
+			context.EXPECT().DB().Return(db).AnyTimes()
+			context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
+			context.EXPECT().Log().Return(log).AnyTimes()
+
+			err := storage_jobs.CleanupFilesCron(
+				mockqueue.NewMockContext(context),
+			)
+			assert.EqualError(t, err, "database is on fire")
 		}
 	})
 }

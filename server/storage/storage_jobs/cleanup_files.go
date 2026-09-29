@@ -1,6 +1,8 @@
 package storage_jobs
 
 import (
+	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
 )
@@ -26,25 +28,24 @@ func CleanupFilesCron(ctx queue.Context) error {
 
 	log.InfoContext(ctx, "queueing expired files to be removed", "expiredFilesCount", len(expiredFiles))
 
-	for i := range expiredFiles {
-		expiredFile := expiredFiles[i]
-		fileLog := log.With(
-			"accountId", expiredFile.AccountId,
-			"fileId", expiredFile.FileId,
-		)
-		fileLog.DebugContext(ctx, "queueing file to be removed")
-		if err := queue.Enqueue(
-			ctx,
-			ctx.Enqueuer(),
-			RemoveFile,
-			RemoveFileArguments{
-				AccountId: expiredFile.AccountId,
-				FileId:    expiredFile.FileId,
-			},
-		); err != nil {
-			fileLog.WarnContext(ctx, "failed to queue file to be removed", "err", err)
-			continue
-		}
+	if err := queue.BulkEnqueue(
+		ctx,
+		ctx.Enqueuer(),
+		RemoveFile,
+		myownsanity.Map(
+			expiredFiles,
+			func(expiredFile models.File) RemoveFileArguments {
+				return RemoveFileArguments{
+					AccountId: expiredFile.AccountId,
+					FileId:    expiredFile.FileId,
+				}
+			}),
+	); err != nil {
+		log.WarnContext(ctx, "failed to queue files to be removed", "err", err)
+		crumbs.Warn(ctx, "Failed to queue files to be removed", "job", map[string]any{
+			"error": err,
+		})
+		return err
 	}
 
 	return nil

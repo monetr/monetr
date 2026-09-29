@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/logging"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
 	"github.com/pkg/errors"
@@ -45,27 +45,23 @@ func ReconcileSubscriptionCron(ctx queue.Context) error {
 
 	log.InfoContext(ctx, "accounts have missed stripe webhooks, subscriptions need to be reconciled", "count", len(accounts))
 
-	for _, item := range accounts {
-		itemLog := log.With("accountId", item.AccountId)
-
-		itemLog.Log(ctx, logging.LevelTrace, "enqueuing account to have subscription reconciled")
-		if err := queue.Enqueue(
-			ctx,
-			ctx.Enqueuer(),
-			ReconcileSubscription,
-			ReconcileSubscriptionArguments{
-				AccountId: item.AccountId,
-			},
-		); err != nil {
-
-			itemLog.WarnContext(ctx, "failed to enqueue job to reconcile subscription", "err", err)
-			crumbs.Warn(ctx, "Failed to enqueue job to reconcile subscription", "job", map[string]any{
-				"error": err,
-			})
-			continue
-		}
-
-		itemLog.Log(ctx, logging.LevelTrace, "successfully enqueued account for subscription reconciliation")
+	if err = queue.BulkEnqueue(
+		ctx,
+		ctx.Enqueuer(),
+		ReconcileSubscription,
+		myownsanity.Map(
+			accounts,
+			func(item models.Account) ReconcileSubscriptionArguments {
+				return ReconcileSubscriptionArguments{
+					AccountId: item.AccountId,
+				}
+			}),
+	); err != nil {
+		log.WarnContext(ctx, "failed to enqueue jobs to reconcile subscriptions", "err", err)
+		crumbs.Warn(ctx, "Failed to enqueue jobs to reconcile subscriptions", "job", map[string]any{
+			"error": err,
+		})
+		return err
 	}
 
 	return nil

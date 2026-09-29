@@ -2,7 +2,7 @@ package spending_jobs
 
 import (
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/logging"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
@@ -34,31 +34,24 @@ func ProcessSpendingCron(ctx queue.Context) error {
 		"count": len(bankAccountsWithStaleSpending),
 	})
 
-	for _, item := range bankAccountsWithStaleSpending {
-		itemLog := log.With(
-			"accountId", item.AccountId,
-			"bankAccountId", item.BankAccountId,
-		)
-		itemLog.Log(ctx, logging.LevelTrace, "enqueuing bank account to process stale spending")
-
-		err = queue.Enqueue(
-			ctx,
-			ctx.Enqueuer(),
-			ProcessSpending,
-			ProcessSpendingArguments{
-				AccountId:     item.AccountId,
-				BankAccountId: item.BankAccountId,
-			},
-		)
-		if err != nil {
-			log.WarnContext(ctx, "failed to enqueue job to process stale spending", "err", err)
-			crumbs.Warn(ctx, "Failed to enqueue job to process stale spending", "job", map[string]any{
-				"error": err,
-			})
-			continue
-		}
-
-		itemLog.Log(ctx, logging.LevelTrace, "successfully enqueued bank accounts for stale spending processing")
+	if err = queue.BulkEnqueue(
+		ctx,
+		ctx.Enqueuer(),
+		ProcessSpending,
+		myownsanity.Map(
+			bankAccountsWithStaleSpending,
+			func(item repository.BankAccountWithStaleSpendingItem) ProcessSpendingArguments {
+				return ProcessSpendingArguments{
+					AccountId:     item.AccountId,
+					BankAccountId: item.BankAccountId,
+				}
+			}),
+	); err != nil {
+		log.WarnContext(ctx, "failed to enqueue jobs to process stale spending", "err", err)
+		crumbs.Warn(ctx, "Failed to enqueue jobs to process stale spending", "job", map[string]any{
+			"error": err,
+		})
+		return err
 	}
 
 	return nil

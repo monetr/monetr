@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"maps"
+	"slices"
 	"sort"
 	"time"
 
@@ -591,30 +593,25 @@ func SyncPlaidCron(ctx queue.Context) error {
 
 	log.InfoContext(ctx, "syncing plaid links", "count", len(links))
 
-	for _, item := range links {
-		itemLog := log.With(
-			"accountId", item.AccountId,
-			"linkId", item.LinkId,
-		)
-		itemLog.Log(ctx, logging.LevelTrace, "enqueuing link to be synced with plaid")
-		if err := queue.Enqueue(
-			ctx,
-			ctx.Enqueuer(),
-			SyncPlaid,
-			SyncPlaidArguments{
-				AccountId: item.AccountId,
-				LinkId:    item.LinkId,
-				Trigger:   "cron",
-			},
-		); err != nil {
-			itemLog.WarnContext(ctx, "failed to enqueue job to sync with plaid", "err", err)
-			crumbs.Warn(ctx, "Failed to enqueue job to sync with plaid", "job", map[string]any{
-				"error": err,
-			})
-			continue
-		}
-
-		itemLog.Log(ctx, logging.LevelTrace, "successfully enqueued link to be synced with plaid")
+	if err = queue.BulkEnqueue(
+		ctx,
+		ctx.Enqueuer(),
+		SyncPlaid,
+		myownsanity.Map(
+			links,
+			func(item models.Link) SyncPlaidArguments {
+				return SyncPlaidArguments{
+					AccountId: item.AccountId,
+					LinkId:    item.LinkId,
+					Trigger:   "cron",
+				}
+			}),
+	); err != nil {
+		log.WarnContext(ctx, "failed to enqueue jobs to sync with plaid", "err", err)
+		crumbs.Warn(ctx, "Failed to enqueue jobs to sync with plaid", "job", map[string]any{
+			"error": err,
+		})
+		return err
 	}
 
 	return nil
@@ -1009,15 +1006,13 @@ func SyncPlaid(ctx queue.Context, args SyncPlaidArguments) error {
 
 		// Then enqueue all of the bank accounts we touched to have their similar
 		// transactions recalculated.
-		for key := range s.similarity {
-			if err := queue.Enqueue(
-				ctx,
-				ctx.Enqueuer(),
-				similar_jobs.CalculateTransactionClusters,
-				s.similarity[key],
-			); err != nil {
-				return err
-			}
+		if err := queue.BulkEnqueue(
+			ctx,
+			ctx.Enqueuer(),
+			similar_jobs.CalculateTransactionClusters,
+			slices.Collect(maps.Values(s.similarity)),
+		); err != nil {
+			return err
 		}
 
 		return s.maintainLinkStatus(ctx, plaidLink)

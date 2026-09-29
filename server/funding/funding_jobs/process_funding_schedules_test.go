@@ -1,6 +1,7 @@
 package funding_jobs_test
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -28,7 +29,7 @@ func TestProcessFundingSchedulesCron(t *testing.T) {
 
 		enqueuer := mockgen.NewMockProcessor(ctrl)
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				gomock.Any(),
 				gomock.Any(),
@@ -87,14 +88,16 @@ func TestProcessFundingSchedulesCron(t *testing.T) {
 
 		enqueuer := mockgen.NewMockProcessor(ctrl)
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(funding_jobs.ProcessFundingSchedule),
 				gomock.Any(),
-				gomock.Eq(funding_jobs.ProcessFundingScheduleArguments{
-					AccountId:          bankAccount.AccountId,
-					BankAccountId:      bankAccount.BankAccountId,
-					FundingScheduleIds: []models.ID[models.FundingSchedule]{fundingSchedule.FundingScheduleId},
+				gomock.InAnyOrder([]any{
+					funding_jobs.ProcessFundingScheduleArguments{
+						AccountId:          bankAccount.AccountId,
+						BankAccountId:      bankAccount.BankAccountId,
+						FundingScheduleIds: []models.ID[models.FundingSchedule]{fundingSchedule.FundingScheduleId},
+					},
 				}),
 			).
 			Return(nil).
@@ -111,6 +114,64 @@ func TestProcessFundingSchedulesCron(t *testing.T) {
 				mockqueue.NewMockContext(context),
 			)
 			assert.NoError(t, err)
+		}
+	})
+
+	t.Run("returns an error when the enqueue fails", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(
+			t,
+			clock,
+			&link,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
+
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+		fundingRule := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", clock.Now())
+		testutils.MustInsert(t, models.FundingSchedule{
+			AccountId:              bankAccount.AccountId,
+			BankAccountId:          bankAccount.BankAccountId,
+			Name:                   "Payday",
+			Description:            "Payday",
+			RuleSet:                fundingRule,
+			NextRecurrence:         fundingRule.After(clock.Now(), false),
+			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
+		})
+
+		// Move time forward so the funding schedule is due.
+		clock.Add(32 * 24 * time.Hour)
+
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(funding_jobs.ProcessFundingSchedule),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Return(errors.New("database is on fire")).
+			Times(1)
+
+		{
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).AnyTimes()
+			context.EXPECT().DB().Return(db).AnyTimes()
+			context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
+			context.EXPECT().Log().Return(log).AnyTimes()
+
+			err := funding_jobs.ProcessFundingSchedulesCron(
+				mockqueue.NewMockContext(context),
+			)
+			assert.EqualError(t, err, "database is on fire")
 		}
 	})
 }

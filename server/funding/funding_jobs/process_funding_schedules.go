@@ -5,6 +5,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
@@ -40,40 +41,34 @@ func ProcessFundingSchedulesCron(ctx queue.Context) error {
 		"count": len(fundingSchedules),
 	})
 
-	for _, item := range fundingSchedules {
-		itemLog := log.With(
-			"accountId", item.AccountId,
-			"bankAccountId", item.BankAccountId,
-			"fundingScheduleIds", item.FundingScheduleIds,
-		)
-		itemLog.Log(ctx, logging.LevelTrace, "enqueuing funding schedules to be processed for bank account")
-		if err := queue.Enqueue(
+	if err = queue.BulkEnqueue(
+		ctx,
+		ctx.Enqueuer(),
+		ProcessFundingSchedule,
+		myownsanity.Map(
+			fundingSchedules,
+			func(item repository.ProcessFundingSchedulesItem) ProcessFundingScheduleArguments {
+				return ProcessFundingScheduleArguments{
+					AccountId:          item.AccountId,
+					BankAccountId:      item.BankAccountId,
+					FundingScheduleIds: item.FundingScheduleIds,
+				}
+			}),
+	); err != nil {
+		log.WarnContext(
 			ctx,
-			ctx.Enqueuer(),
-			ProcessFundingSchedule,
-			ProcessFundingScheduleArguments{
-				AccountId:          item.AccountId,
-				BankAccountId:      item.BankAccountId,
-				FundingScheduleIds: item.FundingScheduleIds,
+			"failed to enqueue jobs to process funding schedules",
+			"err", err,
+		)
+		crumbs.Warn(
+			ctx,
+			"Failed to enqueue jobs to process funding schedules",
+			"job",
+			map[string]any{
+				"error": err,
 			},
-		); err != nil {
-			log.WarnContext(
-				ctx,
-				"failed to enqueue job to process funding schedule",
-				"err", err,
-			)
-			crumbs.Warn(
-				ctx,
-				"Failed to enqueue job to process funding schedule",
-				"job",
-				map[string]any{
-					"error": err,
-				},
-			)
-			continue
-		}
-
-		itemLog.Log(ctx, logging.LevelTrace, "successfully enqueued funding schedules for processing")
+		)
+		return err
 	}
 
 	return nil

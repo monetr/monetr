@@ -105,13 +105,15 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 			}, nil)
 
 		firstCalculateCall := enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
 				gomock.Any(),
-				gomock.Eq(similar_jobs.CalculateTransactionClustersArguments{
-					AccountId:     plaidBankAccount.AccountId,
-					BankAccountId: plaidBankAccount.BankAccountId,
+				gomock.InAnyOrder([]any{
+					similar_jobs.CalculateTransactionClustersArguments{
+						AccountId:     plaidBankAccount.AccountId,
+						BankAccountId: plaidBankAccount.BankAccountId,
+					},
 				}),
 			).
 			Return(nil).
@@ -197,13 +199,15 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 			}, nil)
 
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
 				gomock.Any(),
-				gomock.Eq(similar_jobs.CalculateTransactionClustersArguments{
-					AccountId:     plaidBankAccount.AccountId,
-					BankAccountId: plaidBankAccount.BankAccountId,
+				gomock.InAnyOrder([]any{
+					similar_jobs.CalculateTransactionClustersArguments{
+						AccountId:     plaidBankAccount.AccountId,
+						BankAccountId: plaidBankAccount.BankAccountId,
+					},
 				}),
 			).
 			MinTimes(1).
@@ -380,13 +384,15 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 			Times(1)
 
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
 				gomock.Any(),
-				gomock.Eq(similar_jobs.CalculateTransactionClustersArguments{
-					AccountId:     plaidBankAccount.AccountId,
-					BankAccountId: plaidBankAccount.BankAccountId,
+				gomock.InAnyOrder([]any{
+					similar_jobs.CalculateTransactionClustersArguments{
+						AccountId:     plaidBankAccount.AccountId,
+						BankAccountId: plaidBankAccount.BankAccountId,
+					},
 				}),
 			).
 			Return(nil).
@@ -515,7 +521,7 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 			Times(2)
 
 		// No transactions get written so no similarity recalc gets enqueued.
-		enqueuer.EXPECT().EnqueueAt(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
+		enqueuer.EXPECT().BulkEnqueueAt(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 
 		context := mockgen.NewMockContext(ctrl)
 		context.EXPECT().Clock().Return(clock).MinTimes(1)
@@ -650,13 +656,15 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 			Times(1)
 
 		firstCalculateCall := enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
 				gomock.Any(),
-				gomock.Eq(similar_jobs.CalculateTransactionClustersArguments{
-					AccountId:     plaidBankAccount.AccountId,
-					BankAccountId: plaidBankAccount.BankAccountId,
+				gomock.InAnyOrder([]any{
+					similar_jobs.CalculateTransactionClustersArguments{
+						AccountId:     plaidBankAccount.AccountId,
+						BankAccountId: plaidBankAccount.BankAccountId,
+					},
 				}),
 			).
 			Return(nil).
@@ -759,13 +767,15 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 			Times(1)
 
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
 				gomock.Any(),
-				gomock.Eq(similar_jobs.CalculateTransactionClustersArguments{
-					AccountId:     plaidBankAccount.AccountId,
-					BankAccountId: plaidBankAccount.BankAccountId,
+				gomock.InAnyOrder([]any{
+					similar_jobs.CalculateTransactionClustersArguments{
+						AccountId:     plaidBankAccount.AccountId,
+						BankAccountId: plaidBankAccount.BankAccountId,
+					},
 				}),
 			).
 			After(firstCalculateCall).
@@ -950,13 +960,15 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 			Times(1)
 
 		firstCalculateCall := enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
 				gomock.Any(),
-				gomock.Eq(similar_jobs.CalculateTransactionClustersArguments{
-					AccountId:     plaidBankAccount.AccountId,
-					BankAccountId: plaidBankAccount.BankAccountId,
+				gomock.InAnyOrder([]any{
+					similar_jobs.CalculateTransactionClustersArguments{
+						AccountId:     plaidBankAccount.AccountId,
+						BankAccountId: plaidBankAccount.BankAccountId,
+					},
 				}),
 			).
 			Return(nil).
@@ -1051,13 +1063,15 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 			Times(1)
 
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
 				gomock.Any(),
-				gomock.Eq(similar_jobs.CalculateTransactionClustersArguments{
-					AccountId:     plaidBankAccount.AccountId,
-					BankAccountId: plaidBankAccount.BankAccountId,
+				gomock.InAnyOrder([]any{
+					similar_jobs.CalculateTransactionClustersArguments{
+						AccountId:     plaidBankAccount.AccountId,
+						BankAccountId: plaidBankAccount.BankAccountId,
+					},
 				}),
 			).
 			After(firstCalculateCall).
@@ -1144,5 +1158,47 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 
 	t.Run("no updates", func(_ *testing.T) {
 		// TODO!!
+	})
+}
+
+func TestSyncPlaidCron(t *testing.T) {
+	t.Run("returns an error when the enqueue fails", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		plaidLink := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+
+		{ // Make the link look like it hasn't been synced in a while.
+			plaidLink.PlaidLink.LastAttemptedUpdate = new(clock.Now().Add(-72 * time.Hour))
+			testutils.MustDBUpdate(t, plaidLink.PlaidLink)
+		}
+
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(plaid_jobs.SyncPlaid),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Return(errors.New("database is on fire")).
+			Times(1)
+
+		{
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).MinTimes(1)
+			context.EXPECT().DB().Return(db).MinTimes(1)
+			context.EXPECT().Enqueuer().Return(enqueuer).MinTimes(1)
+			context.EXPECT().Log().Return(log).MinTimes(1)
+			err := plaid_jobs.SyncPlaidCron(
+				mockqueue.NewMockContext(context),
+			)
+			assert.EqualError(t, err, "database is on fire")
+		}
 	})
 }
