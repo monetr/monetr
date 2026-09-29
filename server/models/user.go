@@ -23,6 +23,7 @@ type User struct {
 	AccountId ID[Account] `json:"accountId" bun:"account_id,notnull,unique:per_account,nullzero"`
 	Account   *Account    `json:"account" bun:"rel:belongs-to,join:account_id=account_id"`
 	Role      UserRole    `json:"role" bun:"role,notnull,nullzero"`
+	LinkOrder []ID[Link]  `json:"linkOrder" bun:"link_order,array,nullzero"`
 }
 
 var (

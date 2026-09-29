@@ -130,108 +130,139 @@ func (m *mergeContext) merge() error {
 			continue
 		}
 
-		switch {
-		case dstField.Type().Implements(jsonUnmarshallerType) && srcValue.Kind() == reflect.String:
-			// Create a new instance of the type of the pointer for the destination
-			// field. For example if the dstField is `*RuleSet` then this will create
-			// a new `RuleSet` instance and call UnmarshalJSON on it.
-			value := reflect.New(dstField.Type().Elem())
-			u := value.Interface().(json.Unmarshaler)
-			if err := u.UnmarshalJSON([]byte(srcValue.String())); err != nil {
-				return errors.WithStack(err)
-			}
-			// If that all works out then we can assign the resulting value to the
-			// destination field even if it is nil.
-			dstField.Set(value)
-		case isInteger(dstField.Type()) && srcValue.Type() == jsonNumberType:
-			// If the destination is an integer field and the source is a json number
-			// then we can work with the destination field directly like this. This
-			// way we can be better about how we parse and handle numbers.
-			jsonNumber := srcValue.Interface().(json.Number)
-			value, err := jsonNumber.Int64()
-			if err != nil {
-				return errors.WithStack(err)
-			}
+		if err := m.assign(key, dstField, srcValue); err != nil {
+			return err
+		}
+	}
 
-			// If the destination is a pointer then we need to set the inner value
-			// instead of the value of the pointer.
-			if dstField.Kind() == reflect.Pointer {
-				newValue := reflect.New(reflect.TypeFor[int64]())
-				newValue.Elem().Set(reflect.ValueOf(value))
-				dstField.Set(newValue)
-			} else {
-				// Otherwise just set the value directly.
-				dstField.SetInt(value)
-			}
-		case isUnsignedInteger(dstField.Type()) && srcValue.Type() == jsonNumberType:
-			// Same idea as the signed integer case above, but the json.Number Int64
-			// helper tops out at the max int64 so it cannot handle a value that fits
-			// in a uint64 but not an int64. So when the destination is unsigned we
-			// parse the raw text of the json number as a uint instead, that way the
-			// whole uint64 range is actually usable.
-			jsonNumber := srcValue.Interface().(json.Number)
-			value, err := strconv.ParseUint(jsonNumber.String(), 10, 64)
-			if err != nil {
-				return errors.WithStack(err)
-			}
+	return nil
+}
 
-			// If the destination is a pointer then we need to set the inner value
-			// instead of the value of the pointer.
-			if dstField.Kind() == reflect.Pointer {
-				newValue := reflect.New(reflect.TypeFor[uint64]())
-				newValue.Elem().Set(reflect.ValueOf(value))
-				dstField.Set(newValue)
-			} else {
-				// Otherwise just set the value directly.
-				dstField.SetUint(value)
-			}
-		case dstField.Kind() == reflect.String && srcValue.Kind() == reflect.String:
-			// This is a weird very specific condition. But basically instead of using
-			// Set() we can use SetString instead which does not perform the same type
-			// checks. So if we are using a models.ID type for example, this will work
-			// better for that.
-			dstField.SetString(srcValue.String())
-		case dstField.Type() == timeType && srcValue.Kind() == reflect.String:
-			// If the destination is a timestamp and the source field is a string then
-			// we should just parse the string!
-			timestamp, err := time.Parse(time.RFC3339Nano, srcValue.String())
-			if err != nil {
-				return errors.WithStack(err)
-			}
-			dstField.Set(reflect.ValueOf(timestamp))
-		case dstField.Kind() == srcValue.Kind():
-			// If the destination and source are the exact same then we can just
-			// assign the value directly.
-			// TODO If they are both pointers but are of different types this will
-			// fail.
-			dstField.Set(srcValue)
-		case dstField.Kind() == reflect.Pointer && srcValue.Kind() != reflect.Pointer:
-			// If the destination is a pointer, but a pointer to the same type as the
-			// source then we can create a new pointer value and assign.
-			if dstField.Type().Elem().Kind() != srcValue.Kind() {
-				// If the types do not match then we cannot handle them. The caller
-				// would need to implement the UnmarshalJSON method in order to handle
-				// custom type matching.
-				return errors.Errorf("cannot assign field '%s', source is %s and destination is %s", key, srcValue.Type(), dstField.Type())
-			}
+// assign converts srcValue into the type of dstField and sets it. Slices call
+// back into this for each element so they get the same conversions.
+func (m *mergeContext) assign(key string, dstField, srcValue reflect.Value) error {
+	switch {
+	case dstField.Type().Implements(jsonUnmarshallerType) && srcValue.Kind() == reflect.String:
+		// Create a new instance of the type of the pointer for the destination
+		// field. For example if the dstField is `*RuleSet` then this will create
+		// a new `RuleSet` instance and call UnmarshalJSON on it.
+		value := reflect.New(dstField.Type().Elem())
+		u := value.Interface().(json.Unmarshaler)
+		if err := u.UnmarshalJSON([]byte(srcValue.String())); err != nil {
+			return errors.WithStack(err)
+		}
+		// If that all works out then we can assign the resulting value to the
+		// destination field even if it is nil.
+		dstField.Set(value)
+	case isInteger(dstField.Type()) && srcValue.Type() == jsonNumberType:
+		// If the destination is an integer field and the source is a json number
+		// then we can work with the destination field directly like this. This
+		// way we can be better about how we parse and handle numbers.
+		jsonNumber := srcValue.Interface().(json.Number)
+		value, err := jsonNumber.Int64()
+		if err != nil {
+			return errors.WithStack(err)
+		}
 
-			switch {
-			case dstField.Type().Elem().Kind() == reflect.String:
-				// Special path for assigning string pointers, this way we can handle
-				// custom types as well that just wrap string pointers.
-				value := reflect.New(dstField.Type().Elem())
-				// We already know from the check above that the base kind of each type
-				// is the same. So it is safe to just set this as a string here.
-				value.Elem().SetString(srcValue.String())
-				dstField.Set(value)
-			default:
-				value := reflect.New(srcValue.Type())
-				value.Elem().Set(srcValue)
-				dstField.Set(value)
+		// If the destination is a pointer then we need to set the inner value
+		// instead of the value of the pointer.
+		if dstField.Kind() == reflect.Pointer {
+			newValue := reflect.New(reflect.TypeFor[int64]())
+			newValue.Elem().Set(reflect.ValueOf(value))
+			dstField.Set(newValue)
+		} else {
+			// Otherwise just set the value directly.
+			dstField.SetInt(value)
+		}
+	case isUnsignedInteger(dstField.Type()) && srcValue.Type() == jsonNumberType:
+		// Same idea as the signed integer case above, but the json.Number Int64
+		// helper tops out at the max int64 so it cannot handle a value that fits
+		// in a uint64 but not an int64. So when the destination is unsigned we
+		// parse the raw text of the json number as a uint instead, that way the
+		// whole uint64 range is actually usable.
+		jsonNumber := srcValue.Interface().(json.Number)
+		value, err := strconv.ParseUint(jsonNumber.String(), 10, 64)
+		if err != nil {
+			return errors.WithStack(err)
+		}
+
+		// If the destination is a pointer then we need to set the inner value
+		// instead of the value of the pointer.
+		if dstField.Kind() == reflect.Pointer {
+			newValue := reflect.New(reflect.TypeFor[uint64]())
+			newValue.Elem().Set(reflect.ValueOf(value))
+			dstField.Set(newValue)
+		} else {
+			// Otherwise just set the value directly.
+			dstField.SetUint(value)
+		}
+	case dstField.Kind() == reflect.String && srcValue.Kind() == reflect.String:
+		// This is a weird very specific condition. But basically instead of using
+		// Set() we can use SetString instead which does not perform the same type
+		// checks. So if we are using a models.ID type for example, this will work
+		// better for that.
+		dstField.SetString(srcValue.String())
+	case dstField.Type() == timeType && srcValue.Kind() == reflect.String:
+		// If the destination is a timestamp and the source field is a string then
+		// we should just parse the string!
+		timestamp, err := time.Parse(time.RFC3339Nano, srcValue.String())
+		if err != nil {
+			return errors.WithStack(err)
+		}
+		dstField.Set(reflect.ValueOf(timestamp))
+	case dstField.Kind() == reflect.Slice &&
+		srcValue.Kind() == reflect.Slice &&
+		!srcValue.Type().AssignableTo(dstField.Type()):
+		// JSON arrays decode as []any, which can't be set directly on a typed slice
+		// like []models.ID[T]. Build a new slice of the destination type and assign
+		// each element individually so things like IDs and numbers are converted.
+		slice := reflect.MakeSlice(dstField.Type(), srcValue.Len(), srcValue.Len())
+		for i := range srcValue.Len() {
+			item := srcValue.Index(i)
+			if item.Kind() == reflect.Interface {
+				item = item.Elem()
 			}
-		default:
+			itemKey := key + "[" + strconv.Itoa(i) + "]"
+			if !item.IsValid() {
+				return errors.Errorf("cannot assign field '%s', source is null", itemKey)
+			}
+			if err := m.assign(itemKey, slice.Index(i), item); err != nil {
+				return err
+			}
+		}
+		dstField.Set(slice)
+	case dstField.Kind() == srcValue.Kind():
+		// If the destination and source are the exact same then we can just
+		// assign the value directly.
+		// TODO If they are both pointers but are of different types this will
+		// fail.
+		dstField.Set(srcValue)
+	case dstField.Kind() == reflect.Pointer && srcValue.Kind() != reflect.Pointer:
+		// If the destination is a pointer, but a pointer to the same type as the
+		// source then we can create a new pointer value and assign.
+		if dstField.Type().Elem().Kind() != srcValue.Kind() {
+			// If the types do not match then we cannot handle them. The caller
+			// would need to implement the UnmarshalJSON method in order to handle
+			// custom type matching.
 			return errors.Errorf("cannot assign field '%s', source is %s and destination is %s", key, srcValue.Type(), dstField.Type())
 		}
+
+		switch {
+		case dstField.Type().Elem().Kind() == reflect.String:
+			// Special path for assigning string pointers, this way we can handle
+			// custom types as well that just wrap string pointers.
+			value := reflect.New(dstField.Type().Elem())
+			// We already know from the check above that the base kind of each type
+			// is the same. So it is safe to just set this as a string here.
+			value.Elem().SetString(srcValue.String())
+			dstField.Set(value)
+		default:
+			value := reflect.New(srcValue.Type())
+			value.Elem().Set(srcValue)
+			dstField.Set(value)
+		}
+	default:
+		return errors.Errorf("cannot assign field '%s', source is %s and destination is %s", key, srcValue.Type(), dstField.Type())
 	}
 
 	return nil

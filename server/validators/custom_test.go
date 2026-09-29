@@ -94,3 +94,37 @@ func TestUnique_ComparableStruct(t *testing.T) {
 		"fully equal structs flagged",
 	)
 }
+
+func TestUnique_PointerToSlice(t *testing.T) {
+	// Struct field validation can hand the rule a pointer to the slice rather
+	// than the slice itself.
+	rule := validators.Unique[string]()
+
+	unique := []string{"a", "b"}
+	duplicate := []string{"a", "b", "a"}
+	var missing *[]string
+
+	assert.NoError(t, rule.Validate(&unique), "pointer to unique slice accepted")
+	assert.EqualError(t, rule.Validate(&duplicate), "fields[2] is a duplicate of an earlier entry", "pointer to slice with repeat flagged")
+	assert.NoError(t, rule.Validate(missing), "nil pointer to slice is skipped")
+}
+
+func TestUnique_DecodedJSONArray(t *testing.T) {
+	// Schemas validate the raw decoded request body, so arrays arrive as []any
+	// rather than a typed slice.
+	rule := validators.Unique[string]()
+
+	assert.NoError(t, rule.Validate([]any{}), "empty decoded array accepted")
+	assert.NoError(t, rule.Validate([]any{"a", "b", "c"}), "unique decoded array accepted")
+	assert.EqualError(t, rule.Validate([]any{"a", "b", "a"}), "fields[2] is a duplicate of an earlier entry", "decoded array with repeat flagged")
+	assert.EqualError(t, rule.Validate([]any{"a", 1}), "fields[1] is not a valid value", "element of the wrong type rejected")
+}
+
+func TestUnique_NotASlice(t *testing.T) {
+	// Values that are not a slice of T are left for other rules to reject.
+	rule := validators.Unique[string]()
+
+	assert.NoError(t, rule.Validate(nil), "nil is skipped")
+	assert.NoError(t, rule.Validate("a"), "non-slice value is skipped")
+	assert.NoError(t, rule.Validate([]int{1, 1}), "slice of another type is skipped")
+}

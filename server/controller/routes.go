@@ -303,6 +303,8 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	tokenOnly.DELETE("/keys/:apiKeyId", c.deleteApiKey)
 	billedTokenOnly.POST("/keys", c.postApiKey)
 
+	// User Settings
+	tokenOnly.PATCH("/users/:userId", c.patchUser)
 	// Icons
 	billedKeyOrToken.POST("/icons/search", c.searchIcon)
 	// Locale and currency data

@@ -328,4 +328,84 @@ func TestMerge(t *testing.T) {
 		assert.NoError(t, err, "Must be able to merge with dates and strings")
 		assert.EqualValues(t, now.Unix(), dst.Timestamp.Unix(), "timestamp should merge properly")
 	})
+
+	t.Run("handle slices of custom string types", func(t *testing.T) {
+		// JSON arrays decode as []any, which cannot be set directly on a typed
+		// slice. Each element needs to go through the same conversions a single
+		// field would.
+		type Foo struct {
+			LinkOrder []models.ID[models.Link] `json:"linkOrder"`
+		}
+
+		first := models.NewID[models.Link]()
+		second := models.NewID[models.Link]()
+		dst := Foo{}
+		src := map[string]any{
+			"linkOrder": []any{first.String(), second.String()},
+		}
+
+		err := merge.Merge(&dst, src)
+		assert.NoError(t, err, "Must be able to merge a decoded array into a slice of IDs")
+		assert.Equal(t, []models.ID[models.Link]{first, second}, dst.LinkOrder, "IDs should merge in order")
+	})
+
+	t.Run("handle slices of json numbers", func(t *testing.T) {
+		type Foo struct {
+			Amounts []int64 `json:"amounts"`
+		}
+
+		dst := Foo{}
+		src := map[string]any{
+			"amounts": []any{json.Number("1"), json.Number("-2")},
+		}
+
+		err := merge.Merge(&dst, src)
+		assert.NoError(t, err, "Must be able to merge a decoded array of numbers")
+		assert.Equal(t, []int64{1, -2}, dst.Amounts, "numbers should merge in order")
+	})
+
+	t.Run("empty slice replaces existing values", func(t *testing.T) {
+		type Foo struct {
+			Names []string `json:"names"`
+		}
+
+		dst := Foo{
+			Names: []string{"a", "b"},
+		}
+		src := map[string]any{
+			"names": []any{},
+		}
+
+		err := merge.Merge(&dst, src)
+		assert.NoError(t, err, "Must be able to merge an empty array")
+		assert.Empty(t, dst.Names, "existing values should be replaced by the empty array")
+	})
+
+	t.Run("slice with an element of the wrong type", func(t *testing.T) {
+		type Foo struct {
+			Names []string `json:"names"`
+		}
+
+		dst := Foo{}
+		src := map[string]any{
+			"names": []any{"a", true},
+		}
+
+		err := merge.Merge(&dst, src)
+		assert.EqualError(t, err, "cannot assign field 'names[1]', source is bool and destination is string")
+	})
+
+	t.Run("slice with a null element", func(t *testing.T) {
+		type Foo struct {
+			Names []string `json:"names"`
+		}
+
+		dst := Foo{}
+		src := map[string]any{
+			"names": []any{"a", nil},
+		}
+
+		err := merge.Merge(&dst, src)
+		assert.EqualError(t, err, "cannot assign field 'names[1]', source is null")
+	})
 }

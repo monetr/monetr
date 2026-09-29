@@ -136,6 +136,46 @@ A user object, the same shape as `user` inside [Get the current user](#get-the-c
 | 400    | `userId` is malformed.        |
 | 404    | No such user on your account. |
 
+## <Badge type="warning">PATCH</Badge> Update your user
+
+Changes your own settings. Right now that's just the order your links show up in.
+
+**In the app:** Nothing calls this yet.
+
+```http
+PATCH /api/users/:userId
+```
+
+**Auth:** Not available to API keys.
+
+You can only update yourself. Passing anyone else's ID, even someone on the same account, gets you a 403.
+
+### Path parameters
+
+| Attribute | Type          | Required | Description                                |
+| --------- | ------------- | -------- | ------------------------------------------ |
+| `userId`  | string (ulid) | Yes      | Your own user ID. Nobody else's will work. |
+
+### Body
+
+| Attribute   | Type             | Required | Description                                                                                                                                                                                         |
+| ----------- | ---------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `linkOrder` | array of strings | No       | Link IDs in the order you want them. Up to 100, no repeats. The whole list gets replaced, so send every link you care about. The IDs aren't checked against your links, so stale ones stick around. |
+
+Anything else in the body, like `role`, gets a 400.
+
+### Response
+
+A user object, the same shape as `user` inside [Get the current user](#get-the-current-user), with `linkOrder` set to
+what you sent. An empty list comes back as null.
+
+### Errors
+
+| Status | When                                                                                           |
+| ------ | ---------------------------------------------------------------------------------------------- |
+| 400    | `userId` is malformed, a link ID is malformed or repeated, or there are more than 100 of them. |
+| 403    | `userId` isn't you.                                                                            |
+
 ## <Badge type="warning">PUT</Badge> Change your password
 
 Replaces the password on your login. You have to prove you know the current one.
