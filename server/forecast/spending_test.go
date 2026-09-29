@@ -430,6 +430,45 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 			},
 		}, events)
 	})
+
+	// https://github.com/monetr/monetr/issues/1309
+	t.Run("weekend avoided funding lands the day before the expense", func(t *testing.T) {
+		t.Skip("this is broken but it proves its broken")
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		spendingRule := testutils.NewRuleSet(t, 2022, 1, 14, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=14")
+		now := time.Date(2026, 9, 14, 0, 0, 1, 0, timezone).UTC()
+		log := testutils.GetLog(t)
+		fundingInstructions := NewFundingScheduleFundingInstructions(
+			log,
+			models.FundingSchedule{
+				RuleSet:         fundingRule,
+				ExcludeWeekends: true,
+				NextRecurrence:  time.Date(2026, 9, 15, 0, 0, 0, 0, timezone),
+			},
+		)
+		spendingInstructions := NewSpendingInstructions(
+			log,
+			models.Spending{
+				SpendingType:   models.SpendingTypeExpense,
+				TargetAmount:   10000,
+				CurrentAmount:  0,
+				NextRecurrence: time.Date(2026, 10, 14, 0, 0, 0, 0, timezone),
+				RuleSet:        spendingRule,
+			},
+			fundingInstructions,
+		)
+
+		// November 15th 2026 is a Sunday, so that funding moves to Friday the 13th,
+		// which is before the expense is due on the 14th. The expense is already
+		// full by then so it should not receive anything more than its target at
+		// any point.
+		events, err := spendingInstructions.GetNextNSpendingEventsAfter(t.Context(), 12, now, timezone)
+		assert.NoError(t, err, "should not return an error")
+		for i, item := range events {
+			assert.LessOrEqual(t, item.RollingAllocation, int64(10000), "rolling allocation must not exceed the target amount: [%d] %s", i, item.Date)
+		}
+	})
 }
 
 func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
