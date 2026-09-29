@@ -79,6 +79,19 @@ export default defineConfig({
     mountId: 'root',
   },
   performance: {
+    // Split vendor code into groups that change independently, so a dependency bump only busts the cache for its own
+    // group instead of one large vendor chunk.
+    chunkSplit: {
+      strategy: 'split-by-experience',
+      forceSplitting: {
+        'lib-sentry': /node_modules[\\/]@sentry/,
+        // Exclude date-fns locales, those are lazy loaded by useLocale and would otherwise be pulled into this chunk.
+        'lib-date': /node_modules[\\/](date-fns(?![\\/]locale)|@date-fns|react-day-picker|rrule)/,
+        'lib-query': /node_modules[\\/]@tanstack/,
+        'lib-forms': /node_modules[\\/](formik|lodash-es|downshift|react-number-format)/,
+        'lib-ui': /node_modules[\\/](@radix-ui|@monetr[\\/]vaul|lucide-react|cmdk)/,
+      },
+    },
     preload: {
       type: 'all-assets',
       include: [/inter-latin-wght-normal.*\.woff2$/, /jetbrains-mono-latin-\d+-normal.*\.woff2$/],
