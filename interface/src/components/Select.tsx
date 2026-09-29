@@ -336,17 +336,25 @@ interface SelectIndicator {
   open?: boolean;
 }
 
-export function SelectIndicator({ isLoading, open }: SelectIndicator): React.JSX.Element {
+export function SelectIndicator({ isLoading, disabled, open }: SelectIndicator): React.JSX.Element {
   const isMobile = useIsMobile();
   // Hover/focus colours come from the `.select` descendant selectors.
   const className = selectStyles.indicator;
   if (isLoading) {
-    return <LoaderCircle className={className} data-loading='true' />;
+    return <LoaderCircle aria-disabled={disabled} className={className} data-loading='true' />;
   }
 
   if (isMobile) {
-    return open ? <PanelBottomClose className={className} /> : <PanelBottomOpen className={className} />;
+    return open ? (
+      <PanelBottomClose aria-disabled={disabled} className={className} />
+    ) : (
+      <PanelBottomOpen aria-disabled={disabled} className={className} />
+    );
   }
 
-  return open ? <ArrowDown className={className} /> : <ArrowUp className={className} />;
+  return open ? (
+    <ArrowDown aria-disabled={disabled} className={className} />
+  ) : (
+    <ArrowUp aria-disabled={disabled} className={className} />
+  );
 }

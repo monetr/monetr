@@ -7,7 +7,7 @@ import type { WithJsonValues } from '@monetr/interface/util/json';
 import type { Writable } from '@monetr/interface/util/readonly';
 import request from '@monetr/interface/util/request';
 
-export type PatchBankAccountRequest = Partial<Writable<Omit<BankAccount, 'accountType' | 'accountSubType'>>> & {
+export type PatchBankAccountRequest = Partial<Writable<BankAccount>> & {
   bankAccountId: ID<BankAccount>;
 };
 

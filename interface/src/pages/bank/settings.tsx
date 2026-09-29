@@ -10,6 +10,8 @@ import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import MForm from '@monetr/interface/components/MForm';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import SelectBankAccountSubType from '@monetr/interface/components/SelectBankAccountSubType';
+import SelectBankAccountType from '@monetr/interface/components/SelectBankAccountType';
 import SelectCurrency from '@monetr/interface/components/SelectCurrency';
 import Typography from '@monetr/interface/components/Typography';
 import { useArchiveBankAccount } from '@monetr/interface/hooks/useArchiveBankAccount';
@@ -17,6 +19,7 @@ import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { useUpdateBankAccount } from '@monetr/interface/hooks/useUpdateBankAccount';
+import type { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
 import { amountToFriendly, friendlyToAmount } from '@monetr/interface/util/amounts';
 import type { APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
@@ -26,6 +29,8 @@ import styles from './settings.module.scss';
 interface BankAccountValues {
   name: string;
   currency: string;
+  accountType: BankAccountType;
+  accountSubType: BankAccountSubType;
   availableBalance: number;
   currentBalance: number;
   limitBalance: number | null;
@@ -88,6 +93,8 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
       name: values.name,
       ...(link?.getIsManual() && {
         currency: values.currency,
+        accountType: values.accountType,
+        accountSubType: values.accountSubType,
         // We don't use the locale.friendlyToAmount helper here because it doesn't accept a currency argument, since the
         // currency could be changed here AND the balance could be changed; we need to handle for that.
         availableBalance: friendlyToAmount(values.availableBalance, locale.locale, values.currency),
@@ -116,6 +123,8 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
   const initialValues: BankAccountValues = {
     name: bankAccount.name,
     currency: bankAccount.currency,
+    accountType: bankAccount.accountType,
+    accountSubType: bankAccount.accountSubType,
     availableBalance: amountToFriendly(bankAccount.availableBalance, locale.locale, bankAccount.currency),
     currentBalance: amountToFriendly(bankAccount.currentBalance, locale.locale, bankAccount.currency),
     limitBalance: bankAccount.limitBalance
@@ -163,6 +172,14 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
                   placeholder='Bank account name...'
                 />
                 <SelectCurrency className={styles.input} disabled={link?.getIsPlaid()} name='currency' />
+                <div className={styles.inputRow}>
+                  <SelectBankAccountType className={styles.input} disabled={!link?.getIsManual()} name='accountType' />
+                  <SelectBankAccountSubType
+                    className={styles.input}
+                    disabled={!link?.getIsManual()}
+                    name='accountSubType'
+                  />
+                </div>
                 <FormAmountField
                   className={styles.input}
                   currency={currency}

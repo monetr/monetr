@@ -77,3 +77,15 @@
 .input {
   width: 100%;
 }
+
+// Pair of form fields that stack on mobile and share a row from md up.
+.inputRow {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  column-gap: 4 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    flex-direction: row;
+  }
+}
