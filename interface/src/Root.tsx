@@ -15,9 +15,10 @@ export default function Root(): React.JSX.Element {
         <MSnackbarProvider>
           <TooltipProvider>
             <NiceModal.Provider>
-              <PullToRefresh />
               <ScrollToTopOnNavigate />
-              <Monetr />
+              <PullToRefresh>
+                <Monetr />
+              </PullToRefresh>
             </NiceModal.Provider>
           </TooltipProvider>
         </MSnackbarProvider>

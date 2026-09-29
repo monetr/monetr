@@ -1,0 +1,217 @@
+@use '@monetr/interface/variables';
+
+// Most of the look of the indicator is driven by the data-status attribute on
+// the indicator, see the Status type in PullToRefreshGesture.tsx. The position,
+// opacity and scale while dragging are set directly by drawPull.
+
+@keyframes ptr-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// tiny bump when they pull far enough to refresh.
+@keyframes ptr-pop {
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+// Used instead of spinning when the user has reduced motion turned on.
+@keyframes ptr-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.indicator {
+  position: fixed;
+  // Starts at the bottom edge of MTopNavigation and sits beneath it, so it
+  // slides out from behind the navigation.
+  z-index: 20;
+  top: 12 * variables.$size;
+  // Centered without using a transform, since drawPull sets the transform.
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: fit-content;
+  padding: 2 * variables.$size 3 * variables.$size;
+  pointer-events: none;
+  // Tucked up behind the navigation until a pull starts. The backdrop and the
+  // content are what actually get faded in, see drawPull for why.
+  transform: translate3d(0, -20 * variables.$size, 0);
+}
+
+// Blurred background behind the disc and label so it stands out even when
+// theres content right behind it, like on pages without the top navigation. The
+// radial mask makes it clear on the outside and more solid towards the middle,
+// so the blur fades out gradually instead of having a hard edge.
+.backdrop {
+  position: absolute;
+  // Bigger than the indicator so theres room for the blur to fade out.
+  inset: -8 * variables.$size;
+  // Behind the disc and label.
+  z-index: -1;
+  opacity: 0;
+  // this looks fucking incredible and it took me so long to figure out how to
+  // do it
+  backdrop-filter: blur(2 * variables.$size);
+  background-color: color-mix(in srgb, var(--background) 60%, transparent);
+  mask-image: radial-gradient(closest-side, black 55%, transparent);
+}
+
+.indicatorContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5 * variables.$size;
+  opacity: 0;
+}
+
+.disc {
+  position: relative;
+  width: 9 * variables.$size;
+  height: 9 * variables.$size;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  // Same surface as Popover.
+  background-color: var(--background);
+  border: 1px solid var(--border);
+  box-shadow:
+    0 variables.$size 1.5 * variables.$size -0.25 * variables.$size rgba(0, 0, 0, 0.1),
+    0 0.5 * variables.$size variables.$size -0.5 * variables.$size rgba(0, 0, 0, 0.1);
+  // The ring and the icons all use currentColor, so changing the color here
+  // changes all of them at once.
+  color: var(--brand-blue);
+  transition: color 0.2s ease;
+
+  .indicator[data-status='armed'] &,
+  .indicator[data-status='reloadArmed'] & {
+    animation: ptr-pop 0.26s var(--ptr-ease);
+  }
+
+  .indicator[data-status='done'] & {
+    color: var(--success);
+  }
+
+  .indicator[data-status='error'] & {
+    color: var(--error);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .indicator[data-status='armed'] &,
+    .indicator[data-status='reloadArmed'] & {
+      animation: none;
+    }
+  }
+}
+
+.ring {
+  position: absolute;
+  // The disc border is 1px, keep the ring centered inside it.
+  inset: -1px;
+  // Size from the inset instead of the svgs width and height attributes, so it
+  // follows the disc.
+  width: auto;
+  height: auto;
+  overflow: visible;
+
+  .indicator[data-status='refreshing'] &,
+  .indicator[data-status='reloading'] & {
+    animation: ptr-spin 0.75s linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .indicator[data-status='refreshing'] &,
+    .indicator[data-status='reloading'] & {
+      animation: ptr-pulse 1.2s ease-in-out infinite;
+    }
+  }
+}
+
+.track,
+.arc {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+}
+
+// The faint full circle behind the arc.
+.track {
+  stroke: var(--background-subtle);
+}
+
+// The part of the ring that fills in as they pull.
+.arc {
+  stroke-linecap: round;
+  transition: stroke-dashoffset 90ms linear;
+}
+
+// All three icons are stacked on top of each other in the middle of the disc
+// and hidden, the status decides which one (if any) is shown.
+.icon {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 4 * variables.$size;
+  height: 4 * variables.$size;
+  opacity: 0;
+  transform: scale(0.6);
+  transition:
+    opacity 0.18s ease,
+    transform 0.26s var(--ptr-ease);
+}
+
+.arrow {
+  .indicator[data-status='pulling'] & {
+    opacity: 1;
+    transform: none;
+  }
+
+  // Flip the arrow around once theyve pulled far enough, kinda hints that
+  // letting go will refresh.
+  .indicator[data-status='armed'] & {
+    opacity: 1;
+    transform: rotate(180deg);
+  }
+}
+
+// Swaps in for the arrow when they pull far enough to do a full reload.
+.reload {
+  .indicator[data-status='reloadArmed'] & {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.check {
+  .indicator[data-status='done'] & {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.cross {
+  .indicator[data-status='error'] & {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.label {
+  font-size: 0.75rem;
+  font-weight: var(--medium);
+  white-space: nowrap;
+  color: var(--content-subtle);
+}
+
+// Visually hidden but still read out by screen readers.
+.screenReaderOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

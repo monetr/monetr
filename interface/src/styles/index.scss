@@ -25,6 +25,8 @@ html {
   // (or any clickable element) flashes the browser's default grey overlay.
   -webkit-tap-highlight-color: transparent;
   background-color: var(--background);
+  // The native rubber band and Safari's own pull to refresh would fight PullToRefresh.
+  overscroll-behavior-y: none;
 }
 
 // Remove default margins on common block elements.
@@ -289,6 +291,8 @@ svg.lucide {
 
   --blue: #3b82f6;
   --blue-subtle: #60a5fa;
+  // The blue from the monetr logo's gradient (assets/logo.svg).
+  --brand-blue: #2cedff;
 
   /* Progress bar colors (budget / goal / upload bars). */
   --progress-track: #374151; /* gray-700 */
