@@ -1,6 +1,7 @@
 package lunch_flow_jobs_test
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -26,7 +27,7 @@ func TestCleanupLunchFlowCron(t *testing.T) {
 		enqueuer := mockgen.NewMockProcessor(ctrl)
 
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				gomock.Any(),
 				gomock.Any(),
@@ -105,13 +106,15 @@ func TestCleanupLunchFlowCron(t *testing.T) {
 		enqueuer := mockgen.NewMockProcessor(ctrl)
 
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(lunch_flow_jobs.CleanupLunchFlow),
 				gomock.Any(),
-				gomock.Eq(lunch_flow_jobs.CleanupLunchFlowArguments{
-					AccountId:       user.AccountId,
-					LunchFlowLinkId: lunchFlowLink.LunchFlowLinkId,
+				gomock.InAnyOrder([]any{
+					lunch_flow_jobs.CleanupLunchFlowArguments{
+						AccountId:       user.AccountId,
+						LunchFlowLinkId: lunchFlowLink.LunchFlowLinkId,
+					},
 				}),
 			).
 			Return(nil).
@@ -189,7 +192,7 @@ func TestCleanupLunchFlowCron(t *testing.T) {
 		enqueuer := mockgen.NewMockProcessor(ctrl)
 
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				gomock.Any(),
 				gomock.Any(),
@@ -213,6 +216,87 @@ func TestCleanupLunchFlowCron(t *testing.T) {
 			mockqueue.NewMockContext(context),
 		)
 		assert.NoError(t, err, "cleanup lunch flow cron should succeed")
+	})
+
+	t.Run("returns an error when the enqueue fails", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+		kms := secrets.NewPlaintextKMS()
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			db,
+			log,
+		)
+		secretsRepo := repository.NewSecretsRepository(
+			log,
+			clock,
+			db,
+			kms,
+			user.AccountId,
+		)
+
+		secret := repository.SecretData{
+			Kind:  models.SecretKindLunchFlow,
+			Value: "test-secret",
+		}
+		assert.NoError(
+			t,
+			secretsRepo.Store(t.Context(), &secret),
+			"must be able to create lunch flow secret",
+		)
+
+		lunchFlowLink := models.LunchFlowLink{
+			AccountId: user.AccountId,
+			SecretId:  secret.SecretId,
+			Name:      "Test Lunch Flow Link",
+			ApiUrl:    config.DefaultLunchFlowAPIURL,
+			Status:    models.LunchFlowLinkStatusPending,
+			CreatedBy: user.UserId,
+		}
+		assert.NoError(
+			t,
+			repo.CreateLunchFlowLink(t.Context(), &lunchFlowLink),
+			"must be able to create lunch flow link",
+		)
+
+		// Move the clock forward past 24 hours so the link becomes stale.
+		clock.Add(25 * time.Hour)
+
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(lunch_flow_jobs.CleanupLunchFlow),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Return(errors.New("database is on fire")).
+			Times(1)
+
+		context := mockgen.NewMockContext(ctrl)
+		context.EXPECT().Clock().Return(clock).MinTimes(1)
+		context.EXPECT().Configuration().Return(config.Configuration{
+			LunchFlow: config.LunchFlow{
+				Enabled: true,
+			},
+		}).MinTimes(1)
+		context.EXPECT().DB().Return(db).MinTimes(1)
+		context.EXPECT().Enqueuer().Return(enqueuer).MinTimes(1)
+		context.EXPECT().Log().Return(log).MinTimes(1)
+
+		err := lunch_flow_jobs.CleanupLunchFlowCron(
+			mockqueue.NewMockContext(context),
+		)
+		assert.EqualError(t, err, "database is on fire")
 	})
 }
 

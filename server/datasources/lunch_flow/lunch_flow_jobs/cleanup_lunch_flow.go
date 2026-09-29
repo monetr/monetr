@@ -2,7 +2,7 @@ package lunch_flow_jobs
 
 import (
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/logging"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
@@ -34,23 +34,24 @@ func CleanupLunchFlowCron(ctx queue.Context) error {
 		return nil
 	}
 
-	for _, item := range staleLinks {
-		itemLog := log.With(
-			"accountId", item.AccountId,
-			"lunchFlowLinkId", item.LunchFlowLinkId,
-		)
-		itemLog.Log(ctx, logging.LevelTrace, "enqueuing Lunch Flow link to be cleaned up")
-		if err := queue.Enqueue(ctx, ctx.Enqueuer(), CleanupLunchFlow, CleanupLunchFlowArguments{
-			AccountId:       item.AccountId,
-			LunchFlowLinkId: item.LunchFlowLinkId,
-		}); err != nil {
-			itemLog.WarnContext(ctx, "failed to enqueue job to cleanup Lunch Flow link", "err", err)
-			crumbs.Warn(ctx, "Failed to enqueue job to cleanup Lunch Flow link", "job", map[string]any{
-				"error": err,
-			})
-			continue
-		}
-		itemLog.Log(ctx, logging.LevelTrace, "successfully enqueued Lunch Flow link for cleanup")
+	if err = queue.BulkEnqueue(
+		ctx,
+		ctx.Enqueuer(),
+		CleanupLunchFlow,
+		myownsanity.Map(
+			staleLinks,
+			func(item models.LunchFlowLink) CleanupLunchFlowArguments {
+				return CleanupLunchFlowArguments{
+					AccountId:       item.AccountId,
+					LunchFlowLinkId: item.LunchFlowLinkId,
+				}
+			}),
+	); err != nil {
+		log.WarnContext(ctx, "failed to enqueue jobs to cleanup Lunch Flow links", "err", err)
+		crumbs.Warn(ctx, "Failed to enqueue jobs to cleanup Lunch Flow links", "job", map[string]any{
+			"error": err,
+		})
+		return err
 	}
 
 	return nil

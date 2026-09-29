@@ -2,7 +2,7 @@ package plaid_jobs
 
 import (
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/logging"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
@@ -39,29 +39,24 @@ func DeactivatePlaidLinkCron(ctx queue.Context) error {
 
 	log.InfoContext(ctx, "preparing to enqueue jobs to remove expired links", "count", len(expiredLinks))
 
-	for _, item := range expiredLinks {
-		itemLog := log.With(
-			"accountId", item.AccountId,
-			"linkId", item.LinkId,
-		)
-		itemLog.Log(ctx, logging.LevelTrace, "enqueuing job to remove expired link for account")
-		if err := queue.Enqueue(
-			ctx,
-			ctx.Enqueuer(),
-			DeactivatePlaidLink,
-			DeactivateLinksArguments{
-				AccountId: item.AccountId,
-				LinkId:    item.LinkId,
-			},
-		); err != nil {
-			log.WarnContext(ctx, "failed to enqueue job to remove expired link", "err", err)
-			crumbs.Warn(ctx, "Failed to enqueue job to remove expired link", "job", map[string]any{
-				"error": err,
-			})
-			continue
-		}
-
-		itemLog.Log(ctx, logging.LevelTrace, "successfully enqueued removal of expired link")
+	if err = queue.BulkEnqueue(
+		ctx,
+		ctx.Enqueuer(),
+		DeactivatePlaidLink,
+		myownsanity.Map(
+			expiredLinks,
+			func(item models.Link) DeactivateLinksArguments {
+				return DeactivateLinksArguments{
+					AccountId: item.AccountId,
+					LinkId:    item.LinkId,
+				}
+			}),
+	); err != nil {
+		log.WarnContext(ctx, "failed to enqueue jobs to remove expired links", "err", err)
+		crumbs.Warn(ctx, "Failed to enqueue jobs to remove expired links", "job", map[string]any{
+			"error": err,
+		})
+		return err
 	}
 
 	return nil

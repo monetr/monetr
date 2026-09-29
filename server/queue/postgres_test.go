@@ -583,6 +583,111 @@ func TestPostgresProcessor_EnqueueAt(t *testing.T) {
 	})
 }
 
+func TestPostgresProcessor_BulkEnqueueAt(t *testing.T) {
+	t.Run("enqueues each argument as its own job", func(t *testing.T) {
+		clock := clock.New()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+		log := testutils.GetLog(t)
+
+		p := NewPostgresQueue(
+			t.Context(),
+			clock,
+			log,
+			config.Configuration{},
+			db,
+			nil, nil, nil, nil, nil, nil,
+		).(*postgresProcessor)
+
+		err := p.Register(t.Context(), "test-bulk", func(_ Context, _ []byte) error {
+			return nil
+		})
+		assert.NoError(t, err)
+
+		at := time.Date(2026, 6, 15, 12, 30, 0, 0, time.UTC)
+		err = p.BulkEnqueueAt(t.Context(), "test-bulk", at, []any{
+			testJobArgs{Value: "one"},
+			testJobArgs{Value: "two"},
+			testJobArgs{Value: "three"},
+		})
+		assert.NoError(t, err, "must be able to bulk enqueue jobs")
+
+		var jobs []models.Job
+		err = db.NewSelect().
+			Model(&jobs).
+			Where(`"queue" = ?`, "test-bulk").
+			Scan(t.Context())
+		require.NoError(t, err)
+		require.Len(t, jobs, 3, "must create one job per argument")
+		for _, job := range jobs {
+			assert.EqualValues(t, 1, job.Attempt, "initial attempt must be 1")
+			assert.Equal(t, models.PendingJobStatus, job.Status, "initial status must be pending")
+			assert.Equal(t, int64(at.Unix()), job.Priority, "priority must match the at timestamp")
+		}
+	})
+
+	t.Run("skips duplicates without dropping the rest of the batch", func(t *testing.T) {
+		clock := clock.New()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+		log := testutils.GetLog(t)
+
+		p := NewPostgresQueue(
+			t.Context(),
+			clock,
+			log,
+			config.Configuration{},
+			db,
+			nil, nil, nil, nil, nil, nil,
+		).(*postgresProcessor)
+
+		err := p.Register(t.Context(), "test-bulk-dupe", func(_ Context, _ []byte) error {
+			return nil
+		})
+		assert.NoError(t, err)
+
+		at := time.Date(2026, 6, 15, 12, 30, 0, 0, time.UTC)
+		err = p.EnqueueAt(t.Context(), "test-bulk-dupe", at, testJobArgs{Value: "one"})
+		assert.NoError(t, err, "must be able to enqueue the first job")
+
+		err = p.BulkEnqueueAt(t.Context(), "test-bulk-dupe", at, []any{
+			testJobArgs{Value: "one"},
+			testJobArgs{Value: "two"},
+		})
+		assert.NoError(t, err, "duplicate should not error")
+
+		count, err := db.NewSelect().
+			Model((*models.Job)(nil)).
+			Where(`"queue" = ?`, "test-bulk-dupe").
+			Count(t.Context())
+		require.NoError(t, err)
+		assert.Equal(t, 2, count, "should skip the duplicate but still enqueue the new job")
+	})
+
+	t.Run("empty arguments do nothing", func(t *testing.T) {
+		clock := clock.New()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+		log := testutils.GetLog(t)
+
+		p := NewPostgresQueue(
+			t.Context(),
+			clock,
+			log,
+			config.Configuration{},
+			db,
+			nil, nil, nil, nil, nil, nil,
+		).(*postgresProcessor)
+
+		err := p.BulkEnqueueAt(t.Context(), "test-bulk-empty", clock.Now(), []any{})
+		assert.NoError(t, err, "empty bulk enqueue must not return an error")
+
+		count, err := db.NewSelect().
+			Model((*models.Job)(nil)).
+			Where(`"queue" = ?`, "test-bulk-empty").
+			Count(t.Context())
+		require.NoError(t, err)
+		assert.Zero(t, count, "no jobs should be created")
+	})
+}
+
 func TestPostgresProcessor_ConsumeJobMaybe(t *testing.T) {
 	t.Run("consumes pending job with past priority", func(t *testing.T) {
 		clock := clock.NewMock()

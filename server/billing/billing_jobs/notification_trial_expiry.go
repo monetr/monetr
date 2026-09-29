@@ -55,27 +55,23 @@ func NotificationTrialExpiryCron(ctx queue.Context) error {
 
 	log.InfoContext(ctx, "accounts need a trial expiry notification", "count", len(accounts))
 
-	for _, item := range accounts {
-		itemLog := log.With("accountId", item.AccountId)
-
-		itemLog.Log(ctx, logging.LevelTrace, "enqueuing account for trial expiry notification")
-		if err := queue.Enqueue(
-			ctx,
-			ctx.Enqueuer(),
-			NotificationTrialExpiry,
-			NotificationTrialExpiryArguments{
-				AccountId: item.AccountId,
-			},
-		); err != nil {
-
-			itemLog.WarnContext(ctx, "failed to enqueue job for trial expiry notification", "err", err)
-			crumbs.Warn(ctx, "Failed to enqueue job for trial expiry notification", "job", map[string]any{
-				"error": err,
-			})
-			continue
-		}
-
-		itemLog.Log(ctx, logging.LevelTrace, "successfully enqueued account for trial expiry notification")
+	if err = queue.BulkEnqueue(
+		ctx,
+		ctx.Enqueuer(),
+		NotificationTrialExpiry,
+		myownsanity.Map(
+			accounts,
+			func(item models.Account) NotificationTrialExpiryArguments {
+				return NotificationTrialExpiryArguments{
+					AccountId: item.AccountId,
+				}
+			}),
+	); err != nil {
+		log.WarnContext(ctx, "failed to enqueue jobs for trial expiry notifications", "err", err)
+		crumbs.Warn(ctx, "Failed to enqueue jobs for trial expiry notifications", "job", map[string]any{
+			"error": err,
+		})
+		return err
 	}
 
 	return nil

@@ -52,34 +52,25 @@ func SyncLunchFlowCron(ctx queue.Context) error {
 		return nil
 	}
 
-	for _, item := range bankAccounts {
-		itemLog := log.With(
-			"accountId", item.AccountId,
-			"bankAccountId", item.BankAccountId,
-			"linkId", item.LinkId,
-		)
-
-		itemLog.Log(ctx, logging.LevelTrace, "enqueuing bank account to be synced with Lunch Flow")
-
-		err := queue.Enqueue(
-			ctx,
-			ctx.Enqueuer(),
-			SyncLunchFlow,
-			SyncLunchFlowArguments{
-				AccountId:     item.AccountId,
-				BankAccountId: item.BankAccountId,
-				LinkId:        item.LinkId,
-			},
-		)
-		if err != nil {
-			itemLog.WarnContext(ctx, "failed to enqueue job to sync with Lunch Flow", "err", err)
-			crumbs.Warn(ctx, "Failed to enqueue job to sync with Lunch Flow", "job", map[string]any{
-				"error": err,
-			})
-			continue
-		}
-
-		itemLog.Log(ctx, logging.LevelTrace, "successfully enqueued bank account to be synced with Lunch Flow")
+	if err = queue.BulkEnqueue(
+		ctx,
+		ctx.Enqueuer(),
+		SyncLunchFlow,
+		myownsanity.Map(
+			bankAccounts,
+			func(item models.BankAccount) SyncLunchFlowArguments {
+				return SyncLunchFlowArguments{
+					AccountId:     item.AccountId,
+					BankAccountId: item.BankAccountId,
+					LinkId:        item.LinkId,
+				}
+			}),
+	); err != nil {
+		log.WarnContext(ctx, "failed to enqueue jobs to sync with Lunch Flow", "err", err)
+		crumbs.Warn(ctx, "Failed to enqueue jobs to sync with Lunch Flow", "job", map[string]any{
+			"error": err,
+		})
+		return err
 	}
 
 	return nil

@@ -1,6 +1,7 @@
 package plaid_jobs_test
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/benbjohnson/clock"
@@ -41,13 +42,15 @@ func TestSyncPlaidAccountsCron(t *testing.T) {
 		// Make sure that we trigger a sync job for the link that hasn't been
 		// updated before.
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(plaid_jobs.SyncPlaidAccounts),
 				gomock.Any(),
-				gomock.Eq(plaid_jobs.SyncPlaidAccountsArguments{
-					AccountId: plaidLink.AccountId,
-					LinkId:    plaidLink.LinkId,
+				gomock.InAnyOrder([]any{
+					plaid_jobs.SyncPlaidAccountsArguments{
+						AccountId: plaidLink.AccountId,
+						LinkId:    plaidLink.LinkId,
+					},
 				}),
 			).
 			Return(nil).
@@ -94,13 +97,15 @@ func TestSyncPlaidAccountsCron(t *testing.T) {
 		// Make sure that we trigger a sync job for the link that hasn't been
 		// updated before.
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(plaid_jobs.SyncPlaidAccounts),
 				gomock.Any(),
-				gomock.Eq(plaid_jobs.SyncPlaidAccountsArguments{
-					AccountId: plaidLink.AccountId,
-					LinkId:    plaidLink.LinkId,
+				gomock.InAnyOrder([]any{
+					plaid_jobs.SyncPlaidAccountsArguments{
+						AccountId: plaidLink.AccountId,
+						LinkId:    plaidLink.LinkId,
+					},
 				}),
 			).
 			Return(nil).
@@ -116,6 +121,48 @@ func TestSyncPlaidAccountsCron(t *testing.T) {
 				mockqueue.NewMockContext(context),
 			)
 			assert.NoError(t, err, "should not return an error")
+		}
+	})
+
+	t.Run("returns an error when the enqueue fails", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		plaidLink := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+		fixtures.GivenIHaveAPlaidBankAccount(
+			t,
+			clock,
+			&plaidLink,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
+
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(plaid_jobs.SyncPlaidAccounts),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Return(errors.New("database is on fire")).
+			Times(1)
+
+		{
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).MinTimes(1)
+			context.EXPECT().DB().Return(db).MinTimes(1)
+			context.EXPECT().Enqueuer().Return(enqueuer).MinTimes(1)
+			context.EXPECT().Log().Return(log).MinTimes(1)
+			err := plaid_jobs.SyncPlaidAccountsCron(
+				mockqueue.NewMockContext(context),
+			)
+			assert.EqualError(t, err, "database is on fire")
 		}
 	})
 }

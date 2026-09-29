@@ -316,6 +316,20 @@ func (m *MockEnqueuer) EXPECT() *MockEnqueuerMockRecorder {
 	return m.recorder
 }
 
+// BulkEnqueueAt mocks base method.
+func (m *MockEnqueuer) BulkEnqueueAt(ctx context.Context, arg1 string, at time.Time, args []any) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BulkEnqueueAt", ctx, arg1, at, args)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// BulkEnqueueAt indicates an expected call of BulkEnqueueAt.
+func (mr *MockEnqueuerMockRecorder) BulkEnqueueAt(ctx, arg1, at, args any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BulkEnqueueAt", reflect.TypeOf((*MockEnqueuer)(nil).BulkEnqueueAt), ctx, arg1, at, args)
+}
+
 // EnqueueAt mocks base method.
 func (m *MockEnqueuer) EnqueueAt(ctx context.Context, arg1 string, at time.Time, args any) error {
 	m.ctrl.T.Helper()
@@ -366,6 +380,20 @@ func NewMockProcessor(ctrl *gomock.Controller) *MockProcessor {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockProcessor) EXPECT() *MockProcessorMockRecorder {
 	return m.recorder
+}
+
+// BulkEnqueueAt mocks base method.
+func (m *MockProcessor) BulkEnqueueAt(ctx context.Context, arg1 string, at time.Time, args []any) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BulkEnqueueAt", ctx, arg1, at, args)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// BulkEnqueueAt indicates an expected call of BulkEnqueueAt.
+func (mr *MockProcessorMockRecorder) BulkEnqueueAt(ctx, arg1, at, args any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BulkEnqueueAt", reflect.TypeOf((*MockProcessor)(nil).BulkEnqueueAt), ctx, arg1, at, args)
 }
 
 // Close mocks base method.

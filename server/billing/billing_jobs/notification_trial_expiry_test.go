@@ -2,6 +2,7 @@ package billing_jobs_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -66,12 +67,14 @@ func TestNotificationTrialExpiryCron(t *testing.T) {
 		clock.Add(26 * 24 * time.Hour)
 
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(billing_jobs.NotificationTrialExpiry),
 				gomock.Any(),
-				gomock.Eq(billing_jobs.NotificationTrialExpiryArguments{
-					AccountId: user.AccountId,
+				gomock.InAnyOrder([]any{
+					billing_jobs.NotificationTrialExpiryArguments{
+						AccountId: user.AccountId,
+					},
 				}),
 			).
 			Return(nil).
@@ -164,12 +167,14 @@ func TestNotificationTrialExpiryCron(t *testing.T) {
 		clock.Add(26 * 24 * time.Hour)
 
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(billing_jobs.NotificationTrialExpiry),
 				gomock.Any(),
-				gomock.Eq(billing_jobs.NotificationTrialExpiryArguments{
-					AccountId: user.AccountId,
+				gomock.InAnyOrder([]any{
+					billing_jobs.NotificationTrialExpiryArguments{
+						AccountId: user.AccountId,
+					},
 				}),
 			).
 			Return(nil).
@@ -244,12 +249,14 @@ func TestNotificationTrialExpiryCron(t *testing.T) {
 		// Make sure that we don't send an email because the user is already
 		// subscribed.
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(billing_jobs.NotificationTrialExpiry),
 				gomock.Any(),
-				gomock.Eq(billing_jobs.NotificationTrialExpiryArguments{
-					AccountId: user.AccountId,
+				gomock.InAnyOrder([]any{
+					billing_jobs.NotificationTrialExpiryArguments{
+						AccountId: user.AccountId,
+					},
 				}),
 			).
 			Return(nil).
@@ -312,16 +319,67 @@ func TestNotificationTrialExpiryCron(t *testing.T) {
 		// Make sure that we don't send an email because the user is already
 		// subscribed.
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(billing_jobs.NotificationTrialExpiry),
 				gomock.Any(),
-				gomock.Eq(billing_jobs.NotificationTrialExpiryArguments{
-					AccountId: user.AccountId,
+				gomock.InAnyOrder([]any{
+					billing_jobs.NotificationTrialExpiryArguments{
+						AccountId: user.AccountId,
+					},
 				}),
 			).
 			Return(nil).
 			Times(0)
+	})
+
+	t.Run("returns an error when the enqueue fails", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+		login, _ := fixtures.GivenIHaveLogin(t, clock)
+		{ // Mark the login's email as verified
+			login.IsEmailVerified = true
+			login.EmailVerifiedAt = new(clock.Now())
+			testutils.MustDBUpdate(t, &login)
+		}
+		fixtures.GivenIHaveATrialingAccount(t, clock, login)
+		config := config.Configuration{
+			Stripe: config.Stripe{
+				Enabled: true,
+			},
+		}
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+
+		// Move into the notification window.
+		clock.Add(26 * 24 * time.Hour)
+
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(billing_jobs.NotificationTrialExpiry),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Return(errors.New("database is on fire")).
+			Times(1)
+
+		{
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).AnyTimes()
+			context.EXPECT().Configuration().Return(config).AnyTimes()
+			context.EXPECT().DB().Return(db).AnyTimes()
+			context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
+			context.EXPECT().Log().Return(log).AnyTimes()
+
+			err := billing_jobs.NotificationTrialExpiryCron(
+				mockqueue.NewMockContext(context),
+			)
+			assert.EqualError(t, err, "database is on fire")
+		}
 	})
 }
 

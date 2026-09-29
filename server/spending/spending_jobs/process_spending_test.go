@@ -1,6 +1,7 @@
 package spending_jobs_test
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -401,5 +402,165 @@ func TestProcessSpending(t *testing.T) {
 		transactions, err := repo.GetTransactions(t.Context(), bankAccount.BankAccountId, 100, 0)
 		assert.NoError(t, err, "should retrieve transactions")
 		assert.Empty(t, transactions, "no transactions should have been created when flag is off")
+	})
+}
+
+func TestProcessSpendingCron(t *testing.T) {
+	givenStaleSpending := func(
+		t *testing.T,
+		clock *clock.Mock,
+		user models.User,
+		bankAccount models.BankAccount,
+		name string,
+	) {
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+		fundingRule := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", clock.Now())
+		fundingSchedule := testutils.MustInsert(t, models.FundingSchedule{
+			AccountId:              bankAccount.AccountId,
+			BankAccountId:          bankAccount.BankAccountId,
+			Name:                   name,
+			Description:            name,
+			RuleSet:                fundingRule,
+			NextRecurrence:         fundingRule.After(clock.Now(), false),
+			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
+		})
+
+		spendingRule := testutils.RuleToSet(t, timezone, "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO", clock.Now())
+		spendingRule.DTStart(clock.Now().Add(-8 * 24 * time.Hour)) // Allow past times.
+		testutils.MustInsert(t, models.Spending{
+			AccountId:         bankAccount.AccountId,
+			BankAccountId:     bankAccount.BankAccountId,
+			FundingScheduleId: fundingSchedule.FundingScheduleId,
+			SpendingType:      models.SpendingTypeExpense,
+			Name:              name,
+			TargetAmount:      5000,
+			CurrentAmount:     5000,
+			RuleSet:           spendingRule,
+			NextRecurrence:    spendingRule.Before(clock.Now(), true), // Make it so it recurs next in the past. (STALE)
+			CreatedAt:         clock.Now(),
+		})
+	}
+
+	t.Run("no stale spending", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				gomock.Any(),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Return(nil).
+			Times(0)
+
+		{
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).AnyTimes()
+			context.EXPECT().DB().Return(db).AnyTimes()
+			context.EXPECT().Enqueuer().Return(enqueuer).Times(0)
+			context.EXPECT().Log().Return(log).AnyTimes()
+
+			err := spending_jobs.ProcessSpendingCron(
+				mockqueue.NewMockContext(context),
+			)
+			assert.NoError(t, err)
+		}
+	})
+
+	t.Run("enqueues one job per bank account with stale spending", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+		checking := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		savings := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.SavingsBankAccountSubType)
+
+		// Two stale on checking, should still only be one job for it.
+		givenStaleSpending(t, clock, user, checking, "Rent")
+		givenStaleSpending(t, clock, user, checking, "Power")
+		givenStaleSpending(t, clock, user, savings, "Rent")
+
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(spending_jobs.ProcessSpending),
+				gomock.Any(),
+				gomock.InAnyOrder([]any{
+					spending_jobs.ProcessSpendingArguments{
+						AccountId:     checking.AccountId,
+						BankAccountId: checking.BankAccountId,
+					},
+					spending_jobs.ProcessSpendingArguments{
+						AccountId:     savings.AccountId,
+						BankAccountId: savings.BankAccountId,
+					},
+				}),
+			).
+			Return(nil).
+			Times(1)
+
+		{
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).AnyTimes()
+			context.EXPECT().DB().Return(db).AnyTimes()
+			context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
+			context.EXPECT().Log().Return(log).AnyTimes()
+
+			err := spending_jobs.ProcessSpendingCron(
+				mockqueue.NewMockContext(context),
+			)
+			assert.NoError(t, err)
+		}
+	})
+
+	t.Run("returns an error when the enqueue fails", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		givenStaleSpending(t, clock, user, bankAccount, "Rent")
+
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(spending_jobs.ProcessSpending),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Return(errors.New("database is on fire")).
+			Times(1)
+
+		{
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).AnyTimes()
+			context.EXPECT().DB().Return(db).AnyTimes()
+			context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
+			context.EXPECT().Log().Return(log).AnyTimes()
+
+			err := spending_jobs.ProcessSpendingCron(
+				mockqueue.NewMockContext(context),
+			)
+			assert.EqualError(t, err, "database is on fire")
+		}
 	})
 }

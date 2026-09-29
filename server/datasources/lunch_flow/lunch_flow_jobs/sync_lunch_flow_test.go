@@ -1,6 +1,7 @@
 package lunch_flow_jobs_test
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -576,5 +577,135 @@ func TestSyncLunchFlow(t *testing.T) {
 				fmt.Sprintf("GET https://www.lunchflow.app/api/v1/accounts/%s/transactions", bankAccount.LunchFlowBankAccount.LunchFlowId): 1,
 			}, "must match Lunch Flow API calls")
 		}()
+	})
+}
+
+func TestSyncLunchFlowCron(t *testing.T) {
+	t.Run("no bank accounts to sync", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				gomock.Any(),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Return(nil).
+			Times(0)
+
+		context := mockgen.NewMockContext(ctrl)
+		context.EXPECT().Clock().Return(clock).AnyTimes()
+		context.EXPECT().Configuration().Return(config.Configuration{
+			LunchFlow: config.LunchFlow{
+				Enabled: true,
+			},
+		}).MinTimes(1)
+		context.EXPECT().DB().Return(db).AnyTimes()
+		context.EXPECT().Enqueuer().Return(enqueuer).Times(0)
+		context.EXPECT().Log().Return(log).AnyTimes()
+
+		err := lunch_flow_jobs.SyncLunchFlowCron(
+			mockqueue.NewMockContext(context),
+		)
+		assert.NoError(t, err, "sync lunch flow cron should succeed")
+	})
+
+	t.Run("enqueues one job per bank account", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveALunchFlowLink(t, clock, user)
+		checking := fixtures.GivenIHaveALunchFlowBankAccount(t, clock, &link)
+		savings := fixtures.GivenIHaveALunchFlowBankAccount(t, clock, &link)
+
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(lunch_flow_jobs.SyncLunchFlow),
+				gomock.Any(),
+				gomock.InAnyOrder([]any{
+					lunch_flow_jobs.SyncLunchFlowArguments{
+						AccountId:     checking.AccountId,
+						BankAccountId: checking.BankAccountId,
+						LinkId:        checking.LinkId,
+					},
+					lunch_flow_jobs.SyncLunchFlowArguments{
+						AccountId:     savings.AccountId,
+						BankAccountId: savings.BankAccountId,
+						LinkId:        savings.LinkId,
+					},
+				}),
+			).
+			Return(nil).
+			Times(1)
+
+		context := mockgen.NewMockContext(ctrl)
+		context.EXPECT().Clock().Return(clock).AnyTimes()
+		context.EXPECT().Configuration().Return(config.Configuration{
+			LunchFlow: config.LunchFlow{
+				Enabled: true,
+			},
+		}).MinTimes(1)
+		context.EXPECT().DB().Return(db).AnyTimes()
+		context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
+		context.EXPECT().Log().Return(log).AnyTimes()
+
+		err := lunch_flow_jobs.SyncLunchFlowCron(
+			mockqueue.NewMockContext(context),
+		)
+		assert.NoError(t, err, "sync lunch flow cron should succeed")
+	})
+
+	t.Run("returns an error when the enqueue fails", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveALunchFlowLink(t, clock, user)
+		fixtures.GivenIHaveALunchFlowBankAccount(t, clock, &link)
+
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(lunch_flow_jobs.SyncLunchFlow),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Return(errors.New("database is on fire")).
+			Times(1)
+
+		context := mockgen.NewMockContext(ctrl)
+		context.EXPECT().Clock().Return(clock).AnyTimes()
+		context.EXPECT().Configuration().Return(config.Configuration{
+			LunchFlow: config.LunchFlow{
+				Enabled: true,
+			},
+		}).MinTimes(1)
+		context.EXPECT().DB().Return(db).AnyTimes()
+		context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
+		context.EXPECT().Log().Return(log).AnyTimes()
+
+		err := lunch_flow_jobs.SyncLunchFlowCron(
+			mockqueue.NewMockContext(context),
+		)
+		assert.EqualError(t, err, "database is on fire")
 	})
 }

@@ -23,6 +23,7 @@ import (
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
@@ -70,6 +71,12 @@ type CronFunction func(ctx Context) error
 type InternalJobWrapper func(ctx Context, args []byte) error
 
 type Enqueuer interface {
+	BulkEnqueueAt(
+		ctx context.Context,
+		queue string,
+		at time.Time,
+		args []any,
+	) error
 	// EnqueueAt is meant to be an internal function that is called by helper
 	// wrappers. While this function can be called directly, doing so without
 	// first sanitizing the inputs properly can result in jobs not being enqueued
@@ -144,6 +151,23 @@ func EnqueueAt[T any](
 		QueueNameFromJobFunction[T](job),
 		at,
 		args,
+	)
+}
+
+func BulkEnqueue[T any](
+	ctx context.Context,
+	enqueuer Enqueuer,
+	job JobFunction[T],
+	args []T,
+) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+	return enqueuer.BulkEnqueueAt(
+		span.Context(),
+		QueueNameFromJobFunction[T](job),
+		time.Now(),
+		// TODO Because go wont convert []T to []any :(
+		myownsanity.Map(args, func(arg T) any { return arg }),
 	)
 }
 

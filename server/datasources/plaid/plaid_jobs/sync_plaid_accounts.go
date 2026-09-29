@@ -6,6 +6,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
@@ -139,29 +140,24 @@ func SyncPlaidAccountsCron(ctx queue.Context) error {
 
 	log.InfoContext(ctx, "syncing plaid links for accounts", "count", len(links))
 
-	for _, item := range links {
-		itemLog := log.With(
-			"accountId", item.AccountId,
-			"linkId", item.LinkId,
-		)
-		itemLog.Log(ctx, logging.LevelTrace, "enqueuing link to be synced with plaid for accounts")
-		if err := queue.Enqueue(
-			ctx,
-			ctx.Enqueuer(),
-			SyncPlaidAccounts,
-			SyncPlaidAccountsArguments{
-				AccountId: item.AccountId,
-				LinkId:    item.LinkId,
-			},
-		); err != nil {
-			itemLog.WarnContext(ctx, "failed to enqueue job to sync with plaid accounts", "err", err)
-			crumbs.Warn(ctx, "Failed to enqueue job to sync with plaid accounts", "job", map[string]any{
-				"error": err,
-			})
-			continue
-		}
-
-		itemLog.Log(ctx, logging.LevelTrace, "successfully enqueued link to be synced with plaid accounts")
+	if err = queue.BulkEnqueue(
+		ctx,
+		ctx.Enqueuer(),
+		SyncPlaidAccounts,
+		myownsanity.Map(
+			links,
+			func(item models.Link) SyncPlaidAccountsArguments {
+				return SyncPlaidAccountsArguments{
+					AccountId: item.AccountId,
+					LinkId:    item.LinkId,
+				}
+			}),
+	); err != nil {
+		log.WarnContext(ctx, "failed to enqueue jobs to sync with plaid accounts", "err", err)
+		crumbs.Warn(ctx, "Failed to enqueue jobs to sync with plaid accounts", "job", map[string]any{
+			"error": err,
+		})
+		return err
 	}
 
 	return nil

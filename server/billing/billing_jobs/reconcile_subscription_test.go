@@ -1,6 +1,7 @@
 package billing_jobs_test
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -50,12 +51,14 @@ func TestReconcileSubscriptionCron(t *testing.T) {
 		// Now we want to actually trigger the handler, and see if it enqueus the
 		// job we want.
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(billing_jobs.ReconcileSubscription),
 				gomock.Any(),
-				gomock.Eq(billing_jobs.ReconcileSubscriptionArguments{
-					AccountId: user.AccountId,
+				gomock.InAnyOrder([]any{
+					billing_jobs.ReconcileSubscriptionArguments{
+						AccountId: user.AccountId,
+					},
 				}),
 			).
 			Return(nil).
@@ -85,7 +88,7 @@ func TestReconcileSubscriptionCron(t *testing.T) {
 		conf.Stripe.Enabled = false
 
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				gomock.Any(),
 				gomock.Any(),
@@ -132,7 +135,7 @@ func TestReconcileSubscriptionCron(t *testing.T) {
 		// Now we want to trigger the handler and make sure that it does not enqueue any
 		// jobs since there are no stale subscriptions.
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(billing_jobs.ReconcileSubscription),
 				gomock.Any(),
@@ -154,6 +157,46 @@ func TestReconcileSubscriptionCron(t *testing.T) {
 				mockqueue.NewMockContext(context),
 			)
 			assert.NoError(t, err)
+		}
+	})
+
+	t.Run("returns an error when the enqueue fails", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+		conf := testutils.GetConfig(t)
+		conf.Stripe.Enabled = true
+
+		fixtures.GivenIHaveABasicAccount(t, clock)
+
+		// Move the clock forward 30 days so the subscription is stale.
+		clock.Add(30 * 24 * time.Hour)
+
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(billing_jobs.ReconcileSubscription),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Return(errors.New("database is on fire")).
+			Times(1)
+
+		{
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).AnyTimes()
+			context.EXPECT().Configuration().Return(conf).AnyTimes()
+			context.EXPECT().DB().Return(db).AnyTimes()
+			context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
+			context.EXPECT().Log().Return(log).AnyTimes()
+			err := billing_jobs.ReconcileSubscriptionCron(
+				mockqueue.NewMockContext(context),
+			)
+			assert.EqualError(t, err, "database is on fire")
 		}
 	})
 }
