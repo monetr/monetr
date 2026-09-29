@@ -4,6 +4,7 @@ import PlaidInstitutionLogo from '@monetr/interface/components/Plaid/Institution
 import { Tooltip, TooltipContent, TooltipTrigger } from '@monetr/interface/components/Tooltip';
 import { useBankAccounts } from '@monetr/interface/hooks/useBankAccounts';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
+import type { SortableItemProps } from '@monetr/interface/hooks/useSortableList';
 import type MonetrLink from '@monetr/interface/models/Link';
 import sortAccounts from '@monetr/interface/util/sortAccounts';
 
@@ -11,9 +12,10 @@ import styles from './BankSidebarItem.module.scss';
 
 interface BankSidebarItemProps {
   link: MonetrLink;
+  sortable?: SortableItemProps;
 }
 
-export default function BankSidebarItem({ link }: BankSidebarItemProps): React.JSX.Element {
+export default function BankSidebarItem({ link, sortable }: BankSidebarItemProps): React.JSX.Element {
   const selectBankAccount = useSelectedBankAccount();
   const { data: bankAccounts } = useBankAccounts();
   const active = selectBankAccount.data?.linkId === link.linkId;
@@ -41,9 +43,9 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): React.J
 
   return (
     <Tooltip delayDuration={100}>
-      <TooltipTrigger className={styles.root} data-testid={`bank-sidebar-item-${link.linkId}`}>
+      <TooltipTrigger {...sortable} className={styles.root} data-testid={`bank-sidebar-item-${link.linkId}`}>
         <div className={styles.indicator} data-active={String(active)} />
-        <Link className={styles.link} to={linkPath}>
+        <Link className={styles.link} draggable={false} to={linkPath}>
           <PlaidInstitutionLogo link={link} />
           <LinkWarningIndicator link={link} />
           <LinkRevokedIndicator link={link} />

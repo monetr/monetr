@@ -14,9 +14,25 @@
   align-items: center;
   justify-content: center;
   position: relative;
+  // Items can be dragged to reorder them. Keep the browser from selecting text or popping the iOS link preview on a
+  // long press, while still letting a normal swipe scroll the sidebar.
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 
   &:hover .indicator[data-active='false'] {
     transform: scaleX(1) scaleY(1);
+  }
+
+  &[data-dragging='true'] {
+    z-index: 10;
+    cursor: grabbing;
+
+    .link {
+      transform: scale(1.1);
+      filter: drop-shadow(0 8px 12px rgb(0 0 0 / 0.3));
+    }
   }
 }
 
@@ -50,6 +66,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  transition: transform 150ms, filter 150ms;
 }
 
 .statusIndicator {

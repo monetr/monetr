@@ -110,6 +110,13 @@
   overflow-y: auto;
 }
 
+// Wraps just the link items so they can be reordered, the +1 button stays outside of it.
+.sortableList {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 // Settings / logout glyph buttons at the bottom of the sidebar.
 .actionIcon {
   color: var(--content-subtle);
