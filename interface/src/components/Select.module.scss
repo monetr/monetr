@@ -19,6 +19,7 @@ $basePadding: 4 * variables.$size;
 .input {
   background-color: transparent;
   flex: 1 1 0%;
+  min-width: 0;
 
   &:disabled, &[aria-disabled="true"] {
     color: var(--content-disabled);

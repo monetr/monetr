@@ -61,21 +61,30 @@
   }
 }
 
-// The work-in-progress notice card.
-.card {
-  width: 100%;
-  margin-bottom: 4 * variables.$size;
-}
-
-// The flask icon inside the notice card.
-.cardIcon {
-  width: 16 * variables.$size;
-  height: 16 * variables.$size;
-}
-
-// Full-width form fields.
+// Full-width form fields. The min-width lets them shrink when they share a row, otherwise the native input's
+// intrinsic width pushes them past the column on narrower desktop screens.
 .input {
   width: 100%;
+  min-width: 0;
+}
+
+// Save and archive buttons at the bottom of the form, right aligned.
+.formButtons {
+  width: 100%;
+  display: flex;
+  align-items: end;
+  justify-content: end;
+  gap: 2 * variables.$size;
+}
+
+// The account mask field, full width on mobile and a quarter of the row from md up.
+.maskInput {
+  width: 100%;
+
+  @media (min-width: variables.$mediumScreen) {
+    width: math.percentage(math.div(1, 4));
+    flex-shrink: 0;
+  }
 }
 
 // Pair of form fields that stack on mobile and share a row from md up.

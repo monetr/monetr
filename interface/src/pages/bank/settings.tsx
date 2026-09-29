@@ -1,12 +1,12 @@
 import { Fragment, useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
-import { Archive, FlaskConical, HeartCrack, Save, Settings } from 'lucide-react';
+import { Archive, HeartCrack, Save, Settings } from 'lucide-react';
 import { useLocation } from 'wouter';
 
 import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
-import Card from '@monetr/interface/components/Card';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
+import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import MForm from '@monetr/interface/components/MForm';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
@@ -28,6 +28,7 @@ import styles from './settings.module.scss';
 
 interface BankAccountValues {
   name: string;
+  mask: string;
   currency: string;
   accountType: BankAccountType;
   accountSubType: BankAccountSubType;
@@ -91,6 +92,9 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
     return await updateBankAccount({
       bankAccountId: bankAccount.bankAccountId,
       name: values.name,
+      ...((link?.getIsManual() || link?.getIsLunchFlow()) && {
+        mask: values.mask || null,
+      }),
       ...(link?.getIsManual() && {
         currency: values.currency,
         accountType: values.accountType,
@@ -122,6 +126,7 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
 
   const initialValues: BankAccountValues = {
     name: bankAccount.name,
+    mask: bankAccount.mask ?? '',
     currency: bankAccount.currency,
     accountType: bankAccount.accountType,
     accountSubType: bankAccount.accountSubType,
@@ -141,36 +146,29 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
             breadcrumb='Settings'
             icon={Settings}
             title={bankAccount.name}
-          >
-            {!bankAccount.deletedAt && Boolean(link?.getCanArchiveBankAccount()) && (
-              <Button onClick={archive} variant='destructive'>
-                <Archive />
-                Archive
-              </Button>
-            )}
-            <Button type='submit' variant='primary'>
-              <Save />
-              Save Changes
-            </Button>
-          </MTopNavigation>
+          />
           <div className={styles.content}>
             <div className={styles.row}>
               <div className={styles.column}>
-                <Card className={styles.card}>
-                  <Typography size='inherit'>
-                    <FlaskConical className={styles.cardIcon} />
-                    This page is still a work in progress, however it has been made available to make it possible to
-                    switch the currencies for your bank account sooner. This page will be changed over the next several
-                    releases to improve the UX and functionality.
-                  </Typography>
-                </Card>
-                <FormTextField
-                  className={styles.input}
-                  data-1p-ignore
-                  label='Name'
-                  name='name'
-                  placeholder='Bank account name...'
-                />
+                <div className={styles.inputRow}>
+                  <FormTextField
+                    className={styles.input}
+                    data-1p-ignore
+                    label='Name'
+                    name='name'
+                    placeholder='Bank account name...'
+                  />
+                  <FormTextField
+                    className={styles.maskInput}
+                    data-1p-ignore
+                    disabled={!link?.getIsManual() && !link?.getIsLunchFlow()}
+                    inputMode='numeric'
+                    label='Mask'
+                    maxLength={4}
+                    name='mask'
+                    placeholder='1234'
+                  />
+                </div>
                 <SelectCurrency className={styles.input} disabled={link?.getIsPlaid()} name='currency' />
                 <div className={styles.inputRow}>
                   <SelectBankAccountType className={styles.input} disabled={!link?.getIsManual()} name='accountType' />
@@ -202,6 +200,18 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
                   name='limitBalance'
                   placeholder='No Limit Balance'
                 />
+                <div className={styles.formButtons}>
+                  {Boolean(link?.getCanArchiveBankAccount()) && (
+                    <Button disabled={Boolean(bankAccount.deletedAt)} onClick={archive} variant='destructive'>
+                      <Archive />
+                      Archive
+                    </Button>
+                  )}
+                  <FormButton role='form' type='submit' variant='primary'>
+                    <Save />
+                    Save Changes
+                  </FormButton>
+                </div>
               </div>
             </div>
           </div>
