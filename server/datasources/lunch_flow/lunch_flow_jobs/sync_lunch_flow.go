@@ -109,6 +109,7 @@ type syncLunchFlowContext struct {
 	timezone              *time.Location
 	client                lunch_flow.LunchFlowClient
 	bankAccount           *models.BankAccount
+	lunchFlowLink         *models.LunchFlowLink
 	lunchFlowTransactions []lunch_flow.Transaction
 	existingTransactions  map[string]models.Transaction
 }
@@ -175,6 +176,7 @@ func (s *syncLunchFlowContext) setupClient(ctx queue.Context) error {
 		)
 		return nil
 	}
+	s.lunchFlowLink = link.LunchFlowLink
 	s.log = s.log.With(
 		"linkId", link.LinkId,
 		"lunchFlowLinkId", link.LunchFlowLinkId,
@@ -499,6 +501,13 @@ func SyncLunchFlow(ctx queue.Context, args SyncLunchFlowArguments) error {
 	}
 
 	crumbs.IncludeUserInScope(ctx, args.AccountId)
+
+	// Record the attempt outside of the sync transaction so that it persists even
+	// if the sync fails, otherwise the cron would retry this link on every tick.
+	if err := recordLunchFlowSyncAttempt(ctx, args); err != nil {
+		return err
+	}
+
 	return ctx.RunInTransaction(ctx, func(ctx queue.Context) error {
 		span := sentry.SpanFromContext(ctx)
 		s := &syncLunchFlowContext{
@@ -571,6 +580,14 @@ func SyncLunchFlow(ctx queue.Context, args SyncLunchFlowArguments) error {
 			return err
 		}
 
+		now := ctx.Clock().Now().UTC()
+		s.lunchFlowLink.LastSuccessfulUpdate = &now
+		s.lunchFlowLink.LastAttemptedUpdate = &now
+		if err := s.repo.UpdateLunchFlowLink(ctx, s.lunchFlowLink); err != nil {
+			s.log.ErrorContext(ctx, "failed to update Lunch Flow link after sync", "err", err)
+			return err
+		}
+
 		// Also kick off the transaction similarity job.
 		if err := queue.Enqueue(
 			ctx,
@@ -593,4 +610,35 @@ func SyncLunchFlow(ctx queue.Context, args SyncLunchFlowArguments) error {
 
 		return nil
 	})
+}
+
+func recordLunchFlowSyncAttempt(ctx queue.Context, args SyncLunchFlowArguments) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	repo := repository.NewRepositoryFromSession(
+		ctx.Clock(),
+		"user_lunch_flow",
+		args.AccountId,
+		ctx.DB(),
+		ctx.Log(),
+	)
+
+	link, err := repo.GetLink(span.Context(), args.LinkId)
+	if err != nil {
+		return err
+	}
+
+	// If the link isn't a Lunch Flow link then there is nothing to record, the
+	// sync itself will handle that case.
+	if link.LunchFlowLink == nil {
+		return nil
+	}
+
+	link.LunchFlowLink.LastAttemptedUpdate = new(ctx.Clock().Now().UTC())
+	if err := repo.UpdateLunchFlowLink(span.Context(), link.LunchFlowLink); err != nil {
+		return errors.Wrap(err, "failed to record Lunch Flow sync attempt")
+	}
+
+	return nil
 }

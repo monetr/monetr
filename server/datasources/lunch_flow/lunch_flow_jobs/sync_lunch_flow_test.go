@@ -3,6 +3,7 @@ package lunch_flow_jobs_test
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
@@ -19,6 +20,7 @@ import (
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/similar/similar_jobs"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
 
@@ -170,6 +172,12 @@ func TestSyncLunchFlow(t *testing.T) {
 			count := fixtures.CountNonDeletedTransactions(t, user.AccountId)
 			assert.EqualValues(t, 2, count, "should have one transaction now!")
 
+			lunchFlowLink := testutils.MustDBRead(t, *link.LunchFlowLink)
+			require.NotNil(t, lunchFlowLink.LastSuccessfulUpdate, "must record the successful update")
+			require.NotNil(t, lunchFlowLink.LastAttemptedUpdate, "must record the attempted update")
+			assert.WithinDuration(t, clock.Now(), *lunchFlowLink.LastSuccessfulUpdate, 0, "last successful update should be now")
+			assert.WithinDuration(t, clock.Now(), *lunchFlowLink.LastAttemptedUpdate, 0, "last attempted update should be now")
+
 			assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
 				fmt.Sprintf("GET https://www.lunchflow.app/api/v1/accounts/%s/balance", bankAccount.LunchFlowBankAccount.LunchFlowId):      1,
 				fmt.Sprintf("GET https://www.lunchflow.app/api/v1/accounts/%s/transactions", bankAccount.LunchFlowBankAccount.LunchFlowId): 1,
@@ -193,6 +201,10 @@ func TestSyncLunchFlow(t *testing.T) {
 		func() {
 			httpmock.Activate()
 			defer httpmock.DeactivateAndReset()
+
+			// Move the clock forward so we can tell the second sync updated the
+			// timestamps on the link.
+			clock.Add(time.Hour)
 
 			mock_lunch_flow.MockFetchTransactions(
 				t,
@@ -240,6 +252,12 @@ func TestSyncLunchFlow(t *testing.T) {
 			// We should have a few transactions now.
 			count := fixtures.CountNonDeletedTransactions(t, user.AccountId)
 			assert.EqualValues(t, 3, count, "should have one transaction now!")
+
+			lunchFlowLink := testutils.MustDBRead(t, *link.LunchFlowLink)
+			require.NotNil(t, lunchFlowLink.LastSuccessfulUpdate, "must record the successful update")
+			require.NotNil(t, lunchFlowLink.LastAttemptedUpdate, "must record the attempted update")
+			assert.WithinDuration(t, clock.Now(), *lunchFlowLink.LastSuccessfulUpdate, 0, "last successful update should be bumped by the second sync")
+			assert.WithinDuration(t, clock.Now(), *lunchFlowLink.LastAttemptedUpdate, 0, "last attempted update should be bumped by the second sync")
 
 			assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
 				fmt.Sprintf("GET https://www.lunchflow.app/api/v1/accounts/%s/balance", bankAccount.LunchFlowBankAccount.LunchFlowId):      1,
@@ -436,6 +454,13 @@ func TestSyncLunchFlow(t *testing.T) {
 				assert.Error(t, err, "must return an error if the API call fails")
 			}
 
+			// The attempt should persist even though the sync failed, but it must not
+			// count as a successful update.
+			lunchFlowLink := testutils.MustDBRead(t, *link.LunchFlowLink)
+			require.NotNil(t, lunchFlowLink.LastAttemptedUpdate, "must record the attempted update even on failure")
+			assert.WithinDuration(t, clock.Now(), *lunchFlowLink.LastAttemptedUpdate, 0, "last attempted update should be now")
+			assert.Nil(t, lunchFlowLink.LastSuccessfulUpdate, "must not record a successful update when the sync fails")
+
 			// If it fails we should not create any transactions
 			fixtures.AssertThatIHaveZeroTransactions(t, user.AccountId)
 
@@ -535,6 +560,13 @@ func TestSyncLunchFlow(t *testing.T) {
 				)
 				assert.Error(t, err, "must return an error if the balance API call fails")
 			}
+
+			// The attempt should persist even though the sync failed, but it must not
+			// count as a successful update.
+			lunchFlowLink := testutils.MustDBRead(t, *link.LunchFlowLink)
+			require.NotNil(t, lunchFlowLink.LastAttemptedUpdate, "must record the attempted update even on failure")
+			assert.WithinDuration(t, clock.Now(), *lunchFlowLink.LastAttemptedUpdate, 0, "last attempted update should be now")
+			assert.Nil(t, lunchFlowLink.LastSuccessfulUpdate, "must not record a successful update when the sync fails")
 
 			// If it fails we should not create any transactions
 			fixtures.AssertThatIHaveZeroTransactions(t, user.AccountId)

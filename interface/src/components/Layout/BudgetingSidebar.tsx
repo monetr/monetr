@@ -9,6 +9,7 @@ import BalanceAvailableAmount from '@monetr/interface/components/Layout/BalanceA
 import BalanceCurrentAmount from '@monetr/interface/components/Layout/BalanceCurrentAmount';
 import BalanceFreeToUseAmount from '@monetr/interface/components/Layout/BalanceFreeToUseAmount';
 import BalanceLimitAmount from '@monetr/interface/components/Layout/BalanceLimitAmount';
+import LunchFlowLastUpdatedCard from '@monetr/interface/components/Layout/LunchFlowLastUpdatedCard';
 import { MobileSidebarContext } from '@monetr/interface/components/Layout/MobileSidebarContextProvider';
 import PlaidBankStatusCard from '@monetr/interface/components/Layout/PlaidBankStatusCard';
 import PlaidLastUpdatedCard from '@monetr/interface/components/Layout/PlaidLastUpdatedCard';
@@ -88,6 +89,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): React.JS
         </div>
         <PlaidBankStatusCard />
         <PlaidLastUpdatedCard linkId={bankAccount?.linkId} />
+        <LunchFlowLastUpdatedCard linkId={bankAccount?.linkId} />
       </div>
     </div>
   );
