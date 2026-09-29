@@ -43,9 +43,7 @@ services:
   haproxy:
     tty: true
     image: haproxy:latest
-    # Run as the local user so haproxy can read the mkcert key, which is only
-    # readable by its owner.
-    user: "${UID:-1000}:${GID:-1000}"
+    user: root
     restart: unless-stopped
     ports:
       - "@HAPROXY_PORT@:@HAPROXY_PORT@"
