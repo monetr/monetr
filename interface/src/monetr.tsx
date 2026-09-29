@@ -223,6 +223,7 @@ export default function Monetr(): React.JSX.Element {
 }
 
 function RedirectToBank(): React.JSX.Element | null {
+  const { data: auth } = useAuthentication();
   const { data: links, isLoading: linksIsLoading } = useLinks();
   const { data: bankAccounts, isLoading: bankAccountsIsLoading } = useBankAccounts();
   if (linksIsLoading || bankAccountsIsLoading || !links || !bankAccounts) {
@@ -246,7 +247,11 @@ function RedirectToBank(): React.JSX.Element | null {
     return 0;
   });
 
-  const link = linksSorted[0];
+  // Prefer the user's own sidebar order, taking the first link in it that still exists. If they haven't ordered their
+  // links (or none of the ordered links exist anymore) then fall back to the first link alphabetically.
+  const link =
+    (auth?.user?.linkOrder ?? []).map(linkId => links.find(item => item.linkId === linkId)).find(Boolean) ??
+    linksSorted[0];
   if (!link) {
     return <Redirect replace to='/link/create' />;
   }
