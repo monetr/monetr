@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import { CalendarSync, PiggyBank, Receipt, ShoppingCart } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
 
-import Badge from '@monetr/interface/components/Badge';
+import Badge, { type BadgeProps } from '@monetr/interface/components/Badge';
 import Divider from '@monetr/interface/components/Divider';
 import { layoutVariants } from '@monetr/interface/components/Layout';
 import BalanceAvailableAmount from '@monetr/interface/components/Layout/BalanceAvailableAmount';
@@ -14,6 +14,7 @@ import { MobileSidebarContext } from '@monetr/interface/components/Layout/Mobile
 import PlaidBankStatusCard from '@monetr/interface/components/Layout/PlaidBankStatusCard';
 import PlaidLastUpdatedCard from '@monetr/interface/components/Layout/PlaidLastUpdatedCard';
 import SelectBankAccount from '@monetr/interface/components/Layout/SelectBankAccount';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@monetr/interface/components/Tooltip';
 import Typography from '@monetr/interface/components/Typography';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
@@ -66,18 +67,18 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): React.JS
             <Typography color='inherit' ellipsis size='lg' weight='medium'>
               Expenses
             </Typography>
-            <Badge className={styles.badgeRight} size='sm'>
+            <NavigationBadge tooltip='The total amount currently set aside for all of your expenses.'>
               {balance ? locale?.formatAmount(balance.expenses, AmountType.Stored) : ''}
-            </Badge>
+            </NavigationBadge>
           </NavigationItem>
           <NavigationItem to={`/bank/${bankAccount?.bankAccountId}/goals`}>
             <PiggyBank />
             <Typography color='inherit' ellipsis size='lg' weight='medium'>
               Goals
             </Typography>
-            <Badge className={styles.badgeRight} size='sm'>
+            <NavigationBadge tooltip='The total amount currently saved towards all of your goals.'>
               {balance ? locale?.formatAmount(balance.goals, AmountType.Stored) : ''}
-            </Badge>
+            </NavigationBadge>
           </NavigationItem>
           <NavigationItem to={`/bank/${bankAccount?.bankAccountId}/funding`}>
             <CalendarSync />
@@ -127,8 +128,23 @@ function NextFundingBadge(): React.JSX.Element | null {
   }
 
   return (
-    <Badge className={styles.badgeRight} size='sm'>
+    <NavigationBadge tooltip='The next date that money will be set aside for your expenses and goals.'>
       {next}
-    </Badge>
+    </NavigationBadge>
+  );
+}
+
+interface NavigationBadgeProps extends BadgeProps {
+  tooltip: string;
+}
+
+function NavigationBadge({ tooltip, ...props }: NavigationBadgeProps): React.JSX.Element {
+  return (
+    <Tooltip delayDuration={100}>
+      <TooltipTrigger asChild>
+        <Badge className={styles.badgeRight} size='sm' {...props} />
+      </TooltipTrigger>
+      <TooltipContent side='right'>{tooltip}</TooltipContent>
+    </Tooltip>
   );
 }
