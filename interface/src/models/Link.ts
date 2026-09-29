@@ -66,6 +66,14 @@ export default class Link {
     return this.linkType === LinkType.Plaid && Boolean(this.plaidLink);
   }
 
+  getIsLunchFlow(): boolean {
+    return this.linkType === LinkType.LunchFlow && Boolean(this.lunchFlowLink);
+  }
+
+  getCanArchiveBankAccount(): boolean {
+    return this.getIsManual() || this.getIsLunchFlow();
+  }
+
   getCanUpdateAccountSelection(): boolean {
     return this.getIsPlaid() && this.plaidLink?.newAccountsAvailable === true;
   }

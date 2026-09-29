@@ -142,7 +142,7 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
             icon={Settings}
             title={bankAccount.name}
           >
-            {!bankAccount.deletedAt && Boolean(link?.getIsManual()) && (
+            {!bankAccount.deletedAt && Boolean(link?.getCanArchiveBankAccount()) && (
               <Button onClick={archive} variant='destructive'>
                 <Archive />
                 Archive
