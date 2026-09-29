@@ -991,3 +991,150 @@ func TestGetUserById(t *testing.T) {
 		}
 	})
 }
+
+func TestPatchUser(t *testing.T) {
+	t.Run("update link order", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		first := models.NewID[models.Link]().String()
+		second := models.NewID[models.Link]().String()
+
+		{ // Set the link order on the current user.
+			response := e.PATCH(`/api/users/{userId}`).
+				WithPath("userId", user.UserId.String()).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"linkOrder": []string{second, first},
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.userId").String().IsEqual(user.UserId.String())
+			response.JSON().Path("$.role").String().IsEqual(string(user.Role))
+			response.JSON().Path("$.linkOrder").Array().IsEqual([]string{second, first})
+		}
+
+		{ // Then make sure the order was persisted.
+			response := e.GET(`/api/users/{userId}`).
+				WithPath("userId", user.UserId.String()).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkOrder").Array().IsEqual([]string{second, first})
+		}
+	})
+
+	t.Run("duplicate link ids", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		linkId := models.NewID[models.Link]().String()
+		response := e.PATCH(`/api/users/{userId}`).
+			WithPath("userId", user.UserId.String()).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"linkOrder": []string{linkId, linkId},
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+	})
+
+	t.Run("invalid link id", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.PATCH(`/api/users/{userId}`).
+			WithPath("userId", user.UserId.String()).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"linkOrder": []string{"not-a-link-id"},
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+	})
+
+	t.Run("cant update other fields", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.PATCH(`/api/users/{userId}`).
+			WithPath("userId", user.UserId.String()).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"role": string(models.UserRoleMember),
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+	})
+
+	t.Run("another user in the same account", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+
+		secondLogin, _ := fixtures.GivenIHaveLogin(t, app.Clock)
+		secondUser := models.User{
+			LoginId:   secondLogin.LoginId,
+			AccountId: user.AccountId,
+			Role:      models.UserRoleMember,
+		}
+		repo := repository.NewUnauthenticatedRepository(app.Clock, testutils.GetPgDatabase(t))
+		require.NoError(t, repo.CreateUser(t.Context(), &secondUser), "must be able to seed a second user")
+
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.PATCH(`/api/users/{userId}`).
+			WithPath("userId", secondUser.UserId.String()).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"linkOrder": []string{models.NewID[models.Link]().String()},
+			}).
+			Expect()
+
+		response.Status(http.StatusForbidden)
+		response.JSON().Path("$.error").String().IsEqual("Cannot patch other users")
+	})
+
+	t.Run("invalid user id", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		response := e.PATCH(`/api/users/{userId}`).
+			WithPath("userId", "not-a-valid-id").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"linkOrder": []string{},
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("must specify a valid user Id")
+	})
+
+	t.Run("does not accept an api key", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		token := GivenILogin(t, e, user.Login.Email, password)
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		e.PATCH(`/api/users/{userId}`).
+			WithPath("userId", user.UserId.String()).
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			WithJSON(map[string]any{
+				"linkOrder": []string{},
+			}).
+			Expect().
+			Status(http.StatusUnauthorized)
+	})
+}

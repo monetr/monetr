@@ -159,6 +159,12 @@ func (c *Controller) unauthorizedError(ctx *echo.Context, err error) error {
 	return c.wrapAndReturnError(ctx, err, http.StatusUnauthorized, "unauthorized")
 }
 
+func (c *Controller) forbidden(ctx *echo.Context, msg string, args ...any) error {
+	requestSpan := c.getSpan(ctx)
+	requestSpan.Status = sentry.SpanStatusPermissionDenied
+	return c.returnError(ctx, http.StatusForbidden, msg, args...)
+}
+
 func (c *Controller) badRequest(ctx *echo.Context, msg string, args ...any) error {
 	requestSpan := c.getSpan(ctx)
 	requestSpan.Status = sentry.SpanStatusInvalidArgument

@@ -38,12 +38,35 @@ func By[T any](callback func(ctx context.Context, value *T) error) validation.Ru
 }
 
 func Unique[T comparable]() validation.Rule {
-	return By(func(_ context.Context, fields *[]T) error {
-		if fields == nil {
+	return By(func(_ context.Context, value *any) error {
+		if value == nil {
 			return nil
 		}
-		seen := make(map[T]struct{}, len(*fields))
-		for i, f := range *fields {
+		var fields []T
+		switch v := (*value).(type) {
+		case []T:
+			fields = v
+		case *[]T:
+			if v == nil {
+				return nil
+			}
+			fields = *v
+		case []any:
+			// Raw JSON arrays decode as []any, assert each element to T so schemas
+			// validating decoded request bodies still get checked.
+			fields = make([]T, 0, len(v))
+			for i, raw := range v {
+				item, ok := raw.(T)
+				if !ok {
+					return errors.Errorf("fields[%d] is not a valid value", i)
+				}
+				fields = append(fields, item)
+			}
+		default:
+			return nil
+		}
+		seen := make(map[T]struct{}, len(fields))
+		for i, f := range fields {
 			if _, dup := seen[f]; dup {
 				return errors.Errorf("fields[%d] is a duplicate of an earlier entry", i)
 			}

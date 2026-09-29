@@ -10,6 +10,7 @@ import (
 	"github.com/monetr/monetr/server/currency"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/schemas"
 	"github.com/monetr/monetr/server/security"
 	"github.com/pkg/errors"
 )
@@ -218,4 +219,38 @@ func (c *Controller) getUserById(ctx *echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, user)
+}
+
+func (c *Controller) patchUser(ctx *echo.Context) error {
+	userId, err := models.ParseID[models.User](ctx.Param("userId"))
+	if err != nil || userId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid user Id")
+	}
+
+	if userId != c.mustGetUserId(ctx) {
+		return c.forbidden(ctx, "Cannot patch other users")
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	existingUser, err := repo.GetUserById(c.getContext(ctx), userId)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "could not retrieve user")
+	}
+
+	updatedUser, err := parse(
+		c,
+		ctx,
+		existingUser,
+		schemas.PatchUserSchema,
+	)
+	if err != nil {
+		return err
+	}
+
+	if err := repo.UpdateUser(c.getContext(ctx), updatedUser); err != nil {
+		return c.wrapPgError(ctx, err, "failed to update user")
+	}
+
+	return ctx.JSON(http.StatusOK, updatedUser)
 }
