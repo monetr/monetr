@@ -232,7 +232,7 @@ func MustEz[T any](t *testing.T, generalFunction func() (T, error)) T {
 	return result
 }
 
-func Must[T any, A any](t *testing.T, generalFunction func(arg A) (T, error), arg A) T {
+func Must[T any, A any](t testing.TB, generalFunction func(arg A) (T, error), arg A) T {
 	result, err := generalFunction(arg)
 	require.NoError(t, err, "function must succeed without an error")
 	return result

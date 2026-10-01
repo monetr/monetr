@@ -1,0 +1,4 @@
+ignore:
+  # CPU feature dispatch for the SIMD implementations. Which branch runs depends
+  # on whether the CI runner has AVX512, so coverage of these files flaps.
+  - "server/internal/calc/*_amd64.go"

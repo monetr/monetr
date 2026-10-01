@@ -92,6 +92,9 @@ migrate: | $(CMAKE_CONFIGURATION_DIRECTORY)
 new-pg-migration:
 	cmake -P cmake/scripts/NewPgMigration.cmake
 
+fourier-tables: | $(CMAKE_CONFIGURATION_DIRECTORY)
+	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t generate.fourier.tables $(BUILD_ARGS)
+
 # If the user provides a pattern, then pass that through to CTest
 ifdef PATTERN
 PATTERN_ARG=-R $(PATTERN)
