@@ -7,7 +7,7 @@ import (
 
 	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/stripe/stripe-go/v81/webhook"
+	"github.com/stripe/stripe-go/v86/webhook"
 )
 
 func (c *Controller) handleStripeWebhook(ctx *echo.Context) error {
