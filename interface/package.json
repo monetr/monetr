@@ -51,7 +51,7 @@
     "react-dom": "19.3.0",
     "react-dropzone": "20.1.2",
     "react-number-format": "5.4.5",
-    "react-plaid-link": "4.2.0",
+    "react-plaid-link": "5.0.0",
     "react-qr-code": "2.2.0",
     "rrule": "2.8.1",
     "wouter": "3.11.1"
