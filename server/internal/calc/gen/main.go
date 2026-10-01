@@ -115,6 +115,10 @@ func writeTwiddles(out *bufio.Writer, size int) int {
 			"// Radix-4 pass h=%d, covering the %d and %d point stages.\n",
 			h, 2*h, 4*h,
 		)
+		// math.Sincos behaves slightly differently on different CPUs, this is
+		// expected to be run on an amd64 CPU but running it on an arm64 CPU might
+		// yield slightly different results for the generated table. Its not wrong,
+		// its just floating point bullshit
 		_, _ = fmt.Fprintf(out, "// First %d entries are W(%d)^j, the twiddle for the folded first stage.\n", h, 2*h)
 		for j := 0; j < h; j++ {
 			sin, cos := math.Sincos(-2 * math.Pi * float64(j) / float64(2*h))
