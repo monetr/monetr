@@ -346,6 +346,10 @@ export default function PullToRefreshGesture(props: PullToRefreshGestureProps): 
       if (document.querySelector('[role="dialog"]')) {
         return;
       }
+      // Same thing for the mobile sidebar, when its open pulling anywhere should never refresh the page.
+      if (document.querySelector('#root.sidebar-open')) {
+        return;
+      }
       if (window.scrollY > 0 || isBlockedFromPulling(event.target, root)) {
         return;
       }
