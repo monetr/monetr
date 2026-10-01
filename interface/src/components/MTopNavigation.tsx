@@ -40,6 +40,7 @@ export default function MTopNavigation(props: MTopNavigationProps): React.JSX.El
     <Fragment>
       <div className={styles.spacer} />
       <div className={styles.topNav}>
+        <div aria-hidden='true' className={styles.backdrop} />
         <div className={styles.topNavLeft}>
           <MSidebarToggle backButton={props.base} className={styles.toggle} />
           <span className={styles.titleWrapper}>

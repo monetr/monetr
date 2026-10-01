@@ -2,7 +2,7 @@
 @use '@monetr/interface/variables';
 
 .spacer {
-  padding-bottom: 12 * variables.$size;
+  padding-bottom: calc(12 * variables.$size + env(safe-area-inset-top));
 }
 
 .topNav {
@@ -10,6 +10,9 @@
   width: 100%;
   display: flex;
   flex-direction: column;
+  // Reaches up behind the notch on iOS so things scrolling under the status bar
+  // get blurred too, but the actual contents still sit below it.
+  padding-top: env(safe-area-inset-top);
   padding-left: 4 * variables.$size;
   padding-right: 4 * variables.$size;
   column-gap: 2 * variables.$size;
@@ -17,14 +20,37 @@
   position: fixed;
   z-index: 30;
   top: 0;
-  backdrop-filter: blur(4px);
-  background: linear-gradient(to top, transparent, var(--background));
 
   @media (min-width: variables.$mediumScreen) {
-    height: 12 * variables.$size;
+    height: calc(12 * variables.$size + env(safe-area-inset-top));
     flex-direction: row;
     align-items: center;
   }
+}
+
+// Same idea as the pull to refresh backdrop, but faded out towards the bottom
+// with a linear mask. This is its own element because masking .topNav would
+// fade out the title too. Nothing above this can have a filter, mask or opacity
+// on it or the blur stops working.
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  backdrop-filter: blur(2 * variables.$size);
+  background-color: color-mix(in srgb, var(--background) 60%, transparent);
+  // Fully blurred down through the top half of the title, then fades out so
+  // theres no hard edge at the bottom of the navigation. Gradients cant take an
+  // easing function so the extra stops fake one (1 - x^2), that way the blur
+  // ramps up quickly from the bottom edge instead of linearly.
+  mask-image: linear-gradient(
+    to bottom,
+    black calc(100% - 6 * variables.$size),
+    rgba(0, 0, 0, 0.94) calc(100% - 4.5 * variables.$size),
+    rgba(0, 0, 0, 0.75) calc(100% - 3 * variables.$size),
+    rgba(0, 0, 0, 0.44) calc(100% - 1.5 * variables.$size),
+    transparent
+  );
 }
 
 .topNavLeft {
@@ -133,7 +159,7 @@
 
   @media (min-width: variables.$mediumScreen) {
     column-gap: 2 * variables.$size;
-    top: 2 * variables.$size;
+    top: calc(2 * variables.$size + env(safe-area-inset-top));
     bottom: unset;
     left: unset;
     right: 4 * variables.$size;
