@@ -261,6 +261,12 @@ func testInverseFastFourierTransformAssembly(t *testing.T, forward, inverse func
 			require.InDeltaf(t, imag(expected), imag(actual[m]), 1e-12, "imaginary part of point %d", m)
 		}
 	})
+
+	t.Run("stays in bounds", func(t *testing.T) {
+		// TestInverseFastFourierTransformStaysInBounds only reaches whichever
+		// variant init picked, so this is what checks the others.
+		assertTransformStaysInBounds(t, inverse)
+	})
 }
 
 func BenchmarkFastFourierTransformVariants(bench *testing.B) {

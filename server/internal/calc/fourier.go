@@ -58,6 +58,7 @@ func FastFourierTransformSlow(a []complex128) []complex128 {
 
 // InverseFastFourierTransformSlow is a recursive implementation of the inverse
 // fast Fourier transform.
+//
 // Deprecated: Use [InverseFastFourierTransform] instead.
 func InverseFastFourierTransformSlow(a []complex128) []complex128 {
 	n := len(a)
@@ -219,7 +220,8 @@ func inverseFastFourierTransformGo(dst, src []complex128) {
 	tables := fixedFourierTables()
 
 	// 1/n is a power of two, so scaling by it on the way in only changes the
-	// exponent. It comes out the same as scaling every output at the end without
+	// exponent. As long as nothing in the transform gets small enough to go
+	// subnormal, it comes out the same as scaling every output at the end without
 	// needing another pass over dst.
 	const scale = 1.0 / FourierSize
 	const quarter = FourierSize / 4

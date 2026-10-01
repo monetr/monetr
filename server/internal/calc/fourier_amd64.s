@@ -861,11 +861,10 @@ TEXT ·__inverseFastFourierTransform_AVX512(SB), NOSPLIT, $0-48
 	// straight from memory, so each load is a multiply by Z17 instead of a
 	// VMOVUPD
   //
-	// 1/4096 is a power of two, so multiplying by it only changes the exponent
-	// and nothing gets rounded (unless a value is already down near the smallest
-	// float64 there is). That means scaling on the way in gives the exact same
-	// answer as scaling every output at the end, without an extra trip through
-	// dst
+	// 1/4096 is a power of two, so multiplying by it only changes the exponent.
+	// As long as nothing in the transform gets small enough to go subnormal,
+	// scaling on the way in gives the exact same answer as scaling every output
+	// at the end, and it saves an extra trip through dst
   PASS1_INVERSE_AVX512:
     VMULPD (SI),        Z17, Z0 // Load a0 for q0 through q3 and multiply it by 1/n, stored in Z0
     VMULPD (SI)(R8*1),  Z17, Z1 // Load a1 times 1/n into Z1, from SI + n*8 (halfway)
@@ -993,8 +992,8 @@ TEXT ·__inverseFastFourierTransform_AVX512(SB), NOSPLIT, $0-48
         //   imag = bi*wr - br*wi
         //
 				// So steps 1 and 2 of the forward multiply stay the same, and step 3
-				// uses VFMSUBADD231PD instead of VFMADDSUB231PD. It is the same
-				// instruction with the add and subtract the other way around. It
+				// uses VFMSUBADD231PD instead of VFMADDSUB231PD. It is the twin of
+				// VFMADDSUB231PD with the add and subtract the other way around. It
 				// multiplies b by (wr, wr) to get (br*wr, bi*wr), then adds step 2 on
 				// the real half and subtracts step 2 on the imaginary half. That gives
 				// (br*wr + bi*wi, bi*wr - br*wi)
