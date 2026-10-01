@@ -126,20 +126,20 @@ func InverseFastFourierTransform(a []complex128) []complex128 {
 // fourierTables holds everything about the fixed size transform that only
 // depends on the size.
 type fourierTables struct {
-	// twiddles are the complex roots of unity for every radix-2 stage, packed
-	// end to end smallest stage first. A stage whose half width is h reads h
-	// entries starting at entry h-4, which works because the halves double
-	// every stage and 4 + 8 + ... + h/2 comes out to exactly h-4.
+	// twiddles are the complex roots of unity for every radix-2 stage, packed end
+	// to end smallest stage first. A stage whose half width is h reads h entries
+	// starting at entry h-4, which works because the halves double every stage
+	// and 4 + 8 + ... + h/2 comes out to exactly h-4.
 	twiddles []complex128
-	// scatter is the bit reversal permutation, stored as the index in the
-	// output that each group of four results from the first pass belongs at.
+	// scatter is the bit reversal permutation, stored as the index in the output
+	// that each group of four results from the first pass belongs at.
 	scatter []int
 }
 
-// fixedFourierTables are only built when the Go fallback runs. The assembly uses
-// the generated tables in fourier_twiddles_amd64.s instead, which are laid out
-// per radix-4 pass and store byte offsets, while these are laid out per radix-2
-// stage and store element indices.
+// fixedFourierTables are only built when the Go fallback runs. The assembly
+// uses the generated tables in fourier_twiddles_amd64.s instead, which are laid
+// out per radix-4 pass and store byte offsets, while these are laid out per
+// radix-2 stage and store element indices.
 var fixedFourierTables = sync.OnceValue(func() fourierTables {
 	tables := fourierTables{
 		twiddles: make([]complex128, 0, FourierSize),
@@ -196,8 +196,8 @@ func fastFourierTransformGo(dst, src []complex128) {
 		dst[group+3] = b1 - b3
 	}
 
-	// Then every remaining radix-2 stage in place, from eight points wide all
-	// the way up to the full transform.
+	// Then every remaining radix-2 stage in place, from eight points wide all the
+	// way up to the full transform.
 	for half := 4; half <= FourierSize/2; half <<= 1 {
 		twiddles := tables.twiddles[half-4 : half-4+half]
 		for block := 0; block < FourierSize; block += half * 2 {
@@ -213,9 +213,9 @@ func fastFourierTransformGo(dst, src []complex128) {
 
 // inverseFastFourierTransformGo is the plain Go version of the fixed size
 // inverse transform, used on hosts without the right SIMD instructions. The
-// inverse uses e^(+2*pi*i*j/N) where the forward transform uses e^(-2*pi*i*j/N),
-// so this is fastFourierTransformGo with every twiddle factor conjugated and
-// the input scaled by 1/n.
+// inverse uses e^(+2*pi*i*j/N) where the forward transform uses
+// e^(-2*pi*i*j/N), so this is fastFourierTransformGo with every twiddle factor
+// conjugated and the input scaled by 1/n.
 func inverseFastFourierTransformGo(dst, src []complex128) {
 	tables := fixedFourierTables()
 
