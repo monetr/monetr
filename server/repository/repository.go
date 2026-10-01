@@ -119,6 +119,11 @@ type BaseRepository interface {
 	// doing a bulk update, so if data is missing it has the potential to overwrite a transaction incorrectly.
 	UpdateTransactions(ctx context.Context, transactions []*Transaction) error
 
+	GetTransactionClusters(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		limit, offset int,
+	) ([]TransactionCluster, error)
 	// GetClusteredTransactions returns every transaction in the bank account
 	// that currently belongs to a cluster, including soft deleted ones. Only the
 	// primary key and the cluster ID are populated.

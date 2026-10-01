@@ -9,6 +9,35 @@ import (
 	"github.com/uptrace/bun"
 )
 
+func (r *repositoryBase) GetTransactionClusters(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	limit, offset int,
+) ([]TransactionCluster, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	var result []TransactionCluster
+	if err := r.txn.NewSelect().
+		Model(&result).
+		Where(`"transaction_cluster"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction_cluster"."bank_account_id" = ?`, bankAccountId).
+		Limit(limit).
+		Offset(offset).
+		// TODO Figure out some better ordering for this stuff
+		Order(`name DESC`).
+		Order(`transaction_cluster_id DESC`).
+		Scan(span.Context()); err != nil {
+		return nil, crumbs.WrapError(
+			span.Context(),
+			err,
+			"failed to read transaction clusters",
+		)
+	}
+
+	return result, nil
+}
+
 func (r *repositoryBase) GetClusteredTransactions(
 	ctx context.Context,
 	bankAccountId ID[BankAccount],
