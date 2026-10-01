@@ -28,7 +28,7 @@ require (
 	github.com/monetr/devslog v0.0.17
 	github.com/monetr/validation v1.3.0
 	github.com/oklog/ulid/v2 v2.1.2
-	github.com/openbao/openbao/api/v2 v2.6.0
+	github.com/openbao/openbao/api/v2 v2.7.0
 	github.com/pkg/errors v0.9.1
 	github.com/plaid/plaid-go/v47 v47.0.0
 	github.com/prometheus/client_golang v1.24.1
@@ -95,7 +95,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/klauspost/compress v1.19.1 // indirect
 	github.com/mattn/go-colorable v0.1.15 // indirect
-	github.com/mattn/go-isatty v0.0.22 // indirect
+	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
