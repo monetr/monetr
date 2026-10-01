@@ -19,6 +19,10 @@
 //
 // The tables this reads (fourierScatter4096 and fourierTwiddles4096) are in
 // fourier_twiddles_amd64.s, which is written by gen/main.go
+//
+// The inverse transforms come after the forward ones. They are the same code
+// with the twiddle factors conjugated and everything scaled by 1/n, see the
+// notes above __inverseFastFourierTransform_AVX512
 
 // const_negate_imaginary is used to flip the sign of the imaginary half of
 // every complex number in a ZMM register. 0x8000000000000000 is just the sign
@@ -792,4 +796,656 @@ TEXT ·__fastFourierTransform_AVX(SB), NOSPLIT, $0-48
     JLS  PASS4_AVX        // If it is less than or the same then jump back to PASS4_AVX
 
   VZEROUPPER // Zero the upper bits of the vector registers before going back to Go, see the AVX512 version
+  RET        // We are done, return
+
+// const_one_over_4096 is 1/4096 in every float64 of a ZMM register. The
+// inverse transform has to divide everything by n, and multiplying by 1/n does
+// the same thing without a divide. 0x3F30000000000000 is 2^-12, which is
+// exactly 1/4096. The tables only work for 4096 points anyway, so there is no
+// point working this out from the length of dst
+DATA const_one_over_4096<>+0(SB)/8,  $0x3F30000000000000
+DATA const_one_over_4096<>+8(SB)/8,  $0x3F30000000000000
+DATA const_one_over_4096<>+16(SB)/8, $0x3F30000000000000
+DATA const_one_over_4096<>+24(SB)/8, $0x3F30000000000000
+DATA const_one_over_4096<>+32(SB)/8, $0x3F30000000000000
+DATA const_one_over_4096<>+40(SB)/8, $0x3F30000000000000
+DATA const_one_over_4096<>+48(SB)/8, $0x3F30000000000000
+DATA const_one_over_4096<>+56(SB)/8, $0x3F30000000000000
+GLOBL const_one_over_4096<>(SB), (RODATA+NOPTR), $64
+
+// func __inverseFastFourierTransform_AVX512(dst, src []complex128)
+//
+// The inverse of __fastFourierTransform_AVX512. It takes a spectrum and gives
+// back the series it came from, 1/n scaling included, so running the forward
+// transform and then this one gets you back to where you started
+//
+// The forward transform multiplies by twiddle factors W(N)^j = e^(-2*pi*i*j/N)
+// and the inverse multiplies by e^(+2*pi*i*j/N) instead. Flipping the sign of
+// the exponent is the same as flipping the sign of the imaginary half, so
+// every twiddle factor in the inverse is just the conjugate of the one in the
+// forward transform. Nothing else about the transform changes, so this is the
+// forward code with 3 changes:
+//
+//   1. PASS1 multiplies by +i where the forward version multiplies by -i,
+//      since +i is the conjugate of -i
+//   2. PASS4 multiplies by the conjugate of every twiddle factor it reads.
+//      That only takes VFMSUBADD231PD in place of VFMADDSUB231PD, so it reads
+//      the exact same tables
+//   3. PASS1 multiplies src by 1/n as it loads it
+//
+// The plain Go version of this is inverseFastFourierTransformGo in fourier.go
+TEXT ·__inverseFastFourierTransform_AVX512(SB), NOSPLIT, $0-48
+  MOVQ dst_base+0(FP),  DI // Load the pointer of dst into DI. Everything after PASS1 reads and writes here
+  MOVQ src_base+24(FP), SI // Load the pointer of src into SI. We only ever read from this
+  MOVQ dst_len+8(FP),   AX // Load the length of dst into AX. This is n, the number of complex numbers (4096)
+
+  VMOVUPD const_negate_imaginary<>(SB), Z16 // Load the imaginary sign mask into Z16, PASS1 uses it every loop
+  VMOVUPD const_one_over_4096<>(SB),    Z17 // Load 1/n into every float64 of Z17, PASS1 scales src by it
+
+  LEAQ ·fourierScatter4096(SB), BX // Point BX at the start of the bit reversal table. Each entry is a 4 byte offset into dst
+
+  MOVQ AX, R9  // Copy n into R9
+  SHLQ $2, R9  // R9 = n*4, the byte distance to a quarter of the way through src
+  MOVQ R9, R8  // Copy n*4 into R8
+  ADDQ R9, R8  // R8 = n*8, the byte distance to halfway through src
+  MOVQ R8, R10 // Copy n*8 into R10
+  ADDQ R9, R10 // R10 = n*12, the byte distance to three quarters of the way through src
+
+  MOVQ AX, CX  // Copy n into CX, this is our loop counter
+  SHRQ $4, CX  // Shift right by 4 to divide by 16. We go through the first quarter of src 4 at a time, so n/16 loops (256)
+
+	// Same 4 butterflies side by side as PASS1 in the forward version, see the
+	// notes there
+  //
+	// The loads also take care of the 1/n. VMULPD can read one of its inputs
+	// straight from memory, so each load is a multiply by Z17 instead of a
+	// VMOVUPD
+  //
+	// 1/4096 is a power of two, so multiplying by it only changes the exponent
+	// and nothing gets rounded (unless a value is already down near the smallest
+	// float64 there is). That means scaling on the way in gives the exact same
+	// answer as scaling every output at the end, without an extra trip through
+	// dst
+  PASS1_INVERSE_AVX512:
+    VMULPD (SI),        Z17, Z0 // Load a0 for q0 through q3 and multiply it by 1/n, stored in Z0
+    VMULPD (SI)(R8*1),  Z17, Z1 // Load a1 times 1/n into Z1, from SI + n*8 (halfway)
+    VMULPD (SI)(R9*1),  Z17, Z2 // Load a2 times 1/n into Z2, from SI + n*4 (a quarter)
+    VMULPD (SI)(R10*1), Z17, Z3 // Load a3 times 1/n into Z3, from SI + n*12 (three quarters)
+
+		// First stage. The twiddle factor is always 1 here, and the conjugate of 1
+		// is still 1, so this is the same as the forward version
+    VADDPD Z1, Z0, Z4 // b0 = a0 + a1, stored in Z4
+    VSUBPD Z1, Z0, Z5 // b1 = a0 - a1, stored in Z5
+    VADDPD Z3, Z2, Z6 // b2 = a2 + a3, stored in Z6
+    VSUBPD Z3, Z2, Z7 // b3 = a2 - a3, stored in Z7
+
+		// Second stage. The forward version multiplies b3 by -i here, and the
+		// conjugate of -i is +i. We could make i * b3 with another sign mask, but
+		// i * b3 is just -(-i * b3). So we make -i * b3 the same way the forward
+		// version does, and then swap which of c1 and c3 adds it and which one
+		// subtracts it:
+    //
+    //   c1 = b1 + i*b3 = b1 - (-i * b3)
+    //   c3 = b1 - i*b3 = b1 + (-i * b3)
+    VPERMILPD $0x55, Z7, Z7 // Swap the halves of b3, so (x, y) becomes (y, x)
+    VPXORQ    Z16,   Z7, Z7 // XOR with the imaginary sign mask, so (y, x) becomes (y, -x). Z7 is now -i * b3
+
+    VADDPD Z6, Z4, Z8  // c0 = b0 + b2, stored in Z8
+    VSUBPD Z7, Z5, Z9  // c1 = b1 - (-i * b3), which is b1 + i*b3, stored in Z9
+    VSUBPD Z6, Z4, Z10 // c2 = b0 - b2, stored in Z10
+    VADDPD Z7, Z5, Z11 // c3 = b1 + (-i * b3), which is b1 - i*b3, stored in Z11
+
+    // Same 4x4 transpose as the forward version
+    VSHUFF64X2 $0x44, Z9,  Z8,  Z12 // Z12 = [c0(q0), c0(q1), c1(q0), c1(q1)]
+    VSHUFF64X2 $0xEE, Z9,  Z8,  Z13 // Z13 = [c0(q2), c0(q3), c1(q2), c1(q3)]
+    VSHUFF64X2 $0x44, Z11, Z10, Z14 // Z14 = [c2(q0), c2(q1), c3(q0), c3(q1)]
+    VSHUFF64X2 $0xEE, Z11, Z10, Z15 // Z15 = [c2(q2), c2(q3), c3(q2), c3(q3)]
+    VSHUFF64X2 $0x88, Z14, Z12, Z0  // Z0  = [c0(q0), c1(q0), c2(q0), c3(q0)], all of q0
+    VSHUFF64X2 $0xDD, Z14, Z12, Z1  // Z1  = [c0(q1), c1(q1), c2(q1), c3(q1)], all of q1
+    VSHUFF64X2 $0x88, Z15, Z13, Z2  // Z2  = [c0(q2), c1(q2), c2(q2), c3(q2)], all of q2
+    VSHUFF64X2 $0xDD, Z15, Z13, Z3  // Z3  = [c0(q3), c1(q3), c2(q3), c3(q3)], all of q3
+
+		// The bit reversal is the same in both directions, so this uses the same
+		// scatter table as the forward version
+    MOVL 0(BX),  R11 // Load the dst byte offset for q0 into R11
+    MOVL 4(BX),  R12 // Load the dst byte offset for q1 into R12
+    MOVL 8(BX),  R13 // Load the dst byte offset for q2 into R13
+    MOVL 12(BX), DX  // Load the dst byte offset for q3 into DX
+    VMOVUPD Z0, (DI)(R11*1) // Store all of q0 at dst + R11
+    VMOVUPD Z1, (DI)(R12*1) // Store all of q1 at dst + R12
+    VMOVUPD Z2, (DI)(R13*1) // Store all of q2 at dst + R13
+    VMOVUPD Z3, (DI)(DX*1)  // Store all of q3 at dst + DX
+
+    ADDQ $64, SI              // Add 64 (4 * 16) to SI. This moves src forward by 4 complex numbers
+    ADDQ $16, BX              // Add 16 (4 * 4) to BX. This moves the scatter table forward by 4 entries
+    SUBQ $1,  CX              // Subtract 1 from the CX loop counter
+    JNZ  PASS1_INVERSE_AVX512 // If CX is not zero then jump back to the start of PASS1_INVERSE_AVX512
+
+	// The other 10 stages are the same passes as PASS4 in the forward version,
+	// see the notes there. Each radix-4 butterfly does the same thing too, just
+	// with the conjugate of every twiddle factor:
+  //
+  //   a' = a + conj(w1)*b        A = a' + conj(w2)*c'
+  //   b' = a - conj(w1)*b        B = b' + conj(w3)*d'
+  //   c' = c + conj(w1)*d        C = a' - conj(w2)*c'
+  //   d' = c - conj(w1)*d        D = b' - conj(w3)*d'
+  LEAQ    ·fourierTwiddles4096(SB), BX  // Point BX at the start of the twiddle table. It moves forward after each pass
+  VMOVUPD const_negate_all<>(SB),   Z31 // Load the sign mask for every float64 into Z31, used to get w3 from w2
+
+  MOVQ dst_len+8(FP), DX  // Load n into DX again, PASS1 used DX for an offset
+  SHLQ $4,            DX  // DX = n*16, the size of dst in bytes
+  LEAQ (DI)(DX*1),    AX  // AX = the address right after the end of dst. Blocks stop when they get here
+  SHRQ $2,            DX  // DX = n*4, which is h in bytes on the last pass (1024 * 16)
+  MOVQ $64,           R12 // R12 is h in bytes. The first pass has h = 4, so 4 * 16 = 64 bytes
+
+  PASS4_INVERSE_AVX512:
+    LEAQ (R12)(R12*2), R13 // R13 = 3h in bytes, the distance from a to d
+    MOVQ DI,           R8  // R8 is the start of the current block, start at the beginning of dst
+
+    // Same as the forward version, the h = 4 pass only has 4 values of j in a
+    // block so it goes through NARROWBLOCK_INVERSE_AVX512 instead
+    CMPQ R12, $64                   // Is h 64 bytes (4 points)?
+    JEQ  NARROWBLOCK_INVERSE_AVX512 // If it is then jump to NARROWBLOCK_INVERSE_AVX512 for this pass
+
+    WIDEBLOCK_INVERSE_AVX512:
+      MOVQ R8,  R10 // R10 points at a for the current j, start at the beginning of the block
+      MOVQ BX,  R9  // R9 points at w1 for the current j. Every block in a pass uses the same twiddles so start over at BX
+      MOVQ R12, SI  // SI counts down the bytes of j left in this block, starting at h
+
+      WIDEBUTTERFLY_INVERSE_AVX512:
+        // The twiddles get split up the exact same way as the forward version.
+        // They don't get conjugated here, the multiplies further down take care
+        // of that
+        VMOVUPD   (R9),             Z30 // Load w1 for j through j+3 into Z30
+        VMOVDDUP  Z30,              Z4  // Z4 = (w1.real, w1.real)
+        VPERMILPD $0xFF,       Z30, Z5  // Z5 = (w1.imag, w1.imag)
+        VMOVUPD   (R9)(R12*1),      Z30 // Load w2 for j through j+3 into Z30, it is h bytes after w1
+        VMOVDDUP  Z30,              Z6  // Z6 = (w2.real, w2.real)
+        VPERMILPD $0xFF,       Z30, Z7  // Z7 = (w2.imag, w2.imag), which is also (w3.real, w3.real)
+        VPXORQ    Z31,         Z6,  Z8  // Z8 = (-w2.real, -w2.real), which is (w3.imag, w3.imag)
+
+        // Same thing for j+4 through j+7, which is 64 bytes further along
+        VMOVUPD   64(R9),           Z30 // Load w1 for j+4 through j+7 into Z30
+        VMOVDDUP  Z30,              Z19 // Z19 = (w1.real, w1.real)
+        VPERMILPD $0xFF,       Z30, Z20 // Z20 = (w1.imag, w1.imag)
+        VMOVUPD   64(R9)(R12*1),    Z30 // Load w2 for j+4 through j+7 into Z30
+        VMOVDDUP  Z30,              Z21 // Z21 = (w2.real, w2.real)
+        VPERMILPD $0xFF,       Z30, Z22 // Z22 = (w2.imag, w2.imag), also (w3.real, w3.real)
+        VPXORQ    Z31,         Z21, Z23 // Z23 = (w3.imag, w3.imag)
+
+        // Z16 and Z17 were the mask and 1/n from PASS1, we don't need them
+        // anymore so they get reused
+        VMOVUPD (R10),             Z0  // Load a for j through j+3 into Z0
+        VMOVUPD (R10)(R12*1),      Z1  // Load b into Z1, h bytes after a
+        VMOVUPD (R10)(R12*2),      Z2  // Load c into Z2, 2h bytes after a
+        VMOVUPD (R10)(R13*1),      Z3  // Load d into Z3, 3h bytes after a
+        VMOVUPD 64(R10),           Z15 // Load a for j+4 through j+7 into Z15
+        VMOVUPD 64(R10)(R12*1),    Z16 // Load b for j+4 through j+7 into Z16
+        VMOVUPD 64(R10)(R12*2),    Z17 // Load c for j+4 through j+7 into Z17
+        VMOVUPD 64(R10)(R13*1),    Z18 // Load d for j+4 through j+7 into Z18
+
+        // First stage, we need conj(w1)*b and conj(w1)*d
+        //
+        // Multiplying b = (br, bi) by conj(w) = (wr, -wi) is the same as the
+        // forward multiply but with the sign flipped on both of the wi terms:
+        //
+        //   real = br*wr + bi*wi
+        //   imag = bi*wr - br*wi
+        //
+				// So steps 1 and 2 of the forward multiply stay the same, and step 3
+				// uses VFMSUBADD231PD instead of VFMADDSUB231PD. It is the same
+				// instruction with the add and subtract the other way around. It
+				// multiplies b by (wr, wr) to get (br*wr, bi*wr), then adds step 2 on
+				// the real half and subtracts step 2 on the imaginary half. That gives
+				// (br*wr + bi*wi, bi*wr - br*wi)
+        VPERMILPD      $0x55, Z1,  Z9  // Z9 = b with its halves swapped
+        VPERMILPD      $0x55, Z3,  Z10 // Z10 = d with its halves swapped
+        VPERMILPD      $0x55, Z16, Z24 // Z24 = b swapped for j+4 through j+7
+        VPERMILPD      $0x55, Z18, Z25 // Z25 = d swapped for j+4 through j+7
+        VMULPD         Z5,    Z9,  Z9  // Z9 = swapped b * w1.imag
+        VMULPD         Z5,    Z10, Z10 // Z10 = swapped d * w1.imag
+        VMULPD         Z20,   Z24, Z24 // Z24 = swapped b * w1.imag for j+4 through j+7
+        VMULPD         Z20,   Z25, Z25 // Z25 = swapped d * w1.imag for j+4 through j+7
+        VFMSUBADD231PD Z4,    Z1,  Z9  // Z9 = (b * w1.real) +/- Z9, which is conj(w1)*b
+        VFMSUBADD231PD Z4,    Z3,  Z10 // Z10 = (d * w1.real) +/- Z10, which is conj(w1)*d
+        VFMSUBADD231PD Z19,   Z16, Z24 // Z24 = conj(w1)*b for j+4 through j+7
+        VFMSUBADD231PD Z19,   Z18, Z25 // Z25 = conj(w1)*d for j+4 through j+7
+
+        VADDPD Z9,  Z0,  Z11 // Z11 = a' = a + conj(w1)*b
+        VSUBPD Z9,  Z0,  Z12 // Z12 = b' = a - conj(w1)*b
+        VADDPD Z10, Z2,  Z13 // Z13 = c' = c + conj(w1)*d
+        VSUBPD Z10, Z2,  Z14 // Z14 = d' = c - conj(w1)*d
+        VADDPD Z24, Z15, Z26 // Z26 = a' for j+4 through j+7
+        VSUBPD Z24, Z15, Z27 // Z27 = b' for j+4 through j+7
+        VADDPD Z25, Z17, Z28 // Z28 = c' for j+4 through j+7
+        VSUBPD Z25, Z17, Z29 // Z29 = d' for j+4 through j+7
+
+				// Second stage, we need conj(w2)*c' and conj(w3)*d'. This is the same
+				// conjugate multiply as above. Z7 and Z8 hold w3.real and w3.imag the
+				// same as in the forward version, and VFMSUBADD231PD conjugates w3 the
+				// same way it does w1 and w2
+        VPERMILPD      $0x55, Z13, Z0  // Z0 = c' swapped
+        VPERMILPD      $0x55, Z14, Z1  // Z1 = d' swapped
+        VPERMILPD      $0x55, Z28, Z15 // Z15 = c' swapped for j+4 through j+7
+        VPERMILPD      $0x55, Z29, Z16 // Z16 = d' swapped for j+4 through j+7
+        VMULPD         Z7,    Z0,  Z0  // Z0 = swapped c' * w2.imag
+        VMULPD         Z8,    Z1,  Z1  // Z1 = swapped d' * w3.imag
+        VMULPD         Z22,   Z15, Z15 // Z15 = swapped c' * w2.imag for j+4 through j+7
+        VMULPD         Z23,   Z16, Z16 // Z16 = swapped d' * w3.imag for j+4 through j+7
+        VFMSUBADD231PD Z6,    Z13, Z0  // Z0 = conj(w2)*c'
+        VFMSUBADD231PD Z7,    Z14, Z1  // Z1 = conj(w3)*d', Z7 is w2.imag which is the same as w3.real
+        VFMSUBADD231PD Z21,   Z28, Z15 // Z15 = conj(w2)*c' for j+4 through j+7
+        VFMSUBADD231PD Z22,   Z29, Z16 // Z16 = conj(w3)*d' for j+4 through j+7
+
+        VADDPD Z0,  Z11, Z2  // Z2 = A = a' + conj(w2)*c'
+        VADDPD Z1,  Z12, Z3  // Z3 = B = b' + conj(w3)*d'
+        VSUBPD Z0,  Z11, Z9  // Z9 = C = a' - conj(w2)*c'
+        VSUBPD Z1,  Z12, Z10 // Z10 = D = b' - conj(w3)*d'
+        VADDPD Z15, Z26, Z17 // Z17 = A for j+4 through j+7
+        VADDPD Z16, Z27, Z18 // Z18 = B for j+4 through j+7
+        VSUBPD Z15, Z26, Z24 // Z24 = C for j+4 through j+7
+        VSUBPD Z16, Z27, Z25 // Z25 = D for j+4 through j+7
+
+        VMOVUPD Z2,  (R10)          // Store A where a came from
+        VMOVUPD Z3,  (R10)(R12*1)   // Store B where b came from
+        VMOVUPD Z9,  (R10)(R12*2)   // Store C where c came from
+        VMOVUPD Z10, (R10)(R13*1)   // Store D where d came from
+        VMOVUPD Z17, 64(R10)        // Store A for j+4 through j+7
+        VMOVUPD Z18, 64(R10)(R12*1) // Store B for j+4 through j+7
+        VMOVUPD Z24, 64(R10)(R12*2) // Store C for j+4 through j+7
+        VMOVUPD Z25, 64(R10)(R13*1) // Store D for j+4 through j+7
+
+        ADDQ $128, R9                     // Add 128 (8 * 16) to R9. This moves the twiddle pointer forward by 8 entries
+        ADDQ $128, R10                    // Add 128 (8 * 16) to R10. This moves forward by 8 points to j+8
+        SUBQ $128, SI                     // Subtract 128 from SI since we just did 8 values of j
+        JNZ  WIDEBUTTERFLY_INVERSE_AVX512 // If SI is not zero then there is more of this block left, jump back to WIDEBUTTERFLY_INVERSE_AVX512
+
+      LEAQ (R8)(R12*4), R8          // Move R8 forward by 4h to the start of the next block
+      CMPQ R8,          AX          // Compare R8 against the end of dst
+      JCS  WIDEBLOCK_INVERSE_AVX512 // If R8 is below the end of dst then jump back to WIDEBLOCK_INVERSE_AVX512
+      JMP  PASSDONE_INVERSE_AVX512  // Otherwise this pass is done, skip over NARROWBLOCK_INVERSE_AVX512
+
+    // NARROWBLOCK_INVERSE_AVX512 is the same as WIDEBLOCK_INVERSE_AVX512 but
+    // with only 1 set of registers, for the h = 4 pass
+    NARROWBLOCK_INVERSE_AVX512:
+      MOVQ R8,  R10 // R10 points at a, start at the beginning of the block
+      MOVQ BX,  R9  // R9 points at w1, start over at the top of this pass in the twiddle table
+      MOVQ R12, SI  // SI counts down the bytes of j left in this block. h is 64 bytes here so this only loops once
+
+      NARROWBUTTERFLY_INVERSE_AVX512:
+        VMOVUPD   (R9),          Z30 // Load w1 into Z30
+        VMOVDDUP  Z30,           Z4  // Z4 = (w1.real, w1.real)
+        VPERMILPD $0xFF,    Z30, Z5  // Z5 = (w1.imag, w1.imag)
+        VMOVUPD   (R9)(R12*1),   Z30 // Load w2 into Z30
+        VMOVDDUP  Z30,           Z6  // Z6 = (w2.real, w2.real)
+        VPERMILPD $0xFF,    Z30, Z7  // Z7 = (w2.imag, w2.imag), also (w3.real, w3.real)
+        VPXORQ    Z31,      Z6,  Z8  // Z8 = (w3.imag, w3.imag)
+
+        VMOVUPD (R10),        Z0 // Load a into Z0
+        VMOVUPD (R10)(R12*1), Z1 // Load b into Z1
+        VMOVUPD (R10)(R12*2), Z2 // Load c into Z2
+        VMOVUPD (R10)(R13*1), Z3 // Load d into Z3
+
+        VPERMILPD      $0x55, Z1,  Z9  // Z9 = b swapped
+        VPERMILPD      $0x55, Z3,  Z10 // Z10 = d swapped
+        VMULPD         Z5,    Z9,  Z9  // Z9 = swapped b * w1.imag
+        VMULPD         Z5,    Z10, Z10 // Z10 = swapped d * w1.imag
+        VFMSUBADD231PD Z4,    Z1,  Z9  // Z9 = conj(w1)*b
+        VFMSUBADD231PD Z4,    Z3,  Z10 // Z10 = conj(w1)*d
+
+        VADDPD Z9,  Z0, Z11 // Z11 = a' = a + conj(w1)*b
+        VSUBPD Z9,  Z0, Z12 // Z12 = b' = a - conj(w1)*b
+        VADDPD Z10, Z2, Z13 // Z13 = c' = c + conj(w1)*d
+        VSUBPD Z10, Z2, Z14 // Z14 = d' = c - conj(w1)*d
+
+        VPERMILPD      $0x55, Z13, Z0 // Z0 = c' swapped
+        VPERMILPD      $0x55, Z14, Z1 // Z1 = d' swapped
+        VMULPD         Z7,    Z0,  Z0 // Z0 = swapped c' * w2.imag
+        VMULPD         Z8,    Z1,  Z1 // Z1 = swapped d' * w3.imag
+        VFMSUBADD231PD Z6,    Z13, Z0 // Z0 = conj(w2)*c'
+        VFMSUBADD231PD Z7,    Z14, Z1 // Z1 = conj(w3)*d'
+
+        VADDPD Z0, Z11, Z2  // Z2 = A = a' + conj(w2)*c'
+        VADDPD Z1, Z12, Z3  // Z3 = B = b' + conj(w3)*d'
+        VSUBPD Z0, Z11, Z9  // Z9 = C = a' - conj(w2)*c'
+        VSUBPD Z1, Z12, Z10 // Z10 = D = b' - conj(w3)*d'
+
+        VMOVUPD Z2,  (R10)        // Store A where a came from
+        VMOVUPD Z3,  (R10)(R12*1) // Store B where b came from
+        VMOVUPD Z9,  (R10)(R12*2) // Store C where c came from
+        VMOVUPD Z10, (R10)(R13*1) // Store D where d came from
+
+        ADDQ $64, R9                        // Add 64 (4 * 16) to R9. This moves the twiddle pointer forward by 4 entries
+        ADDQ $64, R10                       // Add 64 (4 * 16) to R10. This moves forward by 4 points
+        SUBQ $64, SI                        // Subtract 64 from SI since we just did 4 values of j
+        JNZ  NARROWBUTTERFLY_INVERSE_AVX512 // If SI is not zero then jump back to NARROWBUTTERFLY_INVERSE_AVX512
+
+      LEAQ (R8)(R12*4), R8            // Move R8 forward by 4h to the start of the next block
+      CMPQ R8,          AX            // Compare R8 against the end of dst
+      JCS  NARROWBLOCK_INVERSE_AVX512 // If R8 is below the end of dst then jump back to NARROWBLOCK_INVERSE_AVX512
+
+    PASSDONE_INVERSE_AVX512:
+    LEAQ (BX)(R12*2), BX      // This pass used 2h twiddle entries (w1 and w2), so move BX to where the next pass starts
+    SHLQ $2,          R12     // Shift left by 2 to multiply h by 4 for the next pass
+    CMPQ R12,         DX      // Compare the new h against h for the last pass (n*4 bytes)
+    JLS  PASS4_INVERSE_AVX512 // If it is less than or the same then jump back to PASS4_INVERSE_AVX512
+
+  VZEROUPPER // Zero the upper bits of the vector registers before going back to Go, see the forward AVX512 version
+  RET        // We are done, return
+
+// const_one_over_4096_y is const_one_over_4096 for a YMM register
+DATA const_one_over_4096_y<>+0(SB)/8,  $0x3F30000000000000
+DATA const_one_over_4096_y<>+8(SB)/8,  $0x3F30000000000000
+DATA const_one_over_4096_y<>+16(SB)/8, $0x3F30000000000000
+DATA const_one_over_4096_y<>+24(SB)/8, $0x3F30000000000000
+GLOBL const_one_over_4096_y<>(SB), (RODATA+NOPTR), $32
+
+// func __inverseFastFourierTransform_AVX_FMA(dst, src []complex128)
+//
+// The inverse of __fastFourierTransform_AVX_FMA. It makes the same 3 changes
+// to that one as __inverseFastFourierTransform_AVX512 makes to the forward
+// AVX512 version, see the notes there
+TEXT ·__inverseFastFourierTransform_AVX_FMA(SB), NOSPLIT, $0-48
+  MOVQ dst_base+0(FP),  DI // Load the pointer of dst into DI
+  MOVQ src_base+24(FP), SI // Load the pointer of src into SI
+  MOVQ dst_len+8(FP),   AX // Load the length of dst into AX, this is n
+
+  VMOVUPD const_negate_imaginary_y<>(SB), Y12 // Load the imaginary sign mask into Y12
+  VMOVUPD const_one_over_4096_y<>(SB),    Y13 // Load 1/n into every float64 of Y13, PASS1 scales src by it
+
+  LEAQ ·fourierScatter4096(SB), BX // Point BX at the start of the bit reversal table
+
+  MOVQ AX, R9  // Copy n into R9
+  SHLQ $2, R9  // R9 = n*4, the byte distance to a quarter of the way through src
+  MOVQ R9, R8  // Copy n*4 into R8
+  ADDQ R9, R8  // R8 = n*8, the byte distance to halfway through src
+  MOVQ R8, R10 // Copy n*8 into R10
+  ADDQ R9, R10 // R10 = n*12, the byte distance to three quarters of the way through src
+
+  MOVQ AX, CX  // Copy n into CX, this is our loop counter
+  SHRQ $3, CX  // Shift right by 3 to divide by 8. We go through the first quarter of src 2 at a time, so n/8 loops (512)
+
+  // Same as PASS1_INVERSE_AVX512, but only 2 butterflies side by side (q0 and
+  // q1) instead of 4
+  PASS1_INVERSE_AVXFMA:
+    VMULPD (SI),        Y13, Y0 // Load a0 for q0 and q1 and multiply it by 1/n, stored in Y0
+    VMULPD (SI)(R8*1),  Y13, Y1 // Load a1 times 1/n into Y1, from halfway through src
+    VMULPD (SI)(R9*1),  Y13, Y2 // Load a2 times 1/n into Y2, from a quarter of the way through src
+    VMULPD (SI)(R10*1), Y13, Y3 // Load a3 times 1/n into Y3, from three quarters of the way through src
+
+    VADDPD Y1, Y0, Y4 // b0 = a0 + a1, stored in Y4
+    VSUBPD Y1, Y0, Y5 // b1 = a0 - a1, stored in Y5
+    VADDPD Y3, Y2, Y6 // b2 = a2 + a3, stored in Y6
+    VSUBPD Y3, Y2, Y7 // b3 = a2 - a3, stored in Y7
+
+    VPERMILPD $0x5, Y7, Y7 // Swap the halves of b3. 0x5 is 0101, the YMM version of 0x55
+    VXORPD    Y12,  Y7, Y7 // Flip the sign of the new imaginary half. Y7 is now -i * b3
+
+		// c1 and c3 are swapped compared to the forward version so that this
+		// multiplies by +i instead of -i, see PASS1_INVERSE_AVX512
+    VADDPD Y6, Y4, Y8  // c0 = b0 + b2, stored in Y8
+    VSUBPD Y7, Y5, Y9  // c1 = b1 - (-i * b3), which is b1 + i*b3, stored in Y9
+    VSUBPD Y6, Y4, Y10 // c2 = b0 - b2, stored in Y10
+    VADDPD Y7, Y5, Y11 // c3 = b1 + (-i * b3), which is b1 - i*b3, stored in Y11
+
+    // Same 2x2 transpose as PASS1_AVXFMA
+    VPERM2F128 $0x20, Y9,  Y8,  Y0 // Y0 = [c0(q0), c1(q0)]
+    VPERM2F128 $0x20, Y11, Y10, Y1 // Y1 = [c2(q0), c3(q0)]
+    VPERM2F128 $0x31, Y9,  Y8,  Y2 // Y2 = [c0(q1), c1(q1)]
+    VPERM2F128 $0x31, Y11, Y10, Y3 // Y3 = [c2(q1), c3(q1)]
+
+    MOVL 0(BX), R11           // Load the dst byte offset for q0 into R11
+    MOVL 4(BX), R12           // Load the dst byte offset for q1 into R12
+    VMOVUPD Y0, (DI)(R11*1)   // Store the first half of q0 at dst + R11
+    VMOVUPD Y1, 32(DI)(R11*1) // Store the second half of q0 32 bytes after that
+    VMOVUPD Y2, (DI)(R12*1)   // Store the first half of q1 at dst + R12
+    VMOVUPD Y3, 32(DI)(R12*1) // Store the second half of q1 32 bytes after that
+
+    ADDQ $32, SI              // Add 32 (2 * 16) to SI. This moves src forward by 2 complex numbers
+    ADDQ $8,  BX              // Add 8 (2 * 4) to BX. This moves the scatter table forward by 2 entries
+    SUBQ $1,  CX              // Subtract 1 from the CX loop counter
+    JNZ  PASS1_INVERSE_AVXFMA // If CX is not zero then jump back to the start of PASS1_INVERSE_AVXFMA
+
+  LEAQ    ·fourierTwiddles4096(SB), BX  // Point BX at the start of the twiddle table
+  VMOVUPD const_negate_all_y<>(SB),  Y15 // Load the sign mask for every float64 into Y15, used to get w3 from w2
+
+  MOVQ dst_len+8(FP), DX  // Load n into DX again
+  SHLQ $4,            DX  // DX = n*16, the size of dst in bytes
+  LEAQ (DI)(DX*1),    AX  // AX = the address right after the end of dst
+  SHRQ $2,            DX  // DX = n*4, which is h in bytes on the last pass
+  MOVQ $64,           R12 // R12 is h in bytes, starting at 4 * 16 = 64
+
+  // Same passes as PASS4_INVERSE_AVX512, see the notes there
+  PASS4_INVERSE_AVXFMA:
+    LEAQ (R12)(R12*2), R13 // R13 = 3h in bytes, the distance from a to d
+    MOVQ DI,           R8  // R8 is the start of the current block, start at the beginning of dst
+
+    BLOCK_INVERSE_AVXFMA:
+      MOVQ R8,  R10 // R10 points at a, start at the beginning of the block
+      MOVQ BX,  R9  // R9 points at w1, start over at the top of this pass in the twiddle table
+      MOVQ R12, SI  // SI counts down the bytes of j left in this block, starting at h
+
+      BUTTERFLY_INVERSE_AVXFMA:
+        // Y0 holds the raw twiddles first and then a, the same as the forward
+        // version
+        VMOVUPD   (R9),         Y0 // Load w1 for j and j+1 into Y0
+        VMOVDDUP  Y0,           Y4 // Y4 = (w1.real, w1.real)
+        VPERMILPD $0xF,     Y0, Y5 // Y5 = (w1.imag, w1.imag). 0xF is 1111, the YMM version of 0xFF
+        VMOVUPD   (R9)(R12*1),  Y0 // Load w2 for j and j+1 into Y0
+        VMOVDDUP  Y0,           Y6 // Y6 = (w2.real, w2.real)
+        VPERMILPD $0xF,     Y0, Y7 // Y7 = (w2.imag, w2.imag), also (w3.real, w3.real)
+        VXORPD    Y15,      Y6, Y8 // Y8 = (-w2.real, -w2.real), which is (w3.imag, w3.imag)
+
+        VMOVUPD (R10),        Y0 // Load a for j and j+1 into Y0
+        VMOVUPD (R10)(R12*1), Y1 // Load b into Y1, h bytes after a
+        VMOVUPD (R10)(R12*2), Y2 // Load c into Y2, 2h bytes after a
+        VMOVUPD (R10)(R13*1), Y3 // Load d into Y3, 3h bytes after a
+
+        // Same conjugate multiply as WIDEBUTTERFLY_INVERSE_AVX512
+        VPERMILPD      $0x5, Y1,  Y9  // Y9 = b swapped
+        VPERMILPD      $0x5, Y3,  Y10 // Y10 = d swapped
+        VMULPD         Y5,   Y9,  Y9  // Y9 = swapped b * w1.imag
+        VMULPD         Y5,   Y10, Y10 // Y10 = swapped d * w1.imag
+        VFMSUBADD231PD Y4,   Y1,  Y9  // Y9 = (b * w1.real) +/- Y9, which is conj(w1)*b
+        VFMSUBADD231PD Y4,   Y3,  Y10 // Y10 = (d * w1.real) +/- Y10, which is conj(w1)*d
+
+        VADDPD Y9,  Y0, Y11 // Y11 = a' = a + conj(w1)*b
+        VSUBPD Y9,  Y0, Y12 // Y12 = b' = a - conj(w1)*b
+        VADDPD Y10, Y2, Y13 // Y13 = c' = c + conj(w1)*d
+        VSUBPD Y10, Y2, Y14 // Y14 = d' = c - conj(w1)*d
+
+        VPERMILPD      $0x5, Y13, Y0 // Y0 = c' swapped
+        VPERMILPD      $0x5, Y14, Y1 // Y1 = d' swapped
+        VMULPD         Y7,   Y0,  Y0 // Y0 = swapped c' * w2.imag
+        VMULPD         Y8,   Y1,  Y1 // Y1 = swapped d' * w3.imag
+        VFMSUBADD231PD Y6,   Y13, Y0 // Y0 = conj(w2)*c'
+        VFMSUBADD231PD Y7,   Y14, Y1 // Y1 = conj(w3)*d', Y7 is w2.imag which is the same as w3.real
+
+        VADDPD Y0, Y11, Y2  // Y2 = A = a' + conj(w2)*c'
+        VADDPD Y1, Y12, Y3  // Y3 = B = b' + conj(w3)*d'
+        VSUBPD Y0, Y11, Y9  // Y9 = C = a' - conj(w2)*c'
+        VSUBPD Y1, Y12, Y10 // Y10 = D = b' - conj(w3)*d'
+
+        VMOVUPD Y2,  (R10)        // Store A where a came from
+        VMOVUPD Y3,  (R10)(R12*1) // Store B where b came from
+        VMOVUPD Y9,  (R10)(R12*2) // Store C where c came from
+        VMOVUPD Y10, (R10)(R13*1) // Store D where d came from
+
+        ADDQ $32, R9                  // Add 32 (2 * 16) to R9. This moves the twiddle pointer forward by 2 entries
+        ADDQ $32, R10                 // Add 32 (2 * 16) to R10. This moves forward by 2 points
+        SUBQ $32, SI                  // Subtract 32 from SI since we just did 2 values of j
+        JNZ  BUTTERFLY_INVERSE_AVXFMA // If SI is not zero then jump back to BUTTERFLY_INVERSE_AVXFMA
+
+      LEAQ (R8)(R12*4), R8      // Move R8 forward by 4h to the start of the next block
+      CMPQ R8,          AX      // Compare R8 against the end of dst
+      JCS  BLOCK_INVERSE_AVXFMA // If R8 is below the end of dst then jump back to BLOCK_INVERSE_AVXFMA
+
+    LEAQ (BX)(R12*2), BX      // Move BX forward by 2h entries to where the next pass's twiddles start
+    SHLQ $2,          R12     // Multiply h by 4 for the next pass
+    CMPQ R12,         DX      // Compare the new h against h for the last pass
+    JLS  PASS4_INVERSE_AVXFMA // If it is less than or the same then jump back to PASS4_INVERSE_AVXFMA
+
+  VZEROUPPER // Zero the upper bits of the vector registers before going back to Go, see the forward AVX512 version
+  RET        // We are done, return
+
+// func __inverseFastFourierTransform_AVX(dst, src []complex128)
+//
+// The inverse of __fastFourierTransform_AVX, for CPUs that have AVX but not
+// FMA3. PASS1 is exactly the same as PASS1_INVERSE_AVXFMA since there is no
+// FMA in it
+//
+// PASS4 is where this one is different. Without FMA there is no
+// VFMSUBADD231PD, and VADDSUBPD only goes the one way (subtract on the real
+// half, add on the imaginary half). So instead we conjugate the twiddle
+// factors in registers by flipping the sign of their imaginary halves, and
+// then do the exact same multiply as the forward AVX version
+//
+// For w1 that takes one more VXORPD than the forward version. For w2 and w3 it
+// doesn't cost anything extra:
+//
+//   conj(w2) = (w2.real, -w2.imag)
+//   conj(w3) = conj(-i * w2) = i * conj(w2) = (w2.imag, w2.real)
+//
+// So conj(w3) is just the two halves of w2 the other way around, with no sign
+// flip at all. The forward version flips the sign of w2.real to get w3, and
+// this flips the sign of w2.imag to get conj(w2) instead
+TEXT ·__inverseFastFourierTransform_AVX(SB), NOSPLIT, $0-48
+  MOVQ dst_base+0(FP),  DI // Load the pointer of dst into DI
+  MOVQ src_base+24(FP), SI // Load the pointer of src into SI
+  MOVQ dst_len+8(FP),   AX // Load the length of dst into AX, this is n
+
+  VMOVUPD const_negate_imaginary_y<>(SB), Y12 // Load the imaginary sign mask into Y12
+  VMOVUPD const_one_over_4096_y<>(SB),    Y13 // Load 1/n into every float64 of Y13, PASS1 scales src by it
+
+  LEAQ ·fourierScatter4096(SB), BX // Point BX at the start of the bit reversal table
+
+  MOVQ AX, R9  // Copy n into R9
+  SHLQ $2, R9  // R9 = n*4, the byte distance to a quarter of the way through src
+  MOVQ R9, R8  // Copy n*4 into R8
+  ADDQ R9, R8  // R8 = n*8, the byte distance to halfway through src
+  MOVQ R8, R10 // Copy n*8 into R10
+  ADDQ R9, R10 // R10 = n*12, the byte distance to three quarters of the way through src
+
+  MOVQ AX, CX  // Copy n into CX, this is our loop counter
+  SHRQ $3, CX  // Shift right by 3 to divide by 8, so n/8 loops (512)
+
+  // PASS1 is exactly the same as PASS1_INVERSE_AVXFMA
+  PASS1_INVERSE_AVX:
+    VMULPD (SI),        Y13, Y0 // Load a0 for q0 and q1 and multiply it by 1/n, stored in Y0
+    VMULPD (SI)(R8*1),  Y13, Y1 // Load a1 times 1/n into Y1, from halfway through src
+    VMULPD (SI)(R9*1),  Y13, Y2 // Load a2 times 1/n into Y2, from a quarter of the way through src
+    VMULPD (SI)(R10*1), Y13, Y3 // Load a3 times 1/n into Y3, from three quarters of the way through src
+
+    VADDPD Y1, Y0, Y4 // b0 = a0 + a1, stored in Y4
+    VSUBPD Y1, Y0, Y5 // b1 = a0 - a1, stored in Y5
+    VADDPD Y3, Y2, Y6 // b2 = a2 + a3, stored in Y6
+    VSUBPD Y3, Y2, Y7 // b3 = a2 - a3, stored in Y7
+
+    VPERMILPD $0x5, Y7, Y7 // Swap the halves of b3
+    VXORPD    Y12,  Y7, Y7 // Flip the sign of the new imaginary half. Y7 is now -i * b3
+
+    VADDPD Y6, Y4, Y8  // c0 = b0 + b2, stored in Y8
+    VSUBPD Y7, Y5, Y9  // c1 = b1 - (-i * b3), which is b1 + i*b3, stored in Y9
+    VSUBPD Y6, Y4, Y10 // c2 = b0 - b2, stored in Y10
+    VADDPD Y7, Y5, Y11 // c3 = b1 + (-i * b3), which is b1 - i*b3, stored in Y11
+
+    VPERM2F128 $0x20, Y9,  Y8,  Y0 // Y0 = [c0(q0), c1(q0)]
+    VPERM2F128 $0x20, Y11, Y10, Y1 // Y1 = [c2(q0), c3(q0)]
+    VPERM2F128 $0x31, Y9,  Y8,  Y2 // Y2 = [c0(q1), c1(q1)]
+    VPERM2F128 $0x31, Y11, Y10, Y3 // Y3 = [c2(q1), c3(q1)]
+
+    MOVL 0(BX), R11           // Load the dst byte offset for q0 into R11
+    MOVL 4(BX), R12           // Load the dst byte offset for q1 into R12
+    VMOVUPD Y0, (DI)(R11*1)   // Store the first half of q0 at dst + R11
+    VMOVUPD Y1, 32(DI)(R11*1) // Store the second half of q0 32 bytes after that
+    VMOVUPD Y2, (DI)(R12*1)   // Store the first half of q1 at dst + R12
+    VMOVUPD Y3, 32(DI)(R12*1) // Store the second half of q1 32 bytes after that
+
+    ADDQ $32, SI           // Add 32 (2 * 16) to SI. This moves src forward by 2 complex numbers
+    ADDQ $8,  BX           // Add 8 (2 * 4) to BX. This moves the scatter table forward by 2 entries
+    SUBQ $1,  CX           // Subtract 1 from the CX loop counter
+    JNZ  PASS1_INVERSE_AVX // If CX is not zero then jump back to the start of PASS1_INVERSE_AVX
+
+  LEAQ    ·fourierTwiddles4096(SB), BX  // Point BX at the start of the twiddle table
+  VMOVUPD const_negate_all_y<>(SB),  Y15 // Load the sign mask for every float64 into Y15, used to conjugate the twiddles
+
+  MOVQ dst_len+8(FP), DX  // Load n into DX again
+  SHLQ $4,            DX  // DX = n*16, the size of dst in bytes
+  LEAQ (DI)(DX*1),    AX  // AX = the address right after the end of dst
+  SHRQ $2,            DX  // DX = n*4, which is h in bytes on the last pass
+  MOVQ $64,           R12 // R12 is h in bytes, starting at 4 * 16 = 64
+
+  PASS4_INVERSE_AVX:
+    LEAQ (R12)(R12*2), R13 // R13 = 3h in bytes, the distance from a to d
+    MOVQ DI,           R8  // R8 is the start of the current block, start at the beginning of dst
+
+    BLOCK_INVERSE_AVX:
+      MOVQ R8,  R10 // R10 points at a, start at the beginning of the block
+      MOVQ BX,  R9  // R9 points at w1, start over at the top of this pass in the twiddle table
+      MOVQ R12, SI  // SI counts down the bytes of j left in this block, starting at h
+
+      BUTTERFLY_INVERSE_AVX:
+        VMOVUPD   (R9),         Y0 // Load w1 for j and j+1 into Y0
+        VMOVDDUP  Y0,           Y4 // Y4 = (w1.real, w1.real), the real half of conj(w1)
+        VPERMILPD $0xF,     Y0, Y5 // Y5 = (w1.imag, w1.imag)
+        VXORPD    Y15,      Y5, Y5 // Y5 = (-w1.imag, -w1.imag), the imaginary half of conj(w1)
+        VMOVUPD   (R9)(R12*1),  Y0 // Load w2 for j and j+1 into Y0
+        VMOVDDUP  Y0,           Y6 // Y6 = (w2.real, w2.real), the real half of conj(w2) and the imaginary half of conj(w3)
+        VPERMILPD $0xF,     Y0, Y7 // Y7 = (w2.imag, w2.imag), the real half of conj(w3)
+        VXORPD    Y15,      Y7, Y8 // Y8 = (-w2.imag, -w2.imag), the imaginary half of conj(w2)
+
+        VMOVUPD (R10),        Y0 // Load a for j and j+1 into Y0
+        VMOVUPD (R10)(R12*1), Y1 // Load b into Y1, h bytes after a
+        VMOVUPD (R10)(R12*2), Y2 // Load c into Y2, 2h bytes after a
+        VMOVUPD (R10)(R13*1), Y3 // Load d into Y3, 3h bytes after a
+
+        // Same multiply as BUTTERFLY_AVX, with conj(w1) split across Y4 and Y5
+        VPERMILPD $0x5, Y1,  Y9  // Y9 = b swapped
+        VPERMILPD $0x5, Y3,  Y10 // Y10 = d swapped
+        VMULPD    Y5,   Y9,  Y9  // Y9 = swapped b * -w1.imag
+        VMULPD    Y5,   Y10, Y10 // Y10 = swapped d * -w1.imag
+        VMULPD    Y4,   Y1,  Y1  // Y1 = b * w1.real, overwriting b
+        VMULPD    Y4,   Y3,  Y3  // Y3 = d * w1.real, overwriting d
+        VADDSUBPD Y9,   Y1,  Y9  // Y9 = Y1 -/+ Y9, which is conj(w1)*b
+        VADDSUBPD Y10,  Y3,  Y10 // Y10 = Y3 -/+ Y10, which is conj(w1)*d
+
+        VADDPD Y9,  Y0, Y11 // Y11 = a' = a + conj(w1)*b
+        VSUBPD Y9,  Y0, Y12 // Y12 = b' = a - conj(w1)*b
+        VADDPD Y10, Y2, Y13 // Y13 = c' = c + conj(w1)*d
+        VSUBPD Y10, Y2, Y14 // Y14 = d' = c - conj(w1)*d
+
+        VPERMILPD $0x5, Y13, Y0  // Y0 = c' swapped
+        VPERMILPD $0x5, Y14, Y1  // Y1 = d' swapped
+        VMULPD    Y8,   Y0,  Y0  // Y0 = swapped c' * -w2.imag, the imaginary half of conj(w2)
+        VMULPD    Y6,   Y1,  Y1  // Y1 = swapped d' * w2.real, the imaginary half of conj(w3)
+        VMULPD    Y6,   Y13, Y13 // Y13 = c' * w2.real, overwriting c'. w2.real is the real half of conj(w2)
+        VMULPD    Y7,   Y14, Y14 // Y14 = d' * w2.imag, overwriting d'. w2.imag is the real half of conj(w3)
+        VADDSUBPD Y0,   Y13, Y0  // Y0 = Y13 -/+ Y0, which is conj(w2)*c'
+        VADDSUBPD Y1,   Y14, Y1  // Y1 = Y14 -/+ Y1, which is conj(w3)*d'
+
+        VADDPD Y0, Y11, Y2  // Y2 = A = a' + conj(w2)*c'
+        VADDPD Y1, Y12, Y3  // Y3 = B = b' + conj(w3)*d'
+        VSUBPD Y0, Y11, Y9  // Y9 = C = a' - conj(w2)*c'
+        VSUBPD Y1, Y12, Y10 // Y10 = D = b' - conj(w3)*d'
+
+        VMOVUPD Y2,  (R10)        // Store A where a came from
+        VMOVUPD Y3,  (R10)(R12*1) // Store B where b came from
+        VMOVUPD Y9,  (R10)(R12*2) // Store C where c came from
+        VMOVUPD Y10, (R10)(R13*1) // Store D where d came from
+
+        ADDQ $32, R9               // Add 32 (2 * 16) to R9. This moves the twiddle pointer forward by 2 entries
+        ADDQ $32, R10              // Add 32 (2 * 16) to R10. This moves forward by 2 points
+        SUBQ $32, SI               // Subtract 32 from SI since we just did 2 values of j
+        JNZ  BUTTERFLY_INVERSE_AVX // If SI is not zero then jump back to BUTTERFLY_INVERSE_AVX
+
+      LEAQ (R8)(R12*4), R8   // Move R8 forward by 4h to the start of the next block
+      CMPQ R8,          AX   // Compare R8 against the end of dst
+      JCS  BLOCK_INVERSE_AVX // If R8 is below the end of dst then jump back to BLOCK_INVERSE_AVX
+
+    LEAQ (BX)(R12*2), BX   // Move BX forward by 2h entries to where the next pass's twiddles start
+    SHLQ $2,          R12  // Multiply h by 4 for the next pass
+    CMPQ R12,         DX   // Compare the new h against h for the last pass
+    JLS  PASS4_INVERSE_AVX // If it is less than or the same then jump back to PASS4_INVERSE_AVX
+
+  VZEROUPPER // Zero the upper bits of the vector registers before going back to Go, see the forward AVX512 version
   RET        // We are done, return

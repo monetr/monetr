@@ -467,7 +467,7 @@ func TestFFTRoundTrip(t *testing.T) {
 	// results?
 	assert.InDeltaf(t, timeDomain, frequencyDomain, 1e-6, "must validate Parseval's theorem")
 
-	inverse := calc.InverseFastFourierTransform(result)
+	inverse := calc.InverseFastFourierTransformSlow(result)
 
 	// Convert back to real domain for energy comparison
 	reconstructedSignal := make([]float64, len(inverse))

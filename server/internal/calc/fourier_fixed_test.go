@@ -92,9 +92,95 @@ func TestFastFourierTransformExported(t *testing.T) {
 	})
 }
 
+func TestInverseFastFourierTransformFixedGo(t *testing.T) {
+	t.Run("matches the recursive implementation", func(t *testing.T) {
+		spectrum := randomSeries(99)
+		expected := InverseFastFourierTransformSlow(spectrum)
+
+		actual := make([]complex128, FourierSize)
+		inverseFastFourierTransformGo(actual, spectrum)
+
+		delta := worstDelta(t, expected, actual)
+		t.Logf("worst relative delta %.3e", delta)
+		assert.Less(t, delta, 1e-13, "go implementation must agree with the recursive implementation")
+	})
+
+	t.Run("undoes the forward transform", func(t *testing.T) {
+		series := randomSeries(98)
+
+		spectrum := make([]complex128, FourierSize)
+		fastFourierTransformGo(spectrum, series)
+
+		actual := make([]complex128, FourierSize)
+		inverseFastFourierTransformGo(actual, spectrum)
+
+		delta := worstDelta(t, series, actual)
+		t.Logf("worst relative delta after a round trip %.3e", delta)
+		assert.Less(t, delta, 1e-14, "the inverse must give back the original series")
+	})
+}
+
+// TestInverseFastFourierTransformExported is TestFastFourierTransformExported
+// for the inverse transform.
+func TestInverseFastFourierTransformExported(t *testing.T) {
+	t.Run("transforms through whichever implementation init picked", func(t *testing.T) {
+		spectrum := randomSeries(5)
+		expected := InverseFastFourierTransformSlow(spectrum)
+
+		actual := InverseFastFourierTransform(spectrum)
+
+		require.Len(t, actual, FourierSize, "must return a full length transform")
+		delta := worstDelta(t, expected, actual)
+		t.Logf("worst relative delta %.3e", delta)
+		assert.Less(t, delta, 1e-13, "the dispatched implementation must be correct")
+	})
+
+	t.Run("undoes FastFourierTransform", func(t *testing.T) {
+		series := randomSeries(4)
+
+		actual := InverseFastFourierTransform(FastFourierTransform(series))
+
+		delta := worstDelta(t, series, actual)
+		t.Logf("worst relative delta after a round trip %.3e", delta)
+		assert.Less(t, delta, 1e-14, "the inverse must give back the original series")
+	})
+
+	t.Run("does not modify the input", func(t *testing.T) {
+		spectrum := randomSeries(6)
+		original := make([]complex128, FourierSize)
+		copy(original, spectrum)
+
+		InverseFastFourierTransform(spectrum)
+
+		assert.Equal(t, original, spectrum, "the input must be left alone")
+	})
+
+	t.Run("panics on the wrong length", func(t *testing.T) {
+		for _, length := range []int{0, 1, FourierSize - 1, FourierSize + 1, FourierSize * 2} {
+			assert.Panicsf(t, func() {
+				InverseFastFourierTransform(make([]complex128, length))
+			}, "must panic for a series of %d points", length)
+		}
+		assert.Panics(t, func() {
+			InverseFastFourierTransform(nil)
+		}, "must panic for a nil series")
+	})
+}
+
 // TestFastFourierTransformStaysInBounds pads both buffers with a sentinel value
 // and makes sure the transform never writes outside of them.
 func TestFastFourierTransformStaysInBounds(t *testing.T) {
+	assertTransformStaysInBounds(t, fastFourierTransform)
+}
+
+// TestInverseFastFourierTransformStaysInBounds is the same check for the
+// inverse transform.
+func TestInverseFastFourierTransformStaysInBounds(t *testing.T) {
+	assertTransformStaysInBounds(t, inverseFastFourierTransform)
+}
+
+func assertTransformStaysInBounds(t *testing.T, transform func(dst, src []complex128)) {
+	t.Helper()
 	const padding = 512
 
 	sentinel := complex(-98765.4321, 12345.6789)
@@ -129,7 +215,7 @@ func TestFastFourierTransformStaysInBounds(t *testing.T) {
 
 	destinationWhole, destination := newPadded()
 
-	fastFourierTransform(destination, source)
+	transform(destination, source)
 
 	assertPaddingIntact(t, destinationWhole, "the destination")
 	assertPaddingIntact(t, sourceWhole, "the source")

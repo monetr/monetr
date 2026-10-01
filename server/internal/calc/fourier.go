@@ -15,7 +15,8 @@ const FourierSize = 4096
 // number of points from the length of the slice, so FourierSize has to match
 // the tables. A negative constant does not convert to uint, so these pin
 // FourierSize to 4096 at compile time. Changing it means changing the generate
-// directive and the symbol names in fourier_amd64.s too.
+// directive, and the symbol names and the 1/4096 constants in fourier_amd64.s
+// too.
 const (
 	_ = uint(FourierSize - 4096)
 	_ = uint(4096 - FourierSize)
@@ -23,6 +24,7 @@ const (
 
 // FastFourierTransformSlow is a recursive implementation of the fast Fourier
 // transform.
+// Deprecated: Use [FastFourierTransform] instead.
 func FastFourierTransformSlow(a []complex128) []complex128 {
 	n := len(a)
 	if n <= 1 {
@@ -54,9 +56,10 @@ func FastFourierTransformSlow(a []complex128) []complex128 {
 	return result
 }
 
-// InverseFastFourierTransform is a recursive implementation of the inverse fast
-// Fourier transform.
-func InverseFastFourierTransform(a []complex128) []complex128 {
+// InverseFastFourierTransformSlow is a recursive implementation of the inverse
+// fast Fourier transform.
+// Deprecated: Use [InverseFastFourierTransform] instead.
+func InverseFastFourierTransformSlow(a []complex128) []complex128 {
 	n := len(a)
 
 	// Conjugate the input
@@ -97,6 +100,25 @@ func FastFourierTransform(a []complex128) []complex128 {
 	}
 	result := make([]complex128, FourierSize)
 	fastFourierTransform(result, a)
+	return result
+}
+
+// inverseFastFourierTransform is swapped out for an assembly implementation by
+// init() on platforms that have one.
+var inverseFastFourierTransform func(dst, src []complex128) = inverseFastFourierTransformGo
+
+// InverseFastFourierTransform is a non-recursive inverse fast Fourier transform
+// for exactly FourierSize points. It includes the 1/n scaling, so it gives back
+// the series that was passed to FastFourierTransform.
+//
+// On amd64 this uses AVX512, AVX with FMA, or plain AVX assembly depending on
+// the CPU. Everything else falls back to inverseFastFourierTransformGo.
+func InverseFastFourierTransform(a []complex128) []complex128 {
+	if len(a) != FourierSize {
+		panic("length of the input must be exactly FourierSize for the fixed size transform")
+	}
+	result := make([]complex128, FourierSize)
+	inverseFastFourierTransform(result, a)
 	return result
 }
 
@@ -181,6 +203,53 @@ func fastFourierTransformGo(dst, src []complex128) {
 			for j := 0; j < half; j++ {
 				u := dst[block+j]
 				t := twiddles[j] * dst[block+j+half]
+				dst[block+j] = u + t
+				dst[block+j+half] = u - t
+			}
+		}
+	}
+}
+
+// inverseFastFourierTransformGo is the plain Go version of the fixed size
+// inverse transform, used on hosts without the right SIMD instructions. The
+// inverse uses e^(+2*pi*i*j/N) where the forward transform uses e^(-2*pi*i*j/N),
+// so this is fastFourierTransformGo with every twiddle factor conjugated and
+// the input scaled by 1/n.
+func inverseFastFourierTransformGo(dst, src []complex128) {
+	tables := fixedFourierTables()
+
+	// 1/n is a power of two, so scaling by it on the way in only changes the
+	// exponent. It comes out the same as scaling every output at the end without
+	// needing another pass over dst.
+	const scale = 1.0 / FourierSize
+	const quarter = FourierSize / 4
+	for q := range quarter {
+		a0 := src[q] * scale
+		a1 := src[q+FourierSize/2] * scale
+		a2 := src[q+quarter] * scale
+		a3 := src[q+quarter*3] * scale
+
+		b0, b1 := a0+a1, a0-a1
+		b2, b3 := a2+a3, a2-a3
+
+		// The forward transform multiplies b3 by -i here and the inverse needs the
+		// conjugate, +i. That is just -(-i * b3), so this makes -i * b3 the same
+		// way and then swaps which of the outputs adds it and which subtracts it.
+		b3 = complex(imag(b3), -real(b3))
+
+		group := tables.scatter[q]
+		dst[group+0] = b0 + b2
+		dst[group+1] = b1 - b3
+		dst[group+2] = b0 - b2
+		dst[group+3] = b1 + b3
+	}
+
+	for half := 4; half <= FourierSize/2; half <<= 1 {
+		twiddles := tables.twiddles[half-4 : half-4+half]
+		for block := 0; block < FourierSize; block += half * 2 {
+			for j := 0; j < half; j++ {
+				u := dst[block+j]
+				t := cmplx.Conj(twiddles[j]) * dst[block+j+half]
 				dst[block+j] = u + t
 				dst[block+j+half] = u - t
 			}
