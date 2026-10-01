@@ -1,4 +1,5 @@
-import { Fragment, useMemo, useRef } from 'react';
+import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useWindowVirtualizer, type VirtualItem } from '@tanstack/react-virtual';
 import { format, parse } from 'date-fns';
 import { HeartCrack, Plus, ShoppingCart, Upload } from 'lucide-react';
 
@@ -11,6 +12,7 @@ import TransactionItem from '@monetr/interface/components/transactions/Transacti
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { useInfiniteScroll } from '@monetr/interface/hooks/useInfiniteScroll';
+import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import { useTransactions } from '@monetr/interface/hooks/useTransactions';
 import { showNewTransactionModal } from '@monetr/interface/modals/NewTransactionModal';
 import type Transaction from '@monetr/interface/models/Transaction';
@@ -24,7 +26,6 @@ const showUploadTransactionsModal = async () =>
 
 export default function Transactions(): React.JSX.Element {
   const { data: transactions, hasNextPage, isLoading, isError, isFetching, fetchNextPage } = useTransactions();
-  const ref = useRef<HTMLUListElement>(null);
 
   const loading = isLoading || isFetching;
 
@@ -41,13 +42,15 @@ export default function Transactions(): React.JSX.Element {
     rootMargin: '0px 0px 700px 0px',
   });
 
-  const groups: { [date: string]: Array<Transaction> } = useMemo(
+  const groups: Array<[string, Array<Transaction>]> = useMemo(
     () =>
-      (transactions ?? []).reduce<{ [date: string]: Array<Transaction> }>((accumulator, item) => {
-        // biome-ignore lint/suspicious/noAssignInExpressions: This is the cleanest way to do this group by...
-        (accumulator[format(item.date, 'yyyy-MM-dd')] ??= []).push(item);
-        return accumulator;
-      }, {}),
+      Object.entries(
+        (transactions ?? []).reduce<{ [date: string]: Array<Transaction> }>((accumulator, item) => {
+          // biome-ignore lint/suspicious/noAssignInExpressions: This is the cleanest way to do this group by...
+          (accumulator[format(item.date, 'yyyy-MM-dd')] ??= []).push(item);
+          return accumulator;
+        }, {}),
+      ),
     [transactions],
   );
 
@@ -112,41 +115,101 @@ export default function Transactions(): React.JSX.Element {
       </MTopNavigation>
       <AddTransactionButton />
       <div className={styles.content}>
-        <ul className={styles.list} ref={ref}>
-          {Object.entries(groups).map(([date, transactionGroup]) => (
-            <li key={date}>
+        <div className={styles.list}>
+          <TransactionDateGroups groups={groups} />
+          {loading && (
+            <div className={styles.loadMore} ref={sentryRef}>
+              <h1>{message}</h1>
+            </div>
+          )}
+          {!loading && hasNextPage && (
+            <div className={styles.loadMore} ref={sentryRef}>
+              <h1>{message}</h1>
+            </div>
+          )}
+          {!loading && !hasNextPage && (
+            <div className={styles.loadMore}>
+              <h1>{message}</h1>
+            </div>
+          )}
+        </div>
+      </div>
+    </Fragment>
+  );
+}
+
+interface TransactionDateGroupsProps {
+  groups: Array<[string, Array<Transaction>]>;
+}
+
+// The measured height of each day for every bank account, kept around after the list goes away. Going back to the list
+// relies on the browser restoring the scroll position, which only lands in the right spot if the list is the same
+// height it was when they left. Without this every day would go back to its estimated height and they would end up
+// somewhere else.
+const measuredDays = new Map<string, Array<VirtualItem>>();
+
+// Only the days that are on (or near) the screen are rendered, and each one is measured after it renders so nothing
+// here needs to know how tall a transaction is.
+function TransactionDateGroups({ groups }: TransactionDateGroupsProps): React.JSX.Element {
+  // The virtualizer keeps the same instance between renders while the items it gives back change as you scroll. If the
+  // React Compiler memoizes against that instance the list gets stuck on whatever it rendered first.
+  'use no memo';
+
+  const selectedBankAccountId = String(useSelectedBankAccountId());
+  const listRef = useRef<HTMLDivElement>(null);
+  const [scrollMargin, setScrollMargin] = useState(0);
+
+  // The page scrolls, not the list, so the virtualizer needs to know how far down the page the list starts.
+  useLayoutEffect(() => {
+    if (listRef.current) {
+      setScrollMargin(listRef.current.getBoundingClientRect().top + window.scrollY);
+    }
+  }, []);
+
+  // Key by the date so days keep their measured height as more pages are loaded.
+  const getItemKey = useCallback((index: number) => groups[index]?.[0] ?? index, [groups]);
+  const virtualizer = useWindowVirtualizer({
+    count: groups.length,
+    getItemKey,
+    // Just a rough guess for days that haven't rendered yet, the real height is measured once they do. If this gets out
+    // of date nothing breaks, the scrollbar is just a bit off until those days render. Guessing high is better than
+    // low.
+    estimateSize: index => 40 + (groups[index]?.[1].length ?? 1) * 72,
+    overscan: 2,
+    scrollMargin,
+    initialMeasurementsCache: measuredDays.get(selectedBankAccountId) ?? [],
+  });
+  const items = virtualizer.getVirtualItems();
+
+  useEffect(() => {
+    return () => {
+      measuredDays.set(selectedBankAccountId, virtualizer.takeSnapshot());
+    };
+  }, [selectedBankAccountId, virtualizer]);
+
+  return (
+    <div ref={listRef} style={{ height: virtualizer.getTotalSize() }}>
+      <ul style={{ paddingTop: (items[0]?.start ?? scrollMargin) - scrollMargin }}>
+        {items.map(item => {
+          const group = groups[item.index];
+          if (!group) {
+            return null;
+          }
+
+          const [date, transactions] = group;
+          return (
+            <li data-index={item.index} key={item.key} ref={virtualizer.measureElement}>
               <ul className={styles.dateGroup}>
                 <TransactionDateItem date={parse(date, 'yyyy-MM-dd', new Date())} />
-                {transactionGroup.map(transaction => (
+                {transactions.map(transaction => (
                   <TransactionItem key={transaction.transactionId} transaction={transaction} />
                 ))}
               </ul>
             </li>
-          ))}
-          {loading && (
-            <li ref={sentryRef}>
-              <div className={styles.loadMore}>
-                <h1>{message}</h1>
-              </div>
-            </li>
-          )}
-          {!loading && hasNextPage && (
-            <li ref={sentryRef}>
-              <div className={styles.loadMore}>
-                <h1>{message}</h1>
-              </div>
-            </li>
-          )}
-          {!loading && !hasNextPage && (
-            <li>
-              <div className={styles.loadMore}>
-                <h1>{message}</h1>
-              </div>
-            </li>
-          )}
-        </ul>
-      </div>
-    </Fragment>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 

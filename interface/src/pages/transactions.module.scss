@@ -85,6 +85,10 @@
 .list {
   width: 100%;
   padding-bottom: 16 * variables.$size;
+  // The virtualizer moves the scroll position itself when a day above the
+  // screen changes height. Without this Chrome and Firefox would also do that
+  // on their own and the page would jump twice as far.
+  overflow-anchor: none;
 }
 
 // Group of transactions sharing a single date.

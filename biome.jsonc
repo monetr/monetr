@@ -39,6 +39,7 @@
                 "@sentry/**",
                 "@storybook/**",
                 "@tanstack/react-query",
+                "@tanstack/react-virtual",
                 "axios",
                 "class-variance-authority",
                 "cmdk",
