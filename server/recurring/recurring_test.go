@@ -107,4 +107,34 @@ func TestRecurringDetection(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("yearly renewal", func(t *testing.T) {
+		// Three renewals on the same day every year, like a yearly subscription.
+		transactions := []models.Transaction{
+			{TransactionId: "txn_0", Amount: 5985, Date: time.Date(2024, 4, 23, 0, 0, 0, 0, time.UTC)},
+			{TransactionId: "txn_1", Amount: 5985, Date: time.Date(2025, 4, 23, 0, 0, 0, 0, time.UTC)},
+			{TransactionId: "txn_2", Amount: 7188, Date: time.Date(2026, 4, 23, 0, 0, 0, 0, time.UTC)},
+		}
+
+		result, err := DetectRecurringTransactions(t.Context(), clock.NewMock(), transactions)
+		require.NoError(t, err, "must be able to check the transactions for recurrence")
+		require.NotNil(t, result.Best, "a yearly renewal must be detected as recurring")
+		assert.EqualValues(t, 365, result.Best.Frequency, "should recur every year")
+		assert.Len(t, result.Members, 3, "every renewal should be part of the result")
+	})
+
+	t.Run("visits roughly a year apart are not yearly", func(t *testing.T) {
+		// Three visits to the same place. The longer gap is 446 days, which a loose
+		// tolerance would accept as about a year, but the gaps are 446 and 273 days
+		// and that is nothing like a yearly charge.
+		transactions := []models.Transaction{
+			{TransactionId: "txn_0", Amount: 1520, Date: time.Date(2023, 3, 10, 0, 0, 0, 0, time.UTC)},
+			{TransactionId: "txn_1", Amount: 829, Date: time.Date(2024, 5, 29, 0, 0, 0, 0, time.UTC)},
+			{TransactionId: "txn_2", Amount: 1537, Date: time.Date(2025, 2, 26, 0, 0, 0, 0, time.UTC)},
+		}
+
+		result, err := DetectRecurringTransactions(t.Context(), clock.NewMock(), transactions)
+		require.NoError(t, err, "must be able to check the transactions for recurrence")
+		assert.Nil(t, result.Best, "irregular visits must not be detected as recurring")
+	})
 }

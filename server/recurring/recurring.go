@@ -32,6 +32,12 @@ const minimumOccurrenceRatio float64 = 0.75
 // within this much of its period, 0.25 is plus or minus 25%.
 const gapTolerance float64 = 0.25
 
+// Yearly gets a tighter gap tolerance. Plus or minus 25% of a year is three
+// months, which lets a few visits to the same place that happen to be roughly a
+// year apart look yearly. Plus or minus 10% is still over a month either way,
+// which is plenty for a renewal or a yearly tax payment.
+const yearlyGapTolerance float64 = 0.10
+
 // A gap between transactions that is longGapMultiple times the median gap, and
 // at least longGapMinimumDays long, means the recurrence stopped for a while.
 const longGapMultiple float64 = 3
@@ -145,19 +151,23 @@ func DetectRecurringTransactions(
 	// evaluate the resulting frequency spectrum from the fourier transform for
 	// these specific frequencies. If a group of transactions clearly show a
 	// specific frequency then that will be the end result. Anything based on
-	// months uses the average length of a month instead of a whole number of
+	// months or years uses their average length instead of a whole number of
 	// days, otherwise over a few years of data the frequency drifts away from
 	// where a calendar month actually lands on the spectrum.
 	frequencies := []struct {
 		Frequency int
 		Days      float64
+		// Tolerance is how far the median gap between transactions can be from
+		// Days, as a fraction of Days.
+		Tolerance float64
 	}{
-		{7, 7},            // Weekly
-		{14, 14},          // Every 2 weeks
-		{15, 365.25 / 24}, // Twice a month
-		{30, 365.25 / 12}, // Monthly
-		{60, 365.25 / 6},  // Every 2 months
-		{90, 365.25 / 4},  // Quarterly
+		{7, 7, gapTolerance},              // Weekly
+		{14, 14, gapTolerance},            // Every 2 weeks
+		{15, 365.25 / 24, gapTolerance},   // Twice a month
+		{30, 365.25 / 12, gapTolerance},   // Monthly
+		{60, 365.25 / 6, gapTolerance},    // Every 2 months
+		{90, 365.25 / 4, gapTolerance},    // Quarterly
+		{365, 365.25, yearlyGapTolerance}, // Yearly
 	}
 
 	result := calc.FastFourierTransform(series)
@@ -186,7 +196,7 @@ func DetectRecurringTransactions(
 		periods := spanDays / frequency.Days
 		if periods < minimumPeriods ||
 			float64(numberOfTransactions) < minimumOccurrenceRatio*(periods+1) ||
-			math.Abs(medianGap-frequency.Days) > gapTolerance*frequency.Days {
+			math.Abs(medianGap-frequency.Days) > frequency.Tolerance*frequency.Days {
 			scores[f] = score
 			continue
 		}
