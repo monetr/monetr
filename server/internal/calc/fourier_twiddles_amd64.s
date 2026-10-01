@@ -2,9 +2,7 @@
 // Source: server/internal/calc/gen, regenerate with `go generate ./server/internal/calc/...`.
 //
 // Lookup tables for the 4096 point fast Fourier transform, shared by every
-// assembly implementation in the package. Every value in here only depends on
-// the transform size, so it is all worked out at build time and none of it
-// costs anything while the server is running.
+// assembly implementation in the package.
 
 #include "textflag.h"
 

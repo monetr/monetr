@@ -11,10 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// BenchmarkFastFourierTransform_AVX512 times just the transform itself with the
-// destination buffer already allocated, so the number is the cost of the
-// assembly on its own rather than the cost of the assembly plus a 64KB
-// allocation.
+// BenchmarkFastFourierTransform_AVX512 preallocates the destination so only the
+// transform is measured.
 func BenchmarkFastFourierTransform_AVX512(bench *testing.B) {
 	if !HasAVX512() {
 		bench.Skip("host does not support AVX512")
@@ -30,7 +28,7 @@ func BenchmarkFastFourierTransform_AVX512(bench *testing.B) {
 }
 
 // BenchmarkFastFourierTransformFixed_Go is the same measurement for the pure Go
-// fallback, which is what hosts without AVX512 end up running.
+// fallback.
 func BenchmarkFastFourierTransformFixed_Go(bench *testing.B) {
 	series := randomSeries(1)
 	result := make([]complex128, FourierSize)
@@ -41,8 +39,6 @@ func BenchmarkFastFourierTransformFixed_Go(bench *testing.B) {
 	}
 }
 
-// fourierAssemblyVariant is one of the hand written transforms along with the
-// CPU feature test that says whether this host can run it.
 type fourierAssemblyVariant struct {
 	Name      string
 	Supported func() bool
@@ -57,12 +53,6 @@ var fourierAssemblyVariants = []fourierAssemblyVariant{
 	{"AVX", HasAVX, __fastFourierTransform_AVX},
 }
 
-// TestFastFourierTransformVariants holds every implementation to the same
-// standard rather than trusting that the narrower ones came out right just
-// because the widest one did. The 256 bit versions are not simply the AVX512
-// one with smaller registers: they transpose two lanes instead of four, they
-// use VXORPD where the AVX512 version uses VPXORQ, and the non-FMA one does its
-// complex multiply with VADDSUBPD, an instruction AVX512 does not even have.
 func TestFastFourierTransformVariants(t *testing.T) {
 	for _, variant := range fourierAssemblyVariants {
 		t.Run(variant.Name, func(t *testing.T) {
@@ -85,10 +75,6 @@ func TestFastFourierTransformVariants(t *testing.T) {
 			})
 
 			t.Run("matches the go implementation", func(t *testing.T) {
-				// Worth checking each variant against the Go separately rather than
-				// only chaining through the recursive comparison, because the three
-				// assembly versions do their arithmetic differently enough from each
-				// other that a shared reference is the only fair judge.
 				series := randomSeries(7)
 
 				expected := make([]complex128, FourierSize)
@@ -97,21 +83,14 @@ func TestFastFourierTransformVariants(t *testing.T) {
 				actual := make([]complex128, FourierSize)
 				variant.Transform(actual, series)
 
-				// These will not agree bit for bit. The assembly folds the stages
-				// into radix-4 passes while the Go stays radix-2, so the additions
-				// associate differently, and two of the three variants use a fused
-				// multiply-add that rounds once where Go rounds twice. Neither is an
-				// error, so all that is worth asserting is that they land within a
-				// few units in the last place.
+				// Radix-4 vs radix-2 and FMA rounding mean these won't match bit for
+				// bit, just within a few units in the last place.
 				delta := worstDelta(t, expected, actual)
 				t.Logf("worst relative delta against the go implementation %.3e", delta)
 				assert.Less(t, delta, 1e-14, "assembly and go must agree to within rounding")
 			})
 
 			t.Run("impulse produces a flat spectrum", func(t *testing.T) {
-				// A single impulse at the front has to transform to a flat spectrum
-				// of ones. This is a spectrum shape check, not a bounds check;
-				// TestFastFourierTransformStaysInBounds is what covers the buffers.
 				series := make([]complex128, FourierSize)
 				series[0] = complex(1, 0)
 

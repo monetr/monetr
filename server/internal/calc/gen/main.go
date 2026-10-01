@@ -2,11 +2,6 @@
 // implementations of the fast Fourier transform depend on. All three of them,
 // AVX512 and both 256 bit variants, read the same two tables.
 //
-// Everything the transform needs that only depends on the transform size gets
-// worked out here and baked into a .s file as read only data. At runtime the
-// assembly just walks these tables, so there is not a single sine, cosine or
-// bit reversal being computed while the server is actually running.
-//
 // Two tables come out of this:
 //
 //   - fourierTwiddles<size>, the complex roots of unity for the radix-4 passes.
@@ -18,10 +13,8 @@
 //     first pass belongs at. This is the bit reversal permutation, converted
 //     ahead of time into the exact offsets the store instructions want.
 //
-// The size is baked into the symbol names on purpose. The assembly refers to
-// them by their full name, so regenerating at a different size and forgetting to
-// update the assembly is a link error rather than something that quietly reads
-// off the end of a table.
+// The size is part of the symbol names so that regenerating at a different size
+// without updating the assembly is a link error.
 package main
 
 import (
@@ -75,9 +68,7 @@ func writeHeader(out *bufio.Writer, size int) {
 	_, _ = fmt.Fprintf(out, "// Source: server/internal/calc/gen, regenerate with `go generate ./server/internal/calc/...`.\n")
 	_, _ = fmt.Fprintf(out, "//\n")
 	_, _ = fmt.Fprintf(out, "// Lookup tables for the %d point fast Fourier transform, shared by every\n", size)
-	_, _ = fmt.Fprintf(out, "// assembly implementation in the package. Every value in here only depends on\n")
-	_, _ = fmt.Fprintf(out, "// the transform size, so it is all worked out at build time and none of it\n")
-	_, _ = fmt.Fprintf(out, "// costs anything while the server is running.\n")
+	_, _ = fmt.Fprintf(out, "// assembly implementation in the package.\n")
 	_, _ = fmt.Fprintf(out, "\n")
 	_, _ = fmt.Fprintf(out, "#include \"textflag.h\"\n")
 }
@@ -89,10 +80,7 @@ func writeHeader(out *bufio.Writer, size int) {
 // need a table at all.
 //
 // The assembly runs these as radix-4 passes, each one covering two radix-2
-// stages at once. That is worth doing because on Zen 4 a 512 bit store only
-// retires every other cycle, so the transform is limited by how many times it
-// walks the buffer rather than by arithmetic. Folding two stages into one pass
-// halves both the loads and the stores.
+// stages at once.
 //
 // A pass with parameter h needs three twiddle factors per butterfly:
 //
@@ -100,10 +88,9 @@ func writeHeader(out *bufio.Writer, size int) {
 //	w2 = W(4h)^j      for the lower pair of the second stage
 //	w3 = W(4h)^(j+h)  for the upper pair of the second stage
 //
-// Only the first two are stored. The third is always exactly -i times the
-// second, and multiplying by -i is free in registers: it is a swap of the real
-// and imaginary halves plus a sign flip, so the assembly derives it rather than
-// reading it. That is what keeps this table down to two entries per butterfly.
+// Only the first two are stored. The third is always -i times the second,
+// which the assembly derives with a swap of the real and imaginary halves plus
+// a sign flip.
 func writeTwiddles(out *bufio.Writer, size int) int {
 	symbol := fmt.Sprintf("·fourierTwiddles%d", size)
 

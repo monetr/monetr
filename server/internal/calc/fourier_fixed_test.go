@@ -9,18 +9,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Everything in this file is deliberately free of build constraints. The
-// architecture specific tests live in fourier_amd64_test.go and only ever run
-// on a host with the right instructions, which means that without this file the
-// pure Go implementation would go completely untested on exactly the builds
-// where it is the only implementation there is: every non amd64 architecture,
-// and any build with the nosimd tag.
+// No build constraints here so the Go fallback is tested on non amd64 builds
+// and with the nosimd tag.
 
 // worstDelta reports the largest absolute difference between two transforms
-// relative to the largest magnitude in the expected result. Comparing relative
-// to the peak is the honest way to do this, an absolute tolerance would be
-// meaningless when the coefficients themselves span several orders of
-// magnitude.
+// relative to the largest magnitude in the expected result, since the
+// coefficients span several orders of magnitude.
 func worstDelta(t testing.TB, expected, actual []complex128) float64 {
 	t.Helper()
 	require.Equal(t, len(expected), len(actual), "both transforms must be the same length")
@@ -34,9 +28,6 @@ func worstDelta(t testing.TB, expected, actual []complex128) float64 {
 			peak = magnitude
 		}
 	}
-	// An all zero expectation would make the ratio meaningless, and no test here
-	// is supposed to produce one, so say so rather than quietly returning a
-	// delta of zero that passes every threshold.
 	require.NotZero(t, peak, "the expected transform must not be all zeroes")
 	return worst / peak
 }
@@ -51,8 +42,6 @@ func randomSeries(seed int64) []complex128 {
 }
 
 func TestFastFourierTransformFixedGo(t *testing.T) {
-	// The pure Go path is what runs anywhere the assembly cannot, so it needs
-	// checking on its own rather than only through the assembly comparison.
 	series := randomSeries(99)
 	expected := FastFourierTransformSlow(series)
 
@@ -64,11 +53,8 @@ func TestFastFourierTransformFixedGo(t *testing.T) {
 	assert.Less(t, delta, 1e-13, "go implementation must agree with the recursive implementation")
 }
 
-// TestFastFourierTransformExported goes through the exported entry point rather
-// than reaching past it to the unexported implementations. Every other test in
-// the package calls the implementations directly, which means nothing else
-// would notice if init() picked the wrong one or the length guard stopped
-// working.
+// TestFastFourierTransformExported covers the dispatch in init() and the length
+// guard, which the other tests skip by calling the implementations directly.
 func TestFastFourierTransformExported(t *testing.T) {
 	t.Run("transforms through whichever implementation init picked", func(t *testing.T) {
 		series := randomSeries(5)
@@ -93,9 +79,8 @@ func TestFastFourierTransformExported(t *testing.T) {
 	})
 
 	t.Run("panics on the wrong length", func(t *testing.T) {
-		// The assembly derives its addressing from the length it is handed while
-		// indexing tables that are fixed at FourierSize, so this guard is the
-		// thing standing between a bad caller and out of bounds writes.
+		// The assembly trusts the slice length, so a bad length here would mean
+		// out of bounds writes.
 		for _, length := range []int{0, 1, FourierSize - 1, FourierSize + 1, FourierSize * 2} {
 			assert.Panicsf(t, func() {
 				FastFourierTransform(make([]complex128, length))
@@ -107,11 +92,8 @@ func TestFastFourierTransformExported(t *testing.T) {
 	})
 }
 
-// TestFastFourierTransformStaysInBounds is the test that actually earns the
-// name. Checking the values of a transform proves nothing about whether it
-// wrote outside its output buffer, because the assertions never look there. So
-// put a known pattern on both sides of both buffers and check afterwards that
-// none of it moved.
+// TestFastFourierTransformStaysInBounds pads both buffers with a sentinel value
+// and makes sure the transform never writes outside of them.
 func TestFastFourierTransformStaysInBounds(t *testing.T) {
 	const padding = 512
 
@@ -153,9 +135,7 @@ func TestFastFourierTransformStaysInBounds(t *testing.T) {
 	assertPaddingIntact(t, sourceWhole, "the source")
 	assert.Equal(t, sourceCopy, source, "the source must not be written at all")
 
-	// And every slot of the destination has to actually be written, otherwise
-	// the padding check above would pass for an implementation that simply did
-	// nothing.
+	// Make sure every bin was actually written too.
 	for i := range destination {
 		require.NotEqualf(t, sentinel, destination[i], "bin %d was never written", i)
 	}

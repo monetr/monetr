@@ -549,12 +549,8 @@ func BenchmarkFastFourierTransform(b *testing.B) {
 
 }
 
-// BenchmarkFastFourierTransformFixed is deliberately the same benchmark as
-// BenchmarkFastFourierTransform above, over the same rules and the same 4096
-// point series, so the two can be compared directly. The only difference is
-// that this one goes through the fixed size implementation, which on a host
-// with AVX512 is the hand written assembly reading twiddle factors that were
-// computed at build time.
+// BenchmarkFastFourierTransformFixed is the same as BenchmarkFastFourierTransform
+// but uses the fixed size implementation, so the two can be compared.
 func BenchmarkFastFourierTransformFixed(b *testing.B) {
 	rules := []*models.RuleSet{
 		// Every 3 months

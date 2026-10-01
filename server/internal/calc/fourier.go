@@ -11,19 +11,11 @@ import (
 
 const FourierSize = 4096
 
-// The assembly implementations look up their twiddle factors and their bit
-// reversal offsets in tables that are generated for one specific size and named
-// after it, and they take the number of points to transform from the length of
-// the slice they are handed. Those two facts have to agree. If FourierSize ever
-// changes without the go:generate line above changing to match and the assembly
-// being pointed at the new symbols, the transform would walk off the end of the
-// tables and start writing at whatever offsets it found there.
-//
-// This makes that a compile error instead. Changing the size means changing
-// this line, the generate directive, and the symbol names in fourier_amd64.s
-// together, which is exactly the set of things that have to move at once.
-// A negative constant does not convert to uint, so these two together pin
-// FourierSize to exactly 4096, one catching each direction.
+// The assembly reads tables generated for exactly 4096 points but takes the
+// number of points from the length of the slice, so FourierSize has to match
+// the tables. A negative constant does not convert to uint, so these pin
+// FourierSize to 4096 at compile time. Changing it means changing the generate
+// directive and the symbol names in fourier_amd64.s too.
 const (
 	_ = uint(FourierSize - 4096)
 	_ = uint(4096 - FourierSize)
@@ -89,23 +81,16 @@ func complexExponential(theta float64) complex128 {
 	return complex(math.Cos(theta), math.Sin(theta))
 }
 
-// fastFourierTransform is whichever implementation of the fixed size
-// transform the host CPU can actually run. Platforms that have a hand written
-// one swap this out from their own init function, the same way the euclidean
-// distance and vector normalization implementations do.
+// fastFourierTransform is swapped out for an assembly implementation by init()
+// on platforms that have one.
 var fastFourierTransform func(dst, src []complex128) = fastFourierTransformGo
 
 // FastFourierTransform is a non-recursive forward fast Fourier transform for
-// exactly FourierSize points. It does the same thing as
-// FastFourierTransformSlow but it can only ever do it at the one size, which is
-// what lets every root of unity and every bit reversal offset be worked out
-// ahead of time instead of during the transform.
+// exactly FourierSize points. Fixing the size lets the twiddle factors and bit
+// reversal offsets be computed ahead of time.
 //
-// On amd64 this runs in hand written SIMD assembly against tables that were
-// computed at build time and baked into the binary as read only data. There are
-// three of those, picked by CPU feature in init(): AVX512, AVX with fused
-// multiply-add, and plain AVX. Anything else, including every other
-// architecture, falls back to the equivalent Go below.
+// On amd64 this uses AVX512, AVX with FMA, or plain AVX assembly depending on
+// the CPU. Everything else falls back to fastFourierTransformGo.
 func FastFourierTransform(a []complex128) []complex128 {
 	if len(a) != FourierSize {
 		panic("length of the input must be exactly FourierSize for the fixed size transform")
@@ -115,9 +100,8 @@ func FastFourierTransform(a []complex128) []complex128 {
 	return result
 }
 
-// fourierTables holds everything about a fixed size transform that only depends
-// on the size, which means all of it can be worked out once and then reused
-// forever.
+// fourierTables holds everything about the fixed size transform that only
+// depends on the size.
 type fourierTables struct {
 	// twiddles are the complex roots of unity for every radix-2 stage, packed
 	// end to end smallest stage first. A stage whose half width is h reads h
@@ -129,17 +113,10 @@ type fourierTables struct {
 	scatter []int
 }
 
-// fixedFourierTables are only ever built if something actually asks for them.
-// A host running one of the assembly implementations gets its tables out of
-// read only data in a generated .s file instead, so nothing is computed at
-// runtime there and this never gets called.
-//
-// Those generated tables are not laid out the same way as these. The assembly
-// runs the stages in radix-4 pairs, so its table is grouped per pass as h
-// copies of W(2h)^j followed by h copies of W(4h)^j, and its permutation is
-// stored as byte offsets. These are grouped per radix-2 stage and the
-// permutation is stored as element indices. The two describe the same
-// transform, but do not expect one to be checkable against the other.
+// fixedFourierTables are only built when the Go fallback runs. The assembly uses
+// the generated tables in fourier_twiddles_amd64.s instead, which are laid out
+// per radix-4 pass and store byte offsets, while these are laid out per radix-2
+// stage and store element indices.
 var fixedFourierTables = sync.OnceValue(func() fourierTables {
 	tables := fourierTables{
 		twiddles: make([]complex128, 0, FourierSize),
@@ -164,16 +141,10 @@ var fixedFourierTables = sync.OnceValue(func() fourierTables {
 	return tables
 })
 
-// fastFourierTransformGo is the plain Go version of the fixed size transform.
-// It is the fallback for hosts without the right SIMD instructions, and it is
-// the readable statement of what the assembly is doing.
-//
-// It is kept in the radix-2 form on purpose. The assembly folds every pair of
-// stages into a radix-4 pass, which is worth a good deal of speed but makes the
-// arithmetic much harder to follow, and none of that helps a reader trying to
-// understand the algorithm or a host that is running this path because it has
-// no AVX512. The two agree to within a few units in the last place, which is
-// all a different association order costs, and there is a test that says so.
+// fastFourierTransformGo is the plain Go version of the fixed size transform,
+// used on hosts without the right SIMD instructions. It stays radix-2 where the
+// assembly folds pairs of stages into radix-4 passes, so the results differ by
+// a few units in the last place.
 func fastFourierTransformGo(dst, src []complex128) {
 	tables := fixedFourierTables()
 
