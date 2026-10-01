@@ -96,20 +96,18 @@ func RemoveLink(ctx queue.Context, args RemoveLinkArguments) error {
 		lunchFlowBankAccountIds := r.getLunchFlowBankAccountsToRemove(ctx)
 		lunchFlowLinkIds := r.getLunchFlowLinksToRemove(ctx)
 
-		r.removeTransactionClusters(ctx, bankAccountIds)
+		// Removing the link cascades to its bank accounts and everything under
+		// them; transactions, spending, funding schedules, transaction clusters
+		// and transaction uploads. This has to happen first since those reference
+		// the Plaid and Lunch Flow data being removed below.
 		// TODO Also remove any non-reconciled files. Really this should also be
 		// calling to files in S3 or the underlying to remove them.
-		r.removeTransactionUploads(ctx, bankAccountIds)
-		r.removeTransactions(ctx, bankAccountIds)
+		r.removeLink(ctx)
 		r.removePlaidTransactions(ctx, plaidTransactionIds)
 		r.removeLunchFlowTransactions(ctx, lunchFlowTransactionIds)
-		r.removeSpending(ctx, bankAccountIds)
-		r.removeFundingSchedules(ctx, bankAccountIds)
-		r.removeBankAccounts(ctx, bankAccountIds)
 		r.removePlaidSyncs(ctx, plaidSyncIds)
 		r.removePlaidBankAccounts(ctx, plaidBankAccountIds)
 		r.removeLunchFlowBankAccounts(ctx, lunchFlowBankAccountIds)
-		r.removeLink(ctx)
 		r.removePlaidLinks(ctx, plaidLinkIds)
 		r.removeLunchFlowLinks(ctx, lunchFlowLinkIds)
 		r.removeSecrets(ctx, secretIds)
@@ -138,66 +136,6 @@ func RemoveLink(ctx queue.Context, args RemoveLinkArguments) error {
 
 		return nil
 	})
-}
-
-func (r *removeLinkJob) removeTransactionClusters(
-	ctx context.Context,
-	bankAccountIds []models.ID[models.BankAccount],
-) {
-	if len(bankAccountIds) == 0 {
-		return
-	}
-	result, err := r.db.NewDelete().Model(&models.TransactionCluster{}).
-		Where(`"account_id" = ?`, r.args.AccountId).
-		Where(`"bank_account_id" IN (?)`, bun.In(bankAccountIds)).
-		Exec(ctx)
-	if err != nil {
-		r.log.ErrorContext(ctx, "failed to remove transaction clusters for link", "err", err)
-		panic(errors.Wrap(err, "failed to remove transaction clusters for link"))
-	}
-
-	affected, _ := result.RowsAffected()
-	r.log.InfoContext(ctx, "removed transaction cluster(s)", "removed", affected)
-}
-
-func (r *removeLinkJob) removeTransactionUploads(
-	ctx context.Context,
-	bankAccountIds []models.ID[models.BankAccount],
-) {
-	if len(bankAccountIds) == 0 {
-		return
-	}
-	result, err := r.db.NewDelete().Model(&models.TransactionUpload{}).
-		Where(`"account_id" = ?`, r.args.AccountId).
-		Where(`"bank_account_id" IN (?)`, bun.In(bankAccountIds)).
-		Exec(ctx)
-	if err != nil {
-		r.log.ErrorContext(ctx, "failed to remove transaction uploads for link", "err", err)
-		panic(errors.Wrap(err, "failed to remove transaction uploads for link"))
-	}
-
-	affected, _ := result.RowsAffected()
-	r.log.InfoContext(ctx, "removed transaction upload(s)", "removed", affected)
-}
-
-func (r *removeLinkJob) removeTransactions(
-	ctx context.Context,
-	bankAccountIds []models.ID[models.BankAccount],
-) {
-	if len(bankAccountIds) == 0 {
-		return
-	}
-	result, err := r.db.NewDelete().Model(&models.Transaction{}).
-		Where(`"account_id" = ?`, r.args.AccountId).
-		Where(`"bank_account_id" IN (?)`, bun.In(bankAccountIds)).
-		Exec(ctx)
-	if err != nil {
-		r.log.ErrorContext(ctx, "failed to remove transactions for link", "err", err)
-		panic(errors.Wrap(err, "failed to remove transactions for link"))
-	}
-
-	affected, _ := result.RowsAffected()
-	r.log.InfoContext(ctx, "removed transaction(s)", "removed", affected)
 }
 
 func (r *removeLinkJob) getLunchFlowTransactionsToRemove(
@@ -291,48 +229,6 @@ func (r *removeLinkJob) removePlaidTransactions(
 
 	affected, _ := result.RowsAffected()
 	r.log.InfoContext(ctx, "removed plaid transaction(s)", "removed", affected)
-}
-
-func (r *removeLinkJob) removeSpending(
-	ctx context.Context,
-	bankAccountIds []models.ID[models.BankAccount],
-) {
-	if len(bankAccountIds) == 0 {
-		return
-	}
-
-	result, err := r.db.NewDelete().Model(&models.Spending{}).
-		Where(`"account_id" = ?`, r.args.AccountId).
-		Where(`"bank_account_id" IN (?)`, bun.In(bankAccountIds)).
-		Exec(ctx)
-	if err != nil {
-		r.log.ErrorContext(ctx, "failed to remove spending for link", "err", err)
-		panic(errors.Wrap(err, "failed to remove spending for link"))
-	}
-
-	affected, _ := result.RowsAffected()
-	r.log.InfoContext(ctx, "removed spending(s)", "removed", affected)
-}
-
-func (r *removeLinkJob) removeFundingSchedules(
-	ctx context.Context,
-	bankAccountIds []models.ID[models.BankAccount],
-) {
-	if len(bankAccountIds) == 0 {
-		return
-	}
-
-	result, err := r.db.NewDelete().Model(&models.FundingSchedule{}).
-		Where(`"account_id" = ?`, r.args.AccountId).
-		Where(`"bank_account_id" IN (?)`, bun.In(bankAccountIds)).
-		Exec(ctx)
-	if err != nil {
-		r.log.ErrorContext(ctx, "failed to remove funding schedules for link", "err", err)
-		panic(errors.Wrap(err, "failed to remove funding schedules for link"))
-	}
-
-	affected, _ := result.RowsAffected()
-	r.log.InfoContext(ctx, "removed funding schedule(s)", "removed", affected)
 }
 
 func (r *removeLinkJob) getPlaidSyncsToRemove(
@@ -592,27 +488,6 @@ func (r *removeLinkJob) removeSecrets(
 
 	affected, _ := result.RowsAffected()
 	r.log.InfoContext(ctx, "removed secret(s)", "removed", affected)
-}
-
-func (r *removeLinkJob) removeBankAccounts(
-	ctx context.Context,
-	bankAccountIds []models.ID[models.BankAccount],
-) {
-	if len(bankAccountIds) == 0 {
-		return
-	}
-
-	result, err := r.db.NewDelete().Model(&models.BankAccount{}).
-		Where(`"account_id" = ?`, r.args.AccountId).
-		Where(`"bank_account_id" IN (?)`, bun.In(bankAccountIds)).
-		Exec(ctx)
-	if err != nil {
-		r.log.ErrorContext(ctx, "failed to remove bank accounts for link", "err", err)
-		panic(errors.Wrap(err, "failed to remove bank accounts for link"))
-	}
-
-	affected, _ := result.RowsAffected()
-	r.log.InfoContext(ctx, "removed bank account(s)", "removed", affected)
 }
 
 func (r *removeLinkJob) removeLink(

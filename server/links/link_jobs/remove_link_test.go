@@ -587,6 +587,63 @@ func TestRemoveLink(t *testing.T) {
 		transactions1 := fixtures.GivenIHaveNTransactions(t, clock, bankAccount1, 5)
 		transactions2 := fixtures.GivenIHaveNTransactions(t, clock, bankAccount2, 5)
 
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+		rule := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1", clock.Now())
+		fundingSchedule1 := fixtures.GivenIHaveAFundingSchedule(
+			t,
+			clock,
+			&bankAccount1,
+			"FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15",
+			false,
+		)
+		fundingSchedule2 := fixtures.GivenIHaveAFundingSchedule(
+			t,
+			clock,
+			&bankAccount2,
+			"FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15",
+			false,
+		)
+		spending1 := testutils.MustInsert(t, models.Spending{
+			AccountId:              bankAccount1.AccountId,
+			BankAccountId:          bankAccount1.BankAccountId,
+			FundingScheduleId:      fundingSchedule1.FundingScheduleId,
+			SpendingType:           models.SpendingTypeExpense,
+			Name:                   "Test Spending",
+			TargetAmount:           10000,
+			CurrentAmount:          5000,
+			NextRecurrence:         rule.After(clock.Now(), false),
+			NextContributionAmount: 5000,
+			RuleSet:                rule,
+			CreatedAt:              clock.Now(),
+		})
+		spending2 := testutils.MustInsert(t, models.Spending{
+			AccountId:              bankAccount2.AccountId,
+			BankAccountId:          bankAccount2.BankAccountId,
+			FundingScheduleId:      fundingSchedule2.FundingScheduleId,
+			SpendingType:           models.SpendingTypeExpense,
+			Name:                   "Test Spending",
+			TargetAmount:           10000,
+			CurrentAmount:          5000,
+			NextRecurrence:         rule.After(clock.Now(), false),
+			NextContributionAmount: 5000,
+			RuleSet:                rule,
+			CreatedAt:              clock.Now(),
+		})
+		cluster1 := testutils.MustInsert(t, models.TransactionCluster{
+			AccountId:     bankAccount1.AccountId,
+			BankAccountId: bankAccount1.BankAccountId,
+			Name:          "Test Cluster",
+			OriginalName:  "test cluster",
+			Members:       []models.ID[models.Transaction]{},
+		})
+		cluster2 := testutils.MustInsert(t, models.TransactionCluster{
+			AccountId:     bankAccount2.AccountId,
+			BankAccountId: bankAccount2.BankAccountId,
+			Name:          "Test Cluster",
+			OriginalName:  "test cluster",
+			Members:       []models.ID[models.Transaction]{},
+		})
+
 		context := mockgen.NewMockContext(ctrl)
 		context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
 		context.EXPECT().Clock().Return(clock).AnyTimes()
@@ -610,6 +667,9 @@ func TestRemoveLink(t *testing.T) {
 				testutils.MustDBNotExist(t, *transactions1[i].PlaidTransaction)
 				testutils.MustDBNotExist(t, transactions1[i])
 			}
+			testutils.MustDBNotExist(t, spending1)
+			testutils.MustDBNotExist(t, *fundingSchedule1)
+			testutils.MustDBNotExist(t, cluster1)
 			testutils.MustDBNotExist(t, *bankAccount1.PlaidBankAccount)
 			testutils.MustDBNotExist(t, bankAccount1)
 			testutils.MustDBNotExist(t, *link1.PlaidLink)
@@ -621,6 +681,9 @@ func TestRemoveLink(t *testing.T) {
 				testutils.MustDBExist(t, *transactions2[i].PlaidTransaction)
 				testutils.MustDBExist(t, transactions2[i])
 			}
+			testutils.MustDBExist(t, spending2)
+			testutils.MustDBExist(t, *fundingSchedule2)
+			testutils.MustDBExist(t, cluster2)
 			testutils.MustDBExist(t, *bankAccount2.PlaidBankAccount)
 			testutils.MustDBExist(t, bankAccount2)
 			testutils.MustDBExist(t, *link2.PlaidLink)
@@ -696,6 +759,359 @@ func TestRemoveLink(t *testing.T) {
 			testutils.MustDBExist(t, lfBankAccount)
 			testutils.MustDBExist(t, *lfLink.LunchFlowLink)
 			testutils.MustDBExist(t, lfLink)
+		}
+	})
+
+	t.Run("with transactions referencing spending", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+		publisher := pubsub.NewPostgresPubSub(log, db)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveAPlaidBankAccount(
+			t,
+			clock,
+			&link,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
+		transactions := fixtures.GivenIHaveNTransactions(t, clock, bankAccount, 3)
+
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(
+			t,
+			clock,
+			&bankAccount,
+			"FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15",
+			false,
+		)
+
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+		rule := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1", clock.Now())
+		spending := testutils.MustInsert(t, models.Spending{
+			AccountId:              bankAccount.AccountId,
+			BankAccountId:          bankAccount.BankAccountId,
+			FundingScheduleId:      fundingSchedule.FundingScheduleId,
+			SpendingType:           models.SpendingTypeExpense,
+			Name:                   "Test Spending",
+			TargetAmount:           10000,
+			CurrentAmount:          5000,
+			NextRecurrence:         rule.After(clock.Now(), false),
+			NextContributionAmount: 5000,
+			RuleSet:                rule,
+			CreatedAt:              clock.Now(),
+		})
+
+		// Spent from the spending object, this is a NO ACTION foreign key that has
+		// to be satisfied by the end of the cascade.
+		transactions[0].SpendingId = &spending.SpendingId
+		transactions[0].SpendingAmount = &transactions[0].Amount
+		testutils.MustDBUpdate(t, &transactions[0])
+		// Created by the spending object and by the funding schedule, these are
+		// SET NULL foreign keys.
+		transactions[1].CreatedBySpendingId = &spending.SpendingId
+		testutils.MustDBUpdate(t, &transactions[1])
+		transactions[2].CreatedByFundingScheduleId = &fundingSchedule.FundingScheduleId
+		testutils.MustDBUpdate(t, &transactions[2])
+
+		context := mockgen.NewMockContext(ctrl)
+		context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+		context.EXPECT().Clock().Return(clock).AnyTimes()
+		context.EXPECT().DB().Return(db).AnyTimes()
+		context.EXPECT().Log().Return(log).AnyTimes()
+		context.EXPECT().Publisher().Return(publisher).AnyTimes()
+
+		assert.NotPanics(t, func() {
+			err := link_jobs.RemoveLink(
+				mockqueue.NewMockContext(context),
+				link_jobs.RemoveLinkArguments{
+					AccountId: user.AccountId,
+					LinkId:    link.LinkId,
+				},
+			)
+			assert.NoError(t, err, "remove link job should succeed")
+		})
+
+		{ // Make sure all data has been removed
+			for i := range transactions {
+				testutils.MustDBNotExist(t, *transactions[i].PlaidTransaction)
+				testutils.MustDBNotExist(t, transactions[i])
+			}
+			testutils.MustDBNotExist(t, spending)
+			testutils.MustDBNotExist(t, *fundingSchedule)
+			testutils.MustDBNotExist(t, *bankAccount.PlaidBankAccount)
+			testutils.MustDBNotExist(t, bankAccount)
+			testutils.MustDBNotExist(t, *link.PlaidLink)
+			testutils.MustDBNotExist(t, link)
+		}
+	})
+
+	t.Run("with pending plaid transactions", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+		publisher := pubsub.NewPostgresPubSub(log, db)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveAPlaidBankAccount(
+			t,
+			clock,
+			&link,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
+		transaction := fixtures.GivenIHaveATransaction(t, clock, bankAccount)
+
+		pendingPlaidTransaction := testutils.MustInsert(t, models.PlaidTransaction{
+			AccountId:          bankAccount.AccountId,
+			PlaidBankAccountId: bankAccount.PlaidBankAccount.PlaidBankAccountId,
+			PlaidId:            "pending-plaid-txn-1",
+			Date:               transaction.Date,
+			Name:               transaction.Name,
+			Amount:             transaction.Amount,
+			Currency:           "USD",
+			IsPending:          true,
+			CreatedAt:          clock.Now(),
+		})
+		transaction.PendingPlaidTransactionId = &pendingPlaidTransaction.PlaidTransactionId
+		testutils.MustDBUpdate(t, &transaction)
+
+		context := mockgen.NewMockContext(ctrl)
+		context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+		context.EXPECT().Clock().Return(clock).AnyTimes()
+		context.EXPECT().DB().Return(db).AnyTimes()
+		context.EXPECT().Log().Return(log).AnyTimes()
+		context.EXPECT().Publisher().Return(publisher).AnyTimes()
+
+		assert.NotPanics(t, func() {
+			err := link_jobs.RemoveLink(
+				mockqueue.NewMockContext(context),
+				link_jobs.RemoveLinkArguments{
+					AccountId: user.AccountId,
+					LinkId:    link.LinkId,
+				},
+			)
+			assert.NoError(t, err, "remove link job should succeed")
+		})
+
+		{ // Make sure all data has been removed
+			testutils.MustDBNotExist(t, pendingPlaidTransaction)
+			testutils.MustDBNotExist(t, *transaction.PlaidTransaction)
+			testutils.MustDBNotExist(t, transaction)
+			testutils.MustDBNotExist(t, *bankAccount.PlaidBankAccount)
+			testutils.MustDBNotExist(t, bankAccount)
+			testutils.MustDBNotExist(t, *link.PlaidLink)
+			testutils.MustDBNotExist(t, link)
+		}
+	})
+
+	t.Run("lunch flow transactions referenced by transactions", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+		publisher := pubsub.NewPostgresPubSub(log, db)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveALunchFlowLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveALunchFlowBankAccount(t, clock, &link)
+
+		lfTxn := testutils.MustInsert(t, models.LunchFlowTransaction{
+			AccountId:              bankAccount.AccountId,
+			LunchFlowBankAccountId: bankAccount.LunchFlowBankAccount.LunchFlowBankAccountId,
+			LunchFlowId:            "lf-txn-referenced-1",
+			Merchant:               "Coffee Shop",
+			Description:            "Morning coffee",
+			Date:                   clock.Now(),
+			Currency:               "USD",
+			Amount:                 450,
+		})
+		transaction := testutils.MustInsert(t, models.Transaction{
+			AccountId:              bankAccount.AccountId,
+			BankAccountId:          bankAccount.BankAccountId,
+			LunchFlowTransactionId: &lfTxn.LunchFlowTransactionId,
+			Amount:                 450,
+			Date:                   clock.Now(),
+			Name:                   "Coffee Shop",
+			OriginalName:           "Coffee Shop",
+			Source:                 models.TransactionSourceLunchFlow,
+			CreatedAt:              clock.Now(),
+		})
+
+		context := mockgen.NewMockContext(ctrl)
+		context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+		context.EXPECT().Clock().Return(clock).AnyTimes()
+		context.EXPECT().DB().Return(db).AnyTimes()
+		context.EXPECT().Log().Return(log).AnyTimes()
+		context.EXPECT().Publisher().Return(publisher).AnyTimes()
+
+		assert.NotPanics(t, func() {
+			err := link_jobs.RemoveLink(
+				mockqueue.NewMockContext(context),
+				link_jobs.RemoveLinkArguments{
+					AccountId: user.AccountId,
+					LinkId:    link.LinkId,
+				},
+			)
+			assert.NoError(t, err, "remove link job should succeed")
+		})
+
+		{ // Make sure all data has been removed
+			testutils.MustDBNotExist(t, transaction)
+			testutils.MustDBNotExist(t, lfTxn)
+			testutils.MustDBNotExist(t, *bankAccount.LunchFlowBankAccount)
+			testutils.MustDBNotExist(t, bankAccount)
+			testutils.MustDBNotExist(t, *link.LunchFlowLink)
+			testutils.MustDBNotExist(t, link)
+		}
+	})
+
+	t.Run("lunch flow bank account without a bank account", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+		publisher := pubsub.NewPostgresPubSub(log, db)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveALunchFlowLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveALunchFlowBankAccount(t, clock, &link)
+
+		// Inactive Lunch Flow bank accounts are not associated with a monetr bank
+		// account, but they still belong to the link and need to be removed.
+		inactiveLFBankAccount := testutils.MustInsert(t, models.LunchFlowBankAccount{
+			AccountId:       link.AccountId,
+			LunchFlowLinkId: *link.LunchFlowLinkId,
+			LunchFlowId:     "lf-inactive-1",
+			LunchFlowStatus: models.LunchFlowBankAccountExternalStatusActive,
+			Name:            "Savings - 5678",
+			InstitutionName: "Lehman Brothers",
+			Provider:        "Bogus",
+			Currency:        "USD",
+			Status:          models.LunchFlowBankAccountStatusInactive,
+			CreatedBy:       link.CreatedBy,
+			CreatedAt:       clock.Now(),
+			UpdatedAt:       clock.Now(),
+		})
+		inactiveLFTxn := testutils.MustInsert(t, models.LunchFlowTransaction{
+			AccountId:              link.AccountId,
+			LunchFlowBankAccountId: inactiveLFBankAccount.LunchFlowBankAccountId,
+			LunchFlowId:            "lf-inactive-txn-1",
+			Merchant:               "Grocery Store",
+			Description:            "Weekly groceries",
+			Date:                   clock.Now(),
+			Currency:               "USD",
+			Amount:                 3500,
+		})
+
+		context := mockgen.NewMockContext(ctrl)
+		context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+		context.EXPECT().Clock().Return(clock).AnyTimes()
+		context.EXPECT().DB().Return(db).AnyTimes()
+		context.EXPECT().Log().Return(log).AnyTimes()
+		context.EXPECT().Publisher().Return(publisher).AnyTimes()
+
+		assert.NotPanics(t, func() {
+			err := link_jobs.RemoveLink(
+				mockqueue.NewMockContext(context),
+				link_jobs.RemoveLinkArguments{
+					AccountId: user.AccountId,
+					LinkId:    link.LinkId,
+				},
+			)
+			assert.NoError(t, err, "remove link job should succeed")
+		})
+
+		{ // Make sure all data has been removed
+			testutils.MustDBNotExist(t, inactiveLFTxn)
+			testutils.MustDBNotExist(t, inactiveLFBankAccount)
+			testutils.MustDBNotExist(t, *bankAccount.LunchFlowBankAccount)
+			testutils.MustDBNotExist(t, bankAccount)
+			testutils.MustDBNotExist(t, *link.LunchFlowLink)
+			testutils.MustDBNotExist(t, link)
+			testutils.MustDBNotExist(t, models.Secret{
+				SecretId:  link.LunchFlowLink.SecretId,
+				AccountId: link.AccountId,
+			})
+		}
+	})
+
+	t.Run("with transaction imports", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+		publisher := pubsub.NewPostgresPubSub(log, db)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(
+			t,
+			clock,
+			&link,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
+
+		file := testutils.MustInsert(t, models.File{
+			AccountId:   bankAccount.AccountId,
+			Kind:        "transactions/uploads",
+			Name:        "test-import.csv",
+			ContentType: models.TextCSVContentType,
+			Size:        1024,
+			CreatedBy:   link.CreatedBy,
+		})
+		mapping := testutils.MustInsert(t, models.TransactionImportMapping{
+			AccountId: bankAccount.AccountId,
+			Signature: "test-signature",
+			CreatedBy: link.CreatedBy,
+		})
+		transactionImport := testutils.MustInsert(t, models.TransactionImport{
+			AccountId:                  bankAccount.AccountId,
+			BankAccountId:              bankAccount.BankAccountId,
+			FileId:                     file.FileId,
+			TransactionImportMappingId: &mapping.TransactionImportMappingId,
+			Headers:                    []string{"Date", "Amount", "Description"},
+			Delimeter:                  ",",
+			Status:                     models.TransactionImportStatusComplete,
+			CreatedBy:                  link.CreatedBy,
+		})
+
+		context := mockgen.NewMockContext(ctrl)
+		context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+		context.EXPECT().Clock().Return(clock).AnyTimes()
+		context.EXPECT().DB().Return(db).AnyTimes()
+		context.EXPECT().Log().Return(log).AnyTimes()
+		context.EXPECT().Publisher().Return(publisher).AnyTimes()
+
+		assert.NotPanics(t, func() {
+			err := link_jobs.RemoveLink(
+				mockqueue.NewMockContext(context),
+				link_jobs.RemoveLinkArguments{
+					AccountId: user.AccountId,
+					LinkId:    link.LinkId,
+				},
+			)
+			assert.NoError(t, err, "remove link job should succeed")
+		})
+
+		{ // Make sure all data has been removed
+			testutils.MustDBNotExist(t, transactionImport)
+			testutils.MustDBNotExist(t, bankAccount)
+			testutils.MustDBNotExist(t, link)
+		}
+
+		{ // Mappings belong to the account, not the link
+			testutils.MustDBExist(t, mapping)
 		}
 	})
 }
