@@ -313,7 +313,7 @@ func TestUp_FreshFullEmbed(t *testing.T) {
 	oldV, newV, err := m.Up(t.Context())
 	require.NoError(t, err)
 	assert.Equal(t, int64(0), oldV)
-	assert.Equal(t, int64(2026092900), newV)
+	assert.Equal(t, int64(2026093000), newV)
 
 	versions := readSchemaVersions(t, db)
 	ups, err := discoverMigrations(pgMigrations)
@@ -330,5 +330,5 @@ func TestUp_FreshFullEmbed(t *testing.T) {
 	current, err := m.CurrentVersion(t.Context())
 	require.NoError(t, err)
 	assert.Equal(t, latest, current)
-	assert.Equal(t, int64(2026092900), latest)
+	assert.Equal(t, int64(2026093000), latest)
 }
