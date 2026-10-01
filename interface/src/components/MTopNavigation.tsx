@@ -75,5 +75,10 @@ function ActionArea(props: ActionAreaProps): React.ReactNode {
     return null;
   }
 
-  return <div className={styles.actionArea}>{props.children}</div>;
+  return (
+    <div className={styles.actionArea}>
+      <div aria-hidden='true' className={styles.actionAreaBackdrop} />
+      {props.children}
+    </div>
+  );
 }
