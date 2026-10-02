@@ -2,8 +2,10 @@ package similar_jobs
 
 import (
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
+	"github.com/monetr/monetr/server/recurring/recurring_jobs"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/similar"
 	"github.com/pkg/errors"
@@ -122,13 +124,31 @@ func CalculateTransactionClusters(ctx queue.Context, args CalculateTransactionCl
 			"deleteMembers", len(diff.DeleteMemberIds),
 		)
 
-		for _, item := range diff.UpsertClusters {
-			log.DebugContext(
-				ctx,
-				"placeholder, triggering recurring transaction detection on transaction cluster",
-				"transactionClusterId", item.TransactionClusterId,
-			)
+		// Every cluster that still exists gets its recurring transactions
+		// recalculated, the clusters that were deleted take their recurring
+		// transactions with them. This is enqueued inside the transaction so the
+		// jobs only run once the clusters are committed.
+		if err := queue.BulkEnqueue(
+			ctx,
+			ctx.Enqueuer(),
+			recurring_jobs.CalculateRecurringTransactions,
+			myownsanity.Map(
+				diff.UpsertClusters,
+				func(item models.TransactionCluster) recurring_jobs.CalculateRecurringTransactionsArguments {
+					return recurring_jobs.CalculateRecurringTransactionsArguments{
+						AccountId:            args.AccountId,
+						BankAccountId:        args.BankAccountId,
+						TransactionClusterId: item.TransactionClusterId,
+					}
+				},
+			),
+		); err != nil {
+			return errors.Wrap(err, "failed to enqueue recurring transaction calculations")
 		}
+
+		log.InfoContext(ctx, "enqueued recurring transaction calculations",
+			"clusters", len(diff.UpsertClusters),
+		)
 
 		for _, item := range diff.InsertMembers {
 			log.DebugContext(
@@ -138,9 +158,6 @@ func CalculateTransactionClusters(ctx queue.Context, args CalculateTransactionCl
 				"transactionClusterId", *item.TransactionClusterId,
 			)
 		}
-
-		// TODO All of the clusters that exist right now need to be enqueued for
-		// recurring transaction detection
 
 		return nil
 	})

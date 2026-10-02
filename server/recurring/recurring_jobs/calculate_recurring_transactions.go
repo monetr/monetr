@@ -17,7 +17,10 @@ type CalculateRecurringTransactionsArguments struct {
 	TransactionClusterId models.ID[models.TransactionCluster] `json:"transactionClusterId"`
 }
 
-func CalculateRecurringTransactions(ctx queue.Context, args CalculateRecurringTransactionsArguments) error {
+func CalculateRecurringTransactions(
+	ctx queue.Context,
+	args CalculateRecurringTransactionsArguments,
+) error {
 	return ctx.RunInTransaction(ctx, func(ctx queue.Context) error {
 		crumbs.IncludeUserInScope(ctx, args.AccountId)
 		log := ctx.Log().With(
