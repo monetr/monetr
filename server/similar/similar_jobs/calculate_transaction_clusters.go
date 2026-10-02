@@ -139,6 +139,9 @@ func CalculateTransactionClusters(ctx queue.Context, args CalculateTransactionCl
 			)
 		}
 
+		// TODO All of the clusters that exist right now need to be enqueued for
+		// recurring transaction detection
+
 		return nil
 	})
 }

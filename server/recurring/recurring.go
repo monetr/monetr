@@ -48,10 +48,11 @@ var (
 )
 
 type Frequency struct {
-	StartDate time.Time
-	EndDate   *time.Time
-	Frequency int
-	Rule      models.RuleSet
+	StartDate  time.Time
+	EndDate    *time.Time
+	Frequency  int
+	Confidence float32
+	Rule       models.RuleSet
 }
 
 type FrequencyScore struct {
@@ -62,15 +63,85 @@ type FrequencyScore struct {
 	Confidence     float64
 }
 
+// Direction is whether money is leaving the account or coming into it.
+type Direction string
+
+const (
+	// DebitDirection is money leaving the account, transactions with a positive
+	// amount.
+	DebitDirection Direction = "debit"
+	// CreditDirection is money coming into the account, transactions with a
+	// negative amount.
+	CreditDirection Direction = "credit"
+)
+
 type RecurringTransactionResult struct {
-	Best    *Frequency
+	Direction Direction
+	Best      *Frequency
+	// RuleSet is only present when Best is, see GenerateRuleSet.
+	RuleSet *models.RuleSet
 	Members []models.Transaction
 	Results []FrequencyScore
 }
 
+// DetectRecurringTransactions splits the transactions by direction, debits and
+// credits, and detects recurrence for each direction on its own. A recurring
+// group can only be one direction, so this returns at most one result per
+// direction. A direction with fewer than minimumNumberOfTransactions is
+// skipped, so this can return no results at all. Transactions with an amount of
+// zero have no direction and are ignored. The timezone should be the account's,
+// it is used to generate the ruleset for each direction that recurs.
 func DetectRecurringTransactions(
 	ctx context.Context,
+	clock clock.Clock,
+	timezone *time.Location,
+	transactions []models.Transaction,
+) ([]RecurringTransactionResult, error) {
+	debits := make([]models.Transaction, 0, len(transactions))
+	credits := make([]models.Transaction, 0, len(transactions))
+	for i := range transactions {
+		switch {
+		case transactions[i].Amount > 0:
+			debits = append(debits, transactions[i])
+		case transactions[i].Amount < 0:
+			credits = append(credits, transactions[i])
+		}
+	}
+
+	results := make([]RecurringTransactionResult, 0, 2)
+	for _, group := range []struct {
+		direction    Direction
+		transactions []models.Transaction
+	}{
+		{DebitDirection, debits},
+		{CreditDirection, credits},
+	} {
+		result, err := detectRecurringTransactions(
+			ctx,
+			clock,
+			timezone,
+			group.direction,
+			group.transactions,
+		)
+		if errors.Is(err, ErrInsufficientTransactionData) {
+			continue
+		}
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, *result)
+	}
+
+	return results, nil
+}
+
+// detectRecurringTransactions detects recurrence for transactions that are all
+// the specified direction.
+func detectRecurringTransactions(
+	ctx context.Context,
 	_ clock.Clock,
+	timezone *time.Location,
+	direction Direction,
 	transactions []models.Transaction,
 ) (*RecurringTransactionResult, error) {
 	span := crumbs.StartFnTrace(ctx)
@@ -232,9 +303,10 @@ func DetectRecurringTransactions(
 	frequency := scores[0]
 	if frequency.Confidence < confidenceMinimum {
 		return &RecurringTransactionResult{
-			Best:    nil,
-			Members: nil,
-			Results: scores,
+			Direction: direction,
+			Best:      nil,
+			Members:   nil,
+			Results:   scores,
 		}, nil
 	}
 
@@ -341,23 +413,19 @@ func DetectRecurringTransactions(
 	// other scores. If its tied but its a compatible score (such as 14, 15 and
 	// 16) then use the top score. Otherwise return no recurrence detected.
 
-	// TODO Generate a rrule based on the data we calculated above and determine
-	// an end date. There is no end date if the recurring result could still be
-	// ongoing.
-	// var startDate time.Time = members[0].Date
-	// var endDate *time.Time
-	// startDateString := startDate.UTC().Format("20060102T150405Z")
-	// var rule *models.RuleSet
-	// switch frequency.Frequency {
-	// case 15, 16:
-	// 	rule = models.NewRuleSet(fmt.Sprintf("DTSTART:%s\nRRULE:FREQ=FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", startDateString))
-	// }
+	ruleset, err := GenerateRuleSet(frequency.Frequency, members, timezone)
+	if err != nil {
+		return nil, err
+	}
 
 	return &RecurringTransactionResult{
+		Direction: direction,
 		Best: &Frequency{
-			StartDate: members[0].Date,
-			Frequency: frequency.Frequency,
+			StartDate:  members[0].Date,
+			Frequency:  frequency.Frequency,
+			Confidence: float32(frequency.Confidence),
 		},
+		RuleSet: ruleset,
 		Members: members,
 		Results: scores,
 	}, nil

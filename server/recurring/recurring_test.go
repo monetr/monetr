@@ -21,10 +21,10 @@ func TestRecurringDetection(t *testing.T) {
 		clock.Set(time.Date(2023, 12, 1, 9, 0, 0, 0, time.UTC))
 		data := GetFixtures(t, "amazon_sample_data_1.json")
 
-		result, err := DetectRecurringTransactions(t.Context(), clock, data)
+		results, err := DetectRecurringTransactions(t.Context(), clock, time.UTC, data)
 		assert.NoError(t, err)
 
-		j, err := json.MarshalIndent(result, "", "    ")
+		j, err := json.MarshalIndent(results, "", "    ")
 		require.NoError(t, err, "must be able to marshall result")
 
 		fmt.Println(string(j))
@@ -35,8 +35,10 @@ func TestRecurringDetection(t *testing.T) {
 		clock.Set(time.Date(2022, 3, 1, 9, 0, 0, 0, time.UTC))
 		data := GetFixtures(t, "monetr_freshbooks_data_1.json")
 
-		result, err := DetectRecurringTransactions(t.Context(), clock, data)
+		results, err := DetectRecurringTransactions(t.Context(), clock, time.UTC, data)
 		assert.NoError(t, err)
+		require.Len(t, results, 1, "freshbooks charges are all debits")
+		result := results[0]
 
 		j, err := json.MarshalIndent(result, "", "    ")
 		require.NoError(t, err, "must be able to marshall result")
@@ -81,29 +83,31 @@ func TestRecurringDetection(t *testing.T) {
 				}
 			}
 
-			recurringResult, err := DetectRecurringTransactions(t.Context(), clock, transactions)
+			recurringResults, err := DetectRecurringTransactions(t.Context(), clock, time.UTC, transactions)
 			assert.NoError(t, err)
 
-			if recurringResult.Best == nil || recurringResult.Best.StartDate.IsZero() {
-				log.Info(fmt.Sprintf("cluster: %q does not recur", group.Name))
-				continue
-			}
+			for _, recurringResult := range recurringResults {
+				if recurringResult.Best == nil || recurringResult.Best.StartDate.IsZero() {
+					log.Info(fmt.Sprintf("cluster: %q does not recur", group.Name))
+					continue
+				}
 
-			log.Info(fmt.Sprintf("cluster: %q does recur roughly every %d days", group.Name, recurringResult.Best.Frequency))
+				log.Info(fmt.Sprintf("cluster: %q does recur roughly every %d days", group.Name, recurringResult.Best.Frequency))
 
-			switch strings.ToLower(group.Name) {
-			case "freshbooks":
-				// Should recur monthly
-				assert.Contains(t, []int{30, 31}, recurringResult.Best.Frequency)
-			case "github inc":
-				// Should recur monthly
-				assert.Contains(t, []int{30, 31}, recurringResult.Best.Frequency)
-			case "sentry":
-				// Should recur monthly
-				assert.Contains(t, []int{30, 31}, recurringResult.Best.Frequency)
-			case "treasury courant elliot":
-				// Should recur twice a month
-				assert.Contains(t, []int{15, 16}, recurringResult.Best.Frequency)
+				switch strings.ToLower(group.Name) {
+				case "freshbooks":
+					// Should recur monthly
+					assert.Contains(t, []int{30, 31}, recurringResult.Best.Frequency)
+				case "github inc":
+					// Should recur monthly
+					assert.Contains(t, []int{30, 31}, recurringResult.Best.Frequency)
+				case "sentry":
+					// Should recur monthly
+					assert.Contains(t, []int{30, 31}, recurringResult.Best.Frequency)
+				case "treasury courant elliot":
+					// Should recur twice a month
+					assert.Contains(t, []int{15, 16}, recurringResult.Best.Frequency)
+				}
 			}
 		}
 	})
@@ -116,8 +120,10 @@ func TestRecurringDetection(t *testing.T) {
 			{TransactionId: "txn_2", Amount: 7188, Date: time.Date(2026, 4, 23, 0, 0, 0, 0, time.UTC)},
 		}
 
-		result, err := DetectRecurringTransactions(t.Context(), clock.NewMock(), transactions)
+		results, err := DetectRecurringTransactions(t.Context(), clock.NewMock(), time.UTC, transactions)
 		require.NoError(t, err, "must be able to check the transactions for recurrence")
+		require.Len(t, results, 1, "all of the renewals are debits")
+		result := results[0]
 		require.NotNil(t, result.Best, "a yearly renewal must be detected as recurring")
 		assert.EqualValues(t, 365, result.Best.Frequency, "should recur every year")
 		assert.Len(t, result.Members, 3, "every renewal should be part of the result")
@@ -133,8 +139,10 @@ func TestRecurringDetection(t *testing.T) {
 			{TransactionId: "txn_2", Amount: 1537, Date: time.Date(2025, 2, 26, 0, 0, 0, 0, time.UTC)},
 		}
 
-		result, err := DetectRecurringTransactions(t.Context(), clock.NewMock(), transactions)
+		results, err := DetectRecurringTransactions(t.Context(), clock.NewMock(), time.UTC, transactions)
 		require.NoError(t, err, "must be able to check the transactions for recurrence")
+		require.Len(t, results, 1, "all of the visits are debits")
+		result := results[0]
 		assert.Nil(t, result.Best, "irregular visits must not be detected as recurring")
 	})
 }
