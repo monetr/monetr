@@ -19,17 +19,24 @@ type RecurringDiff struct {
 	// Existing recurring transactions for a direction that doesn't recur
 	// anymore, these can just be deleted.
 	DeleteRecurringIds []models.ID[models.TransactionRecurring]
+	// Transactions in the cluster whose recurring ID needs to change. Members of
+	// a recurring transaction point at it, everything else in the cluster has
+	// its recurring ID removed.
+	UpdateMembers []models.Transaction
 }
 
 // DiffTransactionRecurring figures out what needs to be written to get the
 // database in line with the recurring transactions we just detected for a
 // cluster. There is only ever one recurring transaction per cluster and
 // direction, so a detected one is matched up with an existing one by its
-// direction and updates it instead of creating a new one.
+// direction and updates it instead of creating a new one. The transactions are
+// every transaction in the cluster as they are in the database right now, they
+// are used to figure out which ones need their recurring ID changed.
 func DiffTransactionRecurring(
 	ctx context.Context,
 	existing []models.TransactionRecurring,
 	results []recurring.RecurringTransactionResult,
+	transactions []models.Transaction,
 	now time.Time,
 	bankAccountId models.ID[models.BankAccount],
 	transactionClusterId models.ID[models.TransactionCluster],
@@ -45,7 +52,10 @@ func DiffTransactionRecurring(
 	diff := RecurringDiff{
 		UpsertRecurring:    make([]models.TransactionRecurring, 0, len(results)),
 		DeleteRecurringIds: make([]models.ID[models.TransactionRecurring], 0, len(existing)),
+		UpdateMembers:      make([]models.Transaction, 0, len(transactions)),
 	}
+	// Which recurring transaction each member should point at.
+	newOwner := make(map[models.ID[models.Transaction]]models.ID[models.TransactionRecurring], len(transactions))
 	for _, result := range results {
 		// A direction that doesn't recur has no recurring transaction, if there was
 		// one before then it gets deleted below.
@@ -58,8 +68,16 @@ func DiffTransactionRecurring(
 			item.TransactionRecurringId = old.TransactionRecurringId
 			item.CreatedAt = old.CreatedAt
 			delete(existingByDirection, result.Direction)
+		} else {
+			// New recurring transactions get their ID now instead of when they are
+			// inserted, that way the members can point at it.
+			item.TransactionRecurringId = models.NewID[models.TransactionRecurring]()
 		}
 		diff.UpsertRecurring = append(diff.UpsertRecurring, item)
+
+		for _, member := range result.Members {
+			newOwner[member.TransactionId] = item.TransactionRecurringId
+		}
 	}
 
 	// Anything left didn't match a direction that still recurs.
@@ -68,6 +86,23 @@ func DiffTransactionRecurring(
 	}
 	// Map iteration is random, keep the order stable.
 	slices.Sort(diff.DeleteRecurringIds)
+
+	// Compare what each transaction in the cluster points at now with what it
+	// should point at, and only update the ones that changed.
+	for _, txn := range transactions {
+		var want *models.ID[models.TransactionRecurring]
+		if owner, ok := newOwner[txn.TransactionId]; ok {
+			want = &owner
+		}
+		have := txn.TransactionRecurringId
+		if (want == nil && have == nil) || (want != nil && have != nil && *want == *have) {
+			continue
+		}
+		diff.UpdateMembers = append(diff.UpdateMembers, models.Transaction{
+			TransactionId:          txn.TransactionId,
+			TransactionRecurringId: want,
+		})
+	}
 
 	return diff
 }

@@ -82,6 +82,7 @@ func CalculateRecurringTransactions(
 			ctx,
 			existing,
 			results,
+			transactions,
 			ctx.Clock().Now(),
 			args.BankAccountId,
 			args.TransactionClusterId,
@@ -91,16 +92,27 @@ func CalculateRecurringTransactions(
 			"transactionClusterId", args.TransactionClusterId,
 			"upsertRecurring", len(diff.UpsertRecurring),
 			"deleteRecurring", len(diff.DeleteRecurringIds),
+			"updateMembers", len(diff.UpdateMembers),
 		)
 
-		// Existing recurring transactions are updated in place before anything new
-		// is created, and the ones that don't recur anymore are cleaned up last.
+		// Order matters here because of the foreign keys. Existing recurring
+		// transactions are updated in place before anything new is created, they
+		// need to exist before transactions can point at them, and the ones that
+		// don't recur anymore are cleaned up last.
 		if err := repo.UpsertTransactionRecurring(
 			ctx,
 			args.BankAccountId,
 			diff.UpsertRecurring,
 		); err != nil {
 			return errors.Wrap(err, "failed to upsert recurring transactions")
+		}
+
+		if err := repo.UpdateTransactionRecurringIds(
+			ctx,
+			args.BankAccountId,
+			diff.UpdateMembers,
+		); err != nil {
+			return errors.Wrap(err, "failed to update transaction recurring ids")
 		}
 
 		if err := repo.DeleteTransactionRecurring(
@@ -115,6 +127,7 @@ func CalculateRecurringTransactions(
 			"transactionClusterId", args.TransactionClusterId,
 			"upsertRecurring", len(diff.UpsertRecurring),
 			"deleteRecurring", len(diff.DeleteRecurringIds),
+			"updateMembers", len(diff.UpdateMembers),
 		)
 
 		return nil
