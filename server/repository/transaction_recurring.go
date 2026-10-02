@@ -85,6 +85,39 @@ func (r *repositoryBase) UpsertTransactionRecurring(
 	return nil
 }
 
+func (r *repositoryBase) UpdateTransactionRecurringIds(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	transactions []Transaction,
+) error {
+	if len(transactions) == 0 {
+		return nil
+	}
+
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	for i := range transactions {
+		transactions[i].AccountId = r.AccountId()
+		transactions[i].BankAccountId = bankAccountId
+	}
+
+	_, err := r.txn.NewUpdate().
+		Model(&transactions).
+		Column("transaction_recurring_id").
+		Bulk().
+		Exec(span.Context())
+	if err != nil {
+		return crumbs.WrapError(
+			span.Context(),
+			err,
+			"failed to update transaction recurring ids",
+		)
+	}
+
+	return nil
+}
+
 func (r *repositoryBase) DeleteTransactionRecurring(
 	ctx context.Context,
 	bankAccountId ID[BankAccount],

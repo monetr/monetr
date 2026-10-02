@@ -263,3 +263,143 @@ func TestRepositoryBase_DeleteTransactionRecurring(t *testing.T) {
 		assert.NoError(t, err, "deleting nothing should not fail")
 	})
 }
+
+func TestRepositoryBase_UpdateTransactionRecurringIds(t *testing.T) {
+	t.Run("sets and clears the recurring id", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		cluster := givenIHaveATransactionCluster(t, bankAccount)
+		transactions := fixtures.GivenIHaveNTransactions(t, clock, bankAccount, 2)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		items := []models.TransactionRecurring{
+			newTransactionRecurring(t, cluster, models.DebitDirection, 800),
+		}
+		err := repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, items)
+		require.NoError(t, err, "must be able to create recurring transaction")
+
+		err = repo.UpdateTransactionRecurringIds(t.Context(), bankAccount.BankAccountId, []models.Transaction{
+			{
+				TransactionId:          transactions[0].TransactionId,
+				TransactionRecurringId: &items[0].TransactionRecurringId,
+			},
+			{
+				TransactionId:          transactions[1].TransactionId,
+				TransactionRecurringId: &items[0].TransactionRecurringId,
+			},
+		})
+		assert.NoError(t, err, "must be able to set the recurring id")
+
+		first := testutils.MustDBRead(t, transactions[0])
+		require.NotNil(t, first.TransactionRecurringId, "recurring id should be set")
+		assert.Equal(t, items[0].TransactionRecurringId, *first.TransactionRecurringId, "should point at the recurring transaction")
+		assert.Equal(t, transactions[0].Name, first.Name, "no other columns should be written")
+		assert.Equal(t, transactions[0].Amount, first.Amount, "no other columns should be written")
+
+		err = repo.UpdateTransactionRecurringIds(t.Context(), bankAccount.BankAccountId, []models.Transaction{
+			{
+				TransactionId:          transactions[0].TransactionId,
+				TransactionRecurringId: nil,
+			},
+		})
+		assert.NoError(t, err, "must be able to clear the recurring id")
+
+		first = testutils.MustDBRead(t, transactions[0])
+		assert.Nil(t, first.TransactionRecurringId, "recurring id should be cleared")
+		second := testutils.MustDBRead(t, transactions[1])
+		require.NotNil(t, second.TransactionRecurringId, "the other transaction should not be changed")
+		assert.Equal(t, items[0].TransactionRecurringId, *second.TransactionRecurringId, "the other transaction should still point at the recurring transaction")
+	})
+
+	t.Run("cannot update another account's transactions", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+
+		// The account the repository is for.
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		cluster := givenIHaveATransactionCluster(t, bankAccount)
+
+		// Another account entirely, with its own recurring transaction that its
+		// transactions point at.
+		otherUser, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		otherLink := fixtures.GivenIHaveAManualLink(t, clock, otherUser)
+		otherBankAccount := fixtures.GivenIHaveABankAccount(t, clock, &otherLink, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		otherCluster := givenIHaveATransactionCluster(t, otherBankAccount)
+		otherTransactions := fixtures.GivenIHaveNTransactions(t, clock, otherBankAccount, 2)
+
+		otherRepo := repository.NewRepositoryFromSession(
+			clock,
+			otherUser.UserId,
+			otherUser.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+		otherItems := []models.TransactionRecurring{
+			newTransactionRecurring(t, otherCluster, models.DebitDirection, 800),
+		}
+		err := otherRepo.UpsertTransactionRecurring(t.Context(), otherBankAccount.BankAccountId, otherItems)
+		require.NoError(t, err, "must be able to create the other recurring transaction")
+		err = otherRepo.UpdateTransactionRecurringIds(t.Context(), otherBankAccount.BankAccountId, []models.Transaction{
+			{
+				TransactionId:          otherTransactions[0].TransactionId,
+				TransactionRecurringId: &otherItems[0].TransactionRecurringId,
+			},
+			{
+				TransactionId:          otherTransactions[1].TransactionId,
+				TransactionRecurringId: &otherItems[0].TransactionRecurringId,
+			},
+		})
+		require.NoError(t, err, "must be able to set the other account's recurring ids")
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+		items := []models.TransactionRecurring{
+			newTransactionRecurring(t, cluster, models.DebitDirection, 800),
+		}
+		err = repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, items)
+		require.NoError(t, err, "must be able to create recurring transaction")
+
+		// Try to clear one of the other account's transactions, and point the other
+		// at this account's recurring transaction. Both with the other account's
+		// bank account and with this account's bank account.
+		for _, bankAccountId := range []models.ID[models.BankAccount]{
+			otherBankAccount.BankAccountId,
+			bankAccount.BankAccountId,
+		} {
+			err = repo.UpdateTransactionRecurringIds(t.Context(), bankAccountId, []models.Transaction{
+				{
+					TransactionId:          otherTransactions[0].TransactionId,
+					TransactionRecurringId: nil,
+				},
+				{
+					TransactionId:          otherTransactions[1].TransactionId,
+					TransactionRecurringId: &items[0].TransactionRecurringId,
+				},
+			})
+			assert.NoError(t, err, "updating transactions that aren't in the account should do nothing")
+		}
+
+		for _, txn := range otherTransactions {
+			stored := testutils.MustDBRead(t, txn)
+			require.NotNil(t, stored.TransactionRecurringId, "the other account's transaction must not be cleared")
+			assert.Equal(t, otherItems[0].TransactionRecurringId, *stored.TransactionRecurringId, "the other account's transaction must still point at its own recurring transaction")
+		}
+	})
+}

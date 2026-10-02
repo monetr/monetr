@@ -1147,6 +1147,7 @@ func (p *postgresProcessor) cronConsumer(shutdown chan chan struct{}) {
 //	│                  backoff++ (if < max), reset ticker                  │
 //	│   job != nil ──► dispatch ◄──── send *Job to worker                  │
 //	│                  reset backoff=1, reset ticker                       │
+//	│                  back to PHASE 1 to try another job right away       │
 //	│                                                                      │
 //	│  PHASE 2 — wait for next trigger                                     │
 //	│                                                                      │
@@ -1216,6 +1217,11 @@ func (p *postgresProcessor) jobConsumer(shutdown chan chan struct{}, ready chan 
 			// If we successfully consume a job then reset the backoff
 			backoff = 1
 			ticker.Reset(baseInterval)
+			// There might be more jobs waiting, like after a bulk enqueue which only
+			// sends a single wake signal. So go right back to the top of the loop and
+			// try to consume another one as soon as a worker is available instead of
+			// waiting for another notification or the ticker.
+			continue
 		} else {
 			// If we did not retrieve a job at all then we need to put our "hold" on
 			// an available thread back in the channel this way a thread can still be

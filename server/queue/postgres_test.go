@@ -686,6 +686,49 @@ func TestPostgresProcessor_BulkEnqueueAt(t *testing.T) {
 		require.NoError(t, err)
 		assert.Zero(t, count, "no jobs should be created")
 	})
+
+	t.Run("every job runs without waiting for the ticker", func(t *testing.T) {
+		clock := clock.New()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+		log := testutils.GetLog(t)
+
+		processor := NewPostgresQueue(
+			t.Context(),
+			clock,
+			log,
+			config.Configuration{},
+			db,
+			nil, nil, nil, nil, nil, nil,
+		)
+
+		err := Register(t.Context(), processor, testNoopJob)
+		assert.NoError(t, err)
+
+		err = processor.Start()
+		assert.NoError(t, err, "must be able to start the processor")
+		defer processor.Close()
+
+		// A bulk enqueue only sends a single wake signal, so if the consumer only
+		// took one job per signal then the rest would each wait for the 10 second
+		// ticker.
+		err = BulkEnqueue(t.Context(), processor, testNoopJob, []testJobArgs{
+			{Value: "one"},
+			{Value: "two"},
+			{Value: "three"},
+			{Value: "four"},
+			{Value: "five"},
+			{Value: "six"},
+		})
+		assert.NoError(t, err, "must be able to bulk enqueue jobs")
+
+		require.Eventually(t, func() bool {
+			count, err := db.NewSelect().
+				Model(new(models.Job)).
+				Where(`"status" = ?`, models.CompletedJobStatus).
+				Count(t.Context())
+			return err == nil && count == 6
+		}, 5*time.Second, 100*time.Millisecond, "every job must be completed before the ticker would have fired")
+	})
 }
 
 func TestPostgresProcessor_ConsumeJobMaybe(t *testing.T) {

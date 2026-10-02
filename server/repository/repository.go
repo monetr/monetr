@@ -189,6 +189,15 @@ type BaseRepository interface {
 		bankAccountId ID[BankAccount],
 		recurring []TransactionRecurring,
 	) error
+	// UpdateTransactionRecurringIds sets the recurring ID on each of the provided
+	// transactions by their primary key. A nil recurring ID removes the
+	// transaction from whatever recurring transaction it was part of. No other
+	// columns are written.
+	UpdateTransactionRecurringIds(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		transactions []Transaction,
+	) error
 	// DeleteTransactionRecurring removes the specified recurring transactions by
 	// their IDs. Transactions referencing them will have their recurring ID set
 	// to null.
