@@ -3,6 +3,7 @@ CREATE TABLE "transaction_recurring" (
   "account_id"               VARCHAR(32) NOT NULL,
   "bank_account_id"          VARCHAR(32) NOT NULL,
   "transaction_cluster_id"   VARCHAR(32) NOT NULL,
+  "direction"                TEXT        NOT NULL,
   "window_type"              TEXT        NOT NULL,
   "ruleset"                  TEXT        NOT NULL,
   "first"                    TIMESTAMPTZ NOT NULL,

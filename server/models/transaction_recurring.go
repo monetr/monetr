@@ -7,6 +7,18 @@ import (
 	"github.com/uptrace/bun"
 )
 
+// Direction is whether money is leaving the account or coming into it.
+type Direction string
+
+const (
+	// DebitDirection is money leaving the account, transactions with a positive
+	// amount.
+	DebitDirection Direction = "debit"
+	// CreditDirection is money coming into the account, transactions with a
+	// negative amount.
+	CreditDirection Direction = "credit"
+)
+
 type WindowType string
 
 const (
@@ -38,7 +50,8 @@ type TransactionRecurring struct {
 	Next                   time.Time                `json:"next" bun:"next,notnull,nullzero"`
 	Ended                  bool                     `json:"ended" bun:"ended,notnull,nullzero"`
 	Confidence             float32                  `json:"confidence" bun:"confidence,notnull,nullzero"` // TODO What type should this be in postgres?
-	Amounts                map[int64]int            `json:"amounts" bun:"amounts,notnull"`                // TODO This will be a JSONB or hashmap col.
+	Direction              Direction                `json:"direction" bun:"direction,notnull"`
+	Amounts                map[int64]int            `json:"amounts" bun:"amounts,notnull"` // TODO This will be a JSONB or hashmap col.
 	LastAmount             int64                    `json:"lastAmount" bun:"last_amount,notnull,nullzero"`
 	CreatedAt              time.Time                `json:"createdAt" bun:"created_at,notnull,default:now(),nullzero"`
 	UpdatedAt              time.Time                `json:"updatedAt" bun:"updated_at,notnull,default:now(),nullzero"`
