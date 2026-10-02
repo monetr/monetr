@@ -172,6 +172,12 @@ type BaseRepository interface {
 		limit, offset int,
 	) ([]Transaction, error)
 
+	GetTransactionRecurringById(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		transactionRecurringId ID[TransactionRecurring],
+	) (*TransactionRecurring, error)
+
 	// GetTransactionRecurringByCluster returns the recurring transactions for the
 	// specified cluster, there is at most one for each direction.
 	GetTransactionRecurringByCluster(

@@ -3,10 +3,44 @@ package repository
 import (
 	"context"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
+	"github.com/pkg/errors"
 	"github.com/uptrace/bun"
 )
+
+func (r *repositoryBase) GetTransactionRecurringById(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	transactionRecurringId ID[TransactionRecurring],
+) (*TransactionRecurring, error) {
+
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	span.Data = map[string]any{
+		"accountId":              r.AccountId(),
+		"bankAccountId":          bankAccountId,
+		"transactionRecurringId": transactionRecurringId,
+	}
+
+	var result TransactionRecurring
+	err := r.txn.NewSelect().
+		Model(&result).
+		Where(`"transaction_recurring"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction_recurring"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction_recurring"."transaction_recurring_id" = ?`, transactionRecurringId).
+		Scan(span.Context())
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, errors.Wrap(err, "failed to retrieve recurring transaction")
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return &result, nil
+}
 
 func (r *repositoryBase) GetTransactionRecurringByCluster(
 	ctx context.Context,
