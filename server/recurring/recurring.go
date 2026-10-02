@@ -63,20 +63,8 @@ type FrequencyScore struct {
 	Confidence     float64
 }
 
-// Direction is whether money is leaving the account or coming into it.
-type Direction string
-
-const (
-	// DebitDirection is money leaving the account, transactions with a positive
-	// amount.
-	DebitDirection Direction = "debit"
-	// CreditDirection is money coming into the account, transactions with a
-	// negative amount.
-	CreditDirection Direction = "credit"
-)
-
 type RecurringTransactionResult struct {
-	Direction Direction
+	Direction models.Direction
 	Best      *Frequency
 	// RuleSet is only present when Best is, see GenerateRuleSet.
 	RuleSet *models.RuleSet
@@ -110,11 +98,11 @@ func DetectRecurringTransactions(
 
 	results := make([]RecurringTransactionResult, 0, 2)
 	for _, group := range []struct {
-		direction    Direction
+		direction    models.Direction
 		transactions []models.Transaction
 	}{
-		{DebitDirection, debits},
-		{CreditDirection, credits},
+		{models.DebitDirection, debits},
+		{models.CreditDirection, credits},
 	} {
 		result, err := detectRecurringTransactions(
 			ctx,
@@ -141,7 +129,7 @@ func detectRecurringTransactions(
 	ctx context.Context,
 	_ clock.Clock,
 	timezone *time.Location,
-	direction Direction,
+	direction models.Direction,
 	transactions []models.Transaction,
 ) (*RecurringTransactionResult, error) {
 	span := crumbs.StartFnTrace(ctx)
