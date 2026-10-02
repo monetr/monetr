@@ -52,6 +52,123 @@ func newTransactionRecurring(
 	}
 }
 
+func TestRepositoryBase_GetTransactionRecurringById(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		cluster := givenIHaveATransactionCluster(t, bankAccount)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		recurring := []models.TransactionRecurring{
+			newTransactionRecurring(t, cluster, models.DebitDirection, 800),
+		}
+		err := repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, recurring)
+		require.NoError(t, err, "must be able to create recurring transactions")
+
+		result, err := repo.GetTransactionRecurringById(t.Context(), bankAccount.BankAccountId, recurring[0].TransactionRecurringId)
+		assert.NoError(t, err, "must be able to read the recurring transaction")
+		require.NotNil(t, result, "result must not be nil")
+		assert.Equal(t, recurring[0].TransactionRecurringId, result.TransactionRecurringId, "ID should match")
+		assert.Equal(t, cluster.TransactionClusterId, result.TransactionClusterId, "cluster should match")
+		assert.Equal(t, models.DebitDirection, result.Direction, "direction should match")
+		assert.EqualValues(t, 800, result.LastAmount, "last amount should match")
+	})
+
+	t.Run("does not exist", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		result, err := repo.GetTransactionRecurringById(t.Context(), bankAccount.BankAccountId, models.NewID[models.TransactionRecurring]())
+		assert.Error(t, err, "should fail to read a recurring transaction that does not exist")
+		assert.Nil(t, result, "result should be nil")
+	})
+
+	t.Run("wrong bank account", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		otherBankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.SavingsBankAccountSubType)
+		cluster := givenIHaveATransactionCluster(t, bankAccount)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		recurring := []models.TransactionRecurring{
+			newTransactionRecurring(t, cluster, models.DebitDirection, 800),
+		}
+		err := repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, recurring)
+		require.NoError(t, err, "must be able to create recurring transactions")
+
+		result, err := repo.GetTransactionRecurringById(t.Context(), otherBankAccount.BankAccountId, recurring[0].TransactionRecurringId)
+		assert.Error(t, err, "should not find the recurring transaction under another bank account")
+		assert.Nil(t, result, "result should be nil")
+	})
+
+	t.Run("cannot read another account's recurring transaction", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		cluster := givenIHaveATransactionCluster(t, bankAccount)
+		otherUser, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		recurring := []models.TransactionRecurring{
+			newTransactionRecurring(t, cluster, models.DebitDirection, 800),
+		}
+		err := repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, recurring)
+		require.NoError(t, err, "must be able to create recurring transactions")
+
+		otherRepo := repository.NewRepositoryFromSession(
+			clock,
+			otherUser.UserId,
+			otherUser.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		result, err := otherRepo.GetTransactionRecurringById(t.Context(), bankAccount.BankAccountId, recurring[0].TransactionRecurringId)
+		assert.Error(t, err, "should not be able to read another account's recurring transaction")
+		assert.Nil(t, result, "result should be nil")
+	})
+}
+
 func TestRepositoryBase_GetTransactionRecurringByCluster(t *testing.T) {
 	t.Run("no recurring transactions", func(t *testing.T) {
 		clock := clock.NewMock()

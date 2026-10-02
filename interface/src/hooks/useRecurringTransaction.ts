@@ -10,7 +10,7 @@ export function useRecurringTransaction(
 ): UseQueryResult<TransactionRecurring, unknown> {
   const selectedBankAccountId = useSelectedBankAccountId();
   return useQuery<WithJsonValues<TransactionRecurring>, unknown, TransactionRecurring>({
-    queryKey: [`/api/bank_account/${selectedBankAccountId}/recurring/${transactionRecurringId}`],
+    queryKey: [`/api/bank_accounts/${selectedBankAccountId}/recurring/${transactionRecurringId}`],
     enabled: Boolean(transactionRecurringId),
     select: data => new TransactionRecurring(data),
   });

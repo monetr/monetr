@@ -84,6 +84,7 @@ func CalculateRecurringTransactions(
 			results,
 			transactions,
 			ctx.Clock().Now(),
+			timezone,
 			args.BankAccountId,
 			args.TransactionClusterId,
 		)
