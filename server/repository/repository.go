@@ -172,6 +172,32 @@ type BaseRepository interface {
 		limit, offset int,
 	) ([]Transaction, error)
 
+	// GetTransactionRecurringByCluster returns the recurring transactions for the
+	// specified cluster, there is at most one for each direction.
+	GetTransactionRecurringByCluster(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		transactionClusterId ID[TransactionCluster],
+	) ([]TransactionRecurring, error)
+	// UpsertTransactionRecurring will insert or update the provided recurring
+	// transactions by their cluster and direction. An existing recurring
+	// transaction for the same cluster and direction is updated in place and
+	// keeps its ID. It doesn't delete anything, use DeleteTransactionRecurring
+	// for that.
+	UpsertTransactionRecurring(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		recurring []TransactionRecurring,
+	) error
+	// DeleteTransactionRecurring removes the specified recurring transactions by
+	// their IDs. Transactions referencing them will have their recurring ID set
+	// to null.
+	DeleteTransactionRecurring(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		transactionRecurringIds []ID[TransactionRecurring],
+	) error
+
 	GetTransactionUpload(
 		ctx context.Context,
 		bankAccountId ID[BankAccount],
