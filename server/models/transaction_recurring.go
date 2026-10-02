@@ -43,7 +43,7 @@ type TransactionRecurring struct {
 	BankAccount            *BankAccount             `json:"bankAccount,omitempty" bun:"rel:belongs-to,join:bank_account_id=bank_account_id,join:account_id=account_id"`
 	TransactionClusterId   ID[TransactionCluster]   `json:"transactionClusterId" bun:"transaction_cluster_id,notnull"`
 	TransactionCluster     *TransactionCluster      `json:"transactionCluster,omitempty" bun:"rel:belongs-to,join:transaction_cluster_id=transaction_cluster_id,join:bank_account_id=bank_account_id,join:account_id=account_id"`
-	Window                 WindowType               `json:"windowType" bun:"window_type,notnull,nullzero"`
+	Window                 WindowType               `json:"window" bun:"window_type,notnull,nullzero"`
 	RuleSet                *RuleSet                 `json:"ruleset" bun:"ruleset,notnull,type:text"`
 	First                  time.Time                `json:"first" bun:"first,notnull,nullzero"`
 	Last                   time.Time                `json:"last" bun:"last,notnull,nullzero"`

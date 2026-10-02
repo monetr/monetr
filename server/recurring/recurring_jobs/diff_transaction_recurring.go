@@ -31,13 +31,15 @@ type RecurringDiff struct {
 // direction, so a detected one is matched up with an existing one by its
 // direction and updates it instead of creating a new one. The transactions are
 // every transaction in the cluster as they are in the database right now, they
-// are used to figure out which ones need their recurring ID changed.
+// are used to figure out which ones need their recurring ID changed. The
+// timezone should be the account's, the rulesets are evaluated in it.
 func DiffTransactionRecurring(
 	ctx context.Context,
 	existing []models.TransactionRecurring,
 	results []recurring.RecurringTransactionResult,
 	transactions []models.Transaction,
 	now time.Time,
+	timezone *time.Location,
 	bankAccountId models.ID[models.BankAccount],
 	transactionClusterId models.ID[models.TransactionCluster],
 ) RecurringDiff {
@@ -63,7 +65,7 @@ func DiffTransactionRecurring(
 			continue
 		}
 
-		item := newTransactionRecurring(result, now, bankAccountId, transactionClusterId)
+		item := newTransactionRecurring(result, now, timezone, bankAccountId, transactionClusterId)
 		if old, ok := existingByDirection[result.Direction]; ok {
 			item.TransactionRecurringId = old.TransactionRecurringId
 			item.CreatedAt = old.CreatedAt
@@ -112,6 +114,7 @@ func DiffTransactionRecurring(
 func newTransactionRecurring(
 	result recurring.RecurringTransactionResult,
 	now time.Time,
+	timezone *time.Location,
 	bankAccountId models.ID[models.BankAccount],
 	transactionClusterId models.ID[models.TransactionCluster],
 ) models.TransactionRecurring {
@@ -134,10 +137,15 @@ func newTransactionRecurring(
 		}
 	}
 
+	// The ruleset is stored in UTC, but its days are the account's days. So it
+	// needs to be in the account's timezone to land on the right day.
+	rule := result.RuleSet.Clone()
+	rule.DTStart(rule.GetDTStart().In(timezone))
+
 	// The recurrence has ended once it is past the occurrence that should have
 	// come after the last transaction, with half a period of slack since charges
 	// move around by a few days.
-	expected := result.RuleSet.After(last.Date, false)
+	expected := rule.After(last.Date, false)
 	ended := now.After(expected.AddDate(0, 0, max(result.Best.Frequency/2, 3)))
 
 	return models.TransactionRecurring{
@@ -147,7 +155,7 @@ func newTransactionRecurring(
 		RuleSet:              result.RuleSet,
 		First:                first.Date,
 		Last:                 last.Date,
-		Next:                 result.RuleSet.After(now, false),
+		Next:                 rule.After(now, false),
 		Ended:                ended,
 		Confidence:           result.Best.Confidence,
 		Direction:            result.Direction,

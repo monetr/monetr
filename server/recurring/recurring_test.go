@@ -115,9 +115,21 @@ func TestRecurringDetection(t *testing.T) {
 	t.Run("yearly renewal", func(t *testing.T) {
 		// Three renewals on the same day every year, like a yearly subscription.
 		transactions := []models.Transaction{
-			{TransactionId: "txn_0", Amount: 5985, Date: time.Date(2024, 4, 23, 0, 0, 0, 0, time.UTC)},
-			{TransactionId: "txn_1", Amount: 5985, Date: time.Date(2025, 4, 23, 0, 0, 0, 0, time.UTC)},
-			{TransactionId: "txn_2", Amount: 7188, Date: time.Date(2026, 4, 23, 0, 0, 0, 0, time.UTC)},
+			{
+				TransactionId: "txn_0",
+				Amount:        5985,
+				Date:          time.Date(2024, 4, 23, 0, 0, 0, 0, time.UTC),
+			},
+			{
+				TransactionId: "txn_1",
+				Amount:        5985,
+				Date:          time.Date(2025, 4, 23, 0, 0, 0, 0, time.UTC),
+			},
+			{
+				TransactionId: "txn_2",
+				Amount:        7188,
+				Date:          time.Date(2026, 4, 23, 0, 0, 0, 0, time.UTC),
+			},
 		}
 
 		results, err := DetectRecurringTransactions(t.Context(), clock.NewMock(), time.UTC, transactions)
@@ -134,9 +146,21 @@ func TestRecurringDetection(t *testing.T) {
 		// tolerance would accept as about a year, but the gaps are 446 and 273 days
 		// and that is nothing like a yearly charge.
 		transactions := []models.Transaction{
-			{TransactionId: "txn_0", Amount: 1520, Date: time.Date(2023, 3, 10, 0, 0, 0, 0, time.UTC)},
-			{TransactionId: "txn_1", Amount: 829, Date: time.Date(2024, 5, 29, 0, 0, 0, 0, time.UTC)},
-			{TransactionId: "txn_2", Amount: 1537, Date: time.Date(2025, 2, 26, 0, 0, 0, 0, time.UTC)},
+			{
+				TransactionId: "txn_0",
+				Amount:        1520,
+				Date:          time.Date(2023, 3, 10, 0, 0, 0, 0, time.UTC),
+			},
+			{
+				TransactionId: "txn_1",
+				Amount:        829,
+				Date:          time.Date(2024, 5, 29, 0, 0, 0, 0, time.UTC),
+			},
+			{
+				TransactionId: "txn_2",
+				Amount:        1537,
+				Date:          time.Date(2025, 2, 26, 0, 0, 0, 0, time.UTC),
+			},
 		}
 
 		results, err := DetectRecurringTransactions(t.Context(), clock.NewMock(), time.UTC, transactions)
@@ -153,18 +177,70 @@ func TestRecurringDetection(t *testing.T) {
 		// A cluster that has both a monthly charge on the 8th and a monthly refund
 		// on the 22nd, each direction should be its own recurring result.
 		transactions := []models.Transaction{
-			{TransactionId: "txn_0", Amount: 1858, Date: time.Date(2026, 1, 8, 0, 0, 0, 0, central)},
-			{TransactionId: "txn_1", Amount: -500, Date: time.Date(2026, 1, 22, 0, 0, 0, 0, central)},
-			{TransactionId: "txn_2", Amount: 1858, Date: time.Date(2026, 2, 9, 0, 0, 0, 0, central)},  // 8th was a Sunday
-			{TransactionId: "txn_3", Amount: -500, Date: time.Date(2026, 2, 23, 0, 0, 0, 0, central)}, // 22nd was a Sunday
-			{TransactionId: "txn_4", Amount: 1858, Date: time.Date(2026, 3, 9, 0, 0, 0, 0, central)},  // 8th was a Sunday
-			{TransactionId: "txn_5", Amount: -500, Date: time.Date(2026, 3, 23, 0, 0, 0, 0, central)}, // 22nd was a Sunday
-			{TransactionId: "txn_6", Amount: 1858, Date: time.Date(2026, 4, 8, 0, 0, 0, 0, central)},
-			{TransactionId: "txn_7", Amount: -500, Date: time.Date(2026, 4, 22, 0, 0, 0, 0, central)},
-			{TransactionId: "txn_8", Amount: 1858, Date: time.Date(2026, 5, 8, 0, 0, 0, 0, central)},
-			{TransactionId: "txn_9", Amount: -500, Date: time.Date(2026, 5, 22, 0, 0, 0, 0, central)},
-			{TransactionId: "txn_10", Amount: 1858, Date: time.Date(2026, 6, 8, 0, 0, 0, 0, central)},
-			{TransactionId: "txn_11", Amount: -500, Date: time.Date(2026, 6, 22, 0, 0, 0, 0, central)},
+			{
+				TransactionId: "txn_0",
+				Amount:        1858,
+				Date:          time.Date(2026, 1, 8, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_1",
+				Amount:        -500,
+				Date:          time.Date(2026, 1, 22, 0, 0, 0, 0, central),
+			},
+			// 8th was a Sunday
+			{
+				TransactionId: "txn_2",
+				Amount:        1858,
+				Date:          time.Date(2026, 2, 9, 0, 0, 0, 0, central),
+			},
+			// 22nd was a Sunday
+			{
+				TransactionId: "txn_3",
+				Amount:        -500,
+				Date:          time.Date(2026, 2, 23, 0, 0, 0, 0, central),
+			},
+			// 8th was a Sunday
+			{
+				TransactionId: "txn_4",
+				Amount:        1858,
+				Date:          time.Date(2026, 3, 9, 0, 0, 0, 0, central),
+			},
+			// 22nd was a Sunday
+			{
+				TransactionId: "txn_5",
+				Amount:        -500,
+				Date:          time.Date(2026, 3, 23, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_6",
+				Amount:        1858,
+				Date:          time.Date(2026, 4, 8, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_7",
+				Amount:        -500,
+				Date:          time.Date(2026, 4, 22, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_8",
+				Amount:        1858,
+				Date:          time.Date(2026, 5, 8, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_9",
+				Amount:        -500,
+				Date:          time.Date(2026, 5, 22, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_10",
+				Amount:        1858,
+				Date:          time.Date(2026, 6, 8, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_11",
+				Amount:        -500,
+				Date:          time.Date(2026, 6, 22, 0, 0, 0, 0, central),
+			},
 		}
 
 		results, err := DetectRecurringTransactions(t.Context(), clock.NewMock(), central, transactions)
@@ -196,11 +272,31 @@ func TestRecurringDetection(t *testing.T) {
 		// A monthly charge with a single refund mixed in, there aren't enough
 		// credits to detect anything so there is only a result for the debits.
 		transactions := []models.Transaction{
-			{TransactionId: "txn_0", Amount: 1440, Date: time.Date(2026, 1, 10, 0, 0, 0, 0, time.UTC)},
-			{TransactionId: "txn_1", Amount: 1440, Date: time.Date(2026, 2, 10, 0, 0, 0, 0, time.UTC)},
-			{TransactionId: "txn_2", Amount: -1440, Date: time.Date(2026, 2, 12, 0, 0, 0, 0, time.UTC)},
-			{TransactionId: "txn_3", Amount: 1440, Date: time.Date(2026, 3, 10, 0, 0, 0, 0, time.UTC)},
-			{TransactionId: "txn_4", Amount: 1440, Date: time.Date(2026, 4, 10, 0, 0, 0, 0, time.UTC)},
+			{
+				TransactionId: "txn_0",
+				Amount:        1440,
+				Date:          time.Date(2026, 1, 10, 0, 0, 0, 0, time.UTC),
+			},
+			{
+				TransactionId: "txn_1",
+				Amount:        1440,
+				Date:          time.Date(2026, 2, 10, 0, 0, 0, 0, time.UTC),
+			},
+			{
+				TransactionId: "txn_2",
+				Amount:        -1440,
+				Date:          time.Date(2026, 2, 12, 0, 0, 0, 0, time.UTC),
+			},
+			{
+				TransactionId: "txn_3",
+				Amount:        1440,
+				Date:          time.Date(2026, 3, 10, 0, 0, 0, 0, time.UTC),
+			},
+			{
+				TransactionId: "txn_4",
+				Amount:        1440,
+				Date:          time.Date(2026, 4, 10, 0, 0, 0, 0, time.UTC),
+			},
 		}
 
 		results, err := DetectRecurringTransactions(t.Context(), clock.NewMock(), time.UTC, transactions)
@@ -213,9 +309,21 @@ func TestRecurringDetection(t *testing.T) {
 
 	t.Run("not enough transactions in either direction", func(t *testing.T) {
 		transactions := []models.Transaction{
-			{TransactionId: "txn_0", Amount: 2000, Date: time.Date(2026, 3, 4, 0, 0, 0, 0, time.UTC)},
-			{TransactionId: "txn_1", Amount: -2000, Date: time.Date(2026, 3, 26, 0, 0, 0, 0, time.UTC)},
-			{TransactionId: "txn_2", Amount: 2000, Date: time.Date(2026, 4, 27, 0, 0, 0, 0, time.UTC)},
+			{
+				TransactionId: "txn_0",
+				Amount:        2000,
+				Date:          time.Date(2026, 3, 4, 0, 0, 0, 0, time.UTC),
+			},
+			{
+				TransactionId: "txn_1",
+				Amount:        -2000,
+				Date:          time.Date(2026, 3, 26, 0, 0, 0, 0, time.UTC),
+			},
+			{
+				TransactionId: "txn_2",
+				Amount:        2000,
+				Date:          time.Date(2026, 4, 27, 0, 0, 0, 0, time.UTC),
+			},
 		}
 
 		results, err := DetectRecurringTransactions(t.Context(), clock.NewMock(), time.UTC, transactions)
@@ -227,9 +335,21 @@ func TestRecurringDetection(t *testing.T) {
 		// Transactions with no amount have no direction, so these three don't count
 		// towards either one.
 		transactions := []models.Transaction{
-			{TransactionId: "txn_0", Amount: 0, Date: time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)},
-			{TransactionId: "txn_1", Amount: 0, Date: time.Date(2026, 2, 1, 0, 0, 0, 0, time.UTC)},
-			{TransactionId: "txn_2", Amount: 0, Date: time.Date(2026, 3, 1, 0, 0, 0, 0, time.UTC)},
+			{
+				TransactionId: "txn_0",
+				Amount:        0,
+				Date:          time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
+			},
+			{
+				TransactionId: "txn_1",
+				Amount:        0,
+				Date:          time.Date(2026, 2, 1, 0, 0, 0, 0, time.UTC),
+			},
+			{
+				TransactionId: "txn_2",
+				Amount:        0,
+				Date:          time.Date(2026, 3, 1, 0, 0, 0, 0, time.UTC),
+			},
 		}
 
 		results, err := DetectRecurringTransactions(t.Context(), clock.NewMock(), time.UTC, transactions)

@@ -15,7 +15,7 @@ func (c *Controller) getRecurringTransaction(ctx *echo.Context) error {
 
 	transactionRecurringId, err := ParseID[TransactionRecurring](ctx.Param("transactionRecurringId"))
 	if err != nil || transactionRecurringId.IsZero() {
-		return c.badRequest(ctx, "must specify a valid transaction cluster Id")
+		return c.badRequest(ctx, "must specify a valid recurring transaction Id")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
