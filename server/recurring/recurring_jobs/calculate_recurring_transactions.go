@@ -1,7 +1,6 @@
 package recurring_jobs
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/monetr/monetr/server/crumbs"
@@ -67,7 +66,53 @@ func CalculateRecurringTransactions(ctx queue.Context, args CalculateRecurringTr
 			return errors.Wrap(err, "failed to detect recurring transactions")
 		}
 
-		fmt.Sprint(results)
+		existing, err := repo.GetTransactionRecurringByCluster(
+			ctx,
+			args.BankAccountId,
+			args.TransactionClusterId,
+		)
+		if err != nil {
+			return err
+		}
+
+		diff := DiffTransactionRecurring(
+			ctx,
+			existing,
+			results,
+			ctx.Clock().Now(),
+			args.BankAccountId,
+			args.TransactionClusterId,
+		)
+
+		log.InfoContext(ctx, "recurring transaction diff calculated",
+			"transactionClusterId", args.TransactionClusterId,
+			"upsertRecurring", len(diff.UpsertRecurring),
+			"deleteRecurring", len(diff.DeleteRecurringIds),
+		)
+
+		// Existing recurring transactions are updated in place before anything new
+		// is created, and the ones that don't recur anymore are cleaned up last.
+		if err := repo.UpsertTransactionRecurring(
+			ctx,
+			args.BankAccountId,
+			diff.UpsertRecurring,
+		); err != nil {
+			return errors.Wrap(err, "failed to upsert recurring transactions")
+		}
+
+		if err := repo.DeleteTransactionRecurring(
+			ctx,
+			args.BankAccountId,
+			diff.DeleteRecurringIds,
+		); err != nil {
+			return errors.Wrap(err, "failed to delete obsolete recurring transactions")
+		}
+
+		log.InfoContext(ctx, "finished updating recurring transactions",
+			"transactionClusterId", args.TransactionClusterId,
+			"upsertRecurring", len(diff.UpsertRecurring),
+			"deleteRecurring", len(diff.DeleteRecurringIds),
+		)
 
 		return nil
 	})

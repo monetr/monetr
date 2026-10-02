@@ -16,6 +16,7 @@ CREATE TABLE "transaction_recurring" (
   "created_at"               TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
   "updated_at"               TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
   CONSTRAINT "pk_transaction_recurring"                     PRIMARY KEY ("transaction_recurring_id", "account_id", "bank_account_id"),
+  CONSTRAINT "uq_transaction_recurring_cluster_direction"   UNIQUE ("account_id", "bank_account_id", "transaction_cluster_id", "direction"),
   CONSTRAINT "fk_transaction_recurring_account"             FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id") ON DELETE CASCADE,
   CONSTRAINT "fk_transaction_recurring_bank_account"        FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_accounts" ("bank_account_id", "account_id") ON DELETE CASCADE,
   CONSTRAINT "fk_transaction_recurring_transaction_cluster" FOREIGN KEY ("transaction_cluster_id", "account_id", "bank_account_id") REFERENCES "transaction_clusters" ("transaction_cluster_id", "account_id", "bank_account_id") ON DELETE CASCADE
