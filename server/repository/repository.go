@@ -165,6 +165,12 @@ type BaseRepository interface {
 		bankAccountId ID[BankAccount],
 		transactionClusterId ID[TransactionCluster],
 	) (*TransactionCluster, error)
+	// GetTransactionClusterIds returns the ID of every transaction cluster for
+	// the specified bank account, ordered by ID.
+	GetTransactionClusterIds(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+	) ([]ID[TransactionCluster], error)
 	GetTransactionsByCluster(
 		ctx context.Context,
 		bankAccountId ID[BankAccount],

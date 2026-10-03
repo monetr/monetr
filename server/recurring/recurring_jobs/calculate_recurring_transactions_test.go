@@ -1,6 +1,7 @@
 package recurring_jobs_test
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -103,16 +104,28 @@ func repeatAmount(amount int64, count int) []int64 {
 	return result
 }
 
+// runCalculateRecurringTransactions runs the job for the whole bank account.
+// Each cluster gets its own transaction, the transaction errors are returned by
+// those transactions in order, so a non-nil one makes that cluster fail. Any
+// cluster past the provided errors succeeds.
 func runCalculateRecurringTransactions(
 	t *testing.T,
 	clock clock.Clock,
-	cluster models.TransactionCluster,
+	bankAccount models.BankAccount,
+	transactionErrors ...error,
 ) error {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	context := mockgen.NewMockContext(ctrl)
-	context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+	for _, err := range transactionErrors {
+		context.EXPECT().
+			RunInTransaction(gomock.Any(), gomock.Any()).
+			Return(err).
+			Times(1)
+	}
+	context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).AnyTimes()
+	context.EXPECT().Err().Return(nil).AnyTimes()
 	context.EXPECT().Clock().Return(clock).AnyTimes()
 	context.EXPECT().DB().Return(testutils.GetPgDatabase(t)).AnyTimes()
 	context.EXPECT().Log().Return(testutils.GetLog(t)).AnyTimes()
@@ -120,9 +133,8 @@ func runCalculateRecurringTransactions(
 	return recurring_jobs.CalculateRecurringTransactions(
 		mockqueue.NewMockContext(context),
 		recurring_jobs.CalculateRecurringTransactionsArguments{
-			AccountId:            cluster.AccountId,
-			BankAccountId:        cluster.BankAccountId,
-			TransactionClusterId: cluster.TransactionClusterId,
+			AccountId:     bankAccount.AccountId,
+			BankAccountId: bankAccount.BankAccountId,
 		},
 	)
 }
@@ -192,7 +204,7 @@ func TestCalculateRecurringTransactions(t *testing.T) {
 			monthlyDates(accountTimezone(t, bankAccount), 6),
 		)
 
-		err := runCalculateRecurringTransactions(t, clock, cluster)
+		err := runCalculateRecurringTransactions(t, clock, bankAccount)
 		require.NoError(t, err, "must be able to calculate recurring transactions")
 
 		recurring := readRecurringByCluster(t, clock, cluster)
@@ -228,12 +240,12 @@ func TestCalculateRecurringTransactions(t *testing.T) {
 			monthlyDates(accountTimezone(t, bankAccount), 6),
 		)
 
-		require.NoError(t, runCalculateRecurringTransactions(t, clock, cluster), "first run must succeed")
+		require.NoError(t, runCalculateRecurringTransactions(t, clock, bankAccount), "first run must succeed")
 		first := readRecurringByCluster(t, clock, cluster)
 		require.Len(t, first, 1, "should have a single recurring transaction")
 
 		clock.Add(24 * time.Hour)
-		require.NoError(t, runCalculateRecurringTransactions(t, clock, cluster), "second run must succeed")
+		require.NoError(t, runCalculateRecurringTransactions(t, clock, bankAccount), "second run must succeed")
 		second := readRecurringByCluster(t, clock, cluster)
 		require.Len(t, second, 1, "should still have a single recurring transaction")
 		assert.Equal(t, first[0].TransactionRecurringId, second[0].TransactionRecurringId, "should keep the same ID")
@@ -290,7 +302,7 @@ func TestCalculateRecurringTransactions(t *testing.T) {
 			Exec(t.Context())
 		require.NoError(t, err, "must be able to link the refund to the stale recurring transaction")
 
-		err = runCalculateRecurringTransactions(t, clock, cluster)
+		err = runCalculateRecurringTransactions(t, clock, bankAccount)
 		require.NoError(t, err, "must be able to calculate recurring transactions")
 
 		recurring := readRecurringByCluster(t, clock, cluster)
@@ -324,7 +336,7 @@ func TestCalculateRecurringTransactions(t *testing.T) {
 
 		givenTheAccountTimezoneIs(t, bankAccount, "Not/A_Timezone")
 
-		err := runCalculateRecurringTransactions(t, clock, cluster)
+		err := runCalculateRecurringTransactions(t, clock, bankAccount)
 		require.NoError(t, err, "an invalid timezone should not fail the job")
 
 		recurring := readRecurringByCluster(t, clock, cluster)
@@ -345,8 +357,125 @@ func TestCalculateRecurringTransactions(t *testing.T) {
 		)
 		cluster, _ := givenIHaveAClusterWithTransactions(t, clock, bankAccount, nil, nil)
 
-		err := runCalculateRecurringTransactions(t, clock, cluster)
+		err := runCalculateRecurringTransactions(t, clock, bankAccount)
 		require.NoError(t, err, "must be able to calculate an empty cluster")
 		assert.Empty(t, readRecurringByCluster(t, clock, cluster), "nothing should recur")
+	})
+
+	t.Run("bank account without clusters", func(t *testing.T) {
+		clock := clock.NewMock()
+		clock.Set(time.Date(2026, 7, 1, 9, 0, 0, 0, time.UTC))
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(
+			t,
+			clock,
+			&link,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
+
+		err := runCalculateRecurringTransactions(t, clock, bankAccount)
+		assert.NoError(t, err, "nothing to calculate is not an error")
+	})
+
+	t.Run("calculates every cluster in the bank account", func(t *testing.T) {
+		clock := clock.NewMock()
+		clock.Set(time.Date(2026, 7, 1, 9, 0, 0, 0, time.UTC))
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(
+			t,
+			clock,
+			&link,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
+		timezone := accountTimezone(t, bankAccount)
+		first, _ := givenIHaveAClusterWithTransactions(
+			t,
+			clock,
+			bankAccount,
+			repeatAmount(800, 6),
+			monthlyDates(timezone, 6),
+		)
+		second, _ := givenIHaveAClusterWithTransactions(
+			t,
+			clock,
+			bankAccount,
+			repeatAmount(2600, 6),
+			monthlyDates(timezone, 6),
+		)
+
+		err := runCalculateRecurringTransactions(t, clock, bankAccount)
+		require.NoError(t, err, "must be able to calculate recurring transactions")
+
+		assert.Len(t, readRecurringByCluster(t, clock, first), 1, "the first cluster should recur")
+		assert.Len(t, readRecurringByCluster(t, clock, second), 1, "the second cluster should recur")
+	})
+
+	t.Run("skips a cluster that fails", func(t *testing.T) {
+		clock := clock.NewMock()
+		clock.Set(time.Date(2026, 7, 1, 9, 0, 0, 0, time.UTC))
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(
+			t,
+			clock,
+			&link,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
+		timezone := accountTimezone(t, bankAccount)
+		first, _ := givenIHaveAClusterWithTransactions(
+			t,
+			clock,
+			bankAccount,
+			repeatAmount(800, 6),
+			monthlyDates(timezone, 6),
+		)
+		second, _ := givenIHaveAClusterWithTransactions(
+			t,
+			clock,
+			bankAccount,
+			repeatAmount(2600, 6),
+			monthlyDates(timezone, 6),
+		)
+		// Clusters are calculated in order of their ID, the first one fails.
+		if second.TransactionClusterId < first.TransactionClusterId {
+			first, second = second, first
+		}
+
+		err := runCalculateRecurringTransactions(t, clock, bankAccount, errors.New("boom"))
+		require.NoError(t, err, "one bad cluster should not fail the job")
+
+		assert.Empty(t, readRecurringByCluster(t, clock, first), "the cluster that failed should be skipped")
+		assert.Len(t, readRecurringByCluster(t, clock, second), 1, "the other cluster should still be calculated")
+	})
+
+	t.Run("fails when every cluster fails", func(t *testing.T) {
+		clock := clock.NewMock()
+		clock.Set(time.Date(2026, 7, 1, 9, 0, 0, 0, time.UTC))
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(
+			t,
+			clock,
+			&link,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
+		timezone := accountTimezone(t, bankAccount)
+		cluster, _ := givenIHaveAClusterWithTransactions(
+			t,
+			clock,
+			bankAccount,
+			repeatAmount(800, 6),
+			monthlyDates(timezone, 6),
+		)
+
+		err := runCalculateRecurringTransactions(t, clock, bankAccount, errors.New("boom"))
+		assert.Error(t, err, "should fail when no cluster could be calculated")
+		assert.Empty(t, readRecurringByCluster(t, clock, cluster), "nothing should have been written")
 	})
 }
