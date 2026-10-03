@@ -5,8 +5,8 @@ import parseDate from '@monetr/interface/util/parseDate';
 export default class TransactionCluster {
   readonly [idPrefix] = 'tcl';
 
-  transactionClusterId: string;
-  bankAccountId: string;
+  readonly transactionClusterId: string;
+  readonly bankAccountId: string;
   name: string;
   members: Array<string>;
   createdAt: Date;

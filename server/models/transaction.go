@@ -35,6 +35,8 @@ type Transaction struct {
 	LunchFlowTransaction      *LunchFlowTransaction     `json:"lunchFlowTransaction,omitempty" bun:"rel:belongs-to,join:lunch_flow_transaction_id=lunch_flow_transaction_id,join:account_id=account_id"`
 	TransactionClusterId      *ID[TransactionCluster]   `json:"transactionClusterId" bun:"transaction_cluster_id"`
 	TransactionCluster        *TransactionCluster       `json:"-" bun:"rel:belongs-to,join:transaction_cluster_id=transaction_cluster_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
+	TransactionRecurringId    *ID[TransactionRecurring] `json:"transactionRecurringId" bun:"transaction_recurring_id"`
+	TransactionRecurring      *TransactionRecurring     `json:"-" bun:"rel:belongs-to,join:transaction_recurring_id=transaction_recurring_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
 	Amount                    int64                     `json:"amount" bun:"amount,notnull"`
 	SpendingId                *ID[Spending]             `json:"spendingId" bun:"spending_id"`
 	Spending                  *Spending                 `json:"spending,omitempty" bun:"rel:belongs-to,join:spending_id=spending_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`

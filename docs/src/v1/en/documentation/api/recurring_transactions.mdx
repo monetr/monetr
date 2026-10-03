@@ -1,0 +1,119 @@
+---
+title: "Recurring Transactions API"
+description: "Look up the charges and deposits monetr has noticed repeating on a schedule, when the next one should land, and whether they've stopped, with curl examples."
+---
+
+import { Badge } from "@rspress/core/theme";
+
+# Recurring Transactions API
+
+:::warning Beta
+Recurring transactions are a beta feature. How monetr detects them and what the object looks like are both subject to
+significant changes, so expect this page to move around a bunch before it settles down.
+:::
+
+Once monetr has grouped your transactions into [similar transaction](./similar_transactions) clusters, it looks at each
+cluster and tries to work out whether it happens on a schedule. Your streaming service on the 12th every month, a
+paycheck every other Friday, car insurance once a year. When it finds a schedule that holds up, that's a recurring
+transaction.
+
+A recurring transaction only ever goes one direction. Money going out and money coming in get looked at separately, so
+a cluster can have at most two of them, one for the charges and one for the refunds or deposits. Most only ever have
+one.
+
+monetr wants at least three transactions before it'll call something recurring, and it has to be pretty sure about the
+schedule. Two charges a month apart is a coincidence as far as it's concerned.
+
+Like the clusters, this all happens in a background job. It runs right after the clusters get recalculated, so a brand
+new transaction won't count toward anything until both jobs have gotten to it.
+
+Each [transaction](./transactions#the-transaction-object) has a `transactionRecurringId` pointing at the recurring
+transaction it's part of. That's how you'll find these for now, there's no endpoint to list them yet.
+
+## The recurring transaction object
+
+| Attribute                | Type          | Description                                                                                                                                                                                                       |
+| ------------------------ | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `transactionRecurringId` | string (ulid) | Identifies the recurring transaction. It stays the same between recalculations as long as the cluster keeps recurring in the same direction.                                                                      |
+| `bankAccountId`          | string (ulid) | The bank account it belongs to.                                                                                                                                                                                   |
+| `transactionClusterId`   | string (ulid) | The [similar transactions](./similar_transactions#the-similar-transaction-object) cluster it was found in.                                                                                                        |
+| `direction`              | string        | `debit` for money leaving the account, `credit` for money coming in. Same as the sign on the transactions, debits are positive amounts and credits are negative.                                                  |
+| `window`                 | string        | Roughly how often it happens. One of `weekly`, `biweekly`, `firstAndFifteenth`, `fifteenthAndLast`, `monthly`, `bimonthly`, `quarterly` or `yearly`. `biweekly` is every two weeks, `bimonthly` every two months. |
+| `ruleset`                | string        | The actual schedule, as a [recurrence rule](./recurrence_rules). The days in it are your account's days, see the note below the table.                                                                            |
+| `first`                  | timestamp     | The earliest transaction that's part of it. If something stopped for a long stretch and then started up again, this is from when it started back up.                                                             |
+| `last`                   | timestamp     | The most recent transaction that's part of it.                                                                                                                                                                    |
+| `next`                   | timestamp     | When monetr expects the next one, as of the last recalculation. Nothing updates it in between, so if the job hasn't run in a while this can already be in the past.                                               |
+| `ended`                  | boolean       | True once it's gone too long without a new transaction. monetr gives it half a period of slack past when the next one was due, and never less than 3 days, since charges like to wander around a bit.            |
+| `confidence`             | number        | How sure monetr is about the schedule, between 0.6 and 1. Anything under 0.6 doesn't get to be a recurring transaction at all.                                                                                    |
+| `amounts`                | object        | How many times each amount showed up. Keys are amounts in the currency's smallest unit, as strings since it's JSON, and values are counts. Handy for spotting a price change.                                     |
+| `lastAmount`             | integer       | The amount of the most recent transaction, in the currency's smallest unit. Usually your best guess for what the next one will be. See [Currencies](./currencies#how-monetr-stores-money).                        |
+| `createdAt`              | timestamp     | When monetr first decided it was recurring.                                                                                                                                                                       |
+| `updatedAt`              | timestamp     | When it was last recalculated. This changes on every recalculation, even when nothing about it did, so don't use it to spot changes.                                                                              |
+
+The `ruleset` keeps its `DTSTART` in UTC like every other ruleset in monetr, but the schedule is really in your
+account's timezone. If you want to pull dates out of it yourself, move `DTSTART` into your account's timezone first.
+Skip that and something like `BYMONTHDAY=8` lands on the 9th for anyone east of UTC.
+
+`ended` and deleted aren't the same thing. Something that ended still exists, it just isn't happening anymore. If a
+cluster stops recurring entirely, or the cluster itself goes away, the recurring transaction gets deleted. Its ID stops
+working and the transactions that were in it go back to a null `transactionRecurringId`.
+
+## <Badge type="info">GET</Badge> Get a recurring transaction
+
+Returns one recurring transaction. You'll usually get the ID from a transaction's `transactionRecurringId`.
+
+**In the app:** Nothing in the app calls this yet.
+
+```http
+GET /api/bank_accounts/:bankAccountId/recurring/:transactionRecurringId
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute                | Type          | Required | Description                                            |
+| ------------------------ | ------------- | -------- | ------------------------------------------------------ |
+| `bankAccountId`          | string (ulid) | Yes      | The bank account the recurring transaction belongs to. |
+| `transactionRecurringId` | string (ulid) | Yes      | The recurring transaction you want.                    |
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring/txrc_01j6b4n8w2kq5t9r3xm7vdc6ph" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+{
+  "transactionRecurringId": "txrc_01j6b4n8w2kq5t9r3xm7vdc6ph",
+  "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+  "transactionClusterId": "tcl_01j6b4m3zr8yq2w6tnc5kxd9fe",
+  "window": "monthly",
+  "ruleset": "DTSTART:20240301T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=12",
+  "first": "2024-03-12T05:00:00Z",
+  "last": "2024-08-12T05:00:00Z",
+  "next": "2024-09-12T05:00:00Z",
+  "ended": false,
+  "confidence": 0.94,
+  "direction": "debit",
+  "amounts": {
+    "1399": 3,
+    "1549": 3
+  },
+  "lastAmount": 1549,
+  "createdAt": "2024-05-13T03:15:06.214Z",
+  "updatedAt": "2024-08-30T03:15:05.902Z"
+}
+```
+
+That one's a monthly charge on the 12th that went up from $13.99 to $15.49 partway through, which is why `amounts` has
+two entries.
+
+### Errors
+
+| Status | When                                                        |
+| ------ | ----------------------------------------------------------- |
+| 400    | Either ID is malformed.                                     |
+| 404    | No recurring transaction with that ID on that bank account. |

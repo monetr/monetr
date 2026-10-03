@@ -165,12 +165,59 @@ type BaseRepository interface {
 		bankAccountId ID[BankAccount],
 		transactionClusterId ID[TransactionCluster],
 	) (*TransactionCluster, error)
+	// GetTransactionClusterIds returns the ID of every transaction cluster for
+	// the specified bank account, ordered by ID.
+	GetTransactionClusterIds(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+	) ([]ID[TransactionCluster], error)
 	GetTransactionsByCluster(
 		ctx context.Context,
 		bankAccountId ID[BankAccount],
 		transactionClusterId ID[TransactionCluster],
 		limit, offset int,
 	) ([]Transaction, error)
+
+	GetTransactionRecurringById(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		transactionRecurringId ID[TransactionRecurring],
+	) (*TransactionRecurring, error)
+
+	// GetTransactionRecurringByCluster returns the recurring transactions for the
+	// specified cluster, there is at most one for each direction.
+	GetTransactionRecurringByCluster(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		transactionClusterId ID[TransactionCluster],
+	) ([]TransactionRecurring, error)
+	// UpsertTransactionRecurring will insert or update the provided recurring
+	// transactions by their cluster and direction. An existing recurring
+	// transaction for the same cluster and direction is updated in place and
+	// keeps its ID. It doesn't delete anything, use DeleteTransactionRecurring
+	// for that.
+	UpsertTransactionRecurring(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		recurring []TransactionRecurring,
+	) error
+	// UpdateTransactionRecurringIds sets the recurring ID on each of the provided
+	// transactions by their primary key. A nil recurring ID removes the
+	// transaction from whatever recurring transaction it was part of. No other
+	// columns are written.
+	UpdateTransactionRecurringIds(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		transactions []Transaction,
+	) error
+	// DeleteTransactionRecurring removes the specified recurring transactions by
+	// their IDs. Transactions referencing them will have their recurring ID set
+	// to null.
+	DeleteTransactionRecurring(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		transactionRecurringIds []ID[TransactionRecurring],
+	) error
 
 	GetTransactionUpload(
 		ctx context.Context,
