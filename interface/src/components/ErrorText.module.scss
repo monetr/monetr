@@ -11,6 +11,13 @@ $marginTop: 0.5;
   margin-top: $marginTop * variables.$size;
 }
 
+.descriptionText {
+  @include mixins.text-extra-small;
+
+  color: var(--content);
+  margin-top: $marginTop * variables.$size;
+}
+
 .errorTextPadding {
   // The padding on the bottom should be equal to the top margin of the error
   // text plus the line height of the extra small text.

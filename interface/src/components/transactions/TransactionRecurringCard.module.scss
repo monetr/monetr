@@ -1,0 +1,205 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.card {
+  // inset to match the similar transaction items below it, see Item.module.scss
+  align-self: stretch;
+  margin-left: 1 * variables.$size;
+  margin-right: 1 * variables.$size;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius);
+  background-color: var(--background-darker);
+
+  @media (min-width: variables.$mediumScreen) {
+    margin-left: 2 * variables.$size;
+    margin-right: 2 * variables.$size;
+  }
+
+  // every section after the header gets split off with a subtle divider
+  > * + * {
+    border-top: 1px solid var(--border-subtle);
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 3 * variables.$size;
+  padding: 4 * variables.$size;
+}
+
+.headerIcon {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 9 * variables.$size;
+  height: 9 * variables.$size;
+  border-radius: var(--border-radius);
+  background-color: var(--brand);
+  color: var(--content-emphasis);
+
+  svg {
+    width: 4.5 * variables.$size;
+    height: 4.5 * variables.$size;
+  }
+}
+
+.headerText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.eyebrow {
+  @include mixins.text-small;
+  font-weight: var(--semibold);
+  color: var(--content-subtle);
+}
+
+.title {
+  @include mixins.text-large;
+  font-weight: var(--bold);
+  color: var(--content-emphasis);
+}
+
+.confidence {
+  @include mixins.text-extra-small;
+  flex: none;
+  font-weight: var(--semibold);
+  color: var(--content-emphasis);
+  padding: 0.5 * variables.$size 2 * variables.$size;
+  border-radius: var(--border-radius);
+  background-color: var(--background-emphasis);
+}
+
+// two columns on mobile, all four stats in a row once theres room
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3 * variables.$size;
+  padding: 3.5 * variables.$size 4 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5 * variables.$size;
+}
+
+.statLabel {
+  @include mixins.text-extra-small;
+  font-weight: var(--medium);
+  color: var(--content-subtle);
+}
+
+.statValue {
+  @include mixins.text-base;
+  font-weight: var(--semibold);
+  color: var(--content-emphasis);
+}
+
+.statDetail {
+  @include mixins.text-extra-small;
+  color: var(--content-subtle);
+}
+
+.priceChange {
+  display: flex;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+  padding: 3.5 * variables.$size 4 * variables.$size;
+}
+
+.priceChangeTitle {
+  @include mixins.text-small;
+  display: flex;
+  align-items: center;
+  gap: 1.5 * variables.$size;
+  font-weight: var(--semibold);
+  color: var(--content-emphasis);
+
+  svg {
+    width: 4 * variables.$size;
+    height: 4 * variables.$size;
+    color: var(--warning);
+  }
+}
+
+.priceChangeAmounts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2 * variables.$size;
+
+  > svg {
+    width: 3.5 * variables.$size;
+    height: 3.5 * variables.$size;
+    color: var(--content-muted);
+  }
+}
+
+.priceChip {
+  @include mixins.text-small;
+  padding: 0.75 * variables.$size 2 * variables.$size;
+  border-radius: var(--border-radius);
+  background-color: var(--background-subtle);
+  color: var(--content);
+
+  span {
+    color: var(--content-subtle);
+  }
+
+  &[data-current] {
+    background-color: var(--brand);
+    color: var(--content-emphasis);
+
+    span {
+      color: var(--brand-bright);
+    }
+  }
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3 * variables.$size;
+  padding: 3.5 * variables.$size 4 * variables.$size;
+}
+
+.spentFrom {
+  @include mixins.text-small;
+  display: flex;
+  align-items: center;
+  gap: 2 * variables.$size;
+  min-width: 0;
+  color: var(--content);
+
+  strong {
+    font-weight: var(--semibold);
+    color: var(--content-emphasis);
+  }
+}
+
+.spentFromIcon {
+  display: flex;
+  flex: none;
+  padding: 0.5 * variables.$size 1.5 * variables.$size;
+  border-radius: var(--border-radius);
+  background-color: var(--brand);
+  color: var(--content-emphasis);
+
+  svg {
+    width: 4 * variables.$size;
+    height: 4 * variables.$size;
+  }
+}

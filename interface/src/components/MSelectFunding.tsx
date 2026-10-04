@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useFormikContext } from 'formik';
 import { Calendar } from 'lucide-react';
 
@@ -6,6 +7,7 @@ import Label from '@monetr/interface/components/Label';
 import Select, { type SelectOption } from '@monetr/interface/components/Select';
 import { useFundingSchedules } from '@monetr/interface/hooks/useFundingSchedules';
 import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
+import { ID } from '@monetr/interface/models/ID';
 
 import styles from './MSelectFunding.module.scss';
 
@@ -21,6 +23,17 @@ export default function MSelectFunding(props: MSelectFundingProps): React.JSX.El
   const formikContext = useFormikContext<Record<string, any>>();
   const { data: funding, isLoading: fundingIsLoading, isError: fundingIsError } = useFundingSchedules();
   const label = props.label ?? 'Select a funding schedule';
+
+  // if theres only one funding schedule then theres not really a choice to make, so just pick it for them as long as
+  // nothing is picked yet
+  const onlyFundingScheduleId = funding?.length === 1 ? funding[0]?.fundingScheduleId : undefined;
+  const currentValue = formikContext.values[props.name];
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only want this to run when the funding schedules or the value change
+  useEffect(() => {
+    if (onlyFundingScheduleId && ID.isZero(currentValue)) {
+      formikContext.setFieldValue(props.name, onlyFundingScheduleId);
+    }
+  }, [onlyFundingScheduleId, currentValue]);
 
   if (fundingIsLoading) {
     return (

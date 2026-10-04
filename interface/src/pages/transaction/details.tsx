@@ -22,6 +22,7 @@ import Typography from '@monetr/interface/components/Typography';
 import RemoveTransactionButton from '@monetr/interface/components/transactions/RemoveTransactionButton';
 import SimilarTransactions from '@monetr/interface/components/transactions/SimilarTransactions';
 import TransactionMerchantIcon from '@monetr/interface/components/transactions/TransactionMerchantIcon';
+import TransactionRecurringCard from '@monetr/interface/components/transactions/TransactionRecurringCard';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { usePatchTransaction } from '@monetr/interface/hooks/usePatchTransaction';
@@ -30,6 +31,7 @@ import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { useTransaction } from '@monetr/interface/hooks/useTransaction';
 import type { ID } from '@monetr/interface/models/ID';
 import type Spending from '@monetr/interface/models/Spending';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 import type { APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
 
@@ -269,7 +271,8 @@ export default function TransactionDetails(): React.JSX.Element {
               </FormButton>
             </div>
           </div>
-          <div className={styles.column}>
+          <div className={mergeClasses(styles.column, styles.relatedColumn)}>
+            {transaction.transactionRecurringId && <TransactionRecurringCard transaction={transaction} />}
             <SimilarTransactions transaction={transaction} />
           </div>
         </div>

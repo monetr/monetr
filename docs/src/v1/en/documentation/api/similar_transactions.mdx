@@ -49,7 +49,7 @@ to a null `transactionClusterId`.
 
 Returns one cluster. You'll usually get the ID from a transaction's `transactionClusterId`.
 
-**In the app:** Nothing in the app calls this yet.
+**In the app:** Creating an expense from a recurring transaction uses the cluster's name as the expense's name.
 
 ```http
 GET /api/bank_accounts/:bankAccountId/similar/:transactionClusterId

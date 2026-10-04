@@ -32,6 +32,7 @@ type NumericField = Omit<
 export interface MAmountFieldProps extends NumericField {
   label?: string;
   error?: string;
+  description?: string;
   labelDecorator?: LabelDecorator;
   currency?: string;
   isLoading?: boolean;
@@ -71,7 +72,7 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
   const currency = props.currency ?? 'USD';
   const currencyInfo = intlNumberFormat(locale, currency);
 
-  const { labelDecorator, ...otherProps } = props;
+  const { labelDecorator, description, ...otherProps } = props;
   const LabelDecorator = labelDecorator ?? (() => null);
 
   // If we are working with a date picker, then take the current value and transform it for the actual input.
@@ -129,7 +130,7 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
           thousandSeparator={getNumberGroupSeparator(locale)}
         />
       </div>
-      <ErrorText error={props.error} />
+      <ErrorText description={description} error={props.error} />
     </div>
   );
 }

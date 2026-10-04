@@ -35,6 +35,7 @@ export interface SelectProps<V = unknown> {
   label?: string;
   labelDecorator?: LabelDecorator;
   error?: string;
+  description?: string;
   required?: boolean;
   disabled?: boolean;
   isLoading?: boolean;
@@ -232,7 +233,7 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
         />
         <SelectIndicator disabled={props.disabled} isLoading={props.isLoading} open={isOpen} />
       </div>
-      <ErrorText error={props.error} />
+      <ErrorText description={props.description} error={props.error} />
       <ul
         className={selectStyles.unorderedList}
         data-hidden={!(isOpen && items.length)}
@@ -325,7 +326,7 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
           </DrawerWrapper>
         </DrawerContent>
       </Drawer>
-      <ErrorText error={props.error} />
+      <ErrorText description={props.description} error={props.error} />
     </div>
   );
 }

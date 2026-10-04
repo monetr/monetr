@@ -105,6 +105,7 @@ type BaseRepository interface {
 	// Deprecated: Use GetTransactionsByPlaidId
 	GetTransactionsByPlaidTransactionId(ctx context.Context, linkId ID[Link], plaidTransactionIds []string) ([]Transaction, error)
 	GetTransactionsForSpending(ctx context.Context, bankAccountId ID[BankAccount], spendingId ID[Spending], limit, offset int) ([]Transaction, error)
+	GetTransactionsForRecurring(ctx context.Context, bankAccountId ID[BankAccount], transactionRecurringId ID[TransactionRecurring], limit, offset int) ([]Transaction, error)
 	InsertTransactions(ctx context.Context, transactions []Transaction) error
 	ProcessTransactionSpentFrom(ctx context.Context, bankAccountId ID[BankAccount], input, existing *Transaction) (updatedExpenses []Spending, _ error)
 	UpdateBankAccount(ctx context.Context, bankAccount *BankAccount) error

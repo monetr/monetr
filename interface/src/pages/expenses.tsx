@@ -35,7 +35,7 @@ export default function Expenses(): React.JSX.Element {
   return (
     <Fragment>
       <MTopNavigation icon={Receipt} title='Expenses'>
-        <Button onClick={showNewExpenseModal} variant='primary'>
+        <Button onClick={() => showNewExpenseModal()} variant='primary'>
           <Plus />
           New Expense
         </Button>
