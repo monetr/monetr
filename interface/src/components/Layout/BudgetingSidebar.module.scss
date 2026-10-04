@@ -44,7 +44,6 @@
   flex: 0 0 var(--budget-sidebar-width);
   height: 100dvh;
 
-  padding-top: env(safe-area-inset-top);
   padding-bottom: calc(4 * variables.$size + env(safe-area-inset-bottom));
 }
 

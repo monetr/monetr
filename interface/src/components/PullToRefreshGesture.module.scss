@@ -29,7 +29,7 @@
   // Starts at the bottom edge of MTopNavigation and sits beneath it, so it
   // slides out from behind the navigation.
   z-index: 20;
-  top: calc(12 * variables.$size + env(safe-area-inset-top));
+  top: 12 * variables.$size;
   // Centered without using a transform, since drawPull sets the transform.
   left: 0;
   right: 0;

@@ -40,7 +40,6 @@ export default function MTopNavigation(props: MTopNavigationProps): React.JSX.El
     <Fragment>
       <div className={styles.spacer} />
       <div className={styles.topNav}>
-        <div aria-hidden='true' className={styles.backdrop} />
         <div className={styles.topNavLeft}>
           <MSidebarToggle backButton={props.base} className={styles.toggle} />
           <span className={styles.titleWrapper}>
@@ -75,10 +74,5 @@ function ActionArea(props: ActionAreaProps): React.ReactNode {
     return null;
   }
 
-  return (
-    <div className={styles.actionArea}>
-      <div aria-hidden='true' className={styles.actionAreaBackdrop} />
-      {props.children}
-    </div>
-  );
+  return <div className={styles.actionArea}>{props.children}</div>;
 }
