@@ -77,7 +77,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4]
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
     env:
       MONETR_PG_ADDRESS: localhost
       MONETR_PG_PASSWORD: ""
@@ -90,11 +90,6 @@ jobs:
           POSTGRES_HOST_AUTH_METHOD: trust
           POSTGRES_USER: api-testing
           POSTGRES_DB: test-db
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
         ports:
           - 5432:5432
     steps:
@@ -151,6 +146,8 @@ jobs:
       # ALTER SYSTEM + pg_reload_conf picks them up without a restart.
       - name: Tune Postgres for CI
         run: |
+          # The postgres service has no health check so the runner doesn't block on it, wait for it here.
+          timeout 60 sh -c 'until pg_isready -h localhost -U api-testing; do sleep 1; done'
           psql -h localhost -U api-testing -d test-db -v ON_ERROR_STOP=1 <<'SQL'
           ALTER SYSTEM SET fsync = 'off';
           ALTER SYSTEM SET synchronous_commit = 'off';
@@ -160,21 +157,69 @@ jobs:
 
       - name: Test
         run: |
-          make test SHARDS=4 SHARD=${{ matrix.shard }}
+          make test SHARDS=8 SHARD=${{ matrix.shard }}
+
+      - name: Upload Coverage
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: coverage-shard-${{ matrix.shard }}
+          path: |
+            ${{ github.workspace }}/build/tests/**/*.coverage.txt
+            ${{ github.workspace }}/build/tests/interface/coverage/lcov.info
+          retention-days: 1
+          overwrite: true
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-results-shard-${{ matrix.shard }}
+          path: ${{ github.workspace }}/build/junit-${{ matrix.shard }}.xml
+          retention-days: 1
+          overwrite: true
+
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    needs:
+      - test
+    if: ${{ !cancelled() }}
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Download Coverage
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: coverage-shard-*
+          path: ${{ github.workspace }}/build/coverage
+
+      - name: Download Test Results
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: test-results-shard-*
+          path: ${{ github.workspace }}/build/test-results
 
       - name: Code Coverage Report
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          name: monetr
+          directory: ${{ github.workspace }}/build/coverage
+          root_dir: ${{ github.workspace }}
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Test Results Report
         if: always()
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
-          name: monetr-shard-${{ matrix.shard }}
-          directory: ${{ github.workspace }}/build/tests
-          root_dir: ${{ github.workspace }}
-          token: ${{ secrets.CODECOV_TOKEN }}
-      - name: Test Results Report
-        uses: codecov/test-results-action@0fa95f0e1eeaafde2c782583b36b28ad0d8c77d3 # v1.2.1
-        with:
-          name: monetr-shard-${{ matrix.shard }}
-          files: ${{ github.workspace }}/build/junit-${{ matrix.shard }}.xml
+          name: monetr
+          report_type: test_results
+          directory: ${{ github.workspace }}/build/test-results
           token: ${{ secrets.CODECOV_TOKEN }}
 
   local_dev:
