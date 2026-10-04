@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.17.1](https://github.com/monetr/monetr/compare/v1.17.0...v1.17.1) (2026-10-04)
+
+
+### Bug Fixes
+
+* **api:** Adding yearly detection ([7c4d358](https://github.com/monetr/monetr/commit/7c4d3583047f87d21836f0a668381e175c2effc6))
+* **api:** Improving fourier transform for recurring txns ([#3564](https://github.com/monetr/monetr/issues/3564)) ([c08cf86](https://github.com/monetr/monetr/commit/c08cf86f51fb7a5519e11b7aa0d329c045fa0042))
+* **api:** Make recurring transaction detection more accurate ([9fd05c2](https://github.com/monetr/monetr/commit/9fd05c258079249b1ea8ed7bdea71e2b8eb8d0e6))
+* **api:** Simplifying removing link data ([#3554](https://github.com/monetr/monetr/issues/3554)) ([4f399a9](https://github.com/monetr/monetr/commit/4f399a914ad29b3b16cfedbf666b765e4657b80e))
+* **ui:** Dont allow pull to refresh when mobile sidebar is open ([0d09561](https://github.com/monetr/monetr/commit/0d095618bee1fcfada19d9dc181de2f9be6e0b26))
+* **ui:** Fixed safe area inset on mobile sidebar ([adc72a1](https://github.com/monetr/monetr/commit/adc72a12b416626ff33c0ae0495358aaf181724e))
+* **ui:** Fixing budget sidebar styles on mobile ([9df1715](https://github.com/monetr/monetr/commit/9df1715af9b47eb816778d4706e66ca44589cde5))
+* **ui:** Fixing ios things even more ([8f5abd6](https://github.com/monetr/monetr/commit/8f5abd65a114c3829cada237c2a1843209de6b2b))
+* **ui:** Fuck iOS 27 ([03a905c](https://github.com/monetr/monetr/commit/03a905cab14155365676300990ce30097fb3abea))
+* **ui:** Fuck iOS 27 [#2](https://github.com/monetr/monetr/issues/2) ([8d039e3](https://github.com/monetr/monetr/commit/8d039e3b9d87522bc1288c7fe74b60d221e4dffc))
+* **ui:** Improving fade blur for top navigation ([9abda3e](https://github.com/monetr/monetr/commit/9abda3ed8993bad0f2ef4d67cbf1087b502e3111))
+* **ui:** Making blur better? ([12bf7a8](https://github.com/monetr/monetr/commit/12bf7a88e9f914130beab78755156232e5fdf38b))
+* **ui:** More fighting iOS 27 ([d60fe57](https://github.com/monetr/monetr/commit/d60fe572a8f4b7c3a047f4b80a5722fa13d965fa))
+* **ui:** More iOS 27 padding fixes? ([09fb755](https://github.com/monetr/monetr/commit/09fb7552c6592dbd2f63b3306869276657004e01))
+* **ui:** Reverting things for styles ([25bfcb4](https://github.com/monetr/monetr/commit/25bfcb41076f2e557da81262a1ca7100d72e7fd5))
+* **ui:** Trying to fix iOS 27 PWA things ([944ffb5](https://github.com/monetr/monetr/commit/944ffb56826581eaad35aa15cc46f1bae9c80f80))
+* **ui:** Trying to fix virtualization flash on back nav ([89a5509](https://github.com/monetr/monetr/commit/89a5509eabc9eb5c95316f20d7ec30d2df97642e))
+* **ui:** Virtualize the transactions list (finally) ([e4a88f4](https://github.com/monetr/monetr/commit/e4a88f43b05f620d26b1bee7eeba5a27eaa222cc))
+
+
+### Dependencies
+
+* **api:** update module github.com/labstack/echo/v5 to v5.4.0 ([#3557](https://github.com/monetr/monetr/issues/3557)) ([896410a](https://github.com/monetr/monetr/commit/896410a1baf319c574a735dfd59e839ae28f6e65))
+* **api:** update module github.com/openbao/openbao/api/v2 to v2.7.0 ([#3559](https://github.com/monetr/monetr/issues/3559)) ([928eaac](https://github.com/monetr/monetr/commit/928eaac4d6c38e1973a053436e7df5f96beb93fe))
+* **ui:** update dependency @tanstack/react-query to v5.104.0 ([#3568](https://github.com/monetr/monetr/issues/3568)) ([1b9a977](https://github.com/monetr/monetr/commit/1b9a9777d5ad82adb3401cba95c02ad67aff1000))
+* **ui:** update dependency juice to v12.2.0 ([#3561](https://github.com/monetr/monetr/issues/3561)) ([2a868fd](https://github.com/monetr/monetr/commit/2a868fddb92978f613758bbaa8ff47f097fa4328))
+* **ui:** update dependency lucide-react to v1.48.0 ([#3560](https://github.com/monetr/monetr/issues/3560)) ([90eaaea](https://github.com/monetr/monetr/commit/90eaaea75f9d406b30db0a0ba83cdbda2dc54581))
+* **ui:** update rsbuild ([#3551](https://github.com/monetr/monetr/issues/3551)) ([55a4afc](https://github.com/monetr/monetr/commit/55a4afc2fc3fee0d19ee75daa12bde9ecbba1bec))
+* **ui:** update sentry-javascript monorepo to v11 ([#3562](https://github.com/monetr/monetr/issues/3562)) ([e2cd570](https://github.com/monetr/monetr/commit/e2cd570b21ed81358f7ee8b1bab171e20b11b479))
+
 ## [1.17.0](https://github.com/monetr/monetr/compare/v1.16.0...v1.17.0) (2026-09-29)
 
 
