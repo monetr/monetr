@@ -80,11 +80,6 @@ jobs:
           POSTGRES_HOST_AUTH_METHOD: trust
           POSTGRES_USER: api-testing
           POSTGRES_DB: test-db
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
         ports:
           - 5432:5432
     steps:
@@ -138,6 +133,8 @@ jobs:
       # ALTER SYSTEM + pg_reload_conf picks them up without a restart.
       - name: Tune Postgres for CI
         run: |
+          # The postgres service has no health check so the runner doesn't block on it, wait for it here.
+          timeout 60 sh -c 'until pg_isready -h localhost -U api-testing; do sleep 1; done'
           psql -h localhost -U api-testing -d test-db -v ON_ERROR_STOP=1 <<'SQL'
           ALTER SYSTEM SET fsync = 'off';
           ALTER SYSTEM SET synchronous_commit = 'off';
