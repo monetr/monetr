@@ -4,6 +4,7 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
+	"github.com/monetr/monetr/server/recurring/recurring_jobs"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/similar"
 	"github.com/pkg/errors"
@@ -122,11 +123,26 @@ func CalculateTransactionClusters(ctx queue.Context, args CalculateTransactionCl
 			"deleteMembers", len(diff.DeleteMemberIds),
 		)
 
-		for _, item := range diff.UpsertClusters {
-			log.DebugContext(
+		// Recurring transactions are recalculated for every cluster that still
+		// exists in a single job for the bank account, the clusters that were
+		// deleted take their recurring transactions with them. This is enqueued
+		// inside the transaction so the job only runs once the clusters are
+		// committed.
+		if len(diff.UpsertClusters) > 0 {
+			if err := queue.Enqueue(
 				ctx,
-				"placeholder, triggering recurring transaction detection on transaction cluster",
-				"transactionClusterId", item.TransactionClusterId,
+				ctx.Enqueuer(),
+				recurring_jobs.CalculateRecurringTransactions,
+				recurring_jobs.CalculateRecurringTransactionsArguments{
+					AccountId:     args.AccountId,
+					BankAccountId: args.BankAccountId,
+				},
+			); err != nil {
+				return errors.Wrap(err, "failed to enqueue recurring transaction calculation")
+			}
+
+			log.InfoContext(ctx, "enqueued recurring transaction calculation",
+				"clusters", len(diff.UpsertClusters),
 			)
 		}
 

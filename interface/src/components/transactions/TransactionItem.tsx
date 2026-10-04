@@ -29,7 +29,11 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
       <Link className={itemStyles.mobileLink} to={detailsUrl} />
       <div className={itemStyles.inner}>
         <div className={itemStyles.leftSection}>
-          <TransactionMerchantIcon name={transaction.getName()} pending={transaction.isPending} />
+          <TransactionMerchantIcon
+            name={transaction.getName()}
+            pending={transaction.isPending}
+            recurring={Boolean(transaction.transactionRecurringId)}
+          />
           <Flex flex='shrink' gap='none' orientation='column'>
             <Typography color='emphasis' ellipsis size='md' weight='semibold'>
               {transaction.getName()}

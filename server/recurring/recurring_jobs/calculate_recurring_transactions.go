@@ -1,0 +1,189 @@
+package recurring_jobs
+
+import (
+	"log/slog"
+	"time"
+
+	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/queue"
+	"github.com/monetr/monetr/server/recurring"
+	"github.com/monetr/monetr/server/repository"
+	"github.com/pkg/errors"
+)
+
+type CalculateRecurringTransactionsArguments struct {
+	AccountId     models.ID[models.Account]     `json:"accountId"`
+	BankAccountId models.ID[models.BankAccount] `json:"bankAccountId"`
+}
+
+// CalculateRecurringTransactions detects the recurring transactions for every
+// transaction cluster in the bank account, all in one transaction. A cluster
+// whose detection fails is logged and skipped, since retrying won't change the
+// outcome. Anything that fails in the database fails the whole job, which rolls
+// everything back and lets the queue retry it.
+func CalculateRecurringTransactions(
+	ctx queue.Context,
+	args CalculateRecurringTransactionsArguments,
+) error {
+	return ctx.RunInTransaction(ctx, func(ctx queue.Context) error {
+		crumbs.IncludeUserInScope(ctx, args.AccountId)
+		log := ctx.Log().With(
+			"accountId", args.AccountId,
+			"bankAccountId", args.BankAccountId,
+		)
+
+		repo := repository.NewRepositoryFromSession(
+			ctx.Clock(),
+			"user_system",
+			args.AccountId,
+			ctx.DB(),
+			log,
+		)
+
+		account, err := repo.GetAccount(ctx)
+		if err != nil {
+			return errors.Wrap(err, "failed to retrieve account for job")
+		}
+
+		timezone, err := account.GetTimezone()
+		if err != nil {
+			log.WarnContext(
+				ctx,
+				"failed to get account's time zone, defaulting to UTC",
+				"err", err,
+			)
+			timezone = time.UTC
+		}
+
+		clusterIds, err := repo.GetTransactionClusterIds(ctx, args.BankAccountId)
+		if err != nil {
+			return errors.Wrap(err, "failed to read transaction clusters")
+		}
+
+		for _, transactionClusterId := range clusterIds {
+			if err := calculateRecurringTransactionsForCluster(
+				ctx,
+				log,
+				repo,
+				args.BankAccountId,
+				transactionClusterId,
+				timezone,
+			); err != nil {
+				return err
+			}
+		}
+
+		log.InfoContext(ctx, "finished calculating recurring transactions",
+			"clusters", len(clusterIds),
+		)
+
+		return nil
+	})
+}
+
+func calculateRecurringTransactionsForCluster(
+	ctx queue.Context,
+	log *slog.Logger,
+	repo repository.Repository,
+	bankAccountId models.ID[models.BankAccount],
+	transactionClusterId models.ID[models.TransactionCluster],
+	timezone *time.Location,
+) error {
+	log = log.With("transactionClusterId", transactionClusterId)
+
+	// TODO This will need to change once I support merging clusters.
+	transactions, err := repo.GetTransactionsByCluster(
+		ctx,
+		bankAccountId,
+		transactionClusterId,
+		1000, // Something high for this?
+		0,
+	)
+	if err != nil {
+		return errors.Wrap(err, "failed to read transactions in cluster")
+	}
+
+	results, err := recurring.DetectRecurringTransactions(
+		ctx,
+		ctx.Clock(),
+		timezone,
+		transactions,
+	)
+	if err != nil {
+		// Nothing has been written for this cluster yet, so it can just be skipped.
+		// Its existing recurring transactions are left as they are.
+		log.ErrorContext(
+			ctx,
+			"failed to detect recurring transactions for cluster, skipping it",
+			"err", err,
+		)
+		crumbs.ReportError(
+			ctx,
+			err,
+			"Failed to detect recurring transactions for cluster",
+			"job",
+			map[string]any{
+				"transactionClusterId": transactionClusterId,
+			},
+		)
+		return nil
+	}
+
+	existing, err := repo.GetTransactionRecurringByCluster(
+		ctx,
+		bankAccountId,
+		transactionClusterId,
+	)
+	if err != nil {
+		return err
+	}
+
+	diff := DiffTransactionRecurring(
+		ctx,
+		existing,
+		results,
+		transactions,
+		ctx.Clock().Now(),
+		timezone,
+		bankAccountId,
+		transactionClusterId,
+	)
+
+	// Order matters here because of the foreign keys. Existing recurring
+	// transactions are updated in place before anything new is created, they need
+	// to exist before transactions can point at them, and the ones that don't
+	// recur anymore are cleaned up last.
+	if err := repo.UpsertTransactionRecurring(
+		ctx,
+		bankAccountId,
+		diff.UpsertRecurring,
+	); err != nil {
+		return errors.Wrap(err, "failed to upsert recurring transactions")
+	}
+
+	if err := repo.UpdateTransactionRecurringIds(
+		ctx,
+		bankAccountId,
+		diff.UpdateMembers,
+	); err != nil {
+		return errors.Wrap(err, "failed to update transaction recurring ids")
+	}
+
+	if err := repo.DeleteTransactionRecurring(
+		ctx,
+		bankAccountId,
+		diff.DeleteRecurringIds,
+	); err != nil {
+		return errors.Wrap(err, "failed to delete obsolete recurring transactions")
+	}
+
+	// This runs for every cluster in the bank account, so keep it at debug.
+	log.DebugContext(ctx, "finished updating recurring transactions for cluster",
+		"upsertRecurring", len(diff.UpsertRecurring),
+		"deleteRecurring", len(diff.DeleteRecurringIds),
+		"updateMembers", len(diff.UpdateMembers),
+	)
+
+	return nil
+}

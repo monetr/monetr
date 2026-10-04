@@ -13,6 +13,7 @@ import (
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/links/link_jobs"
 	"github.com/monetr/monetr/server/queue"
+	"github.com/monetr/monetr/server/recurring/recurring_jobs"
 	"github.com/monetr/monetr/server/similar/similar_jobs"
 	"github.com/monetr/monetr/server/spending/spending_jobs"
 	"github.com/monetr/monetr/server/storage/storage_jobs"
@@ -56,6 +57,7 @@ func RegisterJobs(
 		queue.Register(ctx, processor, plaid_jobs.DeactivatePlaidLink),
 		queue.Register(ctx, processor, plaid_jobs.SyncPlaid),
 		queue.Register(ctx, processor, plaid_jobs.SyncPlaidAccounts),
+		queue.Register(ctx, processor, recurring_jobs.CalculateRecurringTransactions),
 		queue.Register(ctx, processor, similar_jobs.CalculateTransactionClusters),
 		queue.Register(ctx, processor, spending_jobs.ProcessSpending),
 		queue.Register(ctx, processor, storage_jobs.RemoveFile),
