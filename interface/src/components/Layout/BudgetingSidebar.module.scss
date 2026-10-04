@@ -45,6 +45,13 @@
   height: 100dvh;
 
   padding-top: env(safe-area-inset-top);
+  // iOS 27 adds some dumb blur shit to the top, so i want to push things down
+  // just a smidge more
+  @supports (-webkit-touch-callout: none) {
+    @media (display-mode: standalone) {
+      padding-top: calc((2 * variables.$size) + env(safe-area-inset-top));
+    }
+  }
   padding-bottom: calc(4 * variables.$size + env(safe-area-inset-bottom));
 }
 

@@ -9,13 +9,13 @@
 
   gap: 1 * variables.$size;
 
-  padding-top: 10 * variables.$size;
+  padding-top: calc((10 * variables.$size) + env(safe-area-inset-top));
   padding-left: 5 * variables.$size;
   padding-right: 5 * variables.$size;
 
   @media (min-width: variables.$mediumScreen) {
     padding-top: unset;
-    padding-bottom: 10 * variables.$size;
+    padding-bottom: calc((10 * variables.$size) + env(safe-area-inset-bottom));
     justify-content: center;
   }
 }
