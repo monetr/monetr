@@ -215,7 +215,7 @@ export default function TransactionDetails(): React.JSX.Element {
               <TransactionMerchantIcon
                 name={transaction?.name ?? undefined}
                 pending={transaction.isPending}
-                recurring={Boolean(transaction.transactionRecurringId)}
+                transactionRecurringId={transaction.transactionRecurringId}
               />
             </Flex>
             <FormTextField

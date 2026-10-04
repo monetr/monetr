@@ -1,0 +1,75 @@
+@use '@monetr/interface/variables';
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.indicator {
+  position: absolute;
+  display: flex;
+  height: 5 * variables.$size;
+  width: 5 * variables.$size;
+  right: -1 * variables.$size;
+  top: -1 * variables.$size;
+  padding: 1 * variables.$size;
+  border-radius: 9999px;
+
+  background: var(--brand);
+}
+
+.tooltip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5 * variables.$size;
+  max-width: 70 * variables.$size;
+}
+
+.title {
+  font-weight: 600;
+  color: var(--content-emphasis);
+}
+
+.subtitle {
+  color: var(--content);
+}
+
+.amount {
+  color: var(--amount-negative);
+  font-weight: var(--semibold);
+
+  &[data-positive="true"] {
+    color: var(--amount-positive);
+  }
+}
+
+// Sized to roughly match the loaded two line tooltip so it doesn't jump when the data comes in.
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5 * variables.$size;
+  width: 56 * variables.$size;
+  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.titlePlaceholder,
+.subtitlePlaceholder {
+  height: 3.5 * variables.$size;
+  margin: 0.75 * variables.$size 0;
+  border-radius: 3 * variables.$size;
+  background-color: var(--background-subtle);
+}
+
+.titlePlaceholder {
+  width: 70%;
+}
+
+.subtitlePlaceholder {
+  width: 100%;
+}

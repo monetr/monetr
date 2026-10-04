@@ -62,7 +62,7 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
         <TransactionMerchantIcon
           name={transaction.getName()}
           pending={transaction.isPending}
-          recurring={Boolean(transaction.transactionRecurringId)}
+          transactionRecurringId={transaction.transactionRecurringId}
         />
         <ItemContent align='default' flex='shrink' gap='none' justify='start' orientation='column' shrink='default'>
           <Typography color='emphasis' component='p' ellipsis size='md' weight='semibold'>
@@ -90,7 +90,7 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
         <TransactionMerchantIcon
           name={transaction.getName()}
           pending={transaction.isPending}
-          recurring={Boolean(transaction.transactionRecurringId)}
+          transactionRecurringId={transaction.transactionRecurringId}
         />
         <ItemContent align='default' flex='shrink' gap='none' justify='start' orientation='column' shrink='default'>
           <Typography color='emphasis' component='p' ellipsis size='md' weight='semibold'>

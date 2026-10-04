@@ -11,19 +11,6 @@
   position: relative;
 }
 
-.recurringIndicator {
-  position: absolute;
-  display: flex;
-  height: 5 * variables.$size;
-  width: 5 * variables.$size;
-  right: -1 * variables.$size;
-  top: -1 * variables.$size;
-  padding: 1 * variables.$size;
-  border-radius: 9999px;
-
-  background: var(--brand);
-}
-
 .pendingIndicator {
   position: absolute;
   display: flex;

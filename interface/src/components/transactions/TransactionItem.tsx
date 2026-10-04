@@ -32,7 +32,7 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
           <TransactionMerchantIcon
             name={transaction.getName()}
             pending={transaction.isPending}
-            recurring={Boolean(transaction.transactionRecurringId)}
+            transactionRecurringId={transaction.transactionRecurringId}
           />
           <Flex flex='shrink' gap='none' orientation='column'>
             <Typography color='emphasis' ellipsis size='md' weight='semibold'>
