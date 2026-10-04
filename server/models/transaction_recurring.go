@@ -55,6 +55,8 @@ type TransactionRecurring struct {
 	LastAmount             int64                    `json:"lastAmount" bun:"last_amount,notnull,nullzero"`
 	CreatedAt              time.Time                `json:"createdAt" bun:"created_at,notnull,default:now(),nullzero"`
 	UpdatedAt              time.Time                `json:"updatedAt" bun:"updated_at,notnull,default:now(),nullzero"`
+
+	Spending *Spending `json:"spending,omitempty" bun:"rel:has-one,join:transaction_recurring_id=transaction_recurring_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
 }
 
 func (TransactionRecurring) IdentityPrefix() string {
