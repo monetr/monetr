@@ -527,6 +527,230 @@ func TestDiffTransactionRecurring(t *testing.T) {
 			assert.Nil(t, member.TransactionRecurringId, "old members should not point at anything")
 		}
 	})
+
+	t.Run("both directions recur", func(t *testing.T) {
+		now := time.Date(2026, 4, 1, 0, 0, 0, 0, time.UTC)
+		existing := []models.TransactionRecurring{
+			{
+				TransactionRecurringId: "txrc_credit",
+				AccountId:              "acct_test",
+				BankAccountId:          "bac_test",
+				TransactionClusterId:   "tcl_test",
+				Direction:              models.CreditDirection,
+			},
+		}
+		// txn_2 used to be counted with the credits by mistake, now it is a debit
+		// member and should move over to the new debit recurring transaction.
+		debits := []models.Transaction{
+			{
+				TransactionId: "txn_0",
+				Amount:        800,
+				Date:          time.Date(2026, 1, 20, 0, 0, 0, 0, time.UTC),
+			},
+			{
+				TransactionId: "txn_1",
+				Amount:        800,
+				Date:          time.Date(2026, 2, 20, 0, 0, 0, 0, time.UTC),
+			},
+			{
+				TransactionId:          "txn_2",
+				Amount:                 800,
+				Date:                   time.Date(2026, 3, 20, 0, 0, 0, 0, time.UTC),
+				TransactionRecurringId: new(models.ID[models.TransactionRecurring]("txrc_credit")),
+			},
+		}
+		credits := []models.Transaction{
+			{
+				TransactionId:          "txn_3",
+				Amount:                 -800,
+				Date:                   time.Date(2026, 1, 25, 0, 0, 0, 0, time.UTC),
+				TransactionRecurringId: new(models.ID[models.TransactionRecurring]("txrc_credit")),
+			},
+			{
+				TransactionId:          "txn_4",
+				Amount:                 -800,
+				Date:                   time.Date(2026, 2, 25, 0, 0, 0, 0, time.UTC),
+				TransactionRecurringId: new(models.ID[models.TransactionRecurring]("txrc_credit")),
+			},
+			{
+				TransactionId:          "txn_5",
+				Amount:                 -800,
+				Date:                   time.Date(2026, 3, 25, 0, 0, 0, 0, time.UTC),
+				TransactionRecurringId: new(models.ID[models.TransactionRecurring]("txrc_credit")),
+			},
+		}
+		results := []recurring.RecurringTransactionResult{
+			{
+				Direction: models.DebitDirection,
+				Best: &recurring.Frequency{
+					Frequency:  30,
+					Confidence: 0.9,
+				},
+				RuleSet: testutils.Must(
+					t,
+					models.NewRuleSet,
+					"DTSTART:20260101T000000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=20",
+				),
+				Members: debits,
+			},
+			{
+				Direction: models.CreditDirection,
+				Best: &recurring.Frequency{
+					Frequency:  30,
+					Confidence: 0.85,
+				},
+				RuleSet: testutils.Must(
+					t,
+					models.NewRuleSet,
+					"DTSTART:20260101T000000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=25",
+				),
+				Members: credits,
+			},
+		}
+		transactions := append(append([]models.Transaction{}, debits...), credits...)
+
+		diff := DiffTransactionRecurring(t.Context(), existing, results, transactions, now, time.UTC, "bac_test", "tcl_test")
+		require.Len(t, diff.UpsertRecurring, 2, "should upsert both directions")
+		assert.Empty(t, diff.DeleteRecurringIds, "should not delete anything")
+
+		byDirection := make(map[models.Direction]models.TransactionRecurring, len(diff.UpsertRecurring))
+		for _, item := range diff.UpsertRecurring {
+			byDirection[item.Direction] = item
+		}
+		require.Contains(t, byDirection, models.DebitDirection, "should have a debit recurring transaction")
+		require.Contains(t, byDirection, models.CreditDirection, "should have a credit recurring transaction")
+		debitId := byDirection[models.DebitDirection].TransactionRecurringId
+		assert.EqualValues(t, "txrc_credit", byDirection[models.CreditDirection].TransactionRecurringId, "the credits should keep the existing ID")
+		assert.False(t, debitId.IsZero(), "the debits should get a new ID")
+		assert.NotEqualValues(t, "txrc_credit", debitId, "the debits must not reuse the credit ID")
+
+		updated := make(map[models.ID[models.Transaction]]*models.ID[models.TransactionRecurring], len(diff.UpdateMembers))
+		for _, member := range diff.UpdateMembers {
+			updated[member.TransactionId] = member.TransactionRecurringId
+		}
+		assert.Len(t, updated, 3, "only the debit members should be updated, the credits already point at the right one")
+		for _, id := range []models.ID[models.Transaction]{"txn_0", "txn_1", "txn_2"} {
+			if assert.Contains(t, updated, id) && assert.NotNil(t, updated[id]) {
+				assert.Equal(t, debitId, *updated[id], "debit member should point at the debit recurring transaction")
+			}
+		}
+	})
+
+	t.Run("not ended within the slack after a missed occurrence", func(t *testing.T) {
+		// The last charge was March 20th, so April 20th was expected. Monthly gets
+		// 15 days of slack, so it isn't ended until after May 5th.
+		results := []recurring.RecurringTransactionResult{
+			{
+				Direction: models.DebitDirection,
+				Best: &recurring.Frequency{
+					Frequency:  30,
+					Confidence: 0.9,
+				},
+				RuleSet: testutils.Must(
+					t,
+					models.NewRuleSet,
+					"DTSTART:20260101T000000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=20",
+				),
+				Members: []models.Transaction{
+					{
+						TransactionId: "txn_0",
+						Amount:        800,
+						Date:          time.Date(2026, 1, 20, 0, 0, 0, 0, time.UTC),
+					},
+					{
+						TransactionId: "txn_1",
+						Amount:        800,
+						Date:          time.Date(2026, 2, 20, 0, 0, 0, 0, time.UTC),
+					},
+					{
+						TransactionId: "txn_2",
+						Amount:        800,
+						Date:          time.Date(2026, 3, 20, 0, 0, 0, 0, time.UTC),
+					},
+				},
+			},
+		}
+
+		withinSlack := time.Date(2026, 5, 5, 0, 0, 0, 0, time.UTC)
+		diff := DiffTransactionRecurring(t.Context(), nil, results, nil, withinSlack, time.UTC, "bac_test", "tcl_test")
+		require.Len(t, diff.UpsertRecurring, 1, "should upsert the recurring transaction")
+		assert.False(t, diff.UpsertRecurring[0].Ended, "should not be ended while still within the slack")
+
+		pastSlack := time.Date(2026, 5, 5, 0, 0, 1, 0, time.UTC)
+		diff = DiffTransactionRecurring(t.Context(), nil, results, nil, pastSlack, time.UTC, "bac_test", "tcl_test")
+		require.Len(t, diff.UpsertRecurring, 1, "should upsert the recurring transaction")
+		assert.True(t, diff.UpsertRecurring[0].Ended, "should be ended once past the slack")
+	})
+
+	t.Run("first and last come from the dates not the order", func(t *testing.T) {
+		now := time.Date(2026, 4, 1, 0, 0, 0, 0, time.UTC)
+		results := []recurring.RecurringTransactionResult{
+			{
+				Direction: models.DebitDirection,
+				Best: &recurring.Frequency{
+					Frequency:  30,
+					Confidence: 0.9,
+				},
+				RuleSet: testutils.Must(
+					t,
+					models.NewRuleSet,
+					"DTSTART:20260101T000000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=20",
+				),
+				Members: []models.Transaction{
+					{
+						TransactionId: "txn_1",
+						Amount:        800,
+						Date:          time.Date(2026, 2, 20, 0, 0, 0, 0, time.UTC),
+					},
+					{
+						TransactionId: "txn_2",
+						Amount:        1000,
+						Date:          time.Date(2026, 3, 20, 0, 0, 0, 0, time.UTC),
+					},
+					{
+						TransactionId: "txn_0",
+						Amount:        700,
+						Date:          time.Date(2026, 1, 20, 0, 0, 0, 0, time.UTC),
+					},
+				},
+			},
+		}
+
+		diff := DiffTransactionRecurring(t.Context(), nil, results, nil, now, time.UTC, "bac_test", "tcl_test")
+		require.Len(t, diff.UpsertRecurring, 1, "should upsert the recurring transaction")
+		item := diff.UpsertRecurring[0]
+		assert.Equal(t, time.Date(2026, 1, 20, 0, 0, 0, 0, time.UTC), item.First, "first should be the earliest member")
+		assert.Equal(t, time.Date(2026, 3, 20, 0, 0, 0, 0, time.UTC), item.Last, "last should be the latest member")
+		assert.EqualValues(t, 1000, item.LastAmount, "last amount should be from the latest member")
+	})
+
+	t.Run("deleted ids are sorted", func(t *testing.T) {
+		now := time.Date(2026, 4, 1, 0, 0, 0, 0, time.UTC)
+		existing := []models.TransactionRecurring{
+			{
+				TransactionRecurringId: "txrc_b",
+				AccountId:              "acct_test",
+				BankAccountId:          "bac_test",
+				TransactionClusterId:   "tcl_test",
+				Direction:              models.DebitDirection,
+			},
+			{
+				TransactionRecurringId: "txrc_a",
+				AccountId:              "acct_test",
+				BankAccountId:          "bac_test",
+				TransactionClusterId:   "tcl_test",
+				Direction:              models.CreditDirection,
+			},
+		}
+
+		// Map iteration order is random, so run it a few times to catch an
+		// unsorted result.
+		for range 10 {
+			diff := DiffTransactionRecurring(t.Context(), existing, nil, nil, now, time.UTC, "bac_test", "tcl_test")
+			assert.Empty(t, diff.UpsertRecurring, "should not upsert anything")
+			assert.Equal(t, []models.ID[models.TransactionRecurring]{"txrc_a", "txrc_b"}, diff.DeleteRecurringIds, "should delete both in order")
+		}
+	})
 }
 
 func TestWindowType(t *testing.T) {
@@ -583,6 +807,12 @@ func TestWindowType(t *testing.T) {
 			frequency: 365,
 			rule:      "DTSTART:20260101T000000Z\nRRULE:FREQ=YEARLY;INTERVAL=1;BYMONTH=4;BYMONTHDAY=23",
 			expected:  models.YearlyWindowType,
+		},
+		{
+			name:      "unknown frequency falls back to monthly",
+			frequency: 45,
+			rule:      "DTSTART:20260101T000000Z\nRRULE:FREQ=DAILY;INTERVAL=45",
+			expected:  models.MonthlyWindowType,
 		},
 	}
 
