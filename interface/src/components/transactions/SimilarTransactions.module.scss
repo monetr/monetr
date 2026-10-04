@@ -20,7 +20,9 @@
 
 // the next one we expect for a recurring transaction, dashed since it hasnt actually happened yet
 .expected {
-  border: 1px dashed var(--background-active);
+  // outline instead of border so it doesnt shift the content over compared to the real rows
+  outline: 1px dashed var(--background-active);
+  outline-offset: -1px;
 
   &:hover,
   &:active {

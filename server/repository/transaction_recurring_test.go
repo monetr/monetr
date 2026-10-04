@@ -52,6 +52,26 @@ func newTransactionRecurring(
 	}
 }
 
+func givenIHaveARecurringTransaction(
+	t *testing.T,
+	clock clock.Clock,
+	bankAccount models.BankAccount,
+	transactionRecurringId *models.ID[models.TransactionRecurring],
+	date time.Time,
+) models.Transaction {
+	return testutils.MustInsert(t, models.Transaction{
+		AccountId:              bankAccount.AccountId,
+		BankAccountId:          bankAccount.BankAccountId,
+		TransactionRecurringId: transactionRecurringId,
+		Amount:                 800,
+		Date:                   date,
+		Name:                   "Github",
+		OriginalName:           "Github",
+		Source:                 models.TransactionSourceUpload,
+		CreatedAt:              clock.Now(),
+	})
+}
+
 func TestRepositoryBase_GetTransactionRecurringById(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		clock := clock.NewMock()
@@ -82,6 +102,55 @@ func TestRepositoryBase_GetTransactionRecurringById(t *testing.T) {
 		assert.Equal(t, cluster.TransactionClusterId, result.TransactionClusterId, "cluster should match")
 		assert.Equal(t, models.DebitDirection, result.Direction, "direction should match")
 		assert.EqualValues(t, 800, result.LastAmount, "last amount should match")
+	})
+
+	t.Run("includes the spending created from it", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		cluster := givenIHaveATransactionCluster(t, bankAccount)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, clock, &bankAccount, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15", false)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		recurring := []models.TransactionRecurring{
+			newTransactionRecurring(t, cluster, models.DebitDirection, 800),
+		}
+		err := repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, recurring)
+		require.NoError(t, err, "must be able to create recurring transactions")
+
+		result, err := repo.GetTransactionRecurringById(t.Context(), bankAccount.BankAccountId, recurring[0].TransactionRecurringId)
+		assert.NoError(t, err, "must be able to read the recurring transaction")
+		require.NotNil(t, result, "result must not be nil")
+		assert.Nil(t, result.Spending, "spending should be nil when nothing was created from it yet")
+
+		spendingRule := testutils.Must(t, models.NewRuleSet, "DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15")
+		spending := testutils.MustInsert(t, models.Spending{
+			AccountId:              bankAccount.AccountId,
+			BankAccountId:          bankAccount.BankAccountId,
+			FundingScheduleId:      fundingSchedule.FundingScheduleId,
+			TransactionRecurringId: &recurring[0].TransactionRecurringId,
+			SpendingType:           models.SpendingTypeExpense,
+			Name:                   "Github",
+			TargetAmount:           800,
+			RuleSet:                spendingRule,
+			NextRecurrence:         spendingRule.After(clock.Now(), false),
+			CreatedAt:              clock.Now(),
+		})
+
+		result, err = repo.GetTransactionRecurringById(t.Context(), bankAccount.BankAccountId, recurring[0].TransactionRecurringId)
+		assert.NoError(t, err, "must be able to read the recurring transaction")
+		require.NotNil(t, result, "result must not be nil")
+		require.NotNil(t, result.Spending, "spending should be included now that one was created from it")
+		assert.Equal(t, spending.SpendingId, result.Spending.SpendingId, "should be the spending that was created from it")
 	})
 
 	t.Run("does not exist", func(t *testing.T) {
@@ -518,5 +587,83 @@ func TestRepositoryBase_UpdateTransactionRecurringIds(t *testing.T) {
 			require.NotNil(t, stored.TransactionRecurringId, "the other account's transaction must not be cleared")
 			assert.Equal(t, otherItems[0].TransactionRecurringId, *stored.TransactionRecurringId, "the other account's transaction must still point at its own recurring transaction")
 		}
+	})
+}
+
+func TestRepositoryBase_GetTransactionsForRecurring(t *testing.T) {
+	t.Run("only returns members newest first", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		cluster := givenIHaveATransactionCluster(t, bankAccount)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		recurring := []models.TransactionRecurring{
+			newTransactionRecurring(t, cluster, models.DebitDirection, 800),
+		}
+		err := repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, recurring)
+		require.NoError(t, err, "must be able to create recurring transactions")
+		recurringId := &recurring[0].TransactionRecurringId
+
+		january := givenIHaveARecurringTransaction(t, clock, bankAccount, recurringId, time.Date(2026, 1, 15, 0, 0, 0, 0, time.UTC))
+		march := givenIHaveARecurringTransaction(t, clock, bankAccount, recurringId, time.Date(2026, 3, 15, 0, 0, 0, 0, time.UTC))
+		february := givenIHaveARecurringTransaction(t, clock, bankAccount, recurringId, time.Date(2026, 2, 15, 0, 0, 0, 0, time.UTC))
+		// not part of the recurring transaction at all
+		givenIHaveARecurringTransaction(t, clock, bankAccount, nil, time.Date(2026, 2, 20, 0, 0, 0, 0, time.UTC))
+		// part of it but deleted so it shouldnt come back
+		deleted := givenIHaveARecurringTransaction(t, clock, bankAccount, recurringId, time.Date(2026, 4, 15, 0, 0, 0, 0, time.UTC))
+		deletedAt := clock.Now()
+		deleted.DeletedAt = &deletedAt
+		testutils.MustDBUpdate(t, &deleted)
+
+		result, err := repo.GetTransactionsForRecurring(t.Context(), bankAccount.BankAccountId, *recurringId, 100, 0)
+		assert.NoError(t, err, "must be able to read the transactions for the recurring transaction")
+		require.Len(t, result, 3, "should only have the members that are not deleted")
+		assert.Equal(t, march.TransactionId, result[0].TransactionId, "newest should be first")
+		assert.Equal(t, february.TransactionId, result[1].TransactionId, "then the one before it")
+		assert.Equal(t, january.TransactionId, result[2].TransactionId, "oldest should be last")
+
+		result, err = repo.GetTransactionsForRecurring(t.Context(), bankAccount.BankAccountId, *recurringId, 1, 1)
+		assert.NoError(t, err, "must be able to page through the transactions")
+		require.Len(t, result, 1, "should respect the limit")
+		assert.Equal(t, february.TransactionId, result[0].TransactionId, "should respect the offset")
+	})
+
+	t.Run("cannot read another bank account's transactions", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		otherBankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.SavingsBankAccountSubType)
+		cluster := givenIHaveATransactionCluster(t, bankAccount)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		recurring := []models.TransactionRecurring{
+			newTransactionRecurring(t, cluster, models.DebitDirection, 800),
+		}
+		err := repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, recurring)
+		require.NoError(t, err, "must be able to create recurring transactions")
+		givenIHaveARecurringTransaction(t, clock, bankAccount, &recurring[0].TransactionRecurringId, time.Date(2026, 1, 15, 0, 0, 0, 0, time.UTC))
+
+		result, err := repo.GetTransactionsForRecurring(t.Context(), otherBankAccount.BankAccountId, recurring[0].TransactionRecurringId, 100, 0)
+		assert.NoError(t, err, "should not fail just because nothing matched")
+		assert.Empty(t, result, "should not return transactions from another bank account")
 	})
 }
