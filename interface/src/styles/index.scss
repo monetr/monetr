@@ -255,6 +255,32 @@ body {
   }
 }
 
+// iOS 27 draws a progressive blur over the top of installed web apps. iOS
+// samples the top few pixels of the page, and if it finds an opaque fixed
+// element there (at least 6px tall, 80% wide, within 4px of the top) it paints
+// a solid status bar in that color instead of the blur.
+// https://modernwebweekly.substack.com/p/so-whats-up-with-the-ios27-blur
+// https://github.com/stackernews/stacker.news/pull/3248
+// https://github.com/xdoubleu/tools.xdoubleu.com/pull/1988
+// https://github.com/MrClit/fin-app/issues/411
+.ios-status-bar {
+  display: none;
+
+  @supports (-webkit-touch-callout: none) {
+    @media (display-mode: standalone) {
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: env(safe-area-inset-top);
+      background-color: var(--background);
+      z-index: 100;
+      pointer-events: none;
+    }
+  }
+}
+
 .text-size-inherit {
   font-size: inherit;
   line-height: inherit;
