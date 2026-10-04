@@ -2,7 +2,7 @@
 @use '@monetr/interface/variables';
 
 .spacer {
-  padding-bottom: 12 * variables.$size;
+  padding-bottom: calc(12 * variables.$size + env(safe-area-inset-top));
 }
 
 .topNav {
@@ -10,6 +10,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
+  padding-top: env(safe-area-inset-top);
   padding-left: 4 * variables.$size;
   padding-right: 4 * variables.$size;
   column-gap: 2 * variables.$size;
@@ -21,7 +22,7 @@
   background: linear-gradient(to top, transparent, var(--background));
 
   @media (min-width: variables.$mediumScreen) {
-    height: 12 * variables.$size;
+    height: calc(12 * variables.$size + env(safe-area-inset-top));
     flex-direction: row;
     align-items: center;
   }
@@ -133,7 +134,7 @@
 
   @media (min-width: variables.$mediumScreen) {
     column-gap: 2 * variables.$size;
-    top: 2 * variables.$size;
+    top: calc(2 * variables.$size + env(safe-area-inset-top));
     bottom: unset;
     left: unset;
     right: 4 * variables.$size;
