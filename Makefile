@@ -102,10 +102,12 @@ endif
 
 # Optional: SHARDS=N SHARD=i runs the i-th of N shards via ctest's -I flag.
 # When set, the per-shard coverage merge is skipped; codecov merges server-side.
+# Precompile steps are left out of the shard selection, ctest pulls them back in
+# as fixtures only for the packages whose tests landed in this shard.
 SHARD ?=
 SHARDS ?=
 ifneq ($(SHARDS),)
-SHARD_ARG=-I $(SHARD),,$(SHARDS)
+SHARD_ARG=-I $(SHARD),,$(SHARDS) -LE precompile
 JUNIT_SUFFIX=-$(SHARD)
 SKIP_COVERAGE_MERGE=1
 else

@@ -72,6 +72,7 @@ macro(provision_golang_tests CURRENT_SOURCE_DIR)
           FIXTURES_SETUP ${PACKAGE}
           RESOURCE_LOCK GO_BUILD_LOCK
           PROCESSORS 2
+          LABELS "precompile"
         )
 
         # Get the number of tests in our current package.
