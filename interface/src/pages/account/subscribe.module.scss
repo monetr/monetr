@@ -8,7 +8,7 @@
   flex-direction: column;
   gap: 1 * variables.$size;
 
-  padding-top: calc((10 * variables.$size) + env(safe-area-inset-top));
+  padding-top: calc((10 * variables.$size) + var(--inset-top));
   padding-bottom: calc((10 * variables.$size) + env(safe-area-inset-bottom));
   padding-left: 5 * variables.$size;
   padding-right: 5 * variables.$size;

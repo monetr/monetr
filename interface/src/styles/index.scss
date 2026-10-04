@@ -330,6 +330,18 @@ svg.lucide {
 
   --bank-sidebar-width-static: #{16 * variables.$size};
   --budget-sidebar-width: #{72 * variables.$size};
+
+  --inset-top: env(safe-area-inset-top);
+}
+
+// iOS 27 draws a progressive blur over installed web apps that reaches ~40pt
+// past the status bar, so push content below it in the standalone app only.
+@supports (-webkit-touch-callout: none) {
+  @media (display-mode: standalone) {
+    :root {
+      --inset-top: calc(env(safe-area-inset-top) + 2.5rem);
+    }
+  }
 }
 
 // Custom scrollbar styles
