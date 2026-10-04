@@ -223,7 +223,7 @@ describe('new expense modal', () => {
     expect(new Date(created.nextRecurrence as string).getTime()).toBeGreaterThan(Date.now());
     const patched = mockFetch.history.patch?.[0];
     expect(patched?.url).toBe(`/api/bank_accounts/${bankAccountId}/transactions/${transactionId}`);
-    expect((patched?.data as Record<string, unknown>).spendingId).toBe('spnd_01hy4rkq0x3c6dtr9w1p2v5bns');
+    expect(patched?.data).toMatchObject({ spendingId: 'spnd_01hy4rkq0x3c6dtr9w1p2v5bns' });
     await waitFor(() => expect(world.queryByTestId('new-expense-modal')).not.toBeInTheDocument());
   });
 });
