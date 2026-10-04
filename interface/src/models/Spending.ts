@@ -4,6 +4,7 @@ import type Balance from '@monetr/interface/models/Balance';
 import type BankAccount from '@monetr/interface/models/BankAccount';
 import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { ID, idPrefix } from '@monetr/interface/models/ID';
+import type TransactionRecurring from '@monetr/interface/models/TransactionRecurring';
 import type { WithJsonValues } from '@monetr/interface/util/json';
 import parseDate from '@monetr/interface/util/parseDate';
 
@@ -21,6 +22,7 @@ export default class Spending {
   readonly spendingId: ID<Spending>;
   readonly bankAccountId: ID<BankAccount>;
   fundingScheduleId: ID<FundingSchedule>;
+  transactionRecurringId: ID<TransactionRecurring> | null;
   name: string;
   readonly spendingType: SpendingType;
   targetAmount: number;
@@ -39,6 +41,7 @@ export default class Spending {
     this.spendingId = ID.from(data.spendingId);
     this.bankAccountId = ID.from(data.bankAccountId);
     this.fundingScheduleId = ID.from(data.fundingScheduleId);
+    this.transactionRecurringId = data.transactionRecurringId ? ID.from(data.transactionRecurringId) : null;
     this.name = data.name;
     this.spendingType = data.spendingType;
     this.targetAmount = data.targetAmount;

@@ -27,6 +27,7 @@ export interface FormDatePickerProps extends Omit<React.HTMLAttributes<HTMLButto
   enableClear?: boolean;
   enableYearNavigation?: boolean;
   error?: string;
+  description?: string;
   label?: string;
   labelDecorator?: LabelDecorator;
   name?: string;
@@ -201,7 +202,7 @@ export default function FormDatePicker(props: FormDatePickerProps): React.JSX.El
           />
         </PopoverContent>
       </Popover>
-      <ErrorText error={props.error} />
+      <ErrorText description={props.description} error={props.error} />
     </div>
   );
 }

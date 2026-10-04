@@ -35,6 +35,28 @@ func (c *Controller) getTransactions(ctx *echo.Context) error {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
+	// transactions can optionally be filtered down to just the ones in a single
+	// recurring transaction
+	if raw := ctx.QueryParam("transaction_recurring_id"); raw != "" {
+		transactionRecurringId, err := ParseID[TransactionRecurring](raw)
+		if err != nil || transactionRecurringId.IsZero() {
+			return c.badRequest(ctx, "must specify a valid recurring transaction Id")
+		}
+
+		transactions, err := repo.GetTransactionsForRecurring(
+			c.getContext(ctx),
+			bankAccountId,
+			transactionRecurringId,
+			limit,
+			offset,
+		)
+		if err != nil {
+			return c.wrapPgError(ctx, err, "failed to retrieve transactions")
+		}
+
+		return ctx.JSON(http.StatusOK, transactions)
+	}
+
 	transactions, err := repo.GetTransactions(c.getContext(ctx), bankAccountId, limit, offset)
 	if err != nil {
 		return c.wrapPgError(ctx, err, "failed to retrieve transactions")

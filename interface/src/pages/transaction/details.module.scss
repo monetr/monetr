@@ -63,6 +63,11 @@
   }
 }
 
+// the column next to the form, has the recurring card and similar transactions
+.relatedColumn {
+  gap: 5 * variables.$size;
+}
+
 .formButtons {
   width: 100%;
   display: flex;

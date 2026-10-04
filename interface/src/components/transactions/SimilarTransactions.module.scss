@@ -17,3 +17,32 @@
   flex-direction: column;
   gap: 2 * variables.$size;
 }
+
+// the next one we expect for a recurring transaction, dashed since it hasnt actually happened yet
+.expected {
+  // outline instead of border so it doesnt shift the content over compared to the real rows
+  outline: 1px dashed var(--background-active);
+  outline-offset: -1px;
+
+  &:hover,
+  &:active {
+    background-color: transparent;
+  }
+}
+
+.expectedIcon {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 10 * variables.$size;
+  height: 10 * variables.$size;
+  border-radius: 9999px;
+  border: 1px dashed var(--content-muted);
+  color: var(--content-subtle);
+
+  svg {
+    width: 4 * variables.$size;
+    height: 4 * variables.$size;
+  }
+}

@@ -42,6 +42,11 @@ export function useCreateSpending(): (_spending: CreateSpendingRequest) => Promi
         ctx.client.invalidateQueries({
           queryKey: [`/api/bank_accounts/${data.bankAccountId}/forecast/next_funding`],
         }),
+        // the recurring transaction includes the spending made from it, so refresh it to pick up the new expense
+        data.transactionRecurringId &&
+          ctx.client.invalidateQueries({
+            queryKey: [`/api/bank_accounts/${data.bankAccountId}/recurring/${data.transactionRecurringId}`],
+          }),
       ]),
   });
 

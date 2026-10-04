@@ -299,6 +299,45 @@ func (r *repositoryBase) GetTransactionsForSpending(
 	return items, nil
 }
 
+func (r *repositoryBase) GetTransactionsForRecurring(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	transactionRecurringId ID[TransactionRecurring],
+	limit, offset int,
+) ([]Transaction, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	span.Data = map[string]any{
+		"accountId":              r.AccountId(),
+		"bankAccountId":          bankAccountId,
+		"transactionRecurringId": transactionRecurringId,
+		"limit":                  limit,
+		"offset":                 offset,
+	}
+
+	items := make([]Transaction, 0)
+	err := r.txn.NewSelect().
+		Model(&items).
+		Where(`"transaction"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction"."transaction_recurring_id" = ?`, transactionRecurringId).
+		Where(`"transaction"."deleted_at" IS NULL`).
+		Limit(limit).
+		Offset(offset).
+		Order(`date DESC`).
+		Order(`transaction_id DESC`).
+		Scan(span.Context())
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, errors.Wrap(err, "failed to retrieve transactions for recurring transaction")
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return items, nil
+}
+
 func (r *repositoryBase) GetTransaction(
 	ctx context.Context,
 	bankAccountId ID[BankAccount],

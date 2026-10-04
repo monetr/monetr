@@ -29,7 +29,7 @@
     outline-offset: var(--outline-size);
   }
 
-  &:enabled:active {
+  &:not(:disabled, [aria-disabled="true"]):active {
     filter: brightness(1.1);
   }
 
@@ -45,7 +45,7 @@
   background-color: var(--brand);
   color: var(--content-emphasis);
 
-  &:enabled:hover {
+  &:not(:disabled, [aria-disabled="true"]):hover {
     background-color: var(--brand-subtle);
   }
 
@@ -72,7 +72,7 @@
     color: var(--content-subtle)
   }
 
-  &:enabled:hover {
+  &:not(:disabled, [aria-disabled="true"]):hover {
     background-color: var(--background-emphasis);
   }
 
@@ -88,7 +88,7 @@
   @include mixins.inset-ring;
   color: var(--content-emphasis);
 
-  &:enabled {
+  &:not(:disabled, [aria-disabled="true"]) {
     &:focus-visible, &:hover {
       --ring-color: var(--brand);
       --ring-size: 2px;
@@ -109,7 +109,7 @@
     background-color: var(--destructive-disabled);
   }
 
-  &:enabled:hover {
+  &:not(:disabled, [aria-disabled="true"]):hover {
     background-color: var(--destructive-subtle);
   }
 
@@ -121,7 +121,7 @@
 .text {
   color: var(--content-emphasis);
 
-  &:enabled:hover {
+  &:not(:disabled, [aria-disabled="true"]):hover {
     background-color: var(--background-emphasis);
   }
 
@@ -146,7 +146,7 @@
   --ring-size: 1px;
   @include mixins.inset-ring;
 
-  &:enabled {
+  &:not(:disabled, [aria-disabled="true"]) {
     &:focus-visible, &:hover {
       --ring-color: var(--brand);
       --ring-size: 2px;

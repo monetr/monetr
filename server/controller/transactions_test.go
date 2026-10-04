@@ -154,6 +154,60 @@ func TestGetTransactions(t *testing.T) {
 
 		response.Status(http.StatusUnauthorized)
 	})
+
+	t.Run("filtered by recurring transaction", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		recurring := givenIHaveATransactionRecurring(t, bank)
+		transactions := fixtures.GivenIHaveNTransactions(t, app.Clock, bank, 5)
+		// only the first two are part of the recurring transaction
+		for i := range transactions[:2] {
+			transactions[i].TransactionRecurringId = &recurring.TransactionRecurringId
+			testutils.MustDBUpdate(t, &transactions[i])
+		}
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		{ // with the filter only the members come back
+			response := e.GET("/api/bank_accounts/{bankAccountId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithQuery("transaction_recurring_id", recurring.TransactionRecurringId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().Length().IsEqual(2)
+			response.JSON().Path("$[*].transactionRecurringId").Array().ContainsOnly(recurring.TransactionRecurringId)
+		}
+
+		{ // without it everything still comes back
+			response := e.GET("/api/bank_accounts/{bankAccountId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().Length().IsEqual(5)
+		}
+	})
+
+	t.Run("invalid recurring transaction id", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.GET("/api/bank_accounts/{bankAccountId}/transactions").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithQuery("transaction_recurring_id", "not_a_real_id").
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").IsEqual("must specify a valid recurring transaction Id")
+	})
 }
 
 func TestGetTransaction(t *testing.T) {
