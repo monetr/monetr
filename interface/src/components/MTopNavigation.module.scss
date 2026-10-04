@@ -2,7 +2,7 @@
 @use '@monetr/interface/variables';
 
 .spacer {
-  padding-bottom: calc(12 * variables.$size + var(--inset-top));
+  padding-bottom: calc(12 * variables.$size + env(safe-area-inset-top));
 }
 
 .topNav {
@@ -12,7 +12,7 @@
   flex-direction: column;
   // Reaches up behind the notch on iOS so things scrolling under the status bar
   // get blurred too, but the actual contents still sit below it.
-  padding-top: var(--inset-top);
+  padding-top: env(safe-area-inset-top);
   padding-left: 4 * variables.$size;
   padding-right: 4 * variables.$size;
   column-gap: 2 * variables.$size;
@@ -22,7 +22,7 @@
   top: 0;
 
   @media (min-width: variables.$mediumScreen) {
-    height: calc(12 * variables.$size + var(--inset-top));
+    height: calc(12 * variables.$size + env(safe-area-inset-top));
     flex-direction: row;
     align-items: center;
   }
@@ -164,7 +164,7 @@
 
   @media (min-width: variables.$mediumScreen) {
     column-gap: 2 * variables.$size;
-    top: calc(2 * variables.$size + var(--inset-top));
+    top: calc(2 * variables.$size + env(safe-area-inset-top));
     bottom: unset;
     left: unset;
     right: 4 * variables.$size;

@@ -34,7 +34,7 @@
   align-items: center;
   height: 100dvh;
 
-  padding-top: calc(4 * variables.$size + var(--inset-top));
+  padding-top: calc(4 * variables.$size + env(safe-area-inset-top));
   padding-bottom: calc(4 * variables.$size + env(safe-area-inset-bottom));
 }
 

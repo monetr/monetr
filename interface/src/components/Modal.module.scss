@@ -58,7 +58,7 @@ $basePadding: 2 * variables.$size;
   width: 100%;
   border-radius: 0px;
   // Handle screen edges on mobile devices.
-  padding-top: calc($basePadding + var(--inset-top));
+  padding-top: calc($basePadding + env(safe-area-inset-top));
   padding-left: calc($basePadding + env(safe-area-inset-left));
   padding-right: calc($basePadding + env(safe-area-inset-left));
   padding-bottom: calc($basePadding + env(safe-area-inset-bottom));
