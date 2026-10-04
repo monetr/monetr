@@ -3,6 +3,7 @@ import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { ID, idPrefix } from '@monetr/interface/models/ID';
 import type Spending from '@monetr/interface/models/Spending';
 import type TransactionCluster from '@monetr/interface/models/TransactionCluster';
+import TransactionRecurring from '@monetr/interface/models/TransactionRecurring';
 import type { WithJsonValues } from '@monetr/interface/util/json';
 import parseDate from '@monetr/interface/util/parseDate';
 
@@ -25,6 +26,7 @@ export default class Transaction {
   readonly originalMerchantName: string | null;
   isPending: boolean;
   readonly transactionClusterId: ID<TransactionCluster> | null;
+  readonly transactionRecurringId: ID<TransactionRecurring> | null;
   readonly createdAt: Date;
 
   constructor(data: WithJsonValues<Transaction>) {
@@ -44,6 +46,7 @@ export default class Transaction {
     this.originalMerchantName = data.originalMerchantName ?? null;
     this.isPending = data.isPending;
     this.transactionClusterId = data.transactionClusterId ?? null;
+    this.transactionRecurringId = data.transactionRecurringId ?? null;
     this.createdAt = parseDate(data.createdAt);
   }
 

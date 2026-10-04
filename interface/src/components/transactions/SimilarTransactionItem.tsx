@@ -59,7 +59,11 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
   if (props.disableNavigate) {
     return (
       <Item>
-        <TransactionMerchantIcon name={transaction.getName()} pending={transaction.isPending} />
+        <TransactionMerchantIcon
+          name={transaction.getName()}
+          pending={transaction.isPending}
+          recurring={Boolean(transaction.transactionRecurringId)}
+        />
         <ItemContent align='default' flex='shrink' gap='none' justify='start' orientation='column' shrink='default'>
           <Typography color='emphasis' component='p' ellipsis size='md' weight='semibold'>
             {transaction.getName()}
@@ -83,7 +87,11 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
   return (
     <Item>
       <Link className={flexVariants({ orientation: 'row', align: 'center' })} to={redirectUrl}>
-        <TransactionMerchantIcon name={transaction.getName()} pending={transaction.isPending} />
+        <TransactionMerchantIcon
+          name={transaction.getName()}
+          pending={transaction.isPending}
+          recurring={Boolean(transaction.transactionRecurringId)}
+        />
         <ItemContent align='default' flex='shrink' gap='none' justify='start' orientation='column' shrink='default'>
           <Typography color='emphasis' component='p' ellipsis size='md' weight='semibold'>
             {transaction.getName()}

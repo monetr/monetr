@@ -212,7 +212,11 @@ export default function TransactionDetails(): React.JSX.Element {
         <div className={styles.columns}>
           <div className={styles.column}>
             <Flex justify='center'>
-              <TransactionMerchantIcon name={transaction?.name ?? undefined} pending={transaction.isPending} />
+              <TransactionMerchantIcon
+                name={transaction?.name ?? undefined}
+                pending={transaction.isPending}
+                recurring={Boolean(transaction.transactionRecurringId)}
+              />
             </Flex>
             <FormTextField
               autoComplete='off'
