@@ -148,6 +148,17 @@ interface TransactionDateGroupsProps {
 // somewhere else.
 const measuredDays = new Map<string, Array<VirtualItem>>();
 
+// Where the page was scrolled to the last time they were on this list, stored on the history entry itself so it only
+// comes back when they go back to that exact entry. The browser does restore the scroll position on its own, but it
+// does that after the list has already rendered. By then the list has rendered the days for wherever the page was
+// scrolled before, so they would see an empty gap until the next scroll event caught the list up.
+const scrollOffsetStateKey = 'transactionsScrollOffset';
+
+function getSavedScrollOffset(): number | undefined {
+  const offset = window.history.state?.[scrollOffsetStateKey];
+  return typeof offset === 'number' ? offset : undefined;
+}
+
 // Only the days that are on (or near) the screen are rendered, and each one is measured after it renders so nothing
 // here needs to know how tall a transaction is.
 function TransactionDateGroups({ groups }: TransactionDateGroupsProps): React.JSX.Element {
@@ -158,6 +169,8 @@ function TransactionDateGroups({ groups }: TransactionDateGroupsProps): React.JS
   const selectedBankAccountId = String(useSelectedBankAccountId());
   const listRef = useRef<HTMLDivElement>(null);
   const [scrollMargin, setScrollMargin] = useState(0);
+  // Only read when the list first mounts, after that the page's actual scroll position is what matters.
+  const [savedScrollOffset] = useState(getSavedScrollOffset);
 
   // The page scrolls, not the list, so the virtualizer needs to know how far down the page the list starts.
   useLayoutEffect(() => {
@@ -178,6 +191,9 @@ function TransactionDateGroups({ groups }: TransactionDateGroupsProps): React.JS
     overscan: 2,
     scrollMargin,
     initialMeasurementsCache: measuredDays.get(selectedBankAccountId) ?? [],
+    // The virtualizer scrolls the page to this offset when it mounts, before anything is painted, so the first frame
+    // already has the right days rendered in the right spot.
+    initialOffset: () => savedScrollOffset ?? window.scrollY,
   });
   const items = virtualizer.getVirtualItems();
 
@@ -186,6 +202,24 @@ function TransactionDateGroups({ groups }: TransactionDateGroupsProps): React.JS
       measuredDays.set(selectedBankAccountId, virtualizer.takeSnapshot());
     };
   }, [selectedBankAccountId, virtualizer]);
+
+  // This cant be saved when the list unmounts, by then the history has already moved on to the next page. Instead it is
+  // saved shortly after they stop scrolling. Safari throws if the history state is replaced too often, so this can't be
+  // done on every scroll event either.
+  useEffect(() => {
+    let timeout: number | undefined;
+    const onScroll = () => {
+      window.clearTimeout(timeout);
+      timeout = window.setTimeout(() => {
+        window.history.replaceState({ ...window.history.state, [scrollOffsetStateKey]: window.scrollY }, '');
+      }, 100);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.clearTimeout(timeout);
+    };
+  }, []);
 
   return (
     <div ref={listRef} style={{ height: virtualizer.getTotalSize() }}>
