@@ -338,11 +338,13 @@ func detectRecurringTransactions(
 		copy(duplicate, signal)
 		sort.Float64s(duplicate)
 		// Sort the points from the resulting signal least to greatest, then take
-		// the value of the point at 66% through the sorted results. This value
-		// represents a point that is higher than 66% of the magnitudes, and thus
+		// the value of the point at 33% through the sorted results. This value
+		// represents a point that is higher than 33% of the magnitudes, and thus
 		// any value greater than this might be considered a peak. Essentially we
-		// want to isolate the top 33% of the waveform.
-		cut := int(float64(len(duplicate)) / 3)
+		// want to isolate the top two thirds of the waveform, which is plus or
+		// minus a third of a period around each peak. That leaves room for things
+		// like a payroll moving to the business day before a weekend.
+		cut := int(float64(len(duplicate)) * 2 / 3)
 		threshold = duplicate[len(duplicate)-cut]
 	}
 
