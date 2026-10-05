@@ -42,6 +42,8 @@ export default function TransactionRecurringCard({
   const formatAmount = (amount: number) => localeCurrency.formatAmount(Math.abs(amount), AmountType.Stored);
   const formatDate = (date: Date, options: Intl.DateTimeFormatOptions) =>
     new Intl.DateTimeFormat(locale.code, { ...options, timeZone: timezone }).format(date);
+  // only include the year when it isn't obvious, otherwise something from last december reads like it's this december
+  const yearIfNeeded = (date: Date) => (isThisYear(date, { in: inTimezone }) ? undefined : 'numeric');
 
   const daysUntilNext = differenceInCalendarDays(inTimezone(recurring.next), startOfToday({ in: inTimezone }));
   const PriceChangeIcon =
@@ -69,12 +71,15 @@ export default function TransactionRecurringCard({
 
       <div className={styles.stats}>
         {recurring.ended ? (
-          <Stat label='Last seen' value={formatDate(recurring.last, { month: 'short', day: 'numeric' })} />
+          <Stat
+            label='Last seen'
+            value={formatDate(recurring.last, { month: 'short', day: 'numeric', year: yearIfNeeded(recurring.last) })}
+          />
         ) : (
           <Stat
             detail={getRelativeDays(daysUntilNext)}
             label='Next expected'
-            value={formatDate(recurring.next, { month: 'short', day: 'numeric' })}
+            value={formatDate(recurring.next, { month: 'short', day: 'numeric', year: yearIfNeeded(recurring.next) })}
           />
         )}
         <Stat label='Usually' value={formatAmount(recurring.lastAmount)} />
@@ -89,7 +94,7 @@ export default function TransactionRecurringCard({
             Price went {priceChange.currentAmount > priceChange.previousAmount ? 'up' : 'down'} in{' '}
             {formatDate(priceChange.changedAt, {
               month: 'long',
-              year: isThisYear(priceChange.changedAt) ? undefined : 'numeric',
+              year: yearIfNeeded(priceChange.changedAt),
             })}
           </span>
           <div className={styles.priceChangeAmounts}>
