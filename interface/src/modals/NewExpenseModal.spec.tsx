@@ -211,7 +211,8 @@ describe('new expense modal', () => {
     await waitFor(() => expect(world.getByDisplayValue('Payday')).toBeInTheDocument());
     await waitFor(() => expect(world.getByDisplayValue('Every month on the 15th')).toBeInTheDocument());
 
-    act(() => within(world.getByTestId('new-expense-move-transaction')).getByRole('switch').click());
+    // spending the charge from the new expense is on by default
+    expect(within(world.getByTestId('new-expense-move-transaction')).getByRole('switch')).toBeChecked();
     act(() => world.getByRole('button', { name: 'Create' }).click());
 
     await waitFor(() => expect(mockFetch.history.patch).toHaveLength(1));

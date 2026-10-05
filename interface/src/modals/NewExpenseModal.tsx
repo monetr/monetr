@@ -102,7 +102,8 @@ function NewExpenseModal(props: NewExpenseModalProps): React.JSX.Element {
     ruleset: recurring?.ruleset ?? '',
     fundingScheduleId: ID.from<FundingSchedule, string>(''),
     autoCreateTransaction: false,
-    moveTransaction: false,
+    // on by default, but only when the toggle is actually shown so a hidden toggle never moves the transaction
+    moveTransaction: Boolean(transaction && !transaction.getIsAddition()),
   };
 
   async function submit(values: NewExpenseValues, helper: FormikHelpers<NewExpenseValues>): Promise<void> {
