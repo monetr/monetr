@@ -72,7 +72,13 @@ export default function MSelectFunding(props: MSelectFundingProps): React.JSX.El
     return (
       <div className={styles.emptyState}>
         <Label label={props.label} required={props.required} />
-        <Button className={styles.createButton} onClick={createAndSetFunding} size='select' variant='primary'>
+        <Button
+          className={styles.createButton}
+          disabled={formikContext.isSubmitting}
+          onClick={createAndSetFunding}
+          size='select'
+          variant='primary'
+        >
           <Calendar />
           Create a new funding schedule...
         </Button>
@@ -94,6 +100,7 @@ export default function MSelectFunding(props: MSelectFundingProps): React.JSX.El
   return (
     <Select
       className={props.className}
+      disabled={formikContext.isSubmitting}
       label={props.label ?? 'Funding'}
       name='fundingScheduleId'
       onChange={onSelect}
