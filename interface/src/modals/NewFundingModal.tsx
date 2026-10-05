@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useId, useRef } from 'react';
+import { Fragment, useCallback, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { startOfDay, startOfTomorrow } from 'date-fns';
 import { type FormikHelpers, useFormikContext } from 'formik';
@@ -14,7 +14,6 @@ import FormTextField from '@monetr/interface/components/FormTextField';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
-import { Switch } from '@monetr/interface/components/Switch';
 import Typography from '@monetr/interface/components/Typography';
 import { useCreateFundingSchedule } from '@monetr/interface/hooks/useCreateFundingSchedule';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
@@ -202,27 +201,18 @@ function NewFundingModal(props: NewFundingModalProps): React.JSX.Element {
 }
 
 function AutoCreateTransactionToggle(): React.JSX.Element {
-  const autoCreateSwitchId = useId();
-  const { setFieldValue, values } = useFormikContext<NewFundingValues>();
+  const { values } = useFormikContext<NewFundingValues>();
   const hasDeposit = (values.estimatedDeposit ?? 0) > 0;
 
   return (
-    <div className={styles.optionRow} data-testid='new-funding-auto-create-transaction'>
-      <div className={styles.optionText}>
-        <label aria-disabled={!hasDeposit} className={styles.optionLabel} htmlFor={autoCreateSwitchId}>
-          Auto create transaction
-        </label>
-        <p aria-disabled={!hasDeposit} className={styles.optionDescription}>
-          Automatically add a deposit transaction for the estimated deposit each time the funding schedule would occur.
-        </p>
-      </div>
-      <Switch
-        checked={hasDeposit && values.autoCreateTransaction}
-        disabled={!hasDeposit}
-        id={autoCreateSwitchId}
-        onCheckedChange={() => setFieldValue('autoCreateTransaction', !values.autoCreateTransaction)}
-      />
-    </div>
+    <FormSwitch
+      checked={hasDeposit && values.autoCreateTransaction}
+      data-testid='new-funding-auto-create-transaction'
+      description='Automatically add a deposit transaction for the estimated deposit each time the funding schedule would occur.'
+      disabled={!hasDeposit}
+      label='Auto create transaction'
+      name='autoCreateTransaction'
+    />
   );
 }
 

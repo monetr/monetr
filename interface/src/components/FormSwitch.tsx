@@ -11,6 +11,11 @@ export interface FormSwitchProps {
   description: string;
   name: string;
   disabled?: boolean;
+  /**
+   * checked overrides what the switch shows, for when the field should read as off even though its value is still true,
+   * like a toggle that only applies once another field is filled in
+   */
+  checked?: boolean;
   className?: string;
   'data-testid'?: string;
 }
@@ -26,7 +31,7 @@ export default function FormSwitch(props: FormSwitchProps): React.JSX.Element {
   return (
     <div className={mergeClasses(styles.formSwitchRoot, props.className)}>
       <SwitchCard
-        checked={Boolean(formikContext?.values[props.name])}
+        checked={props.checked ?? Boolean(formikContext?.values[props.name])}
         data-testid={props['data-testid']}
         description={props.description}
         disabled={Boolean(props.disabled) || formikContext?.isSubmitting}

@@ -1,4 +1,4 @@
-import { useId, useRef } from 'react';
+import { useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { isBefore, startOfDay, startOfTomorrow } from 'date-fns';
 import { type FormikHelpers, useFormikContext } from 'formik';
@@ -10,12 +10,12 @@ import { Button } from '@monetr/interface/components/Button';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
+import FormSwitch from '@monetr/interface/components/FormSwitch';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
 import MSelectFunding from '@monetr/interface/components/MSelectFunding';
-import { Switch } from '@monetr/interface/components/Switch';
 import Typography from '@monetr/interface/components/Typography';
 import { useCreateSpending } from '@monetr/interface/hooks/useCreateSpending';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
@@ -224,27 +224,18 @@ function NewExpenseModal(props: NewExpenseModalProps): React.JSX.Element {
 }
 
 function AutoCreateTransactionToggle(): React.JSX.Element {
-  const autoCreateSwitchId = useId();
-  const { setFieldValue, values } = useFormikContext<NewExpenseValues>();
+  const { values } = useFormikContext<NewExpenseValues>();
   const hasAmount = (values.amount ?? 0) > 0;
 
   return (
-    <div className={styles.optionRow} data-testid='new-expense-auto-create-transaction'>
-      <div className={styles.optionText}>
-        <label aria-disabled={!hasAmount} className={styles.optionLabel} htmlFor={autoCreateSwitchId}>
-          Auto create transaction
-        </label>
-        <p aria-disabled={!hasAmount} className={styles.optionDescription}>
-          Automatically add a transaction for this expense each time it is due, deducting from your balance.
-        </p>
-      </div>
-      <Switch
-        checked={hasAmount && values.autoCreateTransaction}
-        disabled={!hasAmount}
-        id={autoCreateSwitchId}
-        onCheckedChange={() => setFieldValue('autoCreateTransaction', !values.autoCreateTransaction)}
-      />
-    </div>
+    <FormSwitch
+      checked={hasAmount && values.autoCreateTransaction}
+      data-testid='new-expense-auto-create-transaction'
+      description='Automatically add a transaction for this expense each time it is due, deducting from your balance.'
+      disabled={!hasAmount}
+      label='Auto create transaction'
+      name='autoCreateTransaction'
+    />
   );
 }
 
@@ -253,8 +244,6 @@ interface MoveTransactionToggleProps {
 }
 
 function MoveTransactionToggle({ transaction }: MoveTransactionToggleProps): React.JSX.Element {
-  const moveSwitchId = useId();
-  const { setFieldValue, values } = useFormikContext<NewExpenseValues>();
   const { timezone } = useTimezone();
   const { data: locale } = useLocale();
   const date = locale
@@ -264,21 +253,12 @@ function MoveTransactionToggle({ transaction }: MoveTransactionToggleProps): Rea
     : null;
 
   return (
-    <div className={styles.optionRow} data-testid='new-expense-move-transaction'>
-      <div className={styles.optionText}>
-        <label className={styles.optionLabel} htmlFor={moveSwitchId}>
-          Spend the {date} charge from this expense
-        </label>
-        <p className={styles.optionDescription}>
-          This won&apos;t change your Free-To-Use balance, since the expense is brand new.
-        </p>
-      </div>
-      <Switch
-        checked={values.moveTransaction}
-        id={moveSwitchId}
-        onCheckedChange={() => setFieldValue('moveTransaction', !values.moveTransaction)}
-      />
-    </div>
+    <FormSwitch
+      data-testid='new-expense-move-transaction'
+      description="This won't change your Free-To-Use balance, since the expense is brand new."
+      label={`Spend the ${date ?? ''} charge from this expense`}
+      name='moveTransaction'
+    />
   );
 }
 

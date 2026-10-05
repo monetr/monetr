@@ -1,6 +1,6 @@
 import { act } from 'react';
 
-import { waitFor, within } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 import { showNewExpenseModal } from '@monetr/interface/modals/NewExpenseModal';
 import type BankAccount from '@monetr/interface/models/BankAccount';
@@ -212,7 +212,7 @@ describe('new expense modal', () => {
     await waitFor(() => expect(world.getByDisplayValue('Every month on the 15th')).toBeInTheDocument());
 
     // spending the charge from the new expense is on by default
-    expect(within(world.getByTestId('new-expense-move-transaction')).getByRole('switch')).toBeChecked();
+    expect(world.getByTestId('new-expense-move-transaction')).toBeChecked();
     act(() => world.getByRole('button', { name: 'Create' }).click());
 
     await waitFor(() => expect(mockFetch.history.patch).toHaveLength(1));
