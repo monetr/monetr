@@ -29,6 +29,7 @@ func (r *repositoryBase) GetTransactionRecurringById(
 	err := r.txn.NewSelect().
 		Model(&result).
 		Relation("Spending").
+		Relation("FundingSchedule").
 		Where(`"transaction_recurring"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction_recurring"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction_recurring"."transaction_recurring_id" = ?`, transactionRecurringId).

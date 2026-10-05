@@ -1,4 +1,5 @@
 import type BankAccount from '@monetr/interface/models/BankAccount';
+import FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { ID } from '@monetr/interface/models/ID';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
 import type TransactionCluster from '@monetr/interface/models/TransactionCluster';
@@ -23,6 +24,7 @@ function fixture(overrides: Partial<WithJsonValues<TransactionRecurring>> = {}):
     },
     lastAmount: 800,
     spending: null,
+    fundingSchedule: null,
     createdAt: '2026-03-15T06:00:00Z',
     updatedAt: '2026-03-16T06:00:00Z',
     ...overrides,
@@ -94,6 +96,35 @@ describe('transaction recurring', () => {
     expect(recurring.spending?.spendingId.toString()).toBe('spnd_test');
     expect(recurring.spending?.transactionRecurringId?.toString()).toBe('txrc_test');
     expect(recurring.spending?.nextRecurrence).toEqual(new Date('2026-04-15T05:00:00Z'));
+  });
+
+  it('will not have a funding schedule when nothing was created from it', () => {
+    const recurring = fixture();
+    expect(recurring.fundingSchedule).toBeNull();
+  });
+
+  it('will parse the funding schedule created from it', () => {
+    const recurring = fixture({
+      direction: 'credit',
+      fundingSchedule: {
+        fundingScheduleId: ID.from<FundingSchedule>('fund_test'),
+        bankAccountId: ID.from<BankAccount>('bac_test'),
+        transactionRecurringId: ID.from<TransactionRecurring>('txrc_test'),
+        name: 'Payday',
+        description: null,
+        ruleset: 'DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15',
+        lastRecurrence: null,
+        nextRecurrence: '2026-04-15T05:00:00Z',
+        nextRecurrenceOriginal: '2026-04-15T05:00:00Z',
+        excludeWeekends: false,
+        autoCreateTransaction: false,
+        estimatedDeposit: 250000,
+      },
+    });
+    expect(recurring.fundingSchedule).toBeInstanceOf(FundingSchedule);
+    expect(recurring.fundingSchedule?.fundingScheduleId.toString()).toBe('fund_test');
+    expect(recurring.fundingSchedule?.transactionRecurringId?.toString()).toBe('txrc_test');
+    expect(recurring.fundingSchedule?.nextRecurrence).toEqual(new Date('2026-04-15T05:00:00Z'));
   });
 
   it('will throw on an invalid date', () => {

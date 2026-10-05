@@ -25,6 +25,27 @@
   margin-bottom: 2 * variables.$size;
 }
 
+// callout shown when the funding schedule was filled in from a recurring deposit
+.recurringBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: 2.5 * variables.$size;
+  padding: 2.5 * variables.$size 3 * variables.$size;
+  margin-bottom: 4 * variables.$size;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--brand-subtle);
+  background-color: color-mix(in srgb, var(--brand) 40%, var(--background));
+  color: var(--content-emphasis);
+
+  svg {
+    flex: none;
+    width: 4.5 * variables.$size;
+    height: 4.5 * variables.$size;
+    margin-top: 0.25 * variables.$size;
+    color: var(--brand-bright);
+  }
+}
+
 // The bordered toggle box that wraps a label/description and a Switch.
 .optionRow {
   display: flex;

@@ -83,6 +83,24 @@ func (c *Controller) postFundingSchedules(ctx *echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to retrieve bank account")
 	}
 
+	// If the funding schedule is being created from a recurring transaction then
+	// make sure that recurring transaction exists for this bank account, and that
+	// it is money coming into the account. Debits are tracked by spending.
+	if fundingSchedule.TransactionRecurringId != nil {
+		recurring, err := repo.GetTransactionRecurringById(
+			c.getContext(ctx),
+			bankAccountId,
+			*fundingSchedule.TransactionRecurringId,
+		)
+		if err != nil {
+			return c.wrapPgError(ctx, err, "could not find recurring transaction specified")
+		}
+
+		if recurring.Direction != CreditDirection {
+			return c.badRequest(ctx, "funding schedules can only be created from a credit recurring transaction")
+		}
+	}
+
 	if fundingSchedule.AutoCreateTransaction {
 		if fundingSchedule.EstimatedDeposit == nil || *fundingSchedule.EstimatedDeposit <= 0 {
 			return c.badRequest(ctx, "Auto create transaction requires a non-zero estimated deposit")

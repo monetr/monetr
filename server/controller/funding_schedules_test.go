@@ -402,6 +402,106 @@ func TestPostFundingSchedules(t *testing.T) {
 
 		response.Status(http.StatusUnauthorized)
 	})
+	t.Run("creates funding schedule from a credit recurring transaction", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		recurring := givenIHaveATransactionRecurring(t, bank)
+		recurring.Direction = models.CreditDirection
+		testutils.MustDBUpdate(t, &recurring)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":                   "Payday",
+				"ruleset":                FifthteenthAndLastDayOfEveryMonth,
+				"transactionRecurringId": recurring.TransactionRecurringId,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transactionRecurringId").IsEqual(recurring.TransactionRecurringId)
+
+		fundingSchedule := testutils.MustDBRead(t, models.FundingSchedule{
+			FundingScheduleId: models.ID[models.FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw()),
+			AccountId:         bank.AccountId,
+			BankAccountId:     bank.BankAccountId,
+		})
+		if assert.NotNil(t, fundingSchedule.TransactionRecurringId, "recurring ID must be persisted") {
+			assert.Equal(t, recurring.TransactionRecurringId, *fundingSchedule.TransactionRecurringId)
+		}
+	})
+
+	t.Run("rejects funding schedule from a debit recurring transaction", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		recurring := givenIHaveATransactionRecurring(t, bank)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":                   "Github",
+				"ruleset":                FifthteenthAndLastDayOfEveryMonth,
+				"transactionRecurringId": recurring.TransactionRecurringId,
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").IsEqual("funding schedules can only be created from a credit recurring transaction")
+	})
+
+	t.Run("rejects funding schedule with a recurring transaction that does not exist", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":                   "Payday",
+				"ruleset":                FifthteenthAndLastDayOfEveryMonth,
+				"transactionRecurringId": models.NewID[models.TransactionRecurring](),
+			}).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").IsEqual("could not find recurring transaction specified: record does not exist")
+	})
+
+	t.Run("rejects funding schedule with a recurring transaction from another bank account", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		otherBank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.SavingsBankAccountSubType)
+		recurring := givenIHaveATransactionRecurring(t, otherBank)
+		recurring.Direction = models.CreditDirection
+		testutils.MustDBUpdate(t, &recurring)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":                   "Payday",
+				"ruleset":                FifthteenthAndLastDayOfEveryMonth,
+				"transactionRecurringId": recurring.TransactionRecurringId,
+			}).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").IsEqual("could not find recurring transaction specified: record does not exist")
+	})
 }
 
 func TestPatchFundingSchedule(t *testing.T) {

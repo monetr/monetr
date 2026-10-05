@@ -1,4 +1,5 @@
 import type BankAccount from '@monetr/interface/models/BankAccount';
+import FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { ID, idPrefix } from '@monetr/interface/models/ID';
 import Spending from '@monetr/interface/models/Spending';
 import type TransactionCluster from '@monetr/interface/models/TransactionCluster';
@@ -35,6 +36,8 @@ export default class TransactionRecurring {
   readonly lastAmount: number;
   // spending is the expense created from this recurring transaction, if there is one
   readonly spending: Spending | null;
+  // fundingSchedule is the funding schedule created from this recurring transaction, if there is one
+  readonly fundingSchedule: FundingSchedule | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 
@@ -53,6 +56,7 @@ export default class TransactionRecurring {
     this.amounts = data.amounts;
     this.lastAmount = data.lastAmount;
     this.spending = data.spending ? new Spending(data.spending) : null;
+    this.fundingSchedule = data.fundingSchedule ? new FundingSchedule(data.fundingSchedule) : null;
     this.createdAt = parseDate(data.createdAt);
     this.updatedAt = parseDate(data.updatedAt);
   }

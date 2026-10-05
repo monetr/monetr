@@ -24,6 +24,7 @@ function recurring(amounts: { [key: number]: number }): TransactionRecurring {
     amounts,
     lastAmount: 0,
     spending: null,
+    fundingSchedule: null,
     createdAt: '2026-01-15T06:00:00Z',
     updatedAt: '2026-06-16T06:00:00Z',
   });

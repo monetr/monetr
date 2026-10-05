@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import { differenceInCalendarDays, isThisYear, startOfToday } from 'date-fns';
-import { ArrowRight, Plus, Repeat, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
+import { ArrowRight, CalendarSync, Plus, Repeat, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
 import { rrulestr } from 'rrule';
 import { Link } from 'wouter';
 
@@ -13,6 +13,7 @@ import { useRecurringTransactionHistory } from '@monetr/interface/hooks/useRecur
 import { useSpending } from '@monetr/interface/hooks/useSpending';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { showNewExpenseModal } from '@monetr/interface/modals/NewExpenseModal';
+import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
 import type Transaction from '@monetr/interface/models/Transaction';
 import { AmountType } from '@monetr/interface/util/amounts';
 import capitalize from '@monetr/interface/util/capitalize';
@@ -147,6 +148,44 @@ export default function TransactionRecurringCard({
                   Create expense
                 </Button>
               )}
+            </Fragment>
+          )}
+        </div>
+      )}
+
+      {/* money coming in, like a paycheck, can be used to fund expenses with a funding schedule */}
+      {!isDebit && (recurring.fundingSchedule || !recurring.ended) && (
+        <div className={styles.footer}>
+          {recurring.fundingSchedule ? (
+            <Fragment>
+              <span className={styles.spentFrom}>
+                <span className={styles.spentFromIcon}>
+                  <CalendarSync />
+                </span>
+                <span>
+                  Funds <strong>{recurring.fundingSchedule.name}</strong>
+                </span>
+              </span>
+              <Button asChild variant='secondary'>
+                <Link
+                  to={`/bank/${recurring.fundingSchedule.bankAccountId}/funding/${recurring.fundingSchedule.fundingScheduleId}/details`}
+                >
+                  View funding schedule
+                </Link>
+              </Button>
+            </Fragment>
+          ) : (
+            <Fragment>
+              <span className={styles.spentFrom}>
+                <span className={styles.spentFromIcon}>
+                  <CalendarSync />
+                </span>
+                <span>Use this deposit to fund your budgets</span>
+              </span>
+              <Button onClick={() => showNewFundingModal({ recurring, transaction })} variant='primary'>
+                <Plus />
+                Create funding schedule
+              </Button>
             </Fragment>
           )}
         </div>

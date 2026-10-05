@@ -44,7 +44,7 @@ export default function Funding(): React.JSX.Element {
   return (
     <Fragment>
       <MTopNavigation icon={CalendarSync} title='Funding Schedules'>
-        <Button onClick={showNewFundingModal} variant='primary'>
+        <Button onClick={() => showNewFundingModal()} variant='primary'>
           <Plus />
           New Funding Schedule
         </Button>

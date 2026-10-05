@@ -56,7 +56,8 @@ type TransactionRecurring struct {
 	CreatedAt              time.Time                `json:"createdAt" bun:"created_at,notnull,default:now(),nullzero"`
 	UpdatedAt              time.Time                `json:"updatedAt" bun:"updated_at,notnull,default:now(),nullzero"`
 
-	Spending *Spending `json:"spending,omitempty" bun:"rel:has-one,join:transaction_recurring_id=transaction_recurring_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
+	Spending        *Spending        `json:"spending,omitempty" bun:"rel:has-one,join:transaction_recurring_id=transaction_recurring_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
+	FundingSchedule *FundingSchedule `json:"fundingSchedule,omitempty" bun:"rel:has-one,join:transaction_recurring_id=transaction_recurring_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
 }
 
 func (TransactionRecurring) IdentityPrefix() string {

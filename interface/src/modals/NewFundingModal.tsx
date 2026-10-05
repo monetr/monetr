@@ -2,6 +2,7 @@ import { Fragment, useCallback, useId, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { startOfDay, startOfTomorrow } from 'date-fns';
 import { type FormikHelpers, useFormikContext } from 'formik';
+import { Repeat } from 'lucide-react';
 
 import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
@@ -17,9 +18,14 @@ import Typography from '@monetr/interface/components/Typography';
 import { useCreateFundingSchedule } from '@monetr/interface/hooks/useCreateFundingSchedule';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import { useRecurringTransactionHistory } from '@monetr/interface/hooks/useRecurringTransactionHistory';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
+import { useTransactionCluster } from '@monetr/interface/hooks/useTransactionCluster';
+import { getNextRecurrence } from '@monetr/interface/modals/NewExpenseModal';
 import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
+import type Transaction from '@monetr/interface/models/Transaction';
+import type TransactionRecurring from '@monetr/interface/models/TransactionRecurring';
 import type { APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
 
@@ -34,7 +40,20 @@ interface NewFundingValues {
   autoCreateTransaction: boolean;
 }
 
-function NewFundingModal(): React.JSX.Element {
+export interface NewFundingModalProps {
+  /**
+   * recurring fills in the new funding schedule from a recurring deposit, like a paycheck
+   */
+  recurring?: TransactionRecurring;
+  /**
+   * transaction is the one the user started from when creating a funding schedule from a recurring deposit. its name is
+   * the fallback if theres no cluster name
+   */
+  transaction?: Transaction;
+}
+
+function NewFundingModal(props: NewFundingModalProps): React.JSX.Element {
+  const { recurring, transaction } = props;
   const switchId = useId();
   const { inTimezone } = useTimezone();
   const modal = useModal();
@@ -45,15 +64,21 @@ function NewFundingModal(): React.JSX.Element {
   const { data: link } = useCurrentLink();
   const isManual = Boolean(link?.getIsManual());
   const { data: locale } = useLocaleCurrency();
+  const { seen } = useRecurringTransactionHistory(recurring);
+  // use the similar transactions name instead of the transactions own name, since thats the name for the whole group of
+  // deposits and not just the one they happened to start from
+  const { data: cluster, isLoading: clusterIsLoading } = useTransactionCluster(recurring?.transactionClusterId ?? null);
+  const name = cluster?.name || transaction?.getName();
 
+  const tomorrow = startOfTomorrow({
+    in: inTimezone,
+  });
   const initialValues: NewFundingValues = {
-    name: '',
-    nextOccurrence: startOfTomorrow({
-      in: inTimezone,
-    }),
-    ruleset: '',
+    name: name ?? '',
+    nextOccurrence: recurring ? getNextRecurrence(recurring, tomorrow) : tomorrow,
+    ruleset: recurring?.ruleset ?? '',
     excludeWeekends: false,
-    estimatedDeposit: undefined,
+    estimatedDeposit: recurring && locale ? locale.amountToFriendly(Math.abs(recurring.lastAmount)) : undefined,
     autoCreateTransaction: false,
   };
 
@@ -67,6 +92,7 @@ function NewFundingModal(): React.JSX.Element {
       const estimatedDeposit = values.estimatedDeposit ?? 0;
       return await createFundingSchedule({
         bankAccountId: selectedBankAccountId,
+        transactionRecurringId: recurring?.transactionRecurringId ?? null,
         name: values.name,
         description: null,
         nextRecurrence: startOfDay(new Date(values.nextOccurrence), {
@@ -91,8 +117,17 @@ function NewFundingModal(): React.JSX.Element {
         )
         .finally(() => helpers.setSubmitting(false));
     },
-    [createFundingSchedule, enqueueSnackbar, locale, modal, selectedBankAccountId, inTimezone, isManual],
+    [createFundingSchedule, enqueueSnackbar, locale, modal, selectedBankAccountId, inTimezone, isManual, recurring],
   );
+
+  // the form only reads its initial values once, so wait for everything the recurring deposit fills in
+  if (recurring && (!locale || clusterIsLoading)) {
+    return (
+      <MModal className={styles.modal} open={modal.visible} ref={ref}>
+        One moment...
+      </MModal>
+    );
+  }
 
   return (
     <MModal className={styles.modal} open={modal.visible} ref={ref}>
@@ -103,6 +138,14 @@ function NewFundingModal(): React.JSX.Element {
               <Typography className={styles.heading} size='xl' weight='bold'>
                 Create A New Funding Schedule
               </Typography>
+              {recurring && (
+                <div className={styles.recurringBanner} data-testid='new-funding-recurring-banner'>
+                  <Repeat />
+                  <Typography color='inherit' size='sm'>
+                    Filled in from your {seen} {name ?? 'recurring'} deposits. Give it a once over before you create it.
+                  </Typography>
+                </div>
+              )}
               <FormTextField
                 autoComplete='off'
                 autoFocus
@@ -113,6 +156,7 @@ function NewFundingModal(): React.JSX.Element {
                 required
               />
               <FormDatePicker
+                description={recurring && 'When the next deposit is expected.'}
                 label='When do you get paid next?'
                 min={startOfTomorrow({
                   in: inTimezone,
@@ -122,6 +166,7 @@ function NewFundingModal(): React.JSX.Element {
               />
               <MSelectFrequency
                 dateFrom='nextOccurrence'
+                description={recurring && `Matches when ${name ?? 'it'} pays you.`}
                 label='How often do you get paid?'
                 name='ruleset'
                 placeholder='Select a funding frequency...'
@@ -129,6 +174,7 @@ function NewFundingModal(): React.JSX.Element {
               />
               <FormAmountField
                 allowNegative={false}
+                description={recurring && 'Your last deposit.'}
                 label='Estimated Deposit'
                 name='estimatedDeposit'
                 placeholder='Example: $ 1,000.00'
@@ -194,6 +240,6 @@ const newFundingModal = NiceModal.create(NewFundingModal);
 
 export default newFundingModal;
 
-export function showNewFundingModal(): Promise<FundingSchedule | null> {
-  return NiceModal.show(newFundingModal) as Promise<FundingSchedule | null>;
+export function showNewFundingModal(props: NewFundingModalProps = {}): Promise<FundingSchedule | null> {
+  return NiceModal.show(newFundingModal, props) as Promise<FundingSchedule | null>;
 }

@@ -284,7 +284,7 @@ function MoveTransactionToggle({ transaction }: MoveTransactionToggleProps): Rea
 // getNextRecurrence returns when the recurring transaction is next expected. next only gets updated when its recalculated
 // though so it can already be in the past, in that case use the next occurrence of the rule instead since an expense
 // cant be due in the past
-function getNextRecurrence(recurring: TransactionRecurring, tomorrow: Date): Date {
+export function getNextRecurrence(recurring: TransactionRecurring, tomorrow: Date): Date {
   if (!isBefore(recurring.next, tomorrow)) {
     return recurring.next;
   }

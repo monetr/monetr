@@ -33,6 +33,7 @@ function recurring(next: string): TransactionRecurring {
     amounts: { 1549: 3 },
     lastAmount: 1549,
     spending: null,
+    fundingSchedule: null,
     createdAt: '2026-01-15T06:00:00Z',
     updatedAt: '2026-03-16T06:00:00Z',
   });

@@ -13,21 +13,23 @@ import (
 type FundingSchedule struct {
 	bun.BaseModel `bun:"table:funding_schedules,alias:funding_schedule"`
 
-	FundingScheduleId      ID[FundingSchedule] `json:"fundingScheduleId" bun:"funding_schedule_id,notnull,pk"`
-	AccountId              ID[Account]         `json:"-" bun:"account_id,notnull,pk"`
-	Account                *Account            `json:"-" bun:"rel:belongs-to,join:account_id=account_id"`
-	BankAccountId          ID[BankAccount]     `json:"bankAccountId" bun:"bank_account_id,notnull,pk,unique:per_bank"`
-	BankAccount            *BankAccount        `json:"bankAccount,omitempty" bun:"rel:belongs-to,join:bank_account_id=bank_account_id,join:account_id=account_id"`
-	Name                   string              `json:"name" bun:"name,notnull,unique:per_bank,nullzero"`
-	Description            string              `json:"description,omitempty" bun:"description,nullzero"`
-	RuleSet                *RuleSet            `json:"ruleset" bun:"ruleset,notnull,type:text"`
-	ExcludeWeekends        bool                `json:"excludeWeekends" bun:"exclude_weekends,notnull"`
-	WaitForDeposit         bool                `json:"waitForDeposit" bun:"wait_for_deposit,notnull"`
-	AutoCreateTransaction  bool                `json:"autoCreateTransaction" bun:"auto_create_transaction,notnull"`
-	EstimatedDeposit       *int64              `json:"estimatedDeposit" bun:"estimated_deposit"`
-	LastRecurrence         *time.Time          `json:"lastRecurrence" bun:"last_recurrence"`
-	NextRecurrence         time.Time           `json:"nextRecurrence" bun:"next_recurrence,notnull,nullzero"`
-	NextRecurrenceOriginal time.Time           `json:"nextRecurrenceOriginal" bun:"next_recurrence_original,notnull,nullzero"`
+	FundingScheduleId      ID[FundingSchedule]       `json:"fundingScheduleId" bun:"funding_schedule_id,notnull,pk"`
+	AccountId              ID[Account]               `json:"-" bun:"account_id,notnull,pk"`
+	Account                *Account                  `json:"-" bun:"rel:belongs-to,join:account_id=account_id"`
+	BankAccountId          ID[BankAccount]           `json:"bankAccountId" bun:"bank_account_id,notnull,pk,unique:per_bank"`
+	BankAccount            *BankAccount              `json:"bankAccount,omitempty" bun:"rel:belongs-to,join:bank_account_id=bank_account_id,join:account_id=account_id"`
+	TransactionRecurringId *ID[TransactionRecurring] `json:"transactionRecurringId" bun:"transaction_recurring_id"`
+	TransactionRecurring   *TransactionRecurring     `json:"-" bun:"rel:belongs-to,join:transaction_recurring_id=transaction_recurring_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
+	Name                   string                    `json:"name" bun:"name,notnull,unique:per_bank,nullzero"`
+	Description            string                    `json:"description,omitempty" bun:"description,nullzero"`
+	RuleSet                *RuleSet                  `json:"ruleset" bun:"ruleset,notnull,type:text"`
+	ExcludeWeekends        bool                      `json:"excludeWeekends" bun:"exclude_weekends,notnull"`
+	WaitForDeposit         bool                      `json:"waitForDeposit" bun:"wait_for_deposit,notnull"`
+	AutoCreateTransaction  bool                      `json:"autoCreateTransaction" bun:"auto_create_transaction,notnull"`
+	EstimatedDeposit       *int64                    `json:"estimatedDeposit" bun:"estimated_deposit"`
+	LastRecurrence         *time.Time                `json:"lastRecurrence" bun:"last_recurrence"`
+	NextRecurrence         time.Time                 `json:"nextRecurrence" bun:"next_recurrence,notnull,nullzero"`
+	NextRecurrenceOriginal time.Time                 `json:"nextRecurrenceOriginal" bun:"next_recurrence_original,notnull,nullzero"`
 }
 
 func (FundingSchedule) IdentityPrefix() string {
