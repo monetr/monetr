@@ -11,6 +11,7 @@ import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormCheckbox from '@monetr/interface/components/FormCheckbox';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
+import FormSwitch from '@monetr/interface/components/FormSwitch';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import { layoutVariants } from '@monetr/interface/components/Layout';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
@@ -250,7 +251,7 @@ export default function ExpenseDetails(): React.JSX.Element | null {
                 name='autoCreateTransaction'
               />
             )}
-            <FormCheckbox
+            <FormSwitch
               className={layoutVariants({ width: 'full' })}
               data-testid='expense-details-paused'
               description='Pause this expense to temporarily stop contributions to it.'

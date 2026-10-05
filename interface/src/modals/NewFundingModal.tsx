@@ -9,6 +9,7 @@ import { Button } from '@monetr/interface/components/Button';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
+import FormSwitch from '@monetr/interface/components/FormSwitch';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
@@ -54,7 +55,6 @@ export interface NewFundingModalProps {
 
 function NewFundingModal(props: NewFundingModalProps): React.JSX.Element {
   const { recurring, transaction } = props;
-  const switchId = useId();
   const { inTimezone } = useTimezone();
   const modal = useModal();
   const ref = useRef<MModalRef>(null);
@@ -132,7 +132,7 @@ function NewFundingModal(props: NewFundingModalProps): React.JSX.Element {
   return (
     <MModal className={styles.modal} open={modal.visible} ref={ref}>
       <MForm className={styles.form} data-testid='new-funding-modal' initialValues={initialValues} onSubmit={submit}>
-        {({ setFieldValue, values }) => (
+        {() => (
           <Fragment>
             <div className={styles.body}>
               <Typography className={styles.heading} size='xl' weight='bold'>
@@ -179,21 +179,11 @@ function NewFundingModal(props: NewFundingModalProps): React.JSX.Element {
                 name='estimatedDeposit'
                 placeholder='Example: $ 1,000.00'
               />
-              <div className={styles.optionRow}>
-                <div className={styles.optionText}>
-                  <label className={styles.optionLabel} htmlFor={switchId}>
-                    Exclude Weekends
-                  </label>
-                  <p className={styles.optionDescription}>
-                    If it were to land on a weekend, it is adjusted to the previous weekday instead.
-                  </p>
-                </div>
-                <Switch
-                  checked={values.excludeWeekends}
-                  id={switchId}
-                  onCheckedChange={() => setFieldValue('excludeWeekends', !values.excludeWeekends)}
-                />
-              </div>
+              <FormSwitch
+                description='If it were to land on a weekend, it is adjusted to the previous weekday instead.'
+                label='Exclude Weekends'
+                name='excludeWeekends'
+              />
               {isManual && <AutoCreateTransactionToggle />}
             </div>
             <div className={styles.actions}>

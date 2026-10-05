@@ -16,10 +16,12 @@ export default function SwitchCard(props: SwitchCardProps): React.JSX.Element {
   return (
     <div className={styles.optionRow}>
       <div className={styles.optionText}>
-        <label className={styles.optionLabel} htmlFor={id}>
+        <label aria-disabled={switchProps.disabled} className={styles.optionLabel} htmlFor={id}>
           {label}
         </label>
-        <p className={styles.optionDescription}>{description}</p>
+        <p aria-disabled={switchProps.disabled} className={styles.optionDescription}>
+          {description}
+        </p>
       </div>
       <Switch id={id} {...switchProps} />
     </div>

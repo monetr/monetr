@@ -8,8 +8,8 @@ import { Button } from '@monetr/interface/components/Button';
 import Divider from '@monetr/interface/components/Divider';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
-import FormCheckbox from '@monetr/interface/components/FormCheckbox';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
+import FormSwitch from '@monetr/interface/components/FormSwitch';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import GoalTimeline from '@monetr/interface/components/goals/GoalTimeline';
 import { layoutVariants } from '@monetr/interface/components/Layout';
@@ -238,7 +238,7 @@ export default function GoalDetails(): React.JSX.Element | null {
               name='fundingScheduleId'
               required
             />
-            <FormCheckbox
+            <FormSwitch
               data-testid='goal-details-paused'
               description='Pause this goal to temporarily stop contributions to it.'
               label='Paused?'

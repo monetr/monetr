@@ -24,9 +24,18 @@
   font-weight: var(--medium);
   color: var(--content-emphasis);
   cursor: pointer;
+
+  &[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
 }
 
 .optionDescription {
   @include mixins.text-small;
   color: var(--content);
+
+  &[aria-disabled="true"] {
+    opacity: 0.5;
+  }
 }

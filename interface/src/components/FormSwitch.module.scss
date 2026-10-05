@@ -1,0 +1,6 @@
+@use '@monetr/interface/variables';
+
+// matches the spacing the other form fields leave below themselves
+.formSwitchRoot {
+  padding-bottom: 3 * variables.$size;
+}

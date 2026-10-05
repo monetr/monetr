@@ -9,8 +9,8 @@ import { Button } from '@monetr/interface/components/Button';
 import Flex from '@monetr/interface/components/Flex';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
-import FormCheckbox from '@monetr/interface/components/FormCheckbox';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
+import FormSwitch from '@monetr/interface/components/FormSwitch';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import { layoutVariants } from '@monetr/interface/components/Layout';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
@@ -146,7 +146,7 @@ export default function TransactionDetails(): React.JSX.Element {
                 name='amount'
               />
               <FormDatePicker className={layoutVariants({ width: 'full' })} disabled label='Date' name='date' />
-              <FormCheckbox
+              <FormSwitch
                 className={layoutVariants({ width: 'full' })}
                 data-testid='transaction-details-pending'
                 description='Transaction has not yet cleared, the name or amount may change.'
@@ -243,7 +243,7 @@ export default function TransactionDetails(): React.JSX.Element {
               label='Date'
               name='date'
             />
-            <FormCheckbox
+            <FormSwitch
               className={layoutVariants({ width: 'full' })}
               data-testid='transaction-details-pending'
               description='Transaction has not yet cleared, the name or amount may change.'

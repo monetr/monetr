@@ -6,9 +6,9 @@ import { Trash } from 'lucide-react';
 import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
 import FormButton from '@monetr/interface/components/FormButton';
+import FormSwitch from '@monetr/interface/components/FormSwitch';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
-import SwitchCard from '@monetr/interface/components/SwitchCard';
 import Typography from '@monetr/interface/components/Typography';
 import SimilarTransactionItem from '@monetr/interface/components/transactions/SimilarTransactionItem';
 import { useRemoveTransaction } from '@monetr/interface/hooks/useRemoveTransaction';
@@ -76,7 +76,7 @@ function RemoveTransactionModal(props: RemoveTransactionModalProps): React.JSX.E
   return (
     <MModal className={styles.modal} open={modal.visible} ref={ref}>
       <MForm className={styles.form} initialValues={initialValues} onSubmit={submit}>
-        {({ setFieldValue, values, isSubmitting }) => (
+        {({ isSubmitting }) => (
           <div className={styles.body}>
             <Typography className={styles.heading} size='xl' weight='bold'>
               <Trash />
@@ -88,17 +88,17 @@ function RemoveTransactionModal(props: RemoveTransactionModalProps): React.JSX.E
                 <SimilarTransactionItem disableNavigate transaction={transaction} />
               </ul>
               <Typography size='inherit'>You will not be able to undo this action.</Typography>
-              <SwitchCard
-                checked={values.softDelete}
+              <FormSwitch
+                className={styles.switch}
                 description='Prevent this transaction from be re-created if it is present in future file imports?'
                 label='Prevent Re-Creation'
-                onCheckedChange={() => setFieldValue('softDelete', !values.softDelete)}
+                name='softDelete'
               />
-              <SwitchCard
-                checked={values.adjustsBalance}
+              <FormSwitch
+                className={styles.switch}
                 description='Update your account balance as if this transaction was reversed?'
                 label='Adjust Balacne'
-                onCheckedChange={() => setFieldValue('adjustsBalance', !values.adjustsBalance)}
+                name='adjustsBalance'
               />
             </div>
             <div className={styles.actions}>

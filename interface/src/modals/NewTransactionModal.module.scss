@@ -59,48 +59,9 @@
   width: 100%;
 }
 
-// The bordered "Adjust Balance" toggle box.
-.optionRow {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  border-radius: var(--border-radius);
-  padding: 2 * variables.$size;
-  margin-bottom: 4 * variables.$size;
-
-  --ring-color: var(--border-string);
-  --ring-size: 1px;
-  @include mixins.ring;
-}
-
-// The debit tab's toggle box additionally has a top margin (mt-2).
-.optionRowSpaced {
-  @extend .optionRow;
+// The debit tab's toggle has the spending select right above it, so it gets a little room (mt-2).
+.adjustsBalanceSpaced {
   margin-top: 2 * variables.$size;
-}
-
-.optionText {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5 * variables.$size; // space-y-0.5
-}
-
-.optionLabel {
-  @include mixins.text-small;
-  font-weight: var(--medium);
-  color: var(--content-emphasis);
-}
-
-// The debit tab's label is clickable; the credit tab's is not.
-.optionLabelClickable {
-  @extend .optionLabel;
-  cursor: pointer;
-}
-
-.optionDescription {
-  @include mixins.text-small;
-  color: var(--content);
 }
 
 .actions {

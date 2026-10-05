@@ -1,4 +1,4 @@
-import { Fragment, useId, useRef } from 'react';
+import { Fragment, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { startOfDay, startOfToday } from 'date-fns';
 import type { FormikHelpers } from 'formik';
@@ -7,11 +7,11 @@ import { Button } from '@monetr/interface/components/Button';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
+import FormSwitch from '@monetr/interface/components/FormSwitch';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSelectSpending from '@monetr/interface/components/MSelectSpending';
-import { Switch } from '@monetr/interface/components/Switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@monetr/interface/components/Tabs';
 import Typography from '@monetr/interface/components/Typography';
 import {
@@ -47,7 +47,6 @@ function NewTransactionModal(): React.JSX.Element {
   const bankAccountId = useSelectedBankAccountId();
   const { data: selectedBankAccount } = useSelectedBankAccount();
   const createTransaction = useCreateTransaction();
-  const adjustsBalanceToggleId = useId();
 
   if (!bankAccountId) {
     throw new Error('bank account specific component used on non bank account specific page!');
@@ -105,7 +104,7 @@ function NewTransactionModal(): React.JSX.Element {
   return (
     <MModal className={styles.modal} open={modal.visible} ref={ref}>
       <MForm className={styles.form} initialValues={initialValues} onSubmit={submit}>
-        {({ setFieldValue, values }) => (
+        {({ setFieldValue }) => (
           <Fragment>
             <div className={styles.body}>
               <Typography className={styles.heading} size='xl' weight='bold'>
@@ -151,19 +150,12 @@ function NewTransactionModal(): React.JSX.Element {
                     <FormDatePicker className={styles.fieldRowItem} label='Date' name='date' required />
                   </div>
                   <MSelectSpending className={styles.spendingSelect} name='spendingId' />
-                  <div className={styles.optionRowSpaced}>
-                    <div className={styles.optionText}>
-                      <label className={styles.optionLabelClickable} htmlFor={adjustsBalanceToggleId}>
-                        Adjust Balance
-                      </label>
-                      <p className={styles.optionDescription}>Update your account balance for this transaction?</p>
-                    </div>
-                    <Switch
-                      checked={values.adjustsBalance}
-                      id={adjustsBalanceToggleId}
-                      onCheckedChange={() => setFieldValue('adjustsBalance', !values.adjustsBalance)}
-                    />
-                  </div>
+                  <FormSwitch
+                    className={styles.adjustsBalanceSpaced}
+                    description='Update your account balance for this transaction?'
+                    label='Adjust Balance'
+                    name='adjustsBalance'
+                  />
                 </TabsContent>
                 <TabsContent value='credit'>
                   <FormTextField
@@ -184,16 +176,11 @@ function NewTransactionModal(): React.JSX.Element {
                     />
                     <FormDatePicker className={styles.fieldRowItem} label='Date' name='date' required />
                   </div>
-                  <div className={styles.optionRow}>
-                    <div className={styles.optionText}>
-                      <label className={styles.optionLabel}>Adjust Balance</label>
-                      <p className={styles.optionDescription}>Update your account balance for this transaction?</p>
-                    </div>
-                    <Switch
-                      checked={values.adjustsBalance}
-                      onCheckedChange={() => setFieldValue('adjustsBalance', !values.adjustsBalance)}
-                    />
-                  </div>
+                  <FormSwitch
+                    description='Update your account balance for this transaction?'
+                    label='Adjust Balance'
+                    name='adjustsBalance'
+                  />
                 </TabsContent>
               </Tabs>
             </div>
