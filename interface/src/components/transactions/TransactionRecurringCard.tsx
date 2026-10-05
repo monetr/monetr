@@ -43,6 +43,9 @@ export default function TransactionRecurringCard({
   const formatDate = (date: Date, options: Intl.DateTimeFormatOptions) =>
     new Intl.DateTimeFormat(locale.code, { ...options, timeZone: timezone }).format(date);
   // only include the year when it isn't obvious, otherwise something from last december reads like it's this december
+  // numeric auto gives us today, tomorrow and yesterday instead of in 0 days, in 1 day and 1 day ago
+  const formatRelativeDays = (days: number) =>
+    new Intl.RelativeTimeFormat(locale.code, { numeric: 'auto' }).format(days, 'day');
   const yearIfNeeded = (date: Date) => (isThisYear(date, { in: inTimezone }) ? undefined : 'numeric');
 
   const daysUntilNext = differenceInCalendarDays(inTimezone(recurring.next), startOfToday({ in: inTimezone }));
@@ -77,7 +80,7 @@ export default function TransactionRecurringCard({
           />
         ) : (
           <Stat
-            detail={getRelativeDays(daysUntilNext)}
+            detail={formatRelativeDays(daysUntilNext)}
             label='Next expected'
             value={formatDate(recurring.next, { month: 'short', day: 'numeric', year: yearIfNeeded(recurring.next) })}
           />
@@ -207,20 +210,4 @@ function getConfidenceLabel(confidence: number): string {
     return 'Likely';
   }
   return 'Possibly';
-}
-
-function getRelativeDays(days: number): string {
-  if (days === 0) {
-    return 'today';
-  }
-  if (days === 1) {
-    return 'tomorrow';
-  }
-  if (days > 1) {
-    return `in ${days} days`;
-  }
-  if (days === -1) {
-    return 'yesterday';
-  }
-  return `${Math.abs(days)} days ago`;
 }
