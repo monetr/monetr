@@ -46,3 +46,8 @@
     height: 4 * variables.$size;
   }
 }
+
+// takes up the same space as the link arrow on the real rows without showing it
+.expectedArrowSpacer {
+  visibility: hidden;
+}

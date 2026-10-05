@@ -1,4 +1,4 @@
-import { Clock } from 'lucide-react';
+import { ChevronRight, Clock } from 'lucide-react';
 
 import { flexVariants } from '@monetr/interface/components/Flex';
 import { Item, ItemContent } from '@monetr/interface/components/Item';
@@ -92,6 +92,10 @@ function ExpectedTransactionItem({ transaction }: SimilarTransactionsProps): Rea
         <ItemContent align='center' flex='grow' justify='end' shrink='none' width='fit'>
           <Typography color='subtle' weight='semibold'>
             ~{localeCurrency.formatAmount(Math.abs(recurring.lastAmount), AmountType.Stored)}
+          </Typography>
+          {/* theres nothing to link to, but keep the arrows space so the amount lines up with the real rows */}
+          <Typography aria-hidden className={styles.expectedArrowSpacer}>
+            <ChevronRight />
           </Typography>
         </ItemContent>
       </div>
