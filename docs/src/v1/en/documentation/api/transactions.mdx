@@ -79,11 +79,12 @@ GET /api/bank_accounts/:bankAccountId/transactions
 
 ### Query parameters
 
-| Attribute                  | Type          | Required | Description                                                                                                                 |
-| -------------------------- | ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `limit`                    | integer       | No       | How many to return. Defaults to 25, and has to be between 1 and 100. Outside that range is a 400, it doesn't quietly clamp. |
-| `offset`                   | integer       | No       | How many to skip first. Defaults to 0. Negative is a 400.                                                                   |
-| `transaction_recurring_id` | string (ulid) | No       | Only return the transactions that are part of this [recurring transaction](./recurring_transactions).                       |
+| Attribute                  | Type          | Required | Description                                                                                                                                     |
+| -------------------------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `limit`                    | integer       | No       | How many to return. Defaults to 25, and has to be between 1 and 100. Outside that range is a 400, it doesn't quietly clamp.                     |
+| `offset`                   | integer       | No       | How many to skip first. Defaults to 0. Negative is a 400.                                                                                       |
+| `transaction_recurring_id` | string (ulid) | No       | Only return the transactions that are part of this [recurring transaction](./recurring_transactions).                                           |
+| `transaction_cluster_id`   | string (ulid) | No       | Only return the transactions in this [similar transactions](./similar_transactions) cluster. Ignored if `transaction_recurring_id` is also set. |
 
 ### Example
 
@@ -150,11 +151,19 @@ curl --request GET \
 Look at the second one. `-204300` is a paycheck arriving, not a $2,043 refund. Money coming in is negative. Also notice
 `spendingAmount` is missing there, because that transaction isn't assigned to a spending object.
 
+:::details History
+
+**[v1.18.0](https://github.com/monetr/monetr/releases/tag/v1.18.0)**
+
+- Added the `transaction_cluster_id` query parameter.
+
+:::
+
 ### Errors
 
-| Status | When                                                                                                                  |
-| ------ | --------------------------------------------------------------------------------------------------------------------- |
-| 400    | `limit` is outside 1 to 100, `offset` is negative, or `bankAccountId` or `transaction_recurring_id` isn't a valid ID. |
+| Status | When                                                                                                                                            |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| 400    | `limit` is outside 1 to 100, `offset` is negative, or `bankAccountId`, `transaction_recurring_id` or `transaction_cluster_id` isn't a valid ID. |
 
 ## <Badge type="info">GET</Badge> Get a transaction
 

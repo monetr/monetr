@@ -167,10 +167,15 @@ curl --request GET \
 
 ## <Badge type="info">GET</Badge> List similar transactions
 
+:::warning
+This endpoint is deprecated and will be removed in a future release. Use
+[List transactions](./transactions#list-transactions) with the `transaction_cluster_id` query parameter instead.
+:::
+
 Returns the transactions in a cluster, newest first. This is how you get the transactions that look like one you already
 have: take its `transactionClusterId` and ask for the rest of the cluster.
 
-**In the app:** The similar transactions panel on the transaction details page. It only asks for the first 10.
+**In the app:** Nothing in the app calls this anymore.
 
 ```http
 GET /api/bank_accounts/:bankAccountId/similar/:transactionClusterId/transactions
@@ -260,6 +265,15 @@ here too, so skip it yourself if you only want the others. Soft deleted transact
 list, `plaidTransaction` is always null here, use [Get a transaction](./transactions#get-a-transaction) if you need it.
 
 A cluster ID that doesn't exist isn't an error here. You just get back an empty array.
+
+:::details History
+
+**[v1.18.0](https://github.com/monetr/monetr/releases/tag/v1.18.0)**
+
+- Deprecated this endpoint in favor of [List transactions](./transactions#list-transactions) with the
+  `transaction_cluster_id` query parameter.
+
+:::
 
 ### Errors
 
