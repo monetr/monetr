@@ -69,7 +69,7 @@ export default function TransactionRecurringCard({
           <TooltipTrigger asChild>
             <span className={styles.confidence}>{getConfidenceLabel(recurring.confidence)}</span>
           </TooltipTrigger>
-          <TooltipContent side='top'>Confidence {recurring.confidence.toFixed(2)}</TooltipContent>
+          <TooltipContent side='top'>Confidence {Math.round(recurring.confidence * 100)}%</TooltipContent>
         </Tooltip>
       </div>
 
