@@ -29,7 +29,7 @@ export default function MQueryClient(props: MQueryClientProps): React.JSX.Elemen
     }
 
     if (context?.meta?.method === QueryMethod.UseQuery && context.queryKey.length > 1) {
-      params = context.queryKey[1] as RequestParams;
+      params = { ...(context.queryKey[1] as RequestParams) };
     }
 
     if (context.pageParam) {
