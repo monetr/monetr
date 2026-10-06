@@ -4,7 +4,6 @@ import { CalendarSync, ChevronRight, HeartCrack, Receipt, Repeat, TriangleAlert 
 import { rrulestr } from 'rrule';
 import { Link } from 'wouter';
 
-import Badge from '@monetr/interface/components/Badge';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import Typography from '@monetr/interface/components/Typography';
@@ -70,11 +69,7 @@ export default function Recurring(): React.JSX.Element {
 
   return (
     <Fragment>
-      <MTopNavigation icon={Repeat} title='Recurring'>
-        <Badge size='xs' variant='info' weight='semibold'>
-          Beta
-        </Badge>
-      </MTopNavigation>
+      <MTopNavigation icon={Repeat} title='Recurring' />
       <div className={styles.body}>
         {recurring?.length === 0 ? (
           <div className={styles.empty}>
@@ -330,17 +325,15 @@ function RecurringRow({ item }: RecurringRowProps): React.JSX.Element | null {
   return (
     <div className={styles.row} data-testid={item.transactionRecurringId.toString()}>
       <Link aria-label={name} className={styles.rowLink} to={detailsUrl} />
+      <MerchantIcon className={styles.rowIcon} name={name} />
       <div className={styles.rowName}>
-        <MerchantIcon name={name} />
-        <div className={styles.rowNameText}>
-          <span className={styles.rowTitle}>{name}</span>
-          <span className={styles.rowSubtitle}>{capitalize(rrulestr(item.ruleset).toText())}</span>
-          {item.transactionCluster?.originalMemo && (
-            <span className={styles.rowMemo} title={item.transactionCluster.originalMemo}>
-              {item.transactionCluster.originalMemo}
-            </span>
-          )}
-        </div>
+        <span className={styles.rowTitle}>{name}</span>
+        <span className={styles.rowSubtitle}>{capitalize(rrulestr(item.ruleset).toText())}</span>
+        {item.transactionCluster?.originalMemo && (
+          <span className={styles.rowMemo} title={item.transactionCluster.originalMemo}>
+            {item.transactionCluster.originalMemo}
+          </span>
+        )}
       </div>
       <div className={styles.rowDate}>
         {item.ended ? (

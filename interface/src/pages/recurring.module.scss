@@ -63,9 +63,13 @@
 }
 
 .summaryText {
-  @include mixins.text-large;
+  @include mixins.text-base;
   margin: 0;
   color: var(--content);
+
+  @media (min-width: variables.$mediumScreen) {
+    @include mixins.text-large;
+  }
 
   strong {
     font-weight: var(--bold);
@@ -135,9 +139,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4 * variables.$size 4 * variables.$size 2 * variables.$size;
+  padding: 4 * variables.$size 2 * variables.$size 2 * variables.$size;
   font-weight: var(--semibold);
   color: var(--content-subtle);
+
+  @media (min-width: variables.$mediumScreen) {
+    padding-left: 4 * variables.$size;
+    padding-right: 4 * variables.$size;
+  }
 
   &:first-child {
     padding-top: 2 * variables.$size;
@@ -159,19 +168,20 @@
   }
 }
 
-// On mobile the name and amount share a line with the date underneath, once theres room every column gets its own
-// spot in the grid like the design.
+// On mobile this follows the transaction list, the icon on the left with the name, date and budget stacked next to it
+// and the amount in the corner. Once theres room every column gets its own spot in the grid like the design.
 .row {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto 6 * variables.$size;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   grid-template-areas:
-    'name amount chevron'
-    'date budget budget';
-  column-gap: 4 * variables.$size;
-  row-gap: 1 * variables.$size;
+    'icon name amount'
+    'icon date date'
+    'icon budget budget';
+  column-gap: 3 * variables.$size;
+  row-gap: 0.5 * variables.$size;
   align-items: center;
-  padding: 2.5 * variables.$size 4 * variables.$size;
+  padding: 2.5 * variables.$size 2 * variables.$size;
   border-radius: var(--border-radius);
 
   &:hover {
@@ -179,8 +189,12 @@
   }
 
   @media (min-width: variables.$mediumScreen) {
-    grid-template-columns: minmax(0, 2fr) 37.5 * variables.$size minmax(0, 1.6fr) 27.5 * variables.$size 6 * variables.$size;
-    grid-template-areas: 'name date budget amount chevron';
+    grid-template-columns:
+      auto minmax(0, 2fr) 37.5 * variables.$size minmax(0, 1.6fr) 27.5 * variables.$size
+      6 * variables.$size;
+    grid-template-areas: 'icon name date budget amount chevron';
+    column-gap: 4 * variables.$size;
+    padding: 2.5 * variables.$size 4 * variables.$size;
   }
 }
 
@@ -191,15 +205,17 @@
   border-radius: var(--border-radius);
 }
 
-.rowName {
-  grid-area: name;
-  display: flex;
-  align-items: center;
-  gap: 3 * variables.$size;
-  min-width: 0;
+.rowIcon {
+  grid-area: icon;
+  align-self: start;
+
+  @media (min-width: variables.$mediumScreen) {
+    align-self: center;
+  }
 }
 
-.rowNameText {
+.rowName {
+  grid-area: name;
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -214,12 +230,18 @@
   white-space: nowrap;
 }
 
+// the date line already says when on mobile, so the schedule only shows once theres room for it
 .rowSubtitle {
   @include mixins.text-small;
+  display: none;
   color: var(--content-subtle);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: block;
+  }
 }
 
 // memos tend to be long and shouty, so keep it to one muted line and let the title show the rest
@@ -241,7 +263,8 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 2 * variables.$size;
+  gap: 1.5 * variables.$size;
+  min-width: 0;
 
   @media (min-width: variables.$mediumScreen) {
     flex-direction: column;
@@ -273,13 +296,8 @@
   grid-area: budget;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
   gap: 2 * variables.$size;
   min-width: 0;
-
-  @media (min-width: variables.$mediumScreen) {
-    justify-content: flex-start;
-  }
 
   .rowSubtle {
     @include mixins.text-small;
@@ -316,41 +334,62 @@
   color: var(--warning);
 }
 
+// a plain text button on mobile so it fits on the budget line, the full button once theres room
 .budgetButton {
   @include mixins.text-small;
   position: relative;
   flex: none;
-  height: 7.5 * variables.$size;
-  padding: 0 2.5 * variables.$size;
+  padding: 0;
   border: 0;
-  border-radius: var(--border-radius);
-  background-color: var(--background-active);
-  color: var(--content-emphasis);
+  background: transparent;
+  color: var(--brand-bright);
   font-weight: var(--semibold);
   cursor: pointer;
 
-  &:hover {
-    filter: brightness(1.2);
+  @media (min-width: variables.$mediumScreen) {
+    height: 7.5 * variables.$size;
+    padding: 0 2.5 * variables.$size;
+    border-radius: var(--border-radius);
+    background-color: var(--background-active);
+    color: var(--content-emphasis);
+
+    &:hover {
+      filter: brightness(1.2);
+    }
   }
 }
 
 .rowAmount {
   grid-area: amount;
+  align-self: start;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   text-align: right;
   font-weight: var(--semibold);
   color: var(--content-emphasis);
+
+  @media (min-width: variables.$mediumScreen) {
+    align-self: center;
+  }
 }
 
 .rowChevron {
   grid-area: chevron;
+  display: none;
   width: 4.5 * variables.$size;
   height: 4.5 * variables.$size;
   color: var(--content-subtle);
+
+  @media (min-width: variables.$mediumScreen) {
+    display: block;
+  }
 }
 
 .footnote {
-  padding: 0 4 * variables.$size;
+  padding: 0 2 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    padding: 0 4 * variables.$size;
+  }
 }
