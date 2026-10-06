@@ -1,0 +1,356 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+// Centered full-size state used for the loading and error screens.
+.centerState {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+}
+
+.errorIcon {
+  color: var(--content);
+  width: 24 * variables.$size;
+  height: 24 * variables.$size;
+}
+
+.body {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 5 * variables.$size;
+  padding: 4 * variables.$size;
+  padding-bottom: 16 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    padding: 6 * variables.$size;
+  }
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2 * variables.$size;
+  max-width: 112 * variables.$size;
+  margin: 16 * variables.$size auto 0;
+}
+
+.emptyIcon {
+  color: var(--content-muted);
+  width: 16 * variables.$size;
+  height: 16 * variables.$size;
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5 * variables.$size;
+  padding: 4.5 * variables.$size 5 * variables.$size;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius);
+  background-color: var(--background-darker);
+}
+
+.summaryEyebrow {
+  @include mixins.text-small;
+  font-weight: var(--semibold);
+  color: var(--content-subtle);
+}
+
+.summaryText {
+  @include mixins.text-large;
+  margin: 0;
+  color: var(--content);
+
+  strong {
+    font-weight: var(--bold);
+    color: var(--content-emphasis);
+
+    &[data-warning] {
+      color: var(--warning);
+    }
+  }
+}
+
+.tabs {
+  display: flex;
+  gap: 1 * variables.$size;
+  border-bottom: 1px solid var(--border-subtle);
+  overflow-x: auto;
+}
+
+.tab {
+  @include mixins.text-base;
+  display: flex;
+  align-items: center;
+  gap: 2 * variables.$size;
+  padding: 2.5 * variables.$size 3.5 * variables.$size;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  font-weight: var(--medium);
+  color: var(--content-subtle);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--content-emphasis);
+  }
+
+  &[aria-selected='true'] {
+    font-weight: var(--semibold);
+    color: var(--content-emphasis);
+    border-bottom-color: var(--brand-bright);
+
+    .tabCount {
+      background-color: var(--background-active);
+      color: var(--content-emphasis);
+    }
+  }
+}
+
+.tabCount {
+  @include mixins.text-extra-small;
+  padding: 0 1.5 * variables.$size;
+  border-radius: var(--border-radius);
+  background-color: var(--background-emphasis);
+  color: var(--content);
+}
+
+.emptyTab {
+  padding: 4 * variables.$size;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.groupHeader {
+  @include mixins.text-small;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4 * variables.$size 4 * variables.$size 2 * variables.$size;
+  font-weight: var(--semibold);
+  color: var(--content-subtle);
+
+  &:first-child {
+    padding-top: 2 * variables.$size;
+  }
+
+  &[data-late] {
+    color: var(--warning);
+  }
+}
+
+.groupTitle {
+  display: flex;
+  align-items: center;
+  gap: 1.5 * variables.$size;
+
+  svg {
+    width: 3.5 * variables.$size;
+    height: 3.5 * variables.$size;
+  }
+}
+
+// On mobile the name and amount share a line with the date underneath, once theres room every column gets its own
+// spot in the grid like the design.
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 6 * variables.$size;
+  grid-template-areas:
+    'name amount chevron'
+    'date budget budget';
+  column-gap: 4 * variables.$size;
+  row-gap: 1 * variables.$size;
+  align-items: center;
+  padding: 2.5 * variables.$size 4 * variables.$size;
+  border-radius: var(--border-radius);
+
+  &:hover {
+    background-color: var(--background-emphasis);
+  }
+
+  @media (min-width: variables.$mediumScreen) {
+    grid-template-columns: minmax(0, 2fr) 37.5 * variables.$size minmax(0, 1.6fr) 27.5 * variables.$size 6 * variables.$size;
+    grid-template-areas: 'name date budget amount chevron';
+  }
+}
+
+// The whole row navigates to the details, buttons inside the row sit above this so they still get the click.
+.rowLink {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--border-radius);
+}
+
+.rowName {
+  grid-area: name;
+  display: flex;
+  align-items: center;
+  gap: 3 * variables.$size;
+  min-width: 0;
+}
+
+.rowNameText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rowTitle {
+  @include mixins.text-base;
+  font-weight: var(--semibold);
+  color: var(--content-emphasis);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowSubtitle {
+  @include mixins.text-small;
+  color: var(--content-subtle);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// memos tend to be long and shouty, so keep it to one muted line and let the title show the rest
+.rowMemo {
+  @include mixins.text-extra-small;
+  color: var(--content-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowSubtle {
+  @include mixins.text-extra-small;
+  color: var(--content-subtle);
+}
+
+.rowDate {
+  grid-area: date;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5 * variables.$size;
+  }
+}
+
+.rowDateValue {
+  @include mixins.text-small;
+  font-weight: var(--semibold);
+  color: var(--content-emphasis);
+
+  @media (min-width: variables.$mediumScreen) {
+    @include mixins.text-base;
+  }
+}
+
+.lateBadge {
+  @include mixins.text-extra-small;
+  font-weight: var(--semibold);
+  color: var(--warning);
+  padding: 0.25 * variables.$size 2 * variables.$size;
+  border-radius: var(--border-radius);
+  background-color: color-mix(in srgb, var(--warning) 20%, transparent);
+}
+
+.rowBudget {
+  grid-area: budget;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2 * variables.$size;
+  min-width: 0;
+
+  @media (min-width: variables.$mediumScreen) {
+    justify-content: flex-start;
+  }
+
+  .rowSubtle {
+    @include mixins.text-small;
+  }
+}
+
+.budgetIcon {
+  display: flex;
+  flex: none;
+  padding: 0.5 * variables.$size 1.5 * variables.$size;
+  border-radius: var(--border-radius);
+  background-color: var(--success);
+  color: var(--content-emphasis);
+
+  svg {
+    width: 3.5 * variables.$size;
+    height: 3.5 * variables.$size;
+  }
+}
+
+.budgetName {
+  @include mixins.text-small;
+  font-weight: var(--semibold);
+  color: var(--content-emphasis);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.budgetShort {
+  @include mixins.text-extra-small;
+  flex: none;
+  font-weight: var(--semibold);
+  color: var(--warning);
+}
+
+.budgetButton {
+  @include mixins.text-small;
+  position: relative;
+  flex: none;
+  height: 7.5 * variables.$size;
+  padding: 0 2.5 * variables.$size;
+  border: 0;
+  border-radius: var(--border-radius);
+  background-color: var(--background-active);
+  color: var(--content-emphasis);
+  font-weight: var(--semibold);
+  cursor: pointer;
+
+  &:hover {
+    filter: brightness(1.2);
+  }
+}
+
+.rowAmount {
+  grid-area: amount;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  font-weight: var(--semibold);
+  color: var(--content-emphasis);
+}
+
+.rowChevron {
+  grid-area: chevron;
+  width: 4.5 * variables.$size;
+  height: 4.5 * variables.$size;
+  color: var(--content-subtle);
+}
+
+.footnote {
+  padding: 0 4 * variables.$size;
+}

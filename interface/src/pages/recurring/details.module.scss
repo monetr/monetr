@@ -1,0 +1,363 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+// Centered error / empty state.
+.centerState {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+}
+
+.errorIcon {
+  color: var(--content);
+  width: 24 * variables.$size;
+  height: 24 * variables.$size;
+}
+
+.body {
+  width: 100%;
+  min-width: 0;
+  padding: 4 * variables.$size;
+  padding-bottom: 16 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    padding: 6 * variables.$size 8 * variables.$size;
+  }
+}
+
+.columns {
+  display: flex;
+  flex-direction: column;
+  gap: 8 * variables.$size;
+
+  @media (min-width: variables.$largeScreen) {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 5 * variables.$size;
+  min-width: 0;
+
+  @media (min-width: variables.$largeScreen) {
+    &:first-child {
+      flex: 0 1 145 * variables.$size;
+    }
+
+    &:last-child {
+      flex: 1;
+    }
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius);
+  background-color: var(--background-darker);
+
+  > * + * {
+    border-top: 1px solid var(--border-subtle);
+  }
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 3.5 * variables.$size;
+  padding: 4.5 * variables.$size 4.5 * variables.$size 3.5 * variables.$size;
+}
+
+.cardIcon {
+  position: relative;
+  flex: none;
+}
+
+// little repeat badge in the corner of the merchant icon, same idea as the one on recurring transactions
+.cardIconBadge {
+  position: absolute;
+  top: -1 * variables.$size;
+  right: -1 * variables.$size;
+  width: 5 * variables.$size;
+  height: 5 * variables.$size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 2px solid var(--background-darker);
+  background-color: var(--brand);
+  color: var(--content-emphasis);
+
+  svg {
+    width: 2.75 * variables.$size;
+    height: 2.75 * variables.$size;
+    stroke-width: 3;
+  }
+}
+
+.cardHeaderText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.5 * variables.$size;
+  min-width: 0;
+}
+
+.cardEyebrowRow {
+  display: flex;
+  align-items: center;
+  gap: 2 * variables.$size;
+}
+
+.cardEyebrow {
+  @include mixins.text-small;
+  font-weight: var(--semibold);
+  color: var(--content-subtle);
+}
+
+.statusBadge {
+  @include mixins.text-extra-small;
+  font-weight: var(--semibold);
+  padding: 0 2 * variables.$size;
+  border-radius: var(--border-radius);
+  color: var(--success);
+  background-color: color-mix(in srgb, var(--success) 20%, transparent);
+
+  &[data-ended='true'] {
+    color: var(--content-subtle);
+    background-color: var(--background-emphasis);
+  }
+}
+
+.cardTitle {
+  @include mixins.text-2-extra-large;
+  font-weight: var(--bold);
+  color: var(--content-emphasis);
+}
+
+// two columns on mobile, all four stats in a row once theres room
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3 * variables.$size;
+  padding: 3.5 * variables.$size 4.5 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5 * variables.$size;
+}
+
+.statLabel {
+  @include mixins.text-extra-small;
+  font-weight: var(--medium);
+  color: var(--content-subtle);
+}
+
+.statValue {
+  @include mixins.text-base;
+  font-weight: var(--semibold);
+  color: var(--content-emphasis);
+}
+
+.statDetail {
+  @include mixins.text-extra-small;
+  color: var(--content-subtle);
+}
+
+.comingUp {
+  display: flex;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+  padding: 3.5 * variables.$size 4.5 * variables.$size;
+}
+
+.comingUpDates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2 * variables.$size;
+}
+
+.comingUpDate {
+  @include mixins.text-small;
+  padding: 0.75 * variables.$size 2.5 * variables.$size;
+  border-radius: var(--border-radius);
+  background-color: var(--background-emphasis);
+  color: var(--content);
+
+  &[data-next='true'] {
+    font-weight: var(--semibold);
+    color: var(--content-emphasis);
+    background-color: var(--brand-faint);
+  }
+}
+
+.cluster {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5 * variables.$size;
+  padding: 4 * variables.$size;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius);
+  background-color: var(--background-darker);
+}
+
+.clusterEyebrow {
+  @include mixins.text-small;
+  display: flex;
+  align-items: center;
+  gap: 1.5 * variables.$size;
+  font-weight: var(--semibold);
+  color: var(--content-subtle);
+
+  svg {
+    width: 3.5 * variables.$size;
+    height: 3.5 * variables.$size;
+  }
+}
+
+.clusterTitle {
+  @include mixins.text-large;
+  font-weight: var(--bold);
+  color: var(--content-emphasis);
+
+  span {
+    @include mixins.text-small;
+    font-weight: var(--medium);
+    color: var(--content-subtle);
+  }
+}
+
+.clusterChip {
+  @include mixins.text-small;
+  display: flex;
+  align-items: center;
+  gap: 1.5 * variables.$size;
+  padding: 0.75 * variables.$size 2.5 * variables.$size;
+  border-radius: var(--border-radius);
+  font-weight: var(--semibold);
+  color: var(--content-emphasis);
+  background-color: var(--brand);
+
+  svg {
+    width: 3 * variables.$size;
+    height: 3 * variables.$size;
+  }
+}
+
+.clusterNote {
+  @include mixins.text-small;
+  color: var(--content-subtle);
+}
+
+.charges {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5 * variables.$size;
+}
+
+.chargesHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3 * variables.$size;
+}
+
+.segmented {
+  display: flex;
+  gap: 0.5 * variables.$size;
+  padding: 0.75 * variables.$size;
+  border-radius: var(--border-radius);
+  background-color: var(--background-emphasis);
+}
+
+.segment {
+  @include mixins.text-small;
+  border: 0;
+  border-radius: calc(var(--border-radius) - 2px);
+  padding: 1 * variables.$size 2.5 * variables.$size;
+  background: transparent;
+  font-weight: var(--medium);
+  color: var(--content-subtle);
+  cursor: pointer;
+
+  &[aria-selected='true'] {
+    font-weight: var(--semibold);
+    color: var(--content-emphasis);
+    background-color: var(--background-active);
+  }
+}
+
+.chargesList {
+  display: flex;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+}
+
+.chargesEmpty {
+  padding: 2 * variables.$size;
+}
+
+// the next one we expect, dashed since it hasnt actually happened yet
+.expected {
+  // outline instead of border so it doesnt shift the content over compared to the real rows
+  outline: 1px dashed var(--background-active);
+  outline-offset: -1px;
+
+  &:hover,
+  &:active {
+    background-color: transparent;
+  }
+}
+
+.expectedIcon {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 10 * variables.$size;
+  height: 10 * variables.$size;
+  border-radius: 9999px;
+  border: 1px dashed var(--content-muted);
+  color: var(--content-subtle);
+
+  svg {
+    width: 4 * variables.$size;
+    height: 4 * variables.$size;
+  }
+}
+
+// takes up the same space as the link arrow on the real rows without showing it
+.expectedArrowSpacer {
+  visibility: hidden;
+}
+
+.showMore {
+  @include mixins.text-small;
+  align-self: flex-start;
+  border: 0;
+  background: transparent;
+  padding: 1 * variables.$size 2 * variables.$size;
+  font-weight: var(--medium);
+  color: var(--brand-bright);
+  cursor: pointer;
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.7;
+  }
+}

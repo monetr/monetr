@@ -190,6 +190,13 @@ type BaseRepository interface {
 		transactionRecurringId ID[TransactionRecurring],
 	) (*TransactionRecurring, error)
 
+	// GetTransactionRecurrings returns a page of recurring transactions for the
+	// bank account, active ones first ordered by when they are expected next.
+	GetTransactionRecurrings(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		limit, offset int,
+	) ([]TransactionRecurring, error)
 	// GetTransactionRecurringByCluster returns the recurring transactions for the
 	// specified cluster, there is at most one for each direction.
 	GetTransactionRecurringByCluster(

@@ -82,6 +82,131 @@ func givenIHaveACreditTransactionRecurring(
 	return recurring
 }
 
+func TestGetRecurringTransactions(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		recurring := givenIHaveATransactionRecurring(t, bank)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.GET("/api/bank_accounts/{bankAccountId}/recurring").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Array().Length().IsEqual(1)
+		response.JSON().Path("$[0].transactionRecurringId").IsEqual(recurring.TransactionRecurringId)
+		response.JSON().Path("$[0].transactionCluster.name").IsEqual("Github")
+		response.JSON().Path("$[0].transactionCluster").Object().NotContainsKey("members")
+		response.JSON().Path("$[0].transactionCluster.debug").IsNull()
+	})
+
+	t.Run("pagination", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		for range 30 {
+			givenIHaveATransactionRecurring(t, bank)
+		}
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		{ // First page, uses the default limit of 25
+			response := e.GET("/api/bank_accounts/{bankAccountId}/recurring").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().Length().IsEqual(25)
+		}
+
+		{ // Second page
+			response := e.GET("/api/bank_accounts/{bankAccountId}/recurring").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithQuery("offset", 25).
+				WithQuery("limit", 25).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().Length().IsEqual(5)
+		}
+
+		{ // Smaller limit
+			response := e.GET("/api/bank_accounts/{bankAccountId}/recurring").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithQuery("limit", 10).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().Length().IsEqual(10)
+		}
+	})
+
+	t.Run("ended ones come last", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		ended := givenIHaveATransactionRecurring(t, bank)
+		ended.Ended = true
+		ended.Next = time.Date(2026, 1, 1, 5, 0, 0, 0, time.UTC)
+		testutils.MustDBUpdate(t, &ended)
+		active := givenIHaveATransactionRecurring(t, bank)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.GET("/api/bank_accounts/{bankAccountId}/recurring").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$[0].transactionRecurringId").IsEqual(active.TransactionRecurringId)
+		response.JSON().Path("$[1].transactionRecurringId").IsEqual(ended.TransactionRecurringId)
+	})
+
+	t.Run("invalid limit", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.GET("/api/bank_accounts/{bankAccountId}/recurring").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithQuery("limit", 101).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").IsEqual("limit cannot be greater than 100")
+	})
+
+	t.Run("cant get recurring for someone elses bank account", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		otherUser, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		otherLink := fixtures.GivenIHaveAManualLink(t, app.Clock, otherUser)
+		otherBank := fixtures.GivenIHaveABankAccount(t, app.Clock, &otherLink, DepositoryBankAccountType, CheckingBankAccountSubType)
+		givenIHaveATransactionRecurring(t, otherBank)
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.GET("/api/bank_accounts/{bankAccountId}/recurring").
+			WithPath("bankAccountId", otherBank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Array().IsEmpty()
+	})
+}
+
 func TestGetRecurringTransaction(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		app, e := NewTestApplication(t)

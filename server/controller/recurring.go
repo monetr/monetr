@@ -8,6 +8,40 @@ import (
 	"github.com/monetr/monetr/server/schemas"
 )
 
+func (c *Controller) getRecurringTransactions(ctx *echo.Context) error {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
+	}
+
+	limit := urlParamIntDefault(ctx, "limit", 25)
+	offset := urlParamIntDefault(ctx, "offset", 0)
+
+	if limit < 1 {
+		return c.badRequest(ctx, "limit must be at least 1")
+	} else if limit > 100 {
+		return c.badRequest(ctx, "limit cannot be greater than 100")
+	}
+
+	if offset < 0 {
+		return c.badRequest(ctx, "offset cannot be less than 0")
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	items, err := repo.GetTransactionRecurrings(
+		c.getContext(ctx),
+		bankAccountId,
+		limit,
+		offset,
+	)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "failed to retrieve recurring transactions")
+	}
+
+	return ctx.JSON(http.StatusOK, items)
+}
+
 func (c *Controller) getRecurringTransaction(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {

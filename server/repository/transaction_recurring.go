@@ -44,6 +44,48 @@ func (r *repositoryBase) GetTransactionRecurringById(
 	return &result, nil
 }
 
+func (r *repositoryBase) GetTransactionRecurrings(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	limit, offset int,
+) ([]TransactionRecurring, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	span.Data = map[string]any{
+		"accountId":     r.AccountId(),
+		"bankAccountId": bankAccountId,
+	}
+
+	result := make([]TransactionRecurring, 0)
+	if err := r.txn.NewSelect().
+		Model(&result).
+		Relation("Spending").
+		Relation("FundingSchedule").
+		// The cluster is only included for its name, leave out the members and
+		// debug info since those can be huge.
+		Relation("TransactionCluster", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.ExcludeColumn("members", "debug")
+		}).
+		Where(`"transaction_recurring"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction_recurring"."bank_account_id" = ?`, bankAccountId).
+		Limit(limit).
+		Offset(offset).
+		// Active ones first, then whatever is coming up next.
+		Order(`transaction_recurring.ended ASC`).
+		Order(`transaction_recurring.next ASC`).
+		Order(`transaction_recurring.transaction_recurring_id DESC`).
+		Scan(span.Context()); err != nil {
+		return nil, crumbs.WrapError(
+			span.Context(),
+			err,
+			"failed to retrieve recurring transactions",
+		)
+	}
+
+	return result, nil
+}
+
 func (r *repositoryBase) GetTransactionRecurringByCluster(
 	ctx context.Context,
 	bankAccountId ID[BankAccount],

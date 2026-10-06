@@ -259,7 +259,7 @@ function SpentFrom({ seen, transactions }: SpentFromProps): React.JSX.Element | 
   );
 }
 
-function getConfidenceLabel(confidence: number): string {
+export function getConfidenceLabel(confidence: number): string {
   if (confidence >= 0.9) {
     return 'Very likely';
   }
