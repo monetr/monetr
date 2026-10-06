@@ -49,17 +49,67 @@
 .summary {
   display: flex;
   flex-direction: column;
-  gap: 1.5 * variables.$size;
-  padding: 4.5 * variables.$size 5 * variables.$size;
+  gap: 1 * variables.$size;
+  padding: 3.5 * variables.$size 4 * variables.$size;
   border: 1px solid var(--border);
   border-radius: var(--border-radius);
   background-color: var(--background-darker);
+
+  @media (min-width: variables.$mediumScreen) {
+    gap: 1.5 * variables.$size;
+    padding: 4.5 * variables.$size 5 * variables.$size;
+  }
 }
 
 .summaryEyebrow {
-  @include mixins.text-small;
+  @include mixins.text-extra-small;
   font-weight: var(--semibold);
   color: var(--content-subtle);
+
+  @media (min-width: variables.$mediumScreen) {
+    @include mixins.text-small;
+  }
+}
+
+// On mobile the total gets its own big line and the rest goes underneath, the full sentence only fits on desktop.
+.summaryMobile {
+  display: flex;
+  flex-direction: column;
+  gap: 1 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: none;
+  }
+}
+
+.summaryTotal {
+  @include mixins.text-2-extra-large;
+  font-weight: var(--bold);
+  color: var(--content-emphasis);
+
+  span {
+    @include mixins.text-small;
+    font-weight: var(--medium);
+    color: var(--content-subtle);
+  }
+}
+
+.summaryDetail {
+  @include mixins.text-small;
+  color: var(--content-subtle);
+
+  strong {
+    font-weight: var(--bold);
+    color: var(--warning);
+  }
+}
+
+.summaryDesktop {
+  display: none;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: block;
+  }
 }
 
 .summaryText {
@@ -81,48 +131,80 @@
   }
 }
 
+// A full width segmented control on mobile, underlined tabs like the design once theres room.
 .tabs {
-  display: flex;
-  gap: 1 * variables.$size;
-  border-bottom: 1px solid var(--border-subtle);
-  overflow-x: auto;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5 * variables.$size;
+  padding: 0.75 * variables.$size;
+  border-radius: var(--border-radius);
+  background-color: var(--background-emphasis);
+
+  @media (min-width: variables.$mediumScreen) {
+    display: flex;
+    gap: 1 * variables.$size;
+    padding: 0;
+    border-radius: 0;
+    border-bottom: 1px solid var(--border-subtle);
+    background-color: transparent;
+    overflow-x: auto;
+  }
 }
 
 .tab {
-  @include mixins.text-base;
+  @include mixins.text-small;
   display: flex;
   align-items: center;
-  gap: 2 * variables.$size;
-  padding: 2.5 * variables.$size 3.5 * variables.$size;
+  justify-content: center;
+  gap: 1 * variables.$size;
+  min-height: 9 * variables.$size;
   border: 0;
-  border-bottom: 2px solid transparent;
+  border-radius: calc(var(--border-radius) - 2px);
   background: transparent;
   font-weight: var(--medium);
   color: var(--content-subtle);
   cursor: pointer;
 
-  &:hover {
-    color: var(--content-emphasis);
-  }
-
   &[aria-selected='true'] {
     font-weight: var(--semibold);
     color: var(--content-emphasis);
-    border-bottom-color: var(--brand-bright);
+    background-color: var(--background-active);
+  }
 
-    .tabCount {
-      background-color: var(--background-active);
+  @media (min-width: variables.$mediumScreen) {
+    @include mixins.text-base;
+    justify-content: flex-start;
+    gap: 2 * variables.$size;
+    min-height: 0;
+    padding: 2.5 * variables.$size 3.5 * variables.$size;
+    border-radius: 0;
+    border-bottom: 2px solid transparent;
+
+    &:hover {
       color: var(--content-emphasis);
+    }
+
+    &[aria-selected='true'] {
+      background-color: transparent;
+      border-bottom-color: var(--brand-bright);
+
+      .tabCount {
+        background-color: var(--background-active);
+        color: var(--content-emphasis);
+      }
     }
   }
 }
 
+// just part of the label on mobile, its own little chip on desktop
 .tabCount {
-  @include mixins.text-extra-small;
-  padding: 0 1.5 * variables.$size;
-  border-radius: var(--border-radius);
-  background-color: var(--background-emphasis);
-  color: var(--content);
+  @media (min-width: variables.$mediumScreen) {
+    @include mixins.text-extra-small;
+    padding: 0 1.5 * variables.$size;
+    border-radius: var(--border-radius);
+    background-color: var(--background-emphasis);
+    color: var(--content);
+  }
 }
 
 .emptyTab {
@@ -139,17 +221,20 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4 * variables.$size 2 * variables.$size 2 * variables.$size;
+  padding: 4 * variables.$size 0 1 * variables.$size;
   font-weight: var(--semibold);
   color: var(--content-subtle);
 
-  @media (min-width: variables.$mediumScreen) {
-    padding-left: 4 * variables.$size;
-    padding-right: 4 * variables.$size;
-  }
-
   &:first-child {
     padding-top: 2 * variables.$size;
+  }
+
+  @media (min-width: variables.$mediumScreen) {
+    padding: 4 * variables.$size 4 * variables.$size 2 * variables.$size;
+
+    &:first-child {
+      padding-top: 2 * variables.$size;
+    }
   }
 
   &[data-late] {
@@ -168,25 +253,18 @@
   }
 }
 
-// On mobile this follows the transaction list, the icon on the left with the name, date and budget stacked next to it
-// and the amount in the corner. Once theres room every column gets its own spot in the grid like the design.
+// On mobile this is the simple grouped list from the design, icon, name with one status line, and the amount with its
+// date. Once theres room every column gets its own spot in the grid like the desktop design.
 .row {
   position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
-  grid-template-areas:
-    'icon name amount'
-    'icon date date'
-    'icon budget budget';
+  grid-template-areas: 'icon name amount';
   column-gap: 3 * variables.$size;
-  row-gap: 0.5 * variables.$size;
   align-items: center;
-  padding: 2.5 * variables.$size 2 * variables.$size;
+  min-height: 14 * variables.$size;
+  padding: 2 * variables.$size 0;
   border-radius: var(--border-radius);
-
-  &:hover {
-    background-color: var(--background-emphasis);
-  }
 
   @media (min-width: variables.$mediumScreen) {
     grid-template-columns:
@@ -194,7 +272,12 @@
       6 * variables.$size;
     grid-template-areas: 'icon name date budget amount chevron';
     column-gap: 4 * variables.$size;
+    min-height: 0;
     padding: 2.5 * variables.$size 4 * variables.$size;
+
+    &:hover {
+      background-color: var(--background-emphasis);
+    }
   }
 }
 
@@ -207,11 +290,6 @@
 
 .rowIcon {
   grid-area: icon;
-  align-self: start;
-
-  @media (min-width: variables.$mediumScreen) {
-    align-self: center;
-  }
 }
 
 .rowName {
@@ -230,7 +308,7 @@
   white-space: nowrap;
 }
 
-// the date line already says when on mobile, so the schedule only shows once theres room for it
+// the schedule only shows on desktop, the date next to the amount covers it on mobile
 .rowSubtitle {
   @include mixins.text-small;
   display: none;
@@ -244,13 +322,53 @@
   }
 }
 
-// memos tend to be long and shouty, so keep it to one muted line and let the title show the rest
+// memos tend to be long and shouty, so keep it to one muted line and let the title show the rest. The mobile design
+// doesn't have room for it.
 .rowMemo {
   @include mixins.text-extra-small;
+  display: none;
   color: var(--content-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: block;
+  }
+}
+
+// The one line under the name on mobile, stands in for the budget column.
+.rowStatus {
+  @include mixins.text-small;
+  display: flex;
+  align-items: center;
+  gap: 1.25 * variables.$size;
+  min-width: 0;
+  white-space: nowrap;
+  color: var(--content-subtle);
+
+  svg {
+    flex: none;
+    width: 3.25 * variables.$size;
+    height: 3.25 * variables.$size;
+    stroke-width: 2.5;
+    color: var(--success);
+  }
+
+  &[data-warning='true'] {
+    font-weight: var(--semibold);
+    color: var(--warning);
+  }
+
+  @media (min-width: variables.$mediumScreen) {
+    display: none;
+  }
+}
+
+.rowStatusName {
+  color: var(--content);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .rowSubtle {
@@ -260,13 +378,10 @@
 
 .rowDate {
   grid-area: date;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 1.5 * variables.$size;
-  min-width: 0;
+  display: none;
 
   @media (min-width: variables.$mediumScreen) {
+    display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5 * variables.$size;
@@ -274,13 +389,9 @@
 }
 
 .rowDateValue {
-  @include mixins.text-small;
+  @include mixins.text-base;
   font-weight: var(--semibold);
   color: var(--content-emphasis);
-
-  @media (min-width: variables.$mediumScreen) {
-    @include mixins.text-base;
-  }
 }
 
 .lateBadge {
@@ -294,10 +405,14 @@
 
 .rowBudget {
   grid-area: budget;
-  display: flex;
-  align-items: center;
-  gap: 2 * variables.$size;
-  min-width: 0;
+  display: none;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: flex;
+    align-items: center;
+    gap: 2 * variables.$size;
+    min-width: 0;
+  }
 
   .rowSubtle {
     @include mixins.text-small;
@@ -332,45 +447,57 @@
   flex: none;
   font-weight: var(--semibold);
   color: var(--warning);
+
+  .rowStatus & {
+    @include mixins.text-small;
+  }
 }
 
-// a plain text button on mobile so it fits on the budget line, the full button once theres room
 .budgetButton {
   @include mixins.text-small;
   position: relative;
   flex: none;
-  padding: 0;
+  height: 7.5 * variables.$size;
+  padding: 0 2.5 * variables.$size;
   border: 0;
-  background: transparent;
-  color: var(--brand-bright);
+  border-radius: var(--border-radius);
+  background-color: var(--background-active);
+  color: var(--content-emphasis);
   font-weight: var(--semibold);
   cursor: pointer;
 
-  @media (min-width: variables.$mediumScreen) {
-    height: 7.5 * variables.$size;
-    padding: 0 2.5 * variables.$size;
-    border-radius: var(--border-radius);
-    background-color: var(--background-active);
-    color: var(--content-emphasis);
-
-    &:hover {
-      filter: brightness(1.2);
-    }
+  &:hover {
+    filter: brightness(1.2);
   }
 }
 
 .rowAmount {
   grid-area: amount;
-  align-self: start;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   text-align: right;
   font-weight: var(--semibold);
   color: var(--content-emphasis);
+}
+
+// the range only fits on desktop
+.rowAmountRange {
+  display: none;
 
   @media (min-width: variables.$mediumScreen) {
-    align-self: center;
+    display: block;
+  }
+}
+
+// the date has its own column on desktop, on mobile it sits under the amount
+.rowAmountDate {
+  @include mixins.text-small;
+  font-weight: var(--normal);
+  color: var(--content-subtle);
+
+  @media (min-width: variables.$mediumScreen) {
+    display: none;
   }
 }
 
@@ -387,8 +514,6 @@
 }
 
 .footnote {
-  padding: 0 2 * variables.$size;
-
   @media (min-width: variables.$mediumScreen) {
     padding: 0 4 * variables.$size;
   }

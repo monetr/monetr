@@ -17,6 +17,7 @@ import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
 import type TransactionRecurring from '@monetr/interface/models/TransactionRecurring';
 import { AmountType } from '@monetr/interface/util/amounts';
 import capitalize from '@monetr/interface/util/capitalize';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './recurring.module.scss';
 
@@ -201,10 +202,28 @@ function NextFundingSummary({ charges }: NextFundingSummaryProps): React.JSX.Ele
       <span className={styles.summaryEyebrow}>
         Before your next funding on {format.date(nextFunding, { weekday: 'long' })}
       </span>
+      {upcoming.length > 0 && (
+        // mobile gets the total up front and the rest underneath, theres not enough room for the whole sentence
+        <div className={styles.summaryMobile}>
+          <span className={styles.summaryTotal}>
+            {format.amount(total)}{' '}
+            <span>expected · {upcoming.length === 1 ? '1 charge' : `${upcoming.length} charges`}</span>
+          </span>
+          <span className={styles.summaryDetail}>
+            {uncovered > 0 ? (
+              <Fragment>
+                <strong>{format.amount(uncovered)}</strong> isn&apos;t budgeted and will come out of Free-To-Use
+              </Fragment>
+            ) : (
+              'All of it is covered by your expenses'
+            )}
+          </span>
+        </div>
+      )}
       {upcoming.length === 0 ? (
         <p className={styles.summaryText}>Nothing recurring is expected before then.</p>
       ) : (
-        <p className={styles.summaryText}>
+        <p className={mergeClasses(styles.summaryText, styles.summaryDesktop)}>
           <strong>{format.amount(total)}</strong> in {upcoming.length === 1 ? '1 charge' : `${upcoming.length} charges`}{' '}
           is expected.{' '}
           {uncovered > 0 ? (
@@ -334,6 +353,7 @@ function RecurringRow({ item }: RecurringRowProps): React.JSX.Element | null {
             {item.transactionCluster.originalMemo}
           </span>
         )}
+        <RecurringStatus item={item} />
       </div>
       <div className={styles.rowDate}>
         {item.ended ? (
@@ -429,16 +449,59 @@ function RecurringAmount({ item }: RecurringRowProps): React.JSX.Element | null 
 
   // a price change shows up as two amounts, so only call it variable once theres more than that going on
   const amounts = Object.keys(item.amounts).map(amount => Math.abs(Number(amount)));
-  if (amounts.length < 3) {
-    return <span className={styles.rowAmount}>{format.amount(item.lastAmount)}</span>;
-  }
+  const variable = amounts.length >= 3;
 
   return (
     <div className={styles.rowAmount}>
-      <span>~{format.amount(item.lastAmount)}</span>
-      <span className={styles.rowSubtle}>
-        {format.amount(Math.min(...amounts))} to {format.amount(Math.max(...amounts))}
+      <span>
+        {variable && '~'}
+        {format.amount(item.lastAmount)}
       </span>
+      {variable && (
+        <span className={mergeClasses(styles.rowSubtle, styles.rowAmountRange)}>
+          {format.amount(Math.min(...amounts))} to {format.amount(Math.max(...amounts))}
+        </span>
+      )}
+      {/* on mobile theres no date column, so the date tucks in under the amount instead */}
+      <span className={styles.rowAmountDate}>{format.date(item.ended ? item.last : item.next)}</span>
     </div>
+  );
+}
+
+// RecurringStatus is the one line under the name on mobile, it stands in for the budget column which doesnt fit there.
+function RecurringStatus({ item }: RecurringRowProps): React.JSX.Element | null {
+  const format = useFormatters();
+  if (!format) {
+    return null;
+  }
+
+  if (item.direction === 'debit') {
+    if (!item.spending) {
+      return (
+        <span className={styles.rowStatus} data-warning={!item.ended}>
+          Not budgeted
+        </span>
+      );
+    }
+
+    const shortfall = item.ended ? 0 : getShortfall(item);
+    return (
+      <span className={styles.rowStatus}>
+        <Receipt />
+        <span className={styles.rowStatusName}>{item.spending.name}</span>
+        {shortfall > 0 && <span className={styles.budgetShort}>· short {format.amount(shortfall)}</span>}
+      </span>
+    );
+  }
+
+  if (!item.fundingSchedule) {
+    return <span className={styles.rowStatus}>Not funding anything</span>;
+  }
+
+  return (
+    <span className={styles.rowStatus}>
+      <CalendarSync />
+      <span className={styles.rowStatusName}>{item.fundingSchedule.name}</span>
+    </span>
   );
 }
