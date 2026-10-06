@@ -62,6 +62,28 @@ func newIPExtractor(server config.Server) echo.IPExtractor {
 	}
 }
 
+// newRequestIDHeaderFilter strips the request ID headers off of any request
+// that did not come directly from a trusted proxy. Same as the client IP
+// header, a client could otherwise set these to whatever they want and have it
+// show up in our logs and traces.
+func newRequestIDHeaderFilter(server config.Server) echo.MiddlewareFunc {
+	trustedProxies, err := server.GetTrustedProxies()
+	if err != nil {
+		trustedProxies = nil
+	}
+	direct := echo.ExtractIPDirect()
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(ctx *echo.Context) error {
+			req := ctx.Request()
+			if !isTrusted(trustedProxies, net.ParseIP(direct(req))) {
+				req.Header.Del("X-Request-Id")
+				req.Header.Del("X-Cloud-Trace-Context")
+			}
+			return next(ctx)
+		}
+	}
+}
+
 func isTrusted(trustedProxies []*net.IPNet, ip net.IP) bool {
 	if ip == nil {
 		return false
