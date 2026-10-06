@@ -135,8 +135,8 @@ two entries.
 
 ## <Badge type="warning">PATCH</Badge> Link an expense or funding schedule
 
-Links a recurring transaction to the expense or funding schedule that covers it, or unlinks it. These are the only two
-things you can change on a recurring transaction, everything else comes from monetr working it out.
+Links a recurring transaction to the expense or funding schedule that covers it, or clears that link. These are the
+only two things you can change on a recurring transaction, everything else comes from monetr working it out.
 
 A debit can only be linked to an expense, not a goal. A credit can only be linked to a funding schedule. For now an
 expense or funding schedule can only be linked to one recurring transaction at a time.
@@ -161,12 +161,12 @@ PATCH /api/bank_accounts/:bankAccountId/recurring/:transactionRecurringId
 
 Send the one you're changing. Anything else in the body gets rejected.
 
-| Attribute           | Type                    | Required | Description                                                                                   |
-| ------------------- | ----------------------- | -------- | --------------------------------------------------------------------------------------------- |
-| `fundingScheduleId` | string (ulid), nullable | No       | The funding schedule to link, on the same bank account. Credits only. Send null to unlink it. |
-| `spendingId`        | string (ulid), nullable | No       | The expense to link, on the same bank account. Debits only. Send null to unlink it.           |
+| Attribute           | Type                    | Required | Description                                                                                  |
+| ------------------- | ----------------------- | -------- | -------------------------------------------------------------------------------------------- |
+| `fundingScheduleId` | string (ulid), nullable | No       | The funding schedule to link, on the same bank account. Credits only. Send null to clear it. |
+| `spendingId`        | string (ulid), nullable | No       | The expense to link, on the same bank account. Debits only. Send null to clear it.           |
 
-Sending a different ID just moves the link over, you don't have to unlink first.
+Sending a different ID just moves the link over, you don't have to clear it first.
 
 ### Example
 
