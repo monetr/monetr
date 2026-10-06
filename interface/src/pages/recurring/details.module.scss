@@ -24,8 +24,9 @@
   padding: 4 * variables.$size;
   padding-bottom: 16 * variables.$size;
 
+  // same as the transaction details page
   @media (min-width: variables.$mediumScreen) {
-    padding: 6 * variables.$size 8 * variables.$size;
+    padding-bottom: 4 * variables.$size;
   }
 }
 
@@ -47,13 +48,7 @@
   min-width: 0;
 
   @media (min-width: variables.$largeScreen) {
-    &:first-child {
-      flex: 0 1 145 * variables.$size;
-    }
-
-    &:last-child {
-      flex: 1;
-    }
+    flex: 1 1 0;
   }
 }
 
@@ -201,8 +196,128 @@
   &[data-next='true'] {
     font-weight: var(--semibold);
     color: var(--content-emphasis);
-    background-color: var(--brand-faint);
+    background-color: color-mix(in srgb, var(--brand) 40%, transparent);
   }
+}
+
+// Just a heading over the rule card, not a card of its own.
+.link {
+  display: flex;
+  flex-direction: column;
+  gap: 3 * variables.$size;
+}
+
+.linkHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5 * variables.$size;
+}
+
+// The rule card from the design, gets the brand border once something is actually picked.
+.rule {
+  display: flex;
+  flex-direction: column;
+  gap: 3 * variables.$size;
+  padding: 4 * variables.$size;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius);
+  background-color: var(--background-darker);
+
+  &[data-active='true'] {
+    border-color: var(--brand);
+  }
+}
+
+.ruleHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 4 * variables.$size;
+}
+
+.ruleText {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5 * variables.$size;
+  min-width: 0;
+}
+
+.ruleChip {
+  @include mixins.text-extra-small;
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 1.25 * variables.$size;
+  padding: 0.5 * variables.$size 2 * variables.$size;
+  border-radius: var(--border-radius);
+  font-weight: var(--semibold);
+  // dark purple with light text like the design, brand-faint is too light to put text on
+  color: var(--brand-bright);
+  background-color: color-mix(in srgb, var(--brand) 40%, transparent);
+
+  svg {
+    width: 3 * variables.$size;
+    height: 3 * variables.$size;
+  }
+}
+
+.ruleTitle {
+  @include mixins.text-base;
+  font-weight: var(--semibold);
+  color: var(--content-emphasis);
+}
+
+.ruleDescription {
+  @include mixins.text-small;
+  color: var(--content-subtle);
+}
+
+// Select always leaves room underneath for error text, theres never an error here so drop it. Nested so it wins over
+// the padding class Select puts on the same element.
+.rule .ruleSelect {
+  padding-bottom: 0;
+}
+
+// The select and the create button share a line, the select takes whatever room the button leaves.
+.ruleControls {
+  display: flex;
+  align-items: center;
+  gap: 2 * variables.$size;
+}
+
+.ruleSelect {
+  flex: 1;
+  min-width: 0;
+}
+
+// Same height as the select next to it, but with the same text as the rest of monetr's form buttons.
+.linkButton {
+  @include mixins.text-small;
+  flex: none;
+  height: 9.5 * variables.$size;
+}
+
+.linkNote {
+  @include mixins.text-small;
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5 * variables.$size;
+  color: var(--content-subtle);
+
+  svg {
+    flex: none;
+    width: 4 * variables.$size;
+    height: 4 * variables.$size;
+    margin-top: 0.5 * variables.$size;
+    color: var(--brand-bright);
+  }
+}
+
+.linkView {
+  @include mixins.text-small;
+  align-self: flex-start;
+  font-weight: var(--medium);
+  color: var(--brand-bright);
 }
 
 .cluster {

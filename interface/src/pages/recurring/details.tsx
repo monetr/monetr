@@ -1,29 +1,45 @@
 import { Fragment, useMemo, useState } from 'react';
 import { differenceInCalendarDays, isThisYear, startOfToday } from 'date-fns';
-import { ChevronRight, Clock, HeartCrack, Layers, Repeat } from 'lucide-react';
+import { ChevronRight, Clock, HeartCrack, Layers, Plus, Repeat, Sparkles } from 'lucide-react';
 import { rrulestr } from 'rrule';
 import { Link, useRoute } from 'wouter';
 
+import type { ApiError } from '@monetr/interface/api/client';
+import { Button } from '@monetr/interface/components/Button';
 import { flexVariants } from '@monetr/interface/components/Flex';
 import { Item, ItemContent } from '@monetr/interface/components/Item';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
+import { SelectSpendingOptionComponent } from '@monetr/interface/components/MSelectSpending';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import Select, { type SelectOption } from '@monetr/interface/components/Select';
+import { Switch } from '@monetr/interface/components/Switch';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@monetr/interface/components/Tooltip';
 import Typography from '@monetr/interface/components/Typography';
 import TransactionAmount from '@monetr/interface/components/transactions/TransactionAmount';
 import TransactionMerchantIcon from '@monetr/interface/components/transactions/TransactionMerchantIcon';
 import { getConfidenceLabel } from '@monetr/interface/components/transactions/TransactionRecurringCard';
+import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
+import { useFundingSchedules } from '@monetr/interface/hooks/useFundingSchedules';
 import { useLocale } from '@monetr/interface/hooks/useLocale';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import { usePatchTransactionRecurring } from '@monetr/interface/hooks/usePatchTransactionRecurring';
 import { useRecurringTransaction } from '@monetr/interface/hooks/useRecurringTransaction';
 import { useRecurringTransactionHistory } from '@monetr/interface/hooks/useRecurringTransactionHistory';
 import { useSimilarTransactions } from '@monetr/interface/hooks/useSimilarTransactions';
+import { useSpendings } from '@monetr/interface/hooks/useSpendings';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { useTransactionCluster } from '@monetr/interface/hooks/useTransactionCluster';
+import { showNewExpenseModal } from '@monetr/interface/modals/NewExpenseModal';
+import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
+import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { ID } from '@monetr/interface/models/ID';
+import { FREE_TO_USE, FreeToUse, type default as Spending, SpendingType } from '@monetr/interface/models/Spending';
 import type Transaction from '@monetr/interface/models/Transaction';
 import type TransactionRecurring from '@monetr/interface/models/TransactionRecurring';
 import { AmountType } from '@monetr/interface/util/amounts';
 import { DateLength, formatDate } from '@monetr/interface/util/formatDate';
+import type { APIError } from '@monetr/interface/util/request';
+import { useSnackbar } from '@monetr/notify';
 
 import styles from './details.module.scss';
 
@@ -83,6 +99,7 @@ export default function RecurringDetails(): React.JSX.Element | null {
         <div className={styles.columns}>
           <div className={styles.column}>
             <RecurringSummary name={name} recurring={recurring} />
+            <RecurringLink name={name} recurring={recurring} />
           </div>
           <div className={styles.column}>
             <ClusterSummary name={name} recurring={recurring} />
@@ -189,6 +206,232 @@ function RecurringSummary({ recurring, name }: RecurringProps): React.JSX.Elemen
       )}
     </section>
   );
+}
+
+// RecurringLink is where they pick what the charges on this schedule come out of, or what a recurring deposit funds.
+function RecurringLink(props: RecurringProps): React.JSX.Element {
+  if (props.recurring.direction === 'debit') {
+    return <SpendingLink {...props} />;
+  }
+
+  return <FundingLink {...props} />;
+}
+
+type SpendingOption = Pick<Spending | FreeToUse, 'spendingId' | 'spendingType' | 'currentAmount' | 'name'>;
+
+// SpendingLink follows the design for the schedule rule, picking an expense and a switch for automatically spending new
+// charges from it. Only expenses can be linked for now, goals will get their own treatment later.
+function SpendingLink({ recurring, name }: RecurringProps): React.JSX.Element {
+  const { data: spending, isLoading: spendingIsLoading } = useSpendings();
+  const { data: balances, isLoading: balancesIsLoading } = useCurrentBalance();
+  const { data: localeCurrency } = useLocaleCurrency();
+  const { saving, link } = useLinkRecurring(recurring);
+
+  const options: Array<SelectOption<SpendingOption>> = useMemo(
+    () => [
+      // free-to-use is how you say it isn't budgeted with anything, same as everywhere else spending gets picked
+      ...(balances ? [{ label: 'Free-To-Use', value: new FreeToUse(balances) }] : []),
+      ...(spending ?? [])
+        .filter(item => item.spendingType === SpendingType.Expense)
+        .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
+        .map(item => ({ label: item.name, value: item })),
+    ],
+    [balances, spending],
+  );
+  // anything past free-to-use is something they could actually pick
+  const isEmpty = !options.some(option => option.value.spendingId !== FREE_TO_USE);
+  const value = options.find(option => option.value.spendingId === (recurring.spendingId ?? FREE_TO_USE));
+  const amount = localeCurrency?.formatAmount(Math.abs(recurring.lastAmount), AmountType.Stored);
+
+  function onChange(newValue: SelectOption<SpendingOption>) {
+    const spendingId = newValue.value.spendingId === FREE_TO_USE ? null : (newValue.value.spendingId as ID<Spending>);
+    if (spendingId === recurring.spendingId) {
+      return;
+    }
+
+    return link({ spendingId }, spendingId ? `Linked to ${newValue.label}` : 'No longer budgeted with an expense');
+  }
+
+  return (
+    <section className={styles.link}>
+      <div className={styles.linkHeader}>
+        <Typography component='h3' size='lg' weight='semibold'>
+          Automatically spend
+        </Typography>
+        <Typography color='subtle' size='sm'>
+          Pick where new {name || 'recurring'} charges come out of when they show up.
+        </Typography>
+      </div>
+      <div className={styles.rule} data-active={Boolean(recurring.spending)}>
+        <div className={styles.ruleHeader}>
+          <div className={styles.ruleText}>
+            <span className={styles.ruleChip}>
+              <Repeat />
+              This schedule
+            </span>
+            <span className={styles.ruleTitle}>Spend charges on this schedule from</span>
+            <span className={styles.ruleDescription}>
+              Only the {amount ? `${amount} ` : ''}charges monetr matches to this schedule.
+            </span>
+          </div>
+          {/* automatically spending isnt a thing yet, the switch is just here so its obvious where it will live */}
+          <Tooltip delayDuration={100}>
+            <TooltipTrigger asChild>
+              <span>
+                <Switch aria-label='Automatically spend charges on this schedule' checked={false} disabled />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side='top'>Automatically spending new charges is coming soon.</TooltipContent>
+          </Tooltip>
+        </div>
+        <div className={styles.ruleControls}>
+          <Select
+            className={styles.ruleSelect}
+            disabled={saving || isEmpty}
+            isLoading={spendingIsLoading || balancesIsLoading}
+            onChange={onChange}
+            optionComponent={SelectSpendingOptionComponent}
+            options={options}
+            placeholder={isEmpty ? 'No expenses exist...' : 'Select an expense...'}
+            value={isEmpty ? undefined : value}
+          />
+          {/* creating one only makes sense when nothing is picked yet */}
+          {!recurring.spending && !recurring.ended && (
+            <Button
+              className={styles.linkButton}
+              disabled={saving}
+              onClick={() => showNewExpenseModal({ recurring })}
+              variant='secondary'
+            >
+              <Plus />
+              New expense
+            </Button>
+          )}
+        </div>
+        {recurring.spending && recurring.autoMatched && (
+          <span className={styles.linkNote}>
+            <Sparkles />
+            monetr picked {recurring.spending.name} for you since your recent charges were spent from it.
+          </span>
+        )}
+        {recurring.spending && (
+          <Link
+            className={styles.linkView}
+            to={`/bank/${recurring.bankAccountId}/expenses/${recurring.spending.spendingId}/details`}
+          >
+            View expense
+          </Link>
+        )}
+      </div>
+    </section>
+  );
+}
+
+// FundingLink is the same idea for money coming in, like a paycheck funding a schedule. Theres nothing to automatically
+// spend here so theres no switch.
+function FundingLink({ recurring, name }: RecurringProps): React.JSX.Element {
+  const { data: funding, isLoading: fundingIsLoading } = useFundingSchedules();
+  const { saving, link } = useLinkRecurring(recurring);
+
+  const options: Array<SelectOption<ID<FundingSchedule> | null>> = useMemo(
+    () => [
+      { label: 'Nothing', value: null },
+      ...(funding ?? [])
+        .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
+        .map(item => ({ label: item.name, value: item.fundingScheduleId })),
+    ],
+    [funding],
+  );
+  // options always has the nothing option, so anything past that is something they could actually pick
+  const isEmpty = options.length === 1;
+  const value = options.find(option => option.value === recurring.fundingScheduleId);
+
+  function onChange(newValue: SelectOption<ID<FundingSchedule> | null>) {
+    if (newValue.value === recurring.fundingScheduleId) {
+      return;
+    }
+
+    return link(
+      { fundingScheduleId: newValue.value },
+      newValue.value ? `Linked to ${newValue.label}` : 'No longer funding anything',
+    );
+  }
+
+  return (
+    <section className={styles.link}>
+      <div className={styles.linkHeader}>
+        <Typography component='h3' size='lg' weight='semibold'>
+          Funds
+        </Typography>
+        <Typography color='subtle' size='sm'>
+          The funding schedule {name || 'these'} deposits go towards.
+        </Typography>
+      </div>
+      <div className={styles.rule} data-active={Boolean(recurring.fundingSchedule)}>
+        <div className={styles.ruleControls}>
+          <Select
+            className={styles.ruleSelect}
+            disabled={saving || isEmpty}
+            isLoading={fundingIsLoading}
+            onChange={onChange}
+            options={options}
+            placeholder={isEmpty ? 'No funding schedules exist...' : 'Select a funding schedule...'}
+            value={isEmpty ? undefined : value}
+          />
+          {!recurring.fundingSchedule && !recurring.ended && (
+            <Button
+              className={styles.linkButton}
+              disabled={saving}
+              onClick={() => showNewFundingModal({ recurring })}
+              variant='secondary'
+            >
+              <Plus />
+              New funding schedule
+            </Button>
+          )}
+        </div>
+        {recurring.fundingSchedule && (
+          <Link
+            className={styles.linkView}
+            to={`/bank/${recurring.bankAccountId}/funding/${recurring.fundingSchedule.fundingScheduleId}/details`}
+          >
+            View funding schedule
+          </Link>
+        )}
+      </div>
+    </section>
+  );
+}
+
+// useLinkRecurring patches the links on the recurring transaction and lets them know how it went. A null still gets
+// sent so picking nothing actually clears the link.
+function useLinkRecurring(recurring: TransactionRecurring) {
+  const patchTransactionRecurring = usePatchTransactionRecurring();
+  const { enqueueSnackbar } = useSnackbar();
+  const [saving, setSaving] = useState(false);
+
+  async function link(
+    links: { spendingId?: ID<Spending> | null; fundingScheduleId?: ID<FundingSchedule> | null },
+    message: string,
+  ) {
+    setSaving(true);
+    return await patchTransactionRecurring({
+      transactionRecurringId: recurring.transactionRecurringId,
+      bankAccountId: recurring.bankAccountId,
+      ...links,
+    })
+      .then(() => void enqueueSnackbar(message, { variant: 'success', disableWindowBlurListener: true }))
+      .catch(
+        (error: ApiError<APIError>) =>
+          void enqueueSnackbar(error.response?.data?.error || 'Failed to update the recurring transaction', {
+            variant: 'error',
+            disableWindowBlurListener: true,
+          }),
+      )
+      .finally(() => setSaving(false));
+  }
+
+  return { saving, link };
 }
 
 interface StatProps {
