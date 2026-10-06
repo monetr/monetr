@@ -1,5 +1,4 @@
 import { act } from 'react';
-
 import { rs } from '@rstest/core';
 
 import { waitFor } from '@testing-library/react';
