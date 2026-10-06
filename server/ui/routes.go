@@ -78,10 +78,11 @@ func (c *UIController) RegisterRoutes(app *echo.Echo) {
 		}
 
 		// If they request `/index.html` simply redirect them to `/`.
+		// Always use a fixed target, never anything derived from the request URL,
+		// otherwise paths like `//evil.com/..%2f/index.html` become an open
+		// redirect.
 		if requestedPath == indexFile {
-			url := ctx.Request().URL.String()
-			url = strings.TrimSuffix(url, requestedPath)
-			return ctx.Redirect(http.StatusPermanentRedirect, url)
+			return ctx.Redirect(http.StatusPermanentRedirect, "/")
 		}
 
 		log := c.log.With(
