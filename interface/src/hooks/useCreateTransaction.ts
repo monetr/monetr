@@ -56,17 +56,17 @@ export function useCreateTransaction(): (
     onSuccess: ({ transaction, balance, spending }: CreateTransactionResponse) =>
       Promise.all([
         queryClient.setQueryData(
-          [`/api/bank_accounts/${transaction.bankAccountId}/spending`],
+          ['GET', `/api/bank_accounts/${transaction.bankAccountId}/spending`],
           (previous: Array<Partial<Spending>>) =>
             previous.map(item => (spending?.spendingId === item.spendingId ? spending : item)),
         ),
         spending != null &&
           queryClient.setQueryData(
-            [`/api/bank_accounts/${transaction.bankAccountId}/spending/${spending.spendingId}`],
+            ['GET', `/api/bank_accounts/${transaction.bankAccountId}/spending/${spending.spendingId}`],
             spending,
           ),
         queryClient.setQueryData(
-          [`/api/bank_accounts/${transaction.bankAccountId}/balances`],
+          ['GET', `/api/bank_accounts/${transaction.bankAccountId}/balances`],
           (previous: Partial<Balance>) =>
             new Balance({
               ...previous,
@@ -74,7 +74,7 @@ export function useCreateTransaction(): (
             }),
         ),
         queryClient.invalidateQueries({
-          queryKey: [`/api/bank_accounts/${transaction.bankAccountId}/transactions`],
+          queryKey: ['GET', `/api/bank_accounts/${transaction.bankAccountId}/transactions`],
         }),
       ]),
   });

@@ -19,12 +19,12 @@ export function usePatchLink(): (_: PatchLinkRequest) => Promise<Link> {
     mutationFn: patchLink,
     onSuccess: (updated: Link) =>
       Promise.all([
-        queryClient.setQueryData(['/api/links'], (previous: Array<Partial<Link>>) =>
+        queryClient.setQueryData(['GET', '/api/links'], (previous: Array<Partial<Link>>) =>
           (previous ?? [])
             // Take the existing data in the cache and map over it, returning the updated item instead of the old item.
             .map(existing => (existing.linkId === updated.linkId ? updated : existing)),
         ),
-        queryClient.setQueryData([`/api/links/${updated.linkId}`], updated),
+        queryClient.setQueryData(['GET', `/api/links/${updated.linkId}`], updated),
       ]),
   });
 

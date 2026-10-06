@@ -32,7 +32,7 @@ export default function useLogin(): (loginArgs: LoginArguments) => Promise<void>
         // login response above. If the nextUrl is present, then we want to navigate the user to that path. If it is not
         // present then we can direct the user to the root path.
         return await queryClient
-          .invalidateQueries({ queryKey: ['/api/users/me'] })
+          .invalidateQueries({ queryKey: ['GET', '/api/users/me'] })
           .then(() => navigate(result?.data?.nextUrl || '/'));
       })
       .catch(async error => {
@@ -50,7 +50,7 @@ export default function useLogin(): (loginArgs: LoginArguments) => Promise<void>
                 // If we are required to provide multifactor authentication then we should be able to retrieve our user
                 // details at least.
                 return await queryClient
-                  .invalidateQueries({ queryKey: ['/api/users/me'] })
+                  .invalidateQueries({ queryKey: ['GET', '/api/users/me'] })
                   .then(() => navigate('/login/multifactor'));
               case 'EMAIL_NOT_VERIFIED':
                 return navigate(`/verify/email/resend?email=${encodeURIComponent(loginArgs.email)}`);

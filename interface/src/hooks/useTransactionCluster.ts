@@ -10,7 +10,7 @@ export function useTransactionCluster(
 ): UseQueryResult<TransactionCluster, unknown> {
   const selectedBankAccountId = useSelectedBankAccountId();
   return useQuery<WithJsonValues<TransactionCluster>, unknown, TransactionCluster>({
-    queryKey: [`/api/bank_accounts/${selectedBankAccountId}/similar/${transactionClusterId}`],
+    queryKey: ['GET', `/api/bank_accounts/${selectedBankAccountId}/similar/${transactionClusterId}`],
     enabled: Boolean(transactionClusterId),
     select: data => new TransactionCluster(data),
   });

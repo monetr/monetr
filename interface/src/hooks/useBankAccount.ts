@@ -7,7 +7,7 @@ import type { WithJsonValues } from '@monetr/interface/util/json';
 export function useBankAccount(bankAccountId?: string): UseQueryResult<BankAccount | undefined, unknown> {
   const queryClient = useQueryClient();
   const existingData = useMemo(
-    () => queryClient.getQueryData<Array<BankAccount>>(['/api/bank_accounts']),
+    () => queryClient.getQueryData<Array<BankAccount>>(['GET', '/api/bank_accounts']),
     [queryClient],
   );
   const initialData = useCallback(
@@ -20,12 +20,12 @@ export function useBankAccount(bankAccountId?: string): UseQueryResult<BankAccou
     [existingData, bankAccountId],
   );
   const initialDataUpdatedAt = useCallback(
-    () => queryClient.getQueryState(['/api/bank_accounts'])?.dataUpdatedAt,
+    () => queryClient.getQueryState(['GET', '/api/bank_accounts'])?.dataUpdatedAt,
     [queryClient],
   );
 
   return useQuery<WithJsonValues<BankAccount>, unknown, BankAccount | undefined>({
-    queryKey: [`/api/bank_accounts/${bankAccountId}`],
+    queryKey: ['GET', `/api/bank_accounts/${bankAccountId}`],
     enabled: Boolean(bankAccountId), // Only request if we have a valid bank account ID to work with.
     select: data => (data ? new BankAccount(data) : undefined),
     initialData,

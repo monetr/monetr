@@ -27,11 +27,13 @@ export function useUpdateBankAccount(): (_bankAccount: PatchBankAccountRequest) 
     mutationFn: updateBankAccount,
     onSuccess: (updatedBankAccount: BankAccount, _var, _result, ctx) =>
       Promise.all([
-        ctx.client.setQueryData(['/api/bank_accounts'], (previous: Array<WithJsonValues<BankAccount>>) =>
+        ctx.client.setQueryData(['GET', '/api/bank_accounts'], (previous: Array<WithJsonValues<BankAccount>>) =>
           previous.map(item => (item.bankAccountId === updatedBankAccount.bankAccountId ? updatedBankAccount : item)),
         ),
-        ctx.client.setQueryData([`/api/bank_accounts/${updatedBankAccount.bankAccountId}`], updatedBankAccount),
-        ctx.client.invalidateQueries({ queryKey: [`/api/bank_accounts/${updatedBankAccount.bankAccountId}/balances`] }),
+        ctx.client.setQueryData(['GET', `/api/bank_accounts/${updatedBankAccount.bankAccountId}`], updatedBankAccount),
+        ctx.client.invalidateQueries({
+          queryKey: ['GET', `/api/bank_accounts/${updatedBankAccount.bankAccountId}/balances`],
+        }),
       ]),
   });
 

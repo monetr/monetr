@@ -119,8 +119,8 @@ export default function PlaidSetup(props: PlaidProps): React.JSX.Element {
         await longPollSetup(0, linkId);
 
         setTimeout(() => {
-          queryClient.invalidateQueries({ queryKey: ['/api/links'] });
-          queryClient.invalidateQueries({ queryKey: ['/api/bank_accounts'] });
+          queryClient.invalidateQueries({ queryKey: ['GET', '/api/links'] });
+          queryClient.invalidateQueries({ queryKey: ['GET', '/api/bank_accounts'] });
           navigate('/');
         }, 8000);
       })

@@ -49,7 +49,7 @@ function renderPatchUser() {
   // The optimistic update only touches /api/users/me when there is something cached there, which in the real app is
   // always the case since it's loaded on startup. Seed it with the original order.
   act(() => {
-    world.result.current.queryClient.setQueryData(['/api/users/me'], {
+    world.result.current.queryClient.setQueryData(['GET', '/api/users/me'], {
       user: userJson([firstLink, secondLink]),
       isSetup: true,
       isActive: true,
@@ -60,7 +60,8 @@ function renderPatchUser() {
 }
 
 function cachedLinkOrder(world: ReturnType<typeof renderPatchUser>): Array<ID<Link>> | undefined {
-  return world.result.current.queryClient.getQueryData<Partial<Authentication>>(['/api/users/me'])?.user?.linkOrder;
+  return world.result.current.queryClient.getQueryData<Partial<Authentication>>(['GET', '/api/users/me'])?.user
+    ?.linkOrder;
 }
 
 describe('patch user', () => {
@@ -99,7 +100,7 @@ describe('patch user', () => {
     expect(patchHistory?.[0]?.data).toEqual({ linkOrder: [secondLink, firstLink] });
 
     // The single user cache gets the response as is.
-    const single = world.result.current.queryClient.getQueryData<PatchUserResponse>([`/api/users/${userId}`]);
+    const single = world.result.current.queryClient.getQueryData<PatchUserResponse>(['GET', `/api/users/${userId}`]);
     expect(single?.linkOrder).toEqual([secondLink, firstLink]);
 
     // And the current user keeps the new order.
@@ -168,7 +169,7 @@ describe('patch user', () => {
 
     expect(cachedLinkOrder(world)).toEqual([firstLink, secondLink]);
     // Nothing should have been cached for the single user since the patch never went through.
-    expect(world.result.current.queryClient.getQueryData([`/api/users/${userId}`])).toBeUndefined();
+    expect(world.result.current.queryClient.getQueryData(['GET', `/api/users/${userId}`])).toBeUndefined();
   });
 
   it('will not create a current user cache if there was not one', async () => {
@@ -189,6 +190,6 @@ describe('patch user', () => {
       });
     });
 
-    expect(world.result.current.queryClient.getQueryData(['/api/users/me'])).toBeUndefined();
+    expect(world.result.current.queryClient.getQueryData(['GET', '/api/users/me'])).toBeUndefined();
   });
 });

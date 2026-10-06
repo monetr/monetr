@@ -129,7 +129,7 @@ export default function Register(): React.JSX.Element {
           return setSuccessful(true);
         }
 
-        return queryClient.invalidateQueries({ queryKey: ['/api/users/me'] }).then(() => {
+        return queryClient.invalidateQueries({ queryKey: ['GET', '/api/users/me'] }).then(() => {
           // If the register endpoint has told us to navigate to a specific url afterwards, then do that now.
           if (result.nextUrl) {
             return navigate(result.nextUrl);

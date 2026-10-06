@@ -60,7 +60,7 @@ function EnableTOTPModal(): React.JSX.Element {
         totp: values.totp,
       },
     })
-      .then(() => queryClient.invalidateQueries({ queryKey: ['/api/users/me'] }))
+      .then(() => queryClient.invalidateQueries({ queryKey: ['GET', '/api/users/me'] }))
       .then(() =>
         enqueueSnackbar('Multifactor authentication enabled.', {
           variant: 'success',

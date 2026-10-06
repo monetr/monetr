@@ -29,11 +29,11 @@ export function useCreateFundingSchedule(): (_funding: CreateFundingScheduleRequ
     onSuccess: (data: FundingSchedule, _var, _result, ctx) =>
       Promise.all([
         ctx.client.setQueryData(
-          [`/api/bank_accounts/${data.bankAccountId}/funding_schedules`],
+          ['GET', `/api/bank_accounts/${data.bankAccountId}/funding_schedules`],
           (previous: Array<Partial<FundingSchedule>>) => (previous ?? []).concat(data),
         ),
         ctx.client.setQueryData(
-          [`/api/bank_accounts/${data.bankAccountId}/funding_schedules/${data.fundingScheduleId}`],
+          ['GET', `/api/bank_accounts/${data.bankAccountId}/funding_schedules/${data.fundingScheduleId}`],
           data,
         ),
       ]),

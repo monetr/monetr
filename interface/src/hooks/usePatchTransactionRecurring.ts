@@ -34,7 +34,7 @@ export function usePatchTransactionRecurring(): (
     // The response already embeds whatever its linked to, so it can replace the cached recurring transaction as is.
     onSuccess: (result: PatchTransactionRecurringResponse, _input, _, { client: queryClient }) =>
       queryClient.setQueryData(
-        [`/api/bank_accounts/${result.bankAccountId}/recurring/${result.transactionRecurringId}`],
+        ['GET', `/api/bank_accounts/${result.bankAccountId}/recurring/${result.transactionRecurringId}`],
         result,
       ),
   });

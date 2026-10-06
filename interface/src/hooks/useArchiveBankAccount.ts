@@ -14,10 +14,10 @@ export function useArchiveBankAccount(): (_bankAccountId: string) => Promise<str
     mutationFn: archiveBankAccount,
     onSuccess: (bankAccountId: string) =>
       Promise.all([
-        queryClient.setQueryData(['/api/bank_accounts'], (previous: Array<Partial<BankAccount>>) =>
+        queryClient.setQueryData(['GET', '/api/bank_accounts'], (previous: Array<Partial<BankAccount>>) =>
           previous.filter(item => item.bankAccountId !== bankAccountId),
         ),
-        queryClient.removeQueries({ queryKey: [`/api/bank_accounts/${bankAccountId}`] }),
+        queryClient.removeQueries({ queryKey: ['GET', `/api/bank_accounts/${bankAccountId}`] }),
       ]),
   });
 

@@ -36,7 +36,7 @@ export function usePatchTransaction(): (patch: PatchTransactionRequest) => Promi
     onSuccess: ({ transaction, spending, balance }: PatchTransactionResponse, _input, _, { client: queryClient }) =>
       Promise.all([
         queryClient.setQueryData<InfiniteData<Array<WithJsonValues<Transaction>>>>(
-          [`/api/bank_accounts/${transaction.bankAccountId}/transactions`],
+          ['GET', `/api/bank_accounts/${transaction.bankAccountId}/transactions`],
           previous =>
             // If previous does not exist then do nothing, otherwise this will break the page.
             previous && {
@@ -51,11 +51,11 @@ export function usePatchTransaction(): (patch: PatchTransactionRequest) => Promi
           {},
         ),
         queryClient.setQueryData(
-          [`/api/bank_accounts/${transaction.bankAccountId}/transactions/${transaction.transactionId}`],
+          ['GET', `/api/bank_accounts/${transaction.bankAccountId}/transactions/${transaction.transactionId}`],
           transaction,
         ),
         queryClient.setQueryData<Array<WithJsonValues<Spending>>>(
-          [`/api/bank_accounts/${transaction.bankAccountId}/spending`],
+          ['GET', `/api/bank_accounts/${transaction.bankAccountId}/spending`],
           previous =>
             // Since there could be multiple spending objects updated here, we need to take map over all of the existing
             // spendinng objects and then check to see if that spending object is in the array of updated spending
@@ -67,25 +67,26 @@ export function usePatchTransaction(): (patch: PatchTransactionRequest) => Promi
         (spending || []).map(spending =>
           Promise.all([
             queryClient.setQueryData(
-              [`/api/bank_accounts/${transaction.bankAccountId}/spending/${spending.spendingId}`],
+              ['GET', `/api/bank_accounts/${transaction.bankAccountId}/spending/${spending.spendingId}`],
               spending,
             ),
             queryClient.invalidateQueries({
               queryKey: [
+                'GET',
                 `/api/bank_accounts/${transaction.bankAccountId}/spending/${spending.spendingId}/transactions`,
               ],
             }),
           ]),
         ),
         queryClient.setQueryData<Partial<Balance>>(
-          [`/api/bank_accounts/${transaction.bankAccountId}/balances`],
+          ['GET', `/api/bank_accounts/${transaction.bankAccountId}/balances`],
           previous => new Balance({ ...previous, ...balance }),
         ),
         queryClient.invalidateQueries({
-          queryKey: [`/api/bank_accounts/${transaction.bankAccountId}/forecast`],
+          queryKey: ['GET', `/api/bank_accounts/${transaction.bankAccountId}/forecast`],
         }),
         queryClient.invalidateQueries({
-          queryKey: [`/api/bank_accounts/${transaction.bankAccountId}/forecast/next_funding`],
+          queryKey: ['QUERY', `/api/bank_accounts/${transaction.bankAccountId}/forecast/next_funding`],
         }),
       ]),
   });

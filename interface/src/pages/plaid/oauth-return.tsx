@@ -107,8 +107,8 @@ export default function OauthReturn(): React.JSX.Element {
 
       return longPollSetup().then(() =>
         Promise.all([
-          queryClient.invalidateQueries({ queryKey: ['/api/links'] }),
-          queryClient.invalidateQueries({ queryKey: ['/api/bank_accounts'] }),
+          queryClient.invalidateQueries({ queryKey: ['GET', '/api/links'] }),
+          queryClient.invalidateQueries({ queryKey: ['GET', '/api/bank_accounts'] }),
         ]),
       );
     });

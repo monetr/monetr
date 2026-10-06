@@ -31,7 +31,7 @@ func (c *Controller) databaseRepositoryMiddleware(next echo.HandlerFunc) echo.Ha
 		var dbi bun.IDB
 		var handlerError error
 		switch strings.ToUpper(ctx.Request().Method) {
-		case "GET", "OPTIONS":
+		case "GET", "OPTIONS", "QUERY":
 			dbi = c.DB
 		case "POST":
 			// Some endpoints need a POST even though they do not require data access.

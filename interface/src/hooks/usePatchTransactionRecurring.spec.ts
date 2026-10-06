@@ -17,7 +17,7 @@ const bankAccountId = 'bac_01hy4rcmadc01d2kzv7vynbxxx';
 const recurringId = 'txrc_01hy4re7c1xc2v44cf6kx302jx';
 const spendingId = 'spnd_01hy4rkq0x3c6dtr9w1p2v5bns';
 const fundingScheduleId = 'fund_01hy4re7c1xc2v44cf6kx302jx';
-const recurringKey = [`/api/bank_accounts/${bankAccountId}/recurring/${recurringId}`];
+const recurringKey = ['GET', `/api/bank_accounts/${bankAccountId}/recurring/${recurringId}`];
 
 function spendingJson() {
   return {

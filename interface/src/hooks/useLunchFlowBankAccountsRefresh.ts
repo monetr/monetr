@@ -20,6 +20,6 @@ export default function useLunchFlowBankAccountsRefresh(): UseMutationResult<
         .then(() => lunchFlowLinkId);
     },
     onSuccess: (lunchFlowLinkId: string, _a, _b, context) =>
-      context.client.invalidateQueries({ queryKey: [`/api/lunch_flow/link/${lunchFlowLinkId}/bank_accounts`] }),
+      context.client.invalidateQueries({ queryKey: ['GET', `/api/lunch_flow/link/${lunchFlowLinkId}/bank_accounts`] }),
   });
 }

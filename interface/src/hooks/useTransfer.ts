@@ -41,27 +41,27 @@ export function useTransfer(): (transferParameters: TransferParameters) => Promi
     onSuccess: (result: BalanceTransferResponse) =>
       Promise.all([
         queryClient.setQueryData(
-          [`/api/bank_accounts/${selectedBankAccountId}/spending`],
+          ['GET', `/api/bank_accounts/${selectedBankAccountId}/spending`],
           (previous: Array<Partial<Spending>>) =>
             previous.map(item => result.spending.find(updated => updated.spendingId === item.spendingId) || item),
         ),
         result.spending.map(updatedSpending =>
           queryClient.setQueryData(
-            [`/api/bank_accounts/${selectedBankAccountId}/spending/${updatedSpending.spendingId}`],
+            ['GET', `/api/bank_accounts/${selectedBankAccountId}/spending/${updatedSpending.spendingId}`],
             () => updatedSpending,
           ),
         ),
         queryClient.setQueryData(
-          [`/api/bank_accounts/${selectedBankAccountId}/balances`],
+          ['GET', `/api/bank_accounts/${selectedBankAccountId}/balances`],
           (previous: Partial<Balance>) =>
             new Balance({
               ...previous,
               ...result.balance,
             }),
         ),
-        queryClient.invalidateQueries({ queryKey: [`/api/bank_accounts/${selectedBankAccountId}/forecast`] }),
+        queryClient.invalidateQueries({ queryKey: ['GET', `/api/bank_accounts/${selectedBankAccountId}/forecast`] }),
         queryClient.invalidateQueries({
-          queryKey: [`/api/bank_accounts/${selectedBankAccountId}/forecast/next_funding`],
+          queryKey: ['QUERY', `/api/bank_accounts/${selectedBankAccountId}/forecast/next_funding`],
         }),
       ]),
   });

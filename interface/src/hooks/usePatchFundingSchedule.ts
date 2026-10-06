@@ -43,7 +43,7 @@ export function usePatchFundingSchedule(): (_: PatchFundingScheduleRequest) => P
     onSuccess: ({ fundingSchedule, spending }: PatchFundingScheduleResponse) =>
       Promise.all([
         queryClient.setQueryData(
-          [`/api/bank_accounts/${fundingSchedule.bankAccountId}/funding_schedules`],
+          ['GET', `/api/bank_accounts/${fundingSchedule.bankAccountId}/funding_schedules`],
           (previous: Array<Partial<FundingSchedule>>) =>
             (previous ?? []).map(item =>
               item.fundingScheduleId === fundingSchedule.fundingScheduleId ? fundingSchedule : item,
@@ -51,12 +51,13 @@ export function usePatchFundingSchedule(): (_: PatchFundingScheduleRequest) => P
         ),
         queryClient.setQueryData(
           [
+            'GET',
             `/api/bank_accounts/${fundingSchedule.bankAccountId}/funding_schedules/${fundingSchedule.fundingScheduleId}`,
           ],
           fundingSchedule,
         ),
         queryClient.setQueryData(
-          [`/api/bank_accounts/${fundingSchedule.bankAccountId}/spending`],
+          ['GET', `/api/bank_accounts/${fundingSchedule.bankAccountId}/spending`],
           (previous: Array<Partial<Spending>>) =>
             (previous ?? []).map(
               item => (spending || []).find(updated => updated.spendingId === item.spendingId) || item,
@@ -64,15 +65,15 @@ export function usePatchFundingSchedule(): (_: PatchFundingScheduleRequest) => P
         ),
         (spending || []).map(spending =>
           queryClient.setQueryData(
-            [`/api/bank_accounts/${fundingSchedule.bankAccountId}/spending/${spending.spendingId}`],
+            ['GET', `/api/bank_accounts/${fundingSchedule.bankAccountId}/spending/${spending.spendingId}`],
             spending,
           ),
         ),
         queryClient.invalidateQueries({
-          queryKey: [`/api/bank_accounts/${fundingSchedule.bankAccountId}/forecast`],
+          queryKey: ['GET', `/api/bank_accounts/${fundingSchedule.bankAccountId}/forecast`],
         }),
         queryClient.invalidateQueries({
-          queryKey: [`/api/bank_accounts/${fundingSchedule.bankAccountId}/forecast/next_funding`],
+          queryKey: ['QUERY', `/api/bank_accounts/${fundingSchedule.bankAccountId}/forecast/next_funding`],
         }),
       ]),
   });

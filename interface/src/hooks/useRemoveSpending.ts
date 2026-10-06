@@ -20,18 +20,20 @@ export function useRemoveSpending(): (_spendingId: string) => Promise<unknown> {
     onSuccess: (removedSpendingId: string) =>
       Promise.all([
         queryClient.setQueryData(
-          [`/api/bank_accounts/${selectedBankAccountId}/spending`],
+          ['GET', `/api/bank_accounts/${selectedBankAccountId}/spending`],
           (previous: Array<Partial<Spending>>) => previous.filter(item => item.spendingId !== removedSpendingId),
         ),
         queryClient.removeQueries({
-          queryKey: [`/api/bank_accounts/${selectedBankAccountId}/spending/${removedSpendingId}`],
+          queryKey: ['GET', `/api/bank_accounts/${selectedBankAccountId}/spending/${removedSpendingId}`],
         }),
-        queryClient.invalidateQueries({ queryKey: [`/api/bank_accounts/${selectedBankAccountId}/balances`] }),
-        queryClient.invalidateQueries({ queryKey: [`/api/bank_accounts/${selectedBankAccountId}/forecast`] }),
+        queryClient.invalidateQueries({ queryKey: ['GET', `/api/bank_accounts/${selectedBankAccountId}/balances`] }),
+        queryClient.invalidateQueries({ queryKey: ['GET', `/api/bank_accounts/${selectedBankAccountId}/forecast`] }),
         queryClient.invalidateQueries({
-          queryKey: [`/api/bank_accounts/${selectedBankAccountId}/forecast/next_funding`],
+          queryKey: ['QUERY', `/api/bank_accounts/${selectedBankAccountId}/forecast/next_funding`],
         }),
-        queryClient.invalidateQueries({ queryKey: [`/api/bank_accounts/${selectedBankAccountId}/transactions`] }),
+        queryClient.invalidateQueries({
+          queryKey: ['GET', `/api/bank_accounts/${selectedBankAccountId}/transactions`],
+        }),
       ]),
   });
 

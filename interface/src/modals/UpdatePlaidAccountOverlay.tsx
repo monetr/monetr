@@ -83,9 +83,9 @@ function UpdatePlaidAccountOverlay({
       })
         .then(() =>
           Promise.all([
-            queryClient.invalidateQueries({ queryKey: ['/api/bank_accounts'] }),
-            queryClient.invalidateQueries({ queryKey: ['/api/links'] }),
-            queryClient.invalidateQueries({ queryKey: [`/api/links/${link.linkId}`] }),
+            queryClient.invalidateQueries({ queryKey: ['GET', '/api/bank_accounts'] }),
+            queryClient.invalidateQueries({ queryKey: ['GET', '/api/links'] }),
+            queryClient.invalidateQueries({ queryKey: ['GET', `/api/links/${link.linkId}`] }),
           ]),
         )
         .then(() => modal.remove());

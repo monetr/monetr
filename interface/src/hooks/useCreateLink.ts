@@ -19,10 +19,10 @@ export function useCreateLink(): (_link: CreateLinkRequest) => Promise<Link> {
     },
     onSuccess: (newLink: Link, _a, _b, context) =>
       Promise.all([
-        context.client.setQueryData(['/api/links'], (previous: Array<Partial<Link>> | null) =>
+        context.client.setQueryData(['GET', '/api/links'], (previous: Array<Partial<Link>> | null) =>
           (previous ?? []).concat(newLink),
         ),
-        context.client.setQueryData([`/api/links/${newLink.linkId}`], newLink),
+        context.client.setQueryData(['GET', `/api/links/${newLink.linkId}`], newLink),
       ]),
   });
 

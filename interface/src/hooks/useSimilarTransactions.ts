@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
 import { type InfiniteData, type UseInfiniteQueryResult, useInfiniteQuery } from '@tanstack/react-query';
 
-import { QueryMethod } from '@monetr/interface/components/MQueryClient';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import Transaction from '@monetr/interface/models/Transaction';
 import type { WithJsonValues } from '@monetr/interface/util/json';
@@ -16,6 +15,7 @@ export function useSimilarTransactions(
   );
   return useInfiniteQuery<Array<WithJsonValues<Transaction>>, unknown, Array<Transaction>>({
     queryKey: [
+      'GET',
       `/api/bank_accounts/${selectedBankAccountId}/transactions`,
       { transaction_cluster_id: transactionClusterId, limit: 10 },
     ],
@@ -29,9 +29,6 @@ export function useSimilarTransactions(
       return pages.length * 10;
     },
     enabled: Boolean(selectedBankAccountId && transactionClusterId),
-    meta: {
-      method: QueryMethod.UseQuery,
-    },
     // We want to flatten the data we return to the caller so that way it is easier to work with.
     select,
   });

@@ -9,7 +9,7 @@ declare global {
 }
 
 export interface RequestConfig<TRequest = unknown> {
-  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS';
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'QUERY';
   url: string;
   data?: TRequest;
   params?: Record<string, string | number | boolean | undefined>;

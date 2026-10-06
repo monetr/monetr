@@ -33,14 +33,14 @@ export function useCreateSpending(): (_spending: CreateSpendingRequest) => Promi
     onSuccess: (data: Spending, _var, _result, ctx) =>
       Promise.all([
         ctx.client.setQueryData(
-          [`/api/bank_accounts/${data.bankAccountId}/spending`],
+          ['GET', `/api/bank_accounts/${data.bankAccountId}/spending`],
           (previous: Array<Partial<Spending>>) => (previous || []).concat(data),
         ),
-        ctx.client.setQueryData([`/api/bank_accounts/${data.bankAccountId}/spending/${data.spendingId}`], data),
-        ctx.client.invalidateQueries({ queryKey: [`/api/bank_accounts/${data.bankAccountId}/balances`] }),
-        ctx.client.invalidateQueries({ queryKey: [`/api/bank_accounts/${data.bankAccountId}/forecast`] }),
+        ctx.client.setQueryData(['GET', `/api/bank_accounts/${data.bankAccountId}/spending/${data.spendingId}`], data),
+        ctx.client.invalidateQueries({ queryKey: ['GET', `/api/bank_accounts/${data.bankAccountId}/balances`] }),
+        ctx.client.invalidateQueries({ queryKey: ['GET', `/api/bank_accounts/${data.bankAccountId}/forecast`] }),
         ctx.client.invalidateQueries({
-          queryKey: [`/api/bank_accounts/${data.bankAccountId}/forecast/next_funding`],
+          queryKey: ['QUERY', `/api/bank_accounts/${data.bankAccountId}/forecast/next_funding`],
         }),
       ]),
   });
