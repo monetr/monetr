@@ -14,10 +14,10 @@ export function useRemoveLink(): (_linkId: string) => Promise<unknown> {
     mutationFn: removeLink,
     onSuccess: (linkId: string) =>
       Promise.all([
-        queryClient.setQueryData(['/api/links'], (previous: Array<Partial<Link>>) =>
+        queryClient.setQueryData(['GET', '/api/links'], (previous: Array<Partial<Link>>) =>
           previous.filter(item => item.linkId !== linkId),
         ),
-        queryClient.removeQueries({ queryKey: [`/api/links/${linkId}`] }),
+        queryClient.removeQueries({ queryKey: ['GET', `/api/links/${linkId}`] }),
       ]),
   });
 

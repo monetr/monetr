@@ -5,7 +5,7 @@ import type { WithJsonValues } from '@monetr/interface/util/json';
 
 export default function useApiKeys(): UseQueryResult<Array<ApiKey>, unknown> {
   return useQuery<Array<WithJsonValues<ApiKey>>, unknown, Array<ApiKey>>({
-    queryKey: [`/api/keys`],
+    queryKey: ['GET', `/api/keys`],
     select: data => (data || []).map(item => new ApiKey(item)),
   });
 }

@@ -36,8 +36,8 @@ function UploadTransactionsModal(): React.JSX.Element {
   const [monetrUpload, setMonetrUpload] = useState<TransactionUpload | null>(null);
   const onClose = useCallback(() => {
     if (stage === UploadTransactionStage.Processing) {
-      queryClient.invalidateQueries({ queryKey: [`/api/bank_accounts/${selectedBankAccountId}/transactions`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/bank_accounts/${selectedBankAccountId}/balances`] });
+      queryClient.invalidateQueries({ queryKey: ['GET', `/api/bank_accounts/${selectedBankAccountId}/transactions`] });
+      queryClient.invalidateQueries({ queryKey: ['GET', `/api/bank_accounts/${selectedBankAccountId}/balances`] });
     }
     return modal.remove();
   }, [stage, modal, queryClient, selectedBankAccountId]);

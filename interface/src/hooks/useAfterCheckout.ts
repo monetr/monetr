@@ -25,7 +25,7 @@ export function useAfterCheckout(): (_checkoutSessionId: string) => Promise<Afte
 
   const mutation = useMutation({
     mutationFn: queryCheckoutSession,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['/api/users/me'] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['GET', '/api/users/me'] }),
   });
 
   return mutation.mutateAsync;

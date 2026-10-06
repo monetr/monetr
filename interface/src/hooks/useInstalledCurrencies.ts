@@ -15,7 +15,7 @@ export interface Currency {
 export function useInstalledCurrencies(): UseQueryResult<Array<Currency>> {
   const { data } = useAuthentication();
   return useQuery<Array<Currency>>({
-    queryKey: ['/api/locale/currency'],
+    queryKey: ['GET', '/api/locale/currency'],
     // Only allowed to fetch currency and locale information if we are authenticated.
     enabled: Boolean(data?.user),
   });

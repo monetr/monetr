@@ -27,7 +27,7 @@ const apiDocsDirectory = "../../docs/src/v1/en/documentation/api"
 // /api/bank_accounts/:bankAccountId/transactions` inside a ```http fence. The
 // API documentation guide in documentation.mdx requires that format so it can
 // be parsed here.
-var requestLinePattern = regexp.MustCompile(`^(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS) (/\S*)$`)
+var requestLinePattern = regexp.MustCompile(`^(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS|QUERY) (/\S*)$`)
 
 // TestApiDocumentationCoverage turns the build red when a route is added
 // without docs, or deleted while its page stays behind. To fix a failure:
@@ -120,6 +120,7 @@ var documentableMethods = map[string]bool{
 	http.MethodPatch:   true,
 	http.MethodDelete:  true,
 	http.MethodOptions: true,
+	echo.QUERY:         true,
 }
 
 // documentedRoutes returns every request line in the MDX pages, mapped to where

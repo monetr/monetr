@@ -30,7 +30,7 @@ export default function useCreateApiKey(): (_: CreateApiKeyRequest) => Promise<C
   const { mutateAsync } = useMutation({
     mutationFn: createApiKey,
     onSuccess: (_data, _var, _result, { client: queryClient }) =>
-      Promise.all([queryClient.invalidateQueries({ queryKey: [`/api/keys`] })]),
+      Promise.all([queryClient.invalidateQueries({ queryKey: ['GET', `/api/keys`] })]),
   });
 
   return mutateAsync;

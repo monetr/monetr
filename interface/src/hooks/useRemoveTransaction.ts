@@ -38,13 +38,13 @@ export function useRemoveTransaction(): (_: RemoveTransactionRequest) => Promise
             // TODO Instead of just invalidating all of these, it would be more efficient to move them into a mutator so we
             // can update their data in place.
             queryClient.invalidateQueries({
-              queryKey: [`/api/bank_accounts/${removal.transaction.bankAccountId}/transactions`],
+              queryKey: ['GET', `/api/bank_accounts/${removal.transaction.bankAccountId}/transactions`],
             }),
             queryClient.invalidateQueries({
-              queryKey: [`/api/bank_accounts/${removal.transaction.bankAccountId}/spending`],
+              queryKey: ['GET', `/api/bank_accounts/${removal.transaction.bankAccountId}/spending`],
             }),
             queryClient.invalidateQueries({
-              queryKey: [`/api/bank_accounts/${removal.transaction.bankAccountId}/balances`],
+              queryKey: ['GET', `/api/bank_accounts/${removal.transaction.bankAccountId}/balances`],
             }),
           ]),
       );

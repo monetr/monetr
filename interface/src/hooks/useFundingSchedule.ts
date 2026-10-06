@@ -7,7 +7,7 @@ import type { WithJsonValues } from '@monetr/interface/util/json';
 export function useFundingSchedule(fundingScheduleId?: string): UseQueryResult<FundingSchedule | null, unknown> {
   const selectedBankAccountId = useSelectedBankAccountId();
   return useQuery<WithJsonValues<FundingSchedule>, unknown, FundingSchedule | null>({
-    queryKey: [`/api/bank_accounts/${selectedBankAccountId}/funding_schedules/${fundingScheduleId}`],
+    queryKey: ['GET', `/api/bank_accounts/${selectedBankAccountId}/funding_schedules/${fundingScheduleId}`],
     enabled: Boolean(selectedBankAccountId) && Boolean(fundingScheduleId),
     select: data => (data?.fundingScheduleId ? new FundingSchedule(data) : null),
   });

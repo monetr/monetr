@@ -6,7 +6,7 @@ import type { WithJsonValues } from '@monetr/interface/util/json';
 
 export function useUser(userId: ID<User> | null): UseQueryResult<User, unknown> {
   return useQuery<WithJsonValues<User>, unknown, User>({
-    queryKey: [`/api/users/${userId}`],
+    queryKey: ['GET', `/api/users/${userId}`],
     enabled: Boolean(userId),
     select: data => new User(data),
   });

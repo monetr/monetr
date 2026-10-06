@@ -32,7 +32,7 @@ export default function useRemoveApiKey(): (_: RemoveApiKeyRequest) => Promise<v
     mutationFn: removeApiKey,
     onSuccess: (_, input, _result, { client: queryClient }) =>
       Promise.all([
-        queryClient.setQueryData([`/api/keys`], (previous: Array<WithJsonValues<ApiKey>>) =>
+        queryClient.setQueryData(['GET', `/api/keys`], (previous: Array<WithJsonValues<ApiKey>>) =>
           previous.filter(item => item.apiKeyId !== input.apiKeyId),
         ),
       ]),

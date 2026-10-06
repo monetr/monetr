@@ -12,7 +12,7 @@ export function useTransactions(): UseInfiniteQueryResult<Array<Transaction>, un
     [],
   );
   return useInfiniteQuery<Array<WithJsonValues<Transaction>>, unknown, Array<Transaction>>({
-    queryKey: [`/api/bank_accounts/${selectedBankAccountId}/transactions`],
+    queryKey: ['GET', `/api/bank_accounts/${selectedBankAccountId}/transactions`],
     initialPageParam: 0,
     getNextPageParam: (_, pages) => {
       // If there are no more pages then we should return null.

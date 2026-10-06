@@ -307,6 +307,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	tokenOnly.PATCH("/users/:userId", c.patchUser)
 	// Icons
 	billedKeyOrToken.POST("/icons/search", c.searchIcon)
+	billedKeyOrToken.QUERY("/icons/search", c.searchIcon)
 	// Locale and currency data
 	billedKeyOrToken.GET("/locale/currency", c.listCurrencies)
 	billedKeyOrToken.GET("/locale/currency/:currencyCode", c.getCurrency)
@@ -330,6 +331,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/transactions", c.getTransactions)
 	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/transactions/:transactionId", c.getTransactionById)
 	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/transactions/:transactionId/similar", c.getSimilarTransactionsById)
+	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/similar", c.getSimilarTransactions)
 	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/similar/:transactionClusterId", c.getSimilarTransactionCluster)
 	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/similar/:transactionClusterId/transactions", c.getSimilarTransactionsByClusterId)
 	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/recurring/:transactionRecurringId", c.getRecurringTransaction)
@@ -370,7 +372,9 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	// Forecasting
 	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/forecast", c.getForecast)
 	billedKeyOrToken.POST("/bank_accounts/:bankAccountId/forecast/spending", c.postForecastNewSpending)
+	billedKeyOrToken.QUERY("/bank_accounts/:bankAccountId/forecast/spending", c.postForecastNewSpending)
 	billedKeyOrToken.POST("/bank_accounts/:bankAccountId/forecast/next_funding", c.postForecastNextFunding)
+	billedKeyOrToken.QUERY("/bank_accounts/:bankAccountId/forecast/next_funding", c.postForecastNextFunding)
 
 	// Plaid Link, these endpoints are not accessible via API keys because it
 	// creates a potential spam vector for plaid.

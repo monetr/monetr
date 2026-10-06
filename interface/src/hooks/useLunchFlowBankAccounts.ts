@@ -7,7 +7,7 @@ export function useLunchFlowBankAccounts(
   lunchFlowLinkId?: string,
 ): UseQueryResult<Array<LunchFlowBankAccount>, unknown> {
   return useQuery<Array<WithJsonValues<LunchFlowBankAccount>>, unknown, Array<LunchFlowBankAccount>>({
-    queryKey: [`/api/lunch_flow/link/${lunchFlowLinkId}/bank_accounts`],
+    queryKey: ['GET', `/api/lunch_flow/link/${lunchFlowLinkId}/bank_accounts`],
     enabled: Boolean(lunchFlowLinkId),
     select: data => (data ?? []).map(item => new LunchFlowBankAccount(item)),
   });

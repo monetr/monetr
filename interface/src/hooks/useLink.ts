@@ -7,16 +7,16 @@ import type { WithJsonValues } from '@monetr/interface/util/json';
 export function useLink(linkId?: string): UseQueryResult<Link, unknown> {
   const queryClient = useQueryClient();
   const initialData = useCallback(
-    () => queryClient.getQueryData<Array<Link>>(['/api/links'])?.find(item => item.linkId === linkId),
+    () => queryClient.getQueryData<Array<Link>>(['GET', '/api/links'])?.find(item => item.linkId === linkId),
     [queryClient, linkId],
   );
   const initialDataUpdatedAt = useCallback(
-    () => queryClient.getQueryState(['/api/links'])?.dataUpdatedAt,
+    () => queryClient.getQueryState(['GET', '/api/links'])?.dataUpdatedAt,
     [queryClient],
   );
   const select = useCallback((data: WithJsonValues<Link>) => new Link(data), []);
   return useQuery<WithJsonValues<Link>, unknown, Link>({
-    queryKey: [`/api/links/${linkId}`],
+    queryKey: ['GET', `/api/links/${linkId}`],
     enabled: Boolean(linkId),
     select,
     initialData: initialData,

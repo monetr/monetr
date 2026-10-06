@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
-import { QueryMethod } from '@monetr/interface/components/MQueryClient';
 import Transaction from '@monetr/interface/models/Transaction';
 import type TransactionRecurring from '@monetr/interface/models/TransactionRecurring';
 import type { WithJsonValues } from '@monetr/interface/util/json';
@@ -34,13 +33,11 @@ export function useRecurringTransactionHistory(
 ): RecurringTransactionHistory & { isLoading: boolean } {
   const { data: transactions, isLoading } = useQuery<Array<WithJsonValues<Transaction>>, unknown, Array<Transaction>>({
     queryKey: [
+      'GET',
       `/api/bank_accounts/${recurring?.bankAccountId}/transactions`,
       { transaction_recurring_id: recurring?.transactionRecurringId.toString(), limit: 100 },
     ],
     enabled: Boolean(recurring),
-    meta: {
-      method: QueryMethod.UseQuery,
-    },
     select: data => data.map(item => new Transaction(item)),
   });
 

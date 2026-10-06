@@ -51,7 +51,7 @@ describe('update bank account', () => {
 
     act(() => {
       world.result.current.queryClient.setQueryData(
-        ['/api/bank_accounts'],
+        ['GET', '/api/bank_accounts'],
         [
           {
             bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
@@ -86,13 +86,14 @@ describe('update bank account', () => {
     // The single bank account cache should be set directly to the updated account so anything reading it gets the new
     // values without a refetch.
     const single = world.result.current.queryClient.getQueryData<BankAccount>([
+      'GET',
       '/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx',
     ]);
     expect(single).toBeInstanceOf(BankAccount);
     expect(single?.name).toBe('Renamed Checking');
 
     // And the entry in the list cache should have been swapped out for the updated account too.
-    const list = world.result.current.queryClient.getQueryData<Array<BankAccount>>(['/api/bank_accounts']);
+    const list = world.result.current.queryClient.getQueryData<Array<BankAccount>>(['GET', '/api/bank_accounts']);
     expect(list?.[0]?.name).toBe('Renamed Checking');
   });
 
@@ -152,7 +153,7 @@ describe('update bank account', () => {
 
     act(() => {
       world.result.current.queryClient.setQueryData(
-        ['/api/bank_accounts'],
+        ['GET', '/api/bank_accounts'],
         [
           {
             bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
@@ -208,7 +209,7 @@ describe('update bank account', () => {
     // the balances change underneath it.
     act(() => {
       world.result.current.queryClient.setQueryData(
-        ['/api/bank_accounts'],
+        ['GET', '/api/bank_accounts'],
         [
           {
             bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
@@ -216,10 +217,13 @@ describe('update bank account', () => {
           },
         ],
       );
-      world.result.current.queryClient.setQueryData(['/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/balances'], {
-        available: 50000,
-        current: 50000,
-      });
+      world.result.current.queryClient.setQueryData(
+        ['GET', '/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/balances'],
+        {
+          available: 50000,
+          current: 50000,
+        },
+      );
     });
 
     await act(async () => {
@@ -234,6 +238,7 @@ describe('update bank account', () => {
     // After the update the balances query should be flagged stale so the next time something reads it the new numbers
     // get pulled down from the server.
     const state = world.result.current.queryClient.getQueryState([
+      'GET',
       '/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/balances',
     ]);
     expect(state?.isInvalidated).toBe(true);

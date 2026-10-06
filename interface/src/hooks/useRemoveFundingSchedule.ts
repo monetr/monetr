@@ -18,12 +18,12 @@ export function useRemoveFundingSchedule(): (_fundingSchedule: FundingSchedule) 
     onSuccess: ({ bankAccountId, fundingScheduleId }: FundingSchedule) =>
       Promise.all([
         queryClient.setQueryData(
-          [`/api/bank_accounts/${bankAccountId}/funding_schedules`],
+          ['GET', `/api/bank_accounts/${bankAccountId}/funding_schedules`],
           (previous: Array<Partial<FundingSchedule>>) =>
             previous.filter(item => item.fundingScheduleId !== fundingScheduleId),
         ),
         queryClient.removeQueries({
-          queryKey: [`/api/bank_accounts/${bankAccountId}/funding_schedules/${fundingScheduleId}`],
+          queryKey: ['GET', `/api/bank_accounts/${bankAccountId}/funding_schedules/${fundingScheduleId}`],
         }),
       ]),
   });

@@ -5,7 +5,7 @@ import type { WithJsonValues } from '@monetr/interface/util/json';
 
 export function useLunchFlowLink(lunchFlowLinkId?: string): UseQueryResult<LunchFlowLink, unknown> {
   return useQuery<WithJsonValues<LunchFlowLink>, unknown, LunchFlowLink>({
-    queryKey: [`/api/lunch_flow/link/${lunchFlowLinkId}`],
+    queryKey: ['GET', `/api/lunch_flow/link/${lunchFlowLinkId}`],
     enabled: Boolean(lunchFlowLinkId),
     select: data => new LunchFlowLink(data),
   });

@@ -2,12 +2,8 @@ import type React from 'react';
 import { useCallback, useMemo } from 'react';
 import { QueryClient, QueryClientProvider, type QueryFunctionContext, type QueryKey } from '@tanstack/react-query';
 
+import type { RequestConfig } from '@monetr/interface/api/client';
 import request, { type ApiError } from '@monetr/interface/util/request';
-
-export enum QueryMethod {
-  UseQuery,
-  UseBody,
-}
 
 export interface MQueryClientProps {
   children: React.ReactElement;
@@ -20,16 +16,16 @@ interface RequestParams {
 
 export default function MQueryClient(props: MQueryClientProps): React.JSX.Element {
   const queryFn = useCallback(async (context: QueryFunctionContext<QueryKey>) => {
-    let method: 'GET' | 'POST' = 'GET';
+    // Query keys are always [method, path, params?]. For POST and QUERY the params are sent as the request body,
+    // otherwise they are sent as query params.
+    const [method, url, keyParams] = context.queryKey as [RequestConfig['method'], string, RequestParams | undefined];
     let body: unknown;
     let params: RequestParams = {};
-    if (context.queryKey.length > 1 && context?.meta?.method !== QueryMethod.UseQuery) {
-      method = 'POST';
-      body = context.queryKey[1];
-    }
-
-    if (context?.meta?.method === QueryMethod.UseQuery && context.queryKey.length > 1) {
-      params = context.queryKey[1] as RequestParams;
+    if (method === 'POST' || method === 'QUERY') {
+      body = keyParams;
+    } else {
+      // Copy the params so that adding the offset below does not mutate the query key itself.
+      params = { ...keyParams };
     }
 
     if (context.pageParam) {
@@ -38,7 +34,7 @@ export default function MQueryClient(props: MQueryClientProps): React.JSX.Elemen
 
     const { data } = await request({
       method: method,
-      url: `${context.queryKey[0]}`,
+      url: url,
       params: params,
       data: body,
     }).catch((error: ApiError) => {

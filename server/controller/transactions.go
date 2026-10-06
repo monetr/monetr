@@ -57,6 +57,28 @@ func (c *Controller) getTransactions(ctx *echo.Context) error {
 		return ctx.JSON(http.StatusOK, transactions)
 	}
 
+	// Or they can be filtered down to just the ones in a single transaction
+	// cluster
+	if raw := ctx.QueryParam("transaction_cluster_id"); raw != "" {
+		transactionClusterId, err := ParseID[TransactionCluster](raw)
+		if err != nil || transactionClusterId.IsZero() {
+			return c.badRequest(ctx, "must specify a valid transaction cluster Id")
+		}
+
+		transactions, err := repo.GetTransactionsByCluster(
+			c.getContext(ctx),
+			bankAccountId,
+			transactionClusterId,
+			limit,
+			offset,
+		)
+		if err != nil {
+			return c.wrapPgError(ctx, err, "failed to retrieve transactions")
+		}
+
+		return ctx.JSON(http.StatusOK, transactions)
+	}
+
 	transactions, err := repo.GetTransactions(c.getContext(ctx), bankAccountId, limit, offset)
 	if err != nil {
 		return c.wrapPgError(ctx, err, "failed to retrieve transactions")

@@ -35,7 +35,7 @@ export default function MultifactorAuthenticationPage(): React.JSX.Element {
         totp: values.totp,
       },
     })
-      .then(() => queryClient.invalidateQueries({ queryKey: ['/api/users/me'] }))
+      .then(() => queryClient.invalidateQueries({ queryKey: ['GET', '/api/users/me'] }))
       .catch(error =>
         enqueueSnackbar(error?.response?.data?.error || 'Failed to validate TOTP code.', {
           variant: 'error',

@@ -28,22 +28,22 @@ export function usePatchUser(): (patch: PatchUserRequest) => Promise<PatchUserRe
     onMutate: async ({ userId: _, ...patch }, { client: queryClient }) => {
       // /api/users/me refetches on window focus, cancel anything in flight so an older response can't land on top of
       // the optimistic value.
-      await queryClient.cancelQueries({ queryKey: ['/api/users/me'] });
-      const previous = queryClient.getQueryData<Partial<Authentication>>(['/api/users/me']);
-      queryClient.setQueryData<Partial<Authentication>>(['/api/users/me'], current =>
+      await queryClient.cancelQueries({ queryKey: ['GET', '/api/users/me'] });
+      const previous = queryClient.getQueryData<Partial<Authentication>>(['GET', '/api/users/me']);
+      queryClient.setQueryData<Partial<Authentication>>(['GET', '/api/users/me'], current =>
         current?.user ? { ...current, user: new User({ ...current.user, ...patch }) } : current,
       );
       return { previous };
     },
     // If the server rejected the patch then put the cache back the way it was.
     onError: (_error, _input, onMutateResult, { client: queryClient }) =>
-      queryClient.setQueryData(['/api/users/me'], onMutateResult?.previous),
+      queryClient.setQueryData(['GET', '/api/users/me'], onMutateResult?.previous),
     onSuccess: (result: PatchUserResponse, _input, _, { client: queryClient }) =>
-      queryClient.setQueryData([`/api/users/${result.userId}`], result),
+      queryClient.setQueryData(['GET', `/api/users/${result.userId}`], result),
     // Refetch either way so the cache ends up matching the server. On success nothing visibly changes since the server
     // already has what we optimistically wrote.
     onSettled: (_data, _error, _input, _, { client: queryClient }) =>
-      queryClient.invalidateQueries({ queryKey: ['/api/users/me'] }),
+      queryClient.invalidateQueries({ queryKey: ['GET', '/api/users/me'] }),
   });
 
   return mutateAsync;

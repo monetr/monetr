@@ -22,7 +22,7 @@ export function useTriggerManualPlaidSync(): (_linkId: string) => Promise<void> 
           }),
       )
       // Will make things like the "last attempted update" timestamp thing update.
-      .then(() => void setTimeout(() => queryClient.invalidateQueries({ queryKey: ['/api/links'] }), 2000))
+      .then(() => void setTimeout(() => queryClient.invalidateQueries({ queryKey: ['GET', '/api/links'] }), 2000))
       .catch(
         error =>
           void enqueueSnackbar(`Failed to trigger a manual sync: ${error?.response?.data?.error || 'unknown error'}.`, {

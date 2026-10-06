@@ -7,7 +7,7 @@ import type { WithJsonValues } from '@monetr/interface/util/json';
 export function useTransaction(transactionId?: string): UseQueryResult<Transaction, unknown> {
   const selectedBankAccountId = useSelectedBankAccountId();
   return useQuery<WithJsonValues<Transaction>, unknown, Transaction>({
-    queryKey: [`/api/bank_accounts/${selectedBankAccountId}/transactions/${transactionId}`],
+    queryKey: ['GET', `/api/bank_accounts/${selectedBankAccountId}/transactions/${transactionId}`],
     enabled: Boolean(selectedBankAccountId) && Boolean(transactionId),
     select: data => new Transaction(data),
   });

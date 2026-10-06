@@ -14,11 +14,12 @@ export function useSpending(spendingId: ID<Spending> | null): UseQueryResult<Spe
   const selectedBankAccountId = useSelectedBankAccountId();
   const queryClient = useQueryClient();
   const existingData = queryClient.getQueryData<Array<Spending>>([
+    'GET',
     `/api/bank_accounts/${selectedBankAccountId}/spending`,
   ]);
 
   return useQuery<WithJsonValues<Spending>, unknown, Spending>({
-    queryKey: [`/api/bank_accounts/${selectedBankAccountId}/spending/${spendingId}`],
+    queryKey: ['GET', `/api/bank_accounts/${selectedBankAccountId}/spending/${spendingId}`],
     enabled: Boolean(selectedBankAccountId) && Boolean(spendingId),
     initialData: () =>
       Array.isArray(existingData)
@@ -27,7 +28,7 @@ export function useSpending(spendingId: ID<Spending> | null): UseQueryResult<Spe
         : // Otherwise fall back to undefined.
           undefined,
     initialDataUpdatedAt: () =>
-      queryClient.getQueryState([`/api/bank_accounts/${selectedBankAccountId}/spending`])?.dataUpdatedAt,
+      queryClient.getQueryState(['GET', `/api/bank_accounts/${selectedBankAccountId}/spending`])?.dataUpdatedAt,
     select: data => new Spending(data),
   });
 }

@@ -187,7 +187,7 @@ Each spending event:
 | 400    | `end` isn't valid RFC 3339, is in the past, or is more than 12 months out. |
 | 408    | The forecast took longer than 15 seconds.                                  |
 
-## <Badge type="tip">POST</Badge> Estimate the cost of a new spending object
+## <Badge type="info">QUERY</Badge> Estimate the cost of a new spending object
 
 Answers "if I added this expense, what would it cost me per paycheck?" without creating anything. Use it to show someone
 the damage before they commit.
@@ -195,8 +195,14 @@ the damage before they commit.
 **In the app:** Nothing in the app uses this today. The new expense and goal forms work out their estimate another way.
 
 ```http
+QUERY /api/bank_accounts/:bankAccountId/forecast/spending
 POST /api/bank_accounts/:bankAccountId/forecast/spending
 ```
+
+:::warning
+The `POST` version of this endpoint is deprecated and will be removed in a future release. Send the same body with
+`QUERY` instead.
+:::
 
 **Auth:** API key, subscription required.
 
@@ -225,7 +231,7 @@ This endpoint doesn't run the shared validation, so mistakes come back as plain 
 ### Example
 
 ```bash
-curl --request POST \
+curl --request QUERY \
   --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/forecast/spending" \
   --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
   --header "Content-Type: application/json" \
@@ -253,6 +259,15 @@ Despite what the underlying function is called, this is the **most common** per-
 years, not the mean. Contributions vary from period to period, and the mode is the number you would actually quote
 someone, where an average would land between two amounts that never occur.
 
+:::details History
+
+**[v1.18.0](https://github.com/monetr/monetr/releases/tag/v1.18.0)**
+
+- Switched to the `QUERY` method, since this only reads data and never changes anything.
+- Deprecated the `POST` version. It still works the same for now, but will be removed in a future release.
+
+:::
+
 ### Errors
 
 | Status | When                                                                                                                                                                   |
@@ -260,7 +275,7 @@ someone, where an average would land between two amounts that never occur.
 | 400    | `targetAmount` is zero or negative, `currentAmount` is negative, `fundingScheduleId` is missing, or the recurrence rule is missing on an expense or present on a goal. |
 | 408    | The forecast took longer than 25 seconds.                                                                                                                              |
 
-## <Badge type="tip">POST</Badge> Estimate the next contribution
+## <Badge type="info">QUERY</Badge> Estimate the next contribution
 
 Answers "how much of my next paycheck is already spoken for?" It adds up what every spending object on one funding
 schedule will take at its next funding event.
@@ -268,8 +283,14 @@ schedule will take at its next funding event.
 **In the app:** The committed amount shown next to each funding schedule in the funding list.
 
 ```http
+QUERY /api/bank_accounts/:bankAccountId/forecast/next_funding
 POST /api/bank_accounts/:bankAccountId/forecast/next_funding
 ```
+
+:::warning
+The `POST` version of this endpoint is deprecated and will be removed in a future release. Send the same body with
+`QUERY` instead.
+:::
 
 **Auth:** API key, subscription required.
 
@@ -288,7 +309,7 @@ POST /api/bank_accounts/:bankAccountId/forecast/next_funding
 ### Example
 
 ```bash
-curl --request POST \
+curl --request QUERY \
   --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/forecast/next_funding" \
   --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
   --header "Content-Type: application/json" \
@@ -305,6 +326,15 @@ curl --request POST \
 
 Compare that against the schedule's `estimatedDeposit` from [Get a funding
 schedule](./funding_schedules#get-a-funding-schedule) to work out what's left over.
+
+:::details History
+
+**[v1.18.0](https://github.com/monetr/monetr/releases/tag/v1.18.0)**
+
+- Switched to the `QUERY` method, since this only reads data and never changes anything.
+- Deprecated the `POST` version. It still works the same for now, but will be removed in a future release.
+
+:::
 
 ### Errors
 

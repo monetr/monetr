@@ -24,23 +24,23 @@ export function useUpdateSpending(): (_spending: PatchSpendingRequest) => Promis
     onSuccess: (updatedSpending: Spending, _variables, _onMutateResult, { client: queryClient }) =>
       Promise.all([
         queryClient.setQueryData(
-          [`/api/bank_accounts/${updatedSpending.bankAccountId}/spending`],
+          ['GET', `/api/bank_accounts/${updatedSpending.bankAccountId}/spending`],
           (previous: Array<Partial<Spending>>) =>
             (previous ?? []).map(item => (item.spendingId === updatedSpending.spendingId ? updatedSpending : item)),
         ),
         queryClient.setQueryData(
-          [`/api/bank_accounts/${updatedSpending.bankAccountId}/spending/${updatedSpending.spendingId}`],
+          ['GET', `/api/bank_accounts/${updatedSpending.bankAccountId}/spending/${updatedSpending.spendingId}`],
           updatedSpending,
         ),
         // TODO Under what circumstances do we need to invalidate balances for a spending update?
         queryClient.invalidateQueries({
-          queryKey: [`/api/bank_accounts/${updatedSpending.bankAccountId}/balances`],
+          queryKey: ['GET', `/api/bank_accounts/${updatedSpending.bankAccountId}/balances`],
         }),
         queryClient.invalidateQueries({
-          queryKey: [`/api/bank_accounts/${updatedSpending.bankAccountId}/forecast`],
+          queryKey: ['GET', `/api/bank_accounts/${updatedSpending.bankAccountId}/forecast`],
         }),
         queryClient.invalidateQueries({
-          queryKey: [`/api/bank_accounts/${updatedSpending.bankAccountId}/forecast/next_funding`],
+          queryKey: ['QUERY', `/api/bank_accounts/${updatedSpending.bankAccountId}/forecast/next_funding`],
         }),
       ]),
   });

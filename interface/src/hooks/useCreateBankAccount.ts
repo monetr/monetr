@@ -31,10 +31,10 @@ export function useCreateBankAccount(): (_bankAccount: CreateBankAccountRequest)
     mutationFn: createBankAccount,
     onSuccess: (newBankAccount: BankAccount) =>
       Promise.all([
-        queryClient.setQueryData(['/api/bank_accounts'], (previous: Array<Partial<BankAccount>>) =>
+        queryClient.setQueryData(['GET', '/api/bank_accounts'], (previous: Array<Partial<BankAccount>>) =>
           (previous ?? []).concat(newBankAccount),
         ),
-        queryClient.setQueryData([`/api/bank_accounts/${newBankAccount.bankAccountId}`], newBankAccount),
+        queryClient.setQueryData(['GET', `/api/bank_accounts/${newBankAccount.bankAccountId}`], newBankAccount),
       ]),
   });
 
