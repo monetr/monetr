@@ -75,6 +75,34 @@ func (r *repositoryBase) GetTransactionRecurringByCluster(
 	return result, nil
 }
 
+func (r *repositoryBase) GetTransactionRecurringByBankAccount(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+) ([]TransactionRecurring, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	span.Data = map[string]any{
+		"accountId":     r.AccountId(),
+		"bankAccountId": bankAccountId,
+	}
+
+	result := make([]TransactionRecurring, 0)
+	if err := r.txn.NewSelect().
+		Model(&result).
+		Where(`"transaction_recurring"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction_recurring"."bank_account_id" = ?`, bankAccountId).
+		Scan(span.Context()); err != nil {
+		return nil, crumbs.WrapError(
+			span.Context(),
+			err,
+			"failed to retrieve recurring transactions for bank account",
+		)
+	}
+
+	return result, nil
+}
+
 func (r *repositoryBase) UpsertTransactionRecurring(
 	ctx context.Context,
 	bankAccountId ID[BankAccount],

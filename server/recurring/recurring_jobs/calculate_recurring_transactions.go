@@ -78,6 +78,20 @@ func CalculateRecurringTransactions(
 			"clusters", len(clusterIds),
 		)
 
+		// This is enqueued inside the transaction so the job only runs once the
+		// recurring transactions are committed.
+		if err := queue.Enqueue(
+			ctx,
+			ctx.Enqueuer(),
+			MatchRecurringTransactionsToSpending,
+			MatchRecurringTransactionsToSpendingArguments{
+				AccountId:     args.AccountId,
+				BankAccountId: args.BankAccountId,
+			},
+		); err != nil {
+			return errors.Wrap(err, "failed to enqueue matching recurring transactions to spending")
+		}
+
 		return nil
 	})
 }

@@ -197,6 +197,12 @@ type BaseRepository interface {
 		bankAccountId ID[BankAccount],
 		transactionClusterId ID[TransactionCluster],
 	) ([]TransactionRecurring, error)
+	// GetTransactionRecurringByBankAccount returns every recurring transaction
+	// in the specified bank account.
+	GetTransactionRecurringByBankAccount(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+	) ([]TransactionRecurring, error)
 	// UpsertTransactionRecurring will insert or update the provided recurring
 	// transactions by their cluster and direction. An existing recurring
 	// transaction for the same cluster and direction is updated in place and

@@ -58,6 +58,7 @@ func RegisterJobs(
 		queue.Register(ctx, processor, plaid_jobs.SyncPlaid),
 		queue.Register(ctx, processor, plaid_jobs.SyncPlaidAccounts),
 		queue.Register(ctx, processor, recurring_jobs.CalculateRecurringTransactions),
+		queue.Register(ctx, processor, recurring_jobs.MatchRecurringTransactionsToSpending),
 		queue.Register(ctx, processor, similar_jobs.CalculateTransactionClusters),
 		queue.Register(ctx, processor, spending_jobs.ProcessSpending),
 		queue.Register(ctx, processor, storage_jobs.RemoveFile),

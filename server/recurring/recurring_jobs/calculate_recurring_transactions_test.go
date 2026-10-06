@@ -112,10 +112,25 @@ func runCalculateRecurringTransactions(
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	enqueuer := mockgen.NewMockProcessor(ctrl)
+	enqueuer.EXPECT().
+		EnqueueAt(
+			gomock.Any(),
+			mockqueue.EqQueue(recurring_jobs.MatchRecurringTransactionsToSpending),
+			gomock.Any(),
+			gomock.Eq(recurring_jobs.MatchRecurringTransactionsToSpendingArguments{
+				AccountId:     bankAccount.AccountId,
+				BankAccountId: bankAccount.BankAccountId,
+			}),
+		).
+		Return(nil).
+		Times(1)
+
 	context := mockgen.NewMockContext(ctrl)
 	context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
 	context.EXPECT().Clock().Return(clock).AnyTimes()
 	context.EXPECT().DB().Return(testutils.GetPgDatabase(t)).AnyTimes()
+	context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
 	context.EXPECT().Log().Return(testutils.GetLog(t)).AnyTimes()
 
 	return recurring_jobs.CalculateRecurringTransactions(
