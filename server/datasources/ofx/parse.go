@@ -2,6 +2,7 @@ package ofx
 
 import (
 	"bytes"
+	"context"
 	"encoding/xml"
 	"io"
 	"regexp"
@@ -15,6 +16,11 @@ import (
 	"golang.org/x/text/encoding/ianaindex"
 )
 
+// parseTimeout is the most time we'll spend parsing a single OFX file. A real
+// file should parse in like a few milliseconds, so if we hit this then
+// something is very wrong with the file.
+const parseTimeout = 1 * time.Minute
+
 var (
 	ofxDateRegex   = regexp.MustCompile(`^(?<timestamp>(?:\d{14}|\d{8})(?:\.\d{3})?)`)
 	ofxDateFormats = []string{
@@ -24,20 +30,25 @@ var (
 	}
 )
 
-func ParseFile(reader io.Reader) (*gofx.OFX, error) {
+func ParseFile(ctx context.Context, reader io.Reader) (*gofx.OFX, error) {
 	xmlBytes, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to read all of the OFX data from the reader")
 	}
 
-	ofx, err := parseInner(bytes.NewReader(xmlBytes))
+	// Go can't just kill the parse when this times out, so the tokenizer and the
+	// XML reader below both check the context as they go.
+	ctx, cancel := context.WithTimeout(ctx, parseTimeout)
+	defer cancel()
+
+	ofx, err := parseInner(ctx, bytes.NewReader(xmlBytes))
 	if err != nil {
-		tokens, err := Tokenize(xmlBytes)
+		tokens, err := Tokenize(ctx, xmlBytes)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to parse")
 		}
 		xmlBytes = ConvertOFXToXML(tokens)
-		ofx, err = parseInner(bytes.NewReader(xmlBytes))
+		ofx, err = parseInner(ctx, bytes.NewReader(xmlBytes))
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to parse OFX")
 		}
@@ -46,9 +57,26 @@ func ParseFile(reader io.Reader) (*gofx.OFX, error) {
 	return ofx, nil
 }
 
-func parseInner(reader io.Reader) (*gofx.OFX, error) {
+// contextReader stops returning data once the context is done, this way the XML
+// decoder will stop pretty much right away if we time out.
+type contextReader struct {
+	ctx    context.Context
+	reader io.Reader
+}
+
+func (c contextReader) Read(p []byte) (int, error) {
+	if err := c.ctx.Err(); err != nil {
+		return 0, err
+	}
+	return c.reader.Read(p)
+}
+
+func parseInner(ctx context.Context, reader io.Reader) (*gofx.OFX, error) {
 	var ofx gofx.OFX
-	decoder := xml.NewDecoder(reader)
+	decoder := xml.NewDecoder(contextReader{
+		ctx:    ctx,
+		reader: reader,
+	})
 	decoder.CharsetReader = func(charset string, input io.Reader) (io.Reader, error) {
 		enc, err := ianaindex.IANA.Encoding(charset)
 		if err != nil {

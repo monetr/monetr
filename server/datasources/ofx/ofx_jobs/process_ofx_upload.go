@@ -156,7 +156,7 @@ func (j *processOfxUpload) loadFile(
 	}
 	defer fileReader.Close()
 
-	ofxData, err := ofx.ParseFile(fileReader)
+	ofxData, err := ofx.ParseFile(span.Context(), fileReader)
 	if err != nil {
 		return queue.FailWithoutRetry(ctx, err)
 	}

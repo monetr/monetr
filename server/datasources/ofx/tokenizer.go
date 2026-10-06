@@ -2,9 +2,9 @@ package ofx
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"regexp"
-	"strings"
 
 	"github.com/pkg/errors"
 )
@@ -15,6 +15,10 @@ var (
 
 type ItemType uint8
 
+// maxDepth is how deep arrays can be nested in an OFX file before we give up.
+// Real files are only like 10 levels deep so this is plenty of room.
+const maxDepth = 64
+
 const (
 	ArrayStartItemType ItemType = 0
 	ArrayEndItemType   ItemType = 1
@@ -23,7 +27,7 @@ const (
 
 type Token interface {
 	Token() []byte
-	XML() string
+	writeXML(buf *bytes.Buffer)
 }
 
 type Field struct {
@@ -35,8 +39,8 @@ func (f Field) Token() []byte {
 	return f.Name
 }
 
-func (f Field) XML() string {
-	return fmt.Sprintf("<%s>%s</%s>", f.Name, string(bytes.TrimSpace(f.Value)), f.Name)
+func (f Field) writeXML(buf *bytes.Buffer) {
+	fmt.Fprintf(buf, "<%s>%s</%s>", f.Name, string(bytes.TrimSpace(f.Value)), f.Name)
 }
 
 type Array struct {
@@ -48,33 +52,100 @@ func (a Array) Token() []byte {
 	return a.Name
 }
 
-func (a Array) XML() string {
-	pieces := make([]string, len(a.Items))
+// writeXML is still recursive, but this is fine because Tokenize won't let the
+// arrays get nested deeper than maxDepth. Everything gets written to the same
+// buffer so we arent copying the children over and over again at every level.
+func (a Array) writeXML(buf *bytes.Buffer) {
+	fmt.Fprintf(buf, "<%s>", a.Name)
 	for i := range a.Items {
-		pieces[i] = a.Items[i].XML()
+		a.Items[i].writeXML(buf)
 	}
-	return fmt.Sprintf("<%s>%s</%s>", a.Name, strings.Join(pieces, ""), a.Name)
+	fmt.Fprintf(buf, "</%s>", a.Name)
 }
 
-func Tokenize(ofxData []byte) (Token, error) {
-	items := dataRegex.FindAllSubmatch(ofxData, -1)
-	if len(items) == 0 {
+// Tokenize walks the OFX data one tag at a time and builds the tree of arrays
+// and fields. This used to be recursive, but a file that was just <A> over and
+// over again would recurse once per tag and take forever (or blow the stack).
+// So now we keep our own stack of the open arrays and bail if it gets too deep.
+func Tokenize(ctx context.Context, ofxData []byte) (Token, error) {
+	var root Token
+	stack := make([]*Array, 0, 16)
+	for index, offset := 0, 0; ; index++ {
+		// Once the root is closed we are done, anything after it gets ignored.
+		if root != nil && len(stack) == 0 {
+			break
+		}
+
+		// Don't check the context on every single tag, its not free.
+		if index%1024 == 0 {
+			if err := ctx.Err(); err != nil {
+				return nil, errors.Wrap(err, "failed to tokenize OFX data")
+			}
+		}
+
+		match := dataRegex.FindSubmatchIndex(ofxData[offset:])
+		if match == nil {
+			break
+		}
+		item := getItem(ofxData[offset:], match)
+		offset += match[1]
+
+		switch getItemType(item) {
+		case ArrayStartItemType:
+			if len(stack) >= maxDepth {
+				return nil, errors.Errorf("OFX data is nested too deep, more than %d levels at index [%d]", maxDepth, index)
+			}
+			array := &Array{
+				Name:  cleanName(item[1]),
+				Items: make([]Token, 0),
+			}
+			if len(stack) == 0 {
+				root = array
+			} else {
+				parent := stack[len(stack)-1]
+				parent.Items = append(parent.Items, array)
+			}
+			stack = append(stack, array)
+		case FieldItemType:
+			field := &Field{
+				Name:  cleanName(item[1]),
+				Value: item[2],
+			}
+			if len(stack) == 0 {
+				root = field
+			} else {
+				parent := stack[len(stack)-1]
+				parent.Items = append(parent.Items, field)
+			}
+		case ArrayEndItemType:
+			// Closing tag with nothing open, the file starts with a closing tag.
+			if len(stack) == 0 {
+				return nil, errors.Errorf("syntax error at index [%d]", index)
+			}
+			stack = stack[:len(stack)-1]
+		}
+	}
+
+	if root == nil {
 		return nil, errors.New("OFX file provided is not valid")
 	}
-	_, token := tokenizeItem(0, items)
-	return token, nil
+
+	// If there are still arrays open at the end of the file thats fine, we just
+	// treat them as closed.
+	return root, nil
 }
 
-func tokenizeItem(index int, items [][][]byte) (i int, result Token) {
-	item := items[index]
-	switch getItemType(item) {
-	case ArrayStartItemType:
-		return tokenizeArray(index, items)
-	case FieldItemType:
-		return tokenizeField(index, items)
-	default:
-		panic(fmt.Sprintf("syntax error at index [%d]", index))
+// getItem takes the indexes from FindSubmatchIndex and turns them into the same
+// shape that FindAllSubmatch would have given us. The value group is optional
+// so it might be -1 if it didnt match anything.
+func getItem(data []byte, match []int) [][]byte {
+	item := make([][]byte, 3)
+	item[0] = data[match[0]:match[1]]
+	item[1] = data[match[2]:match[3]]
+	if match[4] >= 0 {
+		item[2] = data[match[4]:match[5]]
 	}
+	return item
 }
 
 func getItemType(item [][]byte) ItemType {
@@ -89,38 +160,6 @@ func getItemType(item [][]byte) ItemType {
 	}
 
 	return FieldItemType
-}
-
-func tokenizeArray(index int, items [][][]byte) (i int, result Token) {
-	var token *Array
-	for i = index; i < len(items); i++ {
-		item := items[i]
-		name := item[1]
-		if token == nil {
-			token = &Array{
-				Name:  cleanName(name),
-				Items: make([]Token, 0),
-			}
-			continue
-		}
-
-		switch getItemType(item) {
-		case ArrayEndItemType:
-			return i, token
-		default:
-			var tmp Token
-			i, tmp = tokenizeItem(i, items)
-			token.Items = append(token.Items, tmp)
-		}
-	}
-	return i, token
-}
-
-func tokenizeField(index int, items [][][]byte) (i int, result Token) {
-	return index, &Field{
-		Name:  cleanName(items[index][1]),
-		Value: items[index][2],
-	}
 }
 
 func cleanName(name []byte) []byte {
