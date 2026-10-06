@@ -24,26 +24,25 @@ Both are the same object with the same fields, so `spendingType` is the thing to
 
 ## The spending object
 
-| Attribute                | Type                    | Description                                                                                                                                                |
-| ------------------------ | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `spendingId`             | string (ulid)           | Identifies the spending object.                                                                                                                            |
-| `bankAccountId`          | string (ulid)           | The bank account this belongs to.                                                                                                                          |
-| `fundingScheduleId`      | string (ulid)           | The funding schedule that fills this.                                                                                                                      |
-| `transactionRecurringId` | string (ulid), nullable | The [recurring transaction](./recurring_transactions#the-recurring-transaction-object) this expense tracks, if it was made from one. Always null on goals. |
-| `spendingType`           | string                  | `expense` or `goal`. Set at creation and never changes.                                                                                                    |
-| `name`                   | string                  | What you call it. Has to be unique per bank account, per type.                                                                                             |
-| `targetAmount`           | integer                 | How much needs to be in the envelope by the due date. Has to be greater than zero.                                                                         |
-| `currentAmount`          | integer                 | How much is in the envelope right now, in the currency's smallest unit.                                                                                    |
-| `usedAmount`             | integer                 | How much has been spent out of it. Only meaningful for goals, where it's how you tell a finished goal from an empty one.                                   |
-| `ruleset`                | string, nullable        | The recurrence rule, as an RFC 5545 string like `DTSTART:20240801T050000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1`. Always null on goals.                         |
-| `lastSpentFrom`          | timestamp, nullable     | Intended to record when a transaction last took money out of this. Nothing in monetr writes it today, so it is always null. Don't build on it.             |
-| `lastRecurrence`         | timestamp, nullable     | The previous due date. Null until it's come due at least once.                                                                                             |
-| `nextRecurrence`         | timestamp               | The next due date, as midnight in your account's timezone.                                                                                                 |
-| `nextContributionAmount` | integer                 | How much the next funding event will put in. monetr recalculates this whenever something relevant changes.                                                 |
-| `isBehind`               | boolean                 | Whether monetr thinks it can't get to `targetAmount` in time given the funding schedule. This is the flag behind the warning in the app.                   |
-| `isPaused`               | boolean                 | Whether contributions are stopped. A paused object keeps whatever's in it but stops receiving more.                                                        |
-| `autoCreateTransaction`  | boolean                 | Whether monetr should write a transaction by itself when this comes due. Expenses on manual links only.                                                    |
-| `createdAt`              | timestamp               | When it was created.                                                                                                                                       |
+| Attribute                | Type                | Description                                                                                                                                    |
+| ------------------------ | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `spendingId`             | string (ulid)       | Identifies the spending object.                                                                                                                |
+| `bankAccountId`          | string (ulid)       | The bank account this belongs to.                                                                                                              |
+| `fundingScheduleId`      | string (ulid)       | The funding schedule that fills this.                                                                                                          |
+| `spendingType`           | string              | `expense` or `goal`. Set at creation and never changes.                                                                                        |
+| `name`                   | string              | What you call it. Has to be unique per bank account, per type.                                                                                 |
+| `targetAmount`           | integer             | How much needs to be in the envelope by the due date. Has to be greater than zero.                                                             |
+| `currentAmount`          | integer             | How much is in the envelope right now, in the currency's smallest unit.                                                                        |
+| `usedAmount`             | integer             | How much has been spent out of it. Only meaningful for goals, where it's how you tell a finished goal from an empty one.                       |
+| `ruleset`                | string, nullable    | The recurrence rule, as an RFC 5545 string like `DTSTART:20240801T050000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1`. Always null on goals.             |
+| `lastSpentFrom`          | timestamp, nullable | Intended to record when a transaction last took money out of this. Nothing in monetr writes it today, so it is always null. Don't build on it. |
+| `lastRecurrence`         | timestamp, nullable | The previous due date. Null until it's come due at least once.                                                                                 |
+| `nextRecurrence`         | timestamp           | The next due date, as midnight in your account's timezone.                                                                                     |
+| `nextContributionAmount` | integer             | How much the next funding event will put in. monetr recalculates this whenever something relevant changes.                                     |
+| `isBehind`               | boolean             | Whether monetr thinks it can't get to `targetAmount` in time given the funding schedule. This is the flag behind the warning in the app.       |
+| `isPaused`               | boolean             | Whether contributions are stopped. A paused object keeps whatever's in it but stops receiving more.                                            |
+| `autoCreateTransaction`  | boolean             | Whether monetr should write a transaction by itself when this comes due. Expenses on manual links only.                                        |
+| `createdAt`              | timestamp           | When it was created.                                                                                                                           |
 
 ## <Badge type="info">GET</Badge> List spending objects
 
@@ -78,7 +77,6 @@ curl --request GET \
     "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
     "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
     "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
-    "transactionRecurringId": null,
     "spendingType": "expense",
     "name": "Coffee",
     "targetAmount": 8000,
@@ -98,7 +96,6 @@ curl --request GET \
     "spendingId": "spnd_01j3d7k2vwqrx8m5t9pnbeh4cz",
     "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
     "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
-    "transactionRecurringId": null,
     "spendingType": "goal",
     "name": "New Laptop",
     "targetAmount": 250000,
@@ -151,7 +148,6 @@ curl --request GET \
   "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
   "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
   "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
-  "transactionRecurringId": null,
   "spendingType": "expense",
   "name": "Coffee",
   "targetAmount": 8000,
@@ -282,11 +278,10 @@ Shared by both types:
 
 Expenses also take:
 
-| Attribute                | Type          | Required | Description                                                                                                                                                                                                                                        |
-| ------------------------ | ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ruleset`                | string        | Yes      | The recurrence rule as an RFC 5545 string. Required on expenses, rejected on goals. See the [cookbook](./recurrence_rules#cookbook).                                                                                                               |
-| `autoCreateTransaction`  | boolean       | No       | Have monetr write the transaction itself when this comes due. Manual links only.                                                                                                                                                                   |
-| `transactionRecurringId` | string (ulid) | No       | The [recurring transaction](./recurring_transactions#the-recurring-transaction-object) this expense is for. Has to be on the same bank account and has to be money going out, not coming in. Each recurring transaction can only back one expense. |
+| Attribute               | Type    | Required | Description                                                                                                                          |
+| ----------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `ruleset`               | string  | Yes      | The recurrence rule as an RFC 5545 string. Required on expenses, rejected on goals. See the [cookbook](./recurrence_rules#cookbook). |
+| `autoCreateTransaction` | boolean | No       | Have monetr write the transaction itself when this comes due. Manual links only.                                                     |
 
 `nextRecurrence` has two rules that catch people.
 
@@ -320,7 +315,6 @@ curl --request POST \
   "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
   "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
   "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
-  "transactionRecurringId": null,
   "spendingType": "expense",
   "name": "Coffee",
   "targetAmount": 8000,
@@ -343,10 +337,9 @@ divided the shortfall across them.
 
 ### Errors
 
-| Status | When                                                                                                                                                                                                                                                                                                                                                              |
-| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 400    | `nextRecurrence` is in the past or isn't midnight in your timezone, you sent a `ruleset` on a goal or left it off an expense, `targetAmount` is zero or negative, the funding schedule doesn't exist, you asked for `autoCreateTransaction` on a goal or a non-manual link, or `transactionRecurringId` points at a recurring transaction that's money coming in. |
-| 404    | `transactionRecurringId` doesn't exist on that bank account.                                                                                                                                                                                                                                                                                                      |
+| Status | When                                                                                                                                                                                                                                                                           |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 400    | `nextRecurrence` is in the past or isn't midnight in your timezone, you sent a `ruleset` on a goal or left it off an expense, `targetAmount` is zero or negative, the funding schedule doesn't exist, or you asked for `autoCreateTransaction` on a goal or a non-manual link. |
 
 ## <Badge type="warning">PATCH</Badge> Update a spending object
 
@@ -413,7 +406,6 @@ curl --request PATCH \
   "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
   "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
   "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
-  "transactionRecurringId": null,
   "spendingType": "expense",
   "name": "Coffee",
   "targetAmount": 12000,
@@ -501,7 +493,6 @@ curl --request POST \
       "spendingId": "spnd_01j3d7k2vwqrx8m5t9pnbeh4cz",
       "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
       "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
-      "transactionRecurringId": null,
       "spendingType": "goal",
       "name": "New Laptop",
       "targetAmount": 250000,
@@ -521,7 +512,6 @@ curl --request POST \
       "spendingId": "spnd_01fpwx67z8djhb8bqcy17mrzfe",
       "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
       "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
-      "transactionRecurringId": null,
       "spendingType": "expense",
       "name": "Coffee",
       "targetAmount": 12000,

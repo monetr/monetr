@@ -21,29 +21,27 @@ const (
 type Spending struct {
 	bun.BaseModel `bun:"table:spending,alias:spending"`
 
-	SpendingId             ID[Spending]              `json:"spendingId" bun:"spending_id,notnull,pk"`
-	AccountId              ID[Account]               `json:"-" bun:"account_id,notnull,pk"`
-	Account                *Account                  `json:"-" bun:"rel:belongs-to,join:account_id=account_id"`
-	BankAccountId          ID[BankAccount]           `json:"bankAccountId" bun:"bank_account_id,notnull,pk,unique:per_bank"`
-	BankAccount            *BankAccount              `json:"bankAccount,omitempty" bun:"rel:belongs-to,join:bank_account_id=bank_account_id,join:account_id=account_id"`
-	FundingScheduleId      ID[FundingSchedule]       `json:"fundingScheduleId" bun:"funding_schedule_id,notnull,nullzero"`
-	FundingSchedule        *FundingSchedule          `json:"-" bun:"rel:belongs-to,join:funding_schedule_id=funding_schedule_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
-	TransactionRecurringId *ID[TransactionRecurring] `json:"transactionRecurringId" bun:"transaction_recurring_id"`
-	TransactionRecurring   *TransactionRecurring     `json:"-" bun:"rel:belongs-to,join:transaction_recurring_id=transaction_recurring_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
-	SpendingType           SpendingType              `json:"spendingType" bun:"spending_type,notnull,unique:per_bank"`
-	Name                   string                    `json:"name" bun:"name,notnull,unique:per_bank,nullzero"`
-	TargetAmount           int64                     `json:"targetAmount" bun:"target_amount,notnull"`
-	CurrentAmount          int64                     `json:"currentAmount" bun:"current_amount,notnull"`
-	UsedAmount             int64                     `json:"usedAmount" bun:"used_amount,notnull"`
-	RuleSet                *RuleSet                  `json:"ruleset" bun:"ruleset,notnull,type:text"`
-	LastSpentFrom          *time.Time                `json:"lastSpentFrom" bun:"last_spent_from"`
-	LastRecurrence         *time.Time                `json:"lastRecurrence" bun:"last_recurrence"`
-	NextRecurrence         time.Time                 `json:"nextRecurrence" bun:"next_recurrence,notnull,nullzero"`
-	NextContributionAmount int64                     `json:"nextContributionAmount" bun:"next_contribution_amount,notnull"`
-	IsBehind               bool                      `json:"isBehind" bun:"is_behind,notnull"`
-	IsPaused               bool                      `json:"isPaused" bun:"is_paused,notnull"`
-	AutoCreateTransaction  bool                      `json:"autoCreateTransaction" bun:"auto_create_transaction,notnull"`
-	CreatedAt              time.Time                 `json:"createdAt" bun:"created_at,notnull,nullzero"`
+	SpendingId             ID[Spending]        `json:"spendingId" bun:"spending_id,notnull,pk"`
+	AccountId              ID[Account]         `json:"-" bun:"account_id,notnull,pk"`
+	Account                *Account            `json:"-" bun:"rel:belongs-to,join:account_id=account_id"`
+	BankAccountId          ID[BankAccount]     `json:"bankAccountId" bun:"bank_account_id,notnull,pk,unique:per_bank"`
+	BankAccount            *BankAccount        `json:"bankAccount,omitempty" bun:"rel:belongs-to,join:bank_account_id=bank_account_id,join:account_id=account_id"`
+	FundingScheduleId      ID[FundingSchedule] `json:"fundingScheduleId" bun:"funding_schedule_id,notnull,nullzero"`
+	FundingSchedule        *FundingSchedule    `json:"-" bun:"rel:belongs-to,join:funding_schedule_id=funding_schedule_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
+	SpendingType           SpendingType        `json:"spendingType" bun:"spending_type,notnull,unique:per_bank"`
+	Name                   string              `json:"name" bun:"name,notnull,unique:per_bank,nullzero"`
+	TargetAmount           int64               `json:"targetAmount" bun:"target_amount,notnull"`
+	CurrentAmount          int64               `json:"currentAmount" bun:"current_amount,notnull"`
+	UsedAmount             int64               `json:"usedAmount" bun:"used_amount,notnull"`
+	RuleSet                *RuleSet            `json:"ruleset" bun:"ruleset,notnull,type:text"`
+	LastSpentFrom          *time.Time          `json:"lastSpentFrom" bun:"last_spent_from"`
+	LastRecurrence         *time.Time          `json:"lastRecurrence" bun:"last_recurrence"`
+	NextRecurrence         time.Time           `json:"nextRecurrence" bun:"next_recurrence,notnull,nullzero"`
+	NextContributionAmount int64               `json:"nextContributionAmount" bun:"next_contribution_amount,notnull"`
+	IsBehind               bool                `json:"isBehind" bun:"is_behind,notnull"`
+	IsPaused               bool                `json:"isPaused" bun:"is_paused,notnull"`
+	AutoCreateTransaction  bool                `json:"autoCreateTransaction" bun:"auto_create_transaction,notnull"`
+	CreatedAt              time.Time           `json:"createdAt" bun:"created_at,notnull,nullzero"`
 }
 
 func (Spending) IdentityPrefix() string {

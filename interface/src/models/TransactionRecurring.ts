@@ -24,6 +24,10 @@ export default class TransactionRecurring {
   readonly transactionRecurringId: ID<TransactionRecurring>;
   readonly bankAccountId: ID<BankAccount>;
   readonly transactionClusterId: ID<TransactionCluster>;
+  // spendingId is the expense tracking this recurring transaction, only ever set on debits
+  spendingId: ID<Spending> | null;
+  // fundingScheduleId is the funding schedule tracking this recurring transaction, only ever set on credits
+  fundingScheduleId: ID<FundingSchedule> | null;
   readonly window: TransactionRecurringWindow;
   readonly ruleset: string;
   readonly first: Date;
@@ -34,9 +38,9 @@ export default class TransactionRecurring {
   readonly direction: 'debit' | 'credit';
   readonly amounts: { [key: number]: number };
   readonly lastAmount: number;
-  // spending is the expense created from this recurring transaction, if there is one
+  // spending is the expense tracking this recurring transaction, if there is one
   readonly spending: Spending | null;
-  // fundingSchedule is the funding schedule created from this recurring transaction, if there is one
+  // fundingSchedule is the funding schedule tracking this recurring transaction, if there is one
   readonly fundingSchedule: FundingSchedule | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
@@ -45,6 +49,8 @@ export default class TransactionRecurring {
     this.transactionRecurringId = ID.from(data.transactionRecurringId);
     this.bankAccountId = ID.from(data.bankAccountId);
     this.transactionClusterId = ID.from(data.transactionClusterId);
+    this.spendingId = data.spendingId ? ID.from(data.spendingId) : null;
+    this.fundingScheduleId = data.fundingScheduleId ? ID.from(data.fundingScheduleId) : null;
     this.window = data.window;
     this.ruleset = data.ruleset;
     this.first = parseDate(data.first);

@@ -43,6 +43,10 @@ type TransactionRecurring struct {
 	BankAccount            *BankAccount             `json:"bankAccount,omitempty" bun:"rel:belongs-to,join:bank_account_id=bank_account_id,join:account_id=account_id"`
 	TransactionClusterId   ID[TransactionCluster]   `json:"transactionClusterId" bun:"transaction_cluster_id,notnull"`
 	TransactionCluster     *TransactionCluster      `json:"transactionCluster,omitempty" bun:"rel:belongs-to,join:transaction_cluster_id=transaction_cluster_id,join:bank_account_id=bank_account_id,join:account_id=account_id"`
+	SpendingId             *ID[Spending]            `json:"spendingId" bun:"spending_id"`
+	Spending               *Spending                `json:"spending,omitempty" bun:"rel:belongs-to,join:spending_id=spending_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
+	FundingScheduleId      *ID[FundingSchedule]     `json:"fundingScheduleId" bun:"funding_schedule_id"`
+	FundingSchedule        *FundingSchedule         `json:"fundingSchedule,omitempty" bun:"rel:belongs-to,join:funding_schedule_id=funding_schedule_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
 	Window                 WindowType               `json:"window" bun:"window_type,notnull,nullzero"`
 	RuleSet                *RuleSet                 `json:"ruleset" bun:"ruleset,notnull,type:text"`
 	First                  time.Time                `json:"first" bun:"first,notnull,nullzero"`
@@ -55,9 +59,6 @@ type TransactionRecurring struct {
 	LastAmount             int64                    `json:"lastAmount" bun:"last_amount,notnull,nullzero"`
 	CreatedAt              time.Time                `json:"createdAt" bun:"created_at,notnull,default:now(),nullzero"`
 	UpdatedAt              time.Time                `json:"updatedAt" bun:"updated_at,notnull,default:now(),nullzero"`
-
-	Spending        *Spending        `json:"spending,omitempty" bun:"rel:has-one,join:transaction_recurring_id=transaction_recurring_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
-	FundingSchedule *FundingSchedule `json:"fundingSchedule,omitempty" bun:"rel:has-one,join:transaction_recurring_id=transaction_recurring_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
 }
 
 func (TransactionRecurring) IdentityPrefix() string {

@@ -30,27 +30,34 @@ new transaction won't count toward anything until both jobs have gotten to it.
 Each [transaction](./transactions#the-transaction-object) has a `transactionRecurringId` pointing at the recurring
 transaction it's part of. That's how you'll find these for now, there's no endpoint to list them yet.
 
+You can link a recurring transaction to the thing in your budget that covers it. A charge going out gets linked to an
+[expense](./spending), money coming in gets linked to a [funding schedule](./funding_schedules), your paycheck for
+example. The link lives on the recurring transaction, so you set it with a PATCH here after you've created the expense or
+funding schedule.
+
 ## The recurring transaction object
 
-| Attribute                | Type          | Description                                                                                                                                                                                                       |
-| ------------------------ | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `transactionRecurringId` | string (ulid) | Identifies the recurring transaction. It stays the same between recalculations as long as the cluster keeps recurring in the same direction.                                                                      |
-| `bankAccountId`          | string (ulid) | The bank account it belongs to.                                                                                                                                                                                   |
-| `transactionClusterId`   | string (ulid) | The [similar transactions](./similar_transactions#the-similar-transaction-object) cluster it was found in.                                                                                                        |
-| `direction`              | string        | `debit` for money leaving the account, `credit` for money coming in. Same as the sign on the transactions, debits are positive amounts and credits are negative.                                                  |
-| `window`                 | string        | Roughly how often it happens. One of `weekly`, `biweekly`, `firstAndFifteenth`, `fifteenthAndLast`, `monthly`, `bimonthly`, `quarterly` or `yearly`. `biweekly` is every two weeks, `bimonthly` every two months. |
-| `ruleset`                | string        | The actual schedule, as a [recurrence rule](./recurrence_rules). The days in it are your account's days, see the note below the table.                                                                            |
-| `first`                  | timestamp     | The earliest transaction that's part of it. If something stopped for a long stretch and then started up again, this is from when it started back up.                                                              |
-| `last`                   | timestamp     | The most recent transaction that's part of it.                                                                                                                                                                    |
-| `next`                   | timestamp     | When monetr expects the next one, as of the last recalculation. Nothing updates it in between, so if the job hasn't run in a while this can already be in the past.                                               |
-| `ended`                  | boolean       | True once it's gone too long without a new transaction. monetr gives it half a period of slack past when the next one was due, and never less than 3 days, since charges like to wander around a bit.             |
-| `confidence`             | number        | How sure monetr is about the schedule, between 0.6 and 1. Anything under 0.6 doesn't get to be a recurring transaction at all.                                                                                    |
-| `amounts`                | object        | How many times each amount showed up. Keys are amounts in the currency's smallest unit, as strings since it's JSON, and values are counts. Handy for spotting a price change.                                     |
-| `lastAmount`             | integer       | The amount of the most recent transaction, in the currency's smallest unit. Usually your best guess for what the next one will be. See [Currencies](./currencies#how-monetr-stores-money).                        |
-| `spending`               | object        | The [expense](./spending#the-spending-object) created from this recurring transaction, if there is one. Left out otherwise.                                                                                       |
-| `fundingSchedule`        | object        | The [funding schedule](./funding_schedules#the-funding-schedule-object) created from this recurring transaction, if there is one. Left out otherwise.                                                             |
-| `createdAt`              | timestamp     | When monetr first decided it was recurring.                                                                                                                                                                       |
-| `updatedAt`              | timestamp     | When it was last recalculated. This changes on every recalculation, even when nothing about it did, so don't use it to spot changes.                                                                              |
+| Attribute                | Type                    | Description                                                                                                                                                                                                       |
+| ------------------------ | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `transactionRecurringId` | string (ulid)           | Identifies the recurring transaction. It stays the same between recalculations as long as the cluster keeps recurring in the same direction.                                                                      |
+| `bankAccountId`          | string (ulid)           | The bank account it belongs to.                                                                                                                                                                                   |
+| `transactionClusterId`   | string (ulid)           | The [similar transactions](./similar_transactions#the-similar-transaction-object) cluster it was found in.                                                                                                        |
+| `spendingId`             | string (ulid), nullable | The [expense](./spending#the-spending-object) tracking this, if you've linked one. Only ever set on debits. See [Link an expense or funding schedule](#link-an-expense-or-funding-schedule).                      |
+| `spending`               | object                  | The [expense](./spending#the-spending-object) in `spendingId`, if there is one. Left out otherwise.                                                                                                               |
+| `fundingScheduleId`      | string (ulid), nullable | The [funding schedule](./funding_schedules#the-funding-schedule-object) tracking this, if you've linked one. Only ever set on credits.                                                                            |
+| `fundingSchedule`        | object                  | The [funding schedule](./funding_schedules#the-funding-schedule-object) in `fundingScheduleId`, if there is one. Left out otherwise.                                                                              |
+| `direction`              | string                  | `debit` for money leaving the account, `credit` for money coming in. Same as the sign on the transactions, debits are positive amounts and credits are negative.                                                  |
+| `window`                 | string                  | Roughly how often it happens. One of `weekly`, `biweekly`, `firstAndFifteenth`, `fifteenthAndLast`, `monthly`, `bimonthly`, `quarterly` or `yearly`. `biweekly` is every two weeks, `bimonthly` every two months. |
+| `ruleset`                | string                  | The actual schedule, as a [recurrence rule](./recurrence_rules). The days in it are your account's days, see the note below the table.                                                                            |
+| `first`                  | timestamp               | The earliest transaction that's part of it. If something stopped for a long stretch and then started up again, this is from when it started back up.                                                              |
+| `last`                   | timestamp               | The most recent transaction that's part of it.                                                                                                                                                                    |
+| `next`                   | timestamp               | When monetr expects the next one, as of the last recalculation. Nothing updates it in between, so if the job hasn't run in a while this can already be in the past.                                               |
+| `ended`                  | boolean                 | True once it's gone too long without a new transaction. monetr gives it half a period of slack past when the next one was due, and never less than 3 days, since charges like to wander around a bit.             |
+| `confidence`             | number                  | How sure monetr is about the schedule, between 0.6 and 1. Anything under 0.6 doesn't get to be a recurring transaction at all.                                                                                    |
+| `amounts`                | object                  | How many times each amount showed up. Keys are amounts in the currency's smallest unit, as strings since it's JSON, and values are counts. Handy for spotting a price change.                                     |
+| `lastAmount`             | integer                 | The amount of the most recent transaction, in the currency's smallest unit. Usually your best guess for what the next one will be. See [Currencies](./currencies#how-monetr-stores-money).                        |
+| `createdAt`              | timestamp               | When monetr first decided it was recurring.                                                                                                                                                                       |
+| `updatedAt`              | timestamp               | When it was last recalculated or linked. This changes on every recalculation, even when nothing about it did, so don't use it to spot changes.                                                                    |
 
 The `ruleset` keeps its `DTSTART` in UTC like every other ruleset in monetr, but the schedule is really in your
 account's timezone. If you want to pull dates out of it yourself, move `DTSTART` into your account's timezone first.
@@ -58,7 +65,11 @@ Skip that and something like `BYMONTHDAY=8` lands on the 9th for anyone east of 
 
 `ended` and deleted aren't the same thing. Something that ended still exists, it just isn't happening anymore. If a
 cluster stops recurring entirely, or the cluster itself goes away, the recurring transaction gets deleted. Its ID stops
-working and the transactions that were in it go back to a null `transactionRecurringId`.
+working and the transactions that were in it go back to a null `transactionRecurringId`. Whatever expense or funding
+schedule was linked to it sticks around, it just isn't linked to anything anymore.
+
+Recalculating doesn't touch the links. They stay put until you change them, or until you delete the expense or funding
+schedule, which sets `spendingId` or `fundingScheduleId` back to null.
 
 ## <Badge type="info">GET</Badge> Get a recurring transaction
 
@@ -92,6 +103,8 @@ curl --request GET \
   "transactionRecurringId": "txrc_01j6b4n8w2kq5t9r3xm7vdc6ph",
   "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
   "transactionClusterId": "tcl_01j6b4m3zr8yq2w6tnc5kxd9fe",
+  "spendingId": null,
+  "fundingScheduleId": null,
   "window": "monthly",
   "ruleset": "DTSTART:20240301T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=12",
   "first": "2024-03-12T05:00:00Z",
@@ -119,3 +132,103 @@ two entries.
 | ------ | ----------------------------------------------------------- |
 | 400    | Either ID is malformed.                                     |
 | 404    | No recurring transaction with that ID on that bank account. |
+
+## <Badge type="warning">PATCH</Badge> Link an expense or funding schedule
+
+Links a recurring transaction to the expense or funding schedule that covers it, or clears that link. These are the
+only two things you can change on a recurring transaction, everything else comes from monetr working it out.
+
+A debit can only be linked to an expense, not a goal. A credit can only be linked to a funding schedule. For now an
+expense or funding schedule can only be linked to one recurring transaction at a time.
+
+**In the app:** Creating an expense or funding schedule from the recurring card on a transaction's details page. The app
+creates it first and then links it with this.
+
+```http
+PATCH /api/bank_accounts/:bankAccountId/recurring/:transactionRecurringId
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute                | Type          | Required | Description                                            |
+| ------------------------ | ------------- | -------- | ------------------------------------------------------ |
+| `bankAccountId`          | string (ulid) | Yes      | The bank account the recurring transaction belongs to. |
+| `transactionRecurringId` | string (ulid) | Yes      | The recurring transaction you're linking.              |
+
+### Body
+
+Send the one you're changing. Anything else in the body gets rejected.
+
+| Attribute           | Type                    | Required | Description                                                                                  |
+| ------------------- | ----------------------- | -------- | -------------------------------------------------------------------------------------------- |
+| `fundingScheduleId` | string (ulid), nullable | No       | The funding schedule to link, on the same bank account. Credits only. Send null to clear it. |
+| `spendingId`        | string (ulid), nullable | No       | The expense to link, on the same bank account. Debits only. Send null to clear it.           |
+
+Sending a different ID just moves the link over, you don't have to clear it first.
+
+### Example
+
+```bash
+curl --request PATCH \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring/txrc_01j6b4n8w2kq5t9r3xm7vdc6ph" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "spendingId": "spnd_01j6b5q2h8ycz4n7w3tkr9vx5d"
+  }'
+```
+
+```json
+{
+  "transactionRecurringId": "txrc_01j6b4n8w2kq5t9r3xm7vdc6ph",
+  "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+  "transactionClusterId": "tcl_01j6b4m3zr8yq2w6tnc5kxd9fe",
+  "spendingId": "spnd_01j6b5q2h8ycz4n7w3tkr9vx5d",
+  "spending": {
+    "spendingId": "spnd_01j6b5q2h8ycz4n7w3tkr9vx5d",
+    "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+    "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
+    "spendingType": "expense",
+    "name": "Netflix",
+    "targetAmount": 1549,
+    "currentAmount": 0,
+    "usedAmount": 0,
+    "ruleset": "DTSTART:20240301T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=12",
+    "lastSpentFrom": null,
+    "lastRecurrence": null,
+    "nextRecurrence": "2024-09-12T05:00:00Z",
+    "nextContributionAmount": 775,
+    "isBehind": false,
+    "isPaused": false,
+    "autoCreateTransaction": false,
+    "createdAt": "2024-08-30T14:02:11.418Z"
+  },
+  "fundingScheduleId": null,
+  "window": "monthly",
+  "ruleset": "DTSTART:20240301T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=12",
+  "first": "2024-03-12T05:00:00Z",
+  "last": "2024-08-12T05:00:00Z",
+  "next": "2024-09-12T05:00:00Z",
+  "ended": false,
+  "confidence": 0.94,
+  "direction": "debit",
+  "amounts": {
+    "1399": 3,
+    "1549": 3
+  },
+  "lastAmount": 1549,
+  "createdAt": "2024-05-13T03:15:06.214Z",
+  "updatedAt": "2024-08-30T14:02:11.733Z"
+}
+```
+
+You get the recurring transaction back with whatever's linked to it filled in, and `updatedAt` bumped to now.
+
+### Errors
+
+| Status | When                                                                                                                                                                                                                                                                              |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 400    | Either ID is malformed, the body has something other than `spendingId` or `fundingScheduleId`, you linked an expense to a credit or a funding schedule to a debit, you linked a goal, or that expense or funding schedule is already linked to a different recurring transaction. |
+| 404    | No recurring transaction with that ID on that bank account, or the expense or funding schedule you sent doesn't exist on that bank account.                                                                                                                                       |

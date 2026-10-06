@@ -36,11 +36,6 @@ export function useCreateFundingSchedule(): (_funding: CreateFundingScheduleRequ
           [`/api/bank_accounts/${data.bankAccountId}/funding_schedules/${data.fundingScheduleId}`],
           data,
         ),
-        // the recurring transaction includes the funding schedule made from it, so refresh it to pick up the new one
-        data.transactionRecurringId &&
-          ctx.client.invalidateQueries({
-            queryKey: [`/api/bank_accounts/${data.bankAccountId}/recurring/${data.transactionRecurringId}`],
-          }),
       ]),
   });
 

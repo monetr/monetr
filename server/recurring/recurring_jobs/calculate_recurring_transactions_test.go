@@ -240,6 +240,54 @@ func TestCalculateRecurringTransactions(t *testing.T) {
 		assert.True(t, second[0].UpdatedAt.After(first[0].UpdatedAt), "should have been updated")
 	})
 
+	t.Run("running again keeps the linked expense", func(t *testing.T) {
+		clock := clock.NewMock()
+		clock.Set(time.Date(2026, 7, 1, 9, 0, 0, 0, time.UTC))
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(
+			t,
+			clock,
+			&link,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, clock, &bankAccount, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15", false)
+		spendingRule := testutils.Must(t, models.NewRuleSet, "DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
+		spending := testutils.MustInsert(t, models.Spending{
+			AccountId:         bankAccount.AccountId,
+			BankAccountId:     bankAccount.BankAccountId,
+			FundingScheduleId: fundingSchedule.FundingScheduleId,
+			SpendingType:      models.SpendingTypeExpense,
+			Name:              "Github",
+			TargetAmount:      800,
+			RuleSet:           spendingRule,
+			NextRecurrence:    spendingRule.After(clock.Now(), false),
+			CreatedAt:         clock.Now(),
+		})
+		cluster, _ := givenIHaveAClusterWithTransactions(
+			t,
+			clock,
+			bankAccount,
+			repeatAmount(800, 6),
+			monthlyDates(accountTimezone(t, bankAccount), 6),
+		)
+
+		require.NoError(t, runCalculateRecurringTransactions(t, clock, bankAccount), "first run must succeed")
+		first := readRecurringByCluster(t, clock, cluster)
+		require.Len(t, first, 1, "should have a single recurring transaction")
+		first[0].SpendingId = &spending.SpendingId
+		testutils.MustDBUpdate(t, &first[0])
+
+		clock.Add(24 * time.Hour)
+		require.NoError(t, runCalculateRecurringTransactions(t, clock, bankAccount), "second run must succeed")
+		second := readRecurringByCluster(t, clock, cluster)
+		require.Len(t, second, 1, "should still have a single recurring transaction")
+		assert.True(t, second[0].UpdatedAt.After(first[0].UpdatedAt), "should have been recalculated")
+		require.NotNil(t, second[0].SpendingId, "the linked expense must survive recalculation")
+		assert.Equal(t, spending.SpendingId, *second[0].SpendingId, "should still be linked to the same expense")
+	})
+
 	t.Run("removes a direction that no longer recurs", func(t *testing.T) {
 		clock := clock.NewMock()
 		clock.Set(time.Date(2026, 7, 1, 9, 0, 0, 0, time.UTC))

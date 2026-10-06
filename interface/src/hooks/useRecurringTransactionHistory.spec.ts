@@ -13,6 +13,8 @@ function recurring(amounts: { [key: number]: number }): TransactionRecurring {
     transactionRecurringId: recurringId,
     bankAccountId: ID.from<BankAccount>('bac_test'),
     transactionClusterId: ID.from<TransactionCluster>('tcl_test'),
+    spendingId: null,
+    fundingScheduleId: null,
     window: TransactionRecurringWindow.Monthly,
     ruleset: 'DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15',
     first: '2026-01-15T06:00:00Z',

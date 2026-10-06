@@ -333,6 +333,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/similar/:transactionClusterId", c.getSimilarTransactionCluster)
 	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/similar/:transactionClusterId/transactions", c.getSimilarTransactionsByClusterId)
 	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/recurring/:transactionRecurringId", c.getRecurringTransaction)
+	billedKeyOrToken.PATCH("/bank_accounts/:bankAccountId/recurring/:transactionRecurringId", c.patchRecurringTransaction)
 	billedKeyOrToken.POST("/bank_accounts/:bankAccountId/transactions", c.postTransactions)
 	billedKeyOrToken.POST("/bank_accounts/:bankAccountId/transactions/upload", c.postTransactionUpload)
 	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/transactions/upload/:transactionUploadId", c.getTransactionUploadById)

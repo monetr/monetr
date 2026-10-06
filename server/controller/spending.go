@@ -88,24 +88,6 @@ func (c *Controller) postSpending(ctx *echo.Context) error {
 		return c.wrapPgError(ctx, err, "could not find funding schedule specified")
 	}
 
-	// If the spending is being created from a recurring transaction then make
-	// sure that recurring transaction exists for this bank account, and that it
-	// is money leaving the account. Credits are tracked by funding schedules.
-	if spending.TransactionRecurringId != nil {
-		recurring, err := repo.GetTransactionRecurringById(
-			c.getContext(ctx),
-			bankAccountId,
-			*spending.TransactionRecurringId,
-		)
-		if err != nil {
-			return c.wrapPgError(ctx, err, "could not find recurring transaction specified")
-		}
-
-		if recurring.Direction != DebitDirection {
-			return c.badRequest(ctx, "spending can only be created from a debit recurring transaction")
-		}
-	}
-
 	spending.LastRecurrence = nil
 
 	// Once we know that the next recurrence is not in the past we can just store

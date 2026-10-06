@@ -22,6 +22,7 @@ import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { useLocale } from '@monetr/interface/hooks/useLocale';
 import useLocaleCurrency, { type LocaleCurrency } from '@monetr/interface/hooks/useLocaleCurrency';
 import { usePatchTransaction } from '@monetr/interface/hooks/usePatchTransaction';
+import { usePatchTransactionRecurring } from '@monetr/interface/hooks/usePatchTransactionRecurring';
 import {
   type RecurringPriceChange,
   useRecurringTransactionHistory,
@@ -75,6 +76,7 @@ function NewExpenseModal(props: NewExpenseModalProps): React.JSX.Element {
   const isManual = Boolean(link?.getIsManual());
   const createSpending = useCreateSpending();
   const patchTransaction = usePatchTransaction();
+  const patchTransactionRecurring = usePatchTransactionRecurring();
   const { seen, priceChange } = useRecurringTransactionHistory(recurring);
   // use the similar transactions name for the expense instead of the transactions own name, since thats the name for the
   // whole group of charges and not just the one they happened to start from
@@ -114,7 +116,6 @@ function NewExpenseModal(props: NewExpenseModalProps): React.JSX.Element {
     helper.setSubmitting(true);
     return await createSpending({
       bankAccountId: selectedBankAccount.bankAccountId,
-      transactionRecurringId: recurring?.transactionRecurringId ?? null,
       name: values.name.trim(),
       nextRecurrence: startOfDay(new Date(values.nextOccurrence), {
         in: inTimezone,
@@ -128,6 +129,21 @@ function NewExpenseModal(props: NewExpenseModalProps): React.JSX.Element {
       autoCreateTransaction: isManual && values.amount > 0 && values.autoCreateTransaction,
     })
       .then(async created => {
+        // the expense is linked to the recurring transaction with a second request. if that fails the expense is still
+        // created, so keep it and just let the user know it isnt linked
+        if (recurring) {
+          await patchTransactionRecurring({
+            transactionRecurringId: recurring.transactionRecurringId,
+            bankAccountId: recurring.bankAccountId,
+            spendingId: created.spendingId,
+          }).catch(
+            () =>
+              void enqueueSnackbar('Your expense was created, but it could not be linked to the recurring charge.', {
+                variant: 'warning',
+                disableWindowBlurListener: true,
+              }),
+          );
+        }
         if (transaction && values.moveTransaction) {
           await patchTransaction({
             transactionId: transaction.transactionId,
