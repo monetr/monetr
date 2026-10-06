@@ -13,12 +13,6 @@ var (
 				ValidID[models.FundingSchedule](),
 				validation.Required,
 			).Required(Require),
-			validation.Key("transactionRecurringId",
-				validation.OneOf(
-					validation.Nil.Error("must be nil"),
-					ValidID[models.TransactionRecurring](),
-				),
-			).Required(Optional),
 			validation.Key("spendingType",
 				validation.Eq("expense"),
 				validation.Required,

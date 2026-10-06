@@ -11,6 +11,8 @@ function fixture(overrides: Partial<WithJsonValues<TransactionRecurring>> = {}):
     transactionRecurringId: ID.from<TransactionRecurring>('txrc_test'),
     bankAccountId: ID.from<BankAccount>('bac_test'),
     transactionClusterId: ID.from<TransactionCluster>('tcl_test'),
+    spendingId: null,
+    fundingScheduleId: null,
     window: TransactionRecurringWindow.Monthly,
     ruleset: 'DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15',
     first: '2026-01-15T06:00:00Z',
@@ -72,11 +74,11 @@ describe('transaction recurring', () => {
 
   it('will parse the spending created from it', () => {
     const recurring = fixture({
+      spendingId: ID.from<Spending>('spnd_test'),
       spending: {
         spendingId: ID.from<Spending>('spnd_test'),
         bankAccountId: ID.from<BankAccount>('bac_test'),
         fundingScheduleId: ID.from('fund_test'),
-        transactionRecurringId: ID.from<TransactionRecurring>('txrc_test'),
         name: 'Github',
         spendingType: SpendingType.Expense,
         targetAmount: 800,
@@ -92,9 +94,9 @@ describe('transaction recurring', () => {
         createdAt: '2026-03-15T06:00:00Z',
       },
     });
+    expect(recurring.spendingId?.toString()).toBe('spnd_test');
     expect(recurring.spending).toBeInstanceOf(Spending);
     expect(recurring.spending?.spendingId.toString()).toBe('spnd_test');
-    expect(recurring.spending?.transactionRecurringId?.toString()).toBe('txrc_test');
     expect(recurring.spending?.nextRecurrence).toEqual(new Date('2026-04-15T05:00:00Z'));
   });
 
@@ -106,10 +108,10 @@ describe('transaction recurring', () => {
   it('will parse the funding schedule created from it', () => {
     const recurring = fixture({
       direction: 'credit',
+      fundingScheduleId: ID.from<FundingSchedule>('fund_test'),
       fundingSchedule: {
         fundingScheduleId: ID.from<FundingSchedule>('fund_test'),
         bankAccountId: ID.from<BankAccount>('bac_test'),
-        transactionRecurringId: ID.from<TransactionRecurring>('txrc_test'),
         name: 'Payday',
         description: null,
         ruleset: 'DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15',
@@ -121,9 +123,9 @@ describe('transaction recurring', () => {
         estimatedDeposit: 250000,
       },
     });
+    expect(recurring.fundingScheduleId?.toString()).toBe('fund_test');
     expect(recurring.fundingSchedule).toBeInstanceOf(FundingSchedule);
     expect(recurring.fundingSchedule?.fundingScheduleId.toString()).toBe('fund_test');
-    expect(recurring.fundingSchedule?.transactionRecurringId?.toString()).toBe('txrc_test');
     expect(recurring.fundingSchedule?.nextRecurrence).toEqual(new Date('2026-04-15T05:00:00Z'));
   });
 

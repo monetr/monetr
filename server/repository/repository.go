@@ -211,6 +211,13 @@ type BaseRepository interface {
 		bankAccountId ID[BankAccount],
 		transactions []Transaction,
 	) error
+	// UpdateTransactionRecurring writes the provided recurring transaction by its
+	// primary key and bumps its updated at.
+	UpdateTransactionRecurring(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		recurring *TransactionRecurring,
+	) error
 	// DeleteTransactionRecurring removes the specified recurring transactions by
 	// their IDs. Transactions referencing them will have their recurring ID set
 	// to null.

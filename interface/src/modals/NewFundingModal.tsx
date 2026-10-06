@@ -18,6 +18,7 @@ import Typography from '@monetr/interface/components/Typography';
 import { useCreateFundingSchedule } from '@monetr/interface/hooks/useCreateFundingSchedule';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import { usePatchTransactionRecurring } from '@monetr/interface/hooks/usePatchTransactionRecurring';
 import { useRecurringTransactionHistory } from '@monetr/interface/hooks/useRecurringTransactionHistory';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
@@ -60,6 +61,7 @@ function NewFundingModal(props: NewFundingModalProps): React.JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const selectedBankAccountId = useSelectedBankAccountId();
   const createFundingSchedule = useCreateFundingSchedule();
+  const patchTransactionRecurring = usePatchTransactionRecurring();
   const { data: link } = useCurrentLink();
   const isManual = Boolean(link?.getIsManual());
   const { data: locale } = useLocaleCurrency();
@@ -91,7 +93,6 @@ function NewFundingModal(props: NewFundingModalProps): React.JSX.Element {
       const estimatedDeposit = values.estimatedDeposit ?? 0;
       return await createFundingSchedule({
         bankAccountId: selectedBankAccountId,
-        transactionRecurringId: recurring?.transactionRecurringId ?? null,
         name: values.name,
         description: null,
         nextRecurrence: startOfDay(new Date(values.nextOccurrence), {
@@ -105,6 +106,27 @@ function NewFundingModal(props: NewFundingModalProps): React.JSX.Element {
         // the create.
         autoCreateTransaction: isManual && estimatedDeposit > 0 && values.autoCreateTransaction,
       })
+        .then(async created => {
+          // the funding schedule is linked to the recurring deposit with a second request. if that fails the funding
+          // schedule is still created, so keep it and just let the user know it isnt linked
+          if (recurring) {
+            await patchTransactionRecurring({
+              transactionRecurringId: recurring.transactionRecurringId,
+              bankAccountId: recurring.bankAccountId,
+              fundingScheduleId: created.fundingScheduleId,
+            }).catch(
+              () =>
+                void enqueueSnackbar(
+                  'Your funding schedule was created, but it could not be linked to the recurring deposit.',
+                  {
+                    variant: 'warning',
+                    disableWindowBlurListener: true,
+                  },
+                ),
+            );
+          }
+          return created;
+        })
         .then(created => modal.resolve(created))
         .then(() => modal.remove())
         .catch(
@@ -116,7 +138,17 @@ function NewFundingModal(props: NewFundingModalProps): React.JSX.Element {
         )
         .finally(() => helpers.setSubmitting(false));
     },
-    [createFundingSchedule, enqueueSnackbar, locale, modal, selectedBankAccountId, inTimezone, isManual, recurring],
+    [
+      createFundingSchedule,
+      patchTransactionRecurring,
+      enqueueSnackbar,
+      locale,
+      modal,
+      selectedBankAccountId,
+      inTimezone,
+      isManual,
+      recurring,
+    ],
   );
 
   // the form only reads its initial values once, so wait for everything the recurring deposit fills in

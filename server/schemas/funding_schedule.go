@@ -1,7 +1,6 @@
 package schemas
 
 import (
-	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/validators"
 	"github.com/monetr/validation"
 	"github.com/monetr/validation/is"
@@ -15,12 +14,6 @@ var (
 		).Required(Require),
 		validation.Key("description",
 			TextField(),
-		).Required(validators.Optional),
-		validation.Key("transactionRecurringId",
-			validation.OneOf(
-				validation.Nil.Error("must be nil"),
-				ValidID[models.TransactionRecurring](),
-			),
 		).Required(validators.Optional),
 		validation.Key("ruleset",
 			validation.Required.Error("Ruleset must be specified for funding schedules"),

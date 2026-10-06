@@ -864,7 +864,9 @@ func TestPostSpending(t *testing.T) {
 		response.JSON().Path("$.autoCreateTransaction").Boolean().IsTrue()
 	})
 
-	t.Run("creates expense from a debit recurring transaction", func(t *testing.T) {
+	t.Run("rejects a recurring transaction id", func(t *testing.T) {
+		// Expenses are linked to a recurring transaction by patching the recurring
+		// transaction, not by creating the expense with its ID.
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
@@ -882,48 +884,6 @@ func TestPostSpending(t *testing.T) {
 			WithCookie(TestCookieName, token).
 			WithJSON(map[string]any{
 				"name":                   "Github",
-				"ruleset":                FirstDayOfEveryMonth,
-				"fundingScheduleId":      fundingSchedule.FundingScheduleId,
-				"transactionRecurringId": recurring.TransactionRecurringId,
-				"targetAmount":           800,
-				"spendingType":           SpendingTypeExpense,
-				"nextRecurrence":         nextRecurrence,
-			}).
-			Expect()
-
-		response.Status(http.StatusOK)
-		response.JSON().Path("$.transactionRecurringId").IsEqual(recurring.TransactionRecurringId)
-
-		spending := testutils.MustDBRead(t, Spending{
-			SpendingId:    ID[Spending](response.JSON().Path("$.spendingId").String().Raw()),
-			AccountId:     bank.AccountId,
-			BankAccountId: bank.BankAccountId,
-		})
-		if assert.NotNil(t, spending.TransactionRecurringId, "recurring ID must be persisted") {
-			assert.Equal(t, recurring.TransactionRecurringId, *spending.TransactionRecurringId)
-		}
-	})
-
-	t.Run("rejects expense from a credit recurring transaction", func(t *testing.T) {
-		app, e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
-		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
-		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
-		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
-		recurring := givenIHaveATransactionRecurring(t, bank)
-		recurring.Direction = CreditDirection
-		testutils.MustDBUpdate(t, &recurring)
-		token := GivenILogin(t, e, user.Login.Email, password)
-
-		now := app.Clock.Now()
-		ruleset := testutils.RuleSetInTimezone(t, testutils.MustEz(t, user.Account.GetTimezone), FirstDayOfEveryMonth)
-		nextRecurrence := ruleset.After(now, false)
-
-		response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
-			WithPath("bankAccountId", bank.BankAccountId).
-			WithCookie(TestCookieName, token).
-			WithJSON(map[string]any{
-				"name":                   "Paycheck",
 				"ruleset":                FirstDayOfEveryMonth,
 				"fundingScheduleId":      fundingSchedule.FundingScheduleId,
 				"transactionRecurringId": recurring.TransactionRecurringId,
@@ -934,69 +894,7 @@ func TestPostSpending(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("spending can only be created from a debit recurring transaction")
-	})
-
-	t.Run("rejects expense with a recurring transaction that does not exist", func(t *testing.T) {
-		app, e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
-		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
-		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
-		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
-		token := GivenILogin(t, e, user.Login.Email, password)
-
-		now := app.Clock.Now()
-		ruleset := testutils.RuleSetInTimezone(t, testutils.MustEz(t, user.Account.GetTimezone), FirstDayOfEveryMonth)
-		nextRecurrence := ruleset.After(now, false)
-
-		response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
-			WithPath("bankAccountId", bank.BankAccountId).
-			WithCookie(TestCookieName, token).
-			WithJSON(map[string]any{
-				"name":                   "Github",
-				"ruleset":                FirstDayOfEveryMonth,
-				"fundingScheduleId":      fundingSchedule.FundingScheduleId,
-				"transactionRecurringId": NewID[TransactionRecurring](),
-				"targetAmount":           800,
-				"spendingType":           SpendingTypeExpense,
-				"nextRecurrence":         nextRecurrence,
-			}).
-			Expect()
-
-		response.Status(http.StatusNotFound)
-		response.JSON().Path("$.error").IsEqual("could not find recurring transaction specified: record does not exist")
-	})
-
-	t.Run("rejects expense with a recurring transaction from another bank account", func(t *testing.T) {
-		app, e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
-		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
-		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
-		otherBank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, SavingsBankAccountSubType)
-		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
-		recurring := givenIHaveATransactionRecurring(t, otherBank)
-		token := GivenILogin(t, e, user.Login.Email, password)
-
-		now := app.Clock.Now()
-		ruleset := testutils.RuleSetInTimezone(t, testutils.MustEz(t, user.Account.GetTimezone), FirstDayOfEveryMonth)
-		nextRecurrence := ruleset.After(now, false)
-
-		response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
-			WithPath("bankAccountId", bank.BankAccountId).
-			WithCookie(TestCookieName, token).
-			WithJSON(map[string]any{
-				"name":                   "Github",
-				"ruleset":                FirstDayOfEveryMonth,
-				"fundingScheduleId":      fundingSchedule.FundingScheduleId,
-				"transactionRecurringId": recurring.TransactionRecurringId,
-				"targetAmount":           800,
-				"spendingType":           SpendingTypeExpense,
-				"nextRecurrence":         nextRecurrence,
-			}).
-			Expect()
-
-		response.Status(http.StatusNotFound)
-		response.JSON().Path("$.error").IsEqual("could not find recurring transaction specified: record does not exist")
+		response.JSON().Path("$.error").IsEqual("Invalid request")
 	})
 }
 

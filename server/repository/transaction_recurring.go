@@ -154,6 +154,40 @@ func (r *repositoryBase) UpdateTransactionRecurringIds(
 	return nil
 }
 
+func (r *repositoryBase) UpdateTransactionRecurring(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	recurring *TransactionRecurring,
+) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	span.Data = map[string]any{
+		"accountId":              r.AccountId(),
+		"bankAccountId":          bankAccountId,
+		"transactionRecurringId": recurring.TransactionRecurringId,
+	}
+
+	recurring.AccountId = r.AccountId()
+	recurring.UpdatedAt = r.clock.Now()
+
+	_, err := r.txn.NewUpdate().
+		Model(recurring).
+		Where(`"transaction_recurring"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction_recurring"."bank_account_id" = ?`, bankAccountId).
+		WherePK().
+		Returning("*").
+		Exec(span.Context())
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return errors.Wrap(err, "failed to update recurring transaction")
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return nil
+}
+
 func (r *repositoryBase) DeleteTransactionRecurring(
 	ctx context.Context,
 	bankAccountId ID[BankAccount],

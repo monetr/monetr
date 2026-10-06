@@ -1,6 +1,5 @@
 import type BankAccount from '@monetr/interface/models/BankAccount';
 import { ID, idPrefix } from '@monetr/interface/models/ID';
-import type TransactionRecurring from '@monetr/interface/models/TransactionRecurring';
 import type { WithJsonValues } from '@monetr/interface/util/json';
 import parseDate from '@monetr/interface/util/parseDate';
 
@@ -9,7 +8,6 @@ export default class FundingSchedule {
 
   readonly fundingScheduleId: ID<FundingSchedule>;
   readonly bankAccountId: ID<BankAccount>;
-  transactionRecurringId: ID<TransactionRecurring> | null;
   name: string;
   description: string | null;
   ruleset: string;
@@ -23,7 +21,6 @@ export default class FundingSchedule {
   constructor(data: WithJsonValues<FundingSchedule>) {
     this.fundingScheduleId = ID.from(data.fundingScheduleId);
     this.bankAccountId = ID.from(data.bankAccountId);
-    this.transactionRecurringId = data.transactionRecurringId ? ID.from(data.transactionRecurringId) : null;
     this.name = data.name;
     this.description = data.description;
     this.ruleset = data.ruleset;

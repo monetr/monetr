@@ -79,7 +79,6 @@ export default function ManualLinkSetupIncome(): React.JSX.Element {
       .then(bankAccount =>
         createFundingSchedule({
           bankAccountId: bankAccount.bankAccountId,
-          transactionRecurringId: null,
           name: 'Payday',
           description: null,
           nextRecurrence: startOfDay(values.nextPayday, {

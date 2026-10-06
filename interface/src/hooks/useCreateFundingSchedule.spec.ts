@@ -60,7 +60,6 @@ describe('create funding schedule', () => {
     await act(async () => {
       result = await world.result.current({
         bankAccountId: ID.from<BankAccount>('bac_01hy4rcmadc01d2kzv7vynbxxx'),
-        transactionRecurringId: null,
         name: "Elliot's Contribution",
         description: 'something',
         nextRecurrence: parseDate('2023-07-31T05:00:00Z') ?? undefined,
@@ -101,8 +100,7 @@ describe('create funding schedule', () => {
       await expect(
         world.result.current({
           bankAccountId: ID.from<BankAccount>('bac_01hy4rcmadc01d2kzv7vynbxxx'),
-          transactionRecurringId: null,
-          description: 'something',
+            description: 'something',
           name: "Elliot's Contribution",
           nextRecurrence: parseDate('2023-07-31T05:00:00Z') ?? undefined,
           ruleset: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',

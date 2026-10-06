@@ -72,6 +72,27 @@ func givenIHaveARecurringTransaction(
 	})
 }
 
+func givenIHaveAnExpense(
+	t *testing.T,
+	clock clock.Clock,
+	bankAccount models.BankAccount,
+	fundingSchedule *models.FundingSchedule,
+	name string,
+) models.Spending {
+	spendingRule := testutils.Must(t, models.NewRuleSet, "DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15")
+	return testutils.MustInsert(t, models.Spending{
+		AccountId:         bankAccount.AccountId,
+		BankAccountId:     bankAccount.BankAccountId,
+		FundingScheduleId: fundingSchedule.FundingScheduleId,
+		SpendingType:      models.SpendingTypeExpense,
+		Name:              name,
+		TargetAmount:      800,
+		RuleSet:           spendingRule,
+		NextRecurrence:    spendingRule.After(clock.Now(), false),
+		CreatedAt:         clock.Now(),
+	})
+}
+
 func TestRepositoryBase_GetTransactionRecurringById(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		clock := clock.NewMock()
@@ -104,7 +125,7 @@ func TestRepositoryBase_GetTransactionRecurringById(t *testing.T) {
 		assert.EqualValues(t, 800, result.LastAmount, "last amount should match")
 	})
 
-	t.Run("includes the spending created from it", func(t *testing.T) {
+	t.Run("includes the linked spending", func(t *testing.T) {
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -130,27 +151,18 @@ func TestRepositoryBase_GetTransactionRecurringById(t *testing.T) {
 		result, err := repo.GetTransactionRecurringById(t.Context(), bankAccount.BankAccountId, recurring[0].TransactionRecurringId)
 		assert.NoError(t, err, "must be able to read the recurring transaction")
 		require.NotNil(t, result, "result must not be nil")
-		assert.Nil(t, result.Spending, "spending should be nil when nothing was created from it yet")
+		assert.Nil(t, result.Spending, "spending should be nil when nothing is linked yet")
 
-		spendingRule := testutils.Must(t, models.NewRuleSet, "DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15")
-		spending := testutils.MustInsert(t, models.Spending{
-			AccountId:              bankAccount.AccountId,
-			BankAccountId:          bankAccount.BankAccountId,
-			FundingScheduleId:      fundingSchedule.FundingScheduleId,
-			TransactionRecurringId: &recurring[0].TransactionRecurringId,
-			SpendingType:           models.SpendingTypeExpense,
-			Name:                   "Github",
-			TargetAmount:           800,
-			RuleSet:                spendingRule,
-			NextRecurrence:         spendingRule.After(clock.Now(), false),
-			CreatedAt:              clock.Now(),
-		})
+		spending := givenIHaveAnExpense(t, clock, bankAccount, fundingSchedule, "Github")
+		recurring[0].SpendingId = &spending.SpendingId
+		err = repo.UpdateTransactionRecurring(t.Context(), bankAccount.BankAccountId, &recurring[0])
+		require.NoError(t, err, "must be able to link the spending")
 
 		result, err = repo.GetTransactionRecurringById(t.Context(), bankAccount.BankAccountId, recurring[0].TransactionRecurringId)
 		assert.NoError(t, err, "must be able to read the recurring transaction")
 		require.NotNil(t, result, "result must not be nil")
-		require.NotNil(t, result.Spending, "spending should be included now that one was created from it")
-		assert.Equal(t, spending.SpendingId, result.Spending.SpendingId, "should be the spending that was created from it")
+		require.NotNil(t, result.Spending, "spending should be included now that one is linked")
+		assert.Equal(t, spending.SpendingId, result.Spending.SpendingId, "should be the linked spending")
 	})
 
 	t.Run("does not exist", func(t *testing.T) {
@@ -447,6 +459,251 @@ func TestRepositoryBase_DeleteTransactionRecurring(t *testing.T) {
 
 		err := repo.DeleteTransactionRecurring(t.Context(), bankAccount.BankAccountId, nil)
 		assert.NoError(t, err, "deleting nothing should not fail")
+	})
+}
+
+func TestRepositoryBase_UpdateTransactionRecurring(t *testing.T) {
+	t.Run("sets and clears the links", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		cluster := givenIHaveATransactionCluster(t, bankAccount)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, clock, &bankAccount, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15", false)
+		spending := givenIHaveAnExpense(t, clock, bankAccount, fundingSchedule, "Github")
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		items := []models.TransactionRecurring{
+			newTransactionRecurring(t, cluster, models.DebitDirection, 800),
+			newTransactionRecurring(t, cluster, models.CreditDirection, -500),
+		}
+		err := repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, items)
+		require.NoError(t, err, "must be able to create recurring transactions")
+
+		before := testutils.MustDBRead(t, items[0])
+		clock.Add(time.Hour)
+
+		items[0].SpendingId = &spending.SpendingId
+		err = repo.UpdateTransactionRecurring(t.Context(), bankAccount.BankAccountId, &items[0])
+		require.NoError(t, err, "must be able to link the spending")
+		items[1].FundingScheduleId = &fundingSchedule.FundingScheduleId
+		err = repo.UpdateTransactionRecurring(t.Context(), bankAccount.BankAccountId, &items[1])
+		require.NoError(t, err, "must be able to link the funding schedule")
+
+		debit := testutils.MustDBRead(t, items[0])
+		require.NotNil(t, debit.SpendingId, "spending should be linked")
+		assert.Equal(t, spending.SpendingId, *debit.SpendingId, "should be linked to the spending")
+		assert.Nil(t, debit.FundingScheduleId, "debit should not have a funding schedule")
+		assert.True(t, debit.UpdatedAt.After(before.UpdatedAt), "updated at should be bumped")
+		credit := testutils.MustDBRead(t, items[1])
+		require.NotNil(t, credit.FundingScheduleId, "funding schedule should be linked")
+		assert.Equal(t, fundingSchedule.FundingScheduleId, *credit.FundingScheduleId, "should be linked to the funding schedule")
+		assert.Nil(t, credit.SpendingId, "credit should not have a spending")
+
+		items[0].SpendingId = nil
+		err = repo.UpdateTransactionRecurring(t.Context(), bankAccount.BankAccountId, &items[0])
+		require.NoError(t, err, "must be able to clear the spending")
+		debit = testutils.MustDBRead(t, items[0])
+		assert.Nil(t, debit.SpendingId, "spending should be cleared")
+	})
+
+	t.Run("recalculation keeps the links", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		cluster := givenIHaveATransactionCluster(t, bankAccount)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, clock, &bankAccount, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15", false)
+		spending := givenIHaveAnExpense(t, clock, bankAccount, fundingSchedule, "Github")
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		items := []models.TransactionRecurring{
+			newTransactionRecurring(t, cluster, models.DebitDirection, 800),
+			newTransactionRecurring(t, cluster, models.CreditDirection, -500),
+		}
+		err := repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, items)
+		require.NoError(t, err, "must be able to create recurring transactions")
+		items[0].SpendingId = &spending.SpendingId
+		require.NoError(t, repo.UpdateTransactionRecurring(t.Context(), bankAccount.BankAccountId, &items[0]), "must be able to link the spending")
+		items[1].FundingScheduleId = &fundingSchedule.FundingScheduleId
+		require.NoError(t, repo.UpdateTransactionRecurring(t.Context(), bankAccount.BankAccountId, &items[1]), "must be able to link the funding schedule")
+
+		// The recalculation job builds fresh recurring transactions that know
+		// nothing about the links, upserting them must not wipe the links out.
+		err = repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, []models.TransactionRecurring{
+			newTransactionRecurring(t, cluster, models.DebitDirection, 1000),
+			newTransactionRecurring(t, cluster, models.CreditDirection, -600),
+		})
+		require.NoError(t, err, "must be able to recalculate recurring transactions")
+
+		debit := testutils.MustDBRead(t, items[0])
+		assert.EqualValues(t, 1000, debit.LastAmount, "recalculation should have updated the debit")
+		require.NotNil(t, debit.SpendingId, "spending link should survive recalculation")
+		assert.Equal(t, spending.SpendingId, *debit.SpendingId, "should still be linked to the spending")
+		credit := testutils.MustDBRead(t, items[1])
+		assert.EqualValues(t, -600, credit.LastAmount, "recalculation should have updated the credit")
+		require.NotNil(t, credit.FundingScheduleId, "funding schedule link should survive recalculation")
+		assert.Equal(t, fundingSchedule.FundingScheduleId, *credit.FundingScheduleId, "should still be linked to the funding schedule")
+	})
+
+	t.Run("deleting the spending clears the link", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		cluster := givenIHaveATransactionCluster(t, bankAccount)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, clock, &bankAccount, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15", false)
+		spending := givenIHaveAnExpense(t, clock, bankAccount, fundingSchedule, "Github")
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		items := []models.TransactionRecurring{
+			newTransactionRecurring(t, cluster, models.DebitDirection, 800),
+		}
+		require.NoError(t, repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, items), "must be able to create recurring transaction")
+		items[0].SpendingId = &spending.SpendingId
+		require.NoError(t, repo.UpdateTransactionRecurring(t.Context(), bankAccount.BankAccountId, &items[0]), "must be able to link the spending")
+
+		require.NoError(t, repo.DeleteSpending(t.Context(), bankAccount.BankAccountId, spending.SpendingId), "must be able to delete the spending")
+
+		debit := testutils.MustDBRead(t, items[0])
+		assert.Nil(t, debit.SpendingId, "link should be cleared once the spending is gone")
+	})
+
+	t.Run("database enforces direction", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		cluster := givenIHaveATransactionCluster(t, bankAccount)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, clock, &bankAccount, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15", false)
+		spending := givenIHaveAnExpense(t, clock, bankAccount, fundingSchedule, "Github")
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		items := []models.TransactionRecurring{
+			newTransactionRecurring(t, cluster, models.DebitDirection, 800),
+			newTransactionRecurring(t, cluster, models.CreditDirection, -500),
+		}
+		require.NoError(t, repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, items), "must be able to create recurring transactions")
+
+		items[0].FundingScheduleId = &fundingSchedule.FundingScheduleId
+		err := repo.UpdateTransactionRecurring(t.Context(), bankAccount.BankAccountId, &items[0])
+		assert.Error(t, err, "a debit must not be linked to a funding schedule")
+
+		items[1].SpendingId = &spending.SpendingId
+		err = repo.UpdateTransactionRecurring(t.Context(), bankAccount.BankAccountId, &items[1])
+		assert.Error(t, err, "a credit must not be linked to a spending")
+	})
+
+	t.Run("a spending can only be linked once", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		cluster := givenIHaveATransactionCluster(t, bankAccount)
+		otherCluster := givenIHaveATransactionCluster(t, bankAccount)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, clock, &bankAccount, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15", false)
+		spending := givenIHaveAnExpense(t, clock, bankAccount, fundingSchedule, "Github")
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		items := []models.TransactionRecurring{
+			newTransactionRecurring(t, cluster, models.DebitDirection, 800),
+			newTransactionRecurring(t, otherCluster, models.DebitDirection, 800),
+		}
+		require.NoError(t, repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, items), "must be able to create recurring transactions")
+
+		items[0].SpendingId = &spending.SpendingId
+		require.NoError(t, repo.UpdateTransactionRecurring(t.Context(), bankAccount.BankAccountId, &items[0]), "must be able to link the spending")
+		items[1].SpendingId = &spending.SpendingId
+		err := repo.UpdateTransactionRecurring(t.Context(), bankAccount.BankAccountId, &items[1])
+		assert.Error(t, err, "the same spending must not be linked to a second recurring transaction")
+	})
+
+	t.Run("cannot update another account's recurring transaction", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, clock, &bankAccount, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15", false)
+		spending := givenIHaveAnExpense(t, clock, bankAccount, fundingSchedule, "Github")
+
+		otherUser, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		otherLink := fixtures.GivenIHaveAManualLink(t, clock, otherUser)
+		otherBankAccount := fixtures.GivenIHaveABankAccount(t, clock, &otherLink, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		otherCluster := givenIHaveATransactionCluster(t, otherBankAccount)
+
+		otherRepo := repository.NewRepositoryFromSession(
+			clock,
+			otherUser.UserId,
+			otherUser.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+		otherItems := []models.TransactionRecurring{
+			newTransactionRecurring(t, otherCluster, models.DebitDirection, 800),
+		}
+		require.NoError(t, otherRepo.UpsertTransactionRecurring(t.Context(), otherBankAccount.BankAccountId, otherItems), "must be able to create the other recurring transaction")
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+		target := otherItems[0]
+		target.SpendingId = &spending.SpendingId
+		for _, bankAccountId := range []models.ID[models.BankAccount]{
+			otherBankAccount.BankAccountId,
+			bankAccount.BankAccountId,
+		} {
+			err := repo.UpdateTransactionRecurring(t.Context(), bankAccountId, &target)
+			assert.NoError(t, err, "updating a recurring transaction that isn't in the account should do nothing")
+		}
+
+		stored := testutils.MustDBRead(t, otherItems[0])
+		assert.Nil(t, stored.SpendingId, "the other account's recurring transaction must not be touched")
 	})
 }
 
