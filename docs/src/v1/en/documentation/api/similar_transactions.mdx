@@ -45,6 +45,67 @@ to a null `transactionClusterId`.
 
 :::
 
+## <Badge type="info">GET</Badge> List clusters
+
+Returns every cluster on a bank account, a page at a time. Results are sorted by `name` descending for now, that ordering
+might change so don't build anything that depends on it.
+
+**In the app:** Nothing in the app calls this yet.
+
+```http
+GET /api/bank_accounts/:bankAccountId/similar
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute       | Type          | Required | Description                               |
+| --------------- | ------------- | -------- | ----------------------------------------- |
+| `bankAccountId` | string (ulid) | Yes      | The bank account whose clusters you want. |
+
+### Query parameters
+
+| Attribute | Type    | Required | Description                                                                 |
+| --------- | ------- | -------- | --------------------------------------------------------------------------- |
+| `limit`   | integer | No       | How many to return. Defaults to 25. Has to be between 1 and 100, or a 400.  |
+| `offset`  | integer | No       | How many to skip first. Defaults to 0. Negative is a 400.                   |
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/similar?limit=1" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+[
+  {
+    "transactionClusterId": "tcl_01j6a2mkxw5rt8p9e3vqn7hd4c",
+    "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+    "signature": "9f2c4e81b07a3d56c8e1f09a4b7d2e63a5c8f1b0d94e7a2c36b5f8e0a1d4c7b9",
+    "centroid": "txn_01j68vszqeq30t7jz7atk9yd9r",
+    "name": "RUBY COFFEE ROASTERS",
+    "originalName": "RUBY COFFEE ROASTERS",
+    "originalMemo": "SQ *RUBY COFFEE ROASTERS",
+    "debug": [],
+    "merchant": [],
+    "createdAt": "2024-08-27T03:15:02.881Z",
+    "updatedAt": "2024-08-30T03:15:04.127Z"
+  }
+]
+```
+
+Each item is a [similar transaction object](#the-similar-transaction-object). A bank account with no clusters, or one
+that isn't yours, isn't an error here. You just get back an empty array.
+
+### Errors
+
+| Status | When                                                                              |
+| ------ | --------------------------------------------------------------------------------- |
+| 400    | `limit` is outside 1 to 100, `offset` is negative, or the bank account ID is bad. |
+
 ## <Badge type="info">GET</Badge> Get similar transactions
 
 Returns one cluster. You'll usually get the ID from a transaction's `transactionClusterId`.

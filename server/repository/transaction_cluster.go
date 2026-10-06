@@ -17,7 +17,7 @@ func (r *repositoryBase) GetTransactionClusters(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	var result []TransactionCluster
+	result := make([]TransactionCluster, 0)
 	if err := r.txn.NewSelect().
 		Model(&result).
 		Where(`"transaction_cluster"."account_id" = ?`, r.AccountId()).
