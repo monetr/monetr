@@ -25,6 +25,7 @@ function recurring(amounts: { [key: number]: number }): TransactionRecurring {
     direction: 'debit',
     amounts,
     lastAmount: 0,
+    autoMatched: false,
     spending: null,
     fundingSchedule: null,
     createdAt: '2026-01-15T06:00:00Z',

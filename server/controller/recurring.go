@@ -101,6 +101,9 @@ func (c *Controller) patchRecurringTransaction(ctx *echo.Context) error {
 		}
 	}
 
+	// Whatever the links are now, the user chose them.
+	recurring.AutoMatched = false
+
 	if err := repo.UpdateTransactionRecurring(
 		c.getContext(ctx),
 		bankAccountId,

@@ -28,7 +28,7 @@ type MatchRecurringTransactionsToSpendingArguments struct {
 // not linked to anything yet to an existing expense. A recurring transaction is
 // matched when enough of its most recent transactions were spent from the same
 // expense by the user. Recurring transactions that are already linked are never
-// changed.
+// changed, and links made here are marked as auto matched.
 func MatchRecurringTransactionsToSpending(
 	ctx queue.Context,
 	args MatchRecurringTransactionsToSpendingArguments,
@@ -68,6 +68,15 @@ func MatchRecurringTransactionsToSpending(
 			}
 		}
 
+		// A spending object can only be linked to a single recurring transaction,
+		// so anything already linked is off the table.
+		linked := make(map[models.ID[models.Spending]]bool, len(recurrings))
+		for _, recurring := range recurrings {
+			if recurring.SpendingId != nil {
+				linked[*recurring.SpendingId] = true
+			}
+		}
+
 		matched := 0
 		for i := range recurrings {
 			recurring := &recurrings[i]
@@ -90,11 +99,12 @@ func MatchRecurringTransactionsToSpending(
 			}
 
 			spendingId, ok := matchSpendingForRecurring(transactions)
-			if !ok || !expenses[spendingId] {
+			if !ok || !expenses[spendingId] || linked[spendingId] {
 				continue
 			}
 
 			recurring.SpendingId = &spendingId
+			recurring.AutoMatched = true
 			if err := repo.UpdateTransactionRecurring(
 				ctx,
 				args.BankAccountId,
@@ -107,6 +117,7 @@ func MatchRecurringTransactionsToSpending(
 				"transactionRecurringId", recurring.TransactionRecurringId,
 				"spendingId", spendingId,
 			)
+			linked[spendingId] = true
 			matched++
 		}
 

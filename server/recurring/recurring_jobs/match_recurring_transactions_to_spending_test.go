@@ -133,6 +133,7 @@ func TestMatchRecurringTransactionsToSpending(t *testing.T) {
 		require.NotNil(t, result[0].SpendingId, "should have been linked to the expense")
 		assert.Equal(t, expense.SpendingId, *result[0].SpendingId, "should be linked to the expense it was spent from")
 		assert.Nil(t, result[0].FundingScheduleId, "should not be linked to a funding schedule")
+		assert.True(t, result[0].AutoMatched, "should be marked as auto matched")
 	})
 
 	t.Run("one recent transaction is not enough", func(t *testing.T) {
@@ -256,6 +257,36 @@ func TestMatchRecurringTransactionsToSpending(t *testing.T) {
 		require.Len(t, result, 1, "should still have a single recurring transaction")
 		require.NotNil(t, result[0].SpendingId, "should still be linked")
 		assert.Equal(t, linked.SpendingId, *result[0].SpendingId, "should still be linked to the original expense")
+		assert.False(t, result[0].AutoMatched, "a link the user made must not be marked as auto matched")
+	})
+
+	t.Run("does not link an expense another recurring transaction has", func(t *testing.T) {
+		clock := clock.NewMock()
+		clock.Set(time.Date(2026, 7, 1, 9, 0, 0, 0, time.UTC))
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(
+			t,
+			clock,
+			&link,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
+		expense := givenIHaveSpending(t, clock, bankAccount, models.SpendingTypeExpense, "Github")
+		linkedCluster, _ := givenIHaveARecurringExpense(t, clock, bankAccount)
+		linked := readRecurringByCluster(t, clock, linkedCluster)
+		linked[0].SpendingId = &expense.SpendingId
+		testutils.MustDBUpdate(t, &linked[0])
+		otherCluster, transactions := givenIHaveARecurringExpense(t, clock, bankAccount)
+		givenTheTransactionsWereSpentFrom(t, expense, transactions[3], transactions[4], transactions[5])
+
+		// An expense can only be linked to one recurring transaction, linking it
+		// again would fail the whole job.
+		require.NoError(t, runMatchRecurringTransactionsToSpending(t, clock, bankAccount), "job must succeed")
+		result := readRecurringByCluster(t, clock, otherCluster)
+		require.Len(t, result, 1, "should still have a single recurring transaction")
+		assert.Nil(t, result[0].SpendingId, "should not take the expense from the other recurring transaction")
+		assert.False(t, result[0].AutoMatched, "should not be marked as auto matched")
 	})
 
 	t.Run("bank account without recurring transactions", func(t *testing.T) {

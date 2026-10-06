@@ -25,6 +25,7 @@ function fixture(overrides: Partial<WithJsonValues<TransactionRecurring>> = {}):
       800: 3,
     },
     lastAmount: 800,
+    autoMatched: false,
     spending: null,
     fundingSchedule: null,
     createdAt: '2026-03-15T06:00:00Z',

@@ -38,6 +38,8 @@ export default class TransactionRecurring {
   readonly direction: 'debit' | 'credit';
   readonly amounts: { [key: number]: number };
   readonly lastAmount: number;
+  // autoMatched is true when monetr linked the expense itself instead of the user picking it
+  readonly autoMatched: boolean;
   // spending is the expense tracking this recurring transaction, if there is one
   readonly spending: Spending | null;
   // fundingSchedule is the funding schedule tracking this recurring transaction, if there is one
@@ -61,6 +63,7 @@ export default class TransactionRecurring {
     this.direction = data.direction;
     this.amounts = data.amounts;
     this.lastAmount = data.lastAmount;
+    this.autoMatched = data.autoMatched;
     this.spending = data.spending ? new Spending(data.spending) : null;
     this.fundingSchedule = data.fundingSchedule ? new FundingSchedule(data.fundingSchedule) : null;
     this.createdAt = parseDate(data.createdAt);

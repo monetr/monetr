@@ -56,6 +56,7 @@ funding schedule.
 | `confidence`             | number                  | How sure monetr is about the schedule, between 0.6 and 1. Anything under 0.6 doesn't get to be a recurring transaction at all.                                                                                    |
 | `amounts`                | object                  | How many times each amount showed up. Keys are amounts in the currency's smallest unit, as strings since it's JSON, and values are counts. Handy for spotting a price change.                                     |
 | `lastAmount`             | integer                 | The amount of the most recent transaction, in the currency's smallest unit. Usually your best guess for what the next one will be. See [Currencies](./currencies#how-monetr-stores-money).                        |
+| `autoMatched`            | boolean                 | True when monetr linked the expense for you, because you kept spending its recent transactions from that expense. Goes back to false as soon as you change the link yourself.                                     |
 | `createdAt`              | timestamp               | When monetr first decided it was recurring.                                                                                                                                                                       |
 | `updatedAt`              | timestamp               | When it was last recalculated or linked. This changes on every recalculation, even when nothing about it did, so don't use it to spot changes.                                                                    |
 
@@ -69,7 +70,9 @@ working and the transactions that were in it go back to a null `transactionRecur
 schedule was linked to it sticks around, it just isn't linked to anything anymore.
 
 Recalculating doesn't touch the links. They stay put until you change them, or until you delete the expense or funding
-schedule, which sets `spendingId` or `fundingScheduleId` back to null.
+schedule, which sets `spendingId` or `fundingScheduleId` back to null. The one exception is a debit with no links at
+all: if two of its last three transactions were spent from the same expense, and nothing else is linked to that
+expense yet, monetr links it for you and sets `autoMatched`.
 
 ## <Badge type="info">GET</Badge> Get a recurring transaction
 
@@ -118,6 +121,7 @@ curl --request GET \
     "1549": 3
   },
   "lastAmount": 1549,
+  "autoMatched": false,
   "createdAt": "2024-05-13T03:15:06.214Z",
   "updatedAt": "2024-08-30T03:15:05.902Z"
 }
@@ -219,6 +223,7 @@ curl --request PATCH \
     "1549": 3
   },
   "lastAmount": 1549,
+  "autoMatched": false,
   "createdAt": "2024-05-13T03:15:06.214Z",
   "updatedAt": "2024-08-30T14:02:11.733Z"
 }

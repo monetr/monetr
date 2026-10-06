@@ -363,6 +363,43 @@ func TestPatchRecurringTransaction(t *testing.T) {
 		response.JSON().Path("$.spending.spendingId").IsEqual(second.SpendingId)
 	})
 
+	t.Run("clears auto matched when the user changes the link", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		first := givenIHaveASpending(t, app.Clock, fundingSchedule, SpendingTypeExpense, "Github")
+		second := givenIHaveASpending(t, app.Clock, fundingSchedule, SpendingTypeExpense, "Github Copilot")
+		recurring := givenIHaveATransactionRecurring(t, bank)
+		recurring.SpendingId = &first.SpendingId
+		recurring.AutoMatched = true
+		testutils.MustDBUpdate(t, &recurring)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		e.GET("/api/bank_accounts/{bankAccountId}/recurring/{transactionRecurringId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionRecurringId", recurring.TransactionRecurringId).
+			WithCookie(TestCookieName, token).
+			Expect().
+			Status(http.StatusOK).
+			JSON().Path("$.autoMatched").IsEqual(true)
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/recurring/{transactionRecurringId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionRecurringId", recurring.TransactionRecurringId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"spendingId": second.SpendingId,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.autoMatched").IsEqual(false)
+		stored := testutils.MustDBRead(t, recurring)
+		assert.False(t, stored.AutoMatched, "a link the user chose must not be marked as auto matched")
+	})
+
 	t.Run("an expense can only be linked once", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)

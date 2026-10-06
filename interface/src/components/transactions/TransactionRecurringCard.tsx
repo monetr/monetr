@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import { differenceInCalendarDays, isThisYear, startOfToday } from 'date-fns';
-import { ArrowRight, CalendarSync, Plus, Repeat, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
+import { ArrowRight, CalendarSync, Plus, Repeat, Sparkles, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
 import { rrulestr } from 'rrule';
 import { Link } from 'wouter';
 
@@ -119,9 +119,27 @@ export default function TransactionRecurringCard({
           {recurring.spending ? (
             <Fragment>
               <span className={styles.spentFrom}>
-                <span className={styles.spentFromIcon}>
-                  <Wallet />
-                </span>
+                {recurring.autoMatched ? (
+                  <Tooltip delayDuration={100}>
+                    <TooltipTrigger asChild>
+                      <span
+                        aria-label='Linked automatically'
+                        className={styles.spentFromIcon}
+                        data-testid='transaction-recurring-auto-matched'
+                        role='img'
+                      >
+                        <Sparkles />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent side='top'>
+                      monetr linked this for you since your recent charges were spent from {recurring.spending.name}
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <span className={styles.spentFromIcon}>
+                    <Wallet />
+                  </span>
+                )}
                 <span>
                   Budgeted with <strong>{recurring.spending.name}</strong>
                 </span>
