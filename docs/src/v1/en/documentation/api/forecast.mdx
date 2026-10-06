@@ -196,7 +196,13 @@ the damage before they commit.
 
 ```http
 QUERY /api/bank_accounts/:bankAccountId/forecast/spending
+POST /api/bank_accounts/:bankAccountId/forecast/spending
 ```
+
+:::warning
+The `POST` version of this endpoint is deprecated and will be removed in a future release. Send the same body with
+`QUERY` instead.
+:::
 
 **Auth:** API key, subscription required.
 
@@ -257,7 +263,8 @@ someone, where an average would land between two amounts that never occur.
 
 **[v1.18.0](https://github.com/monetr/monetr/releases/tag/v1.18.0)**
 
-- Switched to the `QUERY` method, since this only reads data and never changes anything. `POST` still works the same as before.
+- Switched to the `QUERY` method, since this only reads data and never changes anything.
+- Deprecated the `POST` version. It still works the same for now, but will be removed in a future release.
 
 :::
 
@@ -277,7 +284,13 @@ schedule will take at its next funding event.
 
 ```http
 QUERY /api/bank_accounts/:bankAccountId/forecast/next_funding
+POST /api/bank_accounts/:bankAccountId/forecast/next_funding
 ```
+
+:::warning
+The `POST` version of this endpoint is deprecated and will be removed in a future release. Send the same body with
+`QUERY` instead.
+:::
 
 **Auth:** API key, subscription required.
 
@@ -318,7 +331,8 @@ schedule](./funding_schedules#get-a-funding-schedule) to work out what's left ov
 
 **[v1.18.0](https://github.com/monetr/monetr/releases/tag/v1.18.0)**
 
-- Switched to the `QUERY` method, since this only reads data and never changes anything. `POST` still works the same as before.
+- Switched to the `QUERY` method, since this only reads data and never changes anything.
+- Deprecated the `POST` version. It still works the same for now, but will be removed in a future release.
 
 :::
 
