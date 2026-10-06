@@ -25,9 +25,9 @@ export default class TransactionRecurring {
   readonly bankAccountId: ID<BankAccount>;
   readonly transactionClusterId: ID<TransactionCluster>;
   // spendingId is the expense tracking this recurring transaction, only ever set on debits
-  readonly spendingId: ID<Spending> | null;
+  spendingId: ID<Spending> | null;
   // fundingScheduleId is the funding schedule tracking this recurring transaction, only ever set on credits
-  readonly fundingScheduleId: ID<FundingSchedule> | null;
+  fundingScheduleId: ID<FundingSchedule> | null;
   readonly window: TransactionRecurringWindow;
   readonly ruleset: string;
   readonly first: Date;
