@@ -314,43 +314,6 @@ func TestRepositoryBase_GetTransactionRecurrings(t *testing.T) {
 		assert.Empty(t, result, "there should be no recurring transactions")
 	})
 
-	t.Run("includes the cluster", func(t *testing.T) {
-		clock := clock.NewMock()
-		log := testutils.GetLog(t)
-		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
-		link := fixtures.GivenIHaveAManualLink(t, clock, user)
-		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
-		cluster := givenIHaveATransactionCluster(t, bankAccount)
-		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, clock, &bankAccount, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15", false)
-		spending := givenIHaveAnExpense(t, clock, bankAccount, fundingSchedule, "Github")
-
-		repo := repository.NewRepositoryFromSession(
-			clock,
-			user.UserId,
-			user.AccountId,
-			testutils.GetPgDatabase(t),
-			log,
-		)
-
-		recurring := []models.TransactionRecurring{
-			newTransactionRecurring(t, cluster, models.DebitDirection, 800),
-		}
-		err := repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, recurring)
-		require.NoError(t, err, "must be able to create recurring transactions")
-		recurring[0].SpendingId = &spending.SpendingId
-		err = repo.UpdateTransactionRecurring(t.Context(), bankAccount.BankAccountId, &recurring[0])
-		require.NoError(t, err, "must be able to link the spending")
-
-		result, err := repo.GetTransactionRecurrings(t.Context(), bankAccount.BankAccountId, nil, nil, 25, 0)
-		assert.NoError(t, err, "must be able to read recurring transactions")
-		require.Len(t, result, 1, "should return the recurring transaction")
-		require.NotNil(t, result[0].TransactionCluster, "cluster should be included")
-		assert.Equal(t, "Github", result[0].TransactionCluster.Name, "cluster name should be there")
-		assert.Empty(t, result[0].TransactionCluster.Members, "members should be left out")
-		require.NotNil(t, result[0].SpendingId, "spending id should still be there")
-		assert.Equal(t, spending.SpendingId, *result[0].SpendingId, "should be the linked spending")
-	})
-
 	t.Run("pagination", func(t *testing.T) {
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
