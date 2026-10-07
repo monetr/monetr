@@ -31,8 +31,10 @@ export function useCreateBankAccount(): (_bankAccount: CreateBankAccountRequest)
     mutationFn: createBankAccount,
     onSuccess: (newBankAccount: BankAccount) =>
       Promise.all([
-        queryClient.setQueryData(['GET', '/api/bank_accounts'], (previous: Array<Partial<BankAccount>>) =>
-          (previous ?? []).concat(newBankAccount),
+        queryClient.setQueryData(
+          ['GET', '/api/bank_accounts'],
+          // If the list hasn't been loaded yet then leave it alone, otherwise we'd cache a list with only this one in it
+          (previous: Array<Partial<BankAccount>> | undefined) => previous?.concat(newBankAccount),
         ),
         queryClient.setQueryData(['GET', `/api/bank_accounts/${newBankAccount.bankAccountId}`], newBankAccount),
       ]),

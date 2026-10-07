@@ -25,8 +25,9 @@ export function useUpdateSpending(): (_spending: PatchSpendingRequest) => Promis
       Promise.all([
         queryClient.setQueryData(
           ['GET', `/api/bank_accounts/${updatedSpending.bankAccountId}/spending`],
-          (previous: Array<Partial<Spending>>) =>
-            (previous ?? []).map(item => (item.spendingId === updatedSpending.spendingId ? updatedSpending : item)),
+          // If the list hasn't been loaded yet then leave it alone, otherwise we'd cache an empty list
+          (previous: Array<Partial<Spending>> | undefined) =>
+            previous?.map(item => (item.spendingId === updatedSpending.spendingId ? updatedSpending : item)),
         ),
         queryClient.setQueryData(
           ['GET', `/api/bank_accounts/${updatedSpending.bankAccountId}/spending/${updatedSpending.spendingId}`],

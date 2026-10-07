@@ -1,4 +1,5 @@
 import { act } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 import {
   type PatchFundingScheduleResponse,
@@ -227,5 +228,83 @@ describe('patch funding schedule', () => {
     const spending = result.spending[0];
     expect(spending).toBeInstanceOf(Spending);
     expect(spending?.spendingId).toBe('spnd_01hy4rfqk8z4xv1c2v44cf6abc');
+  });
+
+  it('will leave the funding schedule and spending lists alone when they were never loaded', async () => {
+    mockFetch
+      .onPatch('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/funding_schedules/fund_01hy4re7c1xc2v44cf6kx302jx')
+      .reply(200, {
+        fundingSchedule: {
+          bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
+          dateStarted: '2023-02-28T06:00:00Z',
+          description: '15th and last day of every month',
+          estimatedDeposit: null,
+          excludeWeekends: true,
+          fundingScheduleId: 'fund_01hy4re7c1xc2v44cf6kx302jx',
+          lastRecurrence: '2023-09-29T05:00:00Z',
+          name: "Elliot's Contribution",
+          nextRecurrence: '2023-10-13T05:00:00Z',
+          nextRecurrenceOriginal: '2023-10-15T05:00:00Z',
+          ruleset: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
+          waitForDeposit: false,
+        },
+        spending: [
+          {
+            spendingId: 'spnd_01hy4rkq0x3c6dtr9w1p2v5bns',
+            bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
+            fundingScheduleId: 'fund_01hy4re7c1xc2v44cf6kx302jx',
+            spendingType: 'expense',
+            name: 'Netflix',
+            targetAmount: 1549,
+            currentAmount: 0,
+            usedAmount: 0,
+            ruleset: 'DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15',
+            lastRecurrence: null,
+            nextRecurrence: '2099-04-15T05:00:00Z',
+            nextContributionAmount: 774,
+            isBehind: false,
+            isPaused: false,
+            autoCreateTransaction: false,
+            createdAt: '2026-03-16T06:00:00Z',
+          },
+        ],
+      });
+
+    const world = testRenderHook(
+      () => ({
+        patchFundingSchedule: usePatchFundingSchedule(),
+        queryClient: useQueryClient(),
+      }),
+      {
+        initialRoute: '/bank/bac_01hy4rcmadc01d2kzv7vynbxxx/funding',
+      },
+    );
+    await act(async () => {
+      await world.result.current.patchFundingSchedule({
+        fundingScheduleId: ID.from<FundingSchedule>('fund_01hy4re7c1xc2v44cf6kx302jx'),
+        bankAccountId: ID.from<BankAccount>('bac_01hy4rcmadc01d2kzv7vynbxxx'),
+        name: "Elliot's Contribution",
+      });
+    });
+
+    // Mapping over nothing would cache empty lists and hide everything until something refetched them
+    expect(
+      world.result.current.queryClient.getQueryData([
+        'GET',
+        '/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/funding_schedules',
+      ]),
+    ).toBeUndefined();
+    expect(
+      world.result.current.queryClient.getQueryData([
+        'GET',
+        '/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/spending',
+      ]),
+    ).toBeUndefined();
+    expect(
+      world.result.current.queryClient.getQueryData([
+        'GET',
+        '/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/funding_schedules/fund_01hy4re7c1xc2v44cf6kx302jx',
+      ]),
+    ).toBeDefined();
   });
 });

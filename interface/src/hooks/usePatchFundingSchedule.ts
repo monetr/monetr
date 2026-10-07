@@ -44,8 +44,9 @@ export function usePatchFundingSchedule(): (_: PatchFundingScheduleRequest) => P
       Promise.all([
         queryClient.setQueryData(
           ['GET', `/api/bank_accounts/${fundingSchedule.bankAccountId}/funding_schedules`],
-          (previous: Array<Partial<FundingSchedule>>) =>
-            (previous ?? []).map(item =>
+          // If the list hasn't been loaded yet then leave it alone, otherwise we'd cache an empty list
+          (previous: Array<Partial<FundingSchedule>> | undefined) =>
+            previous?.map(item =>
               item.fundingScheduleId === fundingSchedule.fundingScheduleId ? fundingSchedule : item,
             ),
         ),
@@ -58,10 +59,9 @@ export function usePatchFundingSchedule(): (_: PatchFundingScheduleRequest) => P
         ),
         queryClient.setQueryData(
           ['GET', `/api/bank_accounts/${fundingSchedule.bankAccountId}/spending`],
-          (previous: Array<Partial<Spending>>) =>
-            (previous ?? []).map(
-              item => (spending || []).find(updated => updated.spendingId === item.spendingId) || item,
-            ),
+          // If the list hasn't been loaded yet then leave it alone, otherwise we'd cache an empty list
+          (previous: Array<Partial<Spending>> | undefined) =>
+            previous?.map(item => (spending || []).find(updated => updated.spendingId === item.spendingId) || item),
         ),
         (spending || []).map(spending =>
           queryClient.setQueryData(

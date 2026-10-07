@@ -30,7 +30,8 @@ export function useCreateFundingSchedule(): (_funding: CreateFundingScheduleRequ
       Promise.all([
         ctx.client.setQueryData(
           ['GET', `/api/bank_accounts/${data.bankAccountId}/funding_schedules`],
-          (previous: Array<Partial<FundingSchedule>>) => (previous ?? []).concat(data),
+          // If the list hasn't been loaded yet then leave it alone, otherwise we'd cache a list with only this one in it
+          (previous: Array<Partial<FundingSchedule>> | undefined) => previous?.concat(data),
         ),
         ctx.client.setQueryData(
           ['GET', `/api/bank_accounts/${data.bankAccountId}/funding_schedules/${data.fundingScheduleId}`],

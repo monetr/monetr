@@ -1,4 +1,5 @@
 import { act } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { useCreateFundingSchedule } from '@monetr/interface/hooks/useCreateFundingSchedule';
 import type BankAccount from '@monetr/interface/models/BankAccount';
@@ -117,5 +118,58 @@ describe('create funding schedule', () => {
         },
       });
     });
+  });
+
+  it('will leave the funding schedule list alone when it was never loaded', async () => {
+    mockFetch.onPost('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/funding_schedules').reply(200, {
+      bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
+      dateStarted: '2023-02-28T06:00:00Z',
+      description: '15th and last day of every month',
+      estimatedDeposit: null,
+      excludeWeekends: true,
+      fundingScheduleId: 'fund_01hy4re7c1xc2v44cf6kx302jx',
+      lastRecurrence: '2023-09-29T05:00:00Z',
+      name: "Elliot's Contribution",
+      nextRecurrence: '2023-10-13T05:00:00Z',
+      nextRecurrenceOriginal: '2023-10-15T05:00:00Z',
+      ruleset: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
+      waitForDeposit: false,
+    });
+
+    const world = testRenderHook(
+      () => ({
+        createFundingSchedule: useCreateFundingSchedule(),
+        queryClient: useQueryClient(),
+      }),
+      {
+        initialRoute: '/bank/bac_01hy4rcmadc01d2kzv7vynbxxx/funding',
+      },
+    );
+    await act(async () => {
+      await world.result.current.createFundingSchedule({
+        bankAccountId: ID.from<BankAccount>('bac_01hy4rcmadc01d2kzv7vynbxxx'),
+        name: "Elliot's Contribution",
+        description: 'something',
+        nextRecurrence: parseDate('2023-07-31T05:00:00Z') ?? undefined,
+        ruleset: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
+        estimatedDeposit: null,
+        excludeWeekends: true,
+        autoCreateTransaction: false,
+      });
+    });
+
+    // Caching a list with just the new one in it would hide every other funding schedule until something refetched it
+    expect(
+      world.result.current.queryClient.getQueryData([
+        'GET',
+        '/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/funding_schedules',
+      ]),
+    ).toBeUndefined();
+    expect(
+      world.result.current.queryClient.getQueryData([
+        'GET',
+        '/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/funding_schedules/fund_01hy4re7c1xc2v44cf6kx302jx',
+      ]),
+    ).toBeDefined();
   });
 });

@@ -19,8 +19,10 @@ export function useCreateLink(): (_link: CreateLinkRequest) => Promise<Link> {
     },
     onSuccess: (newLink: Link, _a, _b, context) =>
       Promise.all([
-        context.client.setQueryData(['GET', '/api/links'], (previous: Array<Partial<Link>> | null) =>
-          (previous ?? []).concat(newLink),
+        context.client.setQueryData(
+          ['GET', '/api/links'],
+          // If the list hasn't been loaded yet then leave it alone, otherwise we'd cache a list with only this one in it
+          (previous: Array<Partial<Link>> | undefined) => previous?.concat(newLink),
         ),
         context.client.setQueryData(['GET', `/api/links/${newLink.linkId}`], newLink),
       ]),

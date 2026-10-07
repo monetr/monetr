@@ -34,7 +34,8 @@ export function useCreateSpending(): (_spending: CreateSpendingRequest) => Promi
       Promise.all([
         ctx.client.setQueryData(
           ['GET', `/api/bank_accounts/${data.bankAccountId}/spending`],
-          (previous: Array<Partial<Spending>>) => (previous || []).concat(data),
+          // If the list hasn't been loaded yet then leave it alone, otherwise we'd cache a list with only this one in it
+          (previous: Array<Partial<Spending>> | undefined) => previous?.concat(data),
         ),
         ctx.client.setQueryData(['GET', `/api/bank_accounts/${data.bankAccountId}/spending/${data.spendingId}`], data),
         ctx.client.invalidateQueries({ queryKey: ['GET', `/api/bank_accounts/${data.bankAccountId}/balances`] }),
