@@ -74,9 +74,9 @@ TEXT ·__fastFourierTransform_AVX512(SB), NOSPLIT, $0-48
 
   LEAQ ·fourierScatter4096(SB), BX // Point BX at the start of the bit reversal table. Each entry is a 4 byte offset into dst
 
-	// PASS1 reads 4 spots in src at once, each a quarter of the way apart. We
-	// need those distances in bytes. A complex128 is 16 bytes, so n/4 points is
-	// (n/4) * 16 = n*4 bytes
+  // PASS1 reads 4 spots in src at once, each a quarter of the way apart. We
+  // need those distances in bytes. A complex128 is 16 bytes, so n/4 points is
+  // (n/4) * 16 = n*4 bytes
   MOVQ AX, R9   // Copy n into R9
   SHLQ $2, R9   // Shift left by 2 to multiply by 4. R9 = n*4, the byte distance to a quarter of the way through src
   MOVQ R9, R8   // Copy n*4 into R8
@@ -96,10 +96,10 @@ TEXT ·__fastFourierTransform_AVX512(SB), NOSPLIT, $0-48
   //   a2 = src[q + n/4]
   //   a3 = src[q + 3n/4]
   //
-	// After the bit reversal those 4 points end up right next to each other in
-	// the order a0, a1, a2, a3. So instead of shuffling src into bit reversed
-	// order first, we just read them from where they already are and only have
-	// to figure out where to write the results
+  // After the bit reversal those 4 points end up right next to each other in
+  // the order a0, a1, a2, a3. So instead of shuffling src into bit reversed
+  // order first, we just read them from where they already are and only have
+  // to figure out where to write the results
   PASS1:
     VMOVUPD (SI),        Z0 // Load a0 for q0 through q3 into Z0
     VMOVUPD (SI)(R8*1),  Z1 // Load a1 for q0 through q3 into Z1, from SI + n*8 (halfway)
@@ -113,19 +113,19 @@ TEXT ·__fastFourierTransform_AVX512(SB), NOSPLIT, $0-48
     VADDPD Z3, Z2, Z6 // b2 = a2 + a3, stored in Z6
     VSUBPD Z3, Z2, Z7 // b3 = a2 - a3, stored in Z7
 
-		// Second stage. b2 gets multiplied by 1 and b3 gets multiplied by -i. We
-		// don't need an actual multiply for -i though:
+    // Second stage. b2 gets multiplied by 1 and b3 gets multiplied by -i. We
+    // don't need an actual multiply for -i though:
     //
     //   (x + iy) * -i = -ix - i*i*y = y - ix
     //
-		// So the new real half is y and the new imaginary half is -x. That is just
-		// swapping the two halves and then flipping the sign of the imaginary
-		// half
+    // So the new real half is y and the new imaginary half is -x. That is just
+    // swapping the two halves and then flipping the sign of the imaginary
+    // half
     //
-		// VPERMILPD picks the real half (0) or the imaginary half (1) for each
-		// float64 using one bit each, read from the right. 0x55 is 01010101, so
-		// the first float64 of each pair gets the imaginary half and the second
-		// gets the real half, which is a swap
+    // VPERMILPD picks the real half (0) or the imaginary half (1) for each
+    // float64 using one bit each, read from the right. 0x55 is 01010101, so
+    // the first float64 of each pair gets the imaginary half and the second
+    // gets the real half, which is a swap
     VPERMILPD $0x55, Z7, Z7 // Swap the halves of b3, so (x, y) becomes (y, x)
     VPXORQ    Z16,   Z7, Z7 // XOR with the imaginary sign mask, so (y, x) becomes (y, -x). Z7 is now -i * b3
 
@@ -134,22 +134,22 @@ TEXT ·__fastFourierTransform_AVX512(SB), NOSPLIT, $0-48
     VSUBPD Z6, Z4, Z10 // c2 = b0 - b2, stored in Z10
     VSUBPD Z7, Z5, Z11 // c3 = b1 - (-i * b3), stored in Z11
 
-		// Now we have all 16 outputs but they are in the wrong registers. Z8 has
-		// c0 for all 4 butterflies, Z9 has c1 for all 4, and so on:
+    // Now we have all 16 outputs but they are in the wrong registers. Z8 has
+    // c0 for all 4 butterflies, Z9 has c1 for all 4, and so on:
     //
     //   Z8  = [c0(q0), c0(q1), c0(q2), c0(q3)]
     //   Z9  = [c1(q0), c1(q1), c1(q2), c1(q3)]
     //   Z10 = [c2(q0), c2(q1), c2(q2), c2(q3)]
     //   Z11 = [c3(q0), c3(q1), c3(q2), c3(q3)]
     //
-		// But dst wants c0 through c3 of one butterfly next to each other, like
-		// [c0(q0), c1(q0), c2(q0), c3(q0)]. So we need to transpose the 4x4 above
+    // But dst wants c0 through c3 of one butterfly next to each other, like
+    // [c0(q0), c1(q0), c2(q0), c3(q0)]. So we need to transpose the 4x4 above
     //
-		// VSHUFF64X2 builds a register out of the lanes of two other registers. In
-		// Go order it is VSHUFF64X2 $imm, high, low, dst. The low 2 lanes of dst
-		// come from low and the high 2 lanes come from high. The immediate is 4
-		// pairs of bits read from the right, and each pair picks lane 0, 1, 2 or
-		// 3
+    // VSHUFF64X2 builds a register out of the lanes of two other registers. In
+    // Go order it is VSHUFF64X2 $imm, high, low, dst. The low 2 lanes of dst
+    // come from low and the high 2 lanes come from high. The immediate is 4
+    // pairs of bits read from the right, and each pair picks lane 0, 1, 2 or
+    // 3
     //
     //   0x44 = 01 00 01 00 -> lanes 0, 1 of low, then lanes 0, 1 of high
     //   0xEE = 11 10 11 10 -> lanes 2, 3 of low, then lanes 2, 3 of high
@@ -164,11 +164,11 @@ TEXT ·__fastFourierTransform_AVX512(SB), NOSPLIT, $0-48
     VSHUFF64X2 $0x88, Z15, Z13, Z2  // Z2  = [c0(q2), c1(q2), c2(q2), c3(q2)], all of q2
     VSHUFF64X2 $0xDD, Z15, Z13, Z3  // Z3  = [c0(q3), c1(q3), c2(q3), c3(q3)], all of q3
 
-		// Each of those registers is one finished group of 4 outputs, and each
-		// group goes somewhere different in dst. The scatter table has the byte
-		// offset for each one already worked out (it is 64 * the bit reversal of
-		// q). MOVL loads 4 bytes and zeroes the top half of the register, so it is
-		// safe to use as a 64 bit offset
+    // Each of those registers is one finished group of 4 outputs, and each
+    // group goes somewhere different in dst. The scatter table has the byte
+    // offset for each one already worked out (it is 64 * the bit reversal of
+    // q). MOVL loads 4 bytes and zeroes the top half of the register, so it is
+    // safe to use as a 64 bit offset
     MOVL 0(BX),  R11 // Load the dst byte offset for q0 into R11
     MOVL 4(BX),  R12 // Load the dst byte offset for q1 into R12
     MOVL 8(BX),  R13 // Load the dst byte offset for q2 into R13
@@ -183,29 +183,29 @@ TEXT ·__fastFourierTransform_AVX512(SB), NOSPLIT, $0-48
     SUBQ $1,  CX // Subtract 1 from the CX loop counter
     JNZ  PASS1   // If CX is not zero then jump back to the start of PASS1
 
-	// dst now has the first 2 stages done. Everything from here on reads and
-	// writes dst in place
+  // dst now has the first 2 stages done. Everything from here on reads and
+  // writes dst in place
   //
-	// We do the other 10 stages 2 at a time. Each pass has a size h, which is
-	// how far apart the 4 points of one butterfly are. h starts at 4 and gets 4
-	// times bigger each pass: 4, 16, 64, 256, 1024. That is 5 passes. R12 holds
-	// h in bytes (h * 16) the whole way through
+  // We do the other 10 stages 2 at a time. Each pass has a size h, which is
+  // how far apart the 4 points of one butterfly are. h starts at 4 and gets 4
+  // times bigger each pass: 4, 16, 64, 256, 1024. That is 5 passes. R12 holds
+  // h in bytes (h * 16) the whole way through
   //
-	// Doing 2 stages per pass means we only go through dst 5 times instead of
-	// 10. On Zen 4 a 512 bit store can only happen every other cycle, so cutting
-	// the number of loads and stores in half is a big deal here:
-	// https://uops.info/html-instr/VMOVUPD_M512_ZMM.html
+  // Doing 2 stages per pass means we only go through dst 5 times instead of
+  // 10. On Zen 4 a 512 bit store can only happen every other cycle, so cutting
+  // the number of loads and stores in half is a big deal here:
+  // https://uops.info/html-instr/VMOVUPD_M512_ZMM.html
   //
-	// dst gets split up into blocks of 4h points. In each block, butterfly j (0
-	// through h-1) reads 4 points a, b, c and d that are each h apart, and does:
+  // dst gets split up into blocks of 4h points. In each block, butterfly j (0
+  // through h-1) reads 4 points a, b, c and d that are each h apart, and does:
   //
   //   a' = a + w1*b        A = a' + w2*c'
   //   b' = a - w1*b        B = b' + w3*d'
   //   c' = c + w1*d        C = a' - w2*c'
   //   d' = c - w1*d        D = b' - w3*d'
   //
-	// The left side is the first stage and the right side is the second stage.
-	// Then A, B, C and D get written back to where a, b, c and d came from
+  // The left side is the first stage and the right side is the second stage.
+  // Then A, B, C and D get written back to where a, b, c and d came from
   //
   // w1, w2 and w3 are the twiddle factors for butterfly j. W(N) is
   // e^(-2*pi*i/N), the same as complexExponential(-2 * math.Pi / N) in Go
@@ -214,13 +214,13 @@ TEXT ·__fastFourierTransform_AVX512(SB), NOSPLIT, $0-48
   //   w2 = W(4h)^j      The next h entries in the twiddle table
   //   w3 = W(4h)^(j+h)  Not in the table at all
   //
-	// We don't store w3 because it is always -i * w2, and like in PASS1 -i * (x
-	// + iy) = y - ix. So the real half of w3 is the imaginary half of w2, and
-	// the imaginary half of w3 is the real half of w2 with the sign flipped
+  // We don't store w3 because it is always -i * w2, and like in PASS1 -i * (x
+  // + iy) = y - ix. So the real half of w3 is the imaginary half of w2, and
+  // the imaginary half of w3 is the real half of w2 with the sign flipped
   //
-	// A twiddle entry is a complex128, 16 bytes, same as a point in dst. So
-	// adding h bytes gets us from w1 to w2 in the table the same way it gets us
-	// from a to b in dst
+  // A twiddle entry is a complex128, 16 bytes, same as a point in dst. So
+  // adding h bytes gets us from w1 to w2 in the table the same way it gets us
+  // from a to b in dst
   LEAQ    ·fourierTwiddles4096(SB), BX  // Point BX at the start of the twiddle table. It moves forward after each pass
   VMOVUPD const_negate_all<>(SB),   Z31 // Load the sign mask for every float64 into Z31, used to get w3 from w2
 
@@ -234,15 +234,15 @@ TEXT ·__fastFourierTransform_AVX512(SB), NOSPLIT, $0-48
     LEAQ (R12)(R12*2), R13 // R13 = R12 + R12*2 = 3h in bytes, the distance from a to d
     MOVQ DI,           R8  // R8 is the start of the current block, start at the beginning of dst
 
-		// WIDEBUTTERFLY does 2 sets of registers per loop, j through j+3 in one
-		// set and j+4 through j+7 in the other. This is the same idea as the 2
-		// accumulators in the euclidean distance code. Each set is a long chain
-		// where every instruction waits on the one before it, so having 2
-		// independent chains gives the CPU something else to work on while it
-		// waits
+    // WIDEBUTTERFLY does 2 sets of registers per loop, j through j+3 in one
+    // set and j+4 through j+7 in the other. This is the same idea as the 2
+    // accumulators in the euclidean distance code. Each set is a long chain
+    // where every instruction waits on the one before it, so having 2
+    // independent chains gives the CPU something else to work on while it
+    // waits
     //
-		// That needs at least 8 values of j in a block. When h is 4 there are only
-		// 4, so that pass goes through NARROWBLOCK instead which only does 1 set
+    // That needs at least 8 values of j in a block. When h is 4 there are only
+    // 4, so that pass goes through NARROWBLOCK instead which only does 1 set
     CMPQ R12, $64    // Is h 64 bytes (4 points)?
     JEQ  NARROWBLOCK // If it is then jump to NARROWBLOCK for this pass
 
@@ -252,14 +252,14 @@ TEXT ·__fastFourierTransform_AVX512(SB), NOSPLIT, $0-48
       MOVQ R12, SI  // SI counts down the bytes of j left in this block, starting at h
 
       WIDEBUTTERFLY:
-				// To multiply by a twiddle factor w = (wr, wi) we need (wr, wr) in one
-				// register and (wi, wi) in another. VMOVDDUP copies the real half over
-				// the imaginary half. VPERMILPD with 0xFF (all 1s) picks the imaginary
-				// half for both
+        // To multiply by a twiddle factor w = (wr, wi) we need (wr, wr) in one
+        // register and (wi, wi) in another. VMOVDDUP copies the real half over
+        // the imaginary half. VPERMILPD with 0xFF (all 1s) picks the imaginary
+        // half for both
         //
-				// Both of those can load straight from memory, but then we would be
-				// loading the same 64 bytes twice. Zen 4 can't do that many 512 bit
-				// loads per cycle, so we load once into Z30 and split it from there
+        // Both of those can load straight from memory, but then we would be
+        // loading the same 64 bytes twice. Zen 4 can't do that many 512 bit
+        // loads per cycle, so we load once into Z30 and split it from there
         //   https://uops.info/html-instr/VMOVUPD_ZMM_M512.html
         //   https://uops.info/html-instr/VMOVDDUP_ZMM_M512.html
         //   https://uops.info/html-instr/VPERMILPD_ZMM_M512_I8.html
@@ -327,12 +327,12 @@ TEXT ·__fastFourierTransform_AVX512(SB), NOSPLIT, $0-48
         VADDPD Z25, Z17, Z28 // Z28 = c' for j+4 through j+7
         VSUBPD Z25, Z17, Z29 // Z29 = d' for j+4 through j+7
 
-				// Second stage, we need w2*c' and w3*d'. This is the same 3 step
-				// multiply as above. We are done with a and b now so Z0, Z1, Z15 and
-				// Z16 get reused for the swapped copies
+        // Second stage, we need w2*c' and w3*d'. This is the same 3 step
+        // multiply as above. We are done with a and b now so Z0, Z1, Z15 and
+        // Z16 get reused for the swapped copies
         //
-				// For w3 we use Z7 (w2.imag) as w3.real and Z8 (-w2.real) as w3.imag,
-				// see the notes above PASS4
+        // For w3 we use Z7 (w2.imag) as w3.real and Z8 (-w2.real) as w3.imag,
+        // see the notes above PASS4
         VPERMILPD      $0x55, Z13, Z0  // Z0 = c' swapped
         VPERMILPD      $0x55, Z14, Z1  // Z1 = d' swapped
         VPERMILPD      $0x55, Z28, Z15 // Z15 = c' swapped for j+4 through j+7
@@ -374,8 +374,8 @@ TEXT ·__fastFourierTransform_AVX512(SB), NOSPLIT, $0-48
       JCS  WIDEBLOCK       // If R8 is below the end of dst then jump back to WIDEBLOCK. JCS is the unsigned "less than"
       JMP  PASSDONE        // Otherwise this pass is done, skip over NARROWBLOCK
 
-		// NARROWBLOCK is the same as WIDEBLOCK but with only 1 set of registers,
-		// for the h = 4 pass. See WIDEBUTTERFLY for how each step works
+    // NARROWBLOCK is the same as WIDEBLOCK but with only 1 set of registers,
+    // for the h = 4 pass. See WIDEBUTTERFLY for how each step works
     NARROWBLOCK:
       MOVQ R8,  R10 // R10 points at a, start at the beginning of the block
       MOVQ BX,  R9  // R9 points at w1, start over at the top of this pass in the twiddle table
@@ -439,10 +439,10 @@ TEXT ·__fastFourierTransform_AVX512(SB), NOSPLIT, $0-48
     CMPQ R12,         DX  // Compare the new h against h for the last pass (n*4 bytes)
     JLS  PASS4            // If it is less than or the same then jump back to PASS4. JLS is the unsigned "less than or equal"
 
-	// We have to clear the top halves of the vector registers before going back
-	// to Go. Right after this returns Go zeroes X15 with XORPS, which is an old
-	// SSE instruction, and on Intel running SSE instructions while the top
-	// halves are dirty is slow
+  // We have to clear the top halves of the vector registers before going back
+  // to Go. Right after this returns Go zeroes X15 with XORPS, which is an old
+  // SSE instruction, and on Intel running SSE instructions while the top
+  // halves are dirty is slow
   VZEROUPPER // Zero the upper bits of the vector registers
   RET        // We are done, return
 
@@ -496,8 +496,8 @@ TEXT ·__fastFourierTransform_AVX_FMA(SB), NOSPLIT, $0-48
   MOVQ AX, CX  // Copy n into CX, this is our loop counter
   SHRQ $3, CX  // Shift right by 3 to divide by 8. We go through the first quarter of src 2 at a time, so n/8 loops (512)
 
-	// Same as PASS1 in the AVX512 version, but only 2 butterflies side by side
-	// (q0 and q1) instead of 4
+  // Same as PASS1 in the AVX512 version, but only 2 butterflies side by side
+  // (q0 and q1) instead of 4
   PASS1_AVXFMA:
     VMOVUPD (SI),        Y0 // Load a0 for q0 and q1 into Y0
     VMOVUPD (SI)(R8*1),  Y1 // Load a1 into Y1, from halfway through src
@@ -524,14 +524,14 @@ TEXT ·__fastFourierTransform_AVX_FMA(SB), NOSPLIT, $0-48
     //   Y10 = [c2(q0), c2(q1)]
     //   Y11 = [c3(q0), c3(q1)]
     //
-		// A group of 4 outputs is 64 bytes, which is 2 YMM registers. So for q0 we
-		// want [c0(q0), c1(q0)] and [c2(q0), c3(q0)], and the same for q1
+    // A group of 4 outputs is 64 bytes, which is 2 YMM registers. So for q0 we
+    // want [c0(q0), c1(q0)] and [c2(q0), c3(q0)], and the same for q1
     //
-		// VPERM2F128 builds a register out of the lanes of two other registers. In
-		// Go order it is VPERM2F128 $imm, b, a, dst. The right hex digit of the
-		// immediate picks the low lane of dst and the left digit picks the high
-		// lane: 0 is the low lane of a, 1 the high lane of a, 2 the low lane of b
-		// and 3 the high lane of b
+    // VPERM2F128 builds a register out of the lanes of two other registers. In
+    // Go order it is VPERM2F128 $imm, b, a, dst. The right hex digit of the
+    // immediate picks the low lane of dst and the left digit picks the high
+    // lane: 0 is the low lane of a, 1 the high lane of a, 2 the low lane of b
+    // and 3 the high lane of b
     //
     //   0x20 -> low lane of a, then low lane of b
     //   0x31 -> high lane of a, then high lane of b
@@ -572,8 +572,8 @@ TEXT ·__fastFourierTransform_AVX_FMA(SB), NOSPLIT, $0-48
       MOVQ R12, SI  // SI counts down the bytes of j left in this block, starting at h
 
       BUTTERFLY_AVXFMA:
-				// We are short on registers, so Y0 holds the raw twiddles first and
-				// then gets a loaded into it once the twiddles have been split out
+        // We are short on registers, so Y0 holds the raw twiddles first and
+        // then gets a loaded into it once the twiddles have been split out
         VMOVUPD   (R9),         Y0 // Load w1 for j and j+1 into Y0
         VMOVDDUP  Y0,           Y4 // Y4 = (w1.real, w1.real)
         VPERMILPD $0xF,     Y0, Y5 // Y5 = (w1.imag, w1.imag). 0xF is 1111, the YMM version of 0xFF
@@ -739,12 +739,12 @@ TEXT ·__fastFourierTransform_AVX(SB), NOSPLIT, $0-48
 
         // w1*b without FMA, for w = (wr, wi) and b = (br, bi):
         //
-				//   1. Swap the halves of b and multiply by (wi, wi) to get (bi*wi,
-				//      br*wi)
+        //   1. Swap the halves of b and multiply by (wi, wi) to get (bi*wi,
+        //      br*wi)
         //   2. Multiply b by (wr, wr) to get (br*wr, bi*wr)
-				//   3. VADDSUBPD does step 2 - step 1 on the real half and step 2 +
-				//      step 1 on the imaginary half. That gives (br*wr - bi*wi, bi*wr
-				//      + br*wi)
+        //   3. VADDSUBPD does step 2 - step 1 on the real half and step 2 +
+        //      step 1 on the imaginary half. That gives (br*wr - bi*wi, bi*wr
+        //      + br*wi)
         //
         // Step 2 writes over b since we are done with it, so this doesn't need
         // any more registers than the FMA version
@@ -854,35 +854,35 @@ TEXT ·__inverseFastFourierTransform_AVX512(SB), NOSPLIT, $0-48
   MOVQ AX, CX  // Copy n into CX, this is our loop counter
   SHRQ $4, CX  // Shift right by 4 to divide by 16. We go through the first quarter of src 4 at a time, so n/16 loops (256)
 
-	// Same 4 butterflies side by side as PASS1 in the forward version, see the
-	// notes there
+  // Same 4 butterflies side by side as PASS1 in the forward version, see the
+  // notes there
   //
-	// The loads also take care of the 1/n. VMULPD can read one of its inputs
-	// straight from memory, so each load is a multiply by Z17 instead of a
-	// VMOVUPD
+  // The loads also take care of the 1/n. VMULPD can read one of its inputs
+  // straight from memory, so each load is a multiply by Z17 instead of a
+  // VMOVUPD
   //
-	// 1/4096 is a power of two, so multiplying by it only changes the exponent.
-	// As long as nothing in the transform gets small enough to go subnormal,
-	// scaling on the way in gives the exact same answer as scaling every output
-	// at the end, and it saves an extra trip through dst
+  // 1/4096 is a power of two, so multiplying by it only changes the exponent.
+  // As long as nothing in the transform gets small enough to go subnormal,
+  // scaling on the way in gives the exact same answer as scaling every output
+  // at the end, and it saves an extra trip through dst
   PASS1_INVERSE_AVX512:
     VMULPD (SI),        Z17, Z0 // Load a0 for q0 through q3 and multiply it by 1/n, stored in Z0
     VMULPD (SI)(R8*1),  Z17, Z1 // Load a1 times 1/n into Z1, from SI + n*8 (halfway)
     VMULPD (SI)(R9*1),  Z17, Z2 // Load a2 times 1/n into Z2, from SI + n*4 (a quarter)
     VMULPD (SI)(R10*1), Z17, Z3 // Load a3 times 1/n into Z3, from SI + n*12 (three quarters)
 
-		// First stage. The twiddle factor is always 1 here, and the conjugate of 1
-		// is still 1, so this is the same as the forward version
+    // First stage. The twiddle factor is always 1 here, and the conjugate of 1
+    // is still 1, so this is the same as the forward version
     VADDPD Z1, Z0, Z4 // b0 = a0 + a1, stored in Z4
     VSUBPD Z1, Z0, Z5 // b1 = a0 - a1, stored in Z5
     VADDPD Z3, Z2, Z6 // b2 = a2 + a3, stored in Z6
     VSUBPD Z3, Z2, Z7 // b3 = a2 - a3, stored in Z7
 
-		// Second stage. The forward version multiplies b3 by -i here, and the
-		// conjugate of -i is +i. We could make i * b3 with another sign mask, but
-		// i * b3 is just -(-i * b3). So we make -i * b3 the same way the forward
-		// version does, and then swap which of c1 and c3 adds it and which one
-		// subtracts it:
+    // Second stage. The forward version multiplies b3 by -i here, and the
+    // conjugate of -i is +i. We could make i * b3 with another sign mask, but
+    // i * b3 is just -(-i * b3). So we make -i * b3 the same way the forward
+    // version does, and then swap which of c1 and c3 adds it and which one
+    // subtracts it:
     //
     //   c1 = b1 + i*b3 = b1 - (-i * b3)
     //   c3 = b1 - i*b3 = b1 + (-i * b3)
@@ -904,8 +904,8 @@ TEXT ·__inverseFastFourierTransform_AVX512(SB), NOSPLIT, $0-48
     VSHUFF64X2 $0x88, Z15, Z13, Z2  // Z2  = [c0(q2), c1(q2), c2(q2), c3(q2)], all of q2
     VSHUFF64X2 $0xDD, Z15, Z13, Z3  // Z3  = [c0(q3), c1(q3), c2(q3), c3(q3)], all of q3
 
-		// The bit reversal is the same in both directions, so this uses the same
-		// scatter table as the forward version
+    // The bit reversal is the same in both directions, so this uses the same
+    // scatter table as the forward version
     MOVL 0(BX),  R11 // Load the dst byte offset for q0 into R11
     MOVL 4(BX),  R12 // Load the dst byte offset for q1 into R12
     MOVL 8(BX),  R13 // Load the dst byte offset for q2 into R13
@@ -920,9 +920,9 @@ TEXT ·__inverseFastFourierTransform_AVX512(SB), NOSPLIT, $0-48
     SUBQ $1,  CX              // Subtract 1 from the CX loop counter
     JNZ  PASS1_INVERSE_AVX512 // If CX is not zero then jump back to the start of PASS1_INVERSE_AVX512
 
-	// The other 10 stages are the same passes as PASS4 in the forward version,
-	// see the notes there. Each radix-4 butterfly does the same thing too, just
-	// with the conjugate of every twiddle factor:
+  // The other 10 stages are the same passes as PASS4 in the forward version,
+  // see the notes there. Each radix-4 butterfly does the same thing too, just
+  // with the conjugate of every twiddle factor:
   //
   //   a' = a + conj(w1)*b        A = a' + conj(w2)*c'
   //   b' = a - conj(w1)*b        B = b' + conj(w3)*d'
@@ -991,12 +991,12 @@ TEXT ·__inverseFastFourierTransform_AVX512(SB), NOSPLIT, $0-48
         //   real = br*wr + bi*wi
         //   imag = bi*wr - br*wi
         //
-				// So steps 1 and 2 of the forward multiply stay the same, and step 3
-				// uses VFMSUBADD231PD instead of VFMADDSUB231PD. It is the twin of
-				// VFMADDSUB231PD with the add and subtract the other way around. It
-				// multiplies b by (wr, wr) to get (br*wr, bi*wr), then adds step 2 on
-				// the real half and subtracts step 2 on the imaginary half. That gives
-				// (br*wr + bi*wi, bi*wr - br*wi)
+        // So steps 1 and 2 of the forward multiply stay the same, and step 3
+        // uses VFMSUBADD231PD instead of VFMADDSUB231PD. It is the twin of
+        // VFMADDSUB231PD with the add and subtract the other way around. It
+        // multiplies b by (wr, wr) to get (br*wr, bi*wr), then adds step 2 on
+        // the real half and subtracts step 2 on the imaginary half. That gives
+        // (br*wr + bi*wi, bi*wr - br*wi)
         VPERMILPD      $0x55, Z1,  Z9  // Z9 = b with its halves swapped
         VPERMILPD      $0x55, Z3,  Z10 // Z10 = d with its halves swapped
         VPERMILPD      $0x55, Z16, Z24 // Z24 = b swapped for j+4 through j+7
@@ -1019,10 +1019,10 @@ TEXT ·__inverseFastFourierTransform_AVX512(SB), NOSPLIT, $0-48
         VADDPD Z25, Z17, Z28 // Z28 = c' for j+4 through j+7
         VSUBPD Z25, Z17, Z29 // Z29 = d' for j+4 through j+7
 
-				// Second stage, we need conj(w2)*c' and conj(w3)*d'. This is the same
-				// conjugate multiply as above. Z7 and Z8 hold w3.real and w3.imag the
-				// same as in the forward version, and VFMSUBADD231PD conjugates w3 the
-				// same way it does w1 and w2
+        // Second stage, we need conj(w2)*c' and conj(w3)*d'. This is the same
+        // conjugate multiply as above. Z7 and Z8 hold w3.real and w3.imag the
+        // same as in the forward version, and VFMSUBADD231PD conjugates w3 the
+        // same way it does w1 and w2
         VPERMILPD      $0x55, Z13, Z0  // Z0 = c' swapped
         VPERMILPD      $0x55, Z14, Z1  // Z1 = d' swapped
         VPERMILPD      $0x55, Z28, Z15 // Z15 = c' swapped for j+4 through j+7
@@ -1180,8 +1180,8 @@ TEXT ·__inverseFastFourierTransform_AVX_FMA(SB), NOSPLIT, $0-48
     VPERMILPD $0x5, Y7, Y7 // Swap the halves of b3. 0x5 is 0101, the YMM version of 0x55
     VXORPD    Y12,  Y7, Y7 // Flip the sign of the new imaginary half. Y7 is now -i * b3
 
-		// c1 and c3 are swapped compared to the forward version so that this
-		// multiplies by +i instead of -i, see PASS1_INVERSE_AVX512
+    // c1 and c3 are swapped compared to the forward version so that this
+    // multiplies by +i instead of -i, see PASS1_INVERSE_AVX512
     VADDPD Y6, Y4, Y8  // c0 = b0 + b2, stored in Y8
     VSUBPD Y7, Y5, Y9  // c1 = b1 - (-i * b3), which is b1 + i*b3, stored in Y9
     VSUBPD Y6, Y4, Y10 // c2 = b0 - b2, stored in Y10
