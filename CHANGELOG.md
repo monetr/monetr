@@ -1,5 +1,72 @@
 # Changelog
 
+## [1.18.0](https://github.com/monetr/monetr/compare/v1.17.1...v1.18.0) (2026-10-07)
+
+
+### Features
+
+* Allow funding schedules to be created from transactions ([4d6b58e](https://github.com/monetr/monetr/commit/4d6b58e132b55ccfad947cd43839153d5248f28e))
+* **api:** Adding recurring transaction mvp ([#3565](https://github.com/monetr/monetr/issues/3565)) ([a8401b4](https://github.com/monetr/monetr/commit/a8401b415e4ce1a20ef8acf6898ef3f4460b62fc))
+* **api:** Adding similar transactions list API ([#3563](https://github.com/monetr/monetr/issues/3563)) ([71e623d](https://github.com/monetr/monetr/commit/71e623dbf67ac515fb86da7d7a87b9259f2b21b4))
+* **api:** Allow expenses to be associated with recurring txns ([f2a77e7](https://github.com/monetr/monetr/commit/f2a77e70bdb2019d317efe711ba37c8a5db8d9b7))
+* Indicate when a recurring transaction is auto matched ([b950627](https://github.com/monetr/monetr/commit/b95062726a8bb28f30ceb729934d501314f1733d))
+* Recurring transactions view ([#3580](https://github.com/monetr/monetr/issues/3580)) ([34d7929](https://github.com/monetr/monetr/commit/34d7929a3738b6d5d371420f5554cd585d9051fa))
+* Trying to match recurring to existing expenses ([5cf1228](https://github.com/monetr/monetr/commit/5cf12286f66a68a41f55ee533b716b4f3177c77e))
+* **ui:** Add recurring transaction rich tooltip ([99b4d11](https://github.com/monetr/monetr/commit/99b4d1195378f6e40df91220dbe1a243471add8f))
+* **ui:** Allow expenses to be created from transactions ([#3571](https://github.com/monetr/monetr/issues/3571)) ([7500140](https://github.com/monetr/monetr/commit/750014024683651c8751fef0f74271b6b9a9b535))
+* **ui:** Get to recurring transaction from transaction itself ([07cd2bd](https://github.com/monetr/monetr/commit/07cd2bd4a0099a39d2de6115126787126ca6424b))
+
+
+### Bug Fixes
+
+* **api:** Better trusting of X-Request-Id ([28395ea](https://github.com/monetr/monetr/commit/28395ea18a13caad858e7ff82f6c74f7cea0708a))
+* **api:** Dont embed cluster in recurring txn object ([1aeac84](https://github.com/monetr/monetr/commit/1aeac84a97377b12a1e540737b5221d13f26640a))
+* **api:** Fix potential bug in OFX tokenizer/parser ([da891d7](https://github.com/monetr/monetr/commit/da891d7886771d12163b4bd2521786748edd026d))
+* **api:** Fixing redirect ([61fc64f](https://github.com/monetr/monetr/commit/61fc64f439030d3929bf75cd5498a9ef49b661b1))
+* **api:** Fixing similar transaction clustering bug ([a83af7b](https://github.com/monetr/monetr/commit/a83af7b95d21c14cbbb527d406a1b61d3e130f4d))
+* **api:** Tweak sensitivity for recurring membership ([27c7ce6](https://github.com/monetr/monetr/commit/27c7ce66ddcbc321e71af25ddc47f4f397e4500c))
+* **build:** Generate PWA images for local dev ([ae13927](https://github.com/monetr/monetr/commit/ae13927243c44637fc4f0753fcd0c1110ebbbd3b))
+* **docker:** Fixing docker compose status check ([65492ea](https://github.com/monetr/monetr/commit/65492eafd585c7a879f8f38de8c4a12f63e1fb6d))
+* Invert recurring relationship ([#3577](https://github.com/monetr/monetr/issues/3577)) ([75e0e93](https://github.com/monetr/monetr/commit/75e0e9324a7c0e9fe1aca0031a343b9ee19b5f8b))
+* **ui:** Better format date relative strings ([88162ab](https://github.com/monetr/monetr/commit/88162ab03e516d70102a7444a7115ca3f6491809))
+* **ui:** Disable funding dropdown when submitting ([e663746](https://github.com/monetr/monetr/commit/e66374630ff527d3898ee0f0feda9250f021aadd))
+* **ui:** Don't wrap the "This One" badge on similar txns ([385fff9](https://github.com/monetr/monetr/commit/385fff910f1ead0eb702a0f435b69b8c9ff3afd9))
+* **ui:** Enable spend from expense by default ([29463d1](https://github.com/monetr/monetr/commit/29463d1af8b6e96ba8ae083aab55db1a2ef0ba31))
+* **ui:** Fix clicking funding rows or goal rows ([c731691](https://github.com/monetr/monetr/commit/c7316919cca5b6ff5d0fe22f03cbbb0684730091))
+* **ui:** Fix scroll restoration when navigating back via breadcrumb ([0e1a210](https://github.com/monetr/monetr/commit/0e1a2109f972f970f66915554a1778a2a8c14ea4)), closes [#1601](https://github.com/monetr/monetr/issues/1601)
+* **ui:** Fixed bug with creating spending before its queried ([2b24ef6](https://github.com/monetr/monetr/commit/2b24ef64db42565c1b421b7e8dabc2a3d38dda44))
+* **ui:** Fixing dates not showing year properly ([c3f0102](https://github.com/monetr/monetr/commit/c3f010265eb8d1f073bab4a658b7d5cff100b10c))
+* **ui:** Make expense items clickable too ([4b503b5](https://github.com/monetr/monetr/commit/4b503b5150f513a4ffd0578ab7a7beec652c2b34))
+* **ui:** Make transactions clickable ([6d6b027](https://github.com/monetr/monetr/commit/6d6b0275f4e98f5fdf6c59f066554ebe2b829962))
+* **ui:** Migrating away from formcheckbox entirely ([6c677eb](https://github.com/monetr/monetr/commit/6c677ebfddc70eb38f7c3dfe4b2398f17f25f704))
+* **ui:** More migration to the form switch component ([d68f2fa](https://github.com/monetr/monetr/commit/d68f2fa47981185f3380ccaf4308f88252f474e6))
+* **ui:** Moving more UI elements over to switches ([2a44eae](https://github.com/monetr/monetr/commit/2a44eaea3c0d1bf85ce0a579c1cc6371893201ad))
+* **ui:** Properly align amount for expected future txn item ([594e742](https://github.com/monetr/monetr/commit/594e742562e62136b2d087ae68f432af4ddb4c15))
+* **ui:** Use percentage for confidence instead of decimal ([4465652](https://github.com/monetr/monetr/commit/4465652eb9dec8800806ffbde52d662c5e3a5d03))
+
+
+### Miscellaneous
+
+* Fixing dumb indentation ([93c0a65](https://github.com/monetr/monetr/commit/93c0a658e0fd1d36c6640ddec477de3a1e04b4c0))
+* Preparing for release cleanup ([df861c1](https://github.com/monetr/monetr/commit/df861c1cedc9bef82abd4b12f3bc0e9324f6b8d5))
+
+
+### Dependencies
+
+* **renovate:** update dependency unicode-org/cldr-json to v48.2.3 ([#3585](https://github.com/monetr/monetr/issues/3585)) ([c04c94d](https://github.com/monetr/monetr/commit/c04c94dd033a8ed0a83f4db12b02fa8d3d077edd))
+* **ui:** update dependency @imagemagick/magick-wasm to v0.0.44 ([#3583](https://github.com/monetr/monetr/issues/3583)) ([dd04237](https://github.com/monetr/monetr/commit/dd042376e49f0afd0cbb8bca42cf9dcfa9b43f3a))
+* **ui:** update dependency katex to v0.18.10 ([#3586](https://github.com/monetr/monetr/issues/3586)) ([03f646b](https://github.com/monetr/monetr/commit/03f646b33bdc331b277b270bc8c2125713ebfb68))
+* **ui:** update dependency katex to v0.18.9 ([#3552](https://github.com/monetr/monetr/issues/3552)) ([a19fe57](https://github.com/monetr/monetr/commit/a19fe57d4a6b5c5d90bbf1015221e9a8d8e16104))
+* **ui:** update dependency lucide-react to v1.49.0 ([#3582](https://github.com/monetr/monetr/issues/3582)) ([5db0e14](https://github.com/monetr/monetr/commit/5db0e1455ce4448333845f3745b71714d3f7be65))
+* **ui:** update dependency pnpm to v10.34.6 ([#3573](https://github.com/monetr/monetr/issues/3573)) ([78822b4](https://github.com/monetr/monetr/commit/78822b403e486c67a6decefbf1e0f519862c8997))
+* **ui:** update dependency wouter to v3.12.0 ([#3578](https://github.com/monetr/monetr/issues/3578)) ([6fcc3c7](https://github.com/monetr/monetr/commit/6fcc3c7fec08e4d44a2852beed217cfd49516aef))
+* **ui:** update dependency wouter to v3.13.0 ([#3590](https://github.com/monetr/monetr/issues/3590)) ([50eb4c2](https://github.com/monetr/monetr/commit/50eb4c20dd53269ed3993ade101833c5383ddf6b))
+* **ui:** update rsbuild ([#3572](https://github.com/monetr/monetr/issues/3572)) ([371f195](https://github.com/monetr/monetr/commit/371f195862ba5717b523a492b5cb0d06a054fcff))
+* **ui:** update rstest to v0.12.2 ([#3553](https://github.com/monetr/monetr/issues/3553)) ([995a804](https://github.com/monetr/monetr/commit/995a804aa598e3b7e3544304dac876fb67b7d382))
+* **ui:** update rstest to v0.12.3 ([#3588](https://github.com/monetr/monetr/issues/3588)) ([1ffd562](https://github.com/monetr/monetr/commit/1ffd562856d19a07f1c1a5e900ca6489bb761a57))
+* **ui:** update sass to v1.105.1 ([#3581](https://github.com/monetr/monetr/issues/3581)) ([c248d61](https://github.com/monetr/monetr/commit/c248d61fff3e0ed56a87119b587c2e518e40d3b9))
+* **ui:** update sentry-javascript monorepo to v11.1.0 ([#3574](https://github.com/monetr/monetr/issues/3574)) ([4de6b71](https://github.com/monetr/monetr/commit/4de6b71b0db6e2aff1f8328888b9c71f78307d9e))
+
 ## [1.17.1](https://github.com/monetr/monetr/compare/v1.17.0...v1.17.1) (2026-10-04)
 
 
