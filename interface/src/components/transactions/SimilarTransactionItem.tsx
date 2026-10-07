@@ -74,7 +74,7 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
         </ItemContent>
         <ItemContent align='center' flex='grow' justify='end' shrink='none' width='fit'>
           {props.current && (
-            <Badge size='xs' variant='info'>
+            <Badge size='xs' variant='info' wrapping='nowrap'>
               This One
             </Badge>
           )}
@@ -102,7 +102,7 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
         </ItemContent>
         <ItemContent align='center' flex='grow' justify='end' shrink='none' width='fit'>
           {props.current && (
-            <Badge size='xs' variant='info'>
+            <Badge size='xs' variant='info' wrapping='nowrap'>
               This One
             </Badge>
           )}
