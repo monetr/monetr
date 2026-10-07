@@ -9,8 +9,8 @@ import { Button } from '@monetr/interface/components/Button';
 import Divider from '@monetr/interface/components/Divider';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
-import FormCheckbox from '@monetr/interface/components/FormCheckbox';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
+import FormSwitch from '@monetr/interface/components/FormSwitch';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import FundingTimeline from '@monetr/interface/components/funding/FundingTimeline';
 import { layoutVariants } from '@monetr/interface/components/Layout';
@@ -220,7 +220,7 @@ export default function FundingDetails(): React.JSX.Element | null {
               placeholder='Select a funding frequency...'
               required
             />
-            <FormCheckbox
+            <FormSwitch
               data-testid='funding-details-exclude-weekends'
               description='If it were to land on a weekend, it is adjusted to the previous weekday instead.'
               label='Exclude weekends'
@@ -254,7 +254,7 @@ function AutoCreateTransactionToggle(): React.JSX.Element {
   const hasDeposit = (values.estimatedDeposit ?? 0) > 0;
 
   return (
-    <FormCheckbox
+    <FormSwitch
       data-testid='funding-details-auto-create-transaction'
       description='Automatically add a deposit transaction for the estimated deposit each time the funding schedule would occur.'
       disabled={!hasDeposit}

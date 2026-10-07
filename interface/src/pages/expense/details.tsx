@@ -9,7 +9,6 @@ import Divider from '@monetr/interface/components/Divider';
 import ExpenseTransactionList from '@monetr/interface/components/expenses/ExpenseTransactionList';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
-import FormCheckbox from '@monetr/interface/components/FormCheckbox';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
 import FormSwitch from '@monetr/interface/components/FormSwitch';
 import FormTextField from '@monetr/interface/components/FormTextField';
@@ -244,7 +243,7 @@ export default function ExpenseDetails(): React.JSX.Element | null {
               required
             />
             {isManual && (
-              <FormCheckbox
+              <FormSwitch
                 className={layoutVariants({ width: 'full' })}
                 description='Automatically add a transaction for this expense each time it is due, deducting from your balance.'
                 label='Auto create transaction'
