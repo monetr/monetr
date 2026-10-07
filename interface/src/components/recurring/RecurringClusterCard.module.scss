@@ -82,14 +82,7 @@
 }
 
 .memo {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px;
-  line-height: 4.5 * variables.$size;
   color: var(--content);
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .memoCount {

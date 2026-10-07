@@ -25,7 +25,7 @@
   flex: none;
 }
 
-// little repeat badge in the corner of the merchant icon, same idea as the one on recurring transactions
+// Little repeat badge in the corner of the merchant icon, same as the one on recurring transactions
 .iconBadge {
   position: absolute;
   top: -1 * variables.$size;
@@ -36,7 +36,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid var(--background-darker);
+  border: 0.5 * variables.$size solid var(--background-darker);
   background-color: var(--brand);
   color: var(--content-emphasis);
 
@@ -75,7 +75,7 @@
   color: var(--success);
   background-color: color-mix(in srgb, var(--success) 20%, transparent);
 
-  &[data-ended='true'] {
+  &[data-ended="true"] {
     color: var(--content-subtle);
     background-color: var(--background-emphasis);
   }
@@ -85,18 +85,6 @@
   @include mixins.text-2-extra-large;
   font-weight: var(--bold);
   color: var(--content-emphasis);
-}
-
-// The raw text from the bank, monospace so it reads like the statement it came from.
-.memo {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px;
-  line-height: 4.5 * variables.$size;
-  color: var(--content-subtle);
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .showsUpAs {
@@ -112,12 +100,12 @@
   }
 }
 
-// the memo gets cut off instead of the label wrapping
+// The memo gets cut off instead of the label wrapping
 .showsUpAsLabel {
   flex: none;
 }
 
-// two columns on mobile, all four stats in a row once theres room
+// Two columns on mobile, all four stats in a row once theres room
 .stats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -172,7 +160,7 @@
   background-color: var(--background-emphasis);
   color: var(--content);
 
-  &[data-next='true'] {
+  &[data-next="true"] {
     font-weight: var(--semibold);
     color: var(--content-emphasis);
     background-color: color-mix(in srgb, var(--brand) 40%, transparent);

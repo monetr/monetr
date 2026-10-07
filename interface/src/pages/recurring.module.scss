@@ -42,7 +42,7 @@
   height: 16 * variables.$size;
 }
 
-// Full width segmented control on mobile, underlined tabs on desktop.
+// Full width segmented control on mobile, underlined tabs on desktop
 .tabs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -72,13 +72,13 @@
   gap: 1 * variables.$size;
   min-height: 9 * variables.$size;
   border: 0;
-  border-radius: calc(var(--border-radius) - 2px);
+  border-radius: var(--border-radius);
   background: transparent;
   font-weight: var(--medium);
   color: var(--content-subtle);
   cursor: pointer;
 
-  &[aria-selected='true'] {
+  &[aria-selected="true"] {
     font-weight: var(--semibold);
     color: var(--content-emphasis);
     background-color: var(--background-active);
@@ -91,13 +91,13 @@
     min-height: 0;
     padding: 2.5 * variables.$size 3.5 * variables.$size;
     border-radius: 0;
-    border-bottom: 2px solid transparent;
+    border-bottom: 0.5 * variables.$size solid transparent;
 
     &:hover {
       color: var(--content-emphasis);
     }
 
-    &[aria-selected='true'] {
+    &[aria-selected="true"] {
       background-color: transparent;
       border-bottom-color: var(--brand-bright);
 
@@ -109,7 +109,7 @@
   }
 }
 
-// Just part of the label on mobile, a little chip on desktop.
+// Just part of the label on mobile, a little chip on desktop
 .tabCount {
   @media (min-width: variables.$mediumScreen) {
     @include mixins.text-extra-small;
@@ -147,7 +147,7 @@
     padding-top: 2 * variables.$size;
   }
 
-  &[data-late='true'] {
+  &[data-late="true"] {
     color: var(--warning);
   }
 

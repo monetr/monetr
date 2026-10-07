@@ -1,0 +1,10 @@
+@use '@monetr/interface/mixins';
+
+.recurringMemo {
+  @include mixins.text-extra-small;
+  min-width: 0;
+  color: var(--content-subtle);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

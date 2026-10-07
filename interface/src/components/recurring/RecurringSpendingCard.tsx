@@ -21,7 +21,7 @@ import { AmountType } from '@monetr/interface/util/amounts';
 import type { APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
 
-import styles from './RecurringLinkCard.module.scss';
+import styles from './RecurringSpendingCard.module.scss';
 
 type SpendingOption = Pick<Spending | FreeToUse, 'spendingId' | 'spendingType' | 'currentAmount' | 'name'>;
 
@@ -30,7 +30,7 @@ export interface RecurringSpendingCardProps {
   name: string;
 }
 
-export default function RecurringSpendingCard({ recurring, name }: RecurringSpendingCardProps): React.JSX.Element {
+export default function RecurringSpendingCard(props: RecurringSpendingCardProps): React.JSX.Element {
   const { data: spending, isLoading: spendingIsLoading } = useSpendings();
   const { data: balances, isLoading: balancesIsLoading } = useCurrentBalance();
   const { data: locale } = useLocaleCurrency();
@@ -38,49 +38,61 @@ export default function RecurringSpendingCard({ recurring, name }: RecurringSpen
   const { enqueueSnackbar } = useSnackbar();
   const [saving, setSaving] = useState(false);
 
-  // Free-To-Use is how you say its not budgeted with anything, same as everywhere else spending gets picked. Only
-  // expenses can be linked for now, goals will get their own thing later.
-  const options: Array<SelectOption<SpendingOption>> = [];
-  if (balances) {
-    options.push({ label: 'Free-To-Use', value: new FreeToUse(balances) });
-  }
-  const expenses = (spending ?? [])
+  // Only expenses can be linked for now, goals will get their own thing later
+  let options: Array<SelectOption<SpendingOption>> = (spending ?? [])
     .filter(item => item.spendingType === SpendingType.Expense)
-    .sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1));
-  for (const expense of expenses) {
-    options.push({ label: expense.name, value: expense });
+    .sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1))
+    .map(item => ({
+      label: item.name,
+      value: item,
+    }));
+  const hasExpenses = options.length > 0;
+
+  // Free-To-Use is how you say its not budgeted with anything, same as everywhere else spending gets picked
+  if (balances) {
+    options = [
+      {
+        label: 'Free-To-Use',
+        value: new FreeToUse(balances),
+      },
+      ...options,
+    ];
   }
 
-  const hasExpenses = options.some(option => option.value.spendingId !== FREE_TO_USE);
-  const value = options.find(option => option.value.spendingId === (recurring.spendingId ?? FREE_TO_USE));
+  const value = options.find(item => item.value.spendingId === (props.recurring.spendingId ?? FREE_TO_USE));
 
-  async function onChange(newValue: SelectOption<SpendingOption>) {
-    // Picking Free-To-Use means clearing the link, so send null to the server.
+  let placeholder = 'Select an expense...';
+  if (!hasExpenses) {
+    placeholder = 'No expenses exist...';
+  }
+
+  async function linkSpending(newValue: SelectOption<SpendingOption>) {
+    // Picking Free-To-Use means clearing the link, so send null to the server
     let spendingId: ID<Spending> | null = newValue.value.spendingId;
     if (spendingId === FREE_TO_USE) {
       spendingId = null;
     }
 
-    if (spendingId === recurring.spendingId) {
+    if (spendingId === props.recurring.spendingId) {
       return;
     }
 
     setSaving(true);
     return await patchTransactionRecurring({
-      transactionRecurringId: recurring.transactionRecurringId,
-      bankAccountId: recurring.bankAccountId,
+      transactionRecurringId: props.recurring.transactionRecurringId,
+      bankAccountId: props.recurring.bankAccountId,
       spendingId,
     })
       .then(
         () =>
-          void enqueueSnackbar(spendingId ? `Linked to ${newValue.label}` : 'No longer budgeted with an expense', {
+          void enqueueSnackbar('Updated recurring transaction successfully', {
             variant: 'success',
             disableWindowBlurListener: true,
           }),
       )
       .catch(
         (error: ApiError<APIError>) =>
-          void enqueueSnackbar(error.response?.data?.error || 'Failed to update the recurring transaction', {
+          void enqueueSnackbar(error?.response?.data?.error || 'Failed to update recurring transaction', {
             variant: 'error',
             disableWindowBlurListener: true,
           }),
@@ -92,30 +104,35 @@ export default function RecurringSpendingCard({ recurring, name }: RecurringSpen
     <section className={styles.root}>
       <div className={styles.header}>
         <Typography component='h3' size='lg' weight='semibold'>
-          Automatically spend
+          Automatically Spend
         </Typography>
         <Typography color='subtle' size='sm'>
-          Pick where new {name || 'recurring'} charges come out of when they show up.
+          Pick where new {props.name || 'recurring'} charges come out of when they show up.
         </Typography>
       </div>
-      <div className={styles.card} data-active={String(Boolean(recurring.spendingId))}>
+      <div className={styles.card} data-active={String(Boolean(props.recurring.spendingId))}>
         <div className={styles.cardHeader}>
           <div className={styles.cardText}>
             <span className={styles.chip}>
               <Repeat />
-              This schedule
+              This Schedule
             </span>
-            <span className={styles.title}>Spend charges on this schedule from</span>
+            <span className={styles.title}>Spend Charges On This Schedule From</span>
             <span className={styles.description}>
-              Only the {locale?.formatAmount(Math.abs(recurring.lastAmount), AmountType.Stored)} charges monetr matches
-              to this schedule.
+              Only the {locale?.formatAmount(Math.abs(props.recurring.lastAmount), AmountType.Stored)} charges monetr
+              matches to this schedule.
             </span>
           </div>
-          {/* Automatically spending isn't a thing yet, the switch is here so its obvious where it will live. */}
+          {/* Automatically spending isn't a thing yet, the switch is here so its obvious where it will live */}
           <Tooltip delayDuration={100}>
             <TooltipTrigger asChild>
               <span>
-                <Switch aria-label='Automatically spend charges on this schedule' checked={false} disabled />
+                <Switch
+                  aria-label='Automatically spend charges on this schedule'
+                  checked={false}
+                  data-testid='recurring-auto-spend'
+                  disabled
+                />
               </span>
             </TooltipTrigger>
             <TooltipContent side='top'>Automatically spending new charges is coming soon.</TooltipContent>
@@ -126,36 +143,42 @@ export default function RecurringSpendingCard({ recurring, name }: RecurringSpen
             className={styles.select}
             disabled={saving || !hasExpenses}
             isLoading={spendingIsLoading || balancesIsLoading}
-            onChange={onChange}
+            onChange={linkSpending}
             optionComponent={SelectSpendingOptionComponent}
             options={options}
-            placeholder={hasExpenses ? 'Select an expense...' : 'No expenses exist...'}
+            placeholder={placeholder}
             value={hasExpenses ? value : undefined}
           />
-          {!recurring.spendingId && !recurring.ended && (
+          {!props.recurring.spendingId && !props.recurring.ended && (
             <Button
               className={styles.createButton}
+              data-testid='recurring-new-expense'
               disabled={saving}
-              onClick={() => showNewExpenseModal({ recurring })}
+              onClick={() =>
+                showNewExpenseModal({
+                  recurring: props.recurring,
+                })
+              }
               variant='secondary'
             >
               <Plus />
-              New expense
+              New Expense
             </Button>
           )}
         </div>
-        {recurring.spending && recurring.autoMatched && (
-          <span className={styles.note}>
+        {props.recurring.spending && props.recurring.autoMatched && (
+          <span className={styles.note} data-testid='recurring-auto-matched'>
             <Sparkles />
-            monetr picked {recurring.spending.name} for you since your recent charges were spent from it.
+            monetr picked {props.recurring.spending.name} for you since your recent charges were spent from it.
           </span>
         )}
-        {recurring.spending && (
+        {props.recurring.spending && (
           <Link
             className={styles.viewLink}
-            to={`/bank/${recurring.bankAccountId}/expenses/${recurring.spending.spendingId}/details`}
+            data-testid='recurring-view-expense'
+            to={`/bank/${props.recurring.bankAccountId}/expenses/${props.recurring.spending.spendingId}/details`}
           >
-            View expense
+            View Expense
           </Link>
         )}
       </div>

@@ -12,7 +12,7 @@
     padding-right: 2 * variables.$size;
   }
 
-  // Active is what you get when tapping on a phone.
+  // Active is what shows when tapping on a phone
   &:hover,
   &:active {
     .inner {
@@ -21,14 +21,14 @@
   }
 }
 
-// Gets boxed in with the recent charges when its expanded.
+// Gets boxed in with the recent charges when its expanded
 .container {
   display: flex;
   flex-direction: column;
   border: 1px solid transparent;
   border-radius: var(--border-radius);
 
-  &[data-expanded='true'] {
+  &[data-expanded="true"] {
     border-color: var(--border-subtle);
     background-color: var(--background-darker);
   }
@@ -86,21 +86,6 @@
   }
 }
 
-.memo {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
-  line-height: 4 * variables.$size;
-  color: var(--content-subtle);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  @media (min-width: variables.$mediumScreen) {
-    font-size: 12px;
-    line-height: 4.5 * variables.$size;
-  }
-}
-
 .mobileStatus {
   @include mixins.text-small;
   display: flex;
@@ -118,7 +103,7 @@
     color: var(--success);
   }
 
-  &[data-warning='true'] {
+  &[data-warning="true"] {
     font-weight: var(--semibold);
     color: var(--warning);
   }
@@ -218,7 +203,7 @@
   color: var(--content-subtle);
 }
 
-// Sits on top of the row link so clicking it doesn't navigate.
+// Sits on top of the row link so clicking it doesn't navigate
 .createButton {
   @include mixins.text-small;
   position: relative;
@@ -274,7 +259,7 @@
   }
 }
 
-// Same deal as the create button, sits above the row link.
+// Same as the create button, sits above the row link
 .toggle {
   position: relative;
   display: none;
@@ -285,7 +270,7 @@
   justify-content: center;
   padding: 0;
   border: 0;
-  border-radius: calc(var(--border-radius) - 2px);
+  border-radius: var(--border-radius);
   background: transparent;
   color: var(--content-subtle);
   cursor: pointer;
@@ -295,7 +280,7 @@
     height: 4.5 * variables.$size;
   }
 
-  &[aria-expanded='true'] {
+  &[aria-expanded="true"] {
     background-color: var(--background-emphasis);
     color: var(--content-emphasis);
   }

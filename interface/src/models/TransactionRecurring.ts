@@ -45,7 +45,7 @@ export default class TransactionRecurring {
   // fundingSchedule is the funding schedule tracking this recurring transaction, if there is one
   readonly fundingSchedule: FundingSchedule | null;
   // transactionCluster is the similar transactions group this was detected in, only included when listing them
-  readonly transactionCluster?: TransactionCluster | null;
+  readonly transactionCluster: TransactionCluster | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 

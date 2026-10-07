@@ -1,0 +1,56 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 3 * variables.$size;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5 * variables.$size;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 3 * variables.$size;
+  padding: 4 * variables.$size;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius);
+  background-color: var(--background-darker);
+
+  &[data-active="true"] {
+    border-color: var(--brand);
+  }
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 2 * variables.$size;
+}
+
+// Select leaves room underneath for error text, there's never an error here so drop it. Nested so it wins over the
+// padding class Select puts on the same element
+.controls .select {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 0;
+}
+
+// Same height as the select next to it
+.createButton {
+  @include mixins.text-small;
+  flex: none;
+  height: 9.5 * variables.$size;
+}
+
+.viewLink {
+  @include mixins.text-small;
+  align-self: flex-start;
+  font-weight: var(--medium);
+  color: var(--brand-bright);
+}

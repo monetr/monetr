@@ -22,13 +22,13 @@ export interface RecurringChargeListProps {
   recurring: TransactionRecurring;
 }
 
-export default function RecurringChargeList({ recurring }: RecurringChargeListProps): React.JSX.Element | null {
+export default function RecurringChargeList(props: RecurringChargeListProps): React.JSX.Element | null {
   const { data: locale } = useLocaleCurrency();
   const { data: dateLocale } = useLocale();
   const { inTimezone } = useTimezone();
   const [tab, setTab] = useState<Tab>('all');
-  const history = useRecurringTransactionHistory(recurring);
-  const similar = useSimilarTransactions(recurring.transactionClusterId);
+  const history = useRecurringTransactionHistory(props.recurring);
+  const similar = useSimilarTransactions(props.recurring.transactionClusterId);
 
   if (!locale || !dateLocale) {
     return null;
@@ -40,16 +40,29 @@ export default function RecurringChargeList({ recurring }: RecurringChargeListPr
   if (tab === 'schedule') {
     transactions = history.transactions;
   } else if (tab === 'oneoff') {
-    transactions = transactions.filter(item => item.transactionRecurringId !== recurring.transactionRecurringId);
+    transactions = transactions.filter(item => item.transactionRecurringId !== props.recurring.transactionRecurringId);
   }
   const canLoadMore = tab !== 'schedule' && similar.hasNextPage;
-  const isLoading = tab === 'schedule' ? history.isLoading : similar.isLoading;
+  let isLoading = similar.isLoading;
+  if (tab === 'schedule') {
+    isLoading = history.isLoading;
+  }
+
+  let heading = 'Deposits';
+  if (props.recurring.direction === 'debit') {
+    heading = 'Charges';
+  }
+
+  let showMore = 'Show More';
+  if (similar.isFetchingNextPage) {
+    showMore = 'Loading...';
+  }
 
   return (
     <section className={styles.root}>
       <div className={styles.header}>
         <Typography component='h3' size='xl' weight='semibold'>
-          {recurring.direction === 'debit' ? 'Charges' : 'Deposits'}
+          {heading}
         </Typography>
         <div className={styles.tabs} role='tablist'>
           <button
@@ -68,7 +81,7 @@ export default function RecurringChargeList({ recurring }: RecurringChargeListPr
             role='tab'
             type='button'
           >
-            On schedule {history.seen}
+            On Schedule {history.seen}
           </button>
           <button
             aria-selected={tab === 'oneoff'}
@@ -77,14 +90,14 @@ export default function RecurringChargeList({ recurring }: RecurringChargeListPr
             role='tab'
             type='button'
           >
-            One-off
+            One-Off
           </button>
         </div>
       </div>
 
       <ul className={styles.list}>
-        {/* The next one we expect, one-offs by definition don't have one. */}
-        {tab !== 'oneoff' && !recurring.ended && (
+        {/* The next one we expect, one-offs don't have one */}
+        {tab !== 'oneoff' && !props.recurring.ended && (
           <Item className={styles.expected}>
             <div className={flexVariants({ orientation: 'row', align: 'center' })}>
               <div className={styles.expectedIcon}>
@@ -99,17 +112,17 @@ export default function RecurringChargeList({ recurring }: RecurringChargeListPr
                 shrink='default'
               >
                 <Typography component='p' ellipsis size='md' weight='semibold'>
-                  {formatDate(recurring.next, inTimezone, dateLocale, DateLength.Full)}
+                  {formatDate(props.recurring.next, inTimezone, dateLocale, DateLength.Full)}
                 </Typography>
                 <Typography color='subtle' component='p' ellipsis size='sm' weight='medium'>
-                  Expected next
+                  Expected Next
                 </Typography>
               </ItemContent>
               <ItemContent align='center' flex='grow' justify='end' shrink='none' width='fit'>
                 <Typography color='subtle' weight='semibold'>
-                  ~{locale.formatAmount(Math.abs(recurring.lastAmount), AmountType.Stored)}
+                  ~{locale.formatAmount(Math.abs(props.recurring.lastAmount), AmountType.Stored)}
                 </Typography>
-                {/* Nothing to link to, but keep the arrow's space so the amount lines up with the real rows. */}
+                {/* Nothing to link to, but keep the arrow's space so the amount lines up with the real rows */}
                 <Typography aria-hidden className={styles.arrowSpacer}>
                   <ChevronRight />
                 </Typography>
@@ -117,14 +130,14 @@ export default function RecurringChargeList({ recurring }: RecurringChargeListPr
             </div>
           </Item>
         )}
-        {transactions.map(transaction => (
-          <RecurringChargeItem key={transaction.transactionId} recurring={recurring} transaction={transaction} />
+        {transactions.map(item => (
+          <RecurringChargeItem key={item.transactionId} recurring={props.recurring} transaction={item} />
         ))}
       </ul>
 
       {!isLoading && transactions.length === 0 && !canLoadMore && (
         <Typography className={styles.empty} color='subtle' size='sm'>
-          Nothing here.
+          Nothing here...
         </Typography>
       )}
       {canLoadMore && (
@@ -134,7 +147,7 @@ export default function RecurringChargeList({ recurring }: RecurringChargeListPr
           onClick={() => similar.fetchNextPage()}
           type='button'
         >
-          {similar.isFetchingNextPage ? 'Loading...' : 'Show more'}
+          {showMore}
         </button>
       )}
     </section>

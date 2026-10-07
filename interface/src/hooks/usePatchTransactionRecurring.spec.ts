@@ -122,6 +122,27 @@ describe('patch transaction recurring', () => {
     expect(cached?.spending?.spendingId).toBe(spendingId);
   });
 
+  it('will refresh the recurring list', async () => {
+    mockFetch.onPatch(`/api/bank_accounts/${bankAccountId}/recurring/${recurringId}`).reply(200, recurringJson(true));
+
+    const world = renderPatchTransactionRecurring(recurringJson(false));
+    const listKey = ['GET', `/api/bank_accounts/${bankAccountId}/recurring`];
+    act(() => {
+      world.result.current.queryClient.setQueryData(listKey, { pages: [[recurringJson(false)]], pageParams: [0] });
+    });
+
+    await act(async () => {
+      await world.result.current.patchTransactionRecurring({
+        transactionRecurringId: ID.from<TransactionRecurring>(recurringId),
+        bankAccountId: ID.from<BankAccount>(bankAccountId),
+        spendingId: ID.from<Spending>(spendingId),
+      });
+    });
+
+    // The list items have the cluster on them which isn't in the response, so the list just gets marked stale.
+    expect(world.result.current.queryClient.getQueryState(listKey)?.isInvalidated).toBeTruthy();
+  });
+
   it('will link a funding schedule', async () => {
     mockFetch.onPatch(`/api/bank_accounts/${bankAccountId}/recurring/${recurringId}`).reply(200, {
       ...recurringJson(false),

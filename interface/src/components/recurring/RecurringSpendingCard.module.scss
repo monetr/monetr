@@ -1,8 +1,6 @@
 @use '@monetr/interface/mixins';
 @use '@monetr/interface/variables';
 
-// Shared by the spending and funding cards on the recurring details page.
-
 .root {
   display: flex;
   flex-direction: column;
@@ -24,7 +22,7 @@
   border-radius: var(--border-radius);
   background-color: var(--background-darker);
 
-  &[data-active='true'] {
+  &[data-active="true"] {
     border-color: var(--brand);
   }
 }
@@ -79,14 +77,14 @@
 }
 
 // Select leaves room underneath for error text, there's never an error here so drop it. Nested so it wins over the
-// padding class Select puts on the same element.
+// padding class Select puts on the same element
 .controls .select {
   flex: 1;
   min-width: 0;
   padding-bottom: 0;
 }
 
-// Same height as the select next to it.
+// Same height as the select next to it
 .createButton {
   @include mixins.text-small;
   flex: none;

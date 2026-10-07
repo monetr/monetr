@@ -1,7 +1,7 @@
 @use '@monetr/interface/mixins';
 @use '@monetr/interface/variables';
 
-// Lines up with the name of the item above it, past the icon.
+// Lines up with the name of the item above it, past the icon
 .root {
   display: flex;
   flex-direction: column;
@@ -65,13 +65,7 @@
 
 .memo {
   flex: 1;
-  min-width: 0;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px;
   color: var(--content);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .amount {
@@ -81,7 +75,7 @@
   font-weight: var(--semibold);
   color: var(--amount-negative);
 
-  &[data-addition='true'] {
+  &[data-addition="true"] {
     color: var(--amount-positive);
   }
 }

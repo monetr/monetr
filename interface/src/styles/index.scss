@@ -25,10 +25,6 @@ html {
   // (or any clickable element) flashes the browser's default grey overlay.
   -webkit-tap-highlight-color: transparent;
   background-color: var(--background);
-  // Always keep room for the scrollbar so pages don't shift sideways when they
-  // go from fitting on the screen to needing to scroll. Does nothing with
-  // overlay scrollbars like on macOS and phones.
-  scrollbar-gutter: stable;
 }
 
 // Remove default margins on common block elements.

@@ -1,22 +1,24 @@
 import { Fragment, useEffect, useState } from 'react';
-import { format, isBefore, isThisYear, startOfToday } from 'date-fns';
+import { isBefore, startOfToday } from 'date-fns';
 import { HeartCrack, Info, Repeat, TriangleAlert } from 'lucide-react';
 
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import RecurringItem from '@monetr/interface/components/recurring/RecurringItem';
 import Typography from '@monetr/interface/components/Typography';
 import { useFundingSchedules } from '@monetr/interface/hooks/useFundingSchedules';
+import { useLocale } from '@monetr/interface/hooks/useLocale';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useRecurringTransactions } from '@monetr/interface/hooks/useRecurringTransactions';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import type TransactionRecurring from '@monetr/interface/models/TransactionRecurring';
 import { AmountType } from '@monetr/interface/util/amounts';
+import { DateLength, formatDate } from '@monetr/interface/util/formatDate';
 
 import styles from './recurring.module.scss';
 
 type Tab = 'charges' | 'deposits' | 'ended';
 
-export default function Recurring(): React.JSX.Element {
+export default function Recurring(): React.JSX.Element | null {
   const {
     data: recurring,
     isLoading,
@@ -27,10 +29,11 @@ export default function Recurring(): React.JSX.Element {
   } = useRecurringTransactions();
   const { data: fundingSchedules } = useFundingSchedules();
   const { data: locale } = useLocaleCurrency();
+  const { data: dateLocale } = useLocale();
   const { inTimezone } = useTimezone();
   const [tab, setTab] = useState<Tab>('charges');
 
-  // The page groups and totals everything, so keep loading until we have every page instead of just the first one.
+  // The page groups and totals everything, so keep loading until we have every page instead of just the first one
   useEffect(() => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
@@ -55,8 +58,8 @@ export default function Recurring(): React.JSX.Element {
     );
   }
 
-  if (!recurring || !locale) {
-    return <Fragment />;
+  if (!recurring || !locale || !dateLocale) {
+    return null;
   }
 
   const charges = recurring.filter(item => !item.ended && item.direction === 'debit');
@@ -72,16 +75,21 @@ export default function Recurring(): React.JSX.Element {
 
   // Split upcoming ones by whether they land before the next funding. Ended ones aren't upcoming so they don't get
   // split up at all.
-  const today = startOfToday({ in: inTimezone });
+  const today = startOfToday({
+    in: inTimezone,
+  });
   const nextFunding = fundingSchedules
     ?.map(item => item.nextRecurrence)
     .sort((a, b) => a.getTime() - b.getTime())
     .at(0);
-  const late = tab === 'ended' ? [] : items.filter(item => isBefore(item.next, today));
-  const beforeFunding =
-    tab === 'ended' || !nextFunding
-      ? []
-      : items.filter(item => !isBefore(item.next, today) && isBefore(item.next, nextFunding));
+  let late: Array<TransactionRecurring> = [];
+  let beforeFunding: Array<TransactionRecurring> = [];
+  if (tab !== 'ended') {
+    late = items.filter(item => isBefore(item.next, today));
+  }
+  if (tab !== 'ended' && nextFunding) {
+    beforeFunding = items.filter(item => !isBefore(item.next, today) && isBefore(item.next, nextFunding));
+  }
   const later = items.filter(item => !late.includes(item) && !beforeFunding.includes(item));
 
   function sum(group: Array<TransactionRecurring>): string {
@@ -89,7 +97,7 @@ export default function Recurring(): React.JSX.Element {
     return locale?.formatAmount(total, AmountType.Stored) ?? '';
   }
 
-  // If nothing got split off then there isn't really anything to call these "later" than.
+  // If nothing got split off then there isn't really anything to call these later than
   let laterTitle = 'Later';
   if (late.length === 0 && beforeFunding.length === 0) {
     laterTitle = 'Upcoming';
@@ -106,6 +114,7 @@ export default function Recurring(): React.JSX.Element {
               <button
                 aria-selected={tab === 'charges'}
                 className={styles.tab}
+                data-testid='recurring-tab-charges'
                 onClick={() => setTab('charges')}
                 role='tab'
                 type='button'
@@ -115,6 +124,7 @@ export default function Recurring(): React.JSX.Element {
               <button
                 aria-selected={tab === 'deposits'}
                 className={styles.tab}
+                data-testid='recurring-tab-deposits'
                 onClick={() => setTab('deposits')}
                 role='tab'
                 type='button'
@@ -124,6 +134,7 @@ export default function Recurring(): React.JSX.Element {
               <button
                 aria-selected={tab === 'ended'}
                 className={styles.tab}
+                data-testid='recurring-tab-ended'
                 onClick={() => setTab('ended')}
                 role='tab'
                 type='button'
@@ -134,13 +145,14 @@ export default function Recurring(): React.JSX.Element {
 
             {items.length === 0 && (
               <Typography className={styles.emptyTab} color='subtle'>
-                {tab === 'ended' ? 'Nothing has stopped repeating.' : 'Nothing here yet.'}
+                {tab === 'ended' && 'Nothing has stopped repeating...'}
+                {tab !== 'ended' && 'Nothing here yet...'}
               </Typography>
             )}
 
             <ul className={styles.list}>
               {late.length > 0 && (
-                <li className={styles.groupHeader} data-late='true'>
+                <li className={styles.groupHeader} data-late='true' data-testid='recurring-group-late'>
                   <span className={styles.groupTitle}>
                     <TriangleAlert />
                     Late
@@ -154,13 +166,7 @@ export default function Recurring(): React.JSX.Element {
 
               {beforeFunding.length > 0 && nextFunding && (
                 <li className={styles.groupHeader}>
-                  <span>
-                    Before{' '}
-                    {isThisYear(nextFunding)
-                      ? format(inTimezone(nextFunding), 'MMM d')
-                      : format(inTimezone(nextFunding), 'MMM d, yyyy')}{' '}
-                    funding
-                  </span>
+                  <span>Before {formatDate(nextFunding, inTimezone, dateLocale, DateLength.Medium)} Funding</span>
                   <span>{sum(beforeFunding)}</span>
                 </li>
               )}
@@ -194,7 +200,7 @@ export default function Recurring(): React.JSX.Element {
 
 function EmptyState(): React.JSX.Element {
   return (
-    <div className={styles.empty}>
+    <div className={styles.empty} data-testid='recurring-empty'>
       <Repeat className={styles.emptyIcon} />
       <Typography align='center' color='subtle' size='xl'>
         monetr hasn&apos;t found anything recurring yet...

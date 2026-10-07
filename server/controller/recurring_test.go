@@ -184,7 +184,7 @@ func TestGetRecurringTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("limit cannot be greater than 100")
+		response.JSON().Path("$.error").IsEqual("Limit cannot be greater than 100")
 	})
 
 	t.Run("cant get recurring for someone elses bank account", func(t *testing.T) {

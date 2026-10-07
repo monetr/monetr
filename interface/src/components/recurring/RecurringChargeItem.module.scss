@@ -13,19 +13,8 @@
 .oneOffChip {
   @include mixins.text-extra-small;
   padding: 0 1.5 * variables.$size;
-  border-radius: calc(var(--border-radius) - 2px);
+  border-radius: var(--border-radius);
   font-weight: var(--semibold);
   color: var(--content);
   background-color: var(--background-emphasis);
-}
-
-.memo {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px;
-  line-height: 4.5 * variables.$size;
-  color: var(--content-subtle);
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }

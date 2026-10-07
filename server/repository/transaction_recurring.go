@@ -51,20 +51,17 @@ func (r *repositoryBase) GetTransactionRecurrings(
 ) ([]TransactionRecurring, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-
-	span.Data = map[string]any{
-		"accountId":     r.AccountId(),
-		"bankAccountId": bankAccountId,
-	}
+	span.SetData("accountId", r.AccountId())
+	span.SetData("bankAccountId", bankAccountId)
 
 	result := make([]TransactionRecurring, 0)
-	if err := r.txn.NewSelect().
+	err := r.txn.NewSelect().
 		Model(&result).
-		// The spending is left off on purpose, the UI looks each one up by ID so
-		// it shares what it already has cached for the expenses.
+		// Spending is left off, the UI looks each one up by Id so it comes from
+		// the same cache as the expenses
 		Relation("FundingSchedule").
-		// The cluster is only included for its name, leave out the members and
-		// debug info since those can be huge.
+		// The cluster is only here for its name, the members and debug info can
+		// be huge so leave those out
 		Relation("TransactionCluster", func(q *bun.SelectQuery) *bun.SelectQuery {
 			return q.ExcludeColumn("members", "debug")
 		}).
@@ -72,17 +69,17 @@ func (r *repositoryBase) GetTransactionRecurrings(
 		Where(`"transaction_recurring"."bank_account_id" = ?`, bankAccountId).
 		Limit(limit).
 		Offset(offset).
-		// Active ones first, then whatever is coming up next.
+		// Active ones first, then whatever is coming up next
 		Order(`transaction_recurring.ended ASC`).
 		Order(`transaction_recurring.next ASC`).
 		Order(`transaction_recurring.transaction_recurring_id DESC`).
-		Scan(span.Context()); err != nil {
-		return nil, crumbs.WrapError(
-			span.Context(),
-			err,
-			"failed to retrieve recurring transactions",
-		)
+		Scan(span.Context())
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, errors.Wrap(err, "failed to retrieve recurring transactions")
 	}
+
+	span.Status = sentry.SpanStatusOK
 
 	return result, nil
 }

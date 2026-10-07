@@ -250,6 +250,141 @@ func TestRepositoryBase_GetTransactionRecurringById(t *testing.T) {
 	})
 }
 
+func TestRepositoryBase_GetTransactionRecurrings(t *testing.T) {
+	t.Run("no recurring transactions", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		result, err := repo.GetTransactionRecurrings(t.Context(), bankAccount.BankAccountId, 25, 0)
+		assert.NoError(t, err, "must be able to read recurring transactions")
+		assert.Empty(t, result, "there should be no recurring transactions")
+	})
+
+	t.Run("active ones first by next date", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		cluster := givenIHaveATransactionCluster(t, bankAccount)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		// Each one needs its own cluster, there can only be one recurring
+		// transaction per direction in a cluster.
+		later := newTransactionRecurring(t, cluster, models.DebitDirection, 800)
+		later.Next = time.Date(2026, 5, 15, 5, 0, 0, 0, time.UTC)
+		sooner := newTransactionRecurring(t, givenIHaveATransactionCluster(t, bankAccount), models.DebitDirection, 900)
+		sooner.Next = time.Date(2026, 4, 15, 5, 0, 0, 0, time.UTC)
+		// Ended has the earliest next date of them all, but it should still come
+		// last.
+		ended := newTransactionRecurring(t, givenIHaveATransactionCluster(t, bankAccount), models.DebitDirection, 1000)
+		ended.Next = time.Date(2026, 1, 15, 5, 0, 0, 0, time.UTC)
+		ended.Ended = true
+		recurring := []models.TransactionRecurring{
+			later,
+			sooner,
+			ended,
+		}
+		err := repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, recurring)
+		require.NoError(t, err, "must be able to create recurring transactions")
+
+		result, err := repo.GetTransactionRecurrings(t.Context(), bankAccount.BankAccountId, 25, 0)
+		assert.NoError(t, err, "must be able to read recurring transactions")
+		require.Len(t, result, 3, "should return all of the recurring transactions")
+		assert.Equal(t, recurring[1].TransactionRecurringId, result[0].TransactionRecurringId, "sooner should be first")
+		assert.Equal(t, recurring[0].TransactionRecurringId, result[1].TransactionRecurringId, "later should be second")
+		assert.Equal(t, recurring[2].TransactionRecurringId, result[2].TransactionRecurringId, "ended should be last")
+	})
+
+	t.Run("includes the cluster but not the spending", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		cluster := givenIHaveATransactionCluster(t, bankAccount)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, clock, &bankAccount, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15", false)
+		spending := givenIHaveAnExpense(t, clock, bankAccount, fundingSchedule, "Github")
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		recurring := []models.TransactionRecurring{
+			newTransactionRecurring(t, cluster, models.DebitDirection, 800),
+		}
+		err := repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, recurring)
+		require.NoError(t, err, "must be able to create recurring transactions")
+		recurring[0].SpendingId = &spending.SpendingId
+		err = repo.UpdateTransactionRecurring(t.Context(), bankAccount.BankAccountId, &recurring[0])
+		require.NoError(t, err, "must be able to link the spending")
+
+		result, err := repo.GetTransactionRecurrings(t.Context(), bankAccount.BankAccountId, 25, 0)
+		assert.NoError(t, err, "must be able to read recurring transactions")
+		require.Len(t, result, 1, "should return the recurring transaction")
+		require.NotNil(t, result[0].TransactionCluster, "cluster should be included")
+		assert.Equal(t, "Github", result[0].TransactionCluster.Name, "cluster name should be there")
+		assert.Empty(t, result[0].TransactionCluster.Members, "members should be left out")
+		require.NotNil(t, result[0].SpendingId, "spending id should still be there")
+		assert.Equal(t, spending.SpendingId, *result[0].SpendingId, "should be the linked spending")
+		assert.Nil(t, result[0].Spending, "spending itself should not be included")
+	})
+
+	t.Run("pagination", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		recurring := make([]models.TransactionRecurring, 0, 5)
+		for i := range 5 {
+			cluster := givenIHaveATransactionCluster(t, bankAccount)
+			recurring = append(recurring, newTransactionRecurring(t, cluster, models.DebitDirection, int64(800+i)))
+		}
+		err := repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, recurring)
+		require.NoError(t, err, "must be able to create recurring transactions")
+
+		firstPage, err := repo.GetTransactionRecurrings(t.Context(), bankAccount.BankAccountId, 3, 0)
+		assert.NoError(t, err, "must be able to read the first page")
+		assert.Len(t, firstPage, 3, "first page should be full")
+
+		secondPage, err := repo.GetTransactionRecurrings(t.Context(), bankAccount.BankAccountId, 3, 3)
+		assert.NoError(t, err, "must be able to read the second page")
+		assert.Len(t, secondPage, 2, "second page should have whats left")
+	})
+}
+
 func TestRepositoryBase_GetTransactionRecurringByCluster(t *testing.T) {
 	t.Run("no recurring transactions", func(t *testing.T) {
 		clock := clock.NewMock()

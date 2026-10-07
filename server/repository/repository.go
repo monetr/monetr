@@ -190,8 +190,8 @@ type BaseRepository interface {
 		transactionRecurringId ID[TransactionRecurring],
 	) (*TransactionRecurring, error)
 
-	// GetTransactionRecurrings returns a page of recurring transactions for the
-	// bank account, active ones first ordered by when they are expected next.
+	// GetTransactionRecurrings will return a page of recurring transactions for
+	// the bank account, active ones first ordered by when they are expected next.
 	GetTransactionRecurrings(
 		ctx context.Context,
 		bankAccountId ID[BankAccount],

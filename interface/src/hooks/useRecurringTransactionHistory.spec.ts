@@ -28,6 +28,7 @@ function recurring(amounts: { [key: number]: number }): TransactionRecurring {
     autoMatched: false,
     spending: null,
     fundingSchedule: null,
+    transactionCluster: null,
     createdAt: '2026-01-15T06:00:00Z',
     updatedAt: '2026-06-16T06:00:00Z',
   });

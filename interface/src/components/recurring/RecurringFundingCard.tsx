@@ -15,50 +15,61 @@ import type TransactionRecurring from '@monetr/interface/models/TransactionRecur
 import type { APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
 
-import styles from './RecurringLinkCard.module.scss';
+import styles from './RecurringFundingCard.module.scss';
 
 export interface RecurringFundingCardProps {
   recurring: TransactionRecurring;
   name: string;
 }
 
-// Same idea as the spending card but for money coming in, like a paycheck funding a schedule.
-export default function RecurringFundingCard({ recurring, name }: RecurringFundingCardProps): React.JSX.Element {
+// Same idea as the spending card but for money coming in, like a paycheck funding a schedule
+export default function RecurringFundingCard(props: RecurringFundingCardProps): React.JSX.Element {
   const { data: fundingSchedules, isLoading } = useFundingSchedules();
   const patchTransactionRecurring = usePatchTransactionRecurring();
   const { enqueueSnackbar } = useSnackbar();
   const [saving, setSaving] = useState(false);
 
   const options: Array<SelectOption<ID<FundingSchedule> | null>> = [
-    { label: 'Nothing', value: null },
+    {
+      label: 'Nothing',
+      value: null,
+    },
     ...(fundingSchedules ?? [])
       .sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1))
-      .map(item => ({ label: item.name, value: item.fundingScheduleId })),
+      .map(item => ({
+        label: item.name,
+        value: item.fundingScheduleId,
+      })),
   ];
   const hasFundingSchedules = (fundingSchedules?.length ?? 0) > 0;
-  const value = options.find(option => option.value === recurring.fundingScheduleId);
+  const value = options.find(item => item.value === props.recurring.fundingScheduleId);
 
-  async function onChange(newValue: SelectOption<ID<FundingSchedule> | null>) {
-    if (newValue.value === recurring.fundingScheduleId) {
+  let placeholder = 'Select a funding schedule...';
+  if (!hasFundingSchedules) {
+    placeholder = 'No funding schedules exist...';
+  }
+
+  async function linkFundingSchedule(newValue: SelectOption<ID<FundingSchedule> | null>) {
+    if (newValue.value === props.recurring.fundingScheduleId) {
       return;
     }
 
     setSaving(true);
     return await patchTransactionRecurring({
-      transactionRecurringId: recurring.transactionRecurringId,
-      bankAccountId: recurring.bankAccountId,
+      transactionRecurringId: props.recurring.transactionRecurringId,
+      bankAccountId: props.recurring.bankAccountId,
       fundingScheduleId: newValue.value,
     })
       .then(
         () =>
-          void enqueueSnackbar(newValue.value ? `Linked to ${newValue.label}` : 'No longer funding anything', {
+          void enqueueSnackbar('Updated recurring transaction successfully', {
             variant: 'success',
             disableWindowBlurListener: true,
           }),
       )
       .catch(
         (error: ApiError<APIError>) =>
-          void enqueueSnackbar(error.response?.data?.error || 'Failed to update the recurring transaction', {
+          void enqueueSnackbar(error?.response?.data?.error || 'Failed to update recurring transaction', {
             variant: 'error',
             disableWindowBlurListener: true,
           }),
@@ -73,38 +84,42 @@ export default function RecurringFundingCard({ recurring, name }: RecurringFundi
           Funds
         </Typography>
         <Typography color='subtle' size='sm'>
-          The funding schedule {name || 'these'} deposits go towards.
+          The funding schedule {props.name || 'these'} deposits go towards.
         </Typography>
       </div>
-      <div className={styles.card} data-active={String(Boolean(recurring.fundingSchedule))}>
+      <div className={styles.card} data-active={String(Boolean(props.recurring.fundingSchedule))}>
         <div className={styles.controls}>
           <Select
             className={styles.select}
             disabled={saving || !hasFundingSchedules}
             isLoading={isLoading}
-            onChange={onChange}
+            onChange={linkFundingSchedule}
             options={options}
-            placeholder={hasFundingSchedules ? 'Select a funding schedule...' : 'No funding schedules exist...'}
+            placeholder={placeholder}
             value={hasFundingSchedules ? value : undefined}
           />
-          {!recurring.fundingSchedule && !recurring.ended && (
+          {!props.recurring.fundingSchedule && !props.recurring.ended && (
             <Button
               className={styles.createButton}
               disabled={saving}
-              onClick={() => showNewFundingModal({ recurring })}
+              onClick={() =>
+                showNewFundingModal({
+                  recurring: props.recurring,
+                })
+              }
               variant='secondary'
             >
               <Plus />
-              New funding schedule
+              New Funding Schedule
             </Button>
           )}
         </div>
-        {recurring.fundingSchedule && (
+        {props.recurring.fundingSchedule && (
           <Link
             className={styles.viewLink}
-            to={`/bank/${recurring.bankAccountId}/funding/${recurring.fundingSchedule.fundingScheduleId}/details`}
+            to={`/bank/${props.recurring.bankAccountId}/funding/${props.recurring.fundingSchedule.fundingScheduleId}/details`}
           >
-            View funding schedule
+            View Funding Schedule
           </Link>
         )}
       </div>
