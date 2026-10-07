@@ -60,7 +60,8 @@ func (r *repositoryBase) GetTransactionRecurrings(
 	result := make([]TransactionRecurring, 0)
 	if err := r.txn.NewSelect().
 		Model(&result).
-		Relation("Spending").
+		// The spending is left off on purpose, the UI looks each one up by ID so
+		// it shares what it already has cached for the expenses.
 		Relation("FundingSchedule").
 		// The cluster is only included for its name, leave out the members and
 		// debug info since those can be huge.

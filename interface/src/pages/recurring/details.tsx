@@ -1,4 +1,5 @@
 import { Fragment, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { differenceInCalendarDays, isThisYear, startOfToday } from 'date-fns';
 import { ChevronRight, Clock, HeartCrack, Layers, Plus, Repeat, Sparkles } from 'lucide-react';
 import { rrulestr } from 'rrule';
@@ -38,6 +39,7 @@ import type Transaction from '@monetr/interface/models/Transaction';
 import type TransactionRecurring from '@monetr/interface/models/TransactionRecurring';
 import { AmountType } from '@monetr/interface/util/amounts';
 import { DateLength, formatDate } from '@monetr/interface/util/formatDate';
+import type { WithJsonValues } from '@monetr/interface/util/json';
 import type { APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
 
@@ -117,6 +119,7 @@ interface RecurringProps {
 }
 
 function RecurringSummary({ recurring, name }: RecurringProps): React.JSX.Element | null {
+  const { data: cluster } = useTransactionCluster(recurring.transactionClusterId);
   const { timezone, inTimezone } = useTimezone();
   const { data: locale } = useLocale();
   const { data: localeCurrency } = useLocaleCurrency();
@@ -172,6 +175,14 @@ function RecurringSummary({ recurring, name }: RecurringProps): React.JSX.Elemen
           <span className={styles.cardTitle}>
             {formatAmount(recurring.lastAmount)} {rrulestr(recurring.ruleset).toText()}
           </span>
+          {cluster?.originalMemo && (
+            <span className={styles.showsUpAs}>
+              <span className={styles.showsUpAsLabel}>Shows up as</span>
+              <span className={styles.memo} title={cluster.originalMemo}>
+                {cluster.originalMemo}
+              </span>
+            </span>
+          )}
         </div>
       </div>
       <div className={styles.stats}>
@@ -455,6 +466,7 @@ function Stat({ label, value, detail, title }: StatProps): React.JSX.Element {
 
 function ClusterSummary({ recurring, name }: RecurringProps): React.JSX.Element | null {
   const { seen } = useRecurringTransactionHistory(recurring);
+  const memos = useClusterMemos(recurring);
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocale();
   if (!locale) {
@@ -480,11 +492,48 @@ function ClusterSummary({ recurring, name }: RecurringProps): React.JSX.Element 
           {seen} on this schedule
         </span>
       </div>
+      {memos.length > 0 && (
+        <div className={styles.clusterMemos}>
+          <span className={styles.clusterMemosLabel}>Grouped because they show up as</span>
+          <div className={styles.clusterMemoList}>
+            {memos.map(([memo, count]) => (
+              <Fragment key={memo}>
+                <span className={styles.memo} title={memo}>
+                  {memo}
+                </span>
+                <span className={styles.clusterMemoCount}>{count === 1 ? '1 charge' : `${count} charges`}</span>
+              </Fragment>
+            ))}
+          </div>
+        </div>
+      )}
       <span className={styles.clusterNote}>
         Anything else from {name || 'this group'} that isn&apos;t on this schedule shows up as one-off below.
       </span>
     </section>
   );
+}
+
+// useClusterMemos gives back each different way the charges in the group showed up on the statement, most common first.
+// Its only the most recent 100 charges, which covers years of most things that repeat.
+function useClusterMemos(recurring: TransactionRecurring): Array<[string, number]> {
+  const { data: transactions } = useQuery<Array<WithJsonValues<Transaction>>>({
+    queryKey: [
+      'GET',
+      `/api/bank_accounts/${recurring.bankAccountId}/transactions`,
+      { transaction_cluster_id: recurring.transactionClusterId.toString(), limit: 100 },
+    ],
+  });
+
+  return useMemo(() => {
+    const counts = (transactions ?? []).reduce<Map<string, number>>((accumulator, item) => {
+      if (item.originalName) {
+        accumulator.set(item.originalName, (accumulator.get(item.originalName) ?? 0) + 1);
+      }
+      return accumulator;
+    }, new Map());
+    return Array.from(counts.entries()).sort((a, b) => b[1] - a[1]);
+  }, [transactions]);
 }
 
 function Charges({ recurring, name }: RecurringProps): React.JSX.Element {
@@ -571,7 +620,7 @@ function SegmentButton({ children, selected, onClick }: SegmentButtonProps): Rea
   );
 }
 
-function ExpectedItem({ recurring, name }: RecurringProps): React.JSX.Element | null {
+function ExpectedItem({ recurring }: RecurringProps): React.JSX.Element | null {
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocale();
   const { data: localeCurrency } = useLocaleCurrency();
@@ -587,10 +636,10 @@ function ExpectedItem({ recurring, name }: RecurringProps): React.JSX.Element | 
         </div>
         <ItemContent align='default' flex='shrink' gap='none' justify='start' orientation='column' shrink='default'>
           <Typography component='p' ellipsis size='md' weight='semibold'>
-            {name}
+            {formatDate(recurring.next, inTimezone, locale, DateLength.Full)}
           </Typography>
           <Typography color='subtle' component='p' ellipsis size='sm' weight='medium'>
-            Expected {formatDate(recurring.next, inTimezone, locale, DateLength.Long)}
+            Expected next
           </Typography>
         </ItemContent>
         <ItemContent align='center' flex='grow' justify='end' shrink='none' width='fit'>
@@ -633,13 +682,14 @@ function ChargeItem({ transaction, onSchedule, recurringId }: ChargeItemProps): 
           transactionRecurringId={onSchedule ? recurringId : null}
         />
         <ItemContent align='default' flex='shrink' gap='none' justify='start' orientation='column' shrink='default'>
-          <Typography color='emphasis' component='p' ellipsis size='md' weight='semibold'>
-            {transaction.getName()}
-          </Typography>
-          <Typography color='subtle' component='p' ellipsis size='sm' weight='medium'>
+          {/* every charge in here is the same merchant, so the date leads and the raw bank text is what tells them apart */}
+          <span className={styles.chargeDate}>
             {formatDate(transaction.date, inTimezone, locale, DateLength.Full)}
-            {!onSchedule && ' · One-off'}
-          </Typography>
+            {!onSchedule && <span className={styles.oneOffChip}>One-off</span>}
+          </span>
+          <span className={styles.memo} title={transaction.originalName}>
+            {transaction.originalName}
+          </span>
         </ItemContent>
         <ItemContent align='center' flex='grow' justify='end' shrink='none' width='fit'>
           <TransactionAmount transaction={transaction} />

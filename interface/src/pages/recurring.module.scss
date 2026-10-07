@@ -22,13 +22,10 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 5 * variables.$size;
-  padding: 4 * variables.$size;
+  gap: 2 * variables.$size;
+  // same as the other list pages, the items inset themselves instead of the page being padded
+  padding-top: 2 * variables.$size;
   padding-bottom: 16 * variables.$size;
-
-  @media (min-width: variables.$mediumScreen) {
-    padding: 6 * variables.$size;
-  }
 }
 
 .empty {
@@ -46,101 +43,18 @@
   height: 16 * variables.$size;
 }
 
-.summary {
-  display: flex;
-  flex-direction: column;
-  gap: 1 * variables.$size;
-  padding: 3.5 * variables.$size 4 * variables.$size;
-  border: 1px solid var(--border);
-  border-radius: var(--border-radius);
-  background-color: var(--background-darker);
-
-  @media (min-width: variables.$mediumScreen) {
-    gap: 1.5 * variables.$size;
-    padding: 4.5 * variables.$size 5 * variables.$size;
-  }
-}
-
-.summaryEyebrow {
-  @include mixins.text-extra-small;
-  font-weight: var(--semibold);
-  color: var(--content-subtle);
-
-  @media (min-width: variables.$mediumScreen) {
-    @include mixins.text-small;
-  }
-}
-
-// On mobile the total gets its own big line and the rest goes underneath, the full sentence only fits on desktop.
-.summaryMobile {
-  display: flex;
-  flex-direction: column;
-  gap: 1 * variables.$size;
-
-  @media (min-width: variables.$mediumScreen) {
-    display: none;
-  }
-}
-
-.summaryTotal {
-  @include mixins.text-2-extra-large;
-  font-weight: var(--bold);
-  color: var(--content-emphasis);
-
-  span {
-    @include mixins.text-small;
-    font-weight: var(--medium);
-    color: var(--content-subtle);
-  }
-}
-
-.summaryDetail {
-  @include mixins.text-small;
-  color: var(--content-subtle);
-
-  strong {
-    font-weight: var(--bold);
-    color: var(--warning);
-  }
-}
-
-.summaryDesktop {
-  display: none;
-
-  @media (min-width: variables.$mediumScreen) {
-    display: block;
-  }
-}
-
-.summaryText {
-  @include mixins.text-base;
-  margin: 0;
-  color: var(--content);
-
-  @media (min-width: variables.$mediumScreen) {
-    @include mixins.text-large;
-  }
-
-  strong {
-    font-weight: var(--bold);
-    color: var(--content-emphasis);
-
-    &[data-warning] {
-      color: var(--warning);
-    }
-  }
-}
-
 // A full width segmented control on mobile, underlined tabs like the design once theres room.
 .tabs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.5 * variables.$size;
   padding: 0.75 * variables.$size;
+  margin: 0 1 * variables.$size;
   border-radius: var(--border-radius);
   background-color: var(--background-emphasis);
 
   @media (min-width: variables.$mediumScreen) {
+    margin: 0 2 * variables.$size;
     display: flex;
     gap: 1 * variables.$size;
     padding: 0;
@@ -208,7 +122,12 @@
 }
 
 .emptyTab {
-  padding: 4 * variables.$size;
+  padding: 4 * variables.$size 3 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    padding-left: 4 * variables.$size;
+    padding-right: 4 * variables.$size;
+  }
 }
 
 .list {
@@ -221,7 +140,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4 * variables.$size 0 1 * variables.$size;
+  padding: 4 * variables.$size 3 * variables.$size 1 * variables.$size;
   font-weight: var(--semibold);
   color: var(--content-subtle);
 
@@ -230,11 +149,8 @@
   }
 
   @media (min-width: variables.$mediumScreen) {
-    padding: 4 * variables.$size 4 * variables.$size 2 * variables.$size;
-
-    &:first-child {
-      padding-top: 2 * variables.$size;
-    }
+    padding-left: 4 * variables.$size;
+    padding-right: 4 * variables.$size;
   }
 
   &[data-late] {
@@ -263,7 +179,7 @@
   column-gap: 3 * variables.$size;
   align-items: center;
   min-height: 14 * variables.$size;
-  padding: 2 * variables.$size 0;
+  padding: 1 * variables.$size 2 * variables.$size;
   border-radius: var(--border-radius);
 
   @media (min-width: variables.$mediumScreen) {
@@ -272,12 +188,12 @@
       6 * variables.$size;
     grid-template-areas: 'icon name date budget amount chevron';
     column-gap: 4 * variables.$size;
-    min-height: 0;
-    padding: 2.5 * variables.$size 4 * variables.$size;
+  }
 
-    &:hover {
-      background-color: var(--background-emphasis);
-    }
+  // :active is what shows up when a row gets tapped on a phone, same as the other lists
+  &:hover,
+  &:active {
+    background-color: var(--background-emphasis);
   }
 }
 
@@ -299,41 +215,47 @@
   min-width: 0;
 }
 
+// The name and the cadence share a line, a long name gets cut off before the cadence ever does.
 .rowTitle {
   @include mixins.text-base;
+  display: flex;
+  gap: 1 * variables.$size;
+  min-width: 0;
   font-weight: var(--semibold);
   color: var(--content-emphasis);
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-// the schedule only shows on desktop, the date next to the amount covers it on mobile
-.rowSubtitle {
-  @include mixins.text-small;
-  display: none;
+.rowTitleName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rowTitleCadence {
+  flex: none;
+  font-weight: var(--normal);
+  color: var(--content-subtle);
+
+  @media (min-width: variables.$mediumScreen) {
+    display: none;
+  }
+}
+
+// The raw text from the bank, monospace so it reads like the statement it came from. Long and shouty, so one line and
+// the title shows the rest.
+.rowMemo {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  line-height: 4 * variables.$size;
   color: var(--content-subtle);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 
   @media (min-width: variables.$mediumScreen) {
-    display: block;
-  }
-}
-
-// memos tend to be long and shouty, so keep it to one muted line and let the title show the rest. The mobile design
-// doesn't have room for it.
-.rowMemo {
-  @include mixins.text-extra-small;
-  display: none;
-  color: var(--content-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  @media (min-width: variables.$mediumScreen) {
-    display: block;
+    font-size: 12px;
+    line-height: 4.5 * variables.$size;
   }
 }
 
@@ -501,20 +423,142 @@
   }
 }
 
-.rowChevron {
+// Opens the recent charges under the row, only on desktop. Sits above the row link so it gets the click.
+.rowToggle {
   grid-area: chevron;
+  position: relative;
   display: none;
-  width: 4.5 * variables.$size;
-  height: 4.5 * variables.$size;
+  width: 7 * variables.$size;
+  height: 7 * variables.$size;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: calc(var(--border-radius) - 2px);
+  background: transparent;
   color: var(--content-subtle);
+  cursor: pointer;
+
+  svg {
+    width: 4.5 * variables.$size;
+    height: 4.5 * variables.$size;
+  }
+
+  &[aria-expanded='true'] {
+    background-color: var(--background-emphasis);
+    color: var(--content-emphasis);
+  }
 
   @media (min-width: variables.$mediumScreen) {
-    display: block;
+    display: flex;
+  }
+}
+
+// An expanded row gets boxed in together with its recent charges.
+.rowGroup {
+  display: flex;
+  flex-direction: column;
+  margin: 0 1 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    margin: 0 2 * variables.$size;
+  }
+
+  border: 1px solid transparent;
+  border-radius: var(--border-radius);
+
+  &[data-expanded='true'] {
+    border-color: var(--border-subtle);
+    background-color: var(--background-darker);
+  }
+}
+
+.recent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5 * variables.$size;
+  // lines up with the name, past the icon
+  margin: 0 2 * variables.$size 2 * variables.$size 16 * variables.$size;
+  padding-top: 2.5 * variables.$size;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.recentHeader {
+  @include mixins.text-extra-small;
+  display: flex;
+  align-items: center;
+  gap: 1.5 * variables.$size;
+  color: var(--content-subtle);
+
+  svg {
+    width: 3.25 * variables.$size;
+    height: 3.25 * variables.$size;
+  }
+
+  strong {
+    font-weight: var(--semibold);
+    color: var(--content-emphasis);
+  }
+}
+
+.recentLink {
+  margin-left: auto;
+  font-weight: var(--medium);
+  color: var(--brand-faint);
+
+  &:hover {
+    color: var(--brand-bright);
+  }
+}
+
+.recentList {
+  @include mixins.text-small;
+  display: grid;
+  grid-template-columns: 16 * variables.$size minmax(0, 1fr) 20 * variables.$size;
+  gap: 1.5 * variables.$size 3 * variables.$size;
+  align-items: center;
+}
+
+.recentDate {
+  color: var(--content-subtle);
+}
+
+.recentMemo {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  color: var(--content);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recentAmount {
+  text-align: right;
+  font-weight: var(--semibold);
+  color: var(--amount-negative);
+
+  &[data-addition='true'] {
+    color: var(--amount-positive);
   }
 }
 
 .footnote {
+  display: flex;
+  align-items: flex-start;
+  gap: 2 * variables.$size;
+  padding: 2 * variables.$size 3 * variables.$size 0;
+  color: var(--content-subtle);
+
+  // lines up with the first line of text
+  svg {
+    flex: none;
+    width: 4 * variables.$size;
+    height: 4 * variables.$size;
+    margin-top: 0.5 * variables.$size;
+  }
+
   @media (min-width: variables.$mediumScreen) {
-    padding: 0 4 * variables.$size;
+    padding-left: 4 * variables.$size;
+    padding-right: 4 * variables.$size;
   }
 }

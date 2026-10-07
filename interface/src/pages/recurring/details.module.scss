@@ -132,6 +132,36 @@
   }
 }
 
+// The raw text from the bank, monospace so it reads like the statement it came from.
+.memo {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  line-height: 4.5 * variables.$size;
+  color: var(--content-subtle);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.showsUpAs {
+  @include mixins.text-small;
+  display: flex;
+  align-items: baseline;
+  gap: 1.5 * variables.$size;
+  min-width: 0;
+  color: var(--content-subtle);
+
+  .memo {
+    color: var(--content);
+  }
+}
+
+// the memo gets cut off instead of the label wrapping
+.showsUpAsLabel {
+  flex: none;
+}
+
 .cardTitle {
   @include mixins.text-2-extra-large;
   font-weight: var(--bold);
@@ -371,6 +401,54 @@
     width: 3 * variables.$size;
     height: 3 * variables.$size;
   }
+}
+
+.clusterMemos {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5 * variables.$size;
+  padding-top: 2.5 * variables.$size;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.clusterMemosLabel {
+  @include mixins.text-extra-small;
+  font-weight: var(--medium);
+  color: var(--content-subtle);
+}
+
+.clusterMemoList {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1.5 * variables.$size 3 * variables.$size;
+  align-items: center;
+
+  .memo {
+    color: var(--content);
+  }
+}
+
+.clusterMemoCount {
+  @include mixins.text-extra-small;
+  color: var(--content-subtle);
+}
+
+.chargeDate {
+  @include mixins.text-base;
+  display: flex;
+  align-items: center;
+  gap: 2 * variables.$size;
+  font-weight: var(--semibold);
+  color: var(--content-emphasis);
+}
+
+.oneOffChip {
+  @include mixins.text-extra-small;
+  padding: 0 1.5 * variables.$size;
+  border-radius: calc(var(--border-radius) - 2px);
+  font-weight: var(--semibold);
+  color: var(--content);
+  background-color: var(--background-emphasis);
 }
 
 .clusterNote {

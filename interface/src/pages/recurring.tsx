@@ -1,6 +1,16 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { differenceInCalendarDays, differenceInCalendarMonths, isBefore, isThisYear, startOfToday } from 'date-fns';
-import { CalendarSync, ChevronRight, HeartCrack, Receipt, Repeat, TriangleAlert } from 'lucide-react';
+import {
+  CalendarSync,
+  ChevronDown,
+  ChevronUp,
+  HeartCrack,
+  Info,
+  Layers,
+  Receipt,
+  Repeat,
+  TriangleAlert,
+} from 'lucide-react';
 import { rrulestr } from 'rrule';
 import { Link } from 'wouter';
 
@@ -10,11 +20,15 @@ import Typography from '@monetr/interface/components/Typography';
 import { useFundingSchedules } from '@monetr/interface/hooks/useFundingSchedules';
 import { useLocale } from '@monetr/interface/hooks/useLocale';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import { useRecurringTransactionHistory } from '@monetr/interface/hooks/useRecurringTransactionHistory';
 import { useRecurringTransactions } from '@monetr/interface/hooks/useRecurringTransactions';
+import { useSpending } from '@monetr/interface/hooks/useSpending';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { showNewExpenseModal } from '@monetr/interface/modals/NewExpenseModal';
 import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
+import type Spending from '@monetr/interface/models/Spending';
 import type TransactionRecurring from '@monetr/interface/models/TransactionRecurring';
+import { TransactionRecurringWindow } from '@monetr/interface/models/TransactionRecurring';
 import { AmountType } from '@monetr/interface/util/amounts';
 import capitalize from '@monetr/interface/util/capitalize';
 import mergeClasses from '@monetr/interface/util/mergeClasses';
@@ -84,7 +98,6 @@ export default function Recurring(): React.JSX.Element {
           </div>
         ) : (
           <Fragment>
-            <NextFundingSummary charges={tabs.charges} />
             <div className={styles.tabs} role='tablist'>
               <TabButton count={tabs.charges.length} onClick={() => setTab('charges')} selected={tab === 'charges'}>
                 Charges
@@ -97,9 +110,12 @@ export default function Recurring(): React.JSX.Element {
               </TabButton>
             </div>
             {tab === 'ended' ? <EndedList items={tabs.ended} /> : <UpcomingList items={tabs[tab]} />}
-            <Typography className={styles.footnote} color='subtle' size='sm'>
-              {FOOTNOTE}
-            </Typography>
+            <div className={styles.footnote}>
+              <Info />
+              <Typography color='subtle' size='sm'>
+                {FOOTNOTE}
+              </Typography>
+            </div>
           </Fragment>
         )}
       </div>
@@ -173,71 +189,14 @@ function useFormatters() {
   };
 }
 
-// getShortfall is how much of the next charge the linked expense won't cover, or all of it when there isn't one
-function getShortfall(item: TransactionRecurring): number {
-  const amount = Math.abs(item.lastAmount);
-  if (!item.spending) {
-    return amount;
+// getShortfall is how much of the next charge the linked expense won't cover. Only when the expense is actually behind,
+// one that will catch up by the time the charge comes in isn't short. Nothing until the expense has loaded either, so
+// it doesn't flash a shortfall for the whole amount in the meantime.
+function getShortfall(item: TransactionRecurring, spending: Spending | undefined): number {
+  if (item.ended || !spending?.isBehind) {
+    return 0;
   }
-  return Math.max(0, amount - item.spending.currentAmount);
-}
-
-interface NextFundingSummaryProps {
-  charges: Array<TransactionRecurring>;
-}
-
-function NextFundingSummary({ charges }: NextFundingSummaryProps): React.JSX.Element | null {
-  const nextFunding = useNextFunding();
-  const format = useFormatters();
-  if (!nextFunding || !format) {
-    return null;
-  }
-
-  const upcoming = charges.filter(item => !isBefore(item.next, format.today) && isBefore(item.next, nextFunding));
-  const total = upcoming.reduce((sum, item) => sum + Math.abs(item.lastAmount), 0);
-  const uncovered = upcoming.reduce((sum, item) => sum + getShortfall(item), 0);
-
-  return (
-    <section className={styles.summary}>
-      <span className={styles.summaryEyebrow}>
-        Before your next funding on {format.date(nextFunding, { weekday: 'long' })}
-      </span>
-      {upcoming.length > 0 && (
-        // mobile gets the total up front and the rest underneath, theres not enough room for the whole sentence
-        <div className={styles.summaryMobile}>
-          <span className={styles.summaryTotal}>
-            {format.amount(total)}{' '}
-            <span>expected · {upcoming.length === 1 ? '1 charge' : `${upcoming.length} charges`}</span>
-          </span>
-          <span className={styles.summaryDetail}>
-            {uncovered > 0 ? (
-              <Fragment>
-                <strong>{format.amount(uncovered)}</strong> isn&apos;t budgeted and will come out of Free-To-Use
-              </Fragment>
-            ) : (
-              'All of it is covered by your expenses'
-            )}
-          </span>
-        </div>
-      )}
-      {upcoming.length === 0 ? (
-        <p className={styles.summaryText}>Nothing recurring is expected before then.</p>
-      ) : (
-        <p className={mergeClasses(styles.summaryText, styles.summaryDesktop)}>
-          <strong>{format.amount(total)}</strong> in {upcoming.length === 1 ? '1 charge' : `${upcoming.length} charges`}{' '}
-          is expected.{' '}
-          {uncovered > 0 ? (
-            <Fragment>
-              <strong data-warning>{format.amount(uncovered)}</strong> of that isn&apos;t covered by an expense and will
-              come out of Free-To-Use.
-            </Fragment>
-          ) : (
-            'All of it is covered by your expenses.'
-          )}
-        </p>
-      )}
-    </section>
-  );
+  return Math.max(0, Math.abs(item.lastAmount) - spending.currentAmount);
 }
 
 interface ListProps {
@@ -333,88 +292,188 @@ interface RecurringRowProps {
 
 function RecurringRow({ item }: RecurringRowProps): React.JSX.Element | null {
   const format = useFormatters();
+  const [expanded, setExpanded] = useState(false);
   if (!format) {
     return null;
   }
 
   const name = item.transactionCluster?.name ?? 'Recurring';
+  const memo = item.transactionCluster?.originalMemo;
   const detailsUrl = `/bank/${item.bankAccountId}/recurring/${item.transactionRecurringId}/details`;
   const daysLate = -format.daysFromToday(item.next);
+  const cadence = getCadence(item);
 
   return (
-    <div className={styles.row} data-testid={item.transactionRecurringId.toString()}>
-      <Link aria-label={name} className={styles.rowLink} to={detailsUrl} />
-      <MerchantIcon className={styles.rowIcon} name={name} />
-      <div className={styles.rowName}>
-        <span className={styles.rowTitle}>{name}</span>
-        <span className={styles.rowSubtitle}>{capitalize(rrulestr(item.ruleset).toText())}</span>
-        {item.transactionCluster?.originalMemo && (
-          <span className={styles.rowMemo} title={item.transactionCluster.originalMemo}>
-            {item.transactionCluster.originalMemo}
+    <div className={styles.rowGroup} data-expanded={expanded}>
+      <div className={styles.row} data-testid={item.transactionRecurringId.toString()}>
+        <Link aria-label={name} className={styles.rowLink} to={detailsUrl} />
+        <MerchantIcon className={styles.rowIcon} name={name} />
+        <div className={styles.rowName}>
+          <span className={styles.rowTitle}>
+            <span className={styles.rowTitleName}>{name}</span>
+            {/* desktop has the cadence in the date column, mobile tucks it in after the name */}
+            <span className={styles.rowTitleCadence}>· {cadence}</span>
           </span>
-        )}
-        <RecurringStatus item={item} />
+          {/* the raw text from the bank, so its easy to tell which charges on a statement this is */}
+          {memo && (
+            <span className={styles.rowMemo} title={memo}>
+              {memo}
+            </span>
+          )}
+          <RecurringStatus item={item} />
+        </div>
+        <div className={styles.rowDate}>
+          {item.ended ? (
+            <Fragment>
+              <span className={styles.rowDateValue}>{format.date(item.last)}</span>
+              <span className={styles.rowSubtle}>{cadence} · last seen</span>
+            </Fragment>
+          ) : daysLate > 0 ? (
+            <Fragment>
+              <span className={styles.lateBadge}>{daysLate === 1 ? '1 day late' : `${daysLate} days late`}</span>
+              <span className={styles.rowSubtle}>
+                {cadence} · was due {format.date(item.next)}
+              </span>
+            </Fragment>
+          ) : (
+            <Fragment>
+              <span className={styles.rowDateValue}>{format.date(item.next)}</span>
+              <span className={styles.rowSubtle}>
+                {cadence} · {format.relative(item.next)}
+              </span>
+            </Fragment>
+          )}
+        </div>
+        <div className={styles.rowBudget}>
+          <RecurringBudget item={item} />
+        </div>
+        <RecurringAmount item={item} />
+        <button
+          aria-expanded={expanded}
+          aria-label={`${expanded ? 'Hide' : 'Show'} recent ${name} charges`}
+          className={styles.rowToggle}
+          onClick={() => setExpanded(!expanded)}
+          type='button'
+        >
+          {expanded ? <ChevronUp /> : <ChevronDown />}
+        </button>
       </div>
-      <div className={styles.rowDate}>
-        {item.ended ? (
-          <Fragment>
-            <span className={styles.rowDateValue}>{format.date(item.last)}</span>
-            <span className={styles.rowSubtle}>Last seen</span>
-          </Fragment>
-        ) : daysLate > 0 ? (
-          <Fragment>
-            <span className={styles.lateBadge}>{daysLate === 1 ? '1 day late' : `${daysLate} days late`}</span>
-            <span className={styles.rowSubtle}>Expected {format.date(item.next)}</span>
-          </Fragment>
-        ) : (
-          <Fragment>
-            <span className={styles.rowDateValue}>{format.date(item.next)}</span>
-            <span className={styles.rowSubtle}>{format.relative(item.next)}</span>
-          </Fragment>
-        )}
-      </div>
-      <div className={styles.rowBudget}>
-        <RecurringBudget item={item} />
-      </div>
-      <RecurringAmount item={item} />
-      <ChevronRight className={styles.rowChevron} />
+      {expanded && <RecentCharges detailsUrl={detailsUrl} item={item} name={name} />}
     </div>
   );
 }
 
+interface RecentChargesProps {
+  item: TransactionRecurring;
+  name: string;
+  detailsUrl: string;
+}
+
+// RecentCharges is the peek you get when expanding a row, the last few charges with what they actually looked like on
+// the statement. Only fetched once the row is opened.
+function RecentCharges({ item, name, detailsUrl }: RecentChargesProps): React.JSX.Element | null {
+  const { transactions, seen, isLoading } = useRecurringTransactionHistory(item);
+  const format = useFormatters();
+  const { inTimezone } = useTimezone();
+  const { data: locale } = useLocale();
+  if (!format || !locale) {
+    return null;
+  }
+
+  const since = new Intl.DateTimeFormat(locale.code, { month: 'short', year: 'numeric' }).format(
+    inTimezone(item.first),
+  );
+
+  return (
+    <div className={styles.recent}>
+      <div className={styles.recentHeader}>
+        <Layers />
+        <span>Similar transactions group</span>
+        <strong>{name}</strong>
+        <span>
+          · {seen === 1 ? '1 charge' : `${seen} charges`} since {since}
+        </span>
+        <Link className={styles.recentLink} to={detailsUrl}>
+          View details
+        </Link>
+      </div>
+      {isLoading ? (
+        <span className={styles.rowSubtle}>Loading...</span>
+      ) : (
+        <div className={styles.recentList}>
+          {transactions.slice(0, 3).map(transaction => (
+            <Fragment key={transaction.transactionId}>
+              <span className={styles.recentDate}>{format.date(transaction.date)}</span>
+              <span className={styles.recentMemo} title={transaction.originalName}>
+                {transaction.originalName}
+              </span>
+              <span className={styles.recentAmount} data-addition={transaction.getIsAddition()}>
+                {format.amount(transaction.amount)}
+              </span>
+            </Fragment>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// getCadence is the short version of the schedule for the date column, the full ruleset text is on the details page
+function getCadence(item: TransactionRecurring): string {
+  switch (item.window) {
+    case TransactionRecurringWindow.FirstAndFifteenth:
+    case TransactionRecurringWindow.FifteenthAndLast:
+      return 'Twice a month';
+    case TransactionRecurringWindow.Weekly:
+      return 'Weekly';
+    case TransactionRecurringWindow.BiWeekly:
+      return 'Every 2 weeks';
+    case TransactionRecurringWindow.Monthly:
+      return 'Monthly';
+    case TransactionRecurringWindow.BiMonthly:
+      return 'Every 2 months';
+    case TransactionRecurringWindow.Quarterly:
+      return 'Quarterly';
+    case TransactionRecurringWindow.SemiYearly:
+      return 'Every 6 months';
+    case TransactionRecurringWindow.Yearly:
+      return 'Yearly';
+    default:
+      return capitalize(rrulestr(item.ruleset).toText());
+  }
+}
+
 function RecurringBudget({ item }: RecurringRowProps): React.JSX.Element | null {
   const format = useFormatters();
+  // the list doesn't embed the expense, it gets looked up so it comes from the same cache as the rest of the app
+  const { data: spending } = useSpending(item.spendingId);
   if (!format) {
     return null;
   }
 
   if (item.direction === 'debit') {
-    if (item.spending) {
-      const shortfall = item.ended ? 0 : getShortfall(item);
+    if (item.spendingId) {
+      const shortfall = getShortfall(item, spending);
       return (
         <Fragment>
           <span className={styles.budgetIcon}>
             <Receipt />
           </span>
-          <span className={styles.budgetName}>{item.spending.name}</span>
+          <span className={styles.budgetName}>{spending?.name}</span>
           {shortfall > 0 && <span className={styles.budgetShort}>short {format.amount(shortfall)}</span>}
         </Fragment>
       );
     }
 
+    // the button already says theres no expense yet, so only spell it out when theres nothing to create anymore
+    if (item.ended) {
+      return <span className={styles.rowSubtle}>Not budgeted</span>;
+    }
+
     return (
-      <Fragment>
-        <span className={styles.rowSubtle}>Not budgeted</span>
-        {!item.ended && (
-          <button
-            className={styles.budgetButton}
-            onClick={() => showNewExpenseModal({ recurring: item })}
-            type='button'
-          >
-            Create expense
-          </button>
-        )}
-      </Fragment>
+      <button className={styles.budgetButton} onClick={() => showNewExpenseModal({ recurring: item })} type='button'>
+        Create expense
+      </button>
     );
   }
 
@@ -429,15 +488,14 @@ function RecurringBudget({ item }: RecurringRowProps): React.JSX.Element | null 
     );
   }
 
+  if (item.ended) {
+    return <span className={styles.rowSubtle}>Not funding anything</span>;
+  }
+
   return (
-    <Fragment>
-      <span className={styles.rowSubtle}>Not funding anything</span>
-      {!item.ended && (
-        <button className={styles.budgetButton} onClick={() => showNewFundingModal({ recurring: item })} type='button'>
-          Create funding schedule
-        </button>
-      )}
-    </Fragment>
+    <button className={styles.budgetButton} onClick={() => showNewFundingModal({ recurring: item })} type='button'>
+      Create funding schedule
+    </button>
   );
 }
 
@@ -471,12 +529,13 @@ function RecurringAmount({ item }: RecurringRowProps): React.JSX.Element | null 
 // RecurringStatus is the one line under the name on mobile, it stands in for the budget column which doesnt fit there.
 function RecurringStatus({ item }: RecurringRowProps): React.JSX.Element | null {
   const format = useFormatters();
+  const { data: spending } = useSpending(item.spendingId);
   if (!format) {
     return null;
   }
 
   if (item.direction === 'debit') {
-    if (!item.spending) {
+    if (!item.spendingId) {
       return (
         <span className={styles.rowStatus} data-warning={!item.ended}>
           Not budgeted
@@ -484,11 +543,11 @@ function RecurringStatus({ item }: RecurringRowProps): React.JSX.Element | null 
       );
     }
 
-    const shortfall = item.ended ? 0 : getShortfall(item);
+    const shortfall = getShortfall(item, spending);
     return (
       <span className={styles.rowStatus}>
         <Receipt />
-        <span className={styles.rowStatusName}>{item.spending.name}</span>
+        <span className={styles.rowStatusName}>{spending?.name}</span>
         {shortfall > 0 && <span className={styles.budgetShort}>· short {format.amount(shortfall)}</span>}
       </span>
     );
