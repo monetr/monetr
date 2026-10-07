@@ -36,6 +36,9 @@ You can link a recurring transaction to the thing in your budget that covers it.
 example. The link lives on the recurring transaction, so you set it with a PATCH here after you've created the expense or
 funding schedule.
 
+A linked funding schedule comes back filled in as `fundingSchedule`, but a linked expense is only ever its
+`spendingId`. If you need the expense itself, [look it up](./spending#get-a-spending-object) by that ID.
+
 ## The recurring transaction object
 
 | Attribute                | Type                    | Description                                                                                                                                                                                                       |
@@ -45,7 +48,6 @@ funding schedule.
 | `transactionClusterId`   | string (ulid)           | The [similar transactions](./similar_transactions#the-similar-transaction-object) cluster it was found in.                                                                                                        |
 | `transactionCluster`     | object                  | The [similar transactions](./similar_transactions#the-similar-transaction-object) cluster in `transactionClusterId`, without its `debug` info. Only there when listing, it's where the name comes from.           |
 | `spendingId`             | string (ulid), nullable | The [expense](./spending#the-spending-object) tracking this, if you've linked one. Only ever set on debits. See [Link an expense or funding schedule](#link-an-expense-or-funding-schedule).                      |
-| `spending`               | object                  | The [expense](./spending#the-spending-object) in `spendingId`, if there is one. Left out otherwise, and always left out when listing, look it up by `spendingId` instead.                                         |
 | `fundingScheduleId`      | string (ulid), nullable | The [funding schedule](./funding_schedules#the-funding-schedule-object) tracking this, if you've linked one. Only ever set on credits.                                                                            |
 | `fundingSchedule`        | object                  | The [funding schedule](./funding_schedules#the-funding-schedule-object) in `fundingScheduleId`, if there is one. Left out otherwise.                                                                              |
 | `direction`              | string                  | `debit` for money leaving the account, `credit` for money coming in. Same as the sign on the transactions, debits are positive amounts and credits are negative.                                                  |
@@ -82,8 +84,11 @@ Returns every recurring transaction on a bank account, a page at a time. Ones th
 when the next one is expected, then the ones that have ended. You can narrow it down to one direction, or to just the
 ones that are still going or just the ones that ended, so you're not paging through stuff you don't care about.
 
-Each one comes with its `transactionCluster` so you have a name to show, but not its `spending`. If you need the expense
-look it up by `spendingId`.
+If you ask for just the ended ones with `ended=true` they're sorted by when they were last seen instead, most recent
+first. `next` keeps getting worked out from the schedule even after something stops, so it doesn't say anything useful
+about when it ended.
+
+Each one comes with its `transactionCluster` so you have a name to show.
 
 **In the app:** The recurring page, under transactions in the sidebar.
 
@@ -157,9 +162,8 @@ curl --request GET \
 ]
 ```
 
-Each item is a [recurring transaction object](#the-recurring-transaction-object). There's a `spendingId` but no
-`spending` here, look the expense up by its ID if you need it. A bank account with no recurring transactions, or one
-that isn't yours, isn't an error. You just get back an empty array.
+Each item is a [recurring transaction object](#the-recurring-transaction-object). A bank account with no recurring
+transactions, or one that isn't yours, isn't an error. You just get back an empty array.
 
 ### Errors
 
@@ -285,25 +289,6 @@ curl --request PATCH \
   "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
   "transactionClusterId": "tcl_01j6b4m3zr8yq2w6tnc5kxd9fe",
   "spendingId": "spnd_01j6b5q2h8ycz4n7w3tkr9vx5d",
-  "spending": {
-    "spendingId": "spnd_01j6b5q2h8ycz4n7w3tkr9vx5d",
-    "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
-    "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
-    "spendingType": "expense",
-    "name": "Netflix",
-    "targetAmount": 1549,
-    "currentAmount": 0,
-    "usedAmount": 0,
-    "ruleset": "DTSTART:20240301T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=12",
-    "lastSpentFrom": null,
-    "lastRecurrence": null,
-    "nextRecurrence": "2024-09-12T05:00:00Z",
-    "nextContributionAmount": 775,
-    "isBehind": false,
-    "isPaused": false,
-    "autoCreateTransaction": false,
-    "createdAt": "2024-08-30T14:02:11.418Z"
-  },
   "fundingScheduleId": null,
   "window": "monthly",
   "ruleset": "DTSTART:20240301T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=12",
@@ -324,7 +309,8 @@ curl --request PATCH \
 }
 ```
 
-You get the recurring transaction back with whatever's linked to it filled in, and `updatedAt` bumped to now.
+You get the recurring transaction back with the new link and `updatedAt` bumped to now. A funding schedule you linked
+comes back filled in as `fundingSchedule`, an expense is just the `spendingId`.
 
 ### Errors
 
