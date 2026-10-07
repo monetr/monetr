@@ -19,8 +19,10 @@
 .body {
   width: 100%;
   min-width: 0;
-  padding: 4 * variables.$size;
+  padding-top: 4 * variables.$size;
+  padding-right: 4 * variables.$size;
   padding-bottom: 16 * variables.$size;
+  padding-left: 4 * variables.$size;
 
   @media (min-width: variables.$mediumScreen) {
     padding-bottom: 4 * variables.$size;

@@ -17,7 +17,10 @@
   display: flex;
   flex-direction: column;
   gap: 3 * variables.$size;
-  padding: 4 * variables.$size;
+  padding-top: 4 * variables.$size;
+  padding-right: 4 * variables.$size;
+  padding-bottom: 4 * variables.$size;
+  padding-left: 4 * variables.$size;
   border: 1px solid var(--border);
   border-radius: var(--border-radius);
   background-color: var(--background-darker);
@@ -47,7 +50,10 @@
   display: flex;
   align-items: center;
   gap: 1.25 * variables.$size;
-  padding: 0.5 * variables.$size 2 * variables.$size;
+  padding-top: 0.5 * variables.$size;
+  padding-right: 2 * variables.$size;
+  padding-bottom: 0.5 * variables.$size;
+  padding-left: 2 * variables.$size;
   border-radius: var(--border-radius);
   font-weight: var(--semibold);
   color: var(--brand-bright);

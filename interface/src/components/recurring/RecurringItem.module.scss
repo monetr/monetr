@@ -40,7 +40,10 @@
   align-items: center;
   gap: 3 * variables.$size;
   min-height: 14 * variables.$size;
-  padding: 1 * variables.$size 2 * variables.$size;
+  padding-top: 1 * variables.$size;
+  padding-right: 2 * variables.$size;
+  padding-bottom: 1 * variables.$size;
+  padding-left: 2 * variables.$size;
   border-radius: var(--border-radius);
 
   @media (min-width: variables.$mediumScreen) {
@@ -158,7 +161,10 @@
   @include mixins.text-extra-small;
   font-weight: var(--semibold);
   color: var(--warning);
-  padding: 0.25 * variables.$size 2 * variables.$size;
+  padding-top: 0.25 * variables.$size;
+  padding-right: 2 * variables.$size;
+  padding-bottom: 0.25 * variables.$size;
+  padding-left: 2 * variables.$size;
   border-radius: var(--border-radius);
   background-color: color-mix(in srgb, var(--warning) 20%, transparent);
 }
@@ -178,7 +184,10 @@
 .linkedIcon {
   display: flex;
   flex: none;
-  padding: 0.5 * variables.$size 1.5 * variables.$size;
+  padding-top: 0.5 * variables.$size;
+  padding-right: 1.5 * variables.$size;
+  padding-bottom: 0.5 * variables.$size;
+  padding-left: 1.5 * variables.$size;
   border-radius: var(--border-radius);
   background-color: var(--success);
   color: var(--content-emphasis);
@@ -209,7 +218,10 @@
   position: relative;
   flex: none;
   height: 7.5 * variables.$size;
-  padding: 0 2.5 * variables.$size;
+  padding-top: 0;
+  padding-right: 2.5 * variables.$size;
+  padding-bottom: 0;
+  padding-left: 2.5 * variables.$size;
   border: 0;
   border-radius: var(--border-radius);
   background-color: var(--background-active);
@@ -268,7 +280,10 @@
   height: 7 * variables.$size;
   align-items: center;
   justify-content: center;
-  padding: 0;
+  padding-top: 0;
+  padding-right: 0;
+  padding-bottom: 0;
+  padding-left: 0;
   border: 0;
   border-radius: var(--border-radius);
   background: transparent;

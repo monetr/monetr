@@ -18,7 +18,10 @@
 .tabs {
   display: flex;
   gap: 0.5 * variables.$size;
-  padding: 0.75 * variables.$size;
+  padding-top: 0.75 * variables.$size;
+  padding-right: 0.75 * variables.$size;
+  padding-bottom: 0.75 * variables.$size;
+  padding-left: 0.75 * variables.$size;
   border-radius: var(--border-radius);
   background-color: var(--background-emphasis);
 }
@@ -27,7 +30,10 @@
   @include mixins.text-small;
   border: 0;
   border-radius: var(--border-radius);
-  padding: 1 * variables.$size 2.5 * variables.$size;
+  padding-top: 1 * variables.$size;
+  padding-right: 2.5 * variables.$size;
+  padding-bottom: 1 * variables.$size;
+  padding-left: 2.5 * variables.$size;
   background: transparent;
   font-weight: var(--medium);
   color: var(--content-subtle);
@@ -47,7 +53,10 @@
 }
 
 .empty {
-  padding: 2 * variables.$size;
+  padding-top: 2 * variables.$size;
+  padding-right: 2 * variables.$size;
+  padding-bottom: 2 * variables.$size;
+  padding-left: 2 * variables.$size;
 }
 
 // Dashed since it hasn't actually happened yet. Outline instead of border so it doesn't shift the content over
@@ -88,7 +97,10 @@
   align-self: flex-start;
   border: 0;
   background: transparent;
-  padding: 1 * variables.$size 2 * variables.$size;
+  padding-top: 1 * variables.$size;
+  padding-right: 2 * variables.$size;
+  padding-bottom: 1 * variables.$size;
+  padding-left: 2 * variables.$size;
   font-weight: var(--medium);
   color: var(--brand-bright);
   cursor: pointer;

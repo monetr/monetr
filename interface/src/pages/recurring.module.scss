@@ -33,7 +33,10 @@
   align-items: center;
   gap: 2 * variables.$size;
   max-width: 112 * variables.$size;
-  margin: 16 * variables.$size auto 0;
+  margin-top: 16 * variables.$size;
+  margin-right: auto;
+  margin-bottom: 0;
+  margin-left: auto;
 }
 
 .emptyIcon {
@@ -47,16 +50,28 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.5 * variables.$size;
-  margin: 0 1 * variables.$size;
-  padding: 0.75 * variables.$size;
+  margin-top: 0;
+  margin-right: 1 * variables.$size;
+  margin-bottom: 0;
+  margin-left: 1 * variables.$size;
+  padding-top: 0.75 * variables.$size;
+  padding-right: 0.75 * variables.$size;
+  padding-bottom: 0.75 * variables.$size;
+  padding-left: 0.75 * variables.$size;
   border-radius: var(--border-radius);
   background-color: var(--background-emphasis);
 
   @media (min-width: variables.$mediumScreen) {
     display: flex;
     gap: 1 * variables.$size;
-    margin: 0 2 * variables.$size;
-    padding: 0;
+    margin-top: 0;
+    margin-right: 2 * variables.$size;
+    margin-bottom: 0;
+    margin-left: 2 * variables.$size;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
     border-radius: 0;
     border-bottom: 1px solid var(--border-subtle);
     background-color: transparent;
@@ -89,7 +104,10 @@
     justify-content: flex-start;
     gap: 2 * variables.$size;
     min-height: 0;
-    padding: 2.5 * variables.$size 3.5 * variables.$size;
+    padding-top: 2.5 * variables.$size;
+    padding-right: 3.5 * variables.$size;
+    padding-bottom: 2.5 * variables.$size;
+    padding-left: 3.5 * variables.$size;
     border-radius: 0;
     border-bottom: 0.5 * variables.$size solid transparent;
 
@@ -113,7 +131,10 @@
 .tabCount {
   @media (min-width: variables.$mediumScreen) {
     @include mixins.text-extra-small;
-    padding: 0 1.5 * variables.$size;
+    padding-top: 0;
+    padding-right: 1.5 * variables.$size;
+    padding-bottom: 0;
+    padding-left: 1.5 * variables.$size;
     border-radius: var(--border-radius);
     background-color: var(--background-emphasis);
     color: var(--content);
@@ -121,7 +142,10 @@
 }
 
 .emptyTab {
-  padding: 4 * variables.$size 3 * variables.$size;
+  padding-top: 4 * variables.$size;
+  padding-right: 3 * variables.$size;
+  padding-bottom: 4 * variables.$size;
+  padding-left: 3 * variables.$size;
 
   @media (min-width: variables.$mediumScreen) {
     padding-left: 4 * variables.$size;
@@ -139,7 +163,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4 * variables.$size 3 * variables.$size 1 * variables.$size;
+  padding-top: 4 * variables.$size;
+  padding-right: 3 * variables.$size;
+  padding-bottom: 1 * variables.$size;
+  padding-left: 3 * variables.$size;
   font-weight: var(--semibold);
   color: var(--content-subtle);
 
@@ -172,7 +199,10 @@
   display: flex;
   align-items: flex-start;
   gap: 2 * variables.$size;
-  padding: 2 * variables.$size 3 * variables.$size 0;
+  padding-top: 2 * variables.$size;
+  padding-right: 3 * variables.$size;
+  padding-bottom: 0;
+  padding-left: 3 * variables.$size;
   color: var(--content-subtle);
 
   svg {
