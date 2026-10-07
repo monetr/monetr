@@ -25,6 +25,7 @@
 
 .header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 3 * variables.$size;
   padding-left: 4 * variables.$size;
@@ -53,8 +54,17 @@
 .headerText {
   display: flex;
   flex: 1;
+  // Once the title would get squished below this the confidence and details link wrap onto their own line instead
+  flex-basis: 40 * variables.$size;
   flex-direction: column;
   min-width: 0;
+}
+
+.headerActions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 3 * variables.$size;
 }
 
 .eyebrow {
@@ -80,6 +90,17 @@
   padding-bottom: 0.5 * variables.$size;
   border-radius: var(--border-radius);
   background-color: var(--background-emphasis);
+}
+
+.detailsLink {
+  @include mixins.text-small;
+  flex: none;
+  font-weight: var(--medium);
+  color: var(--brand-faint);
+
+  &:hover {
+    color: var(--brand-bright);
+  }
 }
 
 // two columns on mobile, all three stats in a row once there's room

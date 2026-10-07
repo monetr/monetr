@@ -83,12 +83,20 @@ export default function TransactionRecurringCard(props: TransactionRecurringCard
           <span className={styles.eyebrow}>{eyebrow}</span>
           <span className={styles.title}>{title}</span>
         </div>
-        <Tooltip delayDuration={100}>
-          <TooltipTrigger asChild>
-            <span className={styles.confidence}>{recurring.getConfidenceLabel()}</span>
-          </TooltipTrigger>
-          <TooltipContent side='top'>Confidence {Math.round(recurring.confidence * 100)}%</TooltipContent>
-        </Tooltip>
+        <div className={styles.headerActions}>
+          <Tooltip delayDuration={100}>
+            <TooltipTrigger asChild>
+              <span className={styles.confidence}>{recurring.getConfidenceLabel()}</span>
+            </TooltipTrigger>
+            <TooltipContent side='top'>Confidence {Math.round(recurring.confidence * 100)}%</TooltipContent>
+          </Tooltip>
+          <Link
+            className={styles.detailsLink}
+            to={`/bank/${recurring.bankAccountId}/recurring/${recurring.transactionRecurringId}/details`}
+          >
+            View Details
+          </Link>
+        </div>
       </div>
 
       <div className={styles.stats}>
