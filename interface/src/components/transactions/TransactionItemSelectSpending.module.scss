@@ -30,6 +30,8 @@
 }
 
 .selectSpendingWrapper {
+  // Sits above the row link so clicking the select doesn't open the transaction
+  position: relative;
   --ring-size: 0px;
   transition-duration: 0ms;
 

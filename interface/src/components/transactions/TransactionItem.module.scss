@@ -17,7 +17,7 @@
       background-color: var(--background-active);
     }
 
-    .arrowLink {
+    .arrow {
       color: var(--content-emphasis);
     }
   }
@@ -35,7 +35,7 @@
   }
 }
 
-.mobileLink {
+.link {
   position: absolute;
   left: 0;
   top: 0;
@@ -43,10 +43,6 @@
   height: 100%;
   width: 100%;
   cursor: pointer;
-
-  @media (min-width: variables.$mediumScreen) {
-    display: none;
-  }
 }
 
 .leftSection {
@@ -105,13 +101,9 @@
   }
 }
 
-.arrowLink {
+.arrow {
   flex: none;
   color: var(--content-subtle);
-
-  @media (min-width: variables.$mediumScreen) {
-    cursor: pointer;
-  }
 }
 
 .budgetingInfo {

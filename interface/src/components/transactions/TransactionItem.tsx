@@ -26,7 +26,7 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
       data-testid={transaction.transactionId}
       id={transaction.transactionId}
     >
-      <Link className={itemStyles.mobileLink} to={detailsUrl} />
+      <Link aria-label={transaction.getName()} className={itemStyles.link} to={detailsUrl} />
       <div className={itemStyles.inner}>
         <div className={itemStyles.leftSection}>
           <TransactionMerchantIcon
@@ -50,9 +50,9 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
         )}
         <div className={itemStyles.amountSection}>
           <TransactionAmount transaction={transaction} />
-          <Link className={itemStyles.arrowLink} tabIndex={-1} to={detailsUrl}>
+          <span className={itemStyles.arrow}>
             <ChevronRight />
-          </Link>
+          </span>
         </div>
       </div>
     </li>
