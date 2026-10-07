@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Plus, Repeat, Sparkles } from 'lucide-react';
+import { ArrowRight, Plus, Repeat, Sparkles } from 'lucide-react';
+import { rrulestr } from 'rrule';
 import { Link } from 'wouter';
 
 import type { ApiError } from '@monetr/interface/api/client';
@@ -103,26 +104,38 @@ export default function RecurringSpendingCard(props: RecurringSpendingCardProps)
   return (
     <section className={styles.root}>
       <div className={styles.header}>
-        <Typography component='h3' size='lg' weight='semibold'>
-          Automatically Spend
+        <Typography color='emphasis' component='h3' size='md' weight='semibold'>
+          Where New Charges Go
         </Typography>
         <Typography color='subtle' size='sm'>
           Pick where new {props.name || 'recurring'} charges come out of when they show up.
         </Typography>
       </div>
-      <div className={styles.card} data-active={String(Boolean(props.recurring.spendingId))}>
-        <div className={styles.cardHeader}>
-          <div className={styles.cardText}>
-            <span className={styles.chip}>
-              <Repeat />
-              This Schedule
-            </span>
-            <span className={styles.title}>Spend Charges On This Schedule From</span>
-            <span className={styles.description}>
-              Only the {locale?.formatAmount(Math.abs(props.recurring.lastAmount), AmountType.Stored)} charges monetr
-              matches to this schedule.
+      <div className={styles.row}>
+        <div className={styles.rowName}>
+          <span className={styles.rowIcon}>
+            <Repeat />
+          </span>
+          <div className={styles.rowText}>
+            <span className={styles.rowTitle}>{props.name || 'Recurring'} Charges</span>
+            <span className={styles.rowDetail}>
+              {locale?.formatAmount(Math.abs(props.recurring.lastAmount), AmountType.Stored)}{' '}
+              {rrulestr(props.recurring.ruleset).toText()}
             </span>
           </div>
+        </div>
+        <ArrowRight className={styles.arrow} />
+        <div className={styles.controls}>
+          <Select
+            className={styles.select}
+            disabled={saving || !hasExpenses}
+            isLoading={spendingIsLoading || balancesIsLoading}
+            onChange={linkSpending}
+            optionComponent={SelectSpendingOptionComponent}
+            options={options}
+            placeholder={placeholder}
+            value={hasExpenses ? value : undefined}
+          />
           {/* Automatically spending isn't a thing yet, the switch is here so its obvious where it will live */}
           <Tooltip delayDuration={100}>
             <TooltipTrigger asChild>
@@ -138,41 +151,15 @@ export default function RecurringSpendingCard(props: RecurringSpendingCardProps)
             <TooltipContent side='top'>Automatically spending new charges is coming soon.</TooltipContent>
           </Tooltip>
         </div>
-        <div className={styles.controls}>
-          <Select
-            className={styles.select}
-            disabled={saving || !hasExpenses}
-            isLoading={spendingIsLoading || balancesIsLoading}
-            onChange={linkSpending}
-            optionComponent={SelectSpendingOptionComponent}
-            options={options}
-            placeholder={placeholder}
-            value={hasExpenses ? value : undefined}
-          />
-          {!props.recurring.spendingId && !props.recurring.ended && (
-            <Button
-              className={styles.createButton}
-              data-testid='recurring-new-expense'
-              disabled={saving}
-              onClick={() =>
-                showNewExpenseModal({
-                  recurring: props.recurring,
-                })
-              }
-              variant='secondary'
-            >
-              <Plus />
-              New Expense
-            </Button>
+      </div>
+      {props.recurring.spending && (
+        <div className={styles.footer}>
+          {props.recurring.autoMatched && (
+            <span className={styles.note} data-testid='recurring-auto-matched'>
+              <Sparkles />
+              monetr picked {props.recurring.spending.name} for you since your recent charges were spent from it.
+            </span>
           )}
-        </div>
-        {props.recurring.spending && props.recurring.autoMatched && (
-          <span className={styles.note} data-testid='recurring-auto-matched'>
-            <Sparkles />
-            monetr picked {props.recurring.spending.name} for you since your recent charges were spent from it.
-          </span>
-        )}
-        {props.recurring.spending && (
           <Link
             className={styles.viewLink}
             data-testid='recurring-view-expense'
@@ -180,8 +167,25 @@ export default function RecurringSpendingCard(props: RecurringSpendingCardProps)
           >
             View Expense
           </Link>
-        )}
-      </div>
+        </div>
+      )}
+      {!props.recurring.spendingId && !props.recurring.ended && (
+        <div className={styles.footer}>
+          <Button
+            data-testid='recurring-new-expense'
+            disabled={saving}
+            onClick={() =>
+              showNewExpenseModal({
+                recurring: props.recurring,
+              })
+            }
+            variant='secondary'
+          >
+            <Plus />
+            New Expense
+          </Button>
+        </div>
+      )}
     </section>
   );
 }

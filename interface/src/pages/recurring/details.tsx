@@ -4,7 +4,6 @@ import { useParams } from 'wouter';
 
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import RecurringChargeList from '@monetr/interface/components/recurring/RecurringChargeList';
-import RecurringClusterCard from '@monetr/interface/components/recurring/RecurringClusterCard';
 import RecurringFundingCard from '@monetr/interface/components/recurring/RecurringFundingCard';
 import RecurringSpendingCard from '@monetr/interface/components/recurring/RecurringSpendingCard';
 import RecurringSummaryCard from '@monetr/interface/components/recurring/RecurringSummaryCard';
@@ -53,25 +52,28 @@ export default function RecurringDetails(): React.JSX.Element | null {
 
   const name = cluster?.name ?? '';
 
+  // Going back should land on the tab this shows up under, not always charges
+  let tab = 'charges';
+  if (recurring.ended) {
+    tab = 'ended';
+  } else if (recurring.direction === 'credit') {
+    tab = 'deposits';
+  }
+
   return (
     <Fragment>
       <MTopNavigation
-        base={`/bank/${recurring.bankAccountId}/recurring`}
+        base={`/bank/${recurring.bankAccountId}/recurring?tab=${tab}`}
         breadcrumb={name}
         icon={Repeat}
         title='Recurring'
       />
       <div className={styles.body}>
-        <div className={styles.columns}>
-          <div className={styles.column}>
-            <RecurringSummaryCard recurring={recurring} />
-            {recurring.direction === 'debit' && <RecurringSpendingCard name={name} recurring={recurring} />}
-            {recurring.direction === 'credit' && <RecurringFundingCard name={name} recurring={recurring} />}
-          </div>
-          <div className={styles.column}>
-            <RecurringClusterCard name={name} recurring={recurring} />
-            <RecurringChargeList recurring={recurring} />
-          </div>
+        <div className={styles.content}>
+          <RecurringSummaryCard recurring={recurring} />
+          {recurring.direction === 'debit' && <RecurringSpendingCard name={name} recurring={recurring} />}
+          {recurring.direction === 'credit' && <RecurringFundingCard name={name} recurring={recurring} />}
+          <RecurringChargeList recurring={recurring} />
         </div>
       </div>
     </Fragment>

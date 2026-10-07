@@ -11,6 +11,12 @@
   border-radius: 100%;
 }
 
+.sizeLarge {
+  @include mixins.text-2-extra-large;
+  height: 14 * variables.$size; // 56px
+  width: 14 * variables.$size;
+}
+
 .avatarImage {
   aspect-ratio: 1 / 1;
   height: 100%;

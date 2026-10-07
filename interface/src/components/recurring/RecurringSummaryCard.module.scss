@@ -1,26 +1,10 @@
 @use '@monetr/interface/mixins';
 @use '@monetr/interface/variables';
 
-.root {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--border);
-  border-radius: var(--border-radius);
-  background-color: var(--background-darker);
-
-  > * + * {
-    border-top: 1px solid var(--border-subtle);
-  }
-}
-
-.header {
+.hero {
   display: flex;
   align-items: center;
-  gap: 3.5 * variables.$size;
-  padding-top: 4.5 * variables.$size;
-  padding-right: 4.5 * variables.$size;
-  padding-bottom: 3.5 * variables.$size;
-  padding-left: 4.5 * variables.$size;
+  gap: 4.5 * variables.$size;
 }
 
 .icon {
@@ -39,8 +23,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 0.5 * variables.$size solid var(--background-darker);
-  background-color: var(--brand);
+  border: 0.5 * variables.$size solid var(--background);
+  background-color: var(--brand-subtle);
   color: var(--content-emphasis);
 
   svg {
@@ -50,27 +34,36 @@
   }
 }
 
-.headerText {
+.heroText {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 0.5 * variables.$size;
+  gap: 1 * variables.$size;
   min-width: 0;
 }
 
-.eyebrowRow {
+.memo {
+  @include mixins.text-small;
+}
+
+.scheduleRow {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 2 * variables.$size;
+  padding-top: 1 * variables.$size;
 }
 
-.eyebrow {
-  @include mixins.text-small;
-  font-weight: var(--semibold);
-  color: var(--content-subtle);
+.schedule {
+  @include mixins.text-large;
+  color: var(--content-emphasis);
+
+  strong {
+    font-weight: var(--bold);
+  }
 }
 
-.statusBadge {
+.badge {
   @include mixins.text-extra-small;
   font-weight: var(--semibold);
   padding-top: 0;
@@ -78,6 +71,10 @@
   padding-bottom: 0;
   padding-left: 2 * variables.$size;
   border-radius: var(--border-radius);
+}
+
+.statusBadge {
+  @extend .badge;
   color: var(--success);
   background-color: color-mix(in srgb, var(--success) 20%, transparent);
 
@@ -87,97 +84,99 @@
   }
 }
 
-.title {
+.confidenceBadge {
+  @extend .badge;
+  color: var(--content-emphasis);
+  background-color: var(--background-emphasis);
+}
+
+// Coverage drops under the dates on mobile, sits on the right once theres room
+.next {
+  display: flex;
+  flex-direction: column;
+  gap: 4 * variables.$size;
+  padding-top: 4 * variables.$size;
+  padding-right: 4.5 * variables.$size;
+  padding-bottom: 4 * variables.$size;
+  padding-left: 4.5 * variables.$size;
+  border: 1px solid var(--brand-subtle);
+  border-radius: var(--border-radius);
+  background-color: color-mix(in srgb, var(--brand) 40%, transparent);
+
+  @media (min-width: variables.$mediumScreen) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.nextText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5 * variables.$size;
+  min-width: 0;
+}
+
+.nextLabel {
+  @include mixins.text-small;
+  font-weight: var(--semibold);
+  color: var(--brand-bright);
+}
+
+.nextDate {
   @include mixins.text-2-extra-large;
   font-weight: var(--bold);
   color: var(--content-emphasis);
 }
 
-.showsUpAs {
+.nextRelative {
+  @include mixins.text-base;
+  font-weight: var(--medium);
+  color: var(--content);
+}
+
+.nextLater {
   @include mixins.text-small;
+  color: var(--content);
+}
+
+.coverage {
   display: flex;
-  align-items: baseline;
-  gap: 1.5 * variables.$size;
-  min-width: 0;
-  color: var(--content-subtle);
+  align-items: center;
+  gap: 2.5 * variables.$size;
+  padding-top: 2.5 * variables.$size;
+  padding-right: 3.5 * variables.$size;
+  padding-bottom: 2.5 * variables.$size;
+  padding-left: 3.5 * variables.$size;
+  border-radius: var(--border-radius);
+  background-color: var(--background);
 
-  .memo {
-    color: var(--content);
+  svg {
+    flex: none;
+    width: 5 * variables.$size;
+    height: 5 * variables.$size;
+    stroke-width: 2.5;
+    color: var(--amount-positive);
+  }
+
+  &[data-covered="false"] svg {
+    color: var(--warning);
   }
 }
 
-// The memo gets cut off instead of the label wrapping
-.showsUpAsLabel {
-  flex: none;
-}
-
-// Two columns on mobile, all four stats in a row once theres room
-.stats {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 3 * variables.$size;
-  padding-top: 3.5 * variables.$size;
-  padding-right: 4.5 * variables.$size;
-  padding-bottom: 3.5 * variables.$size;
-  padding-left: 4.5 * variables.$size;
-
-  @media (min-width: variables.$mediumScreen) {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-.stat {
+.coverageText {
   display: flex;
   flex-direction: column;
-  gap: 0.5 * variables.$size;
+  min-width: 0;
 }
 
-.statLabel {
-  @include mixins.text-extra-small;
-  font-weight: var(--medium);
-  color: var(--content-subtle);
-}
-
-.statValue {
-  @include mixins.text-base;
+.coverageTitle {
+  @include mixins.text-small;
   font-weight: var(--semibold);
   color: var(--content-emphasis);
 }
 
-.statDetail {
-  @include mixins.text-extra-small;
-  color: var(--content-subtle);
-}
-
-.comingUp {
-  display: flex;
-  flex-direction: column;
-  gap: 2 * variables.$size;
-  padding-top: 3.5 * variables.$size;
-  padding-right: 4.5 * variables.$size;
-  padding-bottom: 3.5 * variables.$size;
-  padding-left: 4.5 * variables.$size;
-}
-
-.comingUpDates {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2 * variables.$size;
-}
-
-.comingUpDate {
+.coverageDetail {
   @include mixins.text-small;
-  padding-top: 0.75 * variables.$size;
-  padding-right: 2.5 * variables.$size;
-  padding-bottom: 0.75 * variables.$size;
-  padding-left: 2.5 * variables.$size;
-  border-radius: var(--border-radius);
-  background-color: var(--background-emphasis);
-  color: var(--content);
-
-  &[data-next="true"] {
-    font-weight: var(--semibold);
-    color: var(--content-emphasis);
-    background-color: color-mix(in srgb, var(--brand) 40%, transparent);
-  }
+  color: var(--content-subtle);
 }

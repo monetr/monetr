@@ -4,7 +4,7 @@
 .root {
   display: flex;
   flex-direction: column;
-  gap: 2.5 * variables.$size;
+  gap: 2 * variables.$size;
 }
 
 .header {
@@ -23,7 +23,7 @@
   padding-bottom: 0.75 * variables.$size;
   padding-left: 0.75 * variables.$size;
   border-radius: var(--border-radius);
-  background-color: var(--background-emphasis);
+  background-color: var(--background-subtle);
 }
 
 .tab {
@@ -42,7 +42,7 @@
   &[aria-selected="true"] {
     font-weight: var(--semibold);
     color: var(--content-emphasis);
-    background-color: var(--background-active);
+    background-color: var(--background-emphasis);
   }
 }
 
@@ -59,50 +59,17 @@
   padding-left: 2 * variables.$size;
 }
 
-// Dashed since it hasn't actually happened yet. Outline instead of border so it doesn't shift the content over
-// compared to the real rows
-.expected {
-  outline: 1px dashed var(--background-active);
-  outline-offset: -1px;
-
-  &:hover,
-  &:active {
-    background-color: transparent;
-  }
-}
-
-.expectedIcon {
-  display: flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  width: 10 * variables.$size;
-  height: 10 * variables.$size;
-  border-radius: 9999px;
-  border: 1px dashed var(--content-muted);
-  color: var(--content-subtle);
-
-  svg {
-    width: 4 * variables.$size;
-    height: 4 * variables.$size;
-  }
-}
-
-.arrowSpacer {
-  visibility: hidden;
-}
-
 .showMore {
   @include mixins.text-small;
   align-self: flex-start;
   border: 0;
   background: transparent;
   padding-top: 1 * variables.$size;
-  padding-right: 2 * variables.$size;
+  padding-right: 0;
   padding-bottom: 1 * variables.$size;
-  padding-left: 2 * variables.$size;
+  padding-left: 0;
   font-weight: var(--medium);
-  color: var(--brand-bright);
+  color: var(--brand-faint);
   cursor: pointer;
 
   &:disabled {

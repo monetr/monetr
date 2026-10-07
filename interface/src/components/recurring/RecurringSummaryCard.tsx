@@ -1,12 +1,16 @@
-import { format } from 'date-fns';
-import { Repeat } from 'lucide-react';
+import { Fragment } from 'react';
+import { addDays } from 'date-fns';
+import { Check, CircleAlert, Repeat } from 'lucide-react';
 import { rrulestr } from 'rrule';
 
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import RecurringMemo from '@monetr/interface/components/recurring/RecurringMemo';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@monetr/interface/components/Tooltip';
+import Typography from '@monetr/interface/components/Typography';
 import { getConfidenceLabel } from '@monetr/interface/components/transactions/TransactionRecurringCard';
 import { useLocale } from '@monetr/interface/hooks/useLocale';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import { useSpending } from '@monetr/interface/hooks/useSpending';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { useTransactionCluster } from '@monetr/interface/hooks/useTransactionCluster';
 import type TransactionRecurring from '@monetr/interface/models/TransactionRecurring';
@@ -19,117 +23,112 @@ export interface RecurringSummaryCardProps {
   recurring: TransactionRecurring;
 }
 
-export default function RecurringSummaryCard({ recurring }: RecurringSummaryCardProps): React.JSX.Element | null {
+export default function RecurringSummaryCard(props: RecurringSummaryCardProps): React.JSX.Element | null {
   const { data: locale } = useLocaleCurrency();
   const { data: dateLocale } = useLocale();
   const { inTimezone } = useTimezone();
-  const { data: cluster } = useTransactionCluster(recurring.transactionClusterId);
+  const { data: cluster } = useTransactionCluster(props.recurring.transactionClusterId);
+  const { data: spending } = useSpending(props.recurring.spendingId);
 
   if (!locale || !dateLocale) {
     return null;
   }
 
-  let eyebrow = 'Recurring Deposit';
-  let lastLabel = 'Last Deposit';
-  if (recurring.direction === 'debit') {
-    eyebrow = 'Recurring Charge';
-    lastLabel = 'Last Charge';
+  let nextLabel = 'Next Deposit';
+  if (props.recurring.direction === 'debit') {
+    nextLabel = 'Next Charge';
   }
 
   let status = 'Active';
-  if (recurring.ended) {
+  if (props.recurring.ended) {
     status = 'Ended';
   }
 
-  // The next three times we expect it. The server already worked out the first one so start from that.
-  const rule = rrulestr(recurring.ruleset);
-  const comingUp = [recurring.next];
-  let last = recurring.next;
+  // The couple of times we expect it after the next one. The server already worked out the next one so start from that,
+  // but look from the day after. Next is midnight in the account's timezone and the rule can be an hour off from that
+  // when daylight savings changed since it started, so it would just give us next again.
+  const rule = rrulestr(props.recurring.ruleset);
+  const later: Array<Date> = [];
+  let last = props.recurring.next;
   for (let i = 0; i < 2; i++) {
-    const after = rule.after(last, false);
+    const after = rule.after(addDays(last, 1), true);
     if (!after) {
       break;
     }
-    comingUp.push(after);
+    later.push(after);
     last = after;
   }
 
+  const amount = locale.formatAmount(Math.abs(props.recurring.lastAmount), AmountType.Stored);
+  // If the expense isn't behind then it'll have enough by the time the next charge comes in, even if it doesn't yet
+  const covered = !spending?.isBehind;
+
   return (
-    <section className={styles.root}>
-      <div className={styles.header}>
+    <Fragment>
+      <section className={styles.hero}>
         <div className={styles.icon}>
-          <MerchantIcon name={cluster?.name} />
+          <MerchantIcon name={cluster?.name} size='large' />
           <span className={styles.iconBadge} title='Recurring'>
             <Repeat />
           </span>
         </div>
-        <div className={styles.headerText}>
-          <div className={styles.eyebrowRow}>
-            <span className={styles.eyebrow}>{eyebrow}</span>
-            <span className={styles.statusBadge} data-ended={String(recurring.ended)}>
+        <div className={styles.heroText}>
+          <Typography color='emphasis' component='h1' ellipsis size='3xl' weight='bold'>
+            {cluster?.name}
+          </Typography>
+          {cluster?.originalMemo && <RecurringMemo className={styles.memo} memo={cluster.originalMemo} />}
+          <div className={styles.scheduleRow}>
+            <span className={styles.schedule}>
+              <strong>{amount}</strong> {rule.toText()}
+            </span>
+            <span className={styles.statusBadge} data-ended={String(props.recurring.ended)}>
               {status}
             </span>
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <span className={styles.confidenceBadge}>{getConfidenceLabel(props.recurring.confidence)}</span>
+              </TooltipTrigger>
+              <TooltipContent side='top'>Confidence {Math.round(props.recurring.confidence * 100)}%</TooltipContent>
+            </Tooltip>
           </div>
-          <span className={styles.title}>
-            {locale.formatAmount(Math.abs(recurring.lastAmount), AmountType.Stored)} {rule.toText()}
-          </span>
-          {cluster?.originalMemo && (
-            <div className={styles.showsUpAs}>
-              <span className={styles.showsUpAsLabel}>Shows Up As</span>
-              <RecurringMemo className={styles.memo} memo={cluster.originalMemo} />
+        </div>
+      </section>
+
+      {!props.recurring.ended && (
+        <section className={styles.next}>
+          <div className={styles.nextText}>
+            <span className={styles.nextLabel}>{nextLabel}</span>
+            <span className={styles.nextDate}>
+              {formatDate(props.recurring.next, inTimezone, dateLocale, DateLength.Long)}{' '}
+              <span className={styles.nextRelative}>
+                {formatRelativeDate(props.recurring.next, inTimezone, dateLocale)}
+              </span>
+            </span>
+            {later.length > 0 && (
+              <span className={styles.nextLater}>
+                Then {later.map(item => formatDate(item, inTimezone, dateLocale, DateLength.Medium)).join(' and ')}
+              </span>
+            )}
+          </div>
+          {spending && (
+            <div className={styles.coverage} data-covered={String(covered)}>
+              {covered && <Check />}
+              {!covered && <CircleAlert />}
+              <div className={styles.coverageText}>
+                <span className={styles.coverageTitle}>
+                  {covered && 'Covered'}
+                  {!covered && 'Not Covered'}
+                </span>
+                <span className={styles.coverageDetail}>
+                  {covered && `${spending.name} will have ${amount} ready`}
+                  {!covered &&
+                    `${spending.name} only has ${locale.formatAmount(spending.currentAmount, AmountType.Stored)} of ${amount}`}
+                </span>
+              </div>
             </div>
           )}
-        </div>
-      </div>
-
-      <div className={styles.stats}>
-        {recurring.ended && (
-          <div className={styles.stat}>
-            <span className={styles.statLabel}>Last Seen</span>
-            <span className={styles.statValue}>
-              {formatDate(recurring.last, inTimezone, dateLocale, DateLength.Medium)}
-            </span>
-          </div>
-        )}
-        {!recurring.ended && (
-          <div className={styles.stat}>
-            <span className={styles.statLabel}>Next Expected</span>
-            <span className={styles.statValue}>
-              {formatDate(recurring.next, inTimezone, dateLocale, DateLength.Medium)}
-            </span>
-            <span className={styles.statDetail}>{formatRelativeDate(recurring.next, inTimezone, dateLocale)}</span>
-          </div>
-        )}
-        <div className={styles.stat}>
-          <span className={styles.statLabel}>{lastLabel}</span>
-          <span className={styles.statValue}>
-            {formatDate(recurring.last, inTimezone, dateLocale, DateLength.Medium)}
-          </span>
-        </div>
-        <div className={styles.stat}>
-          <span className={styles.statLabel}>Since</span>
-          <span className={styles.statValue}>{format(inTimezone(recurring.first), 'MMM yyyy')}</span>
-        </div>
-        <div className={styles.stat}>
-          <span className={styles.statLabel}>Confidence</span>
-          <span className={styles.statValue} title={`${Math.round(recurring.confidence * 100)}%`}>
-            {getConfidenceLabel(recurring.confidence)}
-          </span>
-        </div>
-      </div>
-
-      {!recurring.ended && (
-        <div className={styles.comingUp}>
-          <span className={styles.statLabel}>Coming Up</span>
-          <div className={styles.comingUpDates}>
-            {comingUp.map((item, index) => (
-              <span className={styles.comingUpDate} data-next={String(index === 0)} key={item.toISOString()}>
-                {formatDate(item, inTimezone, dateLocale, DateLength.Medium)}
-              </span>
-            ))}
-          </div>
-        </div>
+        </section>
       )}
-    </section>
+    </Fragment>
   );
 }

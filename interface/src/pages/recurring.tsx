@@ -1,6 +1,7 @@
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect } from 'react';
 import { isBefore, startOfToday } from 'date-fns';
 import { HeartCrack, Info, Repeat, TriangleAlert } from 'lucide-react';
+import { useSearchParams } from 'wouter';
 
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import RecurringItem from '@monetr/interface/components/recurring/RecurringItem';
@@ -31,7 +32,7 @@ export default function Recurring(): React.JSX.Element | null {
   const { data: locale } = useLocaleCurrency();
   const { data: dateLocale } = useLocale();
   const { inTimezone } = useTimezone();
-  const [tab, setTab] = useState<Tab>('charges');
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // The page groups and totals everything, so keep loading until we have every page instead of just the first one
   useEffect(() => {
@@ -60,6 +61,13 @@ export default function Recurring(): React.JSX.Element | null {
 
   if (!recurring || !locale || !dateLocale) {
     return null;
+  }
+
+  // The tab lives in the url so coming back to this page, like from a details page, keeps you on the same tab
+  let tab: Tab = 'charges';
+  const tabParam = searchParams.get('tab');
+  if (tabParam === 'deposits' || tabParam === 'ended') {
+    tab = tabParam;
   }
 
   const charges = recurring.filter(item => !item.ended && item.direction === 'debit');
@@ -92,6 +100,12 @@ export default function Recurring(): React.JSX.Element | null {
   }
   const later = items.filter(item => !late.includes(item) && !beforeFunding.includes(item));
 
+  function changeTab(next: Tab) {
+    setSearchParams({
+      tab: next,
+    });
+  }
+
   function sum(group: Array<TransactionRecurring>): string {
     const total = group.reduce((total, item) => total + Math.abs(item.lastAmount), 0);
     return locale?.formatAmount(total, AmountType.Stored) ?? '';
@@ -115,7 +129,7 @@ export default function Recurring(): React.JSX.Element | null {
                 aria-selected={tab === 'charges'}
                 className={styles.tab}
                 data-testid='recurring-tab-charges'
-                onClick={() => setTab('charges')}
+                onClick={() => changeTab('charges')}
                 role='tab'
                 type='button'
               >
@@ -125,7 +139,7 @@ export default function Recurring(): React.JSX.Element | null {
                 aria-selected={tab === 'deposits'}
                 className={styles.tab}
                 data-testid='recurring-tab-deposits'
-                onClick={() => setTab('deposits')}
+                onClick={() => changeTab('deposits')}
                 role='tab'
                 type='button'
               >
@@ -135,7 +149,7 @@ export default function Recurring(): React.JSX.Element | null {
                 aria-selected={tab === 'ended'}
                 className={styles.tab}
                 data-testid='recurring-tab-ended'
-                onClick={() => setTab('ended')}
+                onClick={() => changeTab('ended')}
                 role='tab'
                 type='button'
               >

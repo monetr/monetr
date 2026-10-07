@@ -4,82 +4,98 @@
 .root {
   display: flex;
   flex-direction: column;
-  gap: 3 * variables.$size;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius);
+  background-color: var(--background-darker);
 }
 
 .header {
   display: flex;
   flex-direction: column;
   gap: 0.5 * variables.$size;
+  padding-top: 4 * variables.$size;
+  padding-right: 4.5 * variables.$size;
+  padding-bottom: 1.5 * variables.$size;
+  padding-left: 4.5 * variables.$size;
 }
 
-.card {
+// Stacked on mobile, everything on one line once theres room
+.row {
   display: flex;
   flex-direction: column;
   gap: 3 * variables.$size;
-  padding-top: 4 * variables.$size;
-  padding-right: 4 * variables.$size;
-  padding-bottom: 4 * variables.$size;
-  padding-left: 4 * variables.$size;
-  border: 1px solid var(--border);
-  border-radius: var(--border-radius);
-  background-color: var(--background-darker);
+  padding-top: 3 * variables.$size;
+  padding-right: 4.5 * variables.$size;
+  padding-bottom: 3 * variables.$size;
+  padding-left: 4.5 * variables.$size;
 
-  &[data-active="true"] {
-    border-color: var(--brand);
+  @media (min-width: variables.$mediumScreen) {
+    flex-direction: row;
+    align-items: center;
+    gap: 3.5 * variables.$size;
   }
 }
 
-.cardHeader {
+.rowName {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 4 * variables.$size;
-}
-
-.cardText {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5 * variables.$size;
+  flex: 1;
+  align-items: center;
+  gap: 2.5 * variables.$size;
   min-width: 0;
 }
 
-.chip {
-  @include mixins.text-extra-small;
-  align-self: flex-start;
+.rowIcon {
   display: flex;
+  flex: none;
   align-items: center;
-  gap: 1.25 * variables.$size;
-  padding-top: 0.5 * variables.$size;
-  padding-right: 2 * variables.$size;
-  padding-bottom: 0.5 * variables.$size;
-  padding-left: 2 * variables.$size;
+  justify-content: center;
+  width: 7.5 * variables.$size;
+  height: 7.5 * variables.$size;
   border-radius: var(--border-radius);
-  font-weight: var(--semibold);
-  color: var(--brand-bright);
-  background-color: color-mix(in srgb, var(--brand) 40%, transparent);
+  background-color: var(--brand);
+  color: var(--content-emphasis);
 
   svg {
-    width: 3 * variables.$size;
-    height: 3 * variables.$size;
+    width: 3.75 * variables.$size;
+    height: 3.75 * variables.$size;
+    stroke-width: 2.5;
   }
 }
 
-.title {
+.rowText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rowTitle {
   @include mixins.text-base;
   font-weight: var(--semibold);
   color: var(--content-emphasis);
 }
 
-.description {
-  @include mixins.text-small;
+.rowDetail {
+  @include mixins.text-extra-small;
   color: var(--content-subtle);
+}
+
+// Only makes sense when its all on one line
+.arrow {
+  display: none;
+  flex: none;
+  width: 5 * variables.$size;
+  height: 5 * variables.$size;
+  color: var(--border-string);
+
+  @media (min-width: variables.$mediumScreen) {
+    display: block;
+  }
 }
 
 .controls {
   display: flex;
   align-items: center;
-  gap: 2 * variables.$size;
+  gap: 3.5 * variables.$size;
 }
 
 // Select leaves room underneath for error text, there's never an error here so drop it. Nested so it wins over the
@@ -88,13 +104,23 @@
   flex: 1;
   min-width: 0;
   padding-bottom: 0;
+
+  @media (min-width: variables.$mediumScreen) {
+    flex: none;
+    width: 60 * variables.$size;
+  }
 }
 
-// Same height as the select next to it
-.createButton {
-  @include mixins.text-small;
-  flex: none;
-  height: 9.5 * variables.$size;
+.footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2 * variables.$size;
+  padding-top: 3 * variables.$size;
+  padding-right: 4.5 * variables.$size;
+  padding-bottom: 4 * variables.$size;
+  padding-left: 4.5 * variables.$size;
+  border-top: 1px solid var(--border-subtle);
 }
 
 .note {
@@ -115,7 +141,6 @@
 
 .viewLink {
   @include mixins.text-small;
-  align-self: flex-start;
   font-weight: var(--medium);
-  color: var(--brand-bright);
+  color: var(--brand-faint);
 }

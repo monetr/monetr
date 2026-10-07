@@ -10,6 +10,18 @@
   color: var(--content-emphasis);
 }
 
+// Not enough room for this on mobile, the amount is what matters there
+.spentFrom {
+  @include mixins.text-small;
+  display: none;
+  color: var(--content-subtle);
+  white-space: nowrap;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: inline;
+  }
+}
+
 .oneOffChip {
   @include mixins.text-extra-small;
   padding-top: 0;
