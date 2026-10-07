@@ -17,7 +17,10 @@ export default function MSidebarToggle(props: MSidebarToggleProps): React.JSX.El
   const { isOpen, setIsOpen } = useContext(MobileSidebarContext);
 
   const onClick = useCallback(() => {
-    if (props.backButton) {
+    // Same as the title in MTopNavigation, if we came from the page this points to then actually go back to it.
+    if (props.backButton && window.history.state?.from === props.backButton) {
+      window.history.back();
+    } else if (props.backButton) {
       navigate(props.backButton);
     } else {
       setIsOpen(!isOpen);

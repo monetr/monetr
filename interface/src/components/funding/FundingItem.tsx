@@ -49,6 +49,9 @@ export default function FundingItem(props: FundingItemProps): React.JSX.Element 
       <Link
         aria-label={funding.name}
         className={styles.link}
+        state={{
+          from: `/bank/${funding.bankAccountId}/funding`,
+        }}
         to={`/bank/${funding.bankAccountId}/funding/${funding.fundingScheduleId}/details`}
       />
       <div className={styles.inner}>

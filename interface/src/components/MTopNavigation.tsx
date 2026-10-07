@@ -21,7 +21,11 @@ export default function MTopNavigation(props: MTopNavigationProps): React.JSX.El
   const [, navigate] = useLocation();
 
   const onInitialClick = useCallback(() => {
-    if (props.base) {
+    // If we came from the base page then just go back instead, that way the browser restores the scroll position and
+    // the history doesn't end up with the base page in it twice.
+    if (props.base && window.history.state?.from === props.base) {
+      window.history.back();
+    } else if (props.base) {
       navigate(props.base);
     }
   }, [props.base, navigate]);

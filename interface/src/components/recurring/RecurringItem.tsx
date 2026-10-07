@@ -57,6 +57,15 @@ export default function RecurringItem(props: RecurringItemProps): React.JSX.Elem
   const name = cluster?.name ?? 'Recurring';
   const memo = cluster?.originalMemo;
   const detailsPath = `/bank/${props.recurring.bankAccountId}/recurring/${props.recurring.transactionRecurringId}/details`;
+  // Has to match the base on the details page exactly, otherwise its breadcrumb won't know it can just go back to this
+  // list
+  let tab = 'charges';
+  if (props.recurring.ended) {
+    tab = 'ended';
+  } else if (props.recurring.direction === 'credit') {
+    tab = 'deposits';
+  }
+  const listPath = `/bank/${props.recurring.bankAccountId}/recurring?tab=${tab}`;
   const cadence = cadences[props.recurring.window];
   const isDebit = props.recurring.direction === 'debit';
   const shortfall = getShortfall(props.recurring, spending);
@@ -121,7 +130,14 @@ export default function RecurringItem(props: RecurringItemProps): React.JSX.Elem
     <li className={styles.root}>
       <div className={styles.container} data-expanded={String(expanded)}>
         <div className={styles.inner}>
-          <Link aria-label={name} className={styles.link} to={detailsPath} />
+          <Link
+            aria-label={name}
+            className={styles.link}
+            state={{
+              from: listPath,
+            }}
+            to={detailsPath}
+          />
           <MerchantIcon name={name} />
           <div className={styles.nameColumn}>
             <div className={styles.nameRow}>
@@ -216,7 +232,9 @@ export default function RecurringItem(props: RecurringItemProps): React.JSX.Elem
             {!expanded && <ChevronDown />}
           </button>
         </div>
-        {expanded && <RecurringItemCharges detailsPath={detailsPath} name={name} recurring={props.recurring} />}
+        {expanded && (
+          <RecurringItemCharges detailsPath={detailsPath} listPath={listPath} name={name} recurring={props.recurring} />
+        )}
       </div>
     </li>
   );

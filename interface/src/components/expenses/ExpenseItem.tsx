@@ -58,7 +58,14 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): React.JSX.E
 
   return (
     <li className={styles.root}>
-      <Link aria-label={spending.name} className={styles.link} to={detailsPath} />
+      <Link
+        aria-label={spending.name}
+        className={styles.link}
+        state={{
+          from: `/bank/${spending.bankAccountId}/expenses`,
+        }}
+        to={detailsPath}
+      />
       <div className={styles.inner}>
         <div className={styles.leftSection}>
           <MerchantIcon name={spending.name} />

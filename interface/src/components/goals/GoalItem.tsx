@@ -38,7 +38,14 @@ export default function GoalItem({ spending }: GoalItemProps): React.JSX.Element
 
   return (
     <li className={styles.root}>
-      <Link aria-label={spending.name} className={styles.link} to={detailsPath} />
+      <Link
+        aria-label={spending.name}
+        className={styles.link}
+        state={{
+          from: `/bank/${spending.bankAccountId}/goals`,
+        }}
+        to={detailsPath}
+      />
       <div className={styles.inner}>
         <MerchantIcon name={spending.name} />
         <div className={styles.column}>

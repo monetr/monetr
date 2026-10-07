@@ -26,7 +26,15 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
       data-testid={transaction.transactionId}
       id={transaction.transactionId}
     >
-      <Link aria-label={transaction.getName()} className={itemStyles.link} to={detailsUrl} />
+      {/* The details page looks at this to know it can just go back to the list instead of navigating to it again. */}
+      <Link
+        aria-label={transaction.getName()}
+        className={itemStyles.link}
+        state={{
+          from: `/bank/${transaction.bankAccountId}/transactions`,
+        }}
+        to={detailsUrl}
+      />
       <div className={itemStyles.inner}>
         <div className={itemStyles.leftSection}>
           <TransactionMerchantIcon

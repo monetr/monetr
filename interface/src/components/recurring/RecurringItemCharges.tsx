@@ -17,6 +17,7 @@ export interface RecurringItemChargesProps {
   recurring: TransactionRecurring;
   name: string;
   detailsPath: string;
+  listPath: string;
 }
 
 // The peek you get when you expand a recurring item, the last few charges with what they looked like on the bank
@@ -39,7 +40,13 @@ export default function RecurringItemCharges(props: RecurringItemChargesProps): 
         <span>Similar Transactions Group</span>
         <strong>{props.name}</strong>
         <span>&middot; since {format(inTimezone(props.recurring.first), 'MMM yyyy')}</span>
-        <Link className={styles.detailsLink} to={props.detailsPath}>
+        <Link
+          className={styles.detailsLink}
+          state={{
+            from: props.listPath,
+          }}
+          to={props.detailsPath}
+        >
           View Details
         </Link>
       </div>
