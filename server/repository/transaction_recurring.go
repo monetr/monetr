@@ -15,15 +15,11 @@ func (r *repositoryBase) GetTransactionRecurringById(
 	bankAccountId ID[BankAccount],
 	transactionRecurringId ID[TransactionRecurring],
 ) (*TransactionRecurring, error) {
-
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-
-	span.Data = map[string]any{
-		"accountId":              r.AccountId(),
-		"bankAccountId":          bankAccountId,
-		"transactionRecurringId": transactionRecurringId,
-	}
+	span.SetData("accountId", r.AccountId())
+	span.SetData("bankAccountId", bankAccountId)
+	span.SetData("transactionRecurringId", transactionRecurringId)
 
 	var result TransactionRecurring
 	err := r.txn.NewSelect().
@@ -108,12 +104,9 @@ func (r *repositoryBase) GetTransactionRecurringByCluster(
 ) ([]TransactionRecurring, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-
-	span.Data = map[string]any{
-		"accountId":            r.AccountId(),
-		"bankAccountId":        bankAccountId,
-		"transactionClusterId": transactionClusterId,
-	}
+	span.SetData("accountId", r.AccountId())
+	span.SetData("bankAccountId", bankAccountId)
+	span.SetData("transactionClusterId", transactionClusterId)
 
 	result := make([]TransactionRecurring, 0)
 	if err := r.txn.NewSelect().
@@ -122,12 +115,15 @@ func (r *repositoryBase) GetTransactionRecurringByCluster(
 		Where(`"transaction_recurring"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction_recurring"."transaction_cluster_id" = ?`, transactionClusterId).
 		Scan(span.Context()); err != nil {
+		span.Status = sentry.SpanStatusInternalError
 		return nil, crumbs.WrapError(
 			span.Context(),
 			err,
 			"failed to retrieve recurring transactions for cluster",
 		)
 	}
+
+	span.Status = sentry.SpanStatusOK
 
 	return result, nil
 }
@@ -138,11 +134,8 @@ func (r *repositoryBase) GetTransactionRecurringByBankAccount(
 ) ([]TransactionRecurring, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-
-	span.Data = map[string]any{
-		"accountId":     r.AccountId(),
-		"bankAccountId": bankAccountId,
-	}
+	span.SetData("accountId", r.AccountId())
+	span.SetData("bankAccountId", bankAccountId)
 
 	result := make([]TransactionRecurring, 0)
 	if err := r.txn.NewSelect().
@@ -150,12 +143,15 @@ func (r *repositoryBase) GetTransactionRecurringByBankAccount(
 		Where(`"transaction_recurring"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction_recurring"."bank_account_id" = ?`, bankAccountId).
 		Scan(span.Context()); err != nil {
+		span.Status = sentry.SpanStatusInternalError
 		return nil, crumbs.WrapError(
 			span.Context(),
 			err,
 			"failed to retrieve recurring transactions for bank account",
 		)
 	}
+
+	span.Status = sentry.SpanStatusOK
 
 	return result, nil
 }
@@ -171,6 +167,8 @@ func (r *repositoryBase) UpsertTransactionRecurring(
 
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
+	span.SetData("accountId", r.AccountId())
+	span.SetData("bankAccountId", bankAccountId)
 
 	now := r.clock.Now()
 	for i := range recurring {
@@ -196,12 +194,15 @@ func (r *repositoryBase) UpsertTransactionRecurring(
 		Set(`"updated_at" = EXCLUDED."updated_at"`).
 		Exec(span.Context())
 	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
 		return crumbs.WrapError(
 			span.Context(),
 			err,
 			"failed to upsert recurring transactions",
 		)
 	}
+
+	span.Status = sentry.SpanStatusOK
 
 	return nil
 }
@@ -217,6 +218,8 @@ func (r *repositoryBase) UpdateTransactionRecurringIds(
 
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
+	span.SetData("accountId", r.AccountId())
+	span.SetData("bankAccountId", bankAccountId)
 
 	for i := range transactions {
 		transactions[i].AccountId = r.AccountId()
@@ -229,12 +232,15 @@ func (r *repositoryBase) UpdateTransactionRecurringIds(
 		Bulk().
 		Exec(span.Context())
 	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
 		return crumbs.WrapError(
 			span.Context(),
 			err,
 			"failed to update transaction recurring ids",
 		)
 	}
+
+	span.Status = sentry.SpanStatusOK
 
 	return nil
 }
@@ -246,12 +252,9 @@ func (r *repositoryBase) UpdateTransactionRecurring(
 ) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-
-	span.Data = map[string]any{
-		"accountId":              r.AccountId(),
-		"bankAccountId":          bankAccountId,
-		"transactionRecurringId": recurring.TransactionRecurringId,
-	}
+	span.SetData("accountId", r.AccountId())
+	span.SetData("bankAccountId", bankAccountId)
+	span.SetData("transactionRecurringId", recurring.TransactionRecurringId)
 
 	recurring.AccountId = r.AccountId()
 	recurring.UpdatedAt = r.clock.Now()
@@ -284,20 +287,25 @@ func (r *repositoryBase) DeleteTransactionRecurring(
 
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
+	span.SetData("accountId", r.AccountId())
+	span.SetData("bankAccountId", bankAccountId)
 
 	_, err := r.txn.NewDelete().
-		Model(&TransactionRecurring{}).
+		Model(new(TransactionRecurring)).
 		Where(`"transaction_recurring"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction_recurring"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction_recurring"."transaction_recurring_id" IN (?)`, bun.List(transactionRecurringIds)).
 		Exec(span.Context())
 	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
 		return crumbs.WrapError(
 			span.Context(),
 			err,
 			"failed to delete obsolete recurring transactions",
 		)
 	}
+
+	span.Status = sentry.SpanStatusOK
 
 	return nil
 }

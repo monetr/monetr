@@ -171,8 +171,6 @@ type BaseRepository interface {
 		bankAccountId ID[BankAccount],
 		transactionClusterId ID[TransactionCluster],
 	) (*TransactionCluster, error)
-	// GetTransactionClusterIds returns the ID of every transaction cluster for
-	// the specified bank account, ordered by ID.
 	GetTransactionClusterIds(
 		ctx context.Context,
 		bankAccountId ID[BankAccount],
@@ -209,41 +207,34 @@ type BaseRepository interface {
 		bankAccountId ID[BankAccount],
 		transactionClusterId ID[TransactionCluster],
 	) ([]TransactionRecurring, error)
-	// GetTransactionRecurringByBankAccount returns every recurring transaction
-	// in the specified bank account.
 	GetTransactionRecurringByBankAccount(
 		ctx context.Context,
 		bankAccountId ID[BankAccount],
 	) ([]TransactionRecurring, error)
 	// UpsertTransactionRecurring will insert or update the provided recurring
-	// transactions by their cluster and direction. An existing recurring
-	// transaction for the same cluster and direction is updated in place and
-	// keeps its ID. It doesn't delete anything, use DeleteTransactionRecurring
-	// for that.
+	// transactions by their cluster and direction. It doesn't delete anything,
+	// use DeleteTransactionRecurring for that.
 	UpsertTransactionRecurring(
 		ctx context.Context,
 		bankAccountId ID[BankAccount],
 		recurring []TransactionRecurring,
 	) error
-	// UpdateTransactionRecurringIds sets the recurring ID on each of the provided
-	// transactions by their primary key. A nil recurring ID removes the
-	// transaction from whatever recurring transaction it was part of. No other
-	// columns are written.
+	// UpdateTransactionRecurringIds will only write the recurring ID of each of
+	// the provided transactions, by their primary key. A nil recurring ID takes
+	// the transaction out of whatever recurring transaction it was part of.
 	UpdateTransactionRecurringIds(
 		ctx context.Context,
 		bankAccountId ID[BankAccount],
 		transactions []Transaction,
 	) error
-	// UpdateTransactionRecurring writes the provided recurring transaction by its
-	// primary key and bumps its updated at.
 	UpdateTransactionRecurring(
 		ctx context.Context,
 		bankAccountId ID[BankAccount],
 		recurring *TransactionRecurring,
 	) error
-	// DeleteTransactionRecurring removes the specified recurring transactions by
-	// their IDs. Transactions referencing them will have their recurring ID set
-	// to null.
+	// DeleteTransactionRecurring will remove the specified recurring
+	// transactions. The foreign key nulls out the recurring ID on any
+	// transactions that still point at them.
 	DeleteTransactionRecurring(
 		ctx context.Context,
 		bankAccountId ID[BankAccount],

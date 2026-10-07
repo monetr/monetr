@@ -33,8 +33,8 @@ transaction it's part of.
 
 You can link a recurring transaction to the thing in your budget that covers it. A charge going out gets linked to an
 [expense](./spending), money coming in gets linked to a [funding schedule](./funding_schedules), your paycheck for
-example. The link lives on the recurring transaction, so you set it with a PATCH here after you've created the expense or
-funding schedule.
+example. The link lives on the recurring transaction, so you set it with a PATCH here after you've created the expense
+or funding schedule.
 
 A linked funding schedule comes back filled in as `fundingSchedule`, but a linked expense is only ever its
 `spendingId`. If you need the expense itself, [look it up](./spending#get-a-spending-object) by that ID.
@@ -50,7 +50,6 @@ A linked funding schedule comes back filled in as `fundingSchedule`, but a linke
 | `spendingId`             | string (ulid), nullable | The [expense](./spending#the-spending-object) tracking this, if you've linked one. Only ever set on debits. See [Link an expense or funding schedule](#link-an-expense-or-funding-schedule).                      |
 | `fundingScheduleId`      | string (ulid), nullable | The [funding schedule](./funding_schedules#the-funding-schedule-object) tracking this, if you've linked one. Only ever set on credits.                                                                            |
 | `fundingSchedule`        | object                  | The [funding schedule](./funding_schedules#the-funding-schedule-object) in `fundingScheduleId`, if there is one. Left out otherwise.                                                                              |
-| `direction`              | string                  | `debit` for money leaving the account, `credit` for money coming in. Same as the sign on the transactions, debits are positive amounts and credits are negative.                                                  |
 | `window`                 | string                  | Roughly how often it happens. One of `weekly`, `biweekly`, `firstAndFifteenth`, `fifteenthAndLast`, `monthly`, `bimonthly`, `quarterly` or `yearly`. `biweekly` is every two weeks, `bimonthly` every two months. |
 | `ruleset`                | string                  | The actual schedule, as a [recurrence rule](./recurrence_rules). The days in it are your account's days, see the note below the table.                                                                            |
 | `first`                  | timestamp               | The earliest transaction that's part of it. If something stopped for a long stretch and then started up again, this is from when it started back up.                                                              |
@@ -58,6 +57,7 @@ A linked funding schedule comes back filled in as `fundingSchedule`, but a linke
 | `next`                   | timestamp               | When monetr expects the next one, as of the last recalculation. Nothing updates it in between, so if the job hasn't run in a while this can already be in the past.                                               |
 | `ended`                  | boolean                 | True once it's gone too long without a new transaction. monetr gives it half a period of slack past when the next one was due, and never less than 3 days, since charges like to wander around a bit.             |
 | `confidence`             | number                  | How sure monetr is about the schedule, between 0.6 and 1. Anything under 0.6 doesn't get to be a recurring transaction at all.                                                                                    |
+| `direction`              | string                  | `debit` for money leaving the account, `credit` for money coming in. Same as the sign on the transactions, debits are positive amounts and credits are negative.                                                  |
 | `amounts`                | object                  | How many times each amount showed up. Keys are amounts in the currency's smallest unit, as strings since it's JSON, and values are counts. Handy for spotting a price change.                                     |
 | `lastAmount`             | integer                 | The amount of the most recent transaction, in the currency's smallest unit. Usually your best guess for what the next one will be. See [Currencies](./currencies#how-monetr-stores-money).                        |
 | `autoMatched`            | boolean                 | True when monetr linked the expense for you, because you kept spending its recent transactions from that expense. Goes back to false as soon as you change the link yourself.                                     |
@@ -74,9 +74,9 @@ working and the transactions that were in it go back to a null `transactionRecur
 schedule was linked to it sticks around, it just isn't linked to anything anymore.
 
 Recalculating doesn't touch the links. They stay put until you change them, or until you delete the expense or funding
-schedule, which sets `spendingId` or `fundingScheduleId` back to null. The one exception is a debit with no links at
-all: if two of its last three transactions were spent from the same expense, and nothing else is linked to that
-expense yet, monetr links it for you and sets `autoMatched`.
+schedule, which sets `spendingId` or `fundingScheduleId` back to null. The one exception is a debit that's still going
+and has no links at all. If two of its last three transactions were spent from the same expense, and nothing else is
+linked to that expense yet, monetr links it for you and sets `autoMatched`.
 
 ## <Badge type="info">GET</Badge> List recurring transactions
 
@@ -176,7 +176,8 @@ transactions, or one that isn't yours, isn't an error. You just get back an empt
 Returns one recurring transaction. You'll usually get the ID from a transaction's `transactionRecurringId`, or from
 [listing them](#list-recurring-transactions).
 
-**In the app:** The recurring card on a transaction's details page, and the recurring transaction's own details page.
+**In the app:** Hovering the recurring icon next to a transaction, the recurring card on a transaction's details page,
+and the recurring transaction's own details page.
 
 ```http
 GET /api/bank_accounts/:bankAccountId/recurring/:transactionRecurringId
@@ -243,9 +244,9 @@ only two things you can change on a recurring transaction, everything else comes
 A debit can only be linked to an expense, not a goal. A credit can only be linked to a funding schedule. For now an
 expense or funding schedule can only be linked to one recurring transaction at a time.
 
-**In the app:** Picking an expense or funding schedule on a recurring transaction's details page. Also creating one from
-the recurring card on a transaction's details page or from the recurring page, the app creates it first and then links it
-with this.
+**In the app:** Picking or creating an expense or funding schedule on a recurring transaction's details page, the
+recurring page, or the recurring card on a transaction's details page. When it's a new one the app creates it first and
+then links it with this.
 
 ```http
 PATCH /api/bank_accounts/:bankAccountId/recurring/:transactionRecurringId

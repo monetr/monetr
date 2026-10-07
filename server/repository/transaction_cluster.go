@@ -17,6 +17,13 @@ func (r *repositoryBase) GetTransactionClusters(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
+	span.Data = map[string]any{
+		"accountId":     r.AccountId(),
+		"bankAccountId": bankAccountId,
+		"limit":         limit,
+		"offset":        offset,
+	}
+
 	result := make([]TransactionCluster, 0)
 	if err := r.txn.NewSelect().
 		Model(&result).
@@ -28,12 +35,15 @@ func (r *repositoryBase) GetTransactionClusters(
 		Order(`name DESC`).
 		Order(`transaction_cluster_id DESC`).
 		Scan(span.Context()); err != nil {
+		span.Status = sentry.SpanStatusInternalError
 		return nil, crumbs.WrapError(
 			span.Context(),
 			err,
 			"failed to read transaction clusters",
 		)
 	}
+
+	span.Status = sentry.SpanStatusOK
 
 	return result, nil
 }
@@ -250,7 +260,7 @@ func (r *repositoryBase) GetTransactionClusterIds(
 
 	result := make([]ID[TransactionCluster], 0)
 	err := r.txn.NewSelect().
-		Model((*TransactionCluster)(nil)).
+		Model(new(TransactionCluster)).
 		Column("transaction_cluster_id").
 		Where(`"transaction_cluster"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction_cluster"."bank_account_id" = ?`, bankAccountId).

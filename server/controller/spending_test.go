@@ -864,15 +864,15 @@ func TestPostSpending(t *testing.T) {
 		response.JSON().Path("$.autoCreateTransaction").Boolean().IsTrue()
 	})
 
-	t.Run("rejects a recurring transaction id", func(t *testing.T) {
+	t.Run("cant set recurring transaction", func(t *testing.T) {
 		// Expenses are linked to a recurring transaction by patching the recurring
-		// transaction, not by creating the expense with its ID.
+		// transaction, not by creating the expense with its Id.
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
-		recurring := givenIHaveATransactionRecurring(t, bank)
+		recurring := GivenIHaveATransactionRecurring(t, bank)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		now := app.Clock.Now()
@@ -894,7 +894,7 @@ func TestPostSpending(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("Invalid request")
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
 	})
 }
 

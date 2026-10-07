@@ -132,7 +132,11 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) enrichClusters(
 							// first original word we see as a fallback, otherwise the cluster
 							// can end up without a name.
 							if tracker.OriginalWord == "" {
-								tracker.OriginalWord = originalWord(originalToken, tokenIndex)
+								if len(originalToken.Final) > 1 {
+									tracker.OriginalWord = originalToken.Equivalent[tokenIndex]
+								} else {
+									tracker.OriginalWord = originalToken.Original
+								}
 							}
 							break
 						}
@@ -188,7 +192,11 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) enrichClusters(
 				for _, originalToken := range centroid.Tokens {
 					for tokenIndex, tokenWord := range originalToken.Final {
 						if strings.EqualFold(indicies[wordIndex], tokenWord) {
-							tracker.OriginalWord = originalWord(originalToken, tokenIndex)
+							if len(originalToken.Final) > 1 {
+								tracker.OriginalWord = originalToken.Equivalent[tokenIndex]
+							} else {
+								tracker.OriginalWord = originalToken.Original
+							}
 							break
 						}
 					}
@@ -281,15 +289,6 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions(
 	// Doing all this work in its own function fixes sentry's "no instrumentation"
 	// warning.
 	return s.enrichClusters(span.Context())
-}
-
-// originalWord returns the word as it appeared in the transaction for one of
-// the token's final words.
-func originalWord(token Token, index int) string {
-	if len(token.Final) > 1 {
-		return token.Equivalent[index]
-	}
-	return token.Original
 }
 
 // calculateRankings takes all of the values of the most valuable tokens in a

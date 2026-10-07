@@ -35,12 +35,12 @@ func (c *Controller) getTransactions(ctx *echo.Context) error {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	// transactions can optionally be filtered down to just the ones in a single
+	// Transactions can optionally be filtered down to just the ones in a single
 	// recurring transaction
 	if raw := ctx.QueryParam("transaction_recurring_id"); raw != "" {
 		transactionRecurringId, err := ParseID[TransactionRecurring](raw)
 		if err != nil || transactionRecurringId.IsZero() {
-			return c.badRequest(ctx, "must specify a valid recurring transaction Id")
+			return c.badRequest(ctx, "Must specify a valid recurring transaction Id")
 		}
 
 		transactions, err := repo.GetTransactionsForRecurring(
@@ -51,7 +51,7 @@ func (c *Controller) getTransactions(ctx *echo.Context) error {
 			offset,
 		)
 		if err != nil {
-			return c.wrapPgError(ctx, err, "failed to retrieve transactions")
+			return c.wrapPgError(ctx, err, "Failed to retrieve transactions")
 		}
 
 		return ctx.JSON(http.StatusOK, transactions)
@@ -62,7 +62,7 @@ func (c *Controller) getTransactions(ctx *echo.Context) error {
 	if raw := ctx.QueryParam("transaction_cluster_id"); raw != "" {
 		transactionClusterId, err := ParseID[TransactionCluster](raw)
 		if err != nil || transactionClusterId.IsZero() {
-			return c.badRequest(ctx, "must specify a valid transaction cluster Id")
+			return c.badRequest(ctx, "Must specify a valid transaction cluster Id")
 		}
 
 		transactions, err := repo.GetTransactionsByCluster(
@@ -73,7 +73,7 @@ func (c *Controller) getTransactions(ctx *echo.Context) error {
 			offset,
 		)
 		if err != nil {
-			return c.wrapPgError(ctx, err, "failed to retrieve transactions")
+			return c.wrapPgError(ctx, err, "Failed to retrieve transactions")
 		}
 
 		return ctx.JSON(http.StatusOK, transactions)

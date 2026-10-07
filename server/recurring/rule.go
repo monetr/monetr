@@ -11,28 +11,32 @@ import (
 	"github.com/teambition/rrule-go"
 )
 
-// Days of the month after the 28th don't exist in every month, and RRULE skips
-// a month entirely when the day doesn't exist. So days are capped at the 28th,
-// which is never later than the real day.
-const latestMonthDay = 28
+const (
+	// Days of the month after the 28th don't exist in every month, and RRULE
+	// skips a month entirely when the day doesn't exist. So days are capped at
+	// the 28th, which is never later than the real day.
+	latestMonthDay = 28
+)
 
-// Indexed by time.Weekday, which starts on Sunday.
-var weekdays = [...]rrule.Weekday{
-	rrule.SU,
-	rrule.MO,
-	rrule.TU,
-	rrule.WE,
-	rrule.TH,
-	rrule.FR,
-	rrule.SA,
-}
+var (
+	// Indexed by time.Weekday, which starts on Sunday.
+	weekdays = [...]rrule.Weekday{
+		rrule.SU,
+		rrule.MO,
+		rrule.TU,
+		rrule.WE,
+		rrule.TH,
+		rrule.FR,
+		rrule.SA,
+	}
+)
 
-// GenerateRuleSet builds a ruleset for transactions that were detected as
+// GenerateRuleSet will build a ruleset for transactions that were detected as
 // recurring at the specified frequency. Whenever a day has to be picked, the
 // earliest day the transactions support is used. That way something funded by
 // this rule is never funded later than the transaction actually happens, only
 // sometimes a few days early. Twice a month is the exception, it uses the most
-// common days instead, see semiMonthlyMajorityDays.
+// common days instead, see [semiMonthlyMajorityDays].
 func GenerateRuleSet(
 	frequency int,
 	members []models.Transaction,
@@ -71,7 +75,7 @@ func GenerateRuleSet(
 			return float64(day.YearDay()-1) / float64(daysInYear)
 		}
 	default:
-		return nil, errors.Errorf("cannot generate a ruleset for a frequency of %d days", frequency)
+		return nil, errors.Errorf("cannot generate a ruleset for a frequency of [%d] days", frequency)
 	}
 
 	// The earliest transaction is the one right after the largest gap on that
@@ -133,12 +137,13 @@ func GenerateRuleSet(
 		return nil, errors.Wrap(err, "failed to generate rule")
 	}
 
-	ruleset := &models.RuleSet{}
+	ruleset := new(models.RuleSet)
 	ruleset.RRule(rule)
+
 	return ruleset, nil
 }
 
-// earliestOnCircle returns the day right after the largest gap between the
+// earliestOnCircle will return the day right after the largest gap between the
 // positions of the days.
 func earliestOnCircle(
 	days []time.Time,
@@ -148,10 +153,15 @@ func earliestOnCircle(
 		day      time.Time
 		position float64
 	}
+
 	points := make([]point, len(days))
 	for i, day := range days {
-		points[i] = point{day, position(day)}
+		points[i] = point{
+			day:      day,
+			position: position(day),
+		}
 	}
+
 	sort.Slice(points, func(i, j int) bool {
 		return points[i].position < points[j].position
 	})
@@ -169,13 +179,13 @@ func earliestOnCircle(
 	return earliest.day
 }
 
-// semiMonthlyMajorityDays returns the most common day in each half of the month
-// for a twice a month rule. Twice a month is usually a payroll on the 15th and
-// the last day of the month, which moves to the previous business day on
-// weekends and holidays. The earliest day would put it on the 12th or 13th, the
-// most common day keeps it on the 15th. A day that is the last day of its month
-// counts as -1, so the 30th, 31st and the end of February all count towards the
-// same day.
+// semiMonthlyMajorityDays will return the most common day in each half of the
+// month for a twice a month rule. Twice a month is usually a payroll on the
+// 15th and the last day of the month, which moves to the previous business day
+// on weekends and holidays. The earliest day would put it on the 12th or 13th,
+// the most common day keeps it on the 15th. A day that is the last day of its
+// month counts as -1, so the 30th, 31st and the end of February all count
+// towards the same day.
 func semiMonthlyMajorityDays(days []time.Time) (int, int) {
 	first, second := map[int]int{}, map[int]int{}
 	for _, day := range days {
@@ -186,17 +196,19 @@ func semiMonthlyMajorityDays(days []time.Time) (int, int) {
 		} else {
 			value = min(value, latestMonthDay)
 		}
+
 		if day.Day() <= 15 {
 			first[value]++
 		} else {
 			second[value]++
 		}
 	}
+
 	return mostCommonDay(first), mostCommonDay(second)
 }
 
-// mostCommonDay returns the day with the highest count, the earlier day wins a
-// tie so that ties still lean towards funding early.
+// mostCommonDay will return the day with the highest count, the earlier day
+// wins a tie so that ties still lean towards funding early.
 func mostCommonDay(counts map[int]int) int {
 	best, bestCount := 0, -1
 	for day, count := range counts {
@@ -204,6 +216,7 @@ func mostCommonDay(counts map[int]int) int {
 			best, bestCount = day, count
 		}
 	}
+
 	return best
 }
 
@@ -212,6 +225,7 @@ func earlierDay(a, b int) bool {
 	if a == -1 {
 		return false
 	}
+
 	return b == -1 || a < b
 }
 

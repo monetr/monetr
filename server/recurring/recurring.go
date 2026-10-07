@@ -66,19 +66,19 @@ type FrequencyScore struct {
 type RecurringTransactionResult struct {
 	Direction models.Direction
 	Best      *Frequency
-	// RuleSet is only present when Best is, see GenerateRuleSet.
+	// RuleSet is only present when Best is, see [GenerateRuleSet].
 	RuleSet *models.RuleSet
 	Members []models.Transaction
 	Results []FrequencyScore
 }
 
-// DetectRecurringTransactions splits the transactions by direction, debits and
-// credits, and detects recurrence for each direction on its own. A recurring
-// group can only be one direction, so this returns at most one result per
-// direction. A direction with fewer than minimumNumberOfTransactions is
-// skipped, so this can return no results at all. Transactions with an amount of
-// zero have no direction and are ignored. The timezone should be the account's,
-// it is used to generate the ruleset for each direction that recurs.
+// DetectRecurringTransactions will split the transactions into debits and
+// credits and detect recurrence for each one on its own, since a recurring
+// group can only ever be one direction. So this returns at most one result per
+// direction, and a direction with fewer than minimumNumberOfTransactions is
+// skipped entirely. Transactions with an amount of zero don't have a direction
+// and are ignored. The timezone should be the account's, it is used to generate
+// the ruleset for each direction that recurs.
 func DetectRecurringTransactions(
 	ctx context.Context,
 	clock clock.Clock,
@@ -101,8 +101,14 @@ func DetectRecurringTransactions(
 		direction    models.Direction
 		transactions []models.Transaction
 	}{
-		{models.DebitDirection, debits},
-		{models.CreditDirection, credits},
+		{
+			direction:    models.DebitDirection,
+			transactions: debits,
+		},
+		{
+			direction:    models.CreditDirection,
+			transactions: credits,
+		},
 	} {
 		result, err := detectRecurringTransactions(
 			ctx,
@@ -114,17 +120,19 @@ func DetectRecurringTransactions(
 		if errors.Is(err, ErrInsufficientTransactionData) {
 			continue
 		}
+
 		if err != nil {
 			return nil, err
 		}
+
 		results = append(results, *result)
 	}
 
 	return results, nil
 }
 
-// detectRecurringTransactions detects recurrence for transactions that are all
-// the specified direction.
+// detectRecurringTransactions expects every transaction to already be the
+// specified direction.
 func detectRecurringTransactions(
 	ctx context.Context,
 	_ clock.Clock,

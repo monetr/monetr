@@ -9,8 +9,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// assertFundedInTime checks that every transaction from the start of the rule
-// onward has an occurrence on the same day or up to maxDays before it. So
+// assertFundedInTime will check that every transaction from the start of the
+// rule onward has an occurrence on the same day or up to maxDays before it. So
 // something funded by the rule would never be funded late.
 func assertFundedInTime(
 	t *testing.T,
@@ -19,14 +19,14 @@ func assertFundedInTime(
 	transactions []models.Transaction,
 	maxDays int,
 ) {
-	t.Helper()
-	// Same as funding schedules, the rule needs to be in the account's timezone so
-	// it stays on midnight across daylight savings time.
+	// Same as funding schedules, the rule needs to be in the account's timezone
+	// so it stays on midnight across daylight savings time.
 	ruleset = inTimezone(ruleset, timezone)
 	for _, txn := range transactions {
 		if txn.Date.Before(ruleset.GetDTStart()) {
 			continue
 		}
+
 		previous := ruleset.Before(txn.Date, true)
 		require.Falsef(t, previous.IsZero(), "%s must have an occurrence before it", txn.Date)
 		assert.Falsef(t, previous.After(txn.Date), "%s must not be funded late, funded on %s", txn.Date, previous)
@@ -34,8 +34,8 @@ func assertFundedInTime(
 	}
 }
 
-// inTimezone returns a copy of the ruleset with its DTSTART in the specified
-// timezone, the same way funding schedules evaluate their rules.
+// inTimezone will return a copy of the ruleset with its DTSTART in the
+// specified timezone, the same way funding schedules evaluate their rules.
 func inTimezone(ruleset *models.RuleSet, timezone *time.Location) *models.RuleSet {
 	rule := ruleset.Clone()
 	rule.DTStart(rule.GetDTStart().In(timezone))
@@ -46,7 +46,7 @@ func TestGenerateRuleSet(t *testing.T) {
 	central, err := time.LoadLocation("America/Chicago")
 	require.NoError(t, err, "must be able to load the timezone")
 
-	t.Run("monthly that slips past weekends", func(t *testing.T) {
+	t.Run("monthly past weekends", func(t *testing.T) {
 		// Billed on the 18th, but when the 18th is on a weekend it posts on the
 		// following Monday instead.
 		transactions := []models.Transaction{
@@ -96,7 +96,7 @@ func TestGenerateRuleSet(t *testing.T) {
 		assertFundedInTime(t, ruleset, central, transactions, 3)
 	})
 
-	t.Run("first of the month that posts the business day before", func(t *testing.T) {
+	t.Run("first of the month", func(t *testing.T) {
 		// A scheduled ACH on the 1st, which posts on the previous business day when
 		// the 1st is a weekend or a holiday. March 1st 2026 was a Sunday, so it
 		// posted on Friday February 27th, which is the earliest it can ever post.
@@ -147,7 +147,7 @@ func TestGenerateRuleSet(t *testing.T) {
 		assertFundedInTime(t, ruleset, central, transactions, 5)
 	})
 
-	t.Run("last day of the month is capped at the 28th", func(t *testing.T) {
+	t.Run("capped at the 28th", func(t *testing.T) {
 		// RRULE skips any month that doesn't have the day, so anything after the
 		// 28th would miss February entirely.
 		transactions := []models.Transaction{
@@ -189,7 +189,7 @@ func TestGenerateRuleSet(t *testing.T) {
 		assertFundedInTime(t, ruleset, central, transactions, 3)
 	})
 
-	t.Run("twice a month uses the most common days", func(t *testing.T) {
+	t.Run("twice a month", func(t *testing.T) {
 		// Payroll on the 15th and the last day of the month, on the business day
 		// before when either one lands on a weekend.
 		transactions := []models.Transaction{
@@ -275,7 +275,7 @@ func TestGenerateRuleSet(t *testing.T) {
 		assert.Equal(t, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", ruleset.GetRRule().OrigOptions.RRuleString(), "should be the 15th and the last day of the month")
 	})
 
-	t.Run("twice a month on other days", func(t *testing.T) {
+	t.Run("twice a month other days", func(t *testing.T) {
 		transactions := []models.Transaction{
 			{
 				TransactionId: "txn_0",
@@ -366,7 +366,7 @@ func TestGenerateRuleSet(t *testing.T) {
 		assertFundedInTime(t, ruleset, central, transactions, 0)
 	})
 
-	t.Run("every other week keeps its phase", func(t *testing.T) {
+	t.Run("every other week", func(t *testing.T) {
 		transactions := []models.Transaction{
 			{
 				TransactionId: "txn_0",
@@ -406,7 +406,7 @@ func TestGenerateRuleSet(t *testing.T) {
 		assertFundedInTime(t, ruleset, central, transactions, 0)
 	})
 
-	t.Run("quarterly keeps its phase", func(t *testing.T) {
+	t.Run("quarterly", func(t *testing.T) {
 		transactions := []models.Transaction{
 			{
 				TransactionId: "txn_0",
@@ -469,7 +469,7 @@ func TestGenerateRuleSet(t *testing.T) {
 		assertFundedInTime(t, ruleset, central, transactions, 0)
 	})
 
-	t.Run("dtstart is midnight in the timezone stored as utc", func(t *testing.T) {
+	t.Run("dtstart stored as utc", func(t *testing.T) {
 		transactions := []models.Transaction{
 			{
 				TransactionId: "txn_0",
@@ -516,55 +516,29 @@ func TestGenerateRuleSet(t *testing.T) {
 }
 
 func TestEarlierDay(t *testing.T) {
-	cases := []struct {
-		name     string
-		a        int
-		b        int
-		expected bool
-	}{
-		{
-			name:     "smaller day is earlier",
-			a:        14,
-			b:        15,
-			expected: true,
-		},
-		{
-			name:     "larger day is not earlier",
-			a:        16,
-			b:        15,
-			expected: false,
-		},
-		{
-			name:     "same day is not earlier",
-			a:        15,
-			b:        15,
-			expected: false,
-		},
-		{
-			name:     "any day is earlier than the last day",
-			a:        31,
-			b:        -1,
-			expected: true,
-		},
-		{
-			name:     "the last day is never earlier",
-			a:        -1,
-			b:        28,
-			expected: false,
-		},
-		{
-			name:     "the last day is not earlier than itself",
-			a:        -1,
-			b:        -1,
-			expected: false,
-		},
-	}
+	t.Run("smaller day", func(t *testing.T) {
+		assert.True(t, earlierDay(14, 15), "smaller day should be earlier")
+	})
 
-	for _, item := range cases {
-		t.Run(item.name, func(t *testing.T) {
-			assert.Equal(t, item.expected, earlierDay(item.a, item.b))
-		})
-	}
+	t.Run("larger day", func(t *testing.T) {
+		assert.False(t, earlierDay(16, 15), "larger day should not be earlier")
+	})
+
+	t.Run("same day", func(t *testing.T) {
+		assert.False(t, earlierDay(15, 15), "same day should not be earlier")
+	})
+
+	t.Run("before the last day", func(t *testing.T) {
+		assert.True(t, earlierDay(31, -1), "any day should be earlier than the last day")
+	})
+
+	t.Run("last day", func(t *testing.T) {
+		assert.False(t, earlierDay(-1, 28), "the last day should never be earlier")
+	})
+
+	t.Run("last day twice", func(t *testing.T) {
+		assert.False(t, earlierDay(-1, -1), "the last day should not be earlier than itself")
+	})
 }
 
 func TestMostCommonDay(t *testing.T) {
@@ -573,7 +547,7 @@ func TestMostCommonDay(t *testing.T) {
 			14: 1,
 			15: 3,
 			16: 2,
-		}))
+		}), "should pick the day with the highest count")
 	})
 
 	t.Run("earlier day wins a tie", func(t *testing.T) {
@@ -583,7 +557,7 @@ func TestMostCommonDay(t *testing.T) {
 			assert.Equal(t, 14, mostCommonDay(map[int]int{
 				14: 2,
 				15: 2,
-			}))
+			}), "earlier day should win the tie")
 		}
 	})
 
@@ -592,7 +566,7 @@ func TestMostCommonDay(t *testing.T) {
 			assert.Equal(t, 30, mostCommonDay(map[int]int{
 				-1: 2,
 				30: 2,
-			}))
+			}), "last day should lose the tie")
 		}
 	})
 }

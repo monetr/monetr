@@ -18,7 +18,10 @@
   width: 5 * variables.$size;
   right: -1 * variables.$size;
   top: -1 * variables.$size;
-  padding: 1 * variables.$size;
+  padding-left: 1 * variables.$size;
+  padding-right: 1 * variables.$size;
+  padding-top: 1 * variables.$size;
+  padding-bottom: 1 * variables.$size;
   border-radius: 9999px;
 
   background: var(--brand);
@@ -32,7 +35,7 @@
 }
 
 .title {
-  font-weight: 600;
+  font-weight: var(--semibold);
   color: var(--content-emphasis);
 }
 
@@ -61,7 +64,8 @@
 .titlePlaceholder,
 .subtitlePlaceholder {
   height: 3.5 * variables.$size;
-  margin: 0.75 * variables.$size 0;
+  margin-top: 0.75 * variables.$size;
+  margin-bottom: 0.75 * variables.$size;
   border-radius: 3 * variables.$size;
   background-color: var(--background-subtle);
 }

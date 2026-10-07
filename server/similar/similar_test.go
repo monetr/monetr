@@ -42,31 +42,67 @@ func TestSimilarTransactions_TFIDF_DBSCAN(t *testing.T) {
 		// plain deposits which doesn't have payroll in it, so the original word for
 		// payroll has to come from one of the other members instead.
 		data := make([]models.Transaction, 0, 240)
-		add := func(count int, name, merchant string) {
-			for range count {
-				data = append(data, models.Transaction{
-					TransactionId:        models.ID[models.Transaction](fmt.Sprintf("txn_%03d", len(data))),
-					OriginalName:         name,
-					OriginalMerchantName: merchant,
-				})
-			}
+		for range 22 {
+			data = append(data, models.Transaction{
+				TransactionId:        models.ID[models.Transaction](fmt.Sprintf("txn_%03d", len(data))),
+				OriginalName:         "Deposit 5176 Treasury Pr  Deposit",
+				OriginalMerchantName: "Deposit 5176 Treasury Pr Deposit",
+			})
 		}
-		add(22, "Deposit 5176 Treasury Pr  Deposit", "Deposit 5176 Treasury Pr Deposit")
-		add(11, "Deposit 5176 Treasury Pr  Payroll", "Deposit 5176 Treasury Pr Payroll")
+		for range 11 {
+			data = append(data, models.Transaction{
+				TransactionId:        models.ID[models.Transaction](fmt.Sprintf("txn_%03d", len(data))),
+				OriginalName:         "Deposit 5176 Treasury Pr  Payroll",
+				OriginalMerchantName: "Deposit 5176 Treasury Pr Payroll",
+			})
+		}
 		// The merchant names sometimes get cut off, these are what bridge the plain
 		// deposits and the payroll deposits into a single cluster.
-		add(1, "Deposit 5176 Treasury Pr  Deposit", "Deposit 5176 Treasury Pr  Deposi")
-		add(1, "Deposit 5176 Treasury Pr  Payroll", "Deposit 5176 Treasury Pr  Payrol")
+		data = append(data, models.Transaction{
+			TransactionId:        models.ID[models.Transaction](fmt.Sprintf("txn_%03d", len(data))),
+			OriginalName:         "Deposit 5176 Treasury Pr  Deposit",
+			OriginalMerchantName: "Deposit 5176 Treasury Pr  Deposi",
+		})
+		data = append(data, models.Transaction{
+			TransactionId:        models.ID[models.Transaction](fmt.Sprintf("txn_%03d", len(data))),
+			OriginalName:         "Deposit 5176 Treasury Pr  Payroll",
+			OriginalMerchantName: "Deposit 5176 Treasury Pr  Payrol",
+		})
 		// Other transactions in the account so that treasury and deposit aren't in
 		// every single transaction.
 		for _, merchant := range []string{
-			"Sentry", "Github", "Discord", "Plaid", "Twilio", "Freshbooks", "Google", "Lunchflow",
+			"Sentry",
+			"Github",
+			"Discord",
+			"Plaid",
+			"Twilio",
+			"Freshbooks",
+			"Google",
+			"Lunchflow",
 		} {
 			name := "ACH Debit - Pwp " + merchant + " Privacycom 2111508"
-			add(20, name, name)
+			for range 20 {
+				data = append(data, models.Transaction{
+					TransactionId:        models.ID[models.Transaction](fmt.Sprintf("txn_%03d", len(data))),
+					OriginalName:         name,
+					OriginalMerchantName: name,
+				})
+			}
 		}
-		add(20, "POS DEBIT-BDC 2069 PLOVER DIGITAL PLOVER", "POS DEBIT-BDC 2069 PLOVER DIGITAL PLOVER")
-		add(25, "Dividend", "Dividend")
+		for range 20 {
+			data = append(data, models.Transaction{
+				TransactionId:        models.ID[models.Transaction](fmt.Sprintf("txn_%03d", len(data))),
+				OriginalName:         "POS DEBIT-BDC 2069 PLOVER DIGITAL PLOVER",
+				OriginalMerchantName: "POS DEBIT-BDC 2069 PLOVER DIGITAL PLOVER",
+			})
+		}
+		for range 25 {
+			data = append(data, models.Transaction{
+				TransactionId:        models.ID[models.Transaction](fmt.Sprintf("txn_%03d", len(data))),
+				OriginalName:         "Dividend",
+				OriginalMerchantName: "Dividend",
+			})
+		}
 
 		log := testutils.GetLog(t)
 		detector := NewSimilarTransactions_TFIDF_DBSCAN(log)
@@ -83,7 +119,7 @@ func TestSimilarTransactions_TFIDF_DBSCAN(t *testing.T) {
 			}
 		}
 		require.NotNil(t, treasury, "the deposits and payroll deposits must be clustered together")
-		assert.Equal(t, "Payroll", treasury.Name)
+		assert.Equal(t, "Payroll", treasury.Name, "cluster should be named after the payroll deposits")
 	})
 
 	t.Run("amazon dataset", func(t *testing.T) {

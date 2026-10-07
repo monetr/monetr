@@ -121,6 +121,7 @@ func TestParse(t *testing.T) {
 		assert.NotNil(t, result.SIGNONMSGSRSV1, "sign on message response must not be nil")
 		assert.NotNil(t, result.BANKMSGSRSV1, "bank message response must not be nil")
 	})
+
 	t.Run("deeply nested garbage", func(t *testing.T) {
 		// This used to take about an hour of CPU to fail, it should fail right
 		// away now.
@@ -128,7 +129,7 @@ func TestParse(t *testing.T) {
 		start := time.Now()
 		result, err := ParseFile(t.Context(), bytes.NewReader(data))
 		assert.Error(t, err, "should not be able to parse a file that is just nested tags")
-		assert.Nil(t, result)
+		assert.Nil(t, result, "result should be nil")
 		assert.Less(t, time.Since(start), 5*time.Second, "should fail fast")
 	})
 
@@ -138,8 +139,8 @@ func TestParse(t *testing.T) {
 		reader := bytes.NewReader(GetFixtures(t, "sample-nfcu.qfx"))
 
 		result, err := ParseFile(ctx, reader)
-		assert.ErrorIs(t, err, context.Canceled)
-		assert.Nil(t, result)
+		assert.EqualError(t, err, "failed to parse: failed to tokenize OFX data: context canceled")
+		assert.Nil(t, result, "result should be nil")
 	})
 }
 

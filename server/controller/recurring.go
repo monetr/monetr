@@ -66,15 +66,15 @@ func (c *Controller) getRecurringTransactions(ctx *echo.Context) error {
 	return ctx.JSON(http.StatusOK, items)
 }
 
-func (c *Controller) getRecurringTransaction(ctx *echo.Context) error {
+func (c *Controller) getRecurringTransactionById(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
-		return c.badRequest(ctx, "must specify a valid bank account Id")
+		return c.badRequest(ctx, "Must specify a valid bank account Id")
 	}
 
 	transactionRecurringId, err := ParseID[TransactionRecurring](ctx.Param("transactionRecurringId"))
 	if err != nil || transactionRecurringId.IsZero() {
-		return c.badRequest(ctx, "must specify a valid recurring transaction Id")
+		return c.badRequest(ctx, "Must specify a valid recurring transaction Id")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
@@ -85,7 +85,7 @@ func (c *Controller) getRecurringTransaction(ctx *echo.Context) error {
 		transactionRecurringId,
 	)
 	if err != nil {
-		return c.wrapPgError(ctx, err, "failed to retrieve recurring transaction")
+		return c.wrapPgError(ctx, err, "Failed to retrieve recurring transaction")
 	}
 
 	return ctx.JSON(http.StatusOK, result)
@@ -94,12 +94,12 @@ func (c *Controller) getRecurringTransaction(ctx *echo.Context) error {
 func (c *Controller) patchRecurringTransaction(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
-		return c.badRequest(ctx, "must specify a valid bank account Id")
+		return c.badRequest(ctx, "Must specify a valid bank account Id")
 	}
 
 	transactionRecurringId, err := ParseID[TransactionRecurring](ctx.Param("transactionRecurringId"))
 	if err != nil || transactionRecurringId.IsZero() {
-		return c.badRequest(ctx, "must specify a valid recurring transaction Id")
+		return c.badRequest(ctx, "Must specify a valid recurring transaction Id")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
@@ -110,7 +110,7 @@ func (c *Controller) patchRecurringTransaction(ctx *echo.Context) error {
 		transactionRecurringId,
 	)
 	if err != nil {
-		return c.wrapPgError(ctx, err, "failed to retrieve recurring transaction")
+		return c.wrapPgError(ctx, err, "Failed to retrieve recurring transaction")
 	}
 
 	recurring, err := parse(
@@ -127,7 +127,7 @@ func (c *Controller) patchRecurringTransaction(ctx *echo.Context) error {
 	// can be linked. Goals will get their own treatment later.
 	if recurring.SpendingId != nil {
 		if recurring.Direction != DebitDirection {
-			return c.badRequest(ctx, "spending can only be linked to a debit recurring transaction")
+			return c.badRequest(ctx, "Spending can only be linked to a debit recurring transaction")
 		}
 
 		spending, err := repo.GetSpendingById(
@@ -136,18 +136,18 @@ func (c *Controller) patchRecurringTransaction(ctx *echo.Context) error {
 			*recurring.SpendingId,
 		)
 		if err != nil {
-			return c.wrapPgError(ctx, err, "could not find spending specified")
+			return c.wrapPgError(ctx, err, "Could not find spending specified")
 		}
 
 		if spending.SpendingType != SpendingTypeExpense {
-			return c.badRequest(ctx, "only expenses can be linked to a recurring transaction")
+			return c.badRequest(ctx, "Only expenses can be linked to a recurring transaction")
 		}
 	}
 
 	// Funding schedules only track money coming into the account.
 	if recurring.FundingScheduleId != nil {
 		if recurring.Direction != CreditDirection {
-			return c.badRequest(ctx, "funding schedules can only be linked to a credit recurring transaction")
+			return c.badRequest(ctx, "Funding schedules can only be linked to a credit recurring transaction")
 		}
 
 		if _, err := repo.GetFundingSchedule(
@@ -155,11 +155,12 @@ func (c *Controller) patchRecurringTransaction(ctx *echo.Context) error {
 			bankAccountId,
 			*recurring.FundingScheduleId,
 		); err != nil {
-			return c.wrapPgError(ctx, err, "could not find funding schedule specified")
+			return c.wrapPgError(ctx, err, "Could not find funding schedule specified")
 		}
 	}
 
-	// Whatever the links are now, the user chose them.
+	// Whatever the links are now the user picked them, so this is no longer auto
+	// matched.
 	recurring.AutoMatched = false
 
 	if err := repo.UpdateTransactionRecurring(
@@ -170,15 +171,14 @@ func (c *Controller) patchRecurringTransaction(ctx *echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to update recurring transaction")
 	}
 
-	// Read it back so the embedded funding schedule matches the new
-	// links.
+	// Read it back so the embedded funding schedule matches the new links.
 	result, err := repo.GetTransactionRecurringById(
 		c.getContext(ctx),
 		bankAccountId,
 		transactionRecurringId,
 	)
 	if err != nil {
-		return c.wrapPgError(ctx, err, "failed to retrieve updated recurring transaction")
+		return c.wrapPgError(ctx, err, "Failed to retrieve updated recurring transaction")
 	}
 
 	return ctx.JSON(http.StatusOK, result)

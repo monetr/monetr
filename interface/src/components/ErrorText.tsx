@@ -4,10 +4,8 @@ import styles from './ErrorText.module.scss';
 
 export interface ErrorTextProps {
   error?: string;
-  /**
-   * description is helper text for the field, it always shows and takes up its own space. the error still goes in the
-   * spot reserved under the field so it doesnt move anything around when it shows up
-   */
+  // The description always shows and takes up its own space. The error still goes in the spot reserved under the field
+  // so it doesn't move anything around when it shows up.
   description?: string;
 }
 

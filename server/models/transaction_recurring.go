@@ -7,15 +7,12 @@ import (
 	"github.com/uptrace/bun"
 )
 
-// Direction is whether money is leaving the account or coming into it.
 type Direction string
 
+// Debits are money leaving the account (positive amounts) and credits are money
+// coming into the account (negative amounts).
 const (
-	// DebitDirection is money leaving the account, transactions with a positive
-	// amount.
-	DebitDirection Direction = "debit"
-	// CreditDirection is money coming into the account, transactions with a
-	// negative amount.
+	DebitDirection  Direction = "debit"
 	CreditDirection Direction = "credit"
 )
 
@@ -66,6 +63,10 @@ type TransactionRecurring struct {
 func (TransactionRecurring) IdentityPrefix() string {
 	return "txrc"
 }
+
+var (
+	_ bun.BeforeAppendModelHook = (*TransactionRecurring)(nil)
+)
 
 func (o *TransactionRecurring) BeforeAppendModel(ctx context.Context, query bun.Query) error {
 	switch query.(type) {

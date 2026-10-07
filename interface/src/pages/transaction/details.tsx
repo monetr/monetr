@@ -31,7 +31,6 @@ import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { useTransaction } from '@monetr/interface/hooks/useTransaction';
 import type { ID } from '@monetr/interface/models/ID';
 import type Spending from '@monetr/interface/models/Spending';
-import mergeClasses from '@monetr/interface/util/mergeClasses';
 import type { APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
 
@@ -271,7 +270,7 @@ export default function TransactionDetails(): React.JSX.Element {
               </FormButton>
             </div>
           </div>
-          <div className={mergeClasses(styles.column, styles.relatedColumn)}>
+          <div className={styles.relatedColumn}>
             {transaction.transactionRecurringId && <TransactionRecurringCard transaction={transaction} />}
             <SimilarTransactions transaction={transaction} />
           </div>

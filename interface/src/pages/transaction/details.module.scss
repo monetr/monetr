@@ -63,8 +63,9 @@
   }
 }
 
-// the column next to the form, has the recurring card and similar transactions
+// The column next to the form, has the recurring card and similar transactions
 .relatedColumn {
+  @extend .column;
   gap: 5 * variables.$size;
 }
 

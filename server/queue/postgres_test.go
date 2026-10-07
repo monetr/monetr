@@ -687,7 +687,7 @@ func TestPostgresProcessor_BulkEnqueueAt(t *testing.T) {
 		assert.Zero(t, count, "no jobs should be created")
 	})
 
-	t.Run("every job runs without waiting for the ticker", func(t *testing.T) {
+	t.Run("doesnt wait for ticker", func(t *testing.T) {
 		clock := clock.New()
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 		log := testutils.GetLog(t)
@@ -702,7 +702,7 @@ func TestPostgresProcessor_BulkEnqueueAt(t *testing.T) {
 		)
 
 		err := Register(t.Context(), processor, testNoopJob)
-		assert.NoError(t, err)
+		assert.NoError(t, err, "must be able to register job")
 
 		err = processor.Start()
 		assert.NoError(t, err, "must be able to start the processor")
@@ -721,13 +721,13 @@ func TestPostgresProcessor_BulkEnqueueAt(t *testing.T) {
 		})
 		assert.NoError(t, err, "must be able to bulk enqueue jobs")
 
-		require.Eventually(t, func() bool {
+		assert.Eventually(t, func() bool {
 			count, err := db.NewSelect().
 				Model(new(models.Job)).
 				Where(`"status" = ?`, models.CompletedJobStatus).
 				Count(t.Context())
 			return err == nil && count == 6
-		}, 5*time.Second, 100*time.Millisecond, "every job must be completed before the ticker would have fired")
+		}, 5*time.Second, 100*time.Millisecond, "all jobs should complete before the ticker fires")
 	})
 }
 

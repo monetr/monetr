@@ -100,9 +100,18 @@ How amounts are represented, plus the currencies monetr supports.
 
 | Method | Path |
 | --- | --- |
+| `GET` | `/api/bank_accounts/:bankAccountId/similar` |
 | `GET` | `/api/bank_accounts/:bankAccountId/similar/:transactionClusterId` |
 | `GET` | `/api/bank_accounts/:bankAccountId/similar/:transactionClusterId/transactions` |
 | `GET` | `/api/bank_accounts/:bankAccountId/transactions/:transactionId/similar` |
+
+### [Recurring Transactions](/documentation/api/recurring_transactions)
+
+| Method | Path |
+| --- | --- |
+| `GET` | `/api/bank_accounts/:bankAccountId/recurring` |
+| `GET` | `/api/bank_accounts/:bankAccountId/recurring/:transactionRecurringId` |
+| `PATCH` | `/api/bank_accounts/:bankAccountId/recurring/:transactionRecurringId` |
 
 ### [Spending](/documentation/api/spending)
 
@@ -227,6 +236,7 @@ These serve the monetr app and can change without notice.
 | `GET` | `/api/config` |
 | `POST` | `/api/authentication/challenge` |
 | `POST` | `/api/icons/search` |
+| `QUERY` | `/api/icons/search` |
 | `GET` | `/api/institutions/:institutionId` |
 | `GET` | `/api/plaid/link/token/new` |
 | `POST` | `/api/plaid/link/token/callback` |

@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 import { useFormikContext } from 'formik';
 
 import SwitchCard from '@monetr/interface/components/SwitchCard';
@@ -11,10 +10,8 @@ export interface FormSwitchProps {
   description: string;
   name: string;
   disabled?: boolean;
-  /**
-   * checked overrides what the switch shows, for when the field should read as off even though its value is still true,
-   * like a toggle that only applies once another field is filled in
-   */
+  // Overrides what the switch shows, for when the field should read as off even though its value is still true. Like a
+  // toggle that only applies once another field is filled in.
   checked?: boolean;
   className?: string;
   'data-testid'?: string;
@@ -23,10 +20,9 @@ export interface FormSwitchProps {
 export default function FormSwitch(props: FormSwitchProps): React.JSX.Element {
   const formikContext = useFormikContext<Record<string, unknown>>();
 
-  const onCheckedChange = useCallback(
-    (checked: boolean) => formikContext?.setFieldValue(props.name, checked),
-    [formikContext, props.name],
-  );
+  function onCheckedChange(checked: boolean) {
+    formikContext?.setFieldValue(props.name, checked);
+  }
 
   return (
     <div className={mergeClasses(styles.formSwitchRoot, props.className)}>

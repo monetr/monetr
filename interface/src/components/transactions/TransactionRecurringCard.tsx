@@ -1,5 +1,4 @@
-import { Fragment } from 'react';
-import { differenceInCalendarDays, isThisYear, startOfToday } from 'date-fns';
+import { isThisYear } from 'date-fns';
 import { CalendarSync, Plus, Repeat, Sparkles, Wallet } from 'lucide-react';
 import { rrulestr } from 'rrule';
 import { Link } from 'wouter';
@@ -18,6 +17,7 @@ import type Transaction from '@monetr/interface/models/Transaction';
 import type TransactionRecurring from '@monetr/interface/models/TransactionRecurring';
 import { AmountType } from '@monetr/interface/util/amounts';
 import capitalize from '@monetr/interface/util/capitalize';
+import { formatRelativeDate } from '@monetr/interface/util/formatDate';
 
 import styles from './TransactionRecurringCard.module.scss';
 
@@ -25,33 +25,53 @@ export interface TransactionRecurringCardProps {
   transaction: Transaction;
 }
 
-export default function TransactionRecurringCard({
-  transaction,
-}: TransactionRecurringCardProps): React.JSX.Element | null {
-  const { data: recurring } = useRecurringTransaction(transaction.transactionRecurringId);
-  // the recurring transaction only has the id, look the expense up so it comes from the same cache as the expenses
+export default function TransactionRecurringCard(props: TransactionRecurringCardProps): React.JSX.Element | null {
+  const { data: recurring } = useRecurringTransaction(props.transaction.transactionRecurringId);
+  // The recurring transaction only has the id, look the expense up so it comes from the same cache as the expenses
   const { data: spending } = useSpending(recurring?.spendingId ?? null);
   const { timezone, inTimezone } = useTimezone();
   const { data: locale } = useLocale();
   const { data: localeCurrency } = useLocaleCurrency();
 
-  // the card is just extra detail on top of the transaction, so instead of a skeleton just leave it out until everything
-  // has loaded
+  // The card is just extra detail on top of the transaction, so instead of a skeleton just leave it out until
+  // everything has loaded
   if (!recurring || !locale || !localeCurrency) {
     return null;
   }
 
   const isDebit = recurring.direction === 'debit';
-  const formatAmount = (amount: number) => localeCurrency.formatAmount(Math.abs(amount), AmountType.Stored);
-  const formatDate = (date: Date, options: Intl.DateTimeFormatOptions) =>
-    new Intl.DateTimeFormat(locale.code, { ...options, timeZone: timezone }).format(date);
-  // only include the year when it isn't obvious, otherwise something from last december reads like it's this december
-  // numeric auto gives us today, tomorrow and yesterday instead of in 0 days, in 1 day and 1 day ago
-  const formatRelativeDays = (days: number) =>
-    new Intl.RelativeTimeFormat(locale.code, { numeric: 'auto' }).format(days, 'day');
-  const yearIfNeeded = (date: Date) => (isThisYear(date, { in: inTimezone }) ? undefined : 'numeric');
 
-  const daysUntilNext = differenceInCalendarDays(inTimezone(recurring.next), startOfToday({ in: inTimezone }));
+  let eyebrow = 'Recurring Deposit';
+  if (isDebit) {
+    eyebrow = 'Recurring Charge';
+  }
+
+  let title = 'No longer repeating';
+  if (!recurring.ended) {
+    title = capitalize(rrulestr(recurring.ruleset).toText());
+  }
+
+  // Ended ones show when they were last seen, everything else shows when it's expected next
+  let dateLabel = 'Next Expected';
+  let date = inTimezone(recurring.next);
+  if (recurring.ended) {
+    dateLabel = 'Last Seen';
+    date = inTimezone(recurring.last);
+  }
+
+  // TODO These should use formatDate, but right now that formats in the browser's timezone instead of the account's
+  const dateString = new Intl.DateTimeFormat(locale.code, {
+    month: 'short',
+    day: 'numeric',
+    // Only include the year when it isn't obvious, otherwise something from last december reads like it's this december
+    year: isThisYear(date) ? undefined : 'numeric',
+    timeZone: timezone,
+  }).format(date);
+  const sinceString = new Intl.DateTimeFormat(locale.code, {
+    month: 'short',
+    year: 'numeric',
+    timeZone: timezone,
+  }).format(recurring.first);
 
   return (
     <section className={styles.card} data-testid='transaction-recurring-card'>
@@ -60,10 +80,8 @@ export default function TransactionRecurringCard({
           <Repeat />
         </span>
         <div className={styles.headerText}>
-          <span className={styles.eyebrow}>{isDebit ? 'Recurring charge' : 'Recurring deposit'}</span>
-          <span className={styles.title}>
-            {recurring.ended ? 'No longer repeating' : capitalize(rrulestr(recurring.ruleset).toText())}
-          </span>
+          <span className={styles.eyebrow}>{eyebrow}</span>
+          <span className={styles.title}>{title}</span>
         </div>
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
@@ -74,132 +92,128 @@ export default function TransactionRecurringCard({
       </div>
 
       <div className={styles.stats}>
-        {recurring.ended ? (
-          <Stat
-            label='Last seen'
-            value={formatDate(recurring.last, { month: 'short', day: 'numeric', year: yearIfNeeded(recurring.last) })}
-          />
-        ) : (
-          <Stat
-            detail={formatRelativeDays(daysUntilNext)}
-            label='Next expected'
-            value={formatDate(recurring.next, { month: 'short', day: 'numeric', year: yearIfNeeded(recurring.next) })}
-          />
-        )}
-        <Stat label='Usually' value={formatAmount(recurring.lastAmount)} />
-        <Stat label='Since' value={formatDate(recurring.first, { month: 'short', year: 'numeric' })} />
+        <div className={styles.stat}>
+          <span className={styles.statLabel}>{dateLabel}</span>
+          <span className={styles.statValue}>{dateString}</span>
+          {!recurring.ended && (
+            <span className={styles.statDetail}>{formatRelativeDate(recurring.next, inTimezone, locale)}</span>
+          )}
+        </div>
+        <div className={styles.stat}>
+          <span className={styles.statLabel}>Usually</span>
+          <span className={styles.statValue}>
+            {localeCurrency.formatAmount(Math.abs(recurring.lastAmount), AmountType.Stored)}
+          </span>
+        </div>
+        <div className={styles.stat}>
+          <span className={styles.statLabel}>Since</span>
+          <span className={styles.statValue}>{sinceString}</span>
+        </div>
       </div>
 
-      {/* only money leaving the account can be budgeted for with an expense */}
-      {isDebit && (
+      {/* Only money leaving the account can be budgeted for with an expense */}
+      {isDebit && recurring.spendingId && (
         <div className={styles.footer}>
-          {recurring.spendingId ? (
-            <Fragment>
-              <span className={styles.spentFrom}>
-                {recurring.autoMatched ? (
-                  <Tooltip delayDuration={100}>
-                    <TooltipTrigger asChild>
-                      <span
-                        aria-label='Linked automatically'
-                        className={styles.spentFromIcon}
-                        data-testid='transaction-recurring-auto-matched'
-                        role='img'
-                      >
-                        <Sparkles />
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent side='top'>
-                      monetr linked this for you since your recent charges were spent from {spending?.name}
-                    </TooltipContent>
-                  </Tooltip>
-                ) : (
-                  <span className={styles.spentFromIcon}>
-                    <Wallet />
+          <span className={styles.spentFrom}>
+            {recurring.autoMatched && (
+              <Tooltip delayDuration={100}>
+                <TooltipTrigger asChild>
+                  <span
+                    aria-label='Linked automatically'
+                    className={styles.spentFromIcon}
+                    data-testid='transaction-recurring-auto-matched'
+                    role='img'
+                  >
+                    <Sparkles />
                   </span>
-                )}
-                <span>
-                  Budgeted with <strong>{spending?.name}</strong>
-                </span>
+                </TooltipTrigger>
+                <TooltipContent side='top'>
+                  monetr linked this for you since your recent charges were spent from {spending?.name}
+                </TooltipContent>
+              </Tooltip>
+            )}
+            {!recurring.autoMatched && (
+              <span className={styles.spentFromIcon}>
+                <Wallet />
               </span>
-              <Button asChild variant='secondary'>
-                <Link to={`/bank/${recurring.bankAccountId}/expenses/${recurring.spendingId}/details`}>
-                  View expense
-                </Link>
-              </Button>
-            </Fragment>
-          ) : (
-            <Fragment>
-              <span className={styles.spentFrom}>
-                <span className={styles.spentFromIcon}>
-                  <Wallet />
-                </span>
-                <SpentFrom recurring={recurring} />
-              </span>
-              {!recurring.ended && (
-                <Button onClick={() => showNewExpenseModal({ recurring, transaction })} variant='primary'>
-                  <Plus />
-                  Create expense
-                </Button>
-              )}
-            </Fragment>
+            )}
+            <span>
+              Budgeted with <strong>{spending?.name}</strong>
+            </span>
+          </span>
+          <Button asChild variant='secondary'>
+            <Link to={`/bank/${recurring.bankAccountId}/expenses/${recurring.spendingId}/details`}>View Expense</Link>
+          </Button>
+        </div>
+      )}
+      {isDebit && !recurring.spendingId && (
+        <div className={styles.footer}>
+          <span className={styles.spentFrom}>
+            <span className={styles.spentFromIcon}>
+              <Wallet />
+            </span>
+            <SpentFrom recurring={recurring} />
+          </span>
+          {!recurring.ended && (
+            <Button
+              onClick={() =>
+                showNewExpenseModal({
+                  recurring: recurring,
+                  transaction: props.transaction,
+                })
+              }
+              variant='primary'
+            >
+              <Plus />
+              Create Expense
+            </Button>
           )}
         </div>
       )}
 
-      {/* money coming in, like a paycheck, can be used to fund expenses with a funding schedule */}
-      {!isDebit && (recurring.fundingSchedule || !recurring.ended) && (
+      {/* Money coming in, like a paycheck, can be used to fund expenses with a funding schedule */}
+      {!isDebit && recurring.fundingSchedule && (
         <div className={styles.footer}>
-          {recurring.fundingSchedule ? (
-            <Fragment>
-              <span className={styles.spentFrom}>
-                <span className={styles.spentFromIcon}>
-                  <CalendarSync />
-                </span>
-                <span>
-                  Funds <strong>{recurring.fundingSchedule.name}</strong>
-                </span>
-              </span>
-              <Button asChild variant='secondary'>
-                <Link
-                  to={`/bank/${recurring.fundingSchedule.bankAccountId}/funding/${recurring.fundingSchedule.fundingScheduleId}/details`}
-                >
-                  View funding schedule
-                </Link>
-              </Button>
-            </Fragment>
-          ) : (
-            <Fragment>
-              <span className={styles.spentFrom}>
-                <span className={styles.spentFromIcon}>
-                  <CalendarSync />
-                </span>
-                <span>Use this deposit to fund your budgets</span>
-              </span>
-              <Button onClick={() => showNewFundingModal({ recurring, transaction })} variant='primary'>
-                <Plus />
-                Create funding schedule
-              </Button>
-            </Fragment>
-          )}
+          <span className={styles.spentFrom}>
+            <span className={styles.spentFromIcon}>
+              <CalendarSync />
+            </span>
+            <span>
+              Funds <strong>{recurring.fundingSchedule.name}</strong>
+            </span>
+          </span>
+          <Button asChild variant='secondary'>
+            <Link
+              to={`/bank/${recurring.fundingSchedule.bankAccountId}/funding/${recurring.fundingSchedule.fundingScheduleId}/details`}
+            >
+              View Funding Schedule
+            </Link>
+          </Button>
+        </div>
+      )}
+      {!isDebit && !recurring.fundingSchedule && !recurring.ended && (
+        <div className={styles.footer}>
+          <span className={styles.spentFrom}>
+            <span className={styles.spentFromIcon}>
+              <CalendarSync />
+            </span>
+            <span>Use this deposit to fund your budgets</span>
+          </span>
+          <Button
+            onClick={() =>
+              showNewFundingModal({
+                recurring: recurring,
+                transaction: props.transaction,
+              })
+            }
+            variant='primary'
+          >
+            <Plus />
+            Create Funding Schedule
+          </Button>
         </div>
       )}
     </section>
-  );
-}
-
-interface StatProps {
-  label: string;
-  value: string;
-  detail?: string;
-}
-
-function Stat({ label, value, detail }: StatProps): React.JSX.Element {
-  return (
-    <div className={styles.stat}>
-      <span className={styles.statLabel}>{label}</span>
-      <span className={styles.statValue}>{value}</span>
-      {detail && <span className={styles.statDetail}>{detail}</span>}
-    </div>
   );
 }
 

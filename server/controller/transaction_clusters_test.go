@@ -100,7 +100,7 @@ func TestGetTransactionClusters(t *testing.T) {
 		}
 	})
 
-	t.Run("no clusters returns an empty array", func(t *testing.T) {
+	t.Run("no clusters", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		var token string
 		var bank BankAccount
@@ -166,7 +166,7 @@ func TestGetTransactionClusters(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("must specify a valid bank account Id")
+		response.JSON().Path("$.error").String().IsEqual("Must specify a valid bank account Id")
 	})
 
 	t.Run("invalid pagination", func(t *testing.T) {
@@ -190,7 +190,7 @@ func TestGetTransactionClusters(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("limit must be at least 1")
+			response.JSON().Path("$.error").String().IsEqual("Limit must be at least 1")
 		}
 
 		{ // Limit too large
@@ -201,7 +201,7 @@ func TestGetTransactionClusters(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("limit cannot be greater than 100")
+			response.JSON().Path("$.error").String().IsEqual("Limit cannot be greater than 100")
 		}
 
 		{ // Negative offset
@@ -212,7 +212,7 @@ func TestGetTransactionClusters(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("offset cannot be less than 0")
+			response.JSON().Path("$.error").String().IsEqual("Offset cannot be less than 0")
 		}
 	})
 

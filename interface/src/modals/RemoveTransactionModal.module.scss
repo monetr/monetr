@@ -31,7 +31,7 @@
   flex-direction: column;
   gap: 2 * variables.$size; // gap-stack
 
-  // the gap already spaces the switches out, so they dont need their own padding
+  // The gap already spaces the switches out, so they don't need their own padding
   .switch {
     padding-bottom: 0;
   }

@@ -36,7 +36,9 @@ describe('read individual recurring transactions', () => {
         ended: false,
         confidence: 0.9,
         direction: 'debit',
-        amounts: { 800: 3 },
+        amounts: {
+          800: 3,
+        },
         lastAmount: 800,
         createdAt: '2026-03-15T06:00:00Z',
         updatedAt: '2026-03-15T06:00:00Z',
@@ -50,7 +52,7 @@ describe('read individual recurring transactions', () => {
     );
     await waitFor(() => expect(world.result.current.isLoading).toBeTruthy());
     await waitFor(() => expect(world.result.current.data).toBeDefined());
-    expect(world.result.current.data?.transactionRecurringId.toString()).toBe('txrc_01hy4re7c1xc2v44cf6kx302jx');
+    expect(world.result.current.data?.transactionRecurringId).toBe('txrc_01hy4re7c1xc2v44cf6kx302jx');
     expect(world.result.current.data?.direction).toBe('debit');
     expect(world.result.current.data?.window).toBe(TransactionRecurringWindow.Monthly);
     expect(world.result.current.data?.lastAmount).toBe(800);

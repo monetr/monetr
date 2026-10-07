@@ -62,11 +62,11 @@ func newIPExtractor(server config.Server) echo.IPExtractor {
 	}
 }
 
-// newRequestIDHeaderFilter strips the request ID headers off of any request
+// newRequestIdHeaderFilter will strip the request Id headers off of any request
 // that did not come directly from a trusted proxy. Same as the client IP
 // header, a client could otherwise set these to whatever they want and have it
 // show up in our logs and traces.
-func newRequestIDHeaderFilter(server config.Server) echo.MiddlewareFunc {
+func newRequestIdHeaderFilter(server config.Server) echo.MiddlewareFunc {
 	trustedProxies, err := server.GetTrustedProxies()
 	if err != nil {
 		trustedProxies = nil

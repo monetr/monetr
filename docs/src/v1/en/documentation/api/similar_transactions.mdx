@@ -47,8 +47,8 @@ to a null `transactionClusterId`.
 
 ## <Badge type="info">GET</Badge> List clusters
 
-Returns every cluster on a bank account, a page at a time. Results are sorted by `name` descending for now, that ordering
-might change so don't build anything that depends on it.
+Returns every cluster on a bank account, a page at a time. Results are sorted by `name` descending for now, that
+ordering might change so don't build anything that depends on it.
 
 **In the app:** Nothing in the app calls this yet.
 
@@ -89,7 +89,16 @@ curl --request GET \
     "name": "RUBY COFFEE ROASTERS",
     "originalName": "RUBY COFFEE ROASTERS",
     "originalMemo": "SQ *RUBY COFFEE ROASTERS",
-    "debug": [],
+    "debug": [
+      {
+        "word": "RUBY",
+        "sanitized": "ruby",
+        "order": 2,
+        "value": 0.48,
+        "rank": 1,
+        "count": 3
+      }
+    ],
     "merchant": [],
     "createdAt": "2024-08-27T03:15:02.881Z",
     "updatedAt": "2024-08-30T03:15:04.127Z"
@@ -110,7 +119,9 @@ that isn't yours, isn't an error here. You just get back an empty array.
 
 Returns one cluster. You'll usually get the ID from a transaction's `transactionClusterId`.
 
-**In the app:** Creating an expense from a recurring transaction uses the cluster's name as the expense's name.
+**In the app:** The name on the similar transactions panel of a transaction's details page, and the name at the top of
+a recurring transaction's details page. Creating an expense or funding schedule from a recurring transaction uses it to
+fill in the name too.
 
 ```http
 GET /api/bank_accounts/:bankAccountId/similar/:transactionClusterId

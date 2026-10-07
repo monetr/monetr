@@ -27,6 +27,7 @@ import (
 	"github.com/monetr/monetr/server/internal/mockgen"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
+	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/powchallenge"
 	"github.com/monetr/monetr/server/pubsub"
@@ -458,4 +459,67 @@ func MustSendPasswordChangedEmail(t *testing.T, app *TestApp, n int, emails ...s
 			}
 			return nil
 		})
+}
+
+func GivenIHaveATransactionRecurring(
+	t *testing.T,
+	bank models.BankAccount,
+) models.TransactionRecurring {
+	cluster := testutils.MustInsert(t, models.TransactionCluster{
+		AccountId:     bank.AccountId,
+		BankAccountId: bank.BankAccountId,
+		Name:          "Github",
+		OriginalName:  "Github",
+		Members: []models.ID[models.Transaction]{
+			models.NewID[models.Transaction](),
+		},
+	})
+
+	return testutils.MustInsert(t, models.TransactionRecurring{
+		AccountId:            bank.AccountId,
+		BankAccountId:        bank.BankAccountId,
+		TransactionClusterId: cluster.TransactionClusterId,
+		Direction:            models.DebitDirection,
+		Window:               models.MonthlyWindowType,
+		RuleSet: testutils.Must(
+			t,
+			models.NewRuleSet,
+			"DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15",
+		),
+		First:      time.Date(2026, 1, 15, 6, 0, 0, 0, time.UTC),
+		Last:       time.Date(2026, 3, 15, 5, 0, 0, 0, time.UTC),
+		Next:       time.Date(2026, 4, 15, 5, 0, 0, 0, time.UTC),
+		Confidence: 0.9,
+		Amounts: map[int64]int{
+			800: 3,
+		},
+		LastAmount: 800,
+	})
+}
+
+func GivenIHaveASpending(
+	t *testing.T,
+	clock clock.Clock,
+	fundingSchedule *models.FundingSchedule,
+	spendingType models.SpendingType,
+	name string,
+) models.Spending {
+	var ruleset *models.RuleSet
+	nextRecurrence := clock.Now().AddDate(0, 1, 0)
+	if spendingType == models.SpendingTypeExpense {
+		ruleset = testutils.Must(t, models.NewRuleSet, "DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15")
+		nextRecurrence = ruleset.After(clock.Now(), false)
+	}
+
+	return testutils.MustInsert(t, models.Spending{
+		AccountId:         fundingSchedule.AccountId,
+		BankAccountId:     fundingSchedule.BankAccountId,
+		FundingScheduleId: fundingSchedule.FundingScheduleId,
+		SpendingType:      spendingType,
+		Name:              name,
+		TargetAmount:      800,
+		RuleSet:           ruleset,
+		NextRecurrence:    nextRecurrence,
+		CreatedAt:         clock.Now(),
+	})
 }

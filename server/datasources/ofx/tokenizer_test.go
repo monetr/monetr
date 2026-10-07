@@ -42,13 +42,13 @@ func TestTokenizer(t *testing.T) {
 	t.Run("too deeply nested", func(t *testing.T) {
 		data := bytes.Repeat([]byte("<A>"), maxDepth+1)
 		_, err := Tokenize(t.Context(), data)
-		assert.EqualError(t, err, "OFX data is nested too deep, more than 64 levels at index [64]")
+		assert.EqualError(t, err, "OFX data is nested too deep, more than [64] levels at index [64]")
 	})
 
-	t.Run("nested right up to the limit", func(t *testing.T) {
+	t.Run("nested to the limit", func(t *testing.T) {
 		data := bytes.Repeat([]byte("<A>"), maxDepth)
 		items, err := Tokenize(t.Context(), data)
-		assert.NoError(t, err)
+		assert.NoError(t, err, "should be able to tokenize right at the limit")
 		assert.IsType(t, new(Array), items, "Root item should be an array")
 	})
 
@@ -63,6 +63,6 @@ func TestTokenizer(t *testing.T) {
 		cancel()
 		data := GetFixtures(t, "sample-nfcu.qfx")
 		_, err := Tokenize(ctx, data)
-		assert.ErrorIs(t, err, context.Canceled)
+		assert.EqualError(t, err, "failed to tokenize OFX data: context canceled")
 	})
 }

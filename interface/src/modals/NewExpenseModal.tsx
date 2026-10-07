@@ -1,9 +1,8 @@
 import { useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { isBefore, startOfDay, startOfTomorrow } from 'date-fns';
+import { startOfDay, startOfTomorrow } from 'date-fns';
 import { type FormikHelpers, useFormikContext } from 'formik';
 import { Repeat } from 'lucide-react';
-import { rrulestr } from 'rrule';
 
 import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
@@ -48,19 +47,14 @@ interface NewExpenseValues {
 }
 
 export interface NewExpenseModalProps {
-  /**
-   * recurring fills in the new expense from a recurring transaction and links the expense to it once its created
-   */
+  // recurring fills in the new expense from a recurring transaction and links the expense to it once it's created
   recurring?: TransactionRecurring;
-  /**
-   * transaction is the one the user started from when creating an expense from a recurring transaction. its name is the
-   * fallback if theres no cluster name, and it lets them spend that charge from the new expense
-   */
+  // transaction is the one the user started from. Its name is the fallback if there's no cluster name, and it lets them
+  // spend that charge from the new expense
   transaction?: Transaction;
 }
 
 function NewExpenseModal(props: NewExpenseModalProps): React.JSX.Element {
-  const { recurring, transaction } = props;
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   const modal = useModal();
@@ -71,14 +65,16 @@ function NewExpenseModal(props: NewExpenseModalProps): React.JSX.Element {
   const createSpending = useCreateSpending();
   const patchTransaction = usePatchTransaction();
   const patchTransactionRecurring = usePatchTransactionRecurring();
-  // use the similar transactions name for the expense instead of the transactions own name, since thats the name for the
-  // whole group of charges and not just the one they happened to start from
-  const { data: cluster, isLoading: clusterIsLoading } = useTransactionCluster(recurring?.transactionClusterId ?? null);
-  const name = cluster?.name || transaction?.getName();
+  // Use the similar transactions name for the expense instead of the transaction's own name, since that's the name for
+  // the whole group of charges and not just the one they happened to start from
+  const { data: cluster, isLoading: clusterIsLoading } = useTransactionCluster(
+    props.recurring?.transactionClusterId ?? null,
+  );
+  const name = cluster?.name || props.transaction?.getName();
 
   const ref = useRef<MModalRef>(null);
 
-  // wait for the cluster too, the form only reads its initial values once so the name has to be there up front
+  // Wait for the cluster too, the form only reads its initial values once so the name has to be there up front
   if (!selectedBankAccount || !locale || clusterIsLoading) {
     return (
       <MModal className={styles.modal} open={modal.visible} ref={ref}>
@@ -92,13 +88,13 @@ function NewExpenseModal(props: NewExpenseModalProps): React.JSX.Element {
   });
   const initialValues: NewExpenseValues = {
     name: name ?? '',
-    amount: recurring ? locale.amountToFriendly(Math.abs(recurring.lastAmount)) : 0.0,
-    nextOccurrence: recurring ? getNextRecurrence(recurring, tomorrow) : tomorrow,
-    ruleset: recurring?.ruleset ?? '',
+    amount: props.recurring ? locale.amountToFriendly(Math.abs(props.recurring.lastAmount)) : 0.0,
+    nextOccurrence: props.recurring?.getNextRecurrence(tomorrow) ?? tomorrow,
+    ruleset: props.recurring?.ruleset ?? '',
     fundingScheduleId: ID.from<FundingSchedule, string>(''),
     autoCreateTransaction: false,
-    // on by default, but only when the toggle is actually shown so a hidden toggle never moves the transaction
-    moveTransaction: Boolean(transaction && !transaction.getIsAddition()),
+    // On by default, but only when the toggle is actually shown so a hidden toggle never moves the transaction
+    moveTransaction: Boolean(props.transaction && !props.transaction.getIsAddition()),
   };
 
   async function submit(values: NewExpenseValues, helper: FormikHelpers<NewExpenseValues>): Promise<void> {
@@ -122,12 +118,12 @@ function NewExpenseModal(props: NewExpenseModalProps): React.JSX.Element {
       autoCreateTransaction: isManual && values.amount > 0 && values.autoCreateTransaction,
     })
       .then(async created => {
-        // the expense is linked to the recurring transaction with a second request. if that fails the expense is still
-        // created, so keep it and just let the user know it isnt linked
-        if (recurring) {
+        // The expense is linked to the recurring transaction with a second request. If that fails the expense is still
+        // created, so keep it and just let the user know it isn't linked
+        if (props.recurring) {
           await patchTransactionRecurring({
-            transactionRecurringId: recurring.transactionRecurringId,
-            bankAccountId: recurring.bankAccountId,
+            transactionRecurringId: props.recurring.transactionRecurringId,
+            bankAccountId: props.recurring.bankAccountId,
             spendingId: created.spendingId,
           }).catch(
             () =>
@@ -137,10 +133,10 @@ function NewExpenseModal(props: NewExpenseModalProps): React.JSX.Element {
               }),
           );
         }
-        if (transaction && values.moveTransaction) {
+        if (props.transaction && values.moveTransaction) {
           await patchTransaction({
-            transactionId: transaction.transactionId,
-            bankAccountId: transaction.bankAccountId,
+            transactionId: props.transaction.transactionId,
+            bankAccountId: props.transaction.bankAccountId,
             spendingId: created.spendingId,
           });
         }
@@ -165,7 +161,7 @@ function NewExpenseModal(props: NewExpenseModalProps): React.JSX.Element {
           <Typography className={styles.heading} size='xl' weight='bold'>
             Create A New Expense
           </Typography>
-          {recurring && (
+          {props.recurring && (
             <div className={styles.recurringBanner} data-testid='new-expense-recurring-banner'>
               <Repeat />
               <Typography color='inherit' size='sm'>
@@ -186,14 +182,14 @@ function NewExpenseModal(props: NewExpenseModalProps): React.JSX.Element {
             <FormAmountField
               allowNegative={false}
               className={styles.fieldRowItem}
-              description={recurring && 'Your last charge.'}
+              description={props.recurring && 'Your last charge.'}
               label='How much do you need?'
               name='amount'
               required
             />
             <FormDatePicker
               className={styles.fieldRowItem}
-              description={recurring && 'When the next charge is expected.'}
+              description={props.recurring && 'When the next charge is expected.'}
               label='When do you need it next?'
               min={startOfTomorrow({
                 in: inTimezone,
@@ -210,20 +206,22 @@ function NewExpenseModal(props: NewExpenseModalProps): React.JSX.Element {
           />
           <MSelectFrequency
             dateFrom='nextOccurrence'
-            description={recurring && `Matches when ${name ?? 'it'} charges you.`}
+            description={props.recurring && `Matches when ${name ?? 'it'} charges you.`}
             label='How frequently do you need this expense?'
             name='ruleset'
             placeholder='Select a spending frequency...'
             required
           />
           {isManual && <AutoCreateTransactionToggle />}
-          {transaction && !transaction.getIsAddition() && <MoveTransactionToggle transaction={transaction} />}
+          {props.transaction && !props.transaction.getIsAddition() && (
+            <MoveTransactionToggle transaction={props.transaction} />
+          )}
         </div>
         <div className={styles.actions}>
           <Button data-testid='close-new-expense-modal' onClick={modal.remove} variant='secondary'>
             Cancel
           </Button>
-          <FormButton type='submit' variant='primary'>
+          <FormButton data-testid='new-expense-submit' type='submit' variant='primary'>
             Create
           </FormButton>
         </div>
@@ -269,17 +267,6 @@ function MoveTransactionToggle({ transaction }: MoveTransactionToggleProps): Rea
       name='moveTransaction'
     />
   );
-}
-
-// getNextRecurrence returns when the recurring transaction is next expected. next only gets updated when its recalculated
-// though so it can already be in the past, in that case use the next occurrence of the rule instead since an expense
-// cant be due in the past
-export function getNextRecurrence(recurring: TransactionRecurring, tomorrow: Date): Date {
-  if (!isBefore(recurring.next, tomorrow)) {
-    return recurring.next;
-  }
-
-  return rrulestr(recurring.ruleset).after(tomorrow, true) ?? tomorrow;
 }
 
 const newExpenseModal = NiceModal.create(NewExpenseModal);

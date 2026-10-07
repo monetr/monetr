@@ -1,3 +1,6 @@
+import { isBefore } from 'date-fns';
+import { rrulestr } from 'rrule';
+
 import type BankAccount from '@monetr/interface/models/BankAccount';
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { ID, idPrefix } from '@monetr/interface/models/ID';
@@ -79,5 +82,16 @@ export default class TransactionRecurring {
       return 'Likely';
     }
     return 'Possibly';
+  }
+
+  // getNextRecurrence will return when this is next expected, but never before tomorrow. next only gets updated when
+  // the server recalculates it so it can already be in the past. In that case use the next occurrence of the rule
+  // instead, since an expense or funding schedule can't be due in the past.
+  getNextRecurrence(tomorrow: Date): Date {
+    if (!isBefore(this.next, tomorrow)) {
+      return this.next;
+    }
+
+    return rrulestr(this.ruleset).after(tomorrow, true) ?? tomorrow;
   }
 }

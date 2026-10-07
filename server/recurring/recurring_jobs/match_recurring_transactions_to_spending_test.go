@@ -17,7 +17,7 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-// givenIHaveSpending creates a spending object of the specified type with a
+// givenIHaveSpending will create a spending object of the specified type with a
 // funding schedule of its own.
 func givenIHaveSpending(
 	t *testing.T,
@@ -41,9 +41,9 @@ func givenIHaveSpending(
 	})
 }
 
-// givenTheTransactionsWereSpentFrom sets the spending on the provided
-// transactions. Only the spending column is written so the recurring ID the job
-// assigned to each transaction is left alone.
+// givenTheTransactionsWereSpentFrom will set the spending on the provided
+// transactions. Only the spending column is written so the recurring ID the
+// job assigned to each transaction is left alone.
 func givenTheTransactionsWereSpentFrom(
 	t *testing.T,
 	spending models.Spending,
@@ -55,7 +55,7 @@ func givenTheTransactionsWereSpentFrom(
 	}
 
 	_, err := testutils.GetPgDatabase(t).NewUpdate().
-		Model(&models.Transaction{}).
+		Model(new(models.Transaction)).
 		Set(`"spending_id" = ?`, spending.SpendingId).
 		Where(`"transaction"."account_id" = ?`, spending.AccountId).
 		Where(`"transaction"."transaction_id" IN (?)`, bun.List(ids)).
@@ -63,9 +63,9 @@ func givenTheTransactionsWereSpentFrom(
 	require.NoError(t, err, "must be able to set the spending on the transactions")
 }
 
-// givenIHaveARecurringExpense creates six monthly charges in a single cluster
-// and calculates the recurring transaction for them. The charges are returned
-// oldest first.
+// givenIHaveARecurringExpense will create six monthly charges in a single
+// cluster and calculate the recurring transaction for them. The charges are
+// returned oldest first.
 func givenIHaveARecurringExpense(
 	t *testing.T,
 	clock clock.Clock,
@@ -84,8 +84,8 @@ func givenIHaveARecurringExpense(
 	return cluster, transactions
 }
 
-// runMatchRecurringTransactionsToSpending runs the job for the whole bank
-// account.
+// runMatchRecurringTransactionsToSpending will run the job for the whole
+// bank account.
 func runMatchRecurringTransactionsToSpending(
 	t *testing.T,
 	clock clock.Clock,
@@ -110,7 +110,7 @@ func runMatchRecurringTransactionsToSpending(
 }
 
 func TestMatchRecurringTransactionsToSpending(t *testing.T) {
-	t.Run("links to the expense most recent transactions were spent from", func(t *testing.T) {
+	t.Run("happy path", func(t *testing.T) {
 		clock := clock.NewMock()
 		clock.Set(time.Date(2026, 7, 1, 9, 0, 0, 0, time.UTC))
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -136,7 +136,7 @@ func TestMatchRecurringTransactionsToSpending(t *testing.T) {
 		assert.True(t, result[0].AutoMatched, "should be marked as auto matched")
 	})
 
-	t.Run("one recent transaction is not enough", func(t *testing.T) {
+	t.Run("one recent transaction", func(t *testing.T) {
 		clock := clock.NewMock()
 		clock.Set(time.Date(2026, 7, 1, 9, 0, 0, 0, time.UTC))
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -167,7 +167,7 @@ func TestMatchRecurringTransactionsToSpending(t *testing.T) {
 		assert.Nil(t, result[0].SpendingId, "should not have been linked to anything")
 	})
 
-	t.Run("only transactions in the recurring transaction count", func(t *testing.T) {
+	t.Run("only members count", func(t *testing.T) {
 		clock := clock.NewMock()
 		clock.Set(time.Date(2026, 7, 1, 9, 0, 0, 0, time.UTC))
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -210,7 +210,7 @@ func TestMatchRecurringTransactionsToSpending(t *testing.T) {
 		assert.Nil(t, result[0].SpendingId, "should not have been linked to anything")
 	})
 
-	t.Run("does not link to a goal", func(t *testing.T) {
+	t.Run("does not link goals", func(t *testing.T) {
 		clock := clock.NewMock()
 		clock.Set(time.Date(2026, 7, 1, 9, 0, 0, 0, time.UTC))
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -232,7 +232,7 @@ func TestMatchRecurringTransactionsToSpending(t *testing.T) {
 		assert.Nil(t, result[0].SpendingId, "should not have been linked to the goal")
 	})
 
-	t.Run("does not change an existing link", func(t *testing.T) {
+	t.Run("existing link", func(t *testing.T) {
 		clock := clock.NewMock()
 		clock.Set(time.Date(2026, 7, 1, 9, 0, 0, 0, time.UTC))
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -260,7 +260,7 @@ func TestMatchRecurringTransactionsToSpending(t *testing.T) {
 		assert.False(t, result[0].AutoMatched, "a link the user made must not be marked as auto matched")
 	})
 
-	t.Run("does not link an expense another recurring transaction has", func(t *testing.T) {
+	t.Run("expense already linked", func(t *testing.T) {
 		clock := clock.NewMock()
 		clock.Set(time.Date(2026, 7, 1, 9, 0, 0, 0, time.UTC))
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -289,7 +289,7 @@ func TestMatchRecurringTransactionsToSpending(t *testing.T) {
 		assert.False(t, result[0].AutoMatched, "should not be marked as auto matched")
 	})
 
-	t.Run("bank account without recurring transactions", func(t *testing.T) {
+	t.Run("no recurring transactions", func(t *testing.T) {
 		clock := clock.NewMock()
 		clock.Set(time.Date(2026, 7, 1, 9, 0, 0, 0, time.UTC))
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)

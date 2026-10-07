@@ -1,4 +1,3 @@
-@use '@monetr/interface/mixins';
 @use '@monetr/interface/variables';
 
 .modal {
@@ -59,7 +58,7 @@
   width: 100%;
 }
 
-// The debit tab's toggle has the spending select right above it, so it gets a little room (mt-2).
+// The debit tab's toggle has the spending select right above it, so it gets a little room
 .adjustsBalanceSpaced {
   margin-top: 2 * variables.$size;
 }

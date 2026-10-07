@@ -52,27 +52,32 @@ function RecurringTooltipContent({ transactionRecurringId }: TransactionRecurrin
     return <span className={styles.title}>Transaction is recurring</span>;
   }
 
-  const next = inTimezone(recurring.next);
-  const last = inTimezone(recurring.last);
   const amount = (
     <span className={styles.amount} data-positive={recurring.direction === 'credit'}>
       {localeCurrency.formatAmount(Math.abs(recurring.lastAmount), AmountType.Stored)}
     </span>
   );
-  const formatShort = (date: Date) =>
-    new Intl.DateTimeFormat(locale.code, {
-      month: 'short',
-      day: 'numeric',
-      year: isThisYear(date) ? undefined : 'numeric',
-      timeZone: timezone,
-    }).format(date);
+
+  // Ended ones show when they were last seen, everything else shows when it's expected next
+  let date = inTimezone(recurring.next);
+  if (recurring.ended) {
+    date = inTimezone(recurring.last);
+  }
+
+  // TODO This should use formatDate, but right now that formats in the browser's timezone instead of the account's
+  const dateString = new Intl.DateTimeFormat(locale.code, {
+    month: 'short',
+    day: 'numeric',
+    year: isThisYear(date) ? undefined : 'numeric',
+    timeZone: timezone,
+  }).format(date);
 
   if (recurring.ended) {
     return (
       <div className={styles.tooltip}>
         <span className={styles.title}>No longer repeating</span>
         <span className={styles.subtitle}>
-          Last one was {formatShort(last)}, {amount}
+          Last one was {dateString}, {amount}
         </span>
       </div>
     );
@@ -84,7 +89,7 @@ function RecurringTooltipContent({ transactionRecurringId }: TransactionRecurrin
     <div className={styles.tooltip}>
       <span className={styles.title}>{title}</span>
       <span className={styles.subtitle}>
-        Next one expected {formatShort(next)}, around {amount}
+        Next one expected {dateString}, around {amount}
       </span>
     </div>
   );

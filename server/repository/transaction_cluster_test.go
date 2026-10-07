@@ -14,34 +14,7 @@ import (
 )
 
 func TestRepositoryBase_GetTransactionClusterIds(t *testing.T) {
-	t.Run("no clusters", func(t *testing.T) {
-		clock := clock.NewMock()
-		log := testutils.GetLog(t)
-		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
-		link := fixtures.GivenIHaveAManualLink(t, clock, user)
-		bankAccount := fixtures.GivenIHaveABankAccount(
-			t,
-			clock,
-			&link,
-			models.DepositoryBankAccountType,
-			models.CheckingBankAccountSubType,
-		)
-
-		repo := repository.NewRepositoryFromSession(
-			clock,
-			user.UserId,
-			user.AccountId,
-			testutils.GetPgDatabase(t),
-			log,
-		)
-
-		result, err := repo.GetTransactionClusterIds(t.Context(), bankAccount.BankAccountId)
-		assert.NoError(t, err, "must be able to read cluster ids")
-		assert.NotNil(t, result, "should be an empty slice, not nil")
-		assert.Empty(t, result, "there should be no clusters")
-	})
-
-	t.Run("only the specified bank account, in order", func(t *testing.T) {
+	t.Run("happy path", func(t *testing.T) {
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -81,7 +54,34 @@ func TestRepositoryBase_GetTransactionClusterIds(t *testing.T) {
 		assert.Equal(t, expected, result, "should be the bank account's clusters ordered by id")
 	})
 
-	t.Run("cannot read another account's clusters", func(t *testing.T) {
+	t.Run("no clusters", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(
+			t,
+			clock,
+			&link,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		result, err := repo.GetTransactionClusterIds(t.Context(), bankAccount.BankAccountId)
+		assert.NoError(t, err, "must be able to read cluster ids")
+		assert.NotNil(t, result, "should be an empty slice, not nil")
+		assert.Empty(t, result, "there should be no clusters")
+	})
+
+	t.Run("cant read other accounts", func(t *testing.T) {
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -111,7 +111,7 @@ func TestRepositoryBase_GetTransactionClusterIds(t *testing.T) {
 }
 
 func TestRepositoryBase_GetTransactionClusters(t *testing.T) {
-	t.Run("ordered by name descending", func(t *testing.T) {
+	t.Run("happy path", func(t *testing.T) {
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
@@ -146,11 +146,11 @@ func TestRepositoryBase_GetTransactionClusters(t *testing.T) {
 		)
 
 		clusters, err := repo.GetTransactionClusters(t.Context(), bank.BankAccountId, 10, 0)
-		require.NoError(t, err, "must retrieve transaction clusters")
+		assert.NoError(t, err, "must retrieve transaction clusters")
 		require.Len(t, clusters, 3, "should return every cluster in the bank account")
-		assert.Equal(t, "Wendy's", clusters[0].Name)
-		assert.Equal(t, "Starbucks", clusters[1].Name)
-		assert.Equal(t, "Amazon", clusters[2].Name)
+		assert.Equal(t, "Wendy's", clusters[0].Name, "should be ordered by name descending")
+		assert.Equal(t, "Starbucks", clusters[1].Name, "should be ordered by name descending")
+		assert.Equal(t, "Amazon", clusters[2].Name, "should be ordered by name descending")
 	})
 
 	t.Run("limit and offset", func(t *testing.T) {
@@ -186,22 +186,22 @@ func TestRepositoryBase_GetTransactionClusters(t *testing.T) {
 
 		all, err := repo.GetTransactionClusters(t.Context(), bank.BankAccountId, 10, 0)
 		require.NoError(t, err, "must retrieve all transaction clusters")
-		require.Len(t, all, 5)
+		require.Len(t, all, 5, "must have every cluster to compare against")
 
 		firstPage, err := repo.GetTransactionClusters(t.Context(), bank.BankAccountId, 3, 0)
-		require.NoError(t, err, "must retrieve first page")
-		require.Len(t, firstPage, 3)
+		assert.NoError(t, err, "must retrieve first page")
+		assert.Len(t, firstPage, 3, "first page should be full")
 
 		secondPage, err := repo.GetTransactionClusters(t.Context(), bank.BankAccountId, 3, 3)
-		require.NoError(t, err, "must retrieve second page")
-		require.Len(t, secondPage, 2)
+		assert.NoError(t, err, "must retrieve second page")
+		assert.Len(t, secondPage, 2, "second page should have whats left")
 
-		// Pages should line up with the unpaginated result.
-		assert.Equal(t, all[:3], firstPage)
-		assert.Equal(t, all[3:], secondPage)
+		// Pages should line up with the unpaginated result
+		assert.Equal(t, all[:3], firstPage, "first page should match")
+		assert.Equal(t, all[3:], secondPage, "second page should match")
 	})
 
-	t.Run("scoped to the bank account", func(t *testing.T) {
+	t.Run("scoped to bank account", func(t *testing.T) {
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
@@ -249,12 +249,12 @@ func TestRepositoryBase_GetTransactionClusters(t *testing.T) {
 		)
 
 		clusters, err := repo.GetTransactionClusters(t.Context(), checking.BankAccountId, 10, 0)
-		require.NoError(t, err, "must retrieve transaction clusters")
+		assert.NoError(t, err, "must retrieve transaction clusters")
 		require.Len(t, clusters, 1, "should only return the checking account cluster")
-		assert.Equal(t, checkingCluster.TransactionClusterId, clusters[0].TransactionClusterId)
+		assert.Equal(t, checkingCluster.TransactionClusterId, clusters[0].TransactionClusterId, "should be the checking cluster")
 	})
 
-	t.Run("scoped to the account", func(t *testing.T) {
+	t.Run("scoped to account", func(t *testing.T) {
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
@@ -290,7 +290,7 @@ func TestRepositoryBase_GetTransactionClusters(t *testing.T) {
 		)
 
 		clusters, err := repo.GetTransactionClusters(t.Context(), bank.BankAccountId, 10, 0)
-		require.NoError(t, err, "must not fail when the bank account belongs to someone else")
+		assert.NoError(t, err, "must not fail when the bank account belongs to someone else")
 		assert.Empty(t, clusters, "should not return clusters from another account")
 	})
 }

@@ -24,7 +24,7 @@ export default function MSelectFunding(props: MSelectFundingProps): React.JSX.El
   const { data: funding, isLoading: fundingIsLoading, isError: fundingIsError } = useFundingSchedules();
   const label = props.label ?? 'Select a funding schedule';
 
-  // if theres only one funding schedule then theres not really a choice to make, so just pick it for them as long as
+  // If there's only one funding schedule then there's not really a choice to make, so just pick it for them as long as
   // nothing is picked yet
   const onlyFundingScheduleId = funding?.length === 1 ? funding[0]?.fundingScheduleId : undefined;
   const currentValue = formikContext.values[props.name];

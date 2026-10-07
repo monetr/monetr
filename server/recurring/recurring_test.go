@@ -170,7 +170,7 @@ func TestRecurringDetection(t *testing.T) {
 		assert.Nil(t, result.Best, "irregular visits must not be detected as recurring")
 	})
 
-	t.Run("debits and credits are detected separately", func(t *testing.T) {
+	t.Run("debits and credits", func(t *testing.T) {
 		central, err := time.LoadLocation("America/Chicago")
 		require.NoError(t, err, "must be able to load the timezone")
 
@@ -268,7 +268,7 @@ func TestRecurringDetection(t *testing.T) {
 		}
 	})
 
-	t.Run("a direction without enough transactions is skipped", func(t *testing.T) {
+	t.Run("one direction skipped", func(t *testing.T) {
 		// A monthly charge with a single refund mixed in, there aren't enough
 		// credits to detect anything so there is only a result for the debits.
 		transactions := []models.Transaction{
@@ -307,7 +307,7 @@ func TestRecurringDetection(t *testing.T) {
 		assert.Len(t, results[0].Members, 4, "the refund must not be a member")
 	})
 
-	t.Run("not enough transactions in either direction", func(t *testing.T) {
+	t.Run("not enough transactions", func(t *testing.T) {
 		transactions := []models.Transaction{
 			{
 				TransactionId: "txn_0",
@@ -331,7 +331,7 @@ func TestRecurringDetection(t *testing.T) {
 		assert.Empty(t, results, "there should be no results")
 	})
 
-	t.Run("zero amounts are ignored", func(t *testing.T) {
+	t.Run("zero amounts", func(t *testing.T) {
 		// Transactions with no amount have no direction, so these three don't count
 		// towards either one.
 		transactions := []models.Transaction{
@@ -357,7 +357,7 @@ func TestRecurringDetection(t *testing.T) {
 		assert.Empty(t, results, "there should be no results")
 	})
 
-	t.Run("monthly generated from a rule", func(t *testing.T) {
+	t.Run("monthly from a rule", func(t *testing.T) {
 		central, err := time.LoadLocation("America/Chicago")
 		require.NoError(t, err, "must be able to load the timezone")
 
@@ -394,7 +394,7 @@ func TestRecurringDetection(t *testing.T) {
 		assert.Equal(t, dates, inTimezone(result.RuleSet, central).Between(start, end, true), "the detected rule should generate the same dates")
 	})
 
-	t.Run("every other week generated from a rule", func(t *testing.T) {
+	t.Run("every other week from a rule", func(t *testing.T) {
 		central, err := time.LoadLocation("America/Chicago")
 		require.NoError(t, err, "must be able to load the timezone")
 

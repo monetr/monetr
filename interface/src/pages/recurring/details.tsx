@@ -10,14 +10,13 @@ import RecurringSummaryCard from '@monetr/interface/components/recurring/Recurri
 import Typography from '@monetr/interface/components/Typography';
 import { useRecurringTransaction } from '@monetr/interface/hooks/useRecurringTransaction';
 import { useTransactionCluster } from '@monetr/interface/hooks/useTransactionCluster';
-import { ID } from '@monetr/interface/models/ID';
+import type { ID } from '@monetr/interface/models/ID';
 import type TransactionRecurring from '@monetr/interface/models/TransactionRecurring';
 
 import styles from './details.module.scss';
 
 export default function RecurringDetails(): React.JSX.Element | null {
-  const { transactionRecurringId: id } = useParams<{ transactionRecurringId: string }>();
-  const transactionRecurringId = id ? ID.from<TransactionRecurring, string>(id) : null;
+  const { transactionRecurringId } = useParams<{ transactionRecurringId: ID<TransactionRecurring> }>();
   const { data: recurring, isLoading, isError } = useRecurringTransaction(transactionRecurringId);
   // The recurring transaction doesn't have a name of its own, it uses the name of its similar transactions group.
   const { data: cluster } = useTransactionCluster(recurring?.transactionClusterId ?? null);

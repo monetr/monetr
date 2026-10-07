@@ -61,7 +61,7 @@ func givenIHaveMonthlyTransactions(
 }
 
 func TestCalculateTransactionClusters(t *testing.T) {
-	t.Run("enqueues one recurring calculation for the bank account", func(t *testing.T) {
+	t.Run("enqueues recurring calculation", func(t *testing.T) {
 		clock := clock.NewMock()
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
@@ -123,7 +123,7 @@ func TestCalculateTransactionClusters(t *testing.T) {
 		assert.Len(t, clusterIds, 2, "there should be a cluster for each merchant")
 	})
 
-	t.Run("does not enqueue without any clusters", func(t *testing.T) {
+	t.Run("no clusters", func(t *testing.T) {
 		clock := clock.NewMock()
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
@@ -142,7 +142,14 @@ func TestCalculateTransactionClusters(t *testing.T) {
 			models.CheckingBankAccountSubType,
 		)
 
-		enqueuer.EXPECT().EnqueueAt(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
+		enqueuer.EXPECT().
+			EnqueueAt(
+				gomock.Any(),
+				gomock.Any(),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Times(0)
 
 		context := mockgen.NewMockContext(ctrl)
 		context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)

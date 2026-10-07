@@ -17,11 +17,11 @@ type CalculateRecurringTransactionsArguments struct {
 	BankAccountId models.ID[models.BankAccount] `json:"bankAccountId"`
 }
 
-// CalculateRecurringTransactions detects the recurring transactions for every
-// transaction cluster in the bank account, all in one transaction. A cluster
-// whose detection fails is logged and skipped, since retrying won't change the
-// outcome. Anything that fails in the database fails the whole job, which rolls
-// everything back and lets the queue retry it.
+// CalculateRecurringTransactions will detect the recurring transactions for
+// every transaction cluster in the bank account, all in one transaction. A
+// cluster whose detection fails is logged and skipped, since retrying won't
+// change the outcome. Anything that fails in the database fails the whole job,
+// which rolls everything back and lets the queue retry it.
 func CalculateRecurringTransactions(
 	ctx queue.Context,
 	args CalculateRecurringTransactionsArguments,

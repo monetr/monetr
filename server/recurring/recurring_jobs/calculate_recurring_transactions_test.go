@@ -18,9 +18,9 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-// givenIHaveAClusterWithTransactions creates a transaction cluster with one
-// transaction per amount and date pair, every transaction is a member of the
-// cluster.
+// givenIHaveAClusterWithTransactions will create a transaction cluster with
+// one transaction per amount and date pair, every transaction is a member of
+// the cluster.
 func givenIHaveAClusterWithTransactions(
 	t *testing.T,
 	clock clock.Clock,
@@ -64,8 +64,8 @@ func givenIHaveAClusterWithTransactions(
 	return cluster, transactions
 }
 
-// monthlyDates returns midnight on the 8th of each month starting in January
-// 2026. Transaction dates are midnight in the account's timezone.
+// monthlyDates will return midnight on the 8th of each month starting in
+// January 2026. Transaction dates are midnight in the account's timezone.
 func monthlyDates(timezone *time.Location, months int) []time.Time {
 	result := make([]time.Time, months)
 	for i := range result {
@@ -80,15 +80,15 @@ func accountTimezone(t *testing.T, bankAccount models.BankAccount) *time.Locatio
 	return timezone
 }
 
-// givenTheAccountTimezoneIs overrides the random timezone the fixtures give the
-// account.
+// givenTheAccountTimezoneIs will override the random timezone the fixtures
+// give the account.
 func givenTheAccountTimezoneIs(
 	t *testing.T,
 	bankAccount models.BankAccount,
 	timezone string,
 ) {
 	_, err := testutils.GetPgDatabase(t).NewUpdate().
-		Model(&models.Account{}).
+		Model(new(models.Account)).
 		Set(`"timezone" = ?`, timezone).
 		Where(`"account"."account_id" = ?`, bankAccount.AccountId).
 		Exec(t.Context())
@@ -103,7 +103,8 @@ func repeatAmount(amount int64, count int) []int64 {
 	return result
 }
 
-// runCalculateRecurringTransactions runs the job for the whole bank account.
+// runCalculateRecurringTransactions will run the job for the whole bank
+// account.
 func runCalculateRecurringTransactions(
 	t *testing.T,
 	clock clock.Clock,
@@ -187,7 +188,7 @@ func readTransactions(
 }
 
 func TestCalculateRecurringTransactions(t *testing.T) {
-	t.Run("creates the recurring transaction and links its members", func(t *testing.T) {
+	t.Run("happy path", func(t *testing.T) {
 		clock := clock.NewMock()
 		clock.Set(time.Date(2026, 7, 1, 9, 0, 0, 0, time.UTC))
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -223,7 +224,7 @@ func TestCalculateRecurringTransactions(t *testing.T) {
 		}
 	})
 
-	t.Run("running again keeps the same recurring transaction", func(t *testing.T) {
+	t.Run("running again", func(t *testing.T) {
 		clock := clock.NewMock()
 		clock.Set(time.Date(2026, 7, 1, 9, 0, 0, 0, time.UTC))
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -255,7 +256,7 @@ func TestCalculateRecurringTransactions(t *testing.T) {
 		assert.True(t, second[0].UpdatedAt.After(first[0].UpdatedAt), "should have been updated")
 	})
 
-	t.Run("running again keeps the linked expense", func(t *testing.T) {
+	t.Run("keeps linked expense", func(t *testing.T) {
 		clock := clock.NewMock()
 		clock.Set(time.Date(2026, 7, 1, 9, 0, 0, 0, time.UTC))
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -303,7 +304,7 @@ func TestCalculateRecurringTransactions(t *testing.T) {
 		assert.Equal(t, spending.SpendingId, *second[0].SpendingId, "should still be linked to the same expense")
 	})
 
-	t.Run("removes a direction that no longer recurs", func(t *testing.T) {
+	t.Run("direction no longer recurs", func(t *testing.T) {
 		clock := clock.NewMock()
 		clock.Set(time.Date(2026, 7, 1, 9, 0, 0, 0, time.UTC))
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -347,7 +348,7 @@ func TestCalculateRecurringTransactions(t *testing.T) {
 			LastAmount: -800,
 		})
 		_, err := testutils.GetPgDatabase(t).NewUpdate().
-			Model(&models.Transaction{}).
+			Model(new(models.Transaction)).
 			Set(`"transaction_recurring_id" = ?`, stale.TransactionRecurringId).
 			Where(`"transaction"."transaction_id" = ?`, refund.TransactionId).
 			Exec(t.Context())
@@ -365,7 +366,7 @@ func TestCalculateRecurringTransactions(t *testing.T) {
 		assert.Nil(t, updated[refund.TransactionId].TransactionRecurringId, "the refund should not point at anything")
 	})
 
-	t.Run("falls back to UTC for an invalid timezone", func(t *testing.T) {
+	t.Run("invalid timezone", func(t *testing.T) {
 		clock := clock.NewMock()
 		clock.Set(time.Date(2026, 7, 1, 9, 0, 0, 0, time.UTC))
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -430,7 +431,7 @@ func TestCalculateRecurringTransactions(t *testing.T) {
 		assert.NoError(t, err, "nothing to calculate is not an error")
 	})
 
-	t.Run("calculates every cluster in the bank account", func(t *testing.T) {
+	t.Run("every cluster", func(t *testing.T) {
 		clock := clock.NewMock()
 		clock.Set(time.Date(2026, 7, 1, 9, 0, 0, 0, time.UTC))
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)

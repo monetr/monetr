@@ -16,10 +16,12 @@ import (
 	"golang.org/x/text/encoding/ianaindex"
 )
 
-// parseTimeout is the most time we'll spend parsing a single OFX file. A real
-// file should parse in like a few milliseconds, so if we hit this then
-// something is very wrong with the file.
-const parseTimeout = 1 * time.Minute
+const (
+	// parseTimeout is the most time we'll spend parsing a single OFX file. A
+	// real file should parse in like a few milliseconds, so if we hit this then
+	// something is very wrong with the file.
+	parseTimeout = 1 * time.Minute
+)
 
 var (
 	ofxDateRegex   = regexp.MustCompile(`^(?<timestamp>(?:\d{14}|\d{8})(?:\.\d{3})?)`)
@@ -57,8 +59,8 @@ func ParseFile(ctx context.Context, reader io.Reader) (*gofx.OFX, error) {
 	return ofx, nil
 }
 
-// contextReader stops returning data once the context is done, this way the XML
-// decoder will stop pretty much right away if we time out.
+// contextReader will stop returning data once the context is done, this way
+// the XML decoder will stop pretty much right away if we time out.
 type contextReader struct {
 	ctx    context.Context
 	reader io.Reader

@@ -402,14 +402,15 @@ func TestPostFundingSchedules(t *testing.T) {
 
 		response.Status(http.StatusUnauthorized)
 	})
-	t.Run("rejects a recurring transaction id", func(t *testing.T) {
+
+	t.Run("cant set recurring transaction", func(t *testing.T) {
 		// Funding schedules are linked to a recurring transaction by patching the
-		// recurring transaction, not by creating the funding schedule with its ID.
+		// recurring transaction, not by creating the funding schedule with its Id.
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
-		recurring := givenIHaveATransactionRecurring(t, bank)
+		recurring := GivenIHaveATransactionRecurring(t, bank)
 		recurring.Direction = models.CreditDirection
 		testutils.MustDBUpdate(t, &recurring)
 		token := GivenILogin(t, e, user.Login.Email, password)
@@ -425,7 +426,7 @@ func TestPostFundingSchedules(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("Invalid request")
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
 	})
 }
 

@@ -1147,7 +1147,6 @@ func (p *postgresProcessor) cronConsumer(shutdown chan chan struct{}) {
 //	│                  backoff++ (if < max), reset ticker                  │
 //	│   job != nil ──► dispatch ◄──── send *Job to worker                  │
 //	│                  reset backoff=1, reset ticker                       │
-//	│                  back to PHASE 1 to try another job right away       │
 //	│                                                                      │
 //	│  PHASE 2 — wait for next trigger                                     │
 //	│                                                                      │

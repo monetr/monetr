@@ -27,7 +27,10 @@
   display: flex;
   align-items: center;
   gap: 3 * variables.$size;
-  padding: 4 * variables.$size;
+  padding-left: 4 * variables.$size;
+  padding-right: 4 * variables.$size;
+  padding-top: 4 * variables.$size;
+  padding-bottom: 4 * variables.$size;
 }
 
 .headerIcon {
@@ -71,17 +74,23 @@
   flex: none;
   font-weight: var(--semibold);
   color: var(--content-emphasis);
-  padding: 0.5 * variables.$size 2 * variables.$size;
+  padding-left: 2 * variables.$size;
+  padding-right: 2 * variables.$size;
+  padding-top: 0.5 * variables.$size;
+  padding-bottom: 0.5 * variables.$size;
   border-radius: var(--border-radius);
   background-color: var(--background-emphasis);
 }
 
-// two columns on mobile, all three stats in a row once theres room
+// two columns on mobile, all three stats in a row once there's room
 .stats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 3 * variables.$size;
-  padding: 3.5 * variables.$size 4 * variables.$size;
+  padding-left: 4 * variables.$size;
+  padding-right: 4 * variables.$size;
+  padding-top: 3.5 * variables.$size;
+  padding-bottom: 3.5 * variables.$size;
 
   @media (min-width: variables.$mediumScreen) {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -117,7 +126,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 3 * variables.$size;
-  padding: 3.5 * variables.$size 4 * variables.$size;
+  padding-left: 4 * variables.$size;
+  padding-right: 4 * variables.$size;
+  padding-top: 3.5 * variables.$size;
+  padding-bottom: 3.5 * variables.$size;
 }
 
 .spentFrom {
@@ -137,7 +149,10 @@
 .spentFromIcon {
   display: flex;
   flex: none;
-  padding: 0.5 * variables.$size 1.5 * variables.$size;
+  padding-left: 1.5 * variables.$size;
+  padding-right: 1.5 * variables.$size;
+  padding-top: 0.5 * variables.$size;
+  padding-bottom: 0.5 * variables.$size;
   border-radius: var(--border-radius);
   background-color: var(--brand);
   color: var(--content-emphasis);

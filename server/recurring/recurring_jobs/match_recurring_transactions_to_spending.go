@@ -24,11 +24,11 @@ type MatchRecurringTransactionsToSpendingArguments struct {
 	BankAccountId models.ID[models.BankAccount] `json:"bankAccountId"`
 }
 
-// MatchRecurringTransactionsToSpending links recurring transactions that are
-// not linked to anything yet to an existing expense. A recurring transaction is
-// matched when enough of its most recent transactions were spent from the same
-// expense by the user. Recurring transactions that are already linked are never
-// changed, and links made here are marked as auto matched.
+// MatchRecurringTransactionsToSpending will link recurring transactions that
+// are not linked to anything yet to an existing expense. A recurring
+// transaction is matched when enough of its most recent transactions were spent
+// from the same expense by the user. Recurring transactions that are already
+// linked are never changed, and links made here are marked as auto matched.
 func MatchRecurringTransactionsToSpending(
 	ctx queue.Context,
 	args MatchRecurringTransactionsToSpendingArguments,
@@ -77,7 +77,7 @@ func MatchRecurringTransactionsToSpending(
 			}
 		}
 
-		matched := 0
+		var matched int
 		for i := range recurrings {
 			recurring := &recurrings[i]
 			if recurring.SpendingId != nil ||
@@ -130,9 +130,9 @@ func MatchRecurringTransactionsToSpending(
 	})
 }
 
-// matchSpendingForRecurring returns the spending that enough of the provided
-// transactions were spent from. If no spending has enough transactions then
-// false is returned.
+// matchSpendingForRecurring will return the spending that enough of the
+// provided transactions were spent from. If no spending has enough transactions
+// then false is returned.
 func matchSpendingForRecurring(
 	transactions []models.Transaction,
 ) (models.ID[models.Spending], bool) {

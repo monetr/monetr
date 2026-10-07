@@ -60,8 +60,8 @@ export default function SimilarTransactions(props: SimilarTransactionsProps): Re
   );
 }
 
-// ExpectedTransactionItem shows the next transaction we expect if this one is recurring, so you can see when the next one
-// should show up right next to the ones that already did
+// ExpectedTransactionItem shows the next transaction we expect if this one is recurring, so you can see when the next
+// one should show up right next to the ones that already did
 function ExpectedTransactionItem({ transaction }: SimilarTransactionsProps): React.JSX.Element | null {
   const { data: recurring } = useRecurringTransaction(transaction.transactionRecurringId);
   // use the name of the whole group of charges, not whatever this one transaction happens to be called
@@ -93,7 +93,7 @@ function ExpectedTransactionItem({ transaction }: SimilarTransactionsProps): Rea
           <Typography color='subtle' weight='semibold'>
             ~{localeCurrency.formatAmount(Math.abs(recurring.lastAmount), AmountType.Stored)}
           </Typography>
-          {/* theres nothing to link to, but keep the arrows space so the amount lines up with the real rows */}
+          {/* There's nothing to link to, but keep the arrow's space so the amount lines up with the real rows */}
           <Typography aria-hidden className={styles.expectedArrowSpacer}>
             <ChevronRight />
           </Typography>

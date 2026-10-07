@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useRef } from 'react';
+import { useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { startOfDay, startOfTomorrow } from 'date-fns';
 import { type FormikHelpers, useFormikContext } from 'formik';
@@ -22,7 +22,6 @@ import { usePatchTransactionRecurring } from '@monetr/interface/hooks/usePatchTr
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { useTransactionCluster } from '@monetr/interface/hooks/useTransactionCluster';
-import { getNextRecurrence } from '@monetr/interface/modals/NewExpenseModal';
 import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import type Transaction from '@monetr/interface/models/Transaction';
 import type TransactionRecurring from '@monetr/interface/models/TransactionRecurring';
@@ -41,19 +40,13 @@ interface NewFundingValues {
 }
 
 export interface NewFundingModalProps {
-  /**
-   * recurring fills in the new funding schedule from a recurring deposit, like a paycheck
-   */
+  // recurring fills in the new funding schedule from a recurring deposit, like a paycheck
   recurring?: TransactionRecurring;
-  /**
-   * transaction is the one the user started from when creating a funding schedule from a recurring deposit. its name is
-   * the fallback if theres no cluster name
-   */
+  // transaction is the one the user started from, its name is the fallback if there's no cluster name
   transaction?: Transaction;
 }
 
 function NewFundingModal(props: NewFundingModalProps): React.JSX.Element {
-  const { recurring, transaction } = props;
   const { inTimezone } = useTimezone();
   const modal = useModal();
   const ref = useRef<MModalRef>(null);
@@ -64,93 +57,15 @@ function NewFundingModal(props: NewFundingModalProps): React.JSX.Element {
   const { data: link } = useCurrentLink();
   const isManual = Boolean(link?.getIsManual());
   const { data: locale } = useLocaleCurrency();
-  // use the similar transactions name instead of the transactions own name, since thats the name for the whole group of
-  // deposits and not just the one they happened to start from
-  const { data: cluster, isLoading: clusterIsLoading } = useTransactionCluster(recurring?.transactionClusterId ?? null);
-  const name = cluster?.name || transaction?.getName();
-
-  const tomorrow = startOfTomorrow({
-    in: inTimezone,
-  });
-  const initialValues: NewFundingValues = {
-    name: name ?? '',
-    nextOccurrence: recurring ? getNextRecurrence(recurring, tomorrow) : tomorrow,
-    ruleset: recurring?.ruleset ?? '',
-    excludeWeekends: false,
-    estimatedDeposit: recurring && locale ? locale.amountToFriendly(Math.abs(recurring.lastAmount)) : undefined,
-    autoCreateTransaction: false,
-  };
-
-  const submit = useCallback(
-    async (values: NewFundingValues, helpers: FormikHelpers<NewFundingValues>): Promise<void> => {
-      if (!selectedBankAccountId || !locale) {
-        return Promise.resolve();
-      }
-
-      helpers.setSubmitting(true);
-      const estimatedDeposit = values.estimatedDeposit ?? 0;
-      return await createFundingSchedule({
-        bankAccountId: selectedBankAccountId,
-        name: values.name,
-        description: null,
-        nextRecurrence: startOfDay(new Date(values.nextOccurrence), {
-          in: inTimezone,
-        }),
-        ruleset: values.ruleset,
-        estimatedDeposit: estimatedDeposit > 0 ? locale.friendlyToAmount(estimatedDeposit) : null,
-        excludeWeekends: values.excludeWeekends,
-        // Auto create transaction requires a manual link and a non-zero
-        // estimated deposit; force it off otherwise so the API will not reject
-        // the create.
-        autoCreateTransaction: isManual && estimatedDeposit > 0 && values.autoCreateTransaction,
-      })
-        .then(async created => {
-          // the funding schedule is linked to the recurring deposit with a second request. if that fails the funding
-          // schedule is still created, so keep it and just let the user know it isnt linked
-          if (recurring) {
-            await patchTransactionRecurring({
-              transactionRecurringId: recurring.transactionRecurringId,
-              bankAccountId: recurring.bankAccountId,
-              fundingScheduleId: created.fundingScheduleId,
-            }).catch(
-              () =>
-                void enqueueSnackbar(
-                  'Your funding schedule was created, but it could not be linked to the recurring deposit.',
-                  {
-                    variant: 'warning',
-                    disableWindowBlurListener: true,
-                  },
-                ),
-            );
-          }
-          return created;
-        })
-        .then(created => modal.resolve(created))
-        .then(() => modal.remove())
-        .catch(
-          (error: ApiError<APIError>) =>
-            void enqueueSnackbar(error.response.data.error, {
-              variant: 'error',
-              disableWindowBlurListener: true,
-            }),
-        )
-        .finally(() => helpers.setSubmitting(false));
-    },
-    [
-      createFundingSchedule,
-      patchTransactionRecurring,
-      enqueueSnackbar,
-      locale,
-      modal,
-      selectedBankAccountId,
-      inTimezone,
-      isManual,
-      recurring,
-    ],
+  // Use the similar transactions name instead of the transaction's own name, since that's the name for the whole group
+  // of deposits and not just the one they happened to start from
+  const { data: cluster, isLoading: clusterIsLoading } = useTransactionCluster(
+    props.recurring?.transactionClusterId ?? null,
   );
+  const name = cluster?.name || props.transaction?.getName();
 
-  // the form only reads its initial values once, so wait for everything the recurring deposit fills in
-  if (recurring && (!locale || clusterIsLoading)) {
+  // The form only reads its initial values once, so wait for everything the recurring deposit fills in
+  if (props.recurring && (!locale || clusterIsLoading)) {
     return (
       <MModal className={styles.modal} open={modal.visible} ref={ref}>
         One moment...
@@ -158,73 +73,137 @@ function NewFundingModal(props: NewFundingModalProps): React.JSX.Element {
     );
   }
 
+  const tomorrow = startOfTomorrow({
+    in: inTimezone,
+  });
+  const initialValues: NewFundingValues = {
+    name: name ?? '',
+    nextOccurrence: props.recurring?.getNextRecurrence(tomorrow) ?? tomorrow,
+    ruleset: props.recurring?.ruleset ?? '',
+    excludeWeekends: false,
+    estimatedDeposit:
+      props.recurring && locale ? locale.amountToFriendly(Math.abs(props.recurring.lastAmount)) : undefined,
+    autoCreateTransaction: false,
+  };
+
+  async function submit(values: NewFundingValues, helpers: FormikHelpers<NewFundingValues>): Promise<void> {
+    if (!selectedBankAccountId || !locale) {
+      return Promise.resolve();
+    }
+
+    helpers.setSubmitting(true);
+    const estimatedDeposit = values.estimatedDeposit ?? 0;
+    return await createFundingSchedule({
+      bankAccountId: selectedBankAccountId,
+      name: values.name,
+      description: null,
+      nextRecurrence: startOfDay(new Date(values.nextOccurrence), {
+        in: inTimezone,
+      }),
+      ruleset: values.ruleset,
+      estimatedDeposit: estimatedDeposit > 0 ? locale.friendlyToAmount(estimatedDeposit) : null,
+      excludeWeekends: values.excludeWeekends,
+      // Auto create transaction requires a manual link and a non-zero
+      // estimated deposit; force it off otherwise so the API will not reject
+      // the create.
+      autoCreateTransaction: isManual && estimatedDeposit > 0 && values.autoCreateTransaction,
+    })
+      .then(async created => {
+        // The funding schedule is linked to the recurring deposit with a second request. If that fails the funding
+        // schedule is still created, so keep it and just let the user know it isn't linked
+        if (props.recurring) {
+          await patchTransactionRecurring({
+            transactionRecurringId: props.recurring.transactionRecurringId,
+            bankAccountId: props.recurring.bankAccountId,
+            fundingScheduleId: created.fundingScheduleId,
+          }).catch(
+            () =>
+              void enqueueSnackbar(
+                'Your funding schedule was created, but it could not be linked to the recurring deposit.',
+                {
+                  variant: 'warning',
+                  disableWindowBlurListener: true,
+                },
+              ),
+          );
+        }
+        return created;
+      })
+      .then(created => modal.resolve(created))
+      .then(() => modal.remove())
+      .catch(
+        (error: ApiError<APIError>) =>
+          void enqueueSnackbar(error.response.data.error, {
+            variant: 'error',
+            disableWindowBlurListener: true,
+          }),
+      )
+      .finally(() => helpers.setSubmitting(false));
+  }
+
   return (
     <MModal className={styles.modal} open={modal.visible} ref={ref}>
       <MForm className={styles.form} data-testid='new-funding-modal' initialValues={initialValues} onSubmit={submit}>
-        {() => (
-          <Fragment>
-            <div className={styles.body}>
-              <Typography className={styles.heading} size='xl' weight='bold'>
-                Create A New Funding Schedule
+        <div className={styles.body}>
+          <Typography className={styles.heading} size='xl' weight='bold'>
+            Create A New Funding Schedule
+          </Typography>
+          {props.recurring && (
+            <div className={styles.recurringBanner} data-testid='new-funding-recurring-banner'>
+              <Repeat />
+              <Typography color='inherit' size='sm'>
+                Filled in from your {name ?? 'recurring'} deposits. Give it a once over before you create it.
               </Typography>
-              {recurring && (
-                <div className={styles.recurringBanner} data-testid='new-funding-recurring-banner'>
-                  <Repeat />
-                  <Typography color='inherit' size='sm'>
-                    Filled in from your {name ?? 'recurring'} deposits. Give it a once over before you create it.
-                  </Typography>
-                </div>
-              )}
-              <FormTextField
-                autoComplete='off'
-                autoFocus
-                data-1p-ignore
-                label='What do you want to call your funding schedule?'
-                name='name'
-                placeholder='Example: Payday...'
-                required
-              />
-              <FormDatePicker
-                description={recurring && 'When the next deposit is expected.'}
-                label='When do you get paid next?'
-                min={startOfTomorrow({
-                  in: inTimezone,
-                })}
-                name='nextOccurrence'
-                required
-              />
-              <MSelectFrequency
-                dateFrom='nextOccurrence'
-                description={recurring && `Matches when ${name ?? 'it'} pays you.`}
-                label='How often do you get paid?'
-                name='ruleset'
-                placeholder='Select a funding frequency...'
-                required
-              />
-              <FormAmountField
-                allowNegative={false}
-                description={recurring && 'Your last deposit.'}
-                label='Estimated Deposit'
-                name='estimatedDeposit'
-                placeholder='Example: $ 1,000.00'
-              />
-              <FormSwitch
-                description='If it were to land on a weekend, it is adjusted to the previous weekday instead.'
-                label='Exclude Weekends'
-                name='excludeWeekends'
-              />
-              {isManual && <AutoCreateTransactionToggle />}
             </div>
-            <div className={styles.actions}>
-              <Button data-testid='close-new-funding-modal' onClick={modal.remove} variant='secondary'>
-                Cancel
-              </Button>
-              <FormButton type='submit' variant='primary'>
-                Create
-              </FormButton>
-            </div>
-          </Fragment>
-        )}
+          )}
+          <FormTextField
+            autoComplete='off'
+            autoFocus
+            data-1p-ignore
+            label='What do you want to call your funding schedule?'
+            name='name'
+            placeholder='Example: Payday...'
+            required
+          />
+          <FormDatePicker
+            description={props.recurring && 'When the next deposit is expected.'}
+            label='When do you get paid next?'
+            min={startOfTomorrow({
+              in: inTimezone,
+            })}
+            name='nextOccurrence'
+            required
+          />
+          <MSelectFrequency
+            dateFrom='nextOccurrence'
+            description={props.recurring && `Matches when ${name ?? 'it'} pays you.`}
+            label='How often do you get paid?'
+            name='ruleset'
+            placeholder='Select a funding frequency...'
+            required
+          />
+          <FormAmountField
+            allowNegative={false}
+            description={props.recurring && 'Your last deposit.'}
+            label='Estimated Deposit'
+            name='estimatedDeposit'
+            placeholder='Example: $ 1,000.00'
+          />
+          <FormSwitch
+            description='If it were to land on a weekend, it is adjusted to the previous weekday instead.'
+            label='Exclude Weekends'
+            name='excludeWeekends'
+          />
+          {isManual && <AutoCreateTransactionToggle />}
+        </div>
+        <div className={styles.actions}>
+          <Button data-testid='close-new-funding-modal' onClick={modal.remove} variant='secondary'>
+            Cancel
+          </Button>
+          <FormButton type='submit' variant='primary'>
+            Create
+          </FormButton>
+        </div>
       </MForm>
     </MModal>
   );

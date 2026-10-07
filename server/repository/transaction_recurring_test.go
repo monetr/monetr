@@ -213,7 +213,7 @@ func TestRepositoryBase_GetTransactionRecurringById(t *testing.T) {
 		assert.Nil(t, result, "result should be nil")
 	})
 
-	t.Run("cannot read another account's recurring transaction", func(t *testing.T) {
+	t.Run("cant read other accounts", func(t *testing.T) {
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -251,27 +251,7 @@ func TestRepositoryBase_GetTransactionRecurringById(t *testing.T) {
 }
 
 func TestRepositoryBase_GetTransactionRecurrings(t *testing.T) {
-	t.Run("no recurring transactions", func(t *testing.T) {
-		clock := clock.NewMock()
-		log := testutils.GetLog(t)
-		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
-		link := fixtures.GivenIHaveAManualLink(t, clock, user)
-		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
-
-		repo := repository.NewRepositoryFromSession(
-			clock,
-			user.UserId,
-			user.AccountId,
-			testutils.GetPgDatabase(t),
-			log,
-		)
-
-		result, err := repo.GetTransactionRecurrings(t.Context(), bankAccount.BankAccountId, nil, nil, 25, 0)
-		assert.NoError(t, err, "must be able to read recurring transactions")
-		assert.Empty(t, result, "there should be no recurring transactions")
-	})
-
-	t.Run("active ones first by next date", func(t *testing.T) {
+	t.Run("happy path", func(t *testing.T) {
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -312,6 +292,26 @@ func TestRepositoryBase_GetTransactionRecurrings(t *testing.T) {
 		assert.Equal(t, recurring[1].TransactionRecurringId, result[0].TransactionRecurringId, "sooner should be first")
 		assert.Equal(t, recurring[0].TransactionRecurringId, result[1].TransactionRecurringId, "later should be second")
 		assert.Equal(t, recurring[2].TransactionRecurringId, result[2].TransactionRecurringId, "ended should be last")
+	})
+
+	t.Run("no recurring transactions", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		result, err := repo.GetTransactionRecurrings(t.Context(), bankAccount.BankAccountId, nil, nil, 25, 0)
+		assert.NoError(t, err, "must be able to read recurring transactions")
+		assert.Empty(t, result, "there should be no recurring transactions")
 	})
 
 	t.Run("includes the cluster", func(t *testing.T) {
@@ -469,28 +469,7 @@ func TestRepositoryBase_GetTransactionRecurrings(t *testing.T) {
 }
 
 func TestRepositoryBase_GetTransactionRecurringByCluster(t *testing.T) {
-	t.Run("no recurring transactions", func(t *testing.T) {
-		clock := clock.NewMock()
-		log := testutils.GetLog(t)
-		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
-		link := fixtures.GivenIHaveAManualLink(t, clock, user)
-		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
-		cluster := givenIHaveATransactionCluster(t, bankAccount)
-
-		repo := repository.NewRepositoryFromSession(
-			clock,
-			user.UserId,
-			user.AccountId,
-			testutils.GetPgDatabase(t),
-			log,
-		)
-
-		result, err := repo.GetTransactionRecurringByCluster(t.Context(), bankAccount.BankAccountId, cluster.TransactionClusterId)
-		assert.NoError(t, err, "must be able to read recurring transactions")
-		assert.Empty(t, result, "there should be no recurring transactions")
-	})
-
-	t.Run("only the specified cluster", func(t *testing.T) {
+	t.Run("happy path", func(t *testing.T) {
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -521,10 +500,31 @@ func TestRepositoryBase_GetTransactionRecurringByCluster(t *testing.T) {
 			assert.Equal(t, cluster.TransactionClusterId, item.TransactionClusterId, "cluster should match")
 		}
 	})
+
+	t.Run("no recurring transactions", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		cluster := givenIHaveATransactionCluster(t, bankAccount)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		result, err := repo.GetTransactionRecurringByCluster(t.Context(), bankAccount.BankAccountId, cluster.TransactionClusterId)
+		assert.NoError(t, err, "must be able to read recurring transactions")
+		assert.Empty(t, result, "there should be no recurring transactions")
+	})
 }
 
 func TestRepositoryBase_UpsertTransactionRecurring(t *testing.T) {
-	t.Run("create", func(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -557,7 +557,7 @@ func TestRepositoryBase_UpsertTransactionRecurring(t *testing.T) {
 		assert.EqualValues(t, 800, stored.LastAmount, "last amount should match")
 	})
 
-	t.Run("updates existing for the same cluster and direction", func(t *testing.T) {
+	t.Run("updates existing", func(t *testing.T) {
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -681,7 +681,7 @@ func TestRepositoryBase_DeleteTransactionRecurring(t *testing.T) {
 }
 
 func TestRepositoryBase_UpdateTransactionRecurring(t *testing.T) {
-	t.Run("sets and clears the links", func(t *testing.T) {
+	t.Run("happy path", func(t *testing.T) {
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -780,7 +780,7 @@ func TestRepositoryBase_UpdateTransactionRecurring(t *testing.T) {
 		assert.Equal(t, fundingSchedule.FundingScheduleId, *credit.FundingScheduleId, "should still be linked to the funding schedule")
 	})
 
-	t.Run("deleting the spending clears the link", func(t *testing.T) {
+	t.Run("deleting spending clears link", func(t *testing.T) {
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -844,7 +844,7 @@ func TestRepositoryBase_UpdateTransactionRecurring(t *testing.T) {
 		assert.Error(t, err, "a credit must not be linked to a spending")
 	})
 
-	t.Run("a spending can only be linked once", func(t *testing.T) {
+	t.Run("spending linked once", func(t *testing.T) {
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -876,7 +876,7 @@ func TestRepositoryBase_UpdateTransactionRecurring(t *testing.T) {
 		assert.Error(t, err, "the same spending must not be linked to a second recurring transaction")
 	})
 
-	t.Run("cannot update another account's recurring transaction", func(t *testing.T) {
+	t.Run("cant update other accounts", func(t *testing.T) {
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 
@@ -926,7 +926,7 @@ func TestRepositoryBase_UpdateTransactionRecurring(t *testing.T) {
 }
 
 func TestRepositoryBase_UpdateTransactionRecurringIds(t *testing.T) {
-	t.Run("sets and clears the recurring id", func(t *testing.T) {
+	t.Run("happy path", func(t *testing.T) {
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -982,7 +982,7 @@ func TestRepositoryBase_UpdateTransactionRecurringIds(t *testing.T) {
 		assert.Equal(t, items[0].TransactionRecurringId, *second.TransactionRecurringId, "the other transaction should still point at the recurring transaction")
 	})
 
-	t.Run("cannot update another account's transactions", func(t *testing.T) {
+	t.Run("cant update other accounts", func(t *testing.T) {
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 
@@ -1066,7 +1066,7 @@ func TestRepositoryBase_UpdateTransactionRecurringIds(t *testing.T) {
 }
 
 func TestRepositoryBase_GetTransactionsForRecurring(t *testing.T) {
-	t.Run("only returns members newest first", func(t *testing.T) {
+	t.Run("happy path", func(t *testing.T) {
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -1094,7 +1094,7 @@ func TestRepositoryBase_GetTransactionsForRecurring(t *testing.T) {
 		february := givenIHaveARecurringTransaction(t, clock, bankAccount, recurringId, time.Date(2026, 2, 15, 0, 0, 0, 0, time.UTC))
 		// not part of the recurring transaction at all
 		givenIHaveARecurringTransaction(t, clock, bankAccount, nil, time.Date(2026, 2, 20, 0, 0, 0, 0, time.UTC))
-		// part of it but deleted so it shouldnt come back
+		// part of it but deleted so it shouldn't come back
 		deleted := givenIHaveARecurringTransaction(t, clock, bankAccount, recurringId, time.Date(2026, 4, 15, 0, 0, 0, 0, time.UTC))
 		deletedAt := clock.Now()
 		deleted.DeletedAt = &deletedAt
@@ -1113,7 +1113,7 @@ func TestRepositoryBase_GetTransactionsForRecurring(t *testing.T) {
 		assert.Equal(t, february.TransactionId, result[0].TransactionId, "should respect the offset")
 	})
 
-	t.Run("cannot read another bank account's transactions", func(t *testing.T) {
+	t.Run("cant read other bank accounts", func(t *testing.T) {
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)

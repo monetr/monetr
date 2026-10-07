@@ -13,11 +13,13 @@ var (
 	dataRegex = regexp.MustCompile(`(?P<tag><[/a-zA-Z0-9.]+>)(?P<value>[^<]+)?`)
 )
 
-type ItemType uint8
+const (
+	// maxDepth is how deep arrays can be nested in an OFX file before we give
+	// up. Real files are only like 10 levels deep so this is plenty of room.
+	maxDepth = 64
+)
 
-// maxDepth is how deep arrays can be nested in an OFX file before we give up.
-// Real files are only like 10 levels deep so this is plenty of room.
-const maxDepth = 64
+type ItemType uint8
 
 const (
 	ArrayStartItemType ItemType = 0
@@ -52,9 +54,9 @@ func (a Array) Token() []byte {
 	return a.Name
 }
 
-// writeXML is still recursive, but this is fine because Tokenize won't let the
-// arrays get nested deeper than maxDepth. Everything gets written to the same
-// buffer so we arent copying the children over and over again at every level.
+// writeXML is recursive, but that's fine because Tokenize won't let the arrays
+// get nested deeper than maxDepth. Everything gets written to the same buffer
+// so we aren't copying the children over and over again at every level.
 func (a Array) writeXML(buf *bytes.Buffer) {
 	fmt.Fprintf(buf, "<%s>", a.Name)
 	for i := range a.Items {
@@ -63,10 +65,11 @@ func (a Array) writeXML(buf *bytes.Buffer) {
 	fmt.Fprintf(buf, "</%s>", a.Name)
 }
 
-// Tokenize walks the OFX data one tag at a time and builds the tree of arrays
-// and fields. This used to be recursive, but a file that was just <A> over and
-// over again would recurse once per tag and take forever (or blow the stack).
-// So now we keep our own stack of the open arrays and bail if it gets too deep.
+// Tokenize will walk the OFX data one tag at a time and build the tree of
+// arrays and fields. We keep our own stack of the open arrays instead of
+// recursing, otherwise a file that was just <A> over and over again would
+// recurse once per tag and take forever (or blow the stack). We also bail if
+// the stack gets deeper than maxDepth.
 func Tokenize(ctx context.Context, ofxData []byte) (Token, error) {
 	var root Token
 	stack := make([]*Array, 0, 16)
@@ -76,7 +79,7 @@ func Tokenize(ctx context.Context, ofxData []byte) (Token, error) {
 			break
 		}
 
-		// Don't check the context on every single tag, its not free.
+		// Don't check the context on every single tag, it's not free.
 		if index%1024 == 0 {
 			if err := ctx.Err(); err != nil {
 				return nil, errors.Wrap(err, "failed to tokenize OFX data")
@@ -93,7 +96,7 @@ func Tokenize(ctx context.Context, ofxData []byte) (Token, error) {
 		switch getItemType(item) {
 		case ArrayStartItemType:
 			if len(stack) >= maxDepth {
-				return nil, errors.Errorf("OFX data is nested too deep, more than %d levels at index [%d]", maxDepth, index)
+				return nil, errors.Errorf("OFX data is nested too deep, more than [%d] levels at index [%d]", maxDepth, index)
 			}
 			array := &Array{
 				Name:  cleanName(item[1]),
@@ -130,14 +133,14 @@ func Tokenize(ctx context.Context, ofxData []byte) (Token, error) {
 		return nil, errors.New("OFX file provided is not valid")
 	}
 
-	// If there are still arrays open at the end of the file thats fine, we just
+	// If there are still arrays open at the end of the file that's fine, we just
 	// treat them as closed.
 	return root, nil
 }
 
 // getItem takes the indexes from FindSubmatchIndex and turns them into the same
 // shape that FindAllSubmatch would have given us. The value group is optional
-// so it might be -1 if it didnt match anything.
+// so it might be -1 if it didn't match anything.
 func getItem(data []byte, match []int) [][]byte {
 	item := make([][]byte, 3)
 	item[0] = data[match[0]:match[1]]
