@@ -12,7 +12,7 @@ import {
   MagickImage,
   MagickImageCollection,
 } from '@imagemagick/magick-wasm';
-import type { RsbuildPlugin } from '@rsbuild/core';
+import type { RsbuildPlugin, Rspack } from '@rsbuild/core';
 
 const wasmLocation = require.resolve('@imagemagick/magick-wasm/magick.wasm');
 const wasmBytes = readFileSync(wasmLocation);
@@ -110,7 +110,17 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
   name: 'pwa',
 
   setup(api) {
+    // processAssets runs on every compilation, so in dev every hot reload would regenerate every image which is really
+    // slow. The logo isn't going to change while the dev server is running, so generate everything once and then just
+    // emit the same sources again on every compilation after that.
+    const generated = new Map<string, Rspack.sources.Source>();
+
     api.processAssets({ stage: 'additional' }, async ({ compilation, sources }) => {
+      if (generated.size > 0) {
+        generated.forEach((source, name) => void compilation.emitAsset(name, source));
+        return;
+      }
+
       await initializeImageMagick(wasmBytes);
       const backgroundColor = new MagickColor(options.background);
 
@@ -129,7 +139,7 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
 
       appleSplashScreens().forEach(
         ({ width, height }) =>
-          void compilation.emitAsset(
+          void generated.set(
             `assets/resources/apple-splash-${width}-${height}.png`,
             new sources.RawSource(
               Buffer.from(
@@ -151,7 +161,7 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
       );
 
       // Apple touch icon
-      compilation.emitAsset(
+      generated.set(
         appleTouchIconName,
         new sources.RawSource(
           Buffer.from(
@@ -172,7 +182,7 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
           ),
         ),
       );
-      compilation.emitAsset(
+      generated.set(
         appleTouchIconPrecomposedName,
         new sources.RawSource(
           Buffer.from(
@@ -194,7 +204,7 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
         ),
       );
 
-      compilation.emitAsset(
+      generated.set(
         'assets/resources/transparent-128.png',
         new sources.RawSource(
           Buffer.from(
@@ -218,7 +228,7 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
 
       mstileIcons().forEach(
         ({ asset, width, height }) =>
-          void compilation.emitAsset(
+          void generated.set(
             asset,
             new sources.RawSource(
               Buffer.from(
@@ -247,7 +257,7 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
       ];
       androidChromeSizes.forEach(
         ([width, height, maskable]) =>
-          void compilation.emitAsset(
+          void generated.set(
             `assets/resources/android-chrome-${width}-${height}${maskable ? '_maskable' : ''}.png`,
             new sources.RawSource(
               Buffer.from(
@@ -279,7 +289,7 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
         [256, 256],
         [512, 512],
       ];
-      compilation.emitAsset(
+      generated.set(
         'favicon.ico',
         new sources.RawSource(
           Buffer.from(
@@ -308,7 +318,7 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
         ),
       );
 
-      return;
+      generated.forEach((source, name) => void compilation.emitAsset(name, source));
     });
 
     api.modifyHTMLTags({
