@@ -5,7 +5,7 @@ import type BankAccount from '@monetr/interface/models/BankAccount';
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { ID, idPrefix } from '@monetr/interface/models/ID';
 import type Spending from '@monetr/interface/models/Spending';
-import TransactionCluster from '@monetr/interface/models/TransactionCluster';
+import type TransactionCluster from '@monetr/interface/models/TransactionCluster';
 import type { WithJsonValues } from '@monetr/interface/util/json';
 import parseDate from '@monetr/interface/util/parseDate';
 
@@ -45,8 +45,6 @@ export default class TransactionRecurring {
   readonly autoMatched: boolean;
   // fundingSchedule is the funding schedule tracking this recurring transaction, if there is one
   readonly fundingSchedule: FundingSchedule | null;
-  // transactionCluster is the similar transactions group this was detected in, only included when listing them
-  readonly transactionCluster: TransactionCluster | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 
@@ -68,7 +66,6 @@ export default class TransactionRecurring {
     this.lastAmount = data.lastAmount;
     this.autoMatched = data.autoMatched;
     this.fundingSchedule = data.fundingSchedule ? new FundingSchedule(data.fundingSchedule) : null;
-    this.transactionCluster = data.transactionCluster ? new TransactionCluster(data.transactionCluster) : null;
     this.createdAt = parseDate(data.createdAt);
     this.updatedAt = parseDate(data.updatedAt);
   }

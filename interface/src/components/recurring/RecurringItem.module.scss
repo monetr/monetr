@@ -78,6 +78,22 @@
   min-width: 0;
 }
 
+// Height plus margin adds up to the name and memo line heights so nothing shifts once the cluster loads, the margins
+// are what keep the two from running together into one blob
+.nameSkeleton {
+  width: 40 * variables.$size;
+  max-width: 100%;
+  height: 5 * variables.$size;
+  margin-bottom: 1 * variables.$size;
+}
+
+.memoSkeleton {
+  width: 56 * variables.$size;
+  max-width: 100%;
+  height: 3 * variables.$size;
+  margin-top: 1 * variables.$size;
+}
+
 .mobileCadence {
   @include mixins.text-base;
   flex: none;

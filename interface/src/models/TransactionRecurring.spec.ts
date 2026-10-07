@@ -27,7 +27,6 @@ describe('transaction recurring', () => {
       lastAmount: 800,
       autoMatched: false,
       fundingSchedule: null,
-      transactionCluster: null,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-16T06:00:00Z',
     });
@@ -57,7 +56,6 @@ describe('transaction recurring', () => {
       lastAmount: 800,
       autoMatched: false,
       fundingSchedule: null,
-      transactionCluster: null,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-16T06:00:00Z',
     });
@@ -89,7 +87,6 @@ describe('transaction recurring', () => {
       lastAmount: -500000,
       autoMatched: false,
       fundingSchedule: null,
-      transactionCluster: null,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-16T06:00:00Z',
     });
@@ -122,7 +119,6 @@ describe('transaction recurring', () => {
       lastAmount: 800,
       autoMatched: false,
       fundingSchedule: null,
-      transactionCluster: null,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-16T06:00:00Z',
     });
@@ -150,7 +146,6 @@ describe('transaction recurring', () => {
       lastAmount: 800,
       autoMatched: false,
       fundingSchedule: null,
-      transactionCluster: null,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-16T06:00:00Z',
     });
@@ -178,7 +173,6 @@ describe('transaction recurring', () => {
       lastAmount: 800,
       autoMatched: false,
       fundingSchedule: null,
-      transactionCluster: null,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-16T06:00:00Z',
     });
@@ -203,7 +197,6 @@ describe('transaction recurring', () => {
       lastAmount: 800,
       autoMatched: false,
       fundingSchedule: null,
-      transactionCluster: null,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-16T06:00:00Z',
     });
@@ -228,7 +221,6 @@ describe('transaction recurring', () => {
       lastAmount: 800,
       autoMatched: false,
       fundingSchedule: null,
-      transactionCluster: null,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-16T06:00:00Z',
     });
@@ -256,7 +248,6 @@ describe('transaction recurring', () => {
       lastAmount: 800,
       autoMatched: false,
       fundingSchedule: null,
-      transactionCluster: null,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-16T06:00:00Z',
     });
@@ -296,7 +287,6 @@ describe('transaction recurring', () => {
         autoCreateTransaction: false,
         estimatedDeposit: 250000,
       },
-      transactionCluster: null,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-16T06:00:00Z',
     });
@@ -329,7 +319,6 @@ describe('transaction recurring', () => {
           lastAmount: 800,
           autoMatched: false,
           fundingSchedule: null,
-          transactionCluster: null,
           createdAt: '2026-03-15T06:00:00Z',
           updatedAt: '2026-03-16T06:00:00Z',
         }),

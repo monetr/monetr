@@ -29,9 +29,7 @@ func TestGetRecurringTransactions(t *testing.T) {
 		response.Status(http.StatusOK)
 		response.JSON().Array().Length().IsEqual(1)
 		response.JSON().Path("$[0].transactionRecurringId").IsEqual(recurring.TransactionRecurringId)
-		response.JSON().Path("$[0].transactionCluster.name").IsEqual("Github")
-		response.JSON().Path("$[0].transactionCluster").Object().NotContainsKey("members")
-		response.JSON().Path("$[0].transactionCluster.debug").IsNull()
+		response.JSON().Path("$[0]").Object().NotContainsKey("transactionCluster")
 	})
 
 	t.Run("pagination", func(t *testing.T) {

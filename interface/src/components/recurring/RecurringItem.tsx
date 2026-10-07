@@ -6,11 +6,13 @@ import { Link } from 'wouter';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import RecurringItemCharges from '@monetr/interface/components/recurring/RecurringItemCharges';
 import RecurringMemo from '@monetr/interface/components/recurring/RecurringMemo';
+import { Skeleton } from '@monetr/interface/components/Skeleton';
 import Typography from '@monetr/interface/components/Typography';
 import { useLocale } from '@monetr/interface/hooks/useLocale';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSpending } from '@monetr/interface/hooks/useSpending';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
+import { useTransactionCluster } from '@monetr/interface/hooks/useTransactionCluster';
 import { showNewExpenseModal } from '@monetr/interface/modals/NewExpenseModal';
 import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
 import type Spending from '@monetr/interface/models/Spending';
@@ -45,14 +47,15 @@ export default function RecurringItem(props: RecurringItemProps): React.JSX.Elem
   // The list doesn't include the spending object so look it up, this way it comes from the same cache as everything
   // else that shows spending
   const { data: spending } = useSpending(props.recurring.spendingId);
+  const { data: cluster, isLoading: clusterIsLoading } = useTransactionCluster(props.recurring.transactionClusterId);
   const [expanded, setExpanded] = useState(false);
 
   if (!locale || !dateLocale) {
     return null;
   }
 
-  const name = props.recurring.transactionCluster?.name ?? 'Recurring';
-  const memo = props.recurring.transactionCluster?.originalMemo;
+  const name = cluster?.name ?? 'Recurring';
+  const memo = cluster?.originalMemo;
   const detailsPath = `/bank/${props.recurring.bankAccountId}/recurring/${props.recurring.transactionRecurringId}/details`;
   const cadence = cadences[props.recurring.window];
   const isDebit = props.recurring.direction === 'debit';
@@ -122,18 +125,22 @@ export default function RecurringItem(props: RecurringItemProps): React.JSX.Elem
           <MerchantIcon name={name} />
           <div className={styles.nameColumn}>
             <div className={styles.nameRow}>
-              <Typography
-                className={styles.name}
-                color='emphasis'
-                data-testid='recurring-item-name'
-                ellipsis
-                weight='semibold'
-              >
-                {name}
-              </Typography>
+              {clusterIsLoading && <Skeleton className={styles.nameSkeleton} />}
+              {!clusterIsLoading && (
+                <Typography
+                  className={styles.name}
+                  color='emphasis'
+                  data-testid='recurring-item-name'
+                  ellipsis
+                  weight='semibold'
+                >
+                  {name}
+                </Typography>
+              )}
               {/* This block only shows on mobile screens */}
               <span className={styles.mobileCadence}>&middot; {cadence}</span>
             </div>
+            {clusterIsLoading && <Skeleton className={styles.memoSkeleton} />}
             {memo && <RecurringMemo memo={memo} />}
             {/* This block only shows on mobile screens */}
             <span className={styles.mobileStatus} data-warning={String(isDebit && !isLinked && !props.recurring.ended)}>

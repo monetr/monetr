@@ -46,7 +46,6 @@ A linked funding schedule comes back filled in as `fundingSchedule`, but a linke
 | `transactionRecurringId` | string (ulid)           | Identifies the recurring transaction. It stays the same between recalculations as long as the cluster keeps recurring in the same direction.                                                                      |
 | `bankAccountId`          | string (ulid)           | The bank account it belongs to.                                                                                                                                                                                   |
 | `transactionClusterId`   | string (ulid)           | The [similar transactions](./similar_transactions#the-similar-transaction-object) cluster it was found in.                                                                                                        |
-| `transactionCluster`     | object                  | The [similar transactions](./similar_transactions#the-similar-transaction-object) cluster in `transactionClusterId`, without its `debug` info. Only there when listing, it's where the name comes from.           |
 | `spendingId`             | string (ulid), nullable | The [expense](./spending#the-spending-object) tracking this, if you've linked one. Only ever set on debits. See [Link an expense or funding schedule](#link-an-expense-or-funding-schedule).                      |
 | `fundingScheduleId`      | string (ulid), nullable | The [funding schedule](./funding_schedules#the-funding-schedule-object) tracking this, if you've linked one. Only ever set on credits.                                                                            |
 | `fundingSchedule`        | object                  | The [funding schedule](./funding_schedules#the-funding-schedule-object) in `fundingScheduleId`, if there is one. Left out otherwise.                                                                              |
@@ -88,7 +87,8 @@ If you ask for just the ended ones with `ended=true` they're sorted by when they
 first. `next` keeps getting worked out from the schedule even after something stops, so it doesn't say anything useful
 about when it ended.
 
-Each one comes with its `transactionCluster` so you have a name to show.
+The name isn't on the recurring transaction itself, it's on the cluster. If you want something to show, [look up the
+cluster](./similar_transactions#get-similar-transactions) by its `transactionClusterId`.
 
 **In the app:** The recurring page, under transactions in the sidebar.
 
@@ -127,19 +127,6 @@ curl --request GET \
     "transactionRecurringId": "txrc_01j6b4n8w2kq5t9r3xm7vdc6ph",
     "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
     "transactionClusterId": "tcl_01j6b4m3zr8yq2w6tnc5kxd9fe",
-    "transactionCluster": {
-      "transactionClusterId": "tcl_01j6b4m3zr8yq2w6tnc5kxd9fe",
-      "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
-      "signature": "4b8e1f2a9c03d7e65a1b8f4c2d9e07a3b6c5f8e1d2a49b7c03e6f5a8b1d2c4e7",
-      "centroid": "txn_01j6b4kq7m2xw9t5r8ynh3vd6c",
-      "name": "Netflix",
-      "originalName": "NETFLIX.COM",
-      "originalMemo": "NETFLIX.COM 866-579-7172 CA",
-      "debug": null,
-      "merchant": null,
-      "createdAt": "2024-03-13T03:15:02.114Z",
-      "updatedAt": "2024-08-30T03:15:04.512Z"
-    },
     "spendingId": "spnd_01j6b5q2h8ycz4n7w3tkr9vx5d",
     "fundingScheduleId": null,
     "window": "monthly",

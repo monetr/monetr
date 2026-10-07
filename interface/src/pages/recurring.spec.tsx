@@ -34,19 +34,42 @@ describe('recurring page', () => {
 
   it('will split things up into tabs', async () => {
     mockFetch
+      .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/similar/tcl_01hy4rf0p7mz9w2q3c4v5b6n01')
+      .reply(200, {
+        transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n01',
+        bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
+        name: 'Github',
+        originalMemo: 'GITHUB.COM 877-448-4820 CA',
+        members: [],
+        createdAt: '2026-01-15T06:00:00Z',
+      });
+    mockFetch
+      .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/similar/tcl_01hy4rf0p7mz9w2q3c4v5b6n02')
+      .reply(200, {
+        transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n02',
+        bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
+        name: 'Mercury Payroll',
+        originalMemo: 'MERCURY PAYROLL DIRECT DEP',
+        members: [],
+        createdAt: '2026-01-15T06:00:00Z',
+      });
+    mockFetch
+      .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/similar/tcl_01hy4rf0p7mz9w2q3c4v5b6n03')
+      .reply(200, {
+        transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n03',
+        bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
+        name: 'Netflix',
+        originalMemo: 'NETFLIX.COM 866-579-7172 CA',
+        members: [],
+        createdAt: '2026-01-15T06:00:00Z',
+      });
+    mockFetch
       .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring?direction=debit&ended=false')
       .reply(200, [
         {
           transactionRecurringId: 'txrc_01hy4re7c1xc2v44cf6kx30201',
           bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
           transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n01',
-          transactionCluster: {
-            transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n01',
-            bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
-            name: 'Github',
-            originalMemo: 'GITHUB.COM 877-448-4820 CA',
-            createdAt: '2026-01-15T06:00:00Z',
-          },
           spendingId: null,
           fundingScheduleId: null,
           window: 'monthly',
@@ -73,13 +96,6 @@ describe('recurring page', () => {
           transactionRecurringId: 'txrc_01hy4re7c1xc2v44cf6kx30202',
           bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
           transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n02',
-          transactionCluster: {
-            transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n02',
-            bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
-            name: 'Mercury Payroll',
-            originalMemo: 'MERCURY PAYROLL DIRECT DEP',
-            createdAt: '2026-01-15T06:00:00Z',
-          },
           spendingId: null,
           fundingScheduleId: null,
           window: 'monthly',
@@ -104,13 +120,6 @@ describe('recurring page', () => {
         transactionRecurringId: 'txrc_01hy4re7c1xc2v44cf6kx30203',
         bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
         transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n03',
-        transactionCluster: {
-          transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n03',
-          bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
-          name: 'Netflix',
-          originalMemo: 'NETFLIX.COM 866-579-7172 CA',
-          createdAt: '2026-01-15T06:00:00Z',
-        },
         spendingId: null,
         fundingScheduleId: null,
         window: 'monthly',
@@ -150,19 +159,22 @@ describe('recurring page', () => {
 
   it('will open the tab from the url', async () => {
     mockFetch
+      .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/similar/tcl_01hy4rf0p7mz9w2q3c4v5b6n02')
+      .reply(200, {
+        transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n02',
+        bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
+        name: 'Mercury Payroll',
+        originalMemo: 'MERCURY PAYROLL DIRECT DEP',
+        members: [],
+        createdAt: '2026-01-15T06:00:00Z',
+      });
+    mockFetch
       .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring?direction=credit&ended=false')
       .reply(200, [
         {
           transactionRecurringId: 'txrc_01hy4re7c1xc2v44cf6kx30202',
           bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
           transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n02',
-          transactionCluster: {
-            transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n02',
-            bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
-            name: 'Mercury Payroll',
-            originalMemo: 'MERCURY PAYROLL DIRECT DEP',
-            createdAt: '2026-01-15T06:00:00Z',
-          },
           spendingId: null,
           fundingScheduleId: null,
           window: 'monthly',
@@ -195,19 +207,22 @@ describe('recurring page', () => {
 
   it('will put things that were due a while ago in the late group', async () => {
     mockFetch
+      .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/similar/tcl_01hy4rf0p7mz9w2q3c4v5b6n01')
+      .reply(200, {
+        transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n01',
+        bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
+        name: 'Hulu',
+        originalMemo: 'HULU 877-8244858 CA',
+        members: [],
+        createdAt: '2020-01-15T06:00:00Z',
+      });
+    mockFetch
       .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring?direction=debit&ended=false')
       .reply(200, [
         {
           transactionRecurringId: 'txrc_01hy4re7c1xc2v44cf6kx30201',
           bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
           transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n01',
-          transactionCluster: {
-            transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n01',
-            bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
-            name: 'Hulu',
-            originalMemo: 'HULU 877-8244858 CA',
-            createdAt: '2020-01-15T06:00:00Z',
-          },
           spendingId: null,
           fundingScheduleId: null,
           window: 'monthly',

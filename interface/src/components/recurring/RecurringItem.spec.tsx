@@ -25,20 +25,22 @@ describe('recurring item', () => {
   });
 
   it('will show the name and a create button when nothing is linked', async () => {
-    apiSampleResponses(mockFetch);
-
-    const recurring = new TransactionRecurring({
-      transactionRecurringId: ID.from<TransactionRecurring>('txrc_01hy4re7c1xc2v44cf6kx302jx'),
-      bankAccountId: ID.from<BankAccount>('bac_01gds6eqsq7h5mgevwtmw3cyxb'),
-      transactionClusterId: ID.from<TransactionCluster>('tcl_01hy4rf0p7mz9w2q3c4v5b6n7m'),
-      transactionCluster: {
+    mockFetch
+      .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/similar/tcl_01hy4rf0p7mz9w2q3c4v5b6n7m')
+      .reply(200, {
         transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
         bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
         name: 'Github',
         originalMemo: 'GITHUB.COM 877-448-4820 CA',
         members: [],
         createdAt: '2026-01-15T06:00:00Z',
-      },
+      });
+    apiSampleResponses(mockFetch);
+
+    const recurring = new TransactionRecurring({
+      transactionRecurringId: ID.from<TransactionRecurring>('txrc_01hy4re7c1xc2v44cf6kx302jx'),
+      bankAccountId: ID.from<BankAccount>('bac_01gds6eqsq7h5mgevwtmw3cyxb'),
+      transactionClusterId: ID.from<TransactionCluster>('tcl_01hy4rf0p7mz9w2q3c4v5b6n7m'),
       spendingId: null,
       fundingScheduleId: null,
       fundingSchedule: null,
@@ -70,6 +72,16 @@ describe('recurring item', () => {
 
   it('will look up the linked expense', async () => {
     mockFetch
+      .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/similar/tcl_01hy4rf0p7mz9w2q3c4v5b6n7m')
+      .reply(200, {
+        transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
+        bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
+        name: 'Github',
+        originalMemo: 'GITHUB.COM 877-448-4820 CA',
+        members: [],
+        createdAt: '2026-01-15T06:00:00Z',
+      });
+    mockFetch
       .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/spending/spnd_01hy4rkq0x3c6dtr9w1p2v5bns')
       .reply(200, {
         spendingId: 'spnd_01hy4rkq0x3c6dtr9w1p2v5bns',
@@ -95,14 +107,6 @@ describe('recurring item', () => {
       transactionRecurringId: ID.from<TransactionRecurring>('txrc_01hy4re7c1xc2v44cf6kx302jx'),
       bankAccountId: ID.from<BankAccount>('bac_01gds6eqsq7h5mgevwtmw3cyxb'),
       transactionClusterId: ID.from<TransactionCluster>('tcl_01hy4rf0p7mz9w2q3c4v5b6n7m'),
-      transactionCluster: {
-        transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
-        bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
-        name: 'Github',
-        originalMemo: 'GITHUB.COM 877-448-4820 CA',
-        members: [],
-        createdAt: '2026-01-15T06:00:00Z',
-      },
       spendingId: ID.from<Spending>('spnd_01hy4rkq0x3c6dtr9w1p2v5bns'),
       fundingScheduleId: null,
       fundingSchedule: null,
@@ -135,6 +139,16 @@ describe('recurring item', () => {
 
   it('will show how short a behind expense is', async () => {
     mockFetch
+      .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/similar/tcl_01hy4rf0p7mz9w2q3c4v5b6n7m')
+      .reply(200, {
+        transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
+        bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
+        name: 'Github',
+        originalMemo: 'GITHUB.COM 877-448-4820 CA',
+        members: [],
+        createdAt: '2026-01-15T06:00:00Z',
+      });
+    mockFetch
       .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/spending/spnd_01hy4rkq0x3c6dtr9w1p2v5bns')
       .reply(200, {
         spendingId: 'spnd_01hy4rkq0x3c6dtr9w1p2v5bns',
@@ -160,14 +174,6 @@ describe('recurring item', () => {
       transactionRecurringId: ID.from<TransactionRecurring>('txrc_01hy4re7c1xc2v44cf6kx302jx'),
       bankAccountId: ID.from<BankAccount>('bac_01gds6eqsq7h5mgevwtmw3cyxb'),
       transactionClusterId: ID.from<TransactionCluster>('tcl_01hy4rf0p7mz9w2q3c4v5b6n7m'),
-      transactionCluster: {
-        transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
-        bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
-        name: 'Github',
-        originalMemo: 'GITHUB.COM 877-448-4820 CA',
-        members: [],
-        createdAt: '2026-01-15T06:00:00Z',
-      },
       spendingId: ID.from<Spending>('spnd_01hy4rkq0x3c6dtr9w1p2v5bns'),
       fundingScheduleId: null,
       fundingSchedule: null,
@@ -198,6 +204,16 @@ describe('recurring item', () => {
 
   it('will show the recent charges when expanded', async () => {
     mockFetch
+      .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/similar/tcl_01hy4rf0p7mz9w2q3c4v5b6n7m')
+      .reply(200, {
+        transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
+        bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
+        name: 'Github',
+        originalMemo: 'GITHUB.COM 877-448-4820 CA',
+        members: [],
+        createdAt: '2026-01-15T06:00:00Z',
+      });
+    mockFetch
       .onGet(
         '/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions?transaction_recurring_id=txrc_01hy4re7c1xc2v44cf6kx302jx&limit=3',
       )
@@ -220,14 +236,6 @@ describe('recurring item', () => {
       transactionRecurringId: ID.from<TransactionRecurring>('txrc_01hy4re7c1xc2v44cf6kx302jx'),
       bankAccountId: ID.from<BankAccount>('bac_01gds6eqsq7h5mgevwtmw3cyxb'),
       transactionClusterId: ID.from<TransactionCluster>('tcl_01hy4rf0p7mz9w2q3c4v5b6n7m'),
-      transactionCluster: {
-        transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
-        bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
-        name: 'Github',
-        originalMemo: 'GITHUB.COM 877-448-4820 CA',
-        members: [],
-        createdAt: '2026-01-15T06:00:00Z',
-      },
       spendingId: null,
       fundingScheduleId: null,
       fundingSchedule: null,

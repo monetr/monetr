@@ -25,13 +25,6 @@ describe('list recurring transactions', () => {
           transactionRecurringId: 'txrc_01hy4re7c1xc2v44cf6kx302jx',
           bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
           transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
-          transactionCluster: {
-            transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
-            bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
-            name: 'Github',
-            originalMemo: 'GITHUB.COM 877-448-4820 CA',
-            createdAt: '2026-01-15T06:00:00Z',
-          },
           spendingId: null,
           fundingScheduleId: null,
           window: 'monthly',
@@ -63,8 +56,6 @@ describe('list recurring transactions', () => {
       },
     );
     await waitFor(() => expect(world.result.current.data).toHaveLength(1));
-    expect(world.result.current.data?.[0]?.transactionCluster?.name).toBe('Github');
-    expect(world.result.current.data?.[0]?.transactionCluster?.originalMemo).toBe('GITHUB.COM 877-448-4820 CA');
     // Less than a full page means there isn't another one
     expect(world.result.current.hasNextPage).toBeFalsy();
   });
@@ -81,7 +72,6 @@ describe('list recurring transactions', () => {
           transactionRecurringId: `txrc_01hy4re7c1xc2v44cf6kx302${index.toString().padStart(2, '0')}`,
           bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
           transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
-          transactionCluster: null,
           spendingId: null,
           fundingScheduleId: null,
           window: 'monthly',
@@ -109,7 +99,6 @@ describe('list recurring transactions', () => {
           transactionRecurringId: 'txrc_01hy4re7c1xc2v44cf6kx30225',
           bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
           transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
-          transactionCluster: null,
           spendingId: null,
           fundingScheduleId: null,
           window: 'monthly',

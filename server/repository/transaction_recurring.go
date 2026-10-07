@@ -57,11 +57,6 @@ func (r *repositoryBase) GetTransactionRecurrings(
 	query := r.txn.NewSelect().
 		Model(&result).
 		Relation("FundingSchedule").
-		// The cluster is only here for its name, the members and debug info can
-		// be huge so leave those out
-		Relation("TransactionCluster", func(q *bun.SelectQuery) *bun.SelectQuery {
-			return q.ExcludeColumn("members", "debug")
-		}).
 		Where(`"transaction_recurring"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction_recurring"."bank_account_id" = ?`, bankAccountId)
 
