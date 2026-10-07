@@ -7,7 +7,7 @@ provision_golang_tests(${CMAKE_CURRENT_SOURCE_DIR})
 # instead of cloning all of cldr-json (its huge) do a shallow sparse clone of
 # just the files we need, then cldrgen squashes the per-locale data down into a
 # single file
-set(CLDR_VERSION "48.2.2")
+set(CLDR_VERSION "48.2.3")
 set(CLDR_SOURCES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/sources")
 set(CLDR_PREFIX_DIR "${CMAKE_CURRENT_BINARY_DIR}/cldr-json")
 # Clone into a folder under the source dir so it can just be deleted and
