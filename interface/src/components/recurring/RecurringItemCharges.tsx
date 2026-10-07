@@ -34,7 +34,8 @@ export default function RecurringItemCharges(props: RecurringItemChargesProps): 
         <span>Similar transactions group</span>
         <strong>{props.name}</strong>
         <span>
-          · {seen === 1 ? '1 charge' : `${seen} charges`} since {format(inTimezone(props.recurring.first), 'MMM yyyy')}
+          &middot; {seen === 1 ? '1 charge' : `${seen} charges`} since{' '}
+          {format(inTimezone(props.recurring.first), 'MMM yyyy')}
         </span>
         <Link className={styles.detailsLink} to={props.detailsPath}>
           View details

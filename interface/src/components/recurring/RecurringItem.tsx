@@ -78,11 +78,11 @@ export default function RecurringItem({ recurring }: RecurringItemProps): React.
   const date = recurring.ended ? recurring.last : recurring.next;
   const dateString = isThisYear(date) ? format(inTimezone(date), 'MMM d') : format(inTimezone(date), 'MMM d, yyyy');
 
-  let dateDetail = `${cadence} · ${formatRelativeDate(recurring.next, inTimezone, dateLocale)}`;
+  let dateDetail = formatRelativeDate(recurring.next, inTimezone, dateLocale);
   if (recurring.ended) {
-    dateDetail = `${cadence} · last seen`;
+    dateDetail = 'last seen';
   } else if (isLate) {
-    dateDetail = `${cadence} · was due ${dateString}`;
+    dateDetail = `was due ${dateString}`;
   }
 
   // A price change shows up as two different amounts, so only call it variable once there are more than that.
@@ -113,7 +113,7 @@ export default function RecurringItem({ recurring }: RecurringItemProps): React.
                 {name}
               </Typography>
               {/* This block only shows on mobile screens */}
-              <span className={styles.mobileCadence}>· {cadence}</span>
+              <span className={styles.mobileCadence}>&middot; {cadence}</span>
             </div>
             {memo && (
               <span className={styles.memo} title={memo}>
@@ -125,7 +125,7 @@ export default function RecurringItem({ recurring }: RecurringItemProps): React.
               {isLinked && <LinkedIcon />}
               {isLinked && <span className={styles.mobileStatusName}>{linkedName}</span>}
               {shortfall > 0 && (
-                <span className={styles.short}>· short {locale.formatAmount(shortfall, AmountType.Stored)}</span>
+                <span className={styles.short}>&middot; short {locale.formatAmount(shortfall, AmountType.Stored)}</span>
               )}
               {!isLinked && (isDebit ? 'Not budgeted' : 'Not funding anything')}
             </span>
@@ -137,7 +137,9 @@ export default function RecurringItem({ recurring }: RecurringItemProps): React.
               <span className={styles.lateBadge}>{daysLate === 1 ? '1 day late' : `${daysLate} days late`}</span>
             )}
             {!isLate && <span className={styles.dateValue}>{dateString}</span>}
-            <span className={styles.dateDetail}>{dateDetail}</span>
+            <span className={styles.dateDetail}>
+              {cadence} &middot; {dateDetail}
+            </span>
           </div>
 
           {/* This block only shows on desktop screens */}

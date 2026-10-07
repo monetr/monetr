@@ -36,7 +36,7 @@ export default function RecurringClusterCard({ recurring, name }: RecurringClust
         Similar transactions group
       </span>
       <span className={styles.title}>
-        {name} <span>· since {format(inTimezone(recurring.first), 'MMM yyyy')}</span>
+        {name} <span>&middot; since {format(inTimezone(recurring.first), 'MMM yyyy')}</span>
       </span>
       <div className={styles.chips}>
         <span className={styles.chip}>
