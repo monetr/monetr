@@ -2,6 +2,18 @@
 
 ## [1.18.0](https://github.com/monetr/monetr/compare/v1.17.1...v1.18.0) (2026-10-07)
 
+This release includes monetr's new recurring transaction feature, available for all monetr data sources. This feature
+allows monetr to detect recurring transactions offline and help you automatically create your budget around them. This
+release contains the very first MVP of this feature so there will likely be many changes coming soon and more
+functionality available in following releases!
+
+The next time you upload an OFX file, or Plaid or Lunch Flow sync your account data, monetr will automatically detect
+recurring transactions and add an indicator to them.
+
+To help reduce the noise from this, monetr will also try to match detected recurring transactions to existing expenses
+so you can see what might be missing in your budget.
+
+Thank you for using monetr!
 
 ### Features
 
