@@ -268,8 +268,8 @@ importers:
         specifier: 2.8.1
         version: 2.8.1
       wouter:
-        specifier: 3.12.0
-        version: 3.12.0(react@19.3.0)
+        specifier: 3.13.0
+        version: 3.13.0(react@19.3.0)
     devDependencies:
       '@imagemagick/magick-wasm':
         specifier: 0.0.44
@@ -4304,8 +4304,8 @@ packages:
     resolution: {integrity: sha512-0yweIbkINJodk27gX9LBGMzyQdBDan3s/dEAiwBOj+Mf0PPyWL6/rikalkv8EeD0E8jm4o5RXEOrFTP3NXbhJg==}
     engines: {node: '>=12.17'}
 
-  wouter@3.12.0:
-    resolution: {integrity: sha512-aJQjVAbrymRz47VFaeMbEZF71dn+5+olVm3dJR6OsHO37Pswa23DoIzy6PwsEtznGSmv9YBu9HC84OJFDMQ9Cg==}
+  wouter@3.13.0:
+    resolution: {integrity: sha512-p1RoCuVyxwb3X5jLjDdkwDzlXj+/UGZqZb+806uaJOVEHvNfGkjET0KiQ/CGiDKC90rLsALMgMj4onNVKxgNdQ==}
     peerDependencies:
       react: '>=16.8.0'
 
@@ -9115,7 +9115,7 @@ snapshots:
 
   wordwrapjs@5.1.1: {}
 
-  wouter@3.12.0(react@19.3.0):
+  wouter@3.13.0(react@19.3.0):
     dependencies:
       react: 19.3.0
       regexparam: 3.0.0
