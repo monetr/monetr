@@ -58,7 +58,7 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): React.JSX.E
 
   return (
     <li className={styles.root}>
-      <Link className={styles.mobileLink} to={detailsPath} />
+      <Link aria-label={spending.name} className={styles.link} to={detailsPath} />
       <div className={styles.inner}>
         <div className={styles.leftSection}>
           <MerchantIcon name={spending.name} />
@@ -110,9 +110,9 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): React.JSX.E
               </span>
             </div>
           </div>
-          <Link className={styles.arrowLink} tabIndex={-1} to={detailsPath}>
+          <span className={styles.arrow}>
             <ChevronRight />
-          </Link>
+          </span>
         </div>
       </div>
     </li>

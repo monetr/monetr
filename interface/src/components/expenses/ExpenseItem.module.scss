@@ -25,13 +25,13 @@
       color: var(--content-subtle);
     }
 
-    .arrowLink {
+    .arrow {
       color: var(--content-emphasis);
     }
   }
 }
 
-.mobileLink {
+.link {
   position: absolute;
   left: 0;
   top: 0;
@@ -39,10 +39,6 @@
   height: 100%;
   width: 100%;
   cursor: pointer;
-
-  @media (min-width: variables.$mediumScreen) {
-    display: none;
-  }
 }
 
 .inner {
@@ -53,10 +49,6 @@
   align-items: center;
   padding: 1 * variables.$size 2 * variables.$size;
   cursor: pointer;
-
-  @media (min-width: variables.$mediumScreen) {
-    cursor: auto;
-  }
 }
 
 .leftSection {
@@ -223,11 +215,7 @@
   font-weight: var(--medium);
 }
 
-.arrowLink {
+.arrow {
   flex: none;
   color: var(--content-subtle);
-
-  @media (min-width: variables.$mediumScreen) {
-    cursor: pointer;
-  }
 }
