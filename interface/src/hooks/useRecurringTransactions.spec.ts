@@ -18,41 +18,50 @@ describe('list recurring transactions', () => {
   });
 
   it('will request the first page', async () => {
-    mockFetch.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/recurring').reply(200, [
-      {
-        transactionRecurringId: 'txrc_01hy4re7c1xc2v44cf6kx302jx',
-        bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
-        transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
-        transactionCluster: {
-          transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
+    mockFetch
+      .onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/recurring?direction=debit&ended=false')
+      .reply(200, [
+        {
+          transactionRecurringId: 'txrc_01hy4re7c1xc2v44cf6kx302jx',
           bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
-          name: 'Github',
-          originalMemo: 'GITHUB.COM 877-448-4820 CA',
-          createdAt: '2026-01-15T06:00:00Z',
+          transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
+          transactionCluster: {
+            transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
+            bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
+            name: 'Github',
+            originalMemo: 'GITHUB.COM 877-448-4820 CA',
+            createdAt: '2026-01-15T06:00:00Z',
+          },
+          spendingId: null,
+          fundingScheduleId: null,
+          window: 'monthly',
+          ruleset: 'DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15',
+          first: '2026-01-15T06:00:00Z',
+          last: '2026-03-15T05:00:00Z',
+          next: '2026-04-15T05:00:00Z',
+          ended: false,
+          confidence: 0.9,
+          direction: 'debit',
+          amounts: {
+            800: 3,
+          },
+          lastAmount: 800,
+          autoMatched: false,
+          createdAt: '2026-03-15T06:00:00Z',
+          updatedAt: '2026-03-15T06:00:00Z',
         },
-        spendingId: null,
-        fundingScheduleId: null,
-        window: 'monthly',
-        ruleset: 'DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15',
-        first: '2026-01-15T06:00:00Z',
-        last: '2026-03-15T05:00:00Z',
-        next: '2026-04-15T05:00:00Z',
-        ended: false,
-        confidence: 0.9,
-        direction: 'debit',
-        amounts: {
-          800: 3,
-        },
-        lastAmount: 800,
-        autoMatched: false,
-        createdAt: '2026-03-15T06:00:00Z',
-        updatedAt: '2026-03-15T06:00:00Z',
-      },
-    ]);
+      ]);
 
-    const world = testRenderHook(() => useRecurringTransactions(), {
-      initialRoute: '/bank/bac_01hy4rcmadc01d2kzv7vynbxxx/recurring',
-    });
+    const world = testRenderHook(
+      () =>
+        useRecurringTransactions({
+          direction: 'debit',
+          ended: false,
+        }),
+      {
+        initialRoute: '/bank/bac_01hy4rcmadc01d2kzv7vynbxxx/recurring',
+      },
+    );
     await waitFor(() => expect(world.result.current.data).toHaveLength(1));
     expect(world.result.current.data?.[0]?.transactionCluster?.name).toBe('Github');
     expect(world.result.current.data?.[0]?.transactionCluster?.originalMemo).toBe('GITHUB.COM 877-448-4820 CA');
@@ -62,7 +71,7 @@ describe('list recurring transactions', () => {
 
   it('will request the next page when the first one is full', async () => {
     // A full page is 25, the IDs just need to be different from each other
-    mockFetch.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/recurring').reply(
+    mockFetch.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/recurring?direction=debit&ended=false').reply(
       200,
       Array.from(
         {
@@ -93,35 +102,44 @@ describe('list recurring transactions', () => {
         }),
       ),
     );
-    mockFetch.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/recurring?offset=25').reply(200, [
-      {
-        transactionRecurringId: 'txrc_01hy4re7c1xc2v44cf6kx30225',
-        bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
-        transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
-        transactionCluster: null,
-        spendingId: null,
-        fundingScheduleId: null,
-        window: 'monthly',
-        ruleset: 'DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15',
-        first: '2026-01-15T06:00:00Z',
-        last: '2026-03-15T05:00:00Z',
-        next: '2026-04-15T05:00:00Z',
-        ended: false,
-        confidence: 0.9,
-        direction: 'debit',
-        amounts: {
-          800: 3,
+    mockFetch
+      .onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/recurring?direction=debit&ended=false&offset=25')
+      .reply(200, [
+        {
+          transactionRecurringId: 'txrc_01hy4re7c1xc2v44cf6kx30225',
+          bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
+          transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
+          transactionCluster: null,
+          spendingId: null,
+          fundingScheduleId: null,
+          window: 'monthly',
+          ruleset: 'DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15',
+          first: '2026-01-15T06:00:00Z',
+          last: '2026-03-15T05:00:00Z',
+          next: '2026-04-15T05:00:00Z',
+          ended: false,
+          confidence: 0.9,
+          direction: 'debit',
+          amounts: {
+            800: 3,
+          },
+          lastAmount: 800,
+          autoMatched: false,
+          createdAt: '2026-03-15T06:00:00Z',
+          updatedAt: '2026-03-15T06:00:00Z',
         },
-        lastAmount: 800,
-        autoMatched: false,
-        createdAt: '2026-03-15T06:00:00Z',
-        updatedAt: '2026-03-15T06:00:00Z',
-      },
-    ]);
+      ]);
 
-    const world = testRenderHook(() => useRecurringTransactions(), {
-      initialRoute: '/bank/bac_01hy4rcmadc01d2kzv7vynbxxx/recurring',
-    });
+    const world = testRenderHook(
+      () =>
+        useRecurringTransactions({
+          direction: 'debit',
+          ended: false,
+        }),
+      {
+        initialRoute: '/bank/bac_01hy4rcmadc01d2kzv7vynbxxx/recurring',
+      },
+    );
     await waitFor(() => expect(world.result.current.data).toHaveLength(25));
     expect(world.result.current.hasNextPage).toBeTruthy();
 

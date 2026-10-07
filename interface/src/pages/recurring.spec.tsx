@@ -20,76 +20,86 @@ describe('recurring page', () => {
   });
 
   it('will show the empty state when nothing is recurring', async () => {
-    mockFetch.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring').reply(200, []);
+    mockFetch
+      .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring?direction=debit&ended=false')
+      .reply(200, []);
     apiSampleResponses(mockFetch);
 
     const world = testRenderer(<Recurring />, {
       initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring',
     });
 
-    await waitFor(() => expect(world.getByTestId('recurring-empty')).toBeVisible());
+    await waitFor(() => expect(world.getByTestId('recurring-empty')).toHaveTextContent('Nothing here yet...'));
   });
 
   it('will split things up into tabs', async () => {
-    mockFetch.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring').reply(200, [
-      {
-        transactionRecurringId: 'txrc_01hy4re7c1xc2v44cf6kx30201',
-        bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
-        transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n01',
-        transactionCluster: {
+    mockFetch
+      .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring?direction=debit&ended=false')
+      .reply(200, [
+        {
+          transactionRecurringId: 'txrc_01hy4re7c1xc2v44cf6kx30201',
+          bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
           transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n01',
+          transactionCluster: {
+            transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n01',
+            bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
+            name: 'Github',
+            originalMemo: 'GITHUB.COM 877-448-4820 CA',
+            createdAt: '2026-01-15T06:00:00Z',
+          },
+          spendingId: null,
+          fundingScheduleId: null,
+          window: 'monthly',
+          ruleset: 'DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15',
+          first: '2026-01-15T06:00:00Z',
+          last: '2026-03-15T05:00:00Z',
+          next: '2099-04-15T05:00:00Z',
+          ended: false,
+          confidence: 0.9,
+          direction: 'debit',
+          amounts: {
+            800: 3,
+          },
+          lastAmount: 800,
+          autoMatched: false,
+          createdAt: '2026-03-15T06:00:00Z',
+          updatedAt: '2026-03-15T06:00:00Z',
+        },
+      ]);
+    mockFetch
+      .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring?direction=credit&ended=false')
+      .reply(200, [
+        {
+          transactionRecurringId: 'txrc_01hy4re7c1xc2v44cf6kx30202',
           bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
-          name: 'Github',
-          originalMemo: 'GITHUB.COM 877-448-4820 CA',
-          createdAt: '2026-01-15T06:00:00Z',
-        },
-        spendingId: null,
-        fundingScheduleId: null,
-        window: 'monthly',
-        ruleset: 'DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15',
-        first: '2026-01-15T06:00:00Z',
-        last: '2026-03-15T05:00:00Z',
-        next: '2099-04-15T05:00:00Z',
-        ended: false,
-        confidence: 0.9,
-        direction: 'debit',
-        amounts: {
-          800: 3,
-        },
-        lastAmount: 800,
-        autoMatched: false,
-        createdAt: '2026-03-15T06:00:00Z',
-        updatedAt: '2026-03-15T06:00:00Z',
-      },
-      {
-        transactionRecurringId: 'txrc_01hy4re7c1xc2v44cf6kx30202',
-        bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
-        transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n02',
-        transactionCluster: {
           transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n02',
-          bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
-          name: 'Mercury Payroll',
-          originalMemo: 'MERCURY PAYROLL DIRECT DEP',
-          createdAt: '2026-01-15T06:00:00Z',
+          transactionCluster: {
+            transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n02',
+            bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
+            name: 'Mercury Payroll',
+            originalMemo: 'MERCURY PAYROLL DIRECT DEP',
+            createdAt: '2026-01-15T06:00:00Z',
+          },
+          spendingId: null,
+          fundingScheduleId: null,
+          window: 'monthly',
+          ruleset: 'DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15',
+          first: '2026-01-15T06:00:00Z',
+          last: '2026-03-15T05:00:00Z',
+          next: '2099-04-15T05:00:00Z',
+          ended: false,
+          confidence: 0.9,
+          direction: 'credit',
+          amounts: {
+            '-250000': 3,
+          },
+          lastAmount: -250000,
+          autoMatched: false,
+          createdAt: '2026-03-15T06:00:00Z',
+          updatedAt: '2026-03-15T06:00:00Z',
         },
-        spendingId: null,
-        fundingScheduleId: null,
-        window: 'monthly',
-        ruleset: 'DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15',
-        first: '2026-01-15T06:00:00Z',
-        last: '2026-03-15T05:00:00Z',
-        next: '2099-04-15T05:00:00Z',
-        ended: false,
-        confidence: 0.9,
-        direction: 'credit',
-        amounts: {
-          '-250000': 3,
-        },
-        lastAmount: -250000,
-        autoMatched: false,
-        createdAt: '2026-03-15T06:00:00Z',
-        updatedAt: '2026-03-15T06:00:00Z',
-      },
+      ]);
+    mockFetch.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring?ended=true').reply(200, [
       {
         transactionRecurringId: 'txrc_01hy4re7c1xc2v44cf6kx30203',
         bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
@@ -139,37 +149,39 @@ describe('recurring page', () => {
   });
 
   it('will put things that were due a while ago in the late group', async () => {
-    mockFetch.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring').reply(200, [
-      {
-        transactionRecurringId: 'txrc_01hy4re7c1xc2v44cf6kx30201',
-        bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
-        transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n01',
-        transactionCluster: {
-          transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n01',
+    mockFetch
+      .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring?direction=debit&ended=false')
+      .reply(200, [
+        {
+          transactionRecurringId: 'txrc_01hy4re7c1xc2v44cf6kx30201',
           bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
-          name: 'Hulu',
-          originalMemo: 'HULU 877-8244858 CA',
-          createdAt: '2020-01-15T06:00:00Z',
+          transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n01',
+          transactionCluster: {
+            transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n01',
+            bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
+            name: 'Hulu',
+            originalMemo: 'HULU 877-8244858 CA',
+            createdAt: '2020-01-15T06:00:00Z',
+          },
+          spendingId: null,
+          fundingScheduleId: null,
+          window: 'monthly',
+          ruleset: 'DTSTART:20200101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15',
+          first: '2020-01-15T06:00:00Z',
+          last: '2020-03-15T05:00:00Z',
+          next: '2020-04-15T05:00:00Z',
+          ended: false,
+          confidence: 0.9,
+          direction: 'debit',
+          amounts: {
+            1799: 3,
+          },
+          lastAmount: 1799,
+          autoMatched: false,
+          createdAt: '2020-03-15T06:00:00Z',
+          updatedAt: '2020-03-15T06:00:00Z',
         },
-        spendingId: null,
-        fundingScheduleId: null,
-        window: 'monthly',
-        ruleset: 'DTSTART:20200101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15',
-        first: '2020-01-15T06:00:00Z',
-        last: '2020-03-15T05:00:00Z',
-        next: '2020-04-15T05:00:00Z',
-        ended: false,
-        confidence: 0.9,
-        direction: 'debit',
-        amounts: {
-          1799: 3,
-        },
-        lastAmount: 1799,
-        autoMatched: false,
-        createdAt: '2020-03-15T06:00:00Z',
-        updatedAt: '2020-03-15T06:00:00Z',
-      },
-    ]);
+      ]);
     apiSampleResponses(mockFetch);
 
     const world = testRenderer(<Recurring />, {

@@ -27,24 +27,6 @@
   padding-bottom: 16 * variables.$size;
 }
 
-.empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2 * variables.$size;
-  max-width: 112 * variables.$size;
-  margin-top: 16 * variables.$size;
-  margin-right: auto;
-  margin-bottom: 0;
-  margin-left: auto;
-}
-
-.emptyIcon {
-  color: var(--content-muted);
-  width: 16 * variables.$size;
-  height: 16 * variables.$size;
-}
-
 // Full width segmented control on mobile, underlined tabs on desktop
 .tabs {
   display: grid;
@@ -118,30 +100,11 @@
     &[aria-selected="true"] {
       background-color: transparent;
       border-bottom-color: var(--brand-bright);
-
-      .tabCount {
-        background-color: var(--background-active);
-        color: var(--content-emphasis);
-      }
     }
   }
 }
 
-// Just part of the label on mobile, a little chip on desktop
-.tabCount {
-  @media (min-width: variables.$mediumScreen) {
-    @include mixins.text-extra-small;
-    padding-top: 0;
-    padding-right: 1.5 * variables.$size;
-    padding-bottom: 0;
-    padding-left: 1.5 * variables.$size;
-    border-radius: var(--border-radius);
-    background-color: var(--background-emphasis);
-    color: var(--content);
-  }
-}
-
-.emptyTab {
+.message {
   padding-top: 4 * variables.$size;
   padding-right: 3 * variables.$size;
   padding-bottom: 4 * variables.$size;

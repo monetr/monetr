@@ -79,7 +79,8 @@ expense yet, monetr links it for you and sets `autoMatched`.
 ## <Badge type="info">GET</Badge> List recurring transactions
 
 Returns every recurring transaction on a bank account, a page at a time. Ones that are still going come first, sorted by
-when the next one is expected, then the ones that have ended.
+when the next one is expected, then the ones that have ended. You can narrow it down to one direction, or to just the
+ones that are still going or just the ones that ended, so you're not paging through stuff you don't care about.
 
 Each one comes with its `transactionCluster` so you have a name to show, but not its `spending`. If you need the expense
 look it up by `spendingId`.
@@ -100,16 +101,18 @@ GET /api/bank_accounts/:bankAccountId/recurring
 
 ### Query parameters
 
-| Attribute | Type    | Required | Description                                                                |
-| --------- | ------- | -------- | -------------------------------------------------------------------------- |
-| `limit`   | integer | No       | How many to return. Defaults to 25. Has to be between 1 and 100, or a 400. |
-| `offset`  | integer | No       | How many to skip first. Defaults to 0. Negative is a 400.                  |
+| Attribute   | Type    | Required | Description                                                                                                                                           |
+| ----------- | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `limit`     | integer | No       | How many to return. Defaults to 25. Has to be between 1 and 100, or a 400.                                                                            |
+| `offset`    | integer | No       | How many to skip first. Defaults to 0. Negative is a 400.                                                                                             |
+| `direction` | string  | No       | `debit` or `credit`, to only get the ones going that way. Leave it off to get both. Anything else is a 400.                                           |
+| `ended`     | boolean | No       | `false` for just the ones that are still going, `true` for just the ones that ended. Leave it off to get both. Has to be `true` or `false`, or a 400. |
 
 ### Example
 
 ```bash
 curl --request GET \
-  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring?limit=1" \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring?direction=debit&ended=false&limit=1" \
   --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
 ```
 
@@ -160,9 +163,9 @@ that isn't yours, isn't an error. You just get back an empty array.
 
 ### Errors
 
-| Status | When                                                                              |
-| ------ | --------------------------------------------------------------------------------- |
-| 400    | `limit` is outside 1 to 100, `offset` is negative, or the bank account ID is bad. |
+| Status | When                                                                                                                                                      |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 400    | `limit` is outside 1 to 100, `offset` is negative, `direction` isn't `debit` or `credit`, `ended` isn't `true` or `false`, or the bank account ID is bad. |
 
 ## <Badge type="info">GET</Badge> Get a recurring transaction
 

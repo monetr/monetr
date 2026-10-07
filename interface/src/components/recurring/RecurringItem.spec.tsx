@@ -202,7 +202,7 @@ describe('recurring item', () => {
   it('will show the recent charges when expanded', async () => {
     mockFetch
       .onGet(
-        '/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions?transaction_recurring_id=txrc_01hy4re7c1xc2v44cf6kx302jx&limit=100',
+        '/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions?transaction_recurring_id=txrc_01hy4re7c1xc2v44cf6kx302jx&limit=3',
       )
       .reply(200, [
         {

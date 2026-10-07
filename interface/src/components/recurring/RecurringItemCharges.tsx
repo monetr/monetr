@@ -5,8 +5,8 @@ import { Link } from 'wouter';
 import RecurringMemo from '@monetr/interface/components/recurring/RecurringMemo';
 import { useLocale } from '@monetr/interface/hooks/useLocale';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
-import { useRecurringTransactionHistory } from '@monetr/interface/hooks/useRecurringTransactionHistory';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
+import { useTransactionsForRecurring } from '@monetr/interface/hooks/useTransactionsForRecurring';
 import type TransactionRecurring from '@monetr/interface/models/TransactionRecurring';
 import { AmountType } from '@monetr/interface/util/amounts';
 import { DateLength, formatDate } from '@monetr/interface/util/formatDate';
@@ -25,15 +25,11 @@ export default function RecurringItemCharges(props: RecurringItemChargesProps): 
   const { data: locale } = useLocaleCurrency();
   const { data: dateLocale } = useLocale();
   const { inTimezone } = useTimezone();
-  const { transactions, seen, isLoading } = useRecurringTransactionHistory(props.recurring);
+  // Only the last three show up here so that's all we ask for
+  const { data: transactions, isLoading } = useTransactionsForRecurring(props.recurring.transactionRecurringId, 3);
 
   if (!locale || !dateLocale) {
     return null;
-  }
-
-  let chargesString = `${seen} charges`;
-  if (seen === 1) {
-    chargesString = '1 charge';
   }
 
   return (
@@ -42,9 +38,7 @@ export default function RecurringItemCharges(props: RecurringItemChargesProps): 
         <Layers />
         <span>Similar Transactions Group</span>
         <strong>{props.name}</strong>
-        <span>
-          &middot; {chargesString} since {format(inTimezone(props.recurring.first), 'MMM yyyy')}
-        </span>
+        <span>&middot; since {format(inTimezone(props.recurring.first), 'MMM yyyy')}</span>
         <Link className={styles.detailsLink} to={props.detailsPath}>
           View Details
         </Link>
@@ -52,7 +46,7 @@ export default function RecurringItemCharges(props: RecurringItemChargesProps): 
       {isLoading && <span className={styles.loading}>Loading...</span>}
       {!isLoading && (
         <div className={styles.list}>
-          {transactions.slice(0, 3).map(item => (
+          {(transactions ?? []).map(item => (
             <div className={styles.charge} key={item.transactionId}>
               <span className={styles.date}>{formatDate(item.date, inTimezone, dateLocale, DateLength.Medium)}</span>
               <RecurringMemo className={styles.memo} memo={item.originalName} />

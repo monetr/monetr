@@ -47,15 +47,19 @@ func (r *repositoryBase) GetTransactionRecurringById(
 func (r *repositoryBase) GetTransactionRecurrings(
 	ctx context.Context,
 	bankAccountId ID[BankAccount],
+	direction *Direction,
+	ended *bool,
 	limit, offset int,
 ) ([]TransactionRecurring, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 	span.SetData("accountId", r.AccountId())
 	span.SetData("bankAccountId", bankAccountId)
+	span.SetData("direction", direction)
+	span.SetData("ended", ended)
 
 	result := make([]TransactionRecurring, 0)
-	err := r.txn.NewSelect().
+	query := r.txn.NewSelect().
 		Model(&result).
 		// Spending is left off, the UI looks each one up by Id so it comes from
 		// the same cache as the expenses
@@ -66,7 +70,23 @@ func (r *repositoryBase) GetTransactionRecurrings(
 			return q.ExcludeColumn("members", "debug")
 		}).
 		Where(`"transaction_recurring"."account_id" = ?`, r.AccountId()).
-		Where(`"transaction_recurring"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction_recurring"."bank_account_id" = ?`, bankAccountId)
+
+	if direction != nil {
+		query = query.Where(`"transaction_recurring"."direction" = ?`, *direction)
+	}
+
+	if ended != nil {
+		query = query.Where(`"transaction_recurring"."ended" = ?`, *ended)
+
+		// Ended ones still project next forward off of their rule so it doesn't
+		// mean anything for them, go by when they were last seen instead
+		if *ended {
+			query = query.Order(`transaction_recurring.last DESC`)
+		}
+	}
+
+	err := query.
 		Limit(limit).
 		Offset(offset).
 		// Active ones first, then whatever is coming up next

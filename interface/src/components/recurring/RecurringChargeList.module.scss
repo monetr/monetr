@@ -52,28 +52,9 @@
   gap: 2 * variables.$size;
 }
 
-.empty {
+.message {
   padding-top: 2 * variables.$size;
   padding-right: 2 * variables.$size;
   padding-bottom: 2 * variables.$size;
   padding-left: 2 * variables.$size;
-}
-
-.showMore {
-  @include mixins.text-small;
-  align-self: flex-start;
-  border: 0;
-  background: transparent;
-  padding-top: 1 * variables.$size;
-  padding-right: 0;
-  padding-bottom: 1 * variables.$size;
-  padding-left: 0;
-  font-weight: var(--medium);
-  color: var(--brand-faint);
-  cursor: pointer;
-
-  &:disabled {
-    cursor: default;
-    opacity: 0.7;
-  }
 }

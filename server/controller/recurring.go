@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v5"
 	. "github.com/monetr/monetr/server/models"
@@ -27,11 +28,34 @@ func (c *Controller) getRecurringTransactions(ctx *echo.Context) error {
 		return c.badRequest(ctx, "Offset cannot be less than 0")
 	}
 
+	// These are both optional, leaving them off just doesn't filter on them. This
+	// way the UI can ask for only the tab it is showing instead of everything.
+	var direction *Direction
+	if raw := ctx.QueryParam("direction"); raw != "" {
+		switch Direction(raw) {
+		case DebitDirection, CreditDirection:
+			direction = new(Direction(raw))
+		default:
+			return c.badRequest(ctx, "Direction must be debit or credit")
+		}
+	}
+
+	var ended *bool
+	if raw := ctx.QueryParam("ended"); raw != "" {
+		value, err := strconv.ParseBool(raw)
+		if err != nil {
+			return c.badRequest(ctx, "Ended must be true or false")
+		}
+		ended = new(value)
+	}
+
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	items, err := repo.GetTransactionRecurrings(
 		c.getContext(ctx),
 		bankAccountId,
+		direction,
+		ended,
 		limit,
 		offset,
 	)

@@ -192,9 +192,14 @@ type BaseRepository interface {
 
 	// GetTransactionRecurrings will return a page of recurring transactions for
 	// the bank account, active ones first ordered by when they are expected next.
+	// When only asking for ended ones they are ordered by when they were last
+	// seen instead, most recent first. The direction and ended filters are
+	// optional, nil means don't filter on it.
 	GetTransactionRecurrings(
 		ctx context.Context,
 		bankAccountId ID[BankAccount],
+		direction *Direction,
+		ended *bool,
 		limit, offset int,
 	) ([]TransactionRecurring, error)
 	// GetTransactionRecurringByCluster returns the recurring transactions for the

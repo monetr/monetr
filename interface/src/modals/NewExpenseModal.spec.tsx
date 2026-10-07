@@ -118,9 +118,6 @@ function givenTheRecurringMocks(mockFetch: FetchMock) {
     createdAt: '2026-01-15T06:00:00Z',
     updatedAt: '2026-03-15T06:00:00Z',
   });
-  mockFetch
-    .onGet(`/api/bank_accounts/${bankAccountId}/transactions?transaction_recurring_id=${recurringId}&limit=100`)
-    .reply(200, []);
 }
 
 const spendingId = 'spnd_01hy4rkq0x3c6dtr9w1p2v5bns';
@@ -212,9 +209,7 @@ describe('new expense modal', () => {
     await act(() => void showNewExpenseModal({ recurring: recurring('2099-04-15T05:00:00Z'), transaction }));
     await waitFor(() => expect(world.getByTestId('new-expense-modal')).toBeVisible());
 
-    expect(world.getByTestId('new-expense-recurring-banner')).toHaveTextContent(
-      'Filled in from your 3 Netflix charges',
-    );
+    expect(world.getByTestId('new-expense-recurring-banner')).toHaveTextContent('Filled in from your Netflix charges');
     // the cluster name wins over the transactions own name
     expect(world.getByDisplayValue('Netflix')).toBeInTheDocument();
     expect(world.getByDisplayValue('$15.49')).toBeInTheDocument();

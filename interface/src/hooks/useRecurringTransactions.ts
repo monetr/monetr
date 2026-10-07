@@ -5,7 +5,15 @@ import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBan
 import TransactionRecurring from '@monetr/interface/models/TransactionRecurring';
 import type { WithJsonValues } from '@monetr/interface/util/json';
 
-export function useRecurringTransactions(): UseInfiniteQueryResult<Array<TransactionRecurring>, unknown> {
+// Both of these are optional, leaving one off just means the server won't filter on it.
+export interface RecurringTransactionsParams {
+  direction?: TransactionRecurring['direction'];
+  ended?: boolean;
+}
+
+export function useRecurringTransactions(
+  params: RecurringTransactionsParams,
+): UseInfiniteQueryResult<Array<TransactionRecurring>, unknown> {
   const selectedBankAccountId = useSelectedBankAccountId();
   const select = useCallback(
     (data: InfiniteData<Array<WithJsonValues<TransactionRecurring>>>) =>
@@ -13,7 +21,7 @@ export function useRecurringTransactions(): UseInfiniteQueryResult<Array<Transac
     [],
   );
   return useInfiniteQuery<Array<WithJsonValues<TransactionRecurring>>, unknown, Array<TransactionRecurring>>({
-    queryKey: ['GET', `/api/bank_accounts/${selectedBankAccountId}/recurring`],
+    queryKey: ['GET', `/api/bank_accounts/${selectedBankAccountId}/recurring`, params],
     initialPageParam: 0,
     getNextPageParam: (_, pages) => {
       // If there are no more pages then we should return null.

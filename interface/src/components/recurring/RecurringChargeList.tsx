@@ -2,8 +2,10 @@ import { useState } from 'react';
 
 import RecurringChargeItem from '@monetr/interface/components/recurring/RecurringChargeItem';
 import Typography from '@monetr/interface/components/Typography';
-import { useRecurringTransactionHistory } from '@monetr/interface/hooks/useRecurringTransactionHistory';
+import { useInfiniteScroll } from '@monetr/interface/hooks/useInfiniteScroll';
 import { useSimilarTransactions } from '@monetr/interface/hooks/useSimilarTransactions';
+import { useTransactionsForRecurring } from '@monetr/interface/hooks/useTransactionsForRecurring';
+import type { ID } from '@monetr/interface/models/ID';
 import type TransactionRecurring from '@monetr/interface/models/TransactionRecurring';
 
 import styles from './RecurringChargeList.module.scss';
@@ -16,34 +18,36 @@ export interface RecurringChargeListProps {
 
 export default function RecurringChargeList(props: RecurringChargeListProps): React.JSX.Element {
   const [tab, setTab] = useState<Tab>('schedule');
-  const [expanded, setExpanded] = useState(false);
-  const history = useRecurringTransactionHistory(props.recurring);
-  const similar = useSimilarTransactions(props.recurring.transactionClusterId);
 
-  // On schedule is everything monetr matched to this recurring transaction, that's all loaded at once so only the first
-  // few show until you ask for the rest. All is the whole similar transactions group, which is paged so that one loads
-  // more instead.
-  let transactions = similar.data ?? [];
-  let isLoading = similar.isLoading;
+  // Only load whichever tab is showing, plenty of people will never look at the all tab. On schedule is everything
+  // monetr matched to this recurring transaction, all is the whole similar transactions group.
+  let transactionRecurringId: ID<TransactionRecurring> | undefined;
+  let transactionClusterId: string | undefined;
   if (tab === 'schedule') {
-    transactions = history.transactions;
-    isLoading = history.isLoading;
+    transactionRecurringId = props.recurring.transactionRecurringId;
+  } else {
+    transactionClusterId = props.recurring.transactionClusterId;
   }
-  let visible = transactions;
-  if (tab === 'schedule' && !expanded) {
-    visible = transactions.slice(0, 5);
+  const onSchedule = useTransactionsForRecurring(transactionRecurringId, 10);
+  const similar = useSimilarTransactions(transactionClusterId);
+
+  let query = onSchedule;
+  if (tab === 'all') {
+    query = similar;
   }
-  const hidden = transactions.length - visible.length;
-  const canLoadMore = tab === 'all' && similar.hasNextPage;
+  const transactions = query.data ?? [];
+  const [sentryRef] = useInfiniteScroll({
+    loading: query.isFetching,
+    hasNextPage: query.hasNextPage,
+    onLoadMore: query.fetchNextPage,
+    disabled: query.isError,
+    // Start loading the next page a bit before the bottom actually shows up
+    rootMargin: '0px 0px 700px 0px',
+  });
 
   let heading = 'Deposits';
   if (props.recurring.direction === 'debit') {
     heading = 'Charges';
-  }
-
-  let showMore = 'Show More';
-  if (similar.isFetchingNextPage) {
-    showMore = 'Loading...';
   }
 
   return (
@@ -60,7 +64,7 @@ export default function RecurringChargeList(props: RecurringChargeListProps): Re
             role='tab'
             type='button'
           >
-            On Schedule {history.seen}
+            On Schedule
           </button>
           <button
             aria-selected={tab === 'all'}
@@ -75,30 +79,22 @@ export default function RecurringChargeList(props: RecurringChargeListProps): Re
       </div>
 
       <ul className={styles.list}>
-        {visible.map(item => (
+        {transactions.map(item => (
           <RecurringChargeItem key={item.transactionId} recurring={props.recurring} transaction={item} />
         ))}
       </ul>
 
-      {!isLoading && visible.length === 0 && !canLoadMore && (
-        <Typography className={styles.empty} color='subtle' size='sm'>
+      {!query.isLoading && transactions.length === 0 && (
+        <Typography className={styles.message} color='subtle' size='sm'>
           Nothing here...
         </Typography>
       )}
-      {hidden > 0 && (
-        <button className={styles.showMore} onClick={() => setExpanded(true)} type='button'>
-          Show {hidden} More
-        </button>
-      )}
-      {canLoadMore && (
-        <button
-          className={styles.showMore}
-          disabled={similar.isFetchingNextPage}
-          onClick={() => similar.fetchNextPage()}
-          type='button'
-        >
-          {showMore}
-        </button>
+      {query.hasNextPage && (
+        <div ref={sentryRef}>
+          <Typography className={styles.message} color='subtle' size='sm'>
+            Loading...
+          </Typography>
+        </div>
       )}
     </section>
   );

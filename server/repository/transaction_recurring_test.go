@@ -266,7 +266,7 @@ func TestRepositoryBase_GetTransactionRecurrings(t *testing.T) {
 			log,
 		)
 
-		result, err := repo.GetTransactionRecurrings(t.Context(), bankAccount.BankAccountId, 25, 0)
+		result, err := repo.GetTransactionRecurrings(t.Context(), bankAccount.BankAccountId, nil, nil, 25, 0)
 		assert.NoError(t, err, "must be able to read recurring transactions")
 		assert.Empty(t, result, "there should be no recurring transactions")
 	})
@@ -306,7 +306,7 @@ func TestRepositoryBase_GetTransactionRecurrings(t *testing.T) {
 		err := repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, recurring)
 		require.NoError(t, err, "must be able to create recurring transactions")
 
-		result, err := repo.GetTransactionRecurrings(t.Context(), bankAccount.BankAccountId, 25, 0)
+		result, err := repo.GetTransactionRecurrings(t.Context(), bankAccount.BankAccountId, nil, nil, 25, 0)
 		assert.NoError(t, err, "must be able to read recurring transactions")
 		require.Len(t, result, 3, "should return all of the recurring transactions")
 		assert.Equal(t, recurring[1].TransactionRecurringId, result[0].TransactionRecurringId, "sooner should be first")
@@ -341,7 +341,7 @@ func TestRepositoryBase_GetTransactionRecurrings(t *testing.T) {
 		err = repo.UpdateTransactionRecurring(t.Context(), bankAccount.BankAccountId, &recurring[0])
 		require.NoError(t, err, "must be able to link the spending")
 
-		result, err := repo.GetTransactionRecurrings(t.Context(), bankAccount.BankAccountId, 25, 0)
+		result, err := repo.GetTransactionRecurrings(t.Context(), bankAccount.BankAccountId, nil, nil, 25, 0)
 		assert.NoError(t, err, "must be able to read recurring transactions")
 		require.Len(t, result, 1, "should return the recurring transaction")
 		require.NotNil(t, result[0].TransactionCluster, "cluster should be included")
@@ -375,11 +375,11 @@ func TestRepositoryBase_GetTransactionRecurrings(t *testing.T) {
 		err := repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, recurring)
 		require.NoError(t, err, "must be able to create recurring transactions")
 
-		firstPage, err := repo.GetTransactionRecurrings(t.Context(), bankAccount.BankAccountId, 3, 0)
+		firstPage, err := repo.GetTransactionRecurrings(t.Context(), bankAccount.BankAccountId, nil, nil, 3, 0)
 		assert.NoError(t, err, "must be able to read the first page")
 		assert.Len(t, firstPage, 3, "first page should be full")
 
-		secondPage, err := repo.GetTransactionRecurrings(t.Context(), bankAccount.BankAccountId, 3, 3)
+		secondPage, err := repo.GetTransactionRecurrings(t.Context(), bankAccount.BankAccountId, nil, nil, 3, 3)
 		assert.NoError(t, err, "must be able to read the second page")
 		assert.Len(t, secondPage, 2, "second page should have whats left")
 	})
