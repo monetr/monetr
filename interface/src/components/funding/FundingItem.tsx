@@ -1,7 +1,7 @@
 import { format } from 'date-fns';
 import { ChevronRight } from 'lucide-react';
 import { rrulestr } from 'rrule';
-import { Link, useLocation } from 'wouter';
+import { Link } from 'wouter';
 
 import { Avatar, AvatarFallback } from '@monetr/interface/components/Avatar';
 import Typography from '@monetr/interface/components/Typography';
@@ -22,7 +22,6 @@ export interface FundingItemProps {
 export default function FundingItem(props: FundingItemProps): React.JSX.Element | null {
   const { data: localeCurrency } = useLocaleCurrency();
   const { data: locale } = useLocale();
-  const [, navigate] = useLocation();
   const { funding } = props;
   const contributionForecast = useNextFundingForecast(funding.fundingScheduleId);
   const rule = rrulestr(funding.ruleset);
@@ -45,14 +44,11 @@ export default function FundingItem(props: FundingItemProps): React.JSX.Element 
     locale,
   });
 
-  function openDetails() {
-    navigate(`/bank/${funding.bankAccountId}/funding/${funding.fundingScheduleId}/details`);
-  }
-
   return (
     <li className={styles.root}>
       <Link
-        className={styles.mobileLink}
+        aria-label={funding.name}
+        className={styles.link}
         to={`/bank/${funding.bankAccountId}/funding/${funding.fundingScheduleId}/details`}
       />
       <div className={styles.inner}>
@@ -83,7 +79,7 @@ export default function FundingItem(props: FundingItemProps): React.JSX.Element 
               </span>
             </div>
           </div>
-          <ChevronRight className={styles.chevron} onClick={openDetails} />
+          <ChevronRight className={styles.chevron} />
         </div>
       </div>
     </li>

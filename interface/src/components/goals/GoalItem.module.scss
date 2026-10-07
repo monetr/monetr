@@ -27,7 +27,7 @@
   }
 }
 
-.mobileLink {
+.link {
   position: absolute;
   left: 0;
   top: 0;
@@ -35,11 +35,6 @@
   height: 100%;
   width: 100%;
   cursor: pointer;
-
-  @media (min-width: variables.$mediumScreen) {
-    display: none; // md:hidden
-    cursor: auto; // md:cursor-auto
-  }
 }
 
 .inner {
@@ -56,8 +51,11 @@
 
   @media (min-width: variables.$mediumScreen) {
     gap: 4 * variables.$size;
-    cursor: auto; // md:cursor-auto
   }
+}
+
+.arrow {
+  flex: none;
 }
 
 .column {
@@ -268,6 +266,8 @@
 // --- Progress bar ---
 
 .progressTrack {
+  // The bar is positioned so it would sit above the row link, let clicks go through to the link
+  pointer-events: none;
   position: relative;
   width: 100%;
   height: 1.5 * variables.$size; // h-1.5

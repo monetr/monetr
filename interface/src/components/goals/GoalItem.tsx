@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
+import { ChevronRight } from 'lucide-react';
 import { Link } from 'wouter';
 
-import ArrowLink from '@monetr/interface/components/ArrowLink';
 import Badge from '@monetr/interface/components/Badge';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import { useFundingSchedule } from '@monetr/interface/hooks/useFundingSchedule';
@@ -38,7 +38,7 @@ export default function GoalItem({ spending }: GoalItemProps): React.JSX.Element
 
   return (
     <li className={styles.root}>
-      <Link className={styles.mobileLink} to={detailsPath} />
+      <Link aria-label={spending.name} className={styles.link} to={detailsPath} />
       <div className={styles.inner}>
         <MerchantIcon name={spending.name} />
         <div className={styles.column}>
@@ -60,7 +60,9 @@ export default function GoalItem({ spending }: GoalItemProps): React.JSX.Element
           </div>
           <GoalProgressBar spending={spending} />
         </div>
-        <ArrowLink to={detailsPath} />
+        <span className={styles.arrow}>
+          <ChevronRight />
+        </span>
       </div>
     </li>
   );

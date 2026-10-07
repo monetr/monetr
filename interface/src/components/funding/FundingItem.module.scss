@@ -30,7 +30,7 @@
   }
 }
 
-.mobileLink {
+.link {
   position: absolute;
   left: 0;
   top: 0;
@@ -38,11 +38,6 @@
   height: 100%;
   width: 100%;
   cursor: pointer;
-
-  @media (min-width: variables.$mediumScreen) {
-    display: none; // md:hidden
-    cursor: auto; // md:cursor-auto
-  }
 }
 
 .inner {
@@ -59,7 +54,6 @@
 
   @media (min-width: variables.$mediumScreen) {
     gap: 4 * variables.$size;
-    cursor: auto; // md:cursor-auto
   }
 }
 
@@ -131,8 +125,4 @@
 .chevron {
   color: var(--content-subtle); // dark:text-dark-monetr-content-subtle
   flex: none; // flex-none
-
-  @media (min-width: variables.$mediumScreen) {
-    cursor: pointer; // md:cursor-pointer
-  }
 }
