@@ -19,7 +19,6 @@ import { useCreateFundingSchedule } from '@monetr/interface/hooks/useCreateFundi
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { usePatchTransactionRecurring } from '@monetr/interface/hooks/usePatchTransactionRecurring';
-import { useRecurringTransactionHistory } from '@monetr/interface/hooks/useRecurringTransactionHistory';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { useTransactionCluster } from '@monetr/interface/hooks/useTransactionCluster';
@@ -65,7 +64,6 @@ function NewFundingModal(props: NewFundingModalProps): React.JSX.Element {
   const { data: link } = useCurrentLink();
   const isManual = Boolean(link?.getIsManual());
   const { data: locale } = useLocaleCurrency();
-  const { seen } = useRecurringTransactionHistory(recurring);
   // use the similar transactions name instead of the transactions own name, since thats the name for the whole group of
   // deposits and not just the one they happened to start from
   const { data: cluster, isLoading: clusterIsLoading } = useTransactionCluster(recurring?.transactionClusterId ?? null);
@@ -173,7 +171,7 @@ function NewFundingModal(props: NewFundingModalProps): React.JSX.Element {
                 <div className={styles.recurringBanner} data-testid='new-funding-recurring-banner'>
                   <Repeat />
                   <Typography color='inherit' size='sm'>
-                    Filled in from your {seen} {name ?? 'recurring'} deposits. Give it a once over before you create it.
+                    Filled in from your {name ?? 'recurring'} deposits. Give it a once over before you create it.
                   </Typography>
                 </div>
               )}

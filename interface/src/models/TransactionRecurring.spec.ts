@@ -1,7 +1,7 @@
 import type BankAccount from '@monetr/interface/models/BankAccount';
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { ID } from '@monetr/interface/models/ID';
-import Spending, { SpendingType } from '@monetr/interface/models/Spending';
+import type Spending from '@monetr/interface/models/Spending';
 import type TransactionCluster from '@monetr/interface/models/TransactionCluster';
 import TransactionRecurring, { TransactionRecurringWindow } from '@monetr/interface/models/TransactionRecurring';
 import type { WithJsonValues } from '@monetr/interface/util/json';
@@ -26,8 +26,8 @@ function fixture(overrides: Partial<WithJsonValues<TransactionRecurring>> = {}):
     },
     lastAmount: 800,
     autoMatched: false,
-    spending: null,
     fundingSchedule: null,
+    transactionCluster: null,
     createdAt: '2026-03-15T06:00:00Z',
     updatedAt: '2026-03-16T06:00:00Z',
     ...overrides,
@@ -68,37 +68,31 @@ describe('transaction recurring', () => {
     expect(recurring.lastAmount).toBe(-500000);
   });
 
-  it('will not have spending when nothing was created from it', () => {
+  it('will not have a spending id when nothing is linked', () => {
     const recurring = fixture();
-    expect(recurring.spending).toBeNull();
+    expect(recurring.spendingId).toBeNull();
   });
 
-  it('will parse the spending created from it', () => {
+  it('will parse the linked spending id', () => {
     const recurring = fixture({
       spendingId: ID.from<Spending>('spnd_test'),
-      spending: {
-        spendingId: ID.from<Spending>('spnd_test'),
-        bankAccountId: ID.from<BankAccount>('bac_test'),
-        fundingScheduleId: ID.from('fund_test'),
-        name: 'Github',
-        spendingType: SpendingType.Expense,
-        targetAmount: 800,
-        currentAmount: 0,
-        usedAmount: 0,
-        ruleset: 'DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15',
-        lastRecurrence: null,
-        nextRecurrence: '2026-04-15T05:00:00Z',
-        nextContributionAmount: 400,
-        isBehind: false,
-        isPaused: false,
-        autoCreateTransaction: false,
-        createdAt: '2026-03-15T06:00:00Z',
-      },
     });
     expect(recurring.spendingId?.toString()).toBe('spnd_test');
-    expect(recurring.spending).toBeInstanceOf(Spending);
-    expect(recurring.spending?.spendingId.toString()).toBe('spnd_test');
-    expect(recurring.spending?.nextRecurrence).toEqual(new Date('2026-04-15T05:00:00Z'));
+  });
+
+  it('will describe the confidence in words', () => {
+    const veryLikely = fixture({
+      confidence: 0.95,
+    });
+    expect(veryLikely.getConfidenceLabel()).toBe('Very likely');
+    const likely = fixture({
+      confidence: 0.8,
+    });
+    expect(likely.getConfidenceLabel()).toBe('Likely');
+    const possibly = fixture({
+      confidence: 0.5,
+    });
+    expect(possibly.getConfidenceLabel()).toBe('Possibly');
   });
 
   it('will not have a funding schedule when nothing was created from it', () => {

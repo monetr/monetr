@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import { differenceInCalendarDays, isThisYear, startOfToday } from 'date-fns';
-import { ArrowRight, CalendarSync, Plus, Repeat, Sparkles, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
+import { CalendarSync, Plus, Repeat, Sparkles, Wallet } from 'lucide-react';
 import { rrulestr } from 'rrule';
 import { Link } from 'wouter';
 
@@ -9,12 +9,13 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@monetr/interface/compo
 import { useLocale } from '@monetr/interface/hooks/useLocale';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useRecurringTransaction } from '@monetr/interface/hooks/useRecurringTransaction';
-import { useRecurringTransactionHistory } from '@monetr/interface/hooks/useRecurringTransactionHistory';
 import { useSpending } from '@monetr/interface/hooks/useSpending';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
+import { useTransactionsForRecurring } from '@monetr/interface/hooks/useTransactionsForRecurring';
 import { showNewExpenseModal } from '@monetr/interface/modals/NewExpenseModal';
 import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
 import type Transaction from '@monetr/interface/models/Transaction';
+import type TransactionRecurring from '@monetr/interface/models/TransactionRecurring';
 import { AmountType } from '@monetr/interface/util/amounts';
 import capitalize from '@monetr/interface/util/capitalize';
 
@@ -28,7 +29,8 @@ export default function TransactionRecurringCard({
   transaction,
 }: TransactionRecurringCardProps): React.JSX.Element | null {
   const { data: recurring } = useRecurringTransaction(transaction.transactionRecurringId);
-  const { transactions, seen, priceChange } = useRecurringTransactionHistory(recurring);
+  // the recurring transaction only has the id, look the expense up so it comes from the same cache as the expenses
+  const { data: spending } = useSpending(recurring?.spendingId ?? null);
   const { timezone, inTimezone } = useTimezone();
   const { data: locale } = useLocale();
   const { data: localeCurrency } = useLocaleCurrency();
@@ -50,8 +52,6 @@ export default function TransactionRecurringCard({
   const yearIfNeeded = (date: Date) => (isThisYear(date, { in: inTimezone }) ? undefined : 'numeric');
 
   const daysUntilNext = differenceInCalendarDays(inTimezone(recurring.next), startOfToday({ in: inTimezone }));
-  const PriceChangeIcon =
-    priceChange && priceChange.currentAmount > priceChange.previousAmount ? TrendingUp : TrendingDown;
 
   return (
     <section className={styles.card} data-testid='transaction-recurring-card'>
@@ -67,7 +67,7 @@ export default function TransactionRecurringCard({
         </div>
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
-            <span className={styles.confidence}>{getConfidenceLabel(recurring.confidence)}</span>
+            <span className={styles.confidence}>{recurring.getConfidenceLabel()}</span>
           </TooltipTrigger>
           <TooltipContent side='top'>Confidence {Math.round(recurring.confidence * 100)}%</TooltipContent>
         </Tooltip>
@@ -88,35 +88,12 @@ export default function TransactionRecurringCard({
         )}
         <Stat label='Usually' value={formatAmount(recurring.lastAmount)} />
         <Stat label='Since' value={formatDate(recurring.first, { month: 'short', year: 'numeric' })} />
-        <Stat label='Seen' value={seen === 1 ? '1 time' : `${seen} times`} />
       </div>
-
-      {priceChange && (
-        <div className={styles.priceChange}>
-          <span className={styles.priceChangeTitle}>
-            <PriceChangeIcon />
-            Price went {priceChange.currentAmount > priceChange.previousAmount ? 'up' : 'down'} in{' '}
-            {formatDate(priceChange.changedAt, {
-              month: 'long',
-              year: yearIfNeeded(priceChange.changedAt),
-            })}
-          </span>
-          <div className={styles.priceChangeAmounts}>
-            <span className={styles.priceChip}>
-              {formatAmount(priceChange.previousAmount)} <span>× {priceChange.previousCount}</span>
-            </span>
-            <ArrowRight />
-            <span className={styles.priceChip} data-current>
-              {formatAmount(priceChange.currentAmount)} <span>× {priceChange.currentCount}</span>
-            </span>
-          </div>
-        </div>
-      )}
 
       {/* only money leaving the account can be budgeted for with an expense */}
       {isDebit && (
         <div className={styles.footer}>
-          {recurring.spending ? (
+          {recurring.spendingId ? (
             <Fragment>
               <span className={styles.spentFrom}>
                 {recurring.autoMatched ? (
@@ -132,7 +109,7 @@ export default function TransactionRecurringCard({
                       </span>
                     </TooltipTrigger>
                     <TooltipContent side='top'>
-                      monetr linked this for you since your recent charges were spent from {recurring.spending.name}
+                      monetr linked this for you since your recent charges were spent from {spending?.name}
                     </TooltipContent>
                   </Tooltip>
                 ) : (
@@ -141,13 +118,11 @@ export default function TransactionRecurringCard({
                   </span>
                 )}
                 <span>
-                  Budgeted with <strong>{recurring.spending.name}</strong>
+                  Budgeted with <strong>{spending?.name}</strong>
                 </span>
               </span>
               <Button asChild variant='secondary'>
-                <Link
-                  to={`/bank/${recurring.spending.bankAccountId}/expenses/${recurring.spending.spendingId}/details`}
-                >
+                <Link to={`/bank/${recurring.bankAccountId}/expenses/${recurring.spendingId}/details`}>
                   View expense
                 </Link>
               </Button>
@@ -158,7 +133,7 @@ export default function TransactionRecurringCard({
                 <span className={styles.spentFromIcon}>
                   <Wallet />
                 </span>
-                <SpentFrom seen={seen} transactions={transactions} />
+                <SpentFrom recurring={recurring} />
               </span>
               {!recurring.ended && (
                 <Button onClick={() => showNewExpenseModal({ recurring, transaction })} variant='primary'>
@@ -229,42 +204,22 @@ function Stat({ label, value, detail }: StatProps): React.JSX.Element {
 }
 
 interface SpentFromProps {
-  seen: number;
-  transactions: Array<Transaction>;
+  recurring: TransactionRecurring;
 }
 
-function SpentFrom({ seen, transactions }: SpentFromProps): React.JSX.Element | null {
-  const latest = transactions.at(0);
+function SpentFrom({ recurring }: SpentFromProps): React.JSX.Element | null {
+  // Only the most recent one matters here so that's all we ask for
+  const { data: transactions } = useTransactionsForRecurring(recurring.transactionRecurringId, 1);
+  const latest = transactions?.at(0);
   const { data: spending } = useSpending(latest?.spendingId ?? null);
   if (!latest) {
     return null;
   }
 
   const name = latest.spendingId ? spending?.name : 'Free-To-Use';
-  // can only say it was always spent from the same place if we actually have every transaction loaded
-  const always =
-    transactions.length === seen && transactions.every(item => item.spendingId === latest.spendingId) && seen > 1;
-  if (always) {
-    return (
-      <span>
-        Spent from <strong>{name}</strong> all {seen} times
-      </span>
-    );
-  }
-
   return (
     <span>
       Last spent from <strong>{name}</strong>
     </span>
   );
-}
-
-function getConfidenceLabel(confidence: number): string {
-  if (confidence >= 0.9) {
-    return 'Very likely';
-  }
-  if (confidence >= 0.75) {
-    return 'Likely';
-  }
-  return 'Possibly';
 }

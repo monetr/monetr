@@ -1,0 +1,35 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.date {
+  @include mixins.text-base;
+  display: flex;
+  align-items: center;
+  gap: 2 * variables.$size;
+  font-weight: var(--semibold);
+  color: var(--content-emphasis);
+}
+
+// Not enough room for this on mobile, the amount is what matters there
+.spentFrom {
+  @include mixins.text-small;
+  display: none;
+  color: var(--content-subtle);
+  white-space: nowrap;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: inline;
+  }
+}
+
+.oneOffChip {
+  @include mixins.text-extra-small;
+  padding-top: 0;
+  padding-right: 1.5 * variables.$size;
+  padding-bottom: 0;
+  padding-left: 1.5 * variables.$size;
+  border-radius: var(--border-radius);
+  font-weight: var(--semibold);
+  color: var(--content);
+  background-color: var(--background-emphasis);
+}

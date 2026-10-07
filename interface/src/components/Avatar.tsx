@@ -1,15 +1,28 @@
 import React from 'react';
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
+import { cva, type VariantProps } from 'class-variance-authority';
 
 import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './Avatar.module.scss';
 
+const avatarVariants = cva([styles.avatar], {
+  variants: {
+    size: {
+      default: undefined,
+      large: styles.sizeLarge,
+    },
+  },
+  defaultVariants: {
+    size: 'default',
+  },
+});
+
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Root className={mergeClasses(styles.avatar, className)} ref={ref} {...props} />
+  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & VariantProps<typeof avatarVariants>
+>(({ className, size, ...props }, ref) => (
+  <AvatarPrimitive.Root className={mergeClasses(avatarVariants({ size }), className)} ref={ref} {...props} />
 ));
 Avatar.displayName = AvatarPrimitive.Root.displayName;
 
@@ -29,4 +42,4 @@ const AvatarFallback = React.forwardRef<
 ));
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName;
 
-export { Avatar, AvatarFallback, AvatarImage };
+export { Avatar, AvatarFallback, AvatarImage, avatarVariants };

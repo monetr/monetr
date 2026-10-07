@@ -2,11 +2,69 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v5"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/schemas"
 )
+
+func (c *Controller) getRecurringTransactions(ctx *echo.Context) error {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
+		return c.badRequest(ctx, "Must specify a valid bank account Id")
+	}
+
+	limit := urlParamIntDefault(ctx, "limit", 25)
+	offset := urlParamIntDefault(ctx, "offset", 0)
+
+	if limit < 1 {
+		return c.badRequest(ctx, "Limit must be at least 1")
+	} else if limit > 100 {
+		return c.badRequest(ctx, "Limit cannot be greater than 100")
+	}
+
+	if offset < 0 {
+		return c.badRequest(ctx, "Offset cannot be less than 0")
+	}
+
+	// These are both optional, leaving them off just doesn't filter on them. This
+	// way the UI can ask for only the tab it is showing instead of everything.
+	var direction *Direction
+	if raw := ctx.QueryParam("direction"); raw != "" {
+		switch Direction(raw) {
+		case DebitDirection, CreditDirection:
+			direction = new(Direction(raw))
+		default:
+			return c.badRequest(ctx, "Direction must be debit or credit")
+		}
+	}
+
+	var ended *bool
+	if raw := ctx.QueryParam("ended"); raw != "" {
+		value, err := strconv.ParseBool(raw)
+		if err != nil {
+			return c.badRequest(ctx, "Ended must be true or false")
+		}
+		ended = new(value)
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	items, err := repo.GetTransactionRecurrings(
+		c.getContext(ctx),
+		bankAccountId,
+		direction,
+		ended,
+		limit,
+		offset,
+	)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "Failed to retrieve recurring transactions")
+	}
+
+	return ctx.JSON(http.StatusOK, items)
+}
 
 func (c *Controller) getRecurringTransaction(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
@@ -112,7 +170,7 @@ func (c *Controller) patchRecurringTransaction(ctx *echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to update recurring transaction")
 	}
 
-	// Read it back so the embedded spending and funding schedule match the new
+	// Read it back so the embedded funding schedule matches the new
 	// links.
 	result, err := repo.GetTransactionRecurringById(
 		c.getContext(ctx),

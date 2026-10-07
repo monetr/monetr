@@ -8,6 +8,8 @@ export default class TransactionCluster {
   readonly transactionClusterId: string;
   readonly bankAccountId: string;
   name: string;
+  // originalMemo is the memo the transactions in this group came in with from the bank, can be blank
+  originalMemo: string;
   members: Array<string>;
   createdAt: Date;
 
@@ -15,6 +17,7 @@ export default class TransactionCluster {
     this.transactionClusterId = data.transactionClusterId;
     this.bankAccountId = data.bankAccountId;
     this.name = data.name;
+    this.originalMemo = data.originalMemo;
     this.members = data.members;
     this.createdAt = parseDate(data.createdAt);
   }

@@ -1,0 +1,306 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.root {
+  position: relative;
+  width: 100%;
+  padding-left: 1 * variables.$size;
+  padding-right: 1 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    padding-left: 2 * variables.$size;
+    padding-right: 2 * variables.$size;
+  }
+
+  // Active is what shows when tapping on a phone
+  &:hover,
+  &:active {
+    .inner {
+      background-color: var(--background-emphasis);
+    }
+  }
+}
+
+// Gets boxed in with the recent charges when its expanded
+.container {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid transparent;
+  border-radius: var(--border-radius);
+
+  &[data-expanded="true"] {
+    border-color: var(--border-subtle);
+    background-color: var(--background-darker);
+  }
+}
+
+.inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 3 * variables.$size;
+  min-height: 14 * variables.$size;
+  padding-top: 1 * variables.$size;
+  padding-right: 2 * variables.$size;
+  padding-bottom: 1 * variables.$size;
+  padding-left: 2 * variables.$size;
+  border-radius: var(--border-radius);
+
+  @media (min-width: variables.$mediumScreen) {
+    gap: 4 * variables.$size;
+  }
+}
+
+.link {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--border-radius);
+}
+
+.nameColumn {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+
+  @media (min-width: variables.$mediumScreen) {
+    flex: 2 1 0;
+  }
+}
+
+.nameRow {
+  display: flex;
+  gap: 1 * variables.$size;
+  min-width: 0;
+}
+
+.name {
+  min-width: 0;
+}
+
+.mobileCadence {
+  @include mixins.text-base;
+  flex: none;
+  white-space: nowrap;
+  color: var(--content-subtle);
+
+  @media (min-width: variables.$mediumScreen) {
+    display: none;
+  }
+}
+
+.mobileStatus {
+  @include mixins.text-small;
+  display: flex;
+  align-items: center;
+  gap: 1.25 * variables.$size;
+  min-width: 0;
+  white-space: nowrap;
+  color: var(--content-subtle);
+
+  svg {
+    flex: none;
+    width: 3.25 * variables.$size;
+    height: 3.25 * variables.$size;
+    stroke-width: 2.5;
+    color: var(--success);
+  }
+
+  &[data-warning="true"] {
+    font-weight: var(--semibold);
+    color: var(--warning);
+  }
+
+  @media (min-width: variables.$mediumScreen) {
+    display: none;
+  }
+}
+
+.mobileStatusName {
+  color: var(--content);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.short {
+  @include mixins.text-extra-small;
+  flex: none;
+  font-weight: var(--semibold);
+  color: var(--warning);
+
+  .mobileStatus & {
+    @include mixins.text-small;
+  }
+}
+
+.desktopDate {
+  display: none;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5 * variables.$size;
+    width: 37.5 * variables.$size;
+  }
+}
+
+.dateValue {
+  @include mixins.text-base;
+  font-weight: var(--semibold);
+  color: var(--content-emphasis);
+}
+
+.dateDetail {
+  @include mixins.text-extra-small;
+  color: var(--content-subtle);
+}
+
+.lateBadge {
+  @include mixins.text-extra-small;
+  font-weight: var(--semibold);
+  color: var(--warning);
+  padding-top: 0.25 * variables.$size;
+  padding-right: 2 * variables.$size;
+  padding-bottom: 0.25 * variables.$size;
+  padding-left: 2 * variables.$size;
+  border-radius: var(--border-radius);
+  background-color: color-mix(in srgb, var(--warning) 20%, transparent);
+}
+
+.desktopBudget {
+  display: none;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: flex;
+    flex: 1.6 1 0;
+    align-items: center;
+    gap: 2 * variables.$size;
+    min-width: 0;
+  }
+}
+
+.linkedIcon {
+  display: flex;
+  flex: none;
+  padding-top: 0.5 * variables.$size;
+  padding-right: 1.5 * variables.$size;
+  padding-bottom: 0.5 * variables.$size;
+  padding-left: 1.5 * variables.$size;
+  border-radius: var(--border-radius);
+  background-color: var(--success);
+  color: var(--content-emphasis);
+
+  svg {
+    width: 3.5 * variables.$size;
+    height: 3.5 * variables.$size;
+  }
+}
+
+.linkedName {
+  @include mixins.text-small;
+  font-weight: var(--semibold);
+  color: var(--content-emphasis);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notLinked {
+  @include mixins.text-small;
+  color: var(--content-subtle);
+}
+
+// Sits on top of the row link so clicking it doesn't navigate
+.createButton {
+  @include mixins.text-small;
+  position: relative;
+  flex: none;
+  height: 7.5 * variables.$size;
+  padding-top: 0;
+  padding-right: 2.5 * variables.$size;
+  padding-bottom: 0;
+  padding-left: 2.5 * variables.$size;
+  border: 0;
+  border-radius: var(--border-radius);
+  background-color: var(--background-active);
+  color: var(--content-emphasis);
+  font-weight: var(--semibold);
+  cursor: pointer;
+
+  &:enabled:hover {
+    filter: brightness(1.2);
+  }
+}
+
+.amountColumn {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+
+  @media (min-width: variables.$mediumScreen) {
+    width: 27.5 * variables.$size;
+  }
+}
+
+.amount {
+  font-weight: var(--semibold);
+  color: var(--content-emphasis);
+}
+
+.desktopRange {
+  display: none;
+
+  @media (min-width: variables.$mediumScreen) {
+    @include mixins.text-extra-small;
+    display: block;
+    font-weight: var(--semibold);
+    color: var(--content-subtle);
+  }
+}
+
+.mobileDate {
+  @include mixins.text-small;
+  color: var(--content-subtle);
+
+  @media (min-width: variables.$mediumScreen) {
+    display: none;
+  }
+}
+
+// Same as the create button, sits above the row link
+.toggle {
+  position: relative;
+  display: none;
+  flex: none;
+  width: 7 * variables.$size;
+  height: 7 * variables.$size;
+  align-items: center;
+  justify-content: center;
+  padding-top: 0;
+  padding-right: 0;
+  padding-bottom: 0;
+  padding-left: 0;
+  border: 0;
+  border-radius: var(--border-radius);
+  background: transparent;
+  color: var(--content-subtle);
+  cursor: pointer;
+
+  svg {
+    width: 4.5 * variables.$size;
+    height: 4.5 * variables.$size;
+  }
+
+  &[aria-expanded="true"] {
+    background-color: var(--background-emphasis);
+    color: var(--content-emphasis);
+  }
+
+  @media (min-width: variables.$mediumScreen) {
+    display: flex;
+  }
+}

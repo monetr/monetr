@@ -1,0 +1,60 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3 * variables.$size;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5 * variables.$size;
+  padding-top: 0.75 * variables.$size;
+  padding-right: 0.75 * variables.$size;
+  padding-bottom: 0.75 * variables.$size;
+  padding-left: 0.75 * variables.$size;
+  border-radius: var(--border-radius);
+  background-color: var(--background-subtle);
+}
+
+.tab {
+  @include mixins.text-small;
+  border: 0;
+  border-radius: var(--border-radius);
+  padding-top: 1 * variables.$size;
+  padding-right: 2.5 * variables.$size;
+  padding-bottom: 1 * variables.$size;
+  padding-left: 2.5 * variables.$size;
+  background: transparent;
+  font-weight: var(--medium);
+  color: var(--content-subtle);
+  cursor: pointer;
+
+  &[aria-selected="true"] {
+    font-weight: var(--semibold);
+    color: var(--content-emphasis);
+    background-color: var(--background-emphasis);
+  }
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+}
+
+.message {
+  padding-top: 2 * variables.$size;
+  padding-right: 2 * variables.$size;
+  padding-bottom: 2 * variables.$size;
+  padding-left: 2 * variables.$size;
+}

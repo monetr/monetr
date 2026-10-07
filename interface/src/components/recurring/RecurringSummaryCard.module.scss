@@ -1,0 +1,182 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 4.5 * variables.$size;
+}
+
+.icon {
+  position: relative;
+  flex: none;
+}
+
+// Little repeat badge in the corner of the merchant icon, same as the one on recurring transactions
+.iconBadge {
+  position: absolute;
+  top: -1 * variables.$size;
+  right: -1 * variables.$size;
+  width: 5 * variables.$size;
+  height: 5 * variables.$size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 0.5 * variables.$size solid var(--background);
+  background-color: var(--brand-subtle);
+  color: var(--content-emphasis);
+
+  svg {
+    width: 2.75 * variables.$size;
+    height: 2.75 * variables.$size;
+    stroke-width: 3;
+  }
+}
+
+.heroText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1 * variables.$size;
+  min-width: 0;
+}
+
+.memo {
+  @include mixins.text-small;
+}
+
+.scheduleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2 * variables.$size;
+  padding-top: 1 * variables.$size;
+}
+
+.schedule {
+  @include mixins.text-large;
+  color: var(--content-emphasis);
+
+  strong {
+    font-weight: var(--bold);
+  }
+}
+
+.badge {
+  @include mixins.text-extra-small;
+  font-weight: var(--semibold);
+  padding-top: 0;
+  padding-right: 2 * variables.$size;
+  padding-bottom: 0;
+  padding-left: 2 * variables.$size;
+  border-radius: var(--border-radius);
+}
+
+.statusBadge {
+  @extend .badge;
+  color: var(--success);
+  background-color: color-mix(in srgb, var(--success) 20%, transparent);
+
+  &[data-ended="true"] {
+    color: var(--content-subtle);
+    background-color: var(--background-emphasis);
+  }
+}
+
+.confidenceBadge {
+  @extend .badge;
+  color: var(--content-emphasis);
+  background-color: var(--background-emphasis);
+}
+
+// Coverage drops under the dates on mobile, sits on the right once theres room
+.next {
+  display: flex;
+  flex-direction: column;
+  gap: 4 * variables.$size;
+  padding-top: 4 * variables.$size;
+  padding-right: 4.5 * variables.$size;
+  padding-bottom: 4 * variables.$size;
+  padding-left: 4.5 * variables.$size;
+  border: 1px solid var(--brand-subtle);
+  border-radius: var(--border-radius);
+  background-color: color-mix(in srgb, var(--brand) 40%, transparent);
+
+  @media (min-width: variables.$mediumScreen) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.nextText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5 * variables.$size;
+  min-width: 0;
+}
+
+.nextLabel {
+  @include mixins.text-small;
+  font-weight: var(--semibold);
+  color: var(--brand-bright);
+}
+
+.nextDate {
+  @include mixins.text-2-extra-large;
+  font-weight: var(--bold);
+  color: var(--content-emphasis);
+}
+
+.nextRelative {
+  @include mixins.text-base;
+  font-weight: var(--medium);
+  color: var(--content);
+}
+
+.nextLater {
+  @include mixins.text-small;
+  color: var(--content);
+}
+
+.coverage {
+  display: flex;
+  align-items: center;
+  gap: 2.5 * variables.$size;
+  padding-top: 2.5 * variables.$size;
+  padding-right: 3.5 * variables.$size;
+  padding-bottom: 2.5 * variables.$size;
+  padding-left: 3.5 * variables.$size;
+  border-radius: var(--border-radius);
+  background-color: var(--background);
+
+  svg {
+    flex: none;
+    width: 5 * variables.$size;
+    height: 5 * variables.$size;
+    stroke-width: 2.5;
+    color: var(--amount-positive);
+  }
+
+  &[data-covered="false"] svg {
+    color: var(--warning);
+  }
+}
+
+.coverageText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.coverageTitle {
+  @include mixins.text-small;
+  font-weight: var(--semibold);
+  color: var(--content-emphasis);
+}
+
+.coverageDetail {
+  @include mixins.text-small;
+  color: var(--content-subtle);
+}

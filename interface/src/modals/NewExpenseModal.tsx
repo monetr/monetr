@@ -20,13 +20,9 @@ import Typography from '@monetr/interface/components/Typography';
 import { useCreateSpending } from '@monetr/interface/hooks/useCreateSpending';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { useLocale } from '@monetr/interface/hooks/useLocale';
-import useLocaleCurrency, { type LocaleCurrency } from '@monetr/interface/hooks/useLocaleCurrency';
+import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { usePatchTransaction } from '@monetr/interface/hooks/usePatchTransaction';
 import { usePatchTransactionRecurring } from '@monetr/interface/hooks/usePatchTransactionRecurring';
-import {
-  type RecurringPriceChange,
-  useRecurringTransactionHistory,
-} from '@monetr/interface/hooks/useRecurringTransactionHistory';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { useTransactionCluster } from '@monetr/interface/hooks/useTransactionCluster';
@@ -36,7 +32,6 @@ import type Spending from '@monetr/interface/models/Spending';
 import { SpendingType } from '@monetr/interface/models/Spending';
 import type Transaction from '@monetr/interface/models/Transaction';
 import type TransactionRecurring from '@monetr/interface/models/TransactionRecurring';
-import { AmountType } from '@monetr/interface/util/amounts';
 import type { APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
 
@@ -66,9 +61,8 @@ export interface NewExpenseModalProps {
 
 function NewExpenseModal(props: NewExpenseModalProps): React.JSX.Element {
   const { recurring, transaction } = props;
-  const { timezone, inTimezone } = useTimezone();
+  const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
-  const { data: dateLocale } = useLocale();
   const modal = useModal();
   const { enqueueSnackbar } = useSnackbar();
   const { data: selectedBankAccount } = useSelectedBankAccount();
@@ -77,7 +71,6 @@ function NewExpenseModal(props: NewExpenseModalProps): React.JSX.Element {
   const createSpending = useCreateSpending();
   const patchTransaction = usePatchTransaction();
   const patchTransactionRecurring = usePatchTransactionRecurring();
-  const { seen, priceChange } = useRecurringTransactionHistory(recurring);
   // use the similar transactions name for the expense instead of the transactions own name, since thats the name for the
   // whole group of charges and not just the one they happened to start from
   const { data: cluster, isLoading: clusterIsLoading } = useTransactionCluster(recurring?.transactionClusterId ?? null);
@@ -176,7 +169,7 @@ function NewExpenseModal(props: NewExpenseModalProps): React.JSX.Element {
             <div className={styles.recurringBanner} data-testid='new-expense-recurring-banner'>
               <Repeat />
               <Typography color='inherit' size='sm'>
-                Filled in from your {seen} {name ?? 'recurring'} charges. Give it a once over before you create it.
+                Filled in from your {name ?? 'recurring'} charges. Give it a once over before you create it.
               </Typography>
             </div>
           )}
@@ -193,7 +186,7 @@ function NewExpenseModal(props: NewExpenseModalProps): React.JSX.Element {
             <FormAmountField
               allowNegative={false}
               className={styles.fieldRowItem}
-              description={recurring && getAmountDescription(priceChange, locale, dateLocale?.code, timezone)}
+              description={recurring && 'Your last charge.'}
               label='How much do you need?'
               name='amount'
               required
@@ -287,23 +280,6 @@ export function getNextRecurrence(recurring: TransactionRecurring, tomorrow: Dat
   }
 
   return rrulestr(recurring.ruleset).after(tomorrow, true) ?? tomorrow;
-}
-
-function getAmountDescription(
-  priceChange: RecurringPriceChange | null,
-  locale: LocaleCurrency,
-  localeCode: string | undefined,
-  timezone: string,
-): string {
-  if (!priceChange) {
-    return 'Your last charge.';
-  }
-
-  const previous = locale.formatAmount(Math.abs(priceChange.previousAmount), AmountType.Stored);
-  const month = new Intl.DateTimeFormat(localeCode, { month: 'long', timeZone: timezone }).format(
-    priceChange.changedAt,
-  );
-  return `Your last charge. It was ${previous} until ${month}.`;
 }
 
 const newExpenseModal = NiceModal.create(NewExpenseModal);

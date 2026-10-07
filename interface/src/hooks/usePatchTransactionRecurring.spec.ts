@@ -19,34 +19,12 @@ const spendingId = 'spnd_01hy4rkq0x3c6dtr9w1p2v5bns';
 const fundingScheduleId = 'fund_01hy4re7c1xc2v44cf6kx302jx';
 const recurringKey = ['GET', `/api/bank_accounts/${bankAccountId}/recurring/${recurringId}`];
 
-function spendingJson() {
-  return {
-    spendingId,
-    bankAccountId,
-    fundingScheduleId,
-    name: 'Netflix',
-    spendingType: 'expense',
-    targetAmount: 1549,
-    currentAmount: 0,
-    usedAmount: 0,
-    ruleset: 'DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15',
-    lastRecurrence: null,
-    nextRecurrence: '2099-04-15T05:00:00Z',
-    nextContributionAmount: 774,
-    isBehind: false,
-    isPaused: false,
-    autoCreateTransaction: false,
-    createdAt: '2026-03-16T06:00:00Z',
-  };
-}
-
 function recurringJson(linked: boolean) {
   return {
     transactionRecurringId: recurringId,
     bankAccountId,
     transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
     spendingId: linked ? spendingId : null,
-    ...(linked ? { spending: spendingJson() } : {}),
     fundingScheduleId: null,
     window: 'monthly',
     ruleset: 'DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15',
@@ -119,7 +97,27 @@ describe('patch transaction recurring', () => {
     // The cached recurring transaction gets replaced with the response, linked expense and all.
     const cached = world.result.current.queryClient.getQueryData<PatchTransactionRecurringResponse>(recurringKey);
     expect(cached?.spendingId).toBe(spendingId);
-    expect(cached?.spending?.spendingId).toBe(spendingId);
+  });
+
+  it('will refresh the recurring list', async () => {
+    mockFetch.onPatch(`/api/bank_accounts/${bankAccountId}/recurring/${recurringId}`).reply(200, recurringJson(true));
+
+    const world = renderPatchTransactionRecurring(recurringJson(false));
+    const listKey = ['GET', `/api/bank_accounts/${bankAccountId}/recurring`];
+    act(() => {
+      world.result.current.queryClient.setQueryData(listKey, { pages: [[recurringJson(false)]], pageParams: [0] });
+    });
+
+    await act(async () => {
+      await world.result.current.patchTransactionRecurring({
+        transactionRecurringId: ID.from<TransactionRecurring>(recurringId),
+        bankAccountId: ID.from<BankAccount>(bankAccountId),
+        spendingId: ID.from<Spending>(spendingId),
+      });
+    });
+
+    // The list items have the cluster on them which isn't in the response, so the list just gets marked stale.
+    expect(world.result.current.queryClient.getQueryState(listKey)?.isInvalidated).toBeTruthy();
   });
 
   it('will link a funding schedule', async () => {
@@ -161,7 +159,6 @@ describe('patch transaction recurring', () => {
     expect(mockFetch.history.patch?.[0]?.data).toEqual({ spendingId: null });
     const cached = world.result.current.queryClient.getQueryData<PatchTransactionRecurringResponse>(recurringKey);
     expect(cached?.spendingId).toBeNull();
-    expect(cached?.spending).toBeUndefined();
   });
 
   it('will leave the cache alone if the patch fails', async () => {

@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { CalendarSync, PiggyBank, Receipt, ShoppingCart } from 'lucide-react';
+import { CalendarSync, PiggyBank, Receipt, Repeat, ShoppingCart } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
 
 import Badge, { type BadgeProps } from '@monetr/interface/components/Badge';
@@ -62,6 +62,13 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): React.JS
               Transactions
             </Typography>
           </NavigationItem>
+          {/* recurring is a view of transactions, so it sits under them instead of being its own top level item */}
+          <NavigationItem nested to={`/bank/${bankAccount?.bankAccountId}/recurring`}>
+            <Repeat />
+            <Typography color='inherit' ellipsis size='lg' weight='medium'>
+              Recurring
+            </Typography>
+          </NavigationItem>
           <NavigationItem to={`/bank/${bankAccount?.bankAccountId}/expenses`}>
             <Receipt />
             <Typography color='inherit' ellipsis size='lg' weight='medium'>
@@ -99,6 +106,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): React.JS
 interface NavigationItemProps {
   children: React.ReactNode;
   to: string;
+  nested?: boolean;
 }
 
 function NavigationItem(props: NavigationItemProps): React.JSX.Element {
@@ -115,7 +123,12 @@ function NavigationItem(props: NavigationItemProps): React.JSX.Element {
   };
 
   return (
-    <Link className={styles.navItem} data-active={active} onClick={onClick} to={props.to}>
+    <Link
+      className={mergeClasses(styles.navItem, props.nested && styles.navItemNested)}
+      data-active={active}
+      onClick={onClick}
+      to={props.to}
+    >
       {props.children}
     </Link>
   );

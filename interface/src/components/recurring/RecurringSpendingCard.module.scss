@@ -1,0 +1,146 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.root {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius);
+  background-color: var(--background-darker);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5 * variables.$size;
+  padding-top: 4 * variables.$size;
+  padding-right: 4.5 * variables.$size;
+  padding-bottom: 1.5 * variables.$size;
+  padding-left: 4.5 * variables.$size;
+}
+
+// Stacked on mobile, everything on one line once theres room
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 3 * variables.$size;
+  padding-top: 3 * variables.$size;
+  padding-right: 4.5 * variables.$size;
+  padding-bottom: 3 * variables.$size;
+  padding-left: 4.5 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    flex-direction: row;
+    align-items: center;
+    gap: 3.5 * variables.$size;
+  }
+}
+
+.rowName {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 2.5 * variables.$size;
+  min-width: 0;
+}
+
+.rowIcon {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 7.5 * variables.$size;
+  height: 7.5 * variables.$size;
+  border-radius: var(--border-radius);
+  background-color: var(--brand);
+  color: var(--content-emphasis);
+
+  svg {
+    width: 3.75 * variables.$size;
+    height: 3.75 * variables.$size;
+    stroke-width: 2.5;
+  }
+}
+
+.rowText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rowTitle {
+  @include mixins.text-base;
+  font-weight: var(--semibold);
+  color: var(--content-emphasis);
+}
+
+.rowDetail {
+  @include mixins.text-extra-small;
+  color: var(--content-subtle);
+}
+
+// Only makes sense when its all on one line
+.arrow {
+  display: none;
+  flex: none;
+  width: 5 * variables.$size;
+  height: 5 * variables.$size;
+  color: var(--border-string);
+
+  @media (min-width: variables.$mediumScreen) {
+    display: block;
+  }
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 3.5 * variables.$size;
+}
+
+// Select leaves room underneath for error text, there's never an error here so drop it. Nested so it wins over the
+// padding class Select puts on the same element
+.controls .select {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 0;
+
+  @media (min-width: variables.$mediumScreen) {
+    flex: none;
+    width: 60 * variables.$size;
+  }
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2 * variables.$size;
+  padding-top: 3 * variables.$size;
+  padding-right: 4.5 * variables.$size;
+  padding-bottom: 4 * variables.$size;
+  padding-left: 4.5 * variables.$size;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.note {
+  @include mixins.text-small;
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5 * variables.$size;
+  color: var(--content-subtle);
+
+  svg {
+    flex: none;
+    width: 4 * variables.$size;
+    height: 4 * variables.$size;
+    margin-top: 0.5 * variables.$size;
+    color: var(--brand-bright);
+  }
+}
+
+.viewLink {
+  @include mixins.text-small;
+  font-weight: var(--medium);
+  color: var(--brand-faint);
+}

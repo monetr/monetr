@@ -1,8 +1,8 @@
 import type BankAccount from '@monetr/interface/models/BankAccount';
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { ID, idPrefix } from '@monetr/interface/models/ID';
-import Spending from '@monetr/interface/models/Spending';
-import type TransactionCluster from '@monetr/interface/models/TransactionCluster';
+import type Spending from '@monetr/interface/models/Spending';
+import TransactionCluster from '@monetr/interface/models/TransactionCluster';
 import type { WithJsonValues } from '@monetr/interface/util/json';
 import parseDate from '@monetr/interface/util/parseDate';
 
@@ -40,10 +40,10 @@ export default class TransactionRecurring {
   readonly lastAmount: number;
   // autoMatched is true when monetr linked the expense itself instead of the user picking it
   readonly autoMatched: boolean;
-  // spending is the expense tracking this recurring transaction, if there is one
-  readonly spending: Spending | null;
   // fundingSchedule is the funding schedule tracking this recurring transaction, if there is one
   readonly fundingSchedule: FundingSchedule | null;
+  // transactionCluster is the similar transactions group this was detected in, only included when listing them
+  readonly transactionCluster: TransactionCluster | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 
@@ -64,9 +64,20 @@ export default class TransactionRecurring {
     this.amounts = data.amounts;
     this.lastAmount = data.lastAmount;
     this.autoMatched = data.autoMatched;
-    this.spending = data.spending ? new Spending(data.spending) : null;
     this.fundingSchedule = data.fundingSchedule ? new FundingSchedule(data.fundingSchedule) : null;
+    this.transactionCluster = data.transactionCluster ? new TransactionCluster(data.transactionCluster) : null;
     this.createdAt = parseDate(data.createdAt);
     this.updatedAt = parseDate(data.updatedAt);
+  }
+
+  // getConfidenceLabel is how sure monetr is that this actually recurs, in words instead of a number
+  getConfidenceLabel(): string {
+    if (this.confidence >= 0.9) {
+      return 'Very likely';
+    }
+    if (this.confidence >= 0.75) {
+      return 'Likely';
+    }
+    return 'Possibly';
   }
 }

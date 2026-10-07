@@ -33,6 +33,8 @@ import LogoutPage from '@monetr/interface/pages/logout';
 import ForgotPassword from '@monetr/interface/pages/password/forgot';
 import PasswordReset from '@monetr/interface/pages/password/reset';
 import OauthReturn from '@monetr/interface/pages/plaid/oauth-return';
+import Recurring from '@monetr/interface/pages/recurring';
+import RecurringDetails from '@monetr/interface/pages/recurring/details';
 import Register from '@monetr/interface/pages/register';
 import SettingsAbout from '@monetr/interface/pages/settings/about';
 import SettingsAPIKeys from '@monetr/interface/pages/settings/api';
@@ -148,6 +150,11 @@ export default function Monetr(): React.JSX.Element {
               <Route component={BankAccountSettingsPage} path='/bank/:bankAccountId/settings' />
               <Route component={Transactions} path='/bank/:bankAccountId/transactions' />
               <Route component={TransactionDetails} path='/bank/:bankAccountId/transactions/:transactionId/details' />
+              <Route component={Recurring} path='/bank/:bankAccountId/recurring' />
+              <Route
+                component={RecurringDetails}
+                path='/bank/:bankAccountId/recurring/:transactionRecurringId/details'
+              />
               <Route component={Expenses} path='/bank/:bankAccountId/expenses' />
               <Route component={ExpenseDetails} path='/bank/:bankAccountId/expenses/:spendingId/details' />
               <Route component={Goals} path='/bank/:bankAccountId/goals' />

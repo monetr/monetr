@@ -27,13 +27,17 @@ schedule. Two charges a month apart is a coincidence as far as it's concerned.
 Like the clusters, this all happens in a background job. It runs right after the clusters get recalculated, so a brand
 new transaction won't count toward anything until both jobs have gotten to it.
 
-Each [transaction](./transactions#the-transaction-object) has a `transactionRecurringId` pointing at the recurring
-transaction it's part of. That's how you'll find these for now, there's no endpoint to list them yet.
+You can [list](#list-recurring-transactions) every recurring transaction on a bank account, or start from a
+[transaction](./transactions#the-transaction-object), each one has a `transactionRecurringId` pointing at the recurring
+transaction it's part of.
 
 You can link a recurring transaction to the thing in your budget that covers it. A charge going out gets linked to an
 [expense](./spending), money coming in gets linked to a [funding schedule](./funding_schedules), your paycheck for
 example. The link lives on the recurring transaction, so you set it with a PATCH here after you've created the expense or
 funding schedule.
+
+A linked funding schedule comes back filled in as `fundingSchedule`, but a linked expense is only ever its
+`spendingId`. If you need the expense itself, [look it up](./spending#get-a-spending-object) by that ID.
 
 ## The recurring transaction object
 
@@ -42,8 +46,8 @@ funding schedule.
 | `transactionRecurringId` | string (ulid)           | Identifies the recurring transaction. It stays the same between recalculations as long as the cluster keeps recurring in the same direction.                                                                      |
 | `bankAccountId`          | string (ulid)           | The bank account it belongs to.                                                                                                                                                                                   |
 | `transactionClusterId`   | string (ulid)           | The [similar transactions](./similar_transactions#the-similar-transaction-object) cluster it was found in.                                                                                                        |
+| `transactionCluster`     | object                  | The [similar transactions](./similar_transactions#the-similar-transaction-object) cluster in `transactionClusterId`, without its `debug` info. Only there when listing, it's where the name comes from.           |
 | `spendingId`             | string (ulid), nullable | The [expense](./spending#the-spending-object) tracking this, if you've linked one. Only ever set on debits. See [Link an expense or funding schedule](#link-an-expense-or-funding-schedule).                      |
-| `spending`               | object                  | The [expense](./spending#the-spending-object) in `spendingId`, if there is one. Left out otherwise.                                                                                                               |
 | `fundingScheduleId`      | string (ulid), nullable | The [funding schedule](./funding_schedules#the-funding-schedule-object) tracking this, if you've linked one. Only ever set on credits.                                                                            |
 | `fundingSchedule`        | object                  | The [funding schedule](./funding_schedules#the-funding-schedule-object) in `fundingScheduleId`, if there is one. Left out otherwise.                                                                              |
 | `direction`              | string                  | `debit` for money leaving the account, `credit` for money coming in. Same as the sign on the transactions, debits are positive amounts and credits are negative.                                                  |
@@ -74,11 +78,105 @@ schedule, which sets `spendingId` or `fundingScheduleId` back to null. The one e
 all: if two of its last three transactions were spent from the same expense, and nothing else is linked to that
 expense yet, monetr links it for you and sets `autoMatched`.
 
+## <Badge type="info">GET</Badge> List recurring transactions
+
+Returns every recurring transaction on a bank account, a page at a time. Ones that are still going come first, sorted by
+when the next one is expected, then the ones that have ended. You can narrow it down to one direction, or to just the
+ones that are still going or just the ones that ended, so you're not paging through stuff you don't care about.
+
+If you ask for just the ended ones with `ended=true` they're sorted by when they were last seen instead, most recent
+first. `next` keeps getting worked out from the schedule even after something stops, so it doesn't say anything useful
+about when it ended.
+
+Each one comes with its `transactionCluster` so you have a name to show.
+
+**In the app:** The recurring page, under transactions in the sidebar.
+
+```http
+GET /api/bank_accounts/:bankAccountId/recurring
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute       | Type          | Required | Description                                             |
+| --------------- | ------------- | -------- | ------------------------------------------------------- |
+| `bankAccountId` | string (ulid) | Yes      | The bank account whose recurring transactions you want. |
+
+### Query parameters
+
+| Attribute   | Type    | Required | Description                                                                                                                                           |
+| ----------- | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `limit`     | integer | No       | How many to return. Defaults to 25. Has to be between 1 and 100, or a 400.                                                                            |
+| `offset`    | integer | No       | How many to skip first. Defaults to 0. Negative is a 400.                                                                                             |
+| `direction` | string  | No       | `debit` or `credit`, to only get the ones going that way. Leave it off to get both. Anything else is a 400.                                           |
+| `ended`     | boolean | No       | `false` for just the ones that are still going, `true` for just the ones that ended. Leave it off to get both. Has to be `true` or `false`, or a 400. |
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring?direction=debit&ended=false&limit=1" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+[
+  {
+    "transactionRecurringId": "txrc_01j6b4n8w2kq5t9r3xm7vdc6ph",
+    "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+    "transactionClusterId": "tcl_01j6b4m3zr8yq2w6tnc5kxd9fe",
+    "transactionCluster": {
+      "transactionClusterId": "tcl_01j6b4m3zr8yq2w6tnc5kxd9fe",
+      "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
+      "signature": "4b8e1f2a9c03d7e65a1b8f4c2d9e07a3b6c5f8e1d2a49b7c03e6f5a8b1d2c4e7",
+      "centroid": "txn_01j6b4kq7m2xw9t5r8ynh3vd6c",
+      "name": "Netflix",
+      "originalName": "NETFLIX.COM",
+      "originalMemo": "NETFLIX.COM 866-579-7172 CA",
+      "debug": null,
+      "merchant": null,
+      "createdAt": "2024-03-13T03:15:02.114Z",
+      "updatedAt": "2024-08-30T03:15:04.512Z"
+    },
+    "spendingId": "spnd_01j6b5q2h8ycz4n7w3tkr9vx5d",
+    "fundingScheduleId": null,
+    "window": "monthly",
+    "ruleset": "DTSTART:20240301T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=12",
+    "first": "2024-03-12T05:00:00Z",
+    "last": "2024-08-12T05:00:00Z",
+    "next": "2024-09-12T05:00:00Z",
+    "ended": false,
+    "confidence": 0.94,
+    "direction": "debit",
+    "amounts": {
+      "1399": 3,
+      "1549": 3
+    },
+    "lastAmount": 1549,
+    "autoMatched": false,
+    "createdAt": "2024-05-13T03:15:06.214Z",
+    "updatedAt": "2024-08-30T14:02:11.733Z"
+  }
+]
+```
+
+Each item is a [recurring transaction object](#the-recurring-transaction-object). A bank account with no recurring
+transactions, or one that isn't yours, isn't an error. You just get back an empty array.
+
+### Errors
+
+| Status | When                                                                                                                                                      |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 400    | `limit` is outside 1 to 100, `offset` is negative, `direction` isn't `debit` or `credit`, `ended` isn't `true` or `false`, or the bank account ID is bad. |
+
 ## <Badge type="info">GET</Badge> Get a recurring transaction
 
-Returns one recurring transaction. You'll usually get the ID from a transaction's `transactionRecurringId`.
+Returns one recurring transaction. You'll usually get the ID from a transaction's `transactionRecurringId`, or from
+[listing them](#list-recurring-transactions).
 
-**In the app:** Nothing in the app calls this yet.
+**In the app:** The recurring card on a transaction's details page, and the recurring transaction's own details page.
 
 ```http
 GET /api/bank_accounts/:bankAccountId/recurring/:transactionRecurringId
@@ -145,8 +243,9 @@ only two things you can change on a recurring transaction, everything else comes
 A debit can only be linked to an expense, not a goal. A credit can only be linked to a funding schedule. For now an
 expense or funding schedule can only be linked to one recurring transaction at a time.
 
-**In the app:** Creating an expense or funding schedule from the recurring card on a transaction's details page. The app
-creates it first and then links it with this.
+**In the app:** Picking an expense or funding schedule on a recurring transaction's details page. Also creating one from
+the recurring card on a transaction's details page or from the recurring page, the app creates it first and then links it
+with this.
 
 ```http
 PATCH /api/bank_accounts/:bankAccountId/recurring/:transactionRecurringId
@@ -190,25 +289,6 @@ curl --request PATCH \
   "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
   "transactionClusterId": "tcl_01j6b4m3zr8yq2w6tnc5kxd9fe",
   "spendingId": "spnd_01j6b5q2h8ycz4n7w3tkr9vx5d",
-  "spending": {
-    "spendingId": "spnd_01j6b5q2h8ycz4n7w3tkr9vx5d",
-    "bankAccountId": "bac_01gds6eqsq7h5mgevwtmw3cyxb",
-    "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz",
-    "spendingType": "expense",
-    "name": "Netflix",
-    "targetAmount": 1549,
-    "currentAmount": 0,
-    "usedAmount": 0,
-    "ruleset": "DTSTART:20240301T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=12",
-    "lastSpentFrom": null,
-    "lastRecurrence": null,
-    "nextRecurrence": "2024-09-12T05:00:00Z",
-    "nextContributionAmount": 775,
-    "isBehind": false,
-    "isPaused": false,
-    "autoCreateTransaction": false,
-    "createdAt": "2024-08-30T14:02:11.418Z"
-  },
   "fundingScheduleId": null,
   "window": "monthly",
   "ruleset": "DTSTART:20240301T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=12",
@@ -229,7 +309,8 @@ curl --request PATCH \
 }
 ```
 
-You get the recurring transaction back with whatever's linked to it filled in, and `updatedAt` bumped to now.
+You get the recurring transaction back with the new link and `updatedAt` bumped to now. A funding schedule you linked
+comes back filled in as `fundingSchedule`, an expense is just the `spendingId`.
 
 ### Errors
 

@@ -1,0 +1,84 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+// Lines up with the name of the item above it, past the icon
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5 * variables.$size;
+  margin-top: 0;
+  margin-right: 2 * variables.$size;
+  margin-bottom: 2 * variables.$size;
+  margin-left: 16 * variables.$size;
+  padding-top: 2.5 * variables.$size;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.header {
+  @include mixins.text-extra-small;
+  display: flex;
+  align-items: center;
+  gap: 1.5 * variables.$size;
+  color: var(--content-subtle);
+
+  svg {
+    width: 3.25 * variables.$size;
+    height: 3.25 * variables.$size;
+  }
+
+  strong {
+    font-weight: var(--semibold);
+    color: var(--content-emphasis);
+  }
+}
+
+.detailsLink {
+  margin-left: auto;
+  font-weight: var(--medium);
+  color: var(--brand-faint);
+
+  &:hover {
+    color: var(--brand-bright);
+  }
+}
+
+.loading {
+  @include mixins.text-extra-small;
+  color: var(--content-subtle);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5 * variables.$size;
+}
+
+.charge {
+  @include mixins.text-small;
+  display: flex;
+  align-items: center;
+  gap: 3 * variables.$size;
+}
+
+.date {
+  flex: none;
+  width: 16 * variables.$size;
+  color: var(--content-subtle);
+}
+
+.memo {
+  flex: 1;
+  color: var(--content);
+}
+
+.amount {
+  flex: none;
+  width: 20 * variables.$size;
+  text-align: right;
+  font-weight: var(--semibold);
+  color: var(--amount-negative);
+
+  &[data-addition="true"] {
+    color: var(--amount-positive);
+  }
+}

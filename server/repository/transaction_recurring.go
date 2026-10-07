@@ -28,7 +28,6 @@ func (r *repositoryBase) GetTransactionRecurringById(
 	var result TransactionRecurring
 	err := r.txn.NewSelect().
 		Model(&result).
-		Relation("Spending").
 		Relation("FundingSchedule").
 		Where(`"transaction_recurring"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction_recurring"."bank_account_id" = ?`, bankAccountId).
@@ -42,6 +41,64 @@ func (r *repositoryBase) GetTransactionRecurringById(
 	span.Status = sentry.SpanStatusOK
 
 	return &result, nil
+}
+
+func (r *repositoryBase) GetTransactionRecurrings(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	direction *Direction,
+	ended *bool,
+	limit, offset int,
+) ([]TransactionRecurring, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+	span.SetData("accountId", r.AccountId())
+	span.SetData("bankAccountId", bankAccountId)
+	span.SetData("direction", direction)
+	span.SetData("ended", ended)
+
+	result := make([]TransactionRecurring, 0)
+	query := r.txn.NewSelect().
+		Model(&result).
+		Relation("FundingSchedule").
+		// The cluster is only here for its name, the members and debug info can
+		// be huge so leave those out
+		Relation("TransactionCluster", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.ExcludeColumn("members", "debug")
+		}).
+		Where(`"transaction_recurring"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction_recurring"."bank_account_id" = ?`, bankAccountId)
+
+	if direction != nil {
+		query = query.Where(`"transaction_recurring"."direction" = ?`, *direction)
+	}
+
+	if ended != nil {
+		query = query.Where(`"transaction_recurring"."ended" = ?`, *ended)
+
+		// Ended ones still project next forward off of their rule so it doesn't
+		// mean anything for them, go by when they were last seen instead
+		if *ended {
+			query = query.Order(`transaction_recurring.last DESC`)
+		}
+	}
+
+	err := query.
+		Limit(limit).
+		Offset(offset).
+		// Active ones first, then whatever is coming up next
+		Order(`transaction_recurring.ended ASC`).
+		Order(`transaction_recurring.next ASC`).
+		Order(`transaction_recurring.transaction_recurring_id DESC`).
+		Scan(span.Context())
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, errors.Wrap(err, "failed to retrieve recurring transactions")
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return result, nil
 }
 
 func (r *repositoryBase) GetTransactionRecurringByCluster(
