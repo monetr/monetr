@@ -187,6 +187,64 @@ func TestGetRecurringTransactions(t *testing.T) {
 		response.JSON().Path("$.error").IsEqual("Limit cannot be greater than 100")
 	})
 
+	t.Run("filter by direction and ended", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		charge := givenIHaveATransactionRecurring(t, bank)
+		givenIHaveACreditTransactionRecurring(t, bank)
+		ended := givenIHaveATransactionRecurring(t, bank)
+		ended.Ended = true
+		testutils.MustDBUpdate(t, &ended)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.GET("/api/bank_accounts/{bankAccountId}/recurring").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithQuery("direction", "debit").
+			WithQuery("ended", "false").
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Array().Length().IsEqual(1)
+		response.JSON().Path("$[0].transactionRecurringId").IsEqual(charge.TransactionRecurringId)
+	})
+
+	t.Run("invalid direction", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.GET("/api/bank_accounts/{bankAccountId}/recurring").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithQuery("direction", "sideways").
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").IsEqual("Direction must be debit or credit")
+	})
+
+	t.Run("invalid ended", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.GET("/api/bank_accounts/{bankAccountId}/recurring").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithQuery("ended", "maybe").
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").IsEqual("Ended must be true or false")
+	})
+
 	t.Run("cant get recurring for someone elses bank account", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		otherUser, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
@@ -359,7 +417,7 @@ func TestPatchRecurringTransaction(t *testing.T) {
 		response.Status(http.StatusOK)
 		response.JSON().Path("$.transactionRecurringId").IsEqual(recurring.TransactionRecurringId)
 		response.JSON().Path("$.spendingId").IsEqual(spending.SpendingId)
-		response.JSON().Path("$.spending.spendingId").IsEqual(spending.SpendingId)
+		response.JSON().Object().NotContainsKey("spending")
 		response.JSON().Path("$.fundingScheduleId").IsNull()
 		response.JSON().Path("$.lastAmount").IsEqual(800)
 
@@ -485,7 +543,6 @@ func TestPatchRecurringTransaction(t *testing.T) {
 
 		response.Status(http.StatusOK)
 		response.JSON().Path("$.spendingId").IsEqual(second.SpendingId)
-		response.JSON().Path("$.spending.spendingId").IsEqual(second.SpendingId)
 	})
 
 	t.Run("clears auto matched when the user changes the link", func(t *testing.T) {

@@ -38,57 +38,47 @@ const cadences: Record<TransactionRecurringWindow, string> = {
   [TransactionRecurringWindow.Yearly]: 'Yearly',
 };
 
-// How much of the next charge the expense won't cover. Only counts if the expense is actually behind, if its going to
-// catch up before the charge comes in then its not really short.
-function getShortfall(recurring: TransactionRecurring, spending: Spending | undefined): number {
-  if (recurring.ended || !spending?.isBehind) {
-    return 0;
-  }
-
-  return Math.max(0, Math.abs(recurring.lastAmount) - spending.currentAmount);
-}
-
-export default function RecurringItem({ recurring }: RecurringItemProps): React.JSX.Element | null {
+export default function RecurringItem(props: RecurringItemProps): React.JSX.Element | null {
   const { data: locale } = useLocaleCurrency();
   const { data: dateLocale } = useLocale();
   const { inTimezone } = useTimezone();
   // The list doesn't include the spending object so look it up, this way it comes from the same cache as everything
   // else that shows spending
-  const { data: spending } = useSpending(recurring.spendingId);
+  const { data: spending } = useSpending(props.recurring.spendingId);
   const [expanded, setExpanded] = useState(false);
 
   if (!locale || !dateLocale) {
     return null;
   }
 
-  const name = recurring.transactionCluster?.name ?? 'Recurring';
-  const memo = recurring.transactionCluster?.originalMemo;
-  const detailsPath = `/bank/${recurring.bankAccountId}/recurring/${recurring.transactionRecurringId}/details`;
-  const cadence = cadences[recurring.window];
-  const isDebit = recurring.direction === 'debit';
-  const shortfall = getShortfall(recurring, spending);
+  const name = props.recurring.transactionCluster?.name ?? 'Recurring';
+  const memo = props.recurring.transactionCluster?.originalMemo;
+  const detailsPath = `/bank/${props.recurring.bankAccountId}/recurring/${props.recurring.transactionRecurringId}/details`;
+  const cadence = cadences[props.recurring.window];
+  const isDebit = props.recurring.direction === 'debit';
+  const shortfall = getShortfall(props.recurring, spending);
   const today = startOfToday({
     in: inTimezone,
   });
-  const daysLate = differenceInCalendarDays(today, inTimezone(recurring.next));
-  const isLate = !recurring.ended && daysLate > 0;
+  const daysLate = differenceInCalendarDays(today, inTimezone(props.recurring.next));
+  const isLate = !props.recurring.ended && daysLate > 0;
 
-  let isLinked = Boolean(recurring.fundingSchedule);
-  let linkedName = recurring.fundingSchedule?.name;
+  let isLinked = Boolean(props.recurring.fundingSchedule);
+  let linkedName = props.recurring.fundingSchedule?.name;
   let notLinked = 'Not funding anything';
   let LinkedIcon = CalendarSync;
   if (isDebit) {
-    isLinked = Boolean(recurring.spendingId);
+    isLinked = Boolean(props.recurring.spendingId);
     linkedName = spending?.name;
     notLinked = 'Not budgeted';
     LinkedIcon = Receipt;
   }
 
   // Ended ones show when they were last seen, everything else shows when its expected next
-  let dateString = formatDate(recurring.next, inTimezone, dateLocale, DateLength.Medium);
-  let dateDetail = formatRelativeDate(recurring.next, inTimezone, dateLocale);
-  if (recurring.ended) {
-    dateString = formatDate(recurring.last, inTimezone, dateLocale, DateLength.Medium);
+  let dateString = formatDate(props.recurring.next, inTimezone, dateLocale, DateLength.Medium);
+  let dateDetail = formatRelativeDate(props.recurring.next, inTimezone, dateLocale);
+  if (props.recurring.ended) {
+    dateString = formatDate(props.recurring.last, inTimezone, dateLocale, DateLength.Medium);
     dateDetail = 'last seen';
   } else if (isLate) {
     dateDetail = `was due ${dateString}`;
@@ -100,9 +90,9 @@ export default function RecurringItem({ recurring }: RecurringItemProps): React.
   }
 
   // A price change shows up as two different amounts, so only call it variable once there are more than that
-  const amounts = Object.keys(recurring.amounts).map(item => Math.abs(Number(item)));
+  const amounts = Object.keys(props.recurring.amounts).map(item => Math.abs(Number(item)));
   const isVariable = amounts.length >= 3;
-  let amountString = locale.formatAmount(Math.abs(recurring.lastAmount), AmountType.Stored);
+  let amountString = locale.formatAmount(Math.abs(props.recurring.lastAmount), AmountType.Stored);
   if (isVariable) {
     amountString = `~${amountString}`;
   }
@@ -115,11 +105,11 @@ export default function RecurringItem({ recurring }: RecurringItemProps): React.
   function createLink() {
     if (isDebit) {
       showNewExpenseModal({
-        recurring,
+        recurring: props.recurring,
       });
     } else {
       showNewFundingModal({
-        recurring,
+        recurring: props.recurring,
       });
     }
   }
@@ -146,7 +136,7 @@ export default function RecurringItem({ recurring }: RecurringItemProps): React.
             </div>
             {memo && <RecurringMemo memo={memo} />}
             {/* This block only shows on mobile screens */}
-            <span className={styles.mobileStatus} data-warning={String(isDebit && !isLinked && !recurring.ended)}>
+            <span className={styles.mobileStatus} data-warning={String(isDebit && !isLinked && !props.recurring.ended)}>
               {isLinked && <LinkedIcon />}
               {isLinked && <span className={styles.mobileStatusName}>{linkedName}</span>}
               {shortfall > 0 && (
@@ -182,8 +172,8 @@ export default function RecurringItem({ recurring }: RecurringItemProps): React.
                 short {locale.formatAmount(shortfall, AmountType.Stored)}
               </span>
             )}
-            {!isLinked && recurring.ended && <span className={styles.notLinked}>{notLinked}</span>}
-            {!isLinked && !recurring.ended && (
+            {!isLinked && props.recurring.ended && <span className={styles.notLinked}>{notLinked}</span>}
+            {!isLinked && !props.recurring.ended && (
               <button
                 className={styles.createButton}
                 data-testid='recurring-item-create'
@@ -219,8 +209,18 @@ export default function RecurringItem({ recurring }: RecurringItemProps): React.
             {!expanded && <ChevronDown />}
           </button>
         </div>
-        {expanded && <RecurringItemCharges detailsPath={detailsPath} name={name} recurring={recurring} />}
+        {expanded && <RecurringItemCharges detailsPath={detailsPath} name={name} recurring={props.recurring} />}
       </div>
     </li>
   );
+}
+
+// How much of the next charge the expense won't cover. Only counts if the expense is actually behind, if its going to
+// catch up before the charge comes in then its not really short.
+function getShortfall(recurring: TransactionRecurring, spending: Spending | undefined): number {
+  if (recurring.ended || !spending?.isBehind) {
+    return 0;
+  }
+
+  return Math.max(0, Math.abs(recurring.lastAmount) - spending.currentAmount);
 }

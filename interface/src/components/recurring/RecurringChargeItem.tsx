@@ -42,7 +42,11 @@ export default function RecurringChargeItem(props: RecurringChargeItemProps): Re
         <ItemContent align='default' flex='shrink' gap='none' justify='start' orientation='column' shrink='default'>
           <span className={styles.date}>
             {formatDate(props.transaction.date, inTimezone, locale, DateLength.Full)}
-            {isOneOff && <span className={styles.oneOffChip}>One-Off</span>}
+            {isOneOff && (
+              <span className={styles.oneOffChip} data-testid='recurring-charge-one-off'>
+                One-Off
+              </span>
+            )}
           </span>
           <RecurringMemo memo={props.transaction.originalName} />
         </ItemContent>

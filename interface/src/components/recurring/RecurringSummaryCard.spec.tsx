@@ -1,7 +1,6 @@
 import { waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
-import RecurringItem from '@monetr/interface/components/recurring/RecurringItem';
+import RecurringSummaryCard from '@monetr/interface/components/recurring/RecurringSummaryCard';
 import type BankAccount from '@monetr/interface/models/BankAccount';
 import { ID } from '@monetr/interface/models/ID';
 import type Spending from '@monetr/interface/models/Spending';
@@ -11,7 +10,7 @@ import FetchMock from '@monetr/interface/testutils/fetchMock';
 import apiSampleResponses from '@monetr/interface/testutils/fixtures/apiSampleResponses';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
-describe('recurring item', () => {
+describe('recurring summary card', () => {
   let mockFetch: FetchMock;
 
   beforeEach(() => {
@@ -24,21 +23,26 @@ describe('recurring item', () => {
     mockFetch.restore();
   });
 
-  it('will show the name and a create button when nothing is linked', async () => {
-    apiSampleResponses(mockFetch);
-
-    const recurring = new TransactionRecurring({
-      transactionRecurringId: ID.from<TransactionRecurring>('txrc_01hy4re7c1xc2v44cf6kx302jx'),
-      bankAccountId: ID.from<BankAccount>('bac_01gds6eqsq7h5mgevwtmw3cyxb'),
-      transactionClusterId: ID.from<TransactionCluster>('tcl_01hy4rf0p7mz9w2q3c4v5b6n7m'),
-      transactionCluster: {
+  it('will show the next couple of dates after the next one', async () => {
+    mockFetch
+      .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/similar/tcl_01hy4rf0p7mz9w2q3c4v5b6n7m')
+      .reply(200, {
         transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
         bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
         name: 'Github',
         originalMemo: 'GITHUB.COM 877-448-4820 CA',
         members: [],
         createdAt: '2026-01-15T06:00:00Z',
-      },
+      });
+    apiSampleResponses(mockFetch);
+
+    // Next is midnight in Chicago during daylight savings, but the rule lands on 1am since it started in the winter.
+    // Looking for the one after next from the same day used to just give back next again.
+    const recurring = new TransactionRecurring({
+      transactionRecurringId: ID.from<TransactionRecurring>('txrc_01hy4re7c1xc2v44cf6kx302jx'),
+      bankAccountId: ID.from<BankAccount>('bac_01gds6eqsq7h5mgevwtmw3cyxb'),
+      transactionClusterId: ID.from<TransactionCluster>('tcl_01hy4rf0p7mz9w2q3c4v5b6n7m'),
+      transactionCluster: null,
       spendingId: null,
       fundingScheduleId: null,
       fundingSchedule: null,
@@ -59,16 +63,26 @@ describe('recurring item', () => {
       updatedAt: '2026-03-15T06:00:00Z',
     });
 
-    const world = testRenderer(<RecurringItem recurring={recurring} />, {
-      initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring',
+    const world = testRenderer(<RecurringSummaryCard recurring={recurring} />, {
+      initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring/txrc_01hy4re7c1xc2v44cf6kx302jx/details',
     });
 
-    await waitFor(() => expect(world.getByTestId('recurring-item-name')).toHaveTextContent('Github'));
-    await waitFor(() => expect(world.getByTestId('recurring-item-create')).toHaveTextContent('Create'));
-    expect(world.queryByTestId('recurring-item-linked')).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(world.getByTestId('recurring-next-later')).toHaveTextContent('Then May 15, 2099 and Jun 15, 2099'),
+    );
   });
 
-  it('will look up the linked expense', async () => {
+  it('will say the next charge is covered when the expense is on track', async () => {
+    mockFetch
+      .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/similar/tcl_01hy4rf0p7mz9w2q3c4v5b6n7m')
+      .reply(200, {
+        transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
+        bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
+        name: 'Github',
+        originalMemo: 'GITHUB.COM 877-448-4820 CA',
+        members: [],
+        createdAt: '2026-01-15T06:00:00Z',
+      });
     mockFetch
       .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/spending/spnd_01hy4rkq0x3c6dtr9w1p2v5bns')
       .reply(200, {
@@ -95,14 +109,7 @@ describe('recurring item', () => {
       transactionRecurringId: ID.from<TransactionRecurring>('txrc_01hy4re7c1xc2v44cf6kx302jx'),
       bankAccountId: ID.from<BankAccount>('bac_01gds6eqsq7h5mgevwtmw3cyxb'),
       transactionClusterId: ID.from<TransactionCluster>('tcl_01hy4rf0p7mz9w2q3c4v5b6n7m'),
-      transactionCluster: {
-        transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
-        bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
-        name: 'Github',
-        originalMemo: 'GITHUB.COM 877-448-4820 CA',
-        members: [],
-        createdAt: '2026-01-15T06:00:00Z',
-      },
+      transactionCluster: null,
       spendingId: ID.from<Spending>('spnd_01hy4rkq0x3c6dtr9w1p2v5bns'),
       fundingScheduleId: null,
       fundingSchedule: null,
@@ -123,17 +130,28 @@ describe('recurring item', () => {
       updatedAt: '2026-03-15T06:00:00Z',
     });
 
-    const world = testRenderer(<RecurringItem recurring={recurring} />, {
-      initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring',
+    const world = testRenderer(<RecurringSummaryCard recurring={recurring} />, {
+      initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring/txrc_01hy4re7c1xc2v44cf6kx302jx/details',
     });
 
-    await waitFor(() => expect(world.getByTestId('recurring-item-linked')).toHaveTextContent('Github Copilot'));
-    expect(world.queryByTestId('recurring-item-create')).not.toBeInTheDocument();
-    // The expense isn't behind so it isn't short, even though it doesn't have enough in it yet
-    expect(world.queryByTestId('recurring-item-short')).not.toBeInTheDocument();
+    // Only $3 is set aside, but it isn't behind so it will have the rest by the time the charge comes in
+    await waitFor(() =>
+      expect(world.getByTestId('recurring-coverage')).toHaveTextContent('Github Copilot will have $8.00 ready'),
+    );
+    await waitFor(() => expect(world.getByTestId('recurring-coverage')).toHaveAttribute('data-covered', 'true'));
   });
 
-  it('will show how short a behind expense is', async () => {
+  it('will say the next charge is not covered when the expense is behind', async () => {
+    mockFetch
+      .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/similar/tcl_01hy4rf0p7mz9w2q3c4v5b6n7m')
+      .reply(200, {
+        transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
+        bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
+        name: 'Github',
+        originalMemo: 'GITHUB.COM 877-448-4820 CA',
+        members: [],
+        createdAt: '2026-01-15T06:00:00Z',
+      });
     mockFetch
       .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/spending/spnd_01hy4rkq0x3c6dtr9w1p2v5bns')
       .reply(200, {
@@ -160,14 +178,7 @@ describe('recurring item', () => {
       transactionRecurringId: ID.from<TransactionRecurring>('txrc_01hy4re7c1xc2v44cf6kx302jx'),
       bankAccountId: ID.from<BankAccount>('bac_01gds6eqsq7h5mgevwtmw3cyxb'),
       transactionClusterId: ID.from<TransactionCluster>('tcl_01hy4rf0p7mz9w2q3c4v5b6n7m'),
-      transactionCluster: {
-        transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
-        bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
-        name: 'Github',
-        originalMemo: 'GITHUB.COM 877-448-4820 CA',
-        members: [],
-        createdAt: '2026-01-15T06:00:00Z',
-      },
+      transactionCluster: null,
       spendingId: ID.from<Spending>('spnd_01hy4rkq0x3c6dtr9w1p2v5bns'),
       fundingScheduleId: null,
       fundingSchedule: null,
@@ -188,76 +199,59 @@ describe('recurring item', () => {
       updatedAt: '2026-03-15T06:00:00Z',
     });
 
-    const world = testRenderer(<RecurringItem recurring={recurring} />, {
-      initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring',
+    const world = testRenderer(<RecurringSummaryCard recurring={recurring} />, {
+      initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring/txrc_01hy4re7c1xc2v44cf6kx302jx/details',
     });
 
-    // $8.00 charge with $3.00 set aside
-    await waitFor(() => expect(world.getByTestId('recurring-item-short')).toHaveTextContent('short $5.00'));
+    await waitFor(() =>
+      expect(world.getByTestId('recurring-coverage')).toHaveTextContent('Github Copilot only has $3.00 of $8.00'),
+    );
+    await waitFor(() => expect(world.getByTestId('recurring-coverage')).toHaveAttribute('data-covered', 'false'));
   });
 
-  it('will show the recent charges when expanded', async () => {
+  it('will not show the next charge once it has ended', async () => {
     mockFetch
-      .onGet(
-        '/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions?transaction_recurring_id=txrc_01hy4re7c1xc2v44cf6kx302jx&limit=3',
-      )
-      .reply(200, [
-        {
-          transactionId: 'txn_01hy4rh2k8m3n4p5q6r7s8t9v0',
-          bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
-          transactionRecurringId: 'txrc_01hy4re7c1xc2v44cf6kx302jx',
-          amount: 800,
-          date: '2026-03-15T05:00:00Z',
-          name: 'Github',
-          originalName: 'GITHUB.COM 877-448-4820 CA MARCH',
-          isPending: false,
-          createdAt: '2026-03-15T06:00:00Z',
-        },
-      ]);
+      .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/similar/tcl_01hy4rf0p7mz9w2q3c4v5b6n7m')
+      .reply(200, {
+        transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
+        bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
+        name: 'Netflix',
+        originalMemo: 'NETFLIX.COM 866-579-7172 CA',
+        members: [],
+        createdAt: '2025-01-15T06:00:00Z',
+      });
     apiSampleResponses(mockFetch);
 
     const recurring = new TransactionRecurring({
       transactionRecurringId: ID.from<TransactionRecurring>('txrc_01hy4re7c1xc2v44cf6kx302jx'),
       bankAccountId: ID.from<BankAccount>('bac_01gds6eqsq7h5mgevwtmw3cyxb'),
       transactionClusterId: ID.from<TransactionCluster>('tcl_01hy4rf0p7mz9w2q3c4v5b6n7m'),
-      transactionCluster: {
-        transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
-        bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
-        name: 'Github',
-        originalMemo: 'GITHUB.COM 877-448-4820 CA',
-        members: [],
-        createdAt: '2026-01-15T06:00:00Z',
-      },
+      transactionCluster: null,
       spendingId: null,
       fundingScheduleId: null,
       fundingSchedule: null,
       window: TransactionRecurringWindow.Monthly,
-      ruleset: 'DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15',
-      first: '2026-01-15T06:00:00Z',
-      last: '2026-03-15T05:00:00Z',
-      next: '2099-04-15T05:00:00Z',
-      ended: false,
+      ruleset: 'DTSTART:20250101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15',
+      first: '2025-01-15T06:00:00Z',
+      last: '2025-06-15T05:00:00Z',
+      next: '2025-07-15T05:00:00Z',
+      ended: true,
       confidence: 0.9,
       direction: 'debit',
       amounts: {
-        800: 3,
+        1549: 6,
       },
-      lastAmount: 800,
+      lastAmount: 1549,
       autoMatched: false,
-      createdAt: '2026-03-15T06:00:00Z',
-      updatedAt: '2026-03-15T06:00:00Z',
+      createdAt: '2025-03-15T06:00:00Z',
+      updatedAt: '2025-08-15T06:00:00Z',
     });
 
-    const user = userEvent.setup();
-    const world = testRenderer(<RecurringItem recurring={recurring} />, {
-      initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring',
+    const world = testRenderer(<RecurringSummaryCard recurring={recurring} />, {
+      initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring/txrc_01hy4re7c1xc2v44cf6kx302jx/details',
     });
 
-    await waitFor(() => expect(world.getByTestId('recurring-item-toggle')).toBeInTheDocument());
-    // Open up the recent charges
-    await user.click(world.getByTestId('recurring-item-toggle'));
-
-    await waitFor(() => expect(world.getByTitle('GITHUB.COM 877-448-4820 CA MARCH')).toBeInTheDocument());
-    await waitFor(() => expect(world.getByTestId('recurring-item-toggle')).toHaveAttribute('aria-expanded', 'true'));
+    await waitFor(() => expect(world.getByTestId('recurring-status')).toHaveTextContent('Ended'));
+    expect(world.queryByTestId('recurring-next')).not.toBeInTheDocument();
   });
 });

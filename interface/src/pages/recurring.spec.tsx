@@ -148,6 +148,51 @@ describe('recurring page', () => {
     await waitFor(() => expect(world.getByTestId('recurring-item-name')).toHaveTextContent('Netflix'));
   });
 
+  it('will open the tab from the url', async () => {
+    mockFetch
+      .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring?direction=credit&ended=false')
+      .reply(200, [
+        {
+          transactionRecurringId: 'txrc_01hy4re7c1xc2v44cf6kx30202',
+          bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
+          transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n02',
+          transactionCluster: {
+            transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n02',
+            bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
+            name: 'Mercury Payroll',
+            originalMemo: 'MERCURY PAYROLL DIRECT DEP',
+            createdAt: '2026-01-15T06:00:00Z',
+          },
+          spendingId: null,
+          fundingScheduleId: null,
+          window: 'monthly',
+          ruleset: 'DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15',
+          first: '2026-01-15T06:00:00Z',
+          last: '2026-03-15T05:00:00Z',
+          next: '2099-04-15T05:00:00Z',
+          ended: false,
+          confidence: 0.9,
+          direction: 'credit',
+          amounts: {
+            '-250000': 3,
+          },
+          lastAmount: -250000,
+          autoMatched: false,
+          createdAt: '2026-03-15T06:00:00Z',
+          updatedAt: '2026-03-15T06:00:00Z',
+        },
+      ]);
+    apiSampleResponses(mockFetch);
+
+    // Coming back from a details page lands here with the tab still in the url
+    const world = testRenderer(<Recurring />, {
+      initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring?tab=deposits',
+    });
+
+    await waitFor(() => expect(world.getByTestId('recurring-item-name')).toHaveTextContent('Mercury Payroll'));
+    await waitFor(() => expect(world.getByTestId('recurring-tab-deposits')).toHaveAttribute('aria-selected', 'true'));
+  });
+
   it('will put things that were due a while ago in the late group', async () => {
     mockFetch
       .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring?direction=debit&ended=false')

@@ -151,7 +151,7 @@ func TestRepositoryBase_GetTransactionRecurringById(t *testing.T) {
 		result, err := repo.GetTransactionRecurringById(t.Context(), bankAccount.BankAccountId, recurring[0].TransactionRecurringId)
 		assert.NoError(t, err, "must be able to read the recurring transaction")
 		require.NotNil(t, result, "result must not be nil")
-		assert.Nil(t, result.Spending, "spending should be nil when nothing is linked yet")
+		assert.Nil(t, result.SpendingId, "spending should be nil when nothing is linked yet")
 
 		spending := givenIHaveAnExpense(t, clock, bankAccount, fundingSchedule, "Github")
 		recurring[0].SpendingId = &spending.SpendingId
@@ -161,8 +161,8 @@ func TestRepositoryBase_GetTransactionRecurringById(t *testing.T) {
 		result, err = repo.GetTransactionRecurringById(t.Context(), bankAccount.BankAccountId, recurring[0].TransactionRecurringId)
 		assert.NoError(t, err, "must be able to read the recurring transaction")
 		require.NotNil(t, result, "result must not be nil")
-		require.NotNil(t, result.Spending, "spending should be included now that one is linked")
-		assert.Equal(t, spending.SpendingId, result.Spending.SpendingId, "should be the linked spending")
+		require.NotNil(t, result.SpendingId, "spending should be set now that one is linked")
+		assert.Equal(t, spending.SpendingId, *result.SpendingId, "should be the linked spending")
 	})
 
 	t.Run("does not exist", func(t *testing.T) {
@@ -314,7 +314,7 @@ func TestRepositoryBase_GetTransactionRecurrings(t *testing.T) {
 		assert.Equal(t, recurring[2].TransactionRecurringId, result[2].TransactionRecurringId, "ended should be last")
 	})
 
-	t.Run("includes the cluster but not the spending", func(t *testing.T) {
+	t.Run("includes the cluster", func(t *testing.T) {
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -349,7 +349,6 @@ func TestRepositoryBase_GetTransactionRecurrings(t *testing.T) {
 		assert.Empty(t, result[0].TransactionCluster.Members, "members should be left out")
 		require.NotNil(t, result[0].SpendingId, "spending id should still be there")
 		assert.Equal(t, spending.SpendingId, *result[0].SpendingId, "should be the linked spending")
-		assert.Nil(t, result[0].Spending, "spending itself should not be included")
 	})
 
 	t.Run("pagination", func(t *testing.T) {
@@ -382,6 +381,90 @@ func TestRepositoryBase_GetTransactionRecurrings(t *testing.T) {
 		secondPage, err := repo.GetTransactionRecurrings(t.Context(), bankAccount.BankAccountId, nil, nil, 3, 3)
 		assert.NoError(t, err, "must be able to read the second page")
 		assert.Len(t, secondPage, 2, "second page should have whats left")
+	})
+
+	t.Run("filter by direction", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		recurring := []models.TransactionRecurring{
+			newTransactionRecurring(t, givenIHaveATransactionCluster(t, bankAccount), models.DebitDirection, 800),
+			newTransactionRecurring(t, givenIHaveATransactionCluster(t, bankAccount), models.CreditDirection, -250000),
+		}
+		err := repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, recurring)
+		require.NoError(t, err, "must be able to create recurring transactions")
+
+		result, err := repo.GetTransactionRecurrings(
+			t.Context(),
+			bankAccount.BankAccountId,
+			new(models.CreditDirection),
+			nil,
+			25,
+			0,
+		)
+		assert.NoError(t, err, "must be able to read recurring transactions")
+		require.Len(t, result, 1, "should only return the credit")
+		assert.Equal(t, recurring[1].TransactionRecurringId, result[0].TransactionRecurringId, "should be the credit")
+	})
+
+	t.Run("ended ones by last seen", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		// Next keeps getting projected forward for ended ones so it doesn't line up
+		// with when they stopped. Older has the sooner next date here, so if this
+		// was still sorting by next it would come first.
+		older := newTransactionRecurring(t, givenIHaveATransactionCluster(t, bankAccount), models.DebitDirection, 800)
+		older.Ended = true
+		older.Last = time.Date(2025, 1, 15, 6, 0, 0, 0, time.UTC)
+		older.Next = time.Date(2026, 4, 15, 5, 0, 0, 0, time.UTC)
+		newer := newTransactionRecurring(t, givenIHaveATransactionCluster(t, bankAccount), models.DebitDirection, 900)
+		newer.Ended = true
+		newer.Last = time.Date(2025, 9, 15, 5, 0, 0, 0, time.UTC)
+		newer.Next = time.Date(2026, 5, 15, 5, 0, 0, 0, time.UTC)
+		active := newTransactionRecurring(t, givenIHaveATransactionCluster(t, bankAccount), models.DebitDirection, 1000)
+		recurring := []models.TransactionRecurring{
+			older,
+			newer,
+			active,
+		}
+		err := repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, recurring)
+		require.NoError(t, err, "must be able to create recurring transactions")
+
+		result, err := repo.GetTransactionRecurrings(
+			t.Context(),
+			bankAccount.BankAccountId,
+			nil,
+			new(true),
+			25,
+			0,
+		)
+		assert.NoError(t, err, "must be able to read recurring transactions")
+		require.Len(t, result, 2, "should only return the ended ones")
+		assert.Equal(t, recurring[1].TransactionRecurringId, result[0].TransactionRecurringId, "most recently seen should be first")
+		assert.Equal(t, recurring[0].TransactionRecurringId, result[1].TransactionRecurringId, "older should be second")
 	})
 }
 

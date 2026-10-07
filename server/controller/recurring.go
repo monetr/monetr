@@ -170,7 +170,7 @@ func (c *Controller) patchRecurringTransaction(ctx *echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to update recurring transaction")
 	}
 
-	// Read it back so the embedded spending and funding schedule match the new
+	// Read it back so the embedded funding schedule matches the new
 	// links.
 	result, err := repo.GetTransactionRecurringById(
 		c.getContext(ctx),

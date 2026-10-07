@@ -229,7 +229,7 @@
   font-weight: var(--semibold);
   cursor: pointer;
 
-  &:hover {
+  &:enabled:hover {
     filter: brightness(1.2);
   }
 }

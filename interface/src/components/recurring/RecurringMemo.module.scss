@@ -2,6 +2,8 @@
 
 .recurringMemo {
   @include mixins.text-extra-small;
+  // Same as the code component, the global code style still uses the system monospace font
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
   min-width: 0;
   color: var(--content-subtle);
   overflow: hidden;

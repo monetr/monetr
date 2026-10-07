@@ -29,6 +29,8 @@ export default function TransactionRecurringCard({
   transaction,
 }: TransactionRecurringCardProps): React.JSX.Element | null {
   const { data: recurring } = useRecurringTransaction(transaction.transactionRecurringId);
+  // the recurring transaction only has the id, look the expense up so it comes from the same cache as the expenses
+  const { data: spending } = useSpending(recurring?.spendingId ?? null);
   const { timezone, inTimezone } = useTimezone();
   const { data: locale } = useLocale();
   const { data: localeCurrency } = useLocaleCurrency();
@@ -65,7 +67,7 @@ export default function TransactionRecurringCard({
         </div>
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
-            <span className={styles.confidence}>{getConfidenceLabel(recurring.confidence)}</span>
+            <span className={styles.confidence}>{recurring.getConfidenceLabel()}</span>
           </TooltipTrigger>
           <TooltipContent side='top'>Confidence {Math.round(recurring.confidence * 100)}%</TooltipContent>
         </Tooltip>
@@ -91,7 +93,7 @@ export default function TransactionRecurringCard({
       {/* only money leaving the account can be budgeted for with an expense */}
       {isDebit && (
         <div className={styles.footer}>
-          {recurring.spending ? (
+          {recurring.spendingId ? (
             <Fragment>
               <span className={styles.spentFrom}>
                 {recurring.autoMatched ? (
@@ -107,7 +109,7 @@ export default function TransactionRecurringCard({
                       </span>
                     </TooltipTrigger>
                     <TooltipContent side='top'>
-                      monetr linked this for you since your recent charges were spent from {recurring.spending.name}
+                      monetr linked this for you since your recent charges were spent from {spending?.name}
                     </TooltipContent>
                   </Tooltip>
                 ) : (
@@ -116,13 +118,11 @@ export default function TransactionRecurringCard({
                   </span>
                 )}
                 <span>
-                  Budgeted with <strong>{recurring.spending.name}</strong>
+                  Budgeted with <strong>{spending?.name}</strong>
                 </span>
               </span>
               <Button asChild variant='secondary'>
-                <Link
-                  to={`/bank/${recurring.spending.bankAccountId}/expenses/${recurring.spending.spendingId}/details`}
-                >
+                <Link to={`/bank/${recurring.bankAccountId}/expenses/${recurring.spendingId}/details`}>
                   View expense
                 </Link>
               </Button>
@@ -222,14 +222,4 @@ function SpentFrom({ recurring }: SpentFromProps): React.JSX.Element | null {
       Last spent from <strong>{name}</strong>
     </span>
   );
-}
-
-export function getConfidenceLabel(confidence: number): string {
-  if (confidence >= 0.9) {
-    return 'Very likely';
-  }
-  if (confidence >= 0.75) {
-    return 'Likely';
-  }
-  return 'Possibly';
 }

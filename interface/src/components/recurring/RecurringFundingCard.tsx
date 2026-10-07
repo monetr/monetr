@@ -119,6 +119,7 @@ export default function RecurringFundingCard(props: RecurringFundingCardProps): 
         <div className={styles.footer}>
           <Link
             className={styles.viewLink}
+            data-testid='recurring-view-funding'
             to={`/bank/${props.recurring.bankAccountId}/funding/${props.recurring.fundingSchedule.fundingScheduleId}/details`}
           >
             View Funding Schedule
@@ -129,6 +130,7 @@ export default function RecurringFundingCard(props: RecurringFundingCardProps): 
         <div className={styles.footer}>
           <Button
             className={styles.createButton}
+            data-testid='recurring-new-funding'
             disabled={saving}
             onClick={() =>
               showNewFundingModal({

@@ -2,10 +2,8 @@ import { waitFor } from '@testing-library/react';
 
 import RecurringSpendingCard from '@monetr/interface/components/recurring/RecurringSpendingCard';
 import type BankAccount from '@monetr/interface/models/BankAccount';
-import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { ID } from '@monetr/interface/models/ID';
 import type Spending from '@monetr/interface/models/Spending';
-import { SpendingType } from '@monetr/interface/models/Spending';
 import type TransactionCluster from '@monetr/interface/models/TransactionCluster';
 import TransactionRecurring, { TransactionRecurringWindow } from '@monetr/interface/models/TransactionRecurring';
 import FetchMock from '@monetr/interface/testutils/fetchMock';
@@ -36,7 +34,6 @@ describe('recurring spending card', () => {
       transactionClusterId: ID.from<TransactionCluster>('tcl_01hy4rf0p7mz9w2q3c4v5b6n7m'),
       transactionCluster: null,
       spendingId: null,
-      spending: null,
       fundingScheduleId: null,
       fundingSchedule: null,
       window: TransactionRecurringWindow.Monthly,
@@ -66,19 +63,13 @@ describe('recurring spending card', () => {
   });
 
   it('will not offer to create an expense when one is already linked', async () => {
-    apiSampleResponses(mockFetch);
-
-    const recurring = new TransactionRecurring({
-      transactionRecurringId: ID.from<TransactionRecurring>('txrc_01hy4re7c1xc2v44cf6kx302jx'),
-      bankAccountId: ID.from<BankAccount>('bac_01gds6eqsq7h5mgevwtmw3cyxb'),
-      transactionClusterId: ID.from<TransactionCluster>('tcl_01hy4rf0p7mz9w2q3c4v5b6n7m'),
-      transactionCluster: null,
-      spendingId: ID.from<Spending>('spnd_01hy4rkq0x3c6dtr9w1p2v5bns'),
-      spending: {
-        spendingId: ID.from<Spending>('spnd_01hy4rkq0x3c6dtr9w1p2v5bns'),
-        bankAccountId: ID.from<BankAccount>('bac_01gds6eqsq7h5mgevwtmw3cyxb'),
-        fundingScheduleId: ID.from<FundingSchedule>('fund_01hym37k3kj4ghv67nfx7vkvr0'),
-        spendingType: SpendingType.Expense,
+    mockFetch
+      .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/spending/spnd_01hy4rkq0x3c6dtr9w1p2v5bns')
+      .reply(200, {
+        spendingId: 'spnd_01hy4rkq0x3c6dtr9w1p2v5bns',
+        bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
+        fundingScheduleId: 'fund_01hym37k3kj4ghv67nfx7vkvr0',
+        spendingType: 'expense',
         name: 'Github Copilot',
         targetAmount: 800,
         currentAmount: 300,
@@ -91,7 +82,15 @@ describe('recurring spending card', () => {
         isPaused: false,
         autoCreateTransaction: false,
         createdAt: '2026-03-16T06:00:00Z',
-      },
+      });
+    apiSampleResponses(mockFetch);
+
+    const recurring = new TransactionRecurring({
+      transactionRecurringId: ID.from<TransactionRecurring>('txrc_01hy4re7c1xc2v44cf6kx302jx'),
+      bankAccountId: ID.from<BankAccount>('bac_01gds6eqsq7h5mgevwtmw3cyxb'),
+      transactionClusterId: ID.from<TransactionCluster>('tcl_01hy4rf0p7mz9w2q3c4v5b6n7m'),
+      transactionCluster: null,
+      spendingId: ID.from<Spending>('spnd_01hy4rkq0x3c6dtr9w1p2v5bns'),
       fundingScheduleId: null,
       fundingSchedule: null,
       window: TransactionRecurringWindow.Monthly,
@@ -121,19 +120,13 @@ describe('recurring spending card', () => {
   });
 
   it('will say when monetr linked it on its own', async () => {
-    apiSampleResponses(mockFetch);
-
-    const recurring = new TransactionRecurring({
-      transactionRecurringId: ID.from<TransactionRecurring>('txrc_01hy4re7c1xc2v44cf6kx302jx'),
-      bankAccountId: ID.from<BankAccount>('bac_01gds6eqsq7h5mgevwtmw3cyxb'),
-      transactionClusterId: ID.from<TransactionCluster>('tcl_01hy4rf0p7mz9w2q3c4v5b6n7m'),
-      transactionCluster: null,
-      spendingId: ID.from<Spending>('spnd_01hy4rkq0x3c6dtr9w1p2v5bns'),
-      spending: {
-        spendingId: ID.from<Spending>('spnd_01hy4rkq0x3c6dtr9w1p2v5bns'),
-        bankAccountId: ID.from<BankAccount>('bac_01gds6eqsq7h5mgevwtmw3cyxb'),
-        fundingScheduleId: ID.from<FundingSchedule>('fund_01hym37k3kj4ghv67nfx7vkvr0'),
-        spendingType: SpendingType.Expense,
+    mockFetch
+      .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/spending/spnd_01hy4rkq0x3c6dtr9w1p2v5bns')
+      .reply(200, {
+        spendingId: 'spnd_01hy4rkq0x3c6dtr9w1p2v5bns',
+        bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
+        fundingScheduleId: 'fund_01hym37k3kj4ghv67nfx7vkvr0',
+        spendingType: 'expense',
         name: 'Github Copilot',
         targetAmount: 800,
         currentAmount: 300,
@@ -146,7 +139,15 @@ describe('recurring spending card', () => {
         isPaused: false,
         autoCreateTransaction: false,
         createdAt: '2026-03-16T06:00:00Z',
-      },
+      });
+    apiSampleResponses(mockFetch);
+
+    const recurring = new TransactionRecurring({
+      transactionRecurringId: ID.from<TransactionRecurring>('txrc_01hy4re7c1xc2v44cf6kx302jx'),
+      bankAccountId: ID.from<BankAccount>('bac_01gds6eqsq7h5mgevwtmw3cyxb'),
+      transactionClusterId: ID.from<TransactionCluster>('tcl_01hy4rf0p7mz9w2q3c4v5b6n7m'),
+      transactionCluster: null,
+      spendingId: ID.from<Spending>('spnd_01hy4rkq0x3c6dtr9w1p2v5bns'),
       fundingScheduleId: null,
       fundingSchedule: null,
       window: TransactionRecurringWindow.Monthly,
@@ -182,7 +183,6 @@ describe('recurring spending card', () => {
       transactionClusterId: ID.from<TransactionCluster>('tcl_01hy4rf0p7mz9w2q3c4v5b6n7m'),
       transactionCluster: null,
       spendingId: null,
-      spending: null,
       fundingScheduleId: null,
       fundingSchedule: null,
       window: TransactionRecurringWindow.Monthly,

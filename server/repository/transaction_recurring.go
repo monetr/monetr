@@ -28,7 +28,6 @@ func (r *repositoryBase) GetTransactionRecurringById(
 	var result TransactionRecurring
 	err := r.txn.NewSelect().
 		Model(&result).
-		Relation("Spending").
 		Relation("FundingSchedule").
 		Where(`"transaction_recurring"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction_recurring"."bank_account_id" = ?`, bankAccountId).
@@ -61,8 +60,6 @@ func (r *repositoryBase) GetTransactionRecurrings(
 	result := make([]TransactionRecurring, 0)
 	query := r.txn.NewSelect().
 		Model(&result).
-		// Spending is left off, the UI looks each one up by Id so it comes from
-		// the same cache as the expenses
 		Relation("FundingSchedule").
 		// The cluster is only here for its name, the members and debug info can
 		// be huge so leave those out

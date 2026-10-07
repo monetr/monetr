@@ -44,7 +44,6 @@ type TransactionRecurring struct {
 	TransactionClusterId   ID[TransactionCluster]   `json:"transactionClusterId" bun:"transaction_cluster_id,notnull"`
 	TransactionCluster     *TransactionCluster      `json:"transactionCluster,omitempty" bun:"rel:belongs-to,join:transaction_cluster_id=transaction_cluster_id,join:bank_account_id=bank_account_id,join:account_id=account_id"`
 	SpendingId             *ID[Spending]            `json:"spendingId" bun:"spending_id"`
-	Spending               *Spending                `json:"spending,omitempty" bun:"rel:belongs-to,join:spending_id=spending_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
 	FundingScheduleId      *ID[FundingSchedule]     `json:"fundingScheduleId" bun:"funding_schedule_id"`
 	FundingSchedule        *FundingSchedule         `json:"fundingSchedule,omitempty" bun:"rel:belongs-to,join:funding_schedule_id=funding_schedule_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
 	Window                 WindowType               `json:"window" bun:"window_type,notnull,nullzero"`

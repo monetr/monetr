@@ -60,6 +60,7 @@ export default function RecurringChargeList(props: RecurringChargeListProps): Re
           <button
             aria-selected={tab === 'schedule'}
             className={styles.tab}
+            data-testid='recurring-charges-tab-schedule'
             onClick={() => setTab('schedule')}
             role='tab'
             type='button'
@@ -69,6 +70,7 @@ export default function RecurringChargeList(props: RecurringChargeListProps): Re
           <button
             aria-selected={tab === 'all'}
             className={styles.tab}
+            data-testid='recurring-charges-tab-all'
             onClick={() => setTab('all')}
             role='tab'
             type='button'

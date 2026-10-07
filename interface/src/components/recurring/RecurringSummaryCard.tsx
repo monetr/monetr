@@ -7,7 +7,6 @@ import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import RecurringMemo from '@monetr/interface/components/recurring/RecurringMemo';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@monetr/interface/components/Tooltip';
 import Typography from '@monetr/interface/components/Typography';
-import { getConfidenceLabel } from '@monetr/interface/components/transactions/TransactionRecurringCard';
 import { useLocale } from '@monetr/interface/hooks/useLocale';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSpending } from '@monetr/interface/hooks/useSpending';
@@ -81,12 +80,16 @@ export default function RecurringSummaryCard(props: RecurringSummaryCardProps): 
             <span className={styles.schedule}>
               <strong>{amount}</strong> {rule.toText()}
             </span>
-            <span className={styles.statusBadge} data-ended={String(props.recurring.ended)}>
+            <span
+              className={styles.statusBadge}
+              data-ended={String(props.recurring.ended)}
+              data-testid='recurring-status'
+            >
               {status}
             </span>
             <Tooltip delayDuration={100}>
               <TooltipTrigger asChild>
-                <span className={styles.confidenceBadge}>{getConfidenceLabel(props.recurring.confidence)}</span>
+                <span className={styles.confidenceBadge}>{props.recurring.getConfidenceLabel()}</span>
               </TooltipTrigger>
               <TooltipContent side='top'>Confidence {Math.round(props.recurring.confidence * 100)}%</TooltipContent>
             </Tooltip>
@@ -95,7 +98,7 @@ export default function RecurringSummaryCard(props: RecurringSummaryCardProps): 
       </section>
 
       {!props.recurring.ended && (
-        <section className={styles.next}>
+        <section className={styles.next} data-testid='recurring-next'>
           <div className={styles.nextText}>
             <span className={styles.nextLabel}>{nextLabel}</span>
             <span className={styles.nextDate}>
@@ -105,13 +108,13 @@ export default function RecurringSummaryCard(props: RecurringSummaryCardProps): 
               </span>
             </span>
             {later.length > 0 && (
-              <span className={styles.nextLater}>
+              <span className={styles.nextLater} data-testid='recurring-next-later'>
                 Then {later.map(item => formatDate(item, inTimezone, dateLocale, DateLength.Medium)).join(' and ')}
               </span>
             )}
           </div>
           {spending && (
-            <div className={styles.coverage} data-covered={String(covered)}>
+            <div className={styles.coverage} data-covered={String(covered)} data-testid='recurring-coverage'>
               {covered && <Check />}
               {!covered && <CircleAlert />}
               <div className={styles.coverageText}>

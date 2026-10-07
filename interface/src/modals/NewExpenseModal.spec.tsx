@@ -44,7 +44,6 @@ function recurringJson(next: string): WithJsonValues<TransactionRecurring> {
     amounts: { 1549: 3 },
     lastAmount: 1549,
     autoMatched: false,
-    spending: null,
     fundingSchedule: null,
     transactionCluster: null,
     createdAt: '2026-01-15T06:00:00Z',

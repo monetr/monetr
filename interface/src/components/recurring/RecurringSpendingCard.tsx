@@ -13,6 +13,7 @@ import Typography from '@monetr/interface/components/Typography';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { usePatchTransactionRecurring } from '@monetr/interface/hooks/usePatchTransactionRecurring';
+import { useSpending } from '@monetr/interface/hooks/useSpending';
 import { useSpendings } from '@monetr/interface/hooks/useSpendings';
 import { showNewExpenseModal } from '@monetr/interface/modals/NewExpenseModal';
 import type { ID } from '@monetr/interface/models/ID';
@@ -33,6 +34,8 @@ export interface RecurringSpendingCardProps {
 
 export default function RecurringSpendingCard(props: RecurringSpendingCardProps): React.JSX.Element {
   const { data: spending, isLoading: spendingIsLoading } = useSpendings();
+  // The recurring transaction only has the id, look the expense up so it comes from the same cache as the expenses
+  const { data: linkedSpending } = useSpending(props.recurring.spendingId);
   const { data: balances, isLoading: balancesIsLoading } = useCurrentBalance();
   const { data: locale } = useLocaleCurrency();
   const patchTransactionRecurring = usePatchTransactionRecurring();
@@ -152,18 +155,18 @@ export default function RecurringSpendingCard(props: RecurringSpendingCardProps)
           </Tooltip>
         </div>
       </div>
-      {props.recurring.spending && (
+      {props.recurring.spendingId && (
         <div className={styles.footer}>
-          {props.recurring.autoMatched && (
+          {props.recurring.autoMatched && linkedSpending && (
             <span className={styles.note} data-testid='recurring-auto-matched'>
               <Sparkles />
-              monetr picked {props.recurring.spending.name} for you since your recent charges were spent from it.
+              monetr picked {linkedSpending.name} for you since your recent charges were spent from it.
             </span>
           )}
           <Link
             className={styles.viewLink}
             data-testid='recurring-view-expense'
-            to={`/bank/${props.recurring.bankAccountId}/expenses/${props.recurring.spending.spendingId}/details`}
+            to={`/bank/${props.recurring.bankAccountId}/expenses/${props.recurring.spendingId}/details`}
           >
             View Expense
           </Link>
