@@ -1,0 +1,100 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5 * variables.$size;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3 * variables.$size;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5 * variables.$size;
+  padding: 0.75 * variables.$size;
+  border-radius: var(--border-radius);
+  background-color: var(--background-emphasis);
+}
+
+.tab {
+  @include mixins.text-small;
+  border: 0;
+  border-radius: calc(var(--border-radius) - 2px);
+  padding: 1 * variables.$size 2.5 * variables.$size;
+  background: transparent;
+  font-weight: var(--medium);
+  color: var(--content-subtle);
+  cursor: pointer;
+
+  &[aria-selected='true'] {
+    font-weight: var(--semibold);
+    color: var(--content-emphasis);
+    background-color: var(--background-active);
+  }
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+}
+
+.empty {
+  padding: 2 * variables.$size;
+}
+
+// Dashed since it hasn't actually happened yet. Outline instead of border so it doesn't shift the content over
+// compared to the real rows.
+.expected {
+  outline: 1px dashed var(--background-active);
+  outline-offset: -1px;
+
+  &:hover,
+  &:active {
+    background-color: transparent;
+  }
+}
+
+.expectedIcon {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 10 * variables.$size;
+  height: 10 * variables.$size;
+  border-radius: 9999px;
+  border: 1px dashed var(--content-muted);
+  color: var(--content-subtle);
+
+  svg {
+    width: 4 * variables.$size;
+    height: 4 * variables.$size;
+  }
+}
+
+.arrowSpacer {
+  visibility: hidden;
+}
+
+.showMore {
+  @include mixins.text-small;
+  align-self: flex-start;
+  border: 0;
+  background: transparent;
+  padding: 1 * variables.$size 2 * variables.$size;
+  font-weight: var(--medium);
+  color: var(--brand-bright);
+  cursor: pointer;
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.7;
+  }
+}

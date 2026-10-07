@@ -1,0 +1,31 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.date {
+  @include mixins.text-base;
+  display: flex;
+  align-items: center;
+  gap: 2 * variables.$size;
+  font-weight: var(--semibold);
+  color: var(--content-emphasis);
+}
+
+.oneOffChip {
+  @include mixins.text-extra-small;
+  padding: 0 1.5 * variables.$size;
+  border-radius: calc(var(--border-radius) - 2px);
+  font-weight: var(--semibold);
+  color: var(--content);
+  background-color: var(--background-emphasis);
+}
+
+.memo {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  line-height: 4.5 * variables.$size;
+  color: var(--content-subtle);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

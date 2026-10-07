@@ -1,0 +1,103 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5 * variables.$size;
+  padding: 4 * variables.$size;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius);
+  background-color: var(--background-darker);
+}
+
+.eyebrow {
+  @include mixins.text-small;
+  display: flex;
+  align-items: center;
+  gap: 1.5 * variables.$size;
+  font-weight: var(--semibold);
+  color: var(--content-subtle);
+
+  svg {
+    width: 3.5 * variables.$size;
+    height: 3.5 * variables.$size;
+  }
+}
+
+.title {
+  @include mixins.text-large;
+  font-weight: var(--bold);
+  color: var(--content-emphasis);
+
+  span {
+    @include mixins.text-small;
+    font-weight: var(--medium);
+    color: var(--content-subtle);
+  }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2 * variables.$size;
+}
+
+.chip {
+  @include mixins.text-small;
+  display: flex;
+  align-items: center;
+  gap: 1.5 * variables.$size;
+  padding: 0.75 * variables.$size 2.5 * variables.$size;
+  border-radius: var(--border-radius);
+  font-weight: var(--semibold);
+  color: var(--content-emphasis);
+  background-color: var(--brand);
+
+  svg {
+    width: 3 * variables.$size;
+    height: 3 * variables.$size;
+  }
+}
+
+.memos {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5 * variables.$size;
+  padding-top: 2.5 * variables.$size;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.memosLabel {
+  @include mixins.text-extra-small;
+  font-weight: var(--medium);
+  color: var(--content-subtle);
+}
+
+.memoList {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1.5 * variables.$size 3 * variables.$size;
+  align-items: center;
+}
+
+.memo {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  line-height: 4.5 * variables.$size;
+  color: var(--content);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.memoCount {
+  @include mixins.text-extra-small;
+  color: var(--content-subtle);
+}
+
+.note {
+  @include mixins.text-small;
+  color: var(--content-subtle);
+}

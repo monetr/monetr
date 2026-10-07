@@ -31,19 +31,18 @@ export function usePatchTransactionRecurring(): (
         data: recurring,
       }).then(result => result.data);
     },
-    // The response already embeds whatever its linked to, so it can replace the cached recurring transaction as is.
-    // The list doesn't get the same treatment since it also embeds the similar transactions group, which isn't in
-    // the response, so that just gets fetched again.
-    onSuccess: (result: PatchTransactionRecurringResponse, _input, _, { client: queryClient }) =>
-      Promise.all([
-        queryClient.setQueryData(
-          ['GET', `/api/bank_accounts/${result.bankAccountId}/recurring/${result.transactionRecurringId}`],
-          result,
-        ),
-        queryClient.invalidateQueries({
-          queryKey: ['GET', `/api/bank_accounts/${result.bankAccountId}/recurring`],
-        }),
-      ]),
+    onSuccess: (result: PatchTransactionRecurringResponse, _input, _, { client: queryClient }) => {
+      // The response already embeds whatever its linked to, so it can replace the cached recurring transaction as is.
+      queryClient.setQueryData(
+        ['GET', `/api/bank_accounts/${result.bankAccountId}/recurring/${result.transactionRecurringId}`],
+        result,
+      );
+      // The list items have the similar transactions group on them which isn't in the response, so just refetch the
+      // list instead.
+      return queryClient.invalidateQueries({
+        queryKey: ['GET', `/api/bank_accounts/${result.bankAccountId}/recurring`],
+      });
+    },
   });
 
   return mutateAsync;

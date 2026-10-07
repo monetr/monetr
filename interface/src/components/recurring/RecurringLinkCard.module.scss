@@ -1,0 +1,117 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+// Shared by the spending and funding cards on the recurring details page.
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 3 * variables.$size;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5 * variables.$size;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 3 * variables.$size;
+  padding: 4 * variables.$size;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius);
+  background-color: var(--background-darker);
+
+  &[data-active='true'] {
+    border-color: var(--brand);
+  }
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 4 * variables.$size;
+}
+
+.cardText {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5 * variables.$size;
+  min-width: 0;
+}
+
+.chip {
+  @include mixins.text-extra-small;
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 1.25 * variables.$size;
+  padding: 0.5 * variables.$size 2 * variables.$size;
+  border-radius: var(--border-radius);
+  font-weight: var(--semibold);
+  color: var(--brand-bright);
+  background-color: color-mix(in srgb, var(--brand) 40%, transparent);
+
+  svg {
+    width: 3 * variables.$size;
+    height: 3 * variables.$size;
+  }
+}
+
+.title {
+  @include mixins.text-base;
+  font-weight: var(--semibold);
+  color: var(--content-emphasis);
+}
+
+.description {
+  @include mixins.text-small;
+  color: var(--content-subtle);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 2 * variables.$size;
+}
+
+// Select leaves room underneath for error text, there's never an error here so drop it. Nested so it wins over the
+// padding class Select puts on the same element.
+.controls .select {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 0;
+}
+
+// Same height as the select next to it.
+.createButton {
+  @include mixins.text-small;
+  flex: none;
+  height: 9.5 * variables.$size;
+}
+
+.note {
+  @include mixins.text-small;
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5 * variables.$size;
+  color: var(--content-subtle);
+
+  svg {
+    flex: none;
+    width: 4 * variables.$size;
+    height: 4 * variables.$size;
+    margin-top: 0.5 * variables.$size;
+    color: var(--brand-bright);
+  }
+}
+
+.viewLink {
+  @include mixins.text-small;
+  align-self: flex-start;
+  font-weight: var(--medium);
+  color: var(--brand-bright);
+}

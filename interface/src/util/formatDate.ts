@@ -1,5 +1,12 @@
 import { type TZDate, tz } from '@date-fns/tz';
-import { format, isThisYear, type Locale } from 'date-fns';
+import {
+  differenceInCalendarDays,
+  differenceInCalendarMonths,
+  format,
+  isThisYear,
+  type Locale,
+  startOfToday,
+} from 'date-fns';
 
 export enum DateLength {
   /**
@@ -52,4 +59,22 @@ export function formatDate(
         },
       );
   }
+}
+
+/**
+ * formatRelativeDate gives back something like "tomorrow", "in 5 days" or "in 4 months" for how far the date is from
+ * today in the specified timezone.
+ */
+export function formatRelativeDate(date: Date, timezone: string | ReturnType<typeof tz>, locale: Locale): string {
+  const inTimezone = typeof timezone === 'function' ? timezone : tz(timezone);
+  const today = startOfToday({ in: inTimezone });
+  // Numeric auto gives us today, tomorrow and yesterday instead of in 0 days, in 1 day and 1 day ago.
+  const relative = new Intl.RelativeTimeFormat(locale.code, { numeric: 'auto' });
+  const days = differenceInCalendarDays(inTimezone(date), today);
+  // Counting days gets hard to picture once its a couple months out, so switch to months.
+  if (Math.abs(days) >= 60) {
+    return relative.format(differenceInCalendarMonths(inTimezone(date), today), 'month');
+  }
+
+  return relative.format(days, 'day');
 }
