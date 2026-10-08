@@ -1613,9 +1613,9 @@ func TestPatchBankAccount(t *testing.T) {
 
 	t.Run("happy path patch a lunch flow bank account", func(t *testing.T) {
 		// A lunch flow account is synced externally so monetr owns the balances,
-		// but the user still picks the name, mask, and currency for it. It gets its
-		// own patch schema (not the manual one and not the bare Plaid one) so it
-		// can change those three things and nothing else. We route to it off of the
+		// but the user still picks the name, mask, currency, and type for it. It
+		// gets its own patch schema (not the manual one and not the bare Plaid one)
+		// so it can change those things and nothing else. We route to it off of the
 		// LunchFlowBankAccountId rather than the isManual check, which is what
 		// these tests are really guarding.
 		app, e := NewTestApplication(t)
@@ -1659,11 +1659,11 @@ func TestPatchBankAccount(t *testing.T) {
 		}
 	})
 
-	t.Run("lunch flow bank account cannot patch balances or classification", func(t *testing.T) {
-		// The whole point of the dedicated lunch flow schema is that balances and
-		// the account classification are synced externally, so the client must not
-		// be able to touch them. These keys are not part of the schema so they
-		// should come back as unexpected. This also guards against the routing ever
+	t.Run("lunch flow bank account cannot patch balances", func(t *testing.T) {
+		// The whole point of the dedicated lunch flow schema is that balances are
+		// synced externally, so the client must not be able to touch them. These
+		// keys are not part of the schema so they should come back as unexpected.
+		// This also guards against the routing ever
 		// accidentally treating a lunch flow account as manual, which would let a
 		// client change balances on an account that monetr keeps in sync.
 		app, e := NewTestApplication(t)
@@ -1704,20 +1704,59 @@ func TestPatchBankAccount(t *testing.T) {
 			response.JSON().Path("$.error").String().IsEqual("Invalid request")
 			response.JSON().Path("$.problems.limitBalance").String().IsEqual("key not expected")
 		}
+	})
 
-		{ // And the account type, monetr owns the classification for a synced
-			// account.
+	t.Run("lunch flow bank account can patch the account type", func(t *testing.T) {
+		// Lunch Flow doesn't give us the account type, every account starts as a
+		// checking account. So the user needs to be able to fix it.
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveALunchFlowLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveALunchFlowBankAccount(t, app.Clock, &link)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{ // Change it to a credit card.
 			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"accountType": CreditBankAccountType,
+					"accountType":    CreditBankAccountType,
+					"accountSubType": CreditCardBankAccountSubType,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.accountType").String().IsEqual(string(CreditBankAccountType))
+			response.JSON().Path("$.accountSubType").String().IsEqual(string(CreditCardBankAccountSubType))
+		}
+
+		{ // Read it back to make sure it was persisted.
+			response := e.GET("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.accountType").String().IsEqual(string(CreditBankAccountType))
+			response.JSON().Path("$.accountSubType").String().IsEqual(string(CreditCardBankAccountSubType))
+		}
+
+		{ // But it still has to be a real account type.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"accountType": "something",
 				}).
 				Expect()
 
 			response.Status(http.StatusBadRequest)
 			response.JSON().Path("$.error").String().IsEqual("Invalid request")
-			response.JSON().Path("$.problems.accountType").String().IsEqual("key not expected")
+			response.JSON().Path("$.problems.accountType").String().IsEqual("Invalid bank account type")
 		}
 	})
 

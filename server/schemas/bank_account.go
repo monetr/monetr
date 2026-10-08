@@ -106,6 +106,18 @@ var (
 			// needs to be valid.
 			CurrencyCode(),
 		).Required(Optional), // Optional because we default to USD.
+		// Lunch Flow doesn't tell us what kind of account it is, so the user can
+		// reclassify it. The sync never touches these.
+		validation.Key(
+			"accountType",
+			validation.Required.Error("Account type is required"),
+			BankAccountAccountType(),
+		).Required(Optional),
+		validation.Key(
+			"accountSubType",
+			validation.Required.Error("Account sub type is required"),
+			BankAccountAccountSubType(),
+		).Required(Optional),
 	)
 
 	PatchManualBankAccount = validation.Map(

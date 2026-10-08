@@ -338,7 +338,8 @@ On a manual account, quite a bit more, since nothing is syncing these for you:
 | `mask`             | string, nullable  | No       | The last 4 digits, or null to clear it. Exactly 4 when set.         |
 | `name`             | string            | No       | The display name. Can't be blanked out.                             |
 
-On a Lunch Flow account, three: `name`, `currency` and `mask`.
+On a Lunch Flow account, five: `name`, `currency`, `mask`, `accountType` and `accountSubType`. Lunch Flow doesn't tell
+monetr what kind of account it is, so every account comes in as `depository` / `checking` until you change it.
 
 Note `status` is never editable, on any account type. monetr owns it, and archiving is what changes it.
 
@@ -380,6 +381,14 @@ curl --request PATCH \
   "updatedAt": "2024-08-29T17:41:55.732Z"
 }
 ```
+
+:::details History
+
+**[v1.18.1](https://github.com/monetr/monetr/releases/tag/v1.18.1)**
+
+- Lunch Flow accounts can now change `accountType` and `accountSubType`.
+
+:::
 
 ### Errors
 

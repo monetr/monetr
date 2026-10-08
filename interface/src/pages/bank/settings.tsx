@@ -94,11 +94,11 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
       name: values.name,
       ...((link?.getIsManual() || link?.getIsLunchFlow()) && {
         mask: values.mask || null,
+        accountType: values.accountType,
+        accountSubType: values.accountSubType,
       }),
       ...(link?.getIsManual() && {
         currency: values.currency,
-        accountType: values.accountType,
-        accountSubType: values.accountSubType,
         // We don't use the locale.friendlyToAmount helper here because it doesn't accept a currency argument, since the
         // currency could be changed here AND the balance could be changed; we need to handle for that.
         availableBalance: friendlyToAmount(values.availableBalance, locale.locale, values.currency),
@@ -171,10 +171,14 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
                 </div>
                 <SelectCurrency className={styles.input} disabled={link?.getIsPlaid()} name='currency' />
                 <div className={styles.inputRow}>
-                  <SelectBankAccountType className={styles.input} disabled={!link?.getIsManual()} name='accountType' />
+                  <SelectBankAccountType
+                    className={styles.input}
+                    disabled={!link?.getIsManual() && !link?.getIsLunchFlow()}
+                    name='accountType'
+                  />
                   <SelectBankAccountSubType
                     className={styles.input}
-                    disabled={!link?.getIsManual()}
+                    disabled={!link?.getIsManual() && !link?.getIsLunchFlow()}
                     name='accountSubType'
                   />
                 </div>
