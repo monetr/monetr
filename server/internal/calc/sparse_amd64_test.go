@@ -49,7 +49,7 @@ func TestSparseDot32_AVX512(t *testing.T) {
 	// The tail handling is the interesting part of this kernel, so walk every
 	// length either side of the 16 lane boundary rather than just the sizes the
 	// real data tends to produce.
-	for _, nnz := range []int{0, 1, 2, 3, 7, 8, 15, 16, 17, 31, 32, 33, 64, 100} {
+	for _, nnz := range []int{0, 1, 2, 3, 7, 8, 15, 16, 17, 31, 32, 33, 64, 100, 500} {
 		t.Run(fmt.Sprint(nnz), func(t *testing.T) {
 			rng := rand.New(rand.NewSource(int64(nnz)))
 			dense, indices, values := buildSparseVector(rng, 2048, nnz)
@@ -112,7 +112,7 @@ func TestSparseDot32_ZeroIntersection(t *testing.T) {
 }
 
 func BenchmarkSparseDot32_Go(bench *testing.B) {
-	for _, nnz := range []int{2, 4, 8, 16, 32} {
+	for _, nnz := range []int{2, 4, 8, 16, 32, 64, 128} {
 		bench.Run(fmt.Sprint(nnz), func(bench *testing.B) {
 			rng := rand.New(rand.NewSource(int64(nnz)))
 			dense, indices, values := buildSparseVector(rng, 2048, nnz)
@@ -129,7 +129,7 @@ func BenchmarkSparseDot32_AVX512(bench *testing.B) {
 		bench.Skip("host does not support AVX512")
 	}
 
-	for _, nnz := range []int{2, 4, 8, 16, 32} {
+	for _, nnz := range []int{2, 4, 8, 16, 32, 64, 128} {
 		bench.Run(fmt.Sprint(nnz), func(bench *testing.B) {
 			rng := rand.New(rand.NewSource(int64(nnz)))
 			dense, indices, values := buildSparseVector(rng, 2048, nnz)
