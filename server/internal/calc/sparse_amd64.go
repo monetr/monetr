@@ -11,6 +11,14 @@ func __sparseDot32_AVX_FMA(dense []float32, indices []int32, values []float32) f
 //go:noescape
 func __sparseDot32_AVX(dense []float32, indices []int32, values []float32) float32
 
+// TODO SparseDot32 doesn't use this yet. Calling it from inside SparseDot32 is
+// a second function call and that costs more than this saves (about 0.7ns on a
+// 7950X). It only wins when the caller calls it directly, which means
+// SparseDot32 needs to be small enough for Go to inline
+//
+//go:noescape
+func __sparseDot32Scalar_AVX_FMA(dense *float32, indices *int32, values *float32, count int) float32
+
 func init() {
 	// The AVX512 version is built around VGATHERDPS. The AVX_FMA and AVX
 	// versions only need AVX (and FMA), same as the fourier and euclidean ones,

@@ -7,6 +7,7 @@ import (
 	"math"
 	"math/rand"
 	"testing"
+	"unsafe"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -104,6 +105,34 @@ func TestSparseDot32_AVX(t *testing.T) {
 			assert.InDelta(t,
 				sparseDot32Go(dense, indices, values),
 				__sparseDot32_AVX(dense, indices, values),
+				1e-6,
+				"the assembly implementation must agree with the go implementation",
+			)
+		})
+	}
+}
+
+func TestSparseDot32Scalar_AVX_FMA(t *testing.T) {
+	if !HasAVXFMA() {
+		t.Skip("host does not support AVX and FMA")
+	}
+
+	// This one does 2 at a time and then 1 if the count is odd, so walk the odd
+	// and even lengths.
+	for _, nnz := range []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 16, 17, 31, 32, 33, 64, 100, 500} {
+		t.Run(fmt.Sprint(nnz), func(t *testing.T) {
+			rng := rand.New(rand.NewSource(int64(nnz)))
+			dense, indices, values := buildSparseVector(rng, 2048, nnz)
+			require.Len(t, indices, nnz, "must have built the requested number of entries")
+
+			assert.InDelta(t,
+				sparseDot32Go(dense, indices, values),
+				__sparseDot32Scalar_AVX_FMA(
+					unsafe.SliceData(dense),
+					unsafe.SliceData(indices),
+					unsafe.SliceData(values),
+					len(indices),
+				),
 				1e-6,
 				"the assembly implementation must agree with the go implementation",
 			)
@@ -216,6 +245,28 @@ func BenchmarkSparseDot32_AVX(bench *testing.B) {
 			bench.ResetTimer()
 			for bench.Loop() {
 				__sparseDot32_AVX(dense, indices, values)
+			}
+		})
+	}
+}
+
+func BenchmarkSparseDot32Scalar_AVX_FMA(bench *testing.B) {
+	if !HasAVXFMA() {
+		bench.Skip("host does not support AVX and FMA")
+	}
+
+	for _, nnz := range []int{2, 4, 8, 16, 32, 64, 128} {
+		bench.Run(fmt.Sprint(nnz), func(bench *testing.B) {
+			rng := rand.New(rand.NewSource(int64(nnz)))
+			dense, indices, values := buildSparseVector(rng, 2048, nnz)
+			bench.ResetTimer()
+			for bench.Loop() {
+				__sparseDot32Scalar_AVX_FMA(
+					unsafe.SliceData(dense),
+					unsafe.SliceData(indices),
+					unsafe.SliceData(values),
+					len(indices),
+				)
 			}
 		})
 	}

@@ -276,6 +276,71 @@ TEXT ·__sparseDot32_AVX_FMA(SB), NOSPLIT, $0-76
     VMOVSS X0, ret+72(FP) // Store X0 as the return value
     RET                   // We are done, return
 
+// func __sparseDot32Scalar_AVX_FMA(dense *float32, indices *int32, values *float32, count int) float32
+//
+// A scalar version for really short vectors, 2 to 8 entries is most of what
+// DBSCAN sees. At that size the work is tiny and most of the time is just the
+// call, so this is built to cost as little as possible to get in and out of:
+//
+//   It takes pointers and a count instead of 3 slices. Go calls assembly
+//   through a wrapper that copies every argument onto the stack first, so 4
+//   words instead of 9 makes the call cheaper. On a 7950X an empty function
+//   took 2.41ns with slices and 2.24ns with pointers
+//
+//   It goes 2 entries at a time into 2 separate sums, X0 and X1, so the 2 FMAs
+//   in each loop don't wait on each other
+//
+//   Both indicies for a pair come from 1 64 bit load and get split apart in
+//   registers. That is 2.5 loads per entry instead of 3, and Zen 4 can only do
+//   3 loads a cycle so the loads are the limit here
+//
+// On a 7950X this beat sparseDot32Go at every size (2.0ns vs 2.2ns at 2 and
+// 3.3ns vs 4.1ns at 8). Against the 1 sum loop that is written right into
+// SparseDot32 it ties at 2 and 3 entries, where the call is basically the
+// whole cost, and wins from 4 up
+TEXT ·__sparseDot32Scalar_AVX_FMA(SB), NOSPLIT, $0-36
+  MOVQ dense+0(FP),   AX // Load the pointer of dense into AX
+  MOVQ indices+8(FP), BX // Load the pointer of indices into BX
+  MOVQ values+16(FP), CX // Load the pointer of values into CX
+  MOVQ count+24(FP),  DX // Load the number of entries into DX
+
+  VXORPS X0, X0, X0 // Zero out X0, the sum for the first entry of each pair
+  VXORPS X1, X1, X1 // Zero out X1, the sum for the second entry of each pair
+
+  CMPQ DX, $2       // Do we have at least 2 entries?
+  JB   SINGLE_SCALAR // If we don't then jump straight to SINGLE_SCALAR
+
+  LOOP_SCALAR:
+    MOVQ    0(BX), R8 // Load the next 2 indicies into R8 at once, the first one is the low 32 bits and the second is the high 32 bits
+    MOVLQSX R8,    R9 // R9 = the low 32 bits of R8 sign extended, this is the first index
+    SARQ    $32,   R8 // Shift R8 right by 32 keeping the sign, now R8 is the second index
+
+    VMOVSS (AX)(R9*4), X2 // X2 = dense[R9]
+    VMOVSS (AX)(R8*4), X3 // X3 = dense[R8]
+
+    VFMADD231SS 0(CX), X2, X0 // X0 = (values[0] * X2) + X0
+    VFMADD231SS 4(CX), X3, X1 // X1 = (values[1] * X3) + X1
+
+    ADDQ $8, BX      // Add 8 (2 * 4) to BX. This moves indices forward by 2 int32s
+    ADDQ $8, CX      // Add 8 (2 * 4) to CX. This moves values forward by 2 float32s
+    SUBQ $2, DX      // Subtract 2 from DX since we just did 2 entries
+    CMPQ DX, $2      // Are there still at least 2 left?
+    JAE  LOOP_SCALAR // If there are then jump back to LOOP_SCALAR, otherwise fall through to SINGLE_SCALAR
+
+  // If the count was odd there is 1 entry left over
+  SINGLE_SCALAR:
+    TESTQ DX, DX      // Is DX zero?
+    JZ    DONE_SCALAR // If it is then there is nothing left, jump straight to DONE_SCALAR
+
+    MOVLQSX     0(BX),      R8 // Load the last index into R8
+    VMOVSS      (AX)(R8*4), X2 // X2 = dense[R8]
+    VFMADD231SS 0(CX),  X2, X0 // X0 = (values[0] * X2) + X0
+
+  DONE_SCALAR:
+    VADDSS X1, X0, X0     // X0 = X0 + X1, this is our dot product
+    VMOVSS X0, ret+32(FP) // Store X0 as the return value
+    RET                   // We are done, return
+
 // func __sparseDot32_AVX(dense []float32, indices []int32, values []float32) float32
 //
 // This is __sparseDot32_AVX_FMA for CPUs that have AVX but not FMA, like Ivy
