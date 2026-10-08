@@ -23,6 +23,12 @@ func HasAVX512() bool {
 	return cpu.X86.HasAVX512F
 }
 
+// HasAVX512VL returns true if the CPU supports AVX512F and can also use those
+// instructions on 256 bit registers.
+func HasAVX512VL() bool {
+	return cpu.X86.HasAVX512F && cpu.X86.HasAVX512VL
+}
+
 func HasAVXFMA() bool {
 	return cpu.X86.HasAVX && cpu.X86.HasFMA
 }

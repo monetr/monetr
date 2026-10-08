@@ -31,10 +31,23 @@ type DBSCAN struct {
 	minPoints int
 	clusters  []Cluster
 	// scratch is one document's vector expanded back out to the full width, so
-	// [calc.SparseDot32] has a dense side to index into. We only allocate it once
-	// and reuse it for every point, and it is all zeros whenever we aren't using
-	// it
+	// [calc.SparseNeighbors32] has a dense side to index into. We only allocate
+	// it once and reuse it for every point, and it is all zeros whenever we
+	// aren't using it
 	scratch []float32
+	// These are the sparse vectors of every document laid out end to end, the
+	// way [calc.SparseNeighbors32] wants them. Document i's entries are
+	// indices[offsets[i]:offsets[i+1]] and values[offsets[i]:offsets[i+1]].
+	// Looking at the next document is just the next few int32s instead of
+	// jumping over a whole Document struct, which is way easier on the cache
+	signatures []uint64
+	norms      []float32
+	offsets    []int32
+	indices    []int32
+	values     []float32
+	// neighbors is where [calc.SparseNeighbors32] writes the neighbors of a
+	// point. Every document could be a neighbor so it is as long as the dataset
+	neighbors []int32
 }
 
 func NewDBSCAN(dataset []Document, epsilon float32, minPoints int) *DBSCAN {
@@ -45,13 +58,37 @@ func NewDBSCAN(dataset []Document, epsilon float32, minPoints int) *DBSCAN {
 		scratch = make([]float32, len(dataset[0].Vector))
 	}
 
+	var entries int
+	for i := range dataset {
+		entries += len(dataset[i].Indices)
+	}
+
+	signatures := make([]uint64, len(dataset))
+	norms := make([]float32, len(dataset))
+	offsets := make([]int32, len(dataset)+1)
+	indices := make([]int32, 0, entries)
+	values := make([]float32, 0, entries)
+	for i := range dataset {
+		signatures[i] = dataset[i].Signature
+		norms[i] = dataset[i].Norm2
+		indices = append(indices, dataset[i].Indices...)
+		values = append(values, dataset[i].Values...)
+		offsets[i+1] = int32(len(indices))
+	}
+
 	return &DBSCAN{
-		labels:    make([]bool, len(dataset)),
-		dataset:   dataset,
-		epsilon:   epsilon,
-		minPoints: minPoints,
-		clusters:  nil,
-		scratch:   scratch,
+		labels:     make([]bool, len(dataset)),
+		dataset:    dataset,
+		epsilon:    epsilon,
+		minPoints:  minPoints,
+		clusters:   nil,
+		scratch:    scratch,
+		signatures: signatures,
+		norms:      norms,
+		offsets:    offsets,
+		indices:    indices,
+		values:     values,
+		neighbors:  make([]int32, len(dataset)),
 	}
 }
 
@@ -137,58 +174,61 @@ func (d *DBSCAN) expandCluster(index int, neighbors []int, cluster *Cluster) {
 }
 
 func (d *DBSCAN) getNeighbors(index int) []int {
-	// Pre-allocate an array of neighbors for us to work with.
-	neighbors := make([]int, 0)
 	point := d.dataset[index]
 
-	// Copy this point into the scratch buffer so SparseDot32 has a dense side to
-	// index into. We only write the indicies this point actually has and only
-	// clear those again at the end, so this costs however many words are in the
-	// transaction instead of the size of the whole vocabulary
+	// Copy this point into the scratch buffer so SparseNeighbors32 has a dense
+	// side to index into. We only write the indicies this point actually has and
+	// only clear those again at the end, so this costs however many words are in
+	// the transaction instead of the size of the whole vocabulary
 	for i, vectorIndex := range point.Indices {
 		d.scratch[vectorIndex] = point.Values[i]
 	}
 
-	for i, counterpoint := range d.dataset {
-		// Don't calculate against yourself
-		if i == index {
-			continue
-		}
-
-		// If two documents don't have a single word in common then they can't be
-		// similar. Both vectors are normalized so both squared norms are about 1,
-		// and with no words in common the dot product is 0. So the distance would
-		// be 1 + 1 - 0 = 2, way past any epsilon we would use
-		//
-		// The signature has one bit set per word (index % 64), so if no bits
-		// overlap then no words overlap. Two different words can land on the same
-		// bit, but that just means we do the real calculation below for nothing, it
-		// can never make us skip a real neighbor
-		if point.Signature&counterpoint.Signature == 0 {
-			continue
-		}
-
-		// Calculate the distance from our Q point to our P point. This is the same
-		// squared distance EuclideanDistance32 gives us, it is just worked out from
-		// the dot product (a . b) instead:
-		//
-		//   ||a - b||^2 = ||a||^2 + ||b||^2 - 2(a . b)
-		//
-		// We already have both squared norms (Norm2), so the dot product is the
-		// only thing left to do for each pair. Every index the counterpoint doesn't
-		// have multiplies out to 0, so SparseDot32 only looks at the ones it does
-		dot := calc.SparseDot32(d.scratch, counterpoint.Indices, counterpoint.Values)
-		distance := point.Norm2 + counterpoint.Norm2 - 2*dot
-		// If we are close enough then we could be part of a core cluster point. Add
-		// it to the list.
-		if distance <= d.epsilon {
-			neighbors = append(neighbors, i)
-		}
-	}
+	// This checks every document against our point in one call.
+	//
+	// If two documents don't have a single word in common then they can't be
+	// similar. Both vectors are normalized so both squared norms are about 1, and
+	// with no words in common the dot product is 0. So the distance would be
+	// 1 + 1 - 0 = 2, way past any epsilon we would use. The signature has one bit
+	// set per word (index % 64), so if no bits overlap then no words overlap and
+	// that document gets skipped. Two different words can land on the same bit,
+	// but that just means we do the real calculation for nothing, it can never
+	// make us skip a real neighbor
+	//
+	// For the rest it works out the same squared distance EuclideanDistance32
+	// gives us, just from the dot product (a . b) instead:
+	//
+	//   ||a - b||^2 = ||a||^2 + ||b||^2 - 2(a . b)
+	//
+	// Anything within epsilon could be part of a core cluster point, and gets
+	// written into d.neighbors
+	count := calc.SparseNeighbors32(
+		d.scratch,
+		point.Signature,
+		point.Norm2,
+		d.epsilon,
+		d.signatures,
+		d.norms,
+		d.offsets,
+		d.indices,
+		d.values,
+		d.neighbors,
+	)
 
 	// Put the scratch buffer back to all zeros for the next point
 	for _, vectorIndex := range point.Indices {
 		d.scratch[vectorIndex] = 0
+	}
+
+	// d.neighbors gets written over by the next call, and expandCluster still
+	// holds onto these while it calls us again. So they have to be copied out
+	neighbors := make([]int, 0, count)
+	for _, neighbor := range d.neighbors[:count] {
+		// Our point is always going to be close to itself, don't include it
+		if int(neighbor) == index {
+			continue
+		}
+		neighbors = append(neighbors, int(neighbor))
 	}
 
 	return neighbors
