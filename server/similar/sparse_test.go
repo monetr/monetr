@@ -76,7 +76,6 @@ func TestSparseDistanceAgreesWithDense(t *testing.T) {
 			require.NotEmpty(t, documents, "must have produced documents to compare")
 
 			scratch := make([]float32, len(documents[0].Vector))
-			var compared, skipped int
 			for _, point := range documents {
 				for i, vectorIndex := range point.Indices {
 					scratch[vectorIndex] = point.Values[i]
@@ -88,7 +87,6 @@ func TestSparseDistanceAgreesWithDense(t *testing.T) {
 					// A pair the signature rejects must never have been a neighbor,
 					// otherwise the prefilter is silently dropping matches.
 					if point.Signature&counterpoint.Signature == 0 {
-						skipped++
 						assert.Greater(t, dense, float32(Epsilon),
 							"the signature prefilter must only skip pairs that are beyond epsilon")
 						continue
@@ -96,8 +94,6 @@ func TestSparseDistanceAgreesWithDense(t *testing.T) {
 
 					dot := calc.SparseDot32(scratch, counterpoint.Indices, counterpoint.Values)
 					sparse := point.Norm2 + counterpoint.Norm2 - 2*dot
-
-					compared++
 					assert.Equal(t, dense <= Epsilon, sparse <= Epsilon,
 						"the sparse and dense distances must agree on the epsilon threshold, got %v against %v",
 						sparse, dense)
@@ -107,18 +103,6 @@ func TestSparseDistanceAgreesWithDense(t *testing.T) {
 					scratch[vectorIndex] = 0
 				}
 			}
-
-			t.Logf("compared %d pairs, signature prefilter skipped %d (%.1f%%)",
-				compared, skipped, 100*float64(skipped)/float64(compared+skipped))
 		})
-	}
-}
-
-func BenchmarkDBSCAN_Amazon(b *testing.B) {
-	documents := documentsForFixture(b, "amazon_sample_data_1.json")
-	ctx := context.Background()
-
-	for b.Loop() {
-		_ = NewDBSCAN(documents, Epsilon, MinNeighbors).Calculate(ctx)
 	}
 }

@@ -140,30 +140,3 @@ func BenchmarkSparseDot32_AVX512(bench *testing.B) {
 		})
 	}
 }
-
-// BenchmarkSparseDot32_VersusDense compares the sparse kernel against the dense
-// euclidean distance it is meant to replace, at a few vocabulary sizes. The
-// sparse cost should be flat as the vocabulary grows where the dense cost is
-// linear in it.
-func BenchmarkSparseDot32_VersusDense(bench *testing.B) {
-	if !HasAVX512() {
-		bench.Skip("host does not support AVX512")
-	}
-
-	for _, size := range []int{512, 2048, 8192} {
-		rng := rand.New(rand.NewSource(int64(size)))
-		aDense, _, _ := buildSparseVector(rng, size, 3)
-		bDense, bIndices, bValues := buildSparseVector(rng, size, 3)
-
-		bench.Run(fmt.Sprintf("%d/Dense", size), func(bench *testing.B) {
-			for bench.Loop() {
-				EuclideanDistance32(aDense, bDense)
-			}
-		})
-		bench.Run(fmt.Sprintf("%d/Sparse", size), func(bench *testing.B) {
-			for bench.Loop() {
-				SparseDot32(aDense, bIndices, bValues)
-			}
-		})
-	}
-}
