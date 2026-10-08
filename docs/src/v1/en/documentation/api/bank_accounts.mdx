@@ -3,7 +3,7 @@ title: "Bank Accounts API"
 description: "monetr's API for bank accounts: list them, read current and available balances, and create manual accounts you keep up to date yourself."
 ---
 
-import { Badge } from "@rspress/core/theme";
+import { Badge, Tab, Tabs } from "@rspress/core/theme";
 
 # Bank Accounts API
 
@@ -319,27 +319,43 @@ PATCH /api/bank_accounts/:bankAccountId
 
 ### Body
 
-On a Plaid account, one field. That's it, because everything else is the bank's to say.
+What you can send depends on what kind of link the account belongs to.
 
-| Attribute | Type   | Required | Description                             |
-| --------- | ------ | -------- | --------------------------------------- |
-| `name`    | string | No       | The display name. Can't be blanked out. |
+<Tabs>
+    <Tab label="Plaid">
+        On a Plaid account, one field. That's it, because everything else is the bank's to say.
 
-On a manual account, quite a bit more, since nothing is syncing these for you:
+        | Attribute | Type   | Required | Description                             |
+        | --------- | ------ | -------- | --------------------------------------- |
+        | `name`    | string | No       | The display name. Can't be blanked out. |
+    </Tab>
+    <Tab label="Manual">
+        On a manual account, quite a bit more, since nothing is syncing these for you:
 
-| Attribute          | Type              | Required | Description                                                         |
-| ------------------ | ----------------- | -------- | ------------------------------------------------------------------- |
-| `accountSubType`   | string            | No       | Reclassify it. Can't be blanked out.                                |
-| `accountType`      | string            | No       | Reclassify it. Can't be blanked out.                                |
-| `availableBalance` | integer           | No       | Set the available balance directly. Zero is fine, null is rejected. |
-| `currency`         | string            | No       | ISO 4217 code. Can't be blanked out.                                |
-| `currentBalance`   | integer           | No       | Set the current balance directly. Zero is fine, null is rejected.   |
-| `limitBalance`     | integer, nullable | No       | Credit limit, or null to clear it. Can't be negative.               |
-| `mask`             | string, nullable  | No       | The last 4 digits, or null to clear it. Exactly 4 when set.         |
-| `name`             | string            | No       | The display name. Can't be blanked out.                             |
+        | Attribute          | Type              | Required | Description                                                         |
+        | ------------------ | ----------------- | -------- | ------------------------------------------------------------------- |
+        | `accountSubType`   | string            | No       | Reclassify it. Can't be blanked out.                                |
+        | `accountType`      | string            | No       | Reclassify it. Can't be blanked out.                                |
+        | `availableBalance` | integer           | No       | Set the available balance directly. Zero is fine, null is rejected. |
+        | `currency`         | string            | No       | ISO 4217 code. Can't be blanked out.                                |
+        | `currentBalance`   | integer           | No       | Set the current balance directly. Zero is fine, null is rejected.   |
+        | `limitBalance`     | integer, nullable | No       | Credit limit, or null to clear it. Can't be negative.               |
+        | `mask`             | string, nullable  | No       | The last 4 digits, or null to clear it. Exactly 4 when set.         |
+        | `name`             | string            | No       | The display name. Can't be blanked out.                             |
+    </Tab>
+    <Tab label="Lunch Flow">
+        On a Lunch Flow account the balances are synced for you, but the rest is yours. Lunch Flow doesn't tell monetr
+        what kind of account it is, so every account comes in as `depository` / `checking` until you change it.
 
-On a Lunch Flow account, five: `name`, `currency`, `mask`, `accountType` and `accountSubType`. Lunch Flow doesn't tell
-monetr what kind of account it is, so every account comes in as `depository` / `checking` until you change it.
+        | Attribute        | Type             | Required | Description                                                 |
+        | ---------------- | ---------------- | -------- | ----------------------------------------------------------- |
+        | `accountSubType` | string           | No       | Reclassify it. Can't be blanked out.                        |
+        | `accountType`    | string           | No       | Reclassify it. Can't be blanked out.                        |
+        | `currency`       | string           | No       | ISO 4217 code. Can't be blanked out.                        |
+        | `mask`           | string, nullable | No       | The last 4 digits, or null to clear it. Exactly 4 when set. |
+        | `name`           | string           | No       | The display name. Can't be blanked out.                     |
+    </Tab>
+</Tabs>
 
 Note `status` is never editable, on any account type. monetr owns it, and archiving is what changes it.
 
