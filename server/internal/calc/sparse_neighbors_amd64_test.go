@@ -103,6 +103,24 @@ func TestSparseNeighbors32_AVX(t *testing.T) {
 		resultCount := __sparseNeighbors32_AVX(dense, 0, 1, 100, signatures, norms, offsets, indices, values, result)
 		assert.Zero(t, resultCount, "should not find any neighbors")
 	})
+
+	t.Run("doesnt write past output", func(t *testing.T) {
+		// Every block stores all 4 lanes even when only some of them are
+		// candidates. Every vector here is a candidate, so the last block is the
+		// one that would go past the end if anything did
+		rng := rand.New(rand.NewSource(3))
+		signatures, norms, offsets, indices, values := buildSparseVectors(rng, 24, 48)
+		for i := range signatures {
+			signatures[i] = 1
+		}
+		dense := make([]float32, 48)
+		buffer := make([]int32, 28)
+		for i := range buffer {
+			buffer[i] = -1
+		}
+		__sparseNeighbors32_AVX(dense, 1, 1, 100, signatures, norms, offsets, indices, values, buffer[:24:24])
+		assert.Equal(t, []int32{-1, -1, -1, -1}, buffer[24:], "nothing past the end of output should change")
+	})
 }
 
 func TestSparseNeighbors32_AVX512VL(t *testing.T) {
