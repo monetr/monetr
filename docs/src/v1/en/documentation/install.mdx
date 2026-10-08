@@ -4,7 +4,7 @@ description: Learn how to self-host monetr for free using Docker or Podman. Expl
 ---
 
 import { Cards } from '@monetr/docs/components/Cards';
-import { Container, ShipWheel } from 'lucide-react';
+import { Container, ShipWheel, Store } from 'lucide-react';
 
 # Install monetr
 
@@ -60,6 +60,20 @@ made available until then.
   title="Follow the Kubernetes Installation Guide"
   description="Install monetr on your own Kubernetes cluster"
   href="/documentation/install/kubernetes/"
+/>
+
+### **Install on umbrelOS (Community Maintained)**
+
+monetr is also available as an app on [umbrelOS](https://umbrel.com). This is a community maintained option, the app is
+packaged and updated in the Umbrel [app repository](https://github.com/getumbrel/umbrel-apps/tree/master/monetr) and not
+by monetr. Updates may take a bit to show up there after a new monetr release. If something is wrong with the Umbrel
+package itself, please [open an issue there](https://github.com/getumbrel/umbrel-apps/issues) instead.
+
+<Cards.Card
+  icon={<Store />}
+  title="View monetr in the Umbrel App Store"
+  description="Install monetr on your umbrelOS device"
+  href="https://apps.umbrel.com/app/monetr"
 />
 
 ## Verify Images

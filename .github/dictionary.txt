@@ -112,6 +112,7 @@ ULID.*
 URI
 USD
 Umami
+Umbrel
 VM
 Valkey
 X86's
@@ -222,6 +223,7 @@ templating
 tf-idf
 tokenization
 tokenized
+umbrelOS
 unbudgeted
 uncomment
 uptime
