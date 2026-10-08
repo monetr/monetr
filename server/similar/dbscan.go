@@ -12,10 +12,6 @@ const (
 	MinNeighbors = 1
 )
 
-var (
-	dbscanClusterDebug = false
-)
-
 type Cluster struct {
 	Items map[int]uint8
 }
