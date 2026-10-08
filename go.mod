@@ -28,7 +28,7 @@ require (
 	github.com/monetr/devslog v0.0.17
 	github.com/monetr/validation v1.3.0
 	github.com/oklog/ulid/v2 v2.1.2
-	github.com/openbao/openbao/api/v2 v2.7.0
+	github.com/openbao/openbao/api/v2 v2.7.1
 	github.com/pkg/errors v0.9.1
 	github.com/plaid/plaid-go/v47 v47.0.0
 	github.com/prometheus/client_golang v1.24.1
