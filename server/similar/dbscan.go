@@ -21,27 +21,25 @@ type Cluster struct {
 }
 
 type DBSCAN struct {
-	// labels records whether a point has been visited yet, indexed the same way
-	// as dataset. This used to be a map keyed by the transaction ID, but it gets
-	// probed once for every pair of points, and hashing an ID that many times
-	// ended up costing several times more than the distance calculation it was
-	// guarding. Each document owns exactly one transaction ID so indexing by
-	// position is equivalent.
+	// labels is whether we have visited a point yet, by its index in dataset.
+	// Every document is one transaction so the index is just as good as the
+	// transaction ID here, and a slice lookup is way cheaper than hashing an ID
+	// for a map
 	labels    []bool
 	dataset   []Document
 	epsilon   float32
 	minPoints int
 	clusters  []Cluster
-	// scratch is where a single document gets expanded back into a dense vector
-	// so that the sparse distance kernel has something to index into. It is
-	// allocated once and reused for every point, and is always all zeros in
-	// between uses.
+	// scratch is one document's vector expanded back out to the full width, so
+	// [calc.SparseDot32] has a dense side to index into. We only allocate it once
+	// and reuse it for every point, and it is all zeros whenever we aren't using
+	// it
 	scratch []float32
 }
 
 func NewDBSCAN(dataset []Document, epsilon float32, minPoints int) *DBSCAN {
-	// Every document's vector is the same width, so a single scratch buffer that
-	// size can serve all of them.
+	// Every document's vector is the same width so one scratch buffer works for
+	// all of them
 	var scratch []float32
 	if len(dataset) > 0 {
 		scratch = make([]float32, len(dataset[0].Vector))
@@ -143,11 +141,10 @@ func (d *DBSCAN) getNeighbors(index int) []int {
 	neighbors := make([]int, 0)
 	point := d.dataset[index]
 
-	// Expand this point into the scratch buffer so the sparse distance kernel has
-	// a dense side to index into. Only the indicies this document occupies get
-	// written, and they are the only ones cleared again at the end, so the cost
-	// of this is the number of words in the transaction rather than the size of
-	// the whole vocabulary.
+	// Copy this point into the scratch buffer so SparseDot32 has a dense side to
+	// index into. We only write the indicies this point actually has and only
+	// clear those again at the end, so this costs however many words are in the
+	// transaction instead of the size of the whole vocabulary
 	for i, vectorIndex := range point.Indices {
 		d.scratch[vectorIndex] = point.Values[i]
 	}
@@ -158,21 +155,28 @@ func (d *DBSCAN) getNeighbors(index int) []int {
 			continue
 		}
 
-		// Two documents that do not have a single word in common cannot be
-		// similar. Both vectors are normalized, so the distance between them would
-		// come out at roughly 2.0, which is far beyond any epsilon worth using.
-		// The signature is a bloom filter of the word indicies, so no overlapping
-		// bits proves there are no overlapping words. A collision can only produce
-		// a false positive, and that just falls through to the real calculation
-		// below, so this can never drop a neighbor that should have been kept.
+		// If two documents don't have a single word in common then they can't be
+		// similar. Both vectors are normalized so both squared norms are about 1,
+		// and with no words in common the dot product is 0. So the distance would
+		// be 1 + 1 - 0 = 2, way past any epsilon we would use
+		//
+		// The signature has one bit set per word (index % 64), so if no bits
+		// overlap then no words overlap. Two different words can land on the same
+		// bit, but that just means we do the real calculation below for nothing,
+		// it can never make us skip a real neighbor
 		if point.Signature&counterpoint.Signature == 0 {
 			continue
 		}
 
-		// Calculate the distance from our Q point to our P point. The dot product
-		// only needs the indicies the counterpoint occupies, because every other
-		// index multiplies out to zero, and the squared distance falls out of it:
-		// ||a - b||^2 == ||a||^2 + ||b||^2 - 2(a . b)
+		// Calculate the distance from our Q point to our P point. This is the same
+		// squared distance EuclideanDistance32 gives us, it is just worked out from
+		// the dot product (a . b) instead:
+		//
+		//   ||a - b||^2 = ||a||^2 + ||b||^2 - 2(a . b)
+		//
+		// We already have both squared norms (Norm2), so the dot product is the
+		// only thing left to do for each pair. Every index the counterpoint doesn't
+		// have multiplies out to 0, so SparseDot32 only looks at the ones it does
 		dot := calc.SparseDot32(d.scratch, counterpoint.Indices, counterpoint.Values)
 		distance := point.Norm2 + counterpoint.Norm2 - 2*dot
 		// If we are close enough then we could be part of a core cluster point. Add
@@ -182,7 +186,7 @@ func (d *DBSCAN) getNeighbors(index int) []int {
 		}
 	}
 
-	// Put the scratch buffer back the way we found it for the next point.
+	// Put the scratch buffer back to all zeros for the next point
 	for _, vectorIndex := range point.Indices {
 		d.scratch[vectorIndex] = 0
 	}

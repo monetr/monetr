@@ -1,9 +1,10 @@
 package calc
 
-// SparseVectorThreshold is the number of non-zero entries a sparse vector needs
-// before SparseDot32 is worth handing to a vector implementation. It was picked
-// by benchmarking the two against each other, see BenchmarkSparseDot32_Go and
-// BenchmarkSparseDot32_AVX512, where they cross over at around 16 entries.
+// SparseVectorThreshold is how many entries a sparse vector needs before
+// [SparseDot32] will hand it to the assembly, below this the plain Go loop is
+// faster. This came from running BenchmarkSparseDot32_Go and
+// BenchmarkSparseDot32_AVX512 against each other, they cross over at around 16
+// entries
 const SparseVectorThreshold = 16
 
 var (
@@ -18,33 +19,34 @@ func sparseDot32Go(dense []float32, indices []int32, values []float32) float32 {
 	return dot
 }
 
-// SparseDot32 calculates the dot product of a dense vector and a sparse one.
-// The sparse vector is provided as a pair of arrays, one of the indicies within
-// the dense vector that the sparse vector actually occupies, and one of the
-// values at each of those indicies.
+// SparseDot32 will calculate the dot product of a dense vector and a sparse
+// one. The sparse vector is two slices, indices is every spot in the dense
+// vector where the sparse vector has a value, and values is the value at each
+// of those spots
 //
-// This exists so that the euclidean distance between two normalized vectors can
-// be derived without touching every index of both of them. Because:
+// This is used to get the euclidean distance between two normalized vectors
+// without having to touch every index of both of them:
 //
-//	||a - b||^2 == ||a||^2 + ||b||^2 - 2(a . b)
+//	||a - b||^2 = ||a||^2 + ||b||^2 - 2(a . b)
 //
-// And because a[i] * b[i] is zero wherever either side is zero, the dot product
-// only needs the indicies that the sparse side occupies. For monetr's
-// transaction vectors that is a handful of words out of a vocabulary that grows
-// with the size of the account, so this ends up being a very small fraction of
-// the work that EuclideanDistance32 would do on the same pair.
+// a . b is the dot product, a[0]*b[0] + a[1]*b[1] + ... and so on. Anywhere
+// either side is 0 that index adds nothing, so we only need the indicies the
+// sparse side actually has. A transaction is only a handful of words out of
+// every word in the account, so this is a tiny fraction of the work
+// [EuclideanDistance32] would do on the same pair
 //
-// Note that the caller is responsible for the norms. Squaring them ahead of time
-// is worthwhile since each document is compared against many others.
+// The caller has to bring ||a||^2 and ||b||^2 themselves. Each document gets
+// compared against a lot of others so it is worth working those out once up
+// front
 func SparseDot32(dense []float32, indices []int32, values []float32) float32 {
 	if len(indices) != len(values) {
 		panic("invalid sparse vector provided, the number of indicies and values must match!")
 	}
-	// Below a certain number of entries the plain go loop beats the vector
-	// kernel. A gather and the horizontal reduce that has to follow it cost the
-	// same whether there are two entries or sixteen, and that fixed cost is more
-	// than a couple of multiply-adds. Transaction vectors normally land well
-	// under this threshold, so this is the branch that usually gets taken.
+	// If there are only a few entries then the plain Go loop is faster. The
+	// assembly always does a full gather and then has to add up all 16 lanes at
+	// the end, that costs the same if there are 2 entries or 16 and it is more
+	// than just doing a couple of multiplies in Go. Most transactions are well
+	// under this so this is usually the path we take
 	if len(indices) < SparseVectorThreshold {
 		return sparseDot32Go(dense, indices, values)
 	}
