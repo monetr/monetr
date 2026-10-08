@@ -1,47 +1,59 @@
 package calc
 
-// SparseVectorThreshold is how many entries a sparse vector needs before
-// [SparseDot32] will hand it off to sparseDotImplementation32, which is the
-// assembly when the CPU has AVX and sparseDot32Go otherwise. 16 is the
-// smallest count where the AVX512 version actually gets to use its gather. For
-// the AVX versions it is about where they start to beat the Go loop in
-// SparseDot32 on a 7950X, any lower and the call into assembly costs more than
-// it saves (8 entries took 3.8ns in Go and 4.9ns through the assembly)
-const SparseVectorThreshold = 16
+import "unsafe"
 
 var (
-	sparseDotImplementation32 func(dense []float32, indices []int32, values []float32) float32 = sparseDot32Go
+	sparseDotImplementation32 func(
+		dense *float32,
+		denseLength int,
+		indices *int32,
+		values *float32,
+		count int,
+	) float32 = sparseDot32GoPointers
 )
 
 func sparseDot32Go(dense []float32, indices []int32, values []float32) float32 {
-	// This is what runs for longer vectors when there isn't an assembly version
-	// for the CPU, see SparseDot32 for the short ones
-	//
-	// This adds into 4 separate sums instead of just 1. Every add has to wait for
+	// This adds into 2 separate sums instead of just 1. Every add has to wait for
 	// the one before it to finish when they all go into the same sum, and an add
-	// takes 3 cycles on Ivy Bridge and Zen 4 and 4 cycles on Skylake-SP. So with
-	// 1 sum we can only ever do 1 entry every 3 or 4 cycles no matter how fast
-	// the loads are. With 4 sums there are always 4 adds that don't depend on
-	// each other, and the loads become the limit instead. On a 7950X this took
-	// 128 entries from 58ns to 43ns
+	// takes 3 cycles on Ivy Bridge and Zen 4. With 2 sums there are always 2 adds
+	// that don't depend on each other. 4 sums was worse for the 2 to 8 entries
+	// most transactions have, setting up and adding together the extra sums
+	// cost more than it saved. On a 7950X 8 entries took 4.4ns with 1 sum, 4.2ns
+	// with 4 sums and 3.9ns with 2 sums
 	//   https://uops.info/html-instr/ADDSS_XMM_XMM.html
-	var a, b, c, d float32
+	var a, b float32
 	count := len(indices)
 	values = values[:count]
 	i := 0
-	for ; i+4 <= count; i += 4 {
+	for ; i+2 <= count; i += 2 {
 		a += dense[indices[i]] * values[i]
 		b += dense[indices[i+1]] * values[i+1]
-		c += dense[indices[i+2]] * values[i+2]
-		d += dense[indices[i+3]] * values[i+3]
 	}
 
-	// Then whatever is left over, there are only ever 0 to 3 of these
-	for ; i < count; i++ {
+	// If the count was odd there is 1 entry left over
+	if i < count {
 		a += dense[indices[i]] * values[i]
 	}
 
-	return (a + b) + (c + d)
+	return a + b
+}
+
+// sparseDot32GoPointers lets sparseDot32Go sit behind
+// sparseDotImplementation32, which takes pointers instead of slices because of
+// the assembly. It just turns them back into the same slices SparseDot32 was
+// given, so every bounds check in sparseDot32Go still works
+func sparseDot32GoPointers(
+	dense *float32,
+	denseLength int,
+	indices *int32,
+	values *float32,
+	count int,
+) float32 {
+	return sparseDot32Go(
+		unsafe.Slice(dense, denseLength),
+		unsafe.Slice(indices, count),
+		unsafe.Slice(values, count),
+	)
 }
 
 // SparseDot32 will calculate the dot product of a dense vector and a sparse
@@ -67,18 +79,18 @@ func SparseDot32(dense []float32, indices []int32, values []float32) float32 {
 	if len(indices) != len(values) {
 		panic("invalid sparse vector provided, the number of indicies and values must match!")
 	}
-	// Most transactions are only 2 to 8 words, so this is usually the path we
-	// take. For that few entries the plain loop with 1 sum beats the 4 sums in
-	// sparseDot32Go, setting up and adding together the extra sums costs more
-	// than it saves. It is written out here instead of calling a function
-	// because the call alone was about half a nanosecond on a 7950X, which is a
-	// lot when the whole thing only takes 2 or 3
-	if len(indices) < SparseVectorThreshold {
-		var dot float32
-		for i, index := range indices {
-			dot += dense[index] * values[i]
-		}
-		return dot
-	}
-	return sparseDotImplementation32(dense, indices, values)
+
+	// This takes pointers and counts for the assembly, see the notes above
+	// __sparseDot32Scalar_AVX in sparse_amd64.s. Keeping this down to the length
+	// check and 1 call also means Go can inline SparseDot32, so DBSCAN calls
+	// straight into the assembly. If SparseDot32 had to call it instead that is 2
+	// calls, and the second one cost about 0.7ns on a 7950X, which is more than
+	// the assembly saves on a short vector
+	return sparseDotImplementation32(
+		unsafe.SliceData(dense),
+		len(dense),
+		unsafe.SliceData(indices),
+		unsafe.SliceData(values),
+		len(indices),
+	)
 }
