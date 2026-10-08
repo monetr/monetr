@@ -138,4 +138,22 @@ describe('list recurring transactions', () => {
     await waitFor(() => expect(world.result.current.data).toHaveLength(26));
     expect(world.result.current.hasNextPage).toBeFalsy();
   });
+
+  it('will not crash when the request fails to send', async () => {
+    // Nothing is mocked so fetch will reject like it does when the network drops out
+
+    const world = testRenderHook(
+      () =>
+        useRecurringTransactions({
+          direction: 'debit',
+          ended: false,
+        }),
+      {
+        initialRoute: '/bank/bac_01hy4rcmadc01d2kzv7vynbxxx/recurring',
+      },
+    );
+    // Only wait for the first failure, otherwise we are waiting on all of the retries
+    await waitFor(() => expect(world.result.current.failureCount).toBe(1));
+    expect(world.result.current.data).toBeUndefined();
+  });
 });

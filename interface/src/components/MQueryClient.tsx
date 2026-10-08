@@ -39,6 +39,9 @@ export default function MQueryClient(props: MQueryClientProps): React.JSX.Elemen
       data: body,
     }).catch((error: ApiError) => {
       switch (error.response.status) {
+        // Network errors (like a flaky phone connection) have no response at all and the data is null. If we return
+        // that then the query looks like it succeeded with null and things like getNextPageParam blow up on it.
+        case 0:
         case 404:
         case 500: // Internal Server Error
         case 502:
