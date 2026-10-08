@@ -162,8 +162,8 @@ func (d *DBSCAN) getNeighbors(index int) []int {
 		//
 		// The signature has one bit set per word (index % 64), so if no bits
 		// overlap then no words overlap. Two different words can land on the same
-		// bit, but that just means we do the real calculation below for nothing,
-		// it can never make us skip a real neighbor
+		// bit, but that just means we do the real calculation below for nothing, it
+		// can never make us skip a real neighbor
 		if point.Signature&counterpoint.Signature == 0 {
 			continue
 		}
