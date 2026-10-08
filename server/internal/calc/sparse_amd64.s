@@ -152,3 +152,220 @@ TEXT ·__sparseDot32_AVX512(SB), NOSPLIT, $0-76
     // top halves are dirty is slow
     VZEROUPPER // Zero the upper bits of the vector registers
     RET        // We are done, return
+
+// func __sparseDot32_AVX_FMA(dense []float32, indices []int32, values []float32) float32
+//
+// Same idea as __sparseDot32_AVX512 but without the gather. VGATHERDPS is an
+// AVX2 instruction and these versions only need AVX (and FMA for this one),
+// same as the fourier and euclidean ones. So we load each dense[index]
+// ourselves and build the vector up 1 lane at a time with VINSERTPS:
+//
+//   VMOVSS    dense[i0]          X2 = [d0,  0,  0,  0]
+//   VINSERTPS dense[i1], lane 1  X2 = [d0, d1,  0,  0]
+//   VINSERTPS dense[i2], lane 2  X2 = [d0, d1, d2,  0]
+//   VINSERTPS dense[i3], lane 3  X2 = [d0, d1, d2, d3]
+//
+// After that it is a normal multiply and add with the 4 values that go with
+// them. LOOP_AVXFMA does 2 of those (8 entries) each time around
+//
+// VINSERTPS can load straight from memory. On Intel that is the load plus 1
+// uop on port 5, on Zen 4 it is just 1 uop. This way each entry costs 2 loads
+// (the index and dense[index]) plus a quarter of a load for the values, where
+// doing every entry with scalar loads would be 3. Ivy Bridge, Haswell and
+// Skylake can only do 2 loads a cycle so the loads are the limit here, not the
+// math
+//   https://uops.info/html-instr/VINSERTPS_XMM_XMM_M32_I8.html
+//
+// On a 7950X this is actually faster than __sparseDot32_AVX512 (26ns vs 35ns
+// for 128 entries) because Zen 4 can do 3 loads a cycle and its gather is slow.
+// Skylake-SP is the other way around, its gather is fast and it only has 2
+// load ports, see the notes above __sparseDot32_AVX512
+//
+// This only uses the 128 bit X registers. Going to 256 bits wouldn't help much
+// since the loads are the limit, and every instruction in here being 128 bit
+// VEX means the top halves of the registers never get dirty, so there is no
+// VZEROUPPER at the end
+TEXT ·__sparseDot32_AVX_FMA(SB), NOSPLIT, $0-76
+  MOVQ dense_base+0(FP),    AX // Load the pointer of dense into AX
+  MOVQ indices_base+24(FP), BX // Load the pointer of indices into BX
+  MOVQ indices_len+32(FP),  DX // Load the length of indices into DX. This is how many entries we have to do
+  MOVQ values_base+48(FP),  CX // Load the pointer of values into CX. It is the same length as indices
+
+  // X0 and X1 are 2 separate sums, X0 for the first 4 entries of each loop and
+  // X1 for the second 4. This way the 2 halves don't have to wait on each other
+  VXORPS X0, X0, X0 // Zero out X0
+  VXORPS X1, X1, X1 // Zero out X1
+
+  CMPQ DX, $8      // Do we have at least 8 entries?
+  JL   QUAD_AVXFMA // If we don't then jump straight to QUAD_AVXFMA
+
+  LOOP_AVXFMA:
+    MOVLQSX 0(BX),  R8  // Load the first index into R8. MOVLQSX sign extends the int32 so we can use it in an address
+    MOVLQSX 4(BX),  R9  // Load the second index into R9
+    MOVLQSX 8(BX),  R10 // Load the third index into R10
+    MOVLQSX 12(BX), R11 // Load the fourth index into R11
+    MOVLQSX 16(BX), R12 // Load the fifth index into R12
+    MOVLQSX 20(BX), R13 // Load the sixth index into R13
+    MOVLQSX 24(BX), SI  // Load the seventh index into SI
+    MOVLQSX 28(BX), DI  // Load the eighth index into DI
+
+    VMOVSS    (AX)(R8*4),           X2 // X2 = [dense[R8], 0, 0, 0], VMOVSS from memory zeroes the other 3 lanes
+    VINSERTPS $0x10, (AX)(R9*4),  X2, X2 // Put dense[R9] in lane 1 of X2. The 1 in 0x10 is the lane
+    VINSERTPS $0x20, (AX)(R10*4), X2, X2 // Put dense[R10] in lane 2 of X2
+    VINSERTPS $0x30, (AX)(R11*4), X2, X2 // Put dense[R11] in lane 3 of X2, X2 now has the first 4
+    VMOVSS    (AX)(R12*4),          X3 // X3 = [dense[R12], 0, 0, 0]
+    VINSERTPS $0x10, (AX)(R13*4), X3, X3 // Put dense[R13] in lane 1 of X3
+    VINSERTPS $0x20, (AX)(SI*4),  X3, X3 // Put dense[SI] in lane 2 of X3
+    VINSERTPS $0x30, (AX)(DI*4),  X3, X3 // Put dense[DI] in lane 3 of X3, X3 now has the second 4
+
+    VFMADD231PS 0(CX),  X2, X0 // X0 = (values[0:4] * X2) + X0
+    VFMADD231PS 16(CX), X3, X1 // X1 = (values[4:8] * X3) + X1
+
+    ADDQ $32, BX // Add 32 (8 * 4) to BX. This moves indices forward by 8 int32s
+    ADDQ $32, CX // Add 32 (8 * 4) to CX. This moves values forward by 8 float32s
+    SUBQ $8,  DX // Subtract 8 from DX since we just did 8 entries
+    CMPQ DX,  $8 // Are there still at least 8 left?
+    JGE  LOOP_AVXFMA // If there are then jump back to LOOP_AVXFMA, otherwise fall through to QUAD_AVXFMA
+
+  // There are 0 to 7 entries left. If there are at least 4 then do 4 of them
+  // the same way as LOOP_AVXFMA, then SINGLE_AVXFMA does the last 0 to 3
+  QUAD_AVXFMA:
+    VADDPS X1, X0, X0 // X0 = X0 + X1, we only need 1 sum from here on
+
+    CMPQ DX, $4        // Do we have at least 4 entries left?
+    JL   SINGLE_AVXFMA // If we don't then jump straight to SINGLE_AVXFMA
+
+    MOVLQSX 0(BX),  R8  // Load the first index into R8
+    MOVLQSX 4(BX),  R9  // Load the second index into R9
+    MOVLQSX 8(BX),  R10 // Load the third index into R10
+    MOVLQSX 12(BX), R11 // Load the fourth index into R11
+
+    VMOVSS    (AX)(R8*4),           X2 // X2 = [dense[R8], 0, 0, 0]
+    VINSERTPS $0x10, (AX)(R9*4),  X2, X2 // Put dense[R9] in lane 1 of X2
+    VINSERTPS $0x20, (AX)(R10*4), X2, X2 // Put dense[R10] in lane 2 of X2
+    VINSERTPS $0x30, (AX)(R11*4), X2, X2 // Put dense[R11] in lane 3 of X2
+
+    VFMADD231PS 0(CX), X2, X0 // X0 = (values[0:4] * X2) + X0
+
+    ADDQ $16, BX // Add 16 (4 * 4) to BX. This moves indices forward by 4 int32s
+    ADDQ $16, CX // Add 16 (4 * 4) to CX. This moves values forward by 4 float32s
+    SUBQ $4,  DX // Subtract 4 from DX since we just did 4 entries
+
+  SINGLE_AVXFMA:
+    TESTQ DX, DX        // Is DX zero?
+    JZ    REDUCE_AVXFMA // If it is then there is nothing left, jump straight to REDUCE_AVXFMA
+
+    SINGLELOOP_AVXFMA:
+      MOVLQSX     0(BX),      R8 // Load the index into R8
+      VMOVSS      (AX)(R8*4), X2 // X2 = [dense[R8], 0, 0, 0]
+      VFMADD231SS 0(CX),  X2, X0 // Lane 0 of X0 = (values[0] * dense[R8]) + lane 0 of X0, the other 3 lanes are left alone
+
+      ADDQ $4, BX            // Add 4 to BX. This moves indices forward by 1 int32
+      ADDQ $4, CX            // Add 4 to CX. This moves values forward by 1 float32
+      SUBQ $1, DX            // Subtract 1 from DX since we just did 1 entry
+      JNZ  SINGLELOOP_AVXFMA // If DX is not zero then jump back to SINGLELOOP_AVXFMA
+
+  // Add the 4 lanes of X0 up into 1, same as the end of the reduce in
+  // __sparseDot32_AVX512
+  REDUCE_AVXFMA:
+    VMOVHLPS  X0, X0, X1 // X1 = lanes 2 and 3 of X0 moved down into lanes 0 and 1
+    VADDPS    X1, X0, X0 // Lanes 0 and 1 of X0 are now (0 + 2) and (1 + 3)
+    VMOVSHDUP X0, X1     // X1 = lane 1 of X0 copied down into lane 0
+    VADDSS    X1, X0, X0 // X0 = lane 0 + lane 1, this is our dot product
+
+    VMOVSS X0, ret+72(FP) // Store X0 as the return value
+    RET                   // We are done, return
+
+// func __sparseDot32_AVX(dense []float32, indices []int32, values []float32) float32
+//
+// This is __sparseDot32_AVX_FMA for CPUs that have AVX but not FMA, like Ivy
+// Bridge. The only difference is every FMA becomes a VMULPS and then a VADDPS,
+// see the notes above __sparseDot32_AVX_FMA for how the rest of it works
+TEXT ·__sparseDot32_AVX(SB), NOSPLIT, $0-76
+  MOVQ dense_base+0(FP),    AX // Load the pointer of dense into AX
+  MOVQ indices_base+24(FP), BX // Load the pointer of indices into BX
+  MOVQ indices_len+32(FP),  DX // Load the length of indices into DX. This is how many entries we have to do
+  MOVQ values_base+48(FP),  CX // Load the pointer of values into CX. It is the same length as indices
+
+  VXORPS X0, X0, X0 // Zero out X0, the sum for the first 4 entries of each loop
+  VXORPS X1, X1, X1 // Zero out X1, the sum for the second 4 entries of each loop
+
+  CMPQ DX, $8   // Do we have at least 8 entries?
+  JL   QUAD_AVX // If we don't then jump straight to QUAD_AVX
+
+  LOOP_AVX:
+    MOVLQSX 0(BX),  R8  // Load the first index into R8
+    MOVLQSX 4(BX),  R9  // Load the second index into R9
+    MOVLQSX 8(BX),  R10 // Load the third index into R10
+    MOVLQSX 12(BX), R11 // Load the fourth index into R11
+    MOVLQSX 16(BX), R12 // Load the fifth index into R12
+    MOVLQSX 20(BX), R13 // Load the sixth index into R13
+    MOVLQSX 24(BX), SI  // Load the seventh index into SI
+    MOVLQSX 28(BX), DI  // Load the eighth index into DI
+
+    VMOVSS    (AX)(R8*4),           X2 // X2 = [dense[R8], 0, 0, 0]
+    VINSERTPS $0x10, (AX)(R9*4),  X2, X2 // Put dense[R9] in lane 1 of X2
+    VINSERTPS $0x20, (AX)(R10*4), X2, X2 // Put dense[R10] in lane 2 of X2
+    VINSERTPS $0x30, (AX)(R11*4), X2, X2 // Put dense[R11] in lane 3 of X2, X2 now has the first 4
+    VMOVSS    (AX)(R12*4),          X3 // X3 = [dense[R12], 0, 0, 0]
+    VINSERTPS $0x10, (AX)(R13*4), X3, X3 // Put dense[R13] in lane 1 of X3
+    VINSERTPS $0x20, (AX)(SI*4),  X3, X3 // Put dense[SI] in lane 2 of X3
+    VINSERTPS $0x30, (AX)(DI*4),  X3, X3 // Put dense[DI] in lane 3 of X3, X3 now has the second 4
+
+    VMULPS 0(CX),  X2, X2 // X2 = values[0:4] * X2
+    VMULPS 16(CX), X3, X3 // X3 = values[4:8] * X3
+    VADDPS X2,     X0, X0 // X0 = X0 + X2
+    VADDPS X3,     X1, X1 // X1 = X1 + X3
+
+    ADDQ $32, BX  // Add 32 (8 * 4) to BX. This moves indices forward by 8 int32s
+    ADDQ $32, CX  // Add 32 (8 * 4) to CX. This moves values forward by 8 float32s
+    SUBQ $8,  DX  // Subtract 8 from DX since we just did 8 entries
+    CMPQ DX,  $8  // Are there still at least 8 left?
+    JGE  LOOP_AVX // If there are then jump back to LOOP_AVX, otherwise fall through to QUAD_AVX
+
+  QUAD_AVX:
+    VADDPS X1, X0, X0 // X0 = X0 + X1, we only need 1 sum from here on
+
+    CMPQ DX, $4     // Do we have at least 4 entries left?
+    JL   SINGLE_AVX // If we don't then jump straight to SINGLE_AVX
+
+    MOVLQSX 0(BX),  R8  // Load the first index into R8
+    MOVLQSX 4(BX),  R9  // Load the second index into R9
+    MOVLQSX 8(BX),  R10 // Load the third index into R10
+    MOVLQSX 12(BX), R11 // Load the fourth index into R11
+
+    VMOVSS    (AX)(R8*4),           X2 // X2 = [dense[R8], 0, 0, 0]
+    VINSERTPS $0x10, (AX)(R9*4),  X2, X2 // Put dense[R9] in lane 1 of X2
+    VINSERTPS $0x20, (AX)(R10*4), X2, X2 // Put dense[R10] in lane 2 of X2
+    VINSERTPS $0x30, (AX)(R11*4), X2, X2 // Put dense[R11] in lane 3 of X2
+
+    VMULPS 0(CX), X2, X2 // X2 = values[0:4] * X2
+    VADDPS X2,    X0, X0 // X0 = X0 + X2
+
+    ADDQ $16, BX // Add 16 (4 * 4) to BX. This moves indices forward by 4 int32s
+    ADDQ $16, CX // Add 16 (4 * 4) to CX. This moves values forward by 4 float32s
+    SUBQ $4,  DX // Subtract 4 from DX since we just did 4 entries
+
+  SINGLE_AVX:
+    TESTQ DX, DX     // Is DX zero?
+    JZ    REDUCE_AVX // If it is then there is nothing left, jump straight to REDUCE_AVX
+
+    SINGLELOOP_AVX:
+      MOVLQSX 0(BX),      R8 // Load the index into R8
+      VMOVSS  (AX)(R8*4), X2 // X2 = [dense[R8], 0, 0, 0]
+      VMULSS  0(CX),  X2, X2 // Lane 0 of X2 = values[0] * dense[R8]
+      VADDSS  X2,     X0, X0 // Lane 0 of X0 = lane 0 of X0 + lane 0 of X2, the other 3 lanes are left alone
+
+      ADDQ $4, BX         // Add 4 to BX. This moves indices forward by 1 int32
+      ADDQ $4, CX         // Add 4 to CX. This moves values forward by 1 float32
+      SUBQ $1, DX         // Subtract 1 from DX since we just did 1 entry
+      JNZ  SINGLELOOP_AVX // If DX is not zero then jump back to SINGLELOOP_AVX
+
+  REDUCE_AVX:
+    VMOVHLPS  X0, X0, X1 // X1 = lanes 2 and 3 of X0 moved down into lanes 0 and 1
+    VADDPS    X1, X0, X0 // Lanes 0 and 1 of X0 are now (0 + 2) and (1 + 3)
+    VMOVSHDUP X0, X1     // X1 = lane 1 of X0 copied down into lane 0
+    VADDSS    X1, X0, X0 // X0 = lane 0 + lane 1, this is our dot product
+
+    VMOVSS X0, ret+72(FP) // Store X0 as the return value
+    RET                   // We are done, return

@@ -5,12 +5,27 @@ package calc
 //go:noescape
 func __sparseDot32_AVX512(dense []float32, indices []int32, values []float32) float32
 
+//go:noescape
+func __sparseDot32_AVX_FMA(dense []float32, indices []int32, values []float32) float32
+
+//go:noescape
+func __sparseDot32_AVX(dense []float32, indices []int32, values []float32) float32
+
 func init() {
-	// There is only an AVX512 version of this. The whole thing is built around a
-	// gather, and the AVX2 gather is slow enough that for the few indicies a
-	// transaction actually has the plain Go loop wins anyway. AVX512 is where
-	// the gather starts being worth it
-	if HasAVX512() {
+	// The AVX512 version is built around VGATHERDPS. The AVX_FMA and AVX
+	// versions only need AVX (and FMA), same as the fourier and euclidean ones,
+	// so they can't use the gather since that is AVX2. They load each value
+	// themselves instead, see the notes in sparse_amd64.s
+	//
+	// On a 7950X the AVX_FMA version is actually faster than the AVX512 one
+	// because Zen 4's gather is slow. Skylake-SP's gather is a lot faster than
+	// doing the loads ourselves though, so AVX512 still goes first
+	switch {
+	case HasAVX512():
 		sparseDotImplementation32 = __sparseDot32_AVX512
+	case HasAVXFMA():
+		sparseDotImplementation32 = __sparseDot32_AVX_FMA
+	case HasAVX():
+		sparseDotImplementation32 = __sparseDot32_AVX
 	}
 }

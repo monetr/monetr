@@ -2,10 +2,11 @@ package calc
 
 // SparseVectorThreshold is how many entries a sparse vector needs before
 // [SparseDot32] will hand it off to sparseDotImplementation32, which is the
-// assembly when the CPU has AVX512 and sparseDot32Go otherwise. 16 is the
-// smallest count where the assembly actually gets to use its gather, below
-// that it is just doing scalar loads same as Go but it also has to pay for
-// the call into assembly
+// assembly when the CPU has AVX and sparseDot32Go otherwise. 16 is the
+// smallest count where the AVX512 version actually gets to use its gather. For
+// the AVX versions it is about where they start to beat the Go loop in
+// SparseDot32 on a 7950X, any lower and the call into assembly costs more than
+// it saves (8 entries took 3.8ns in Go and 4.9ns through the assembly)
 const SparseVectorThreshold = 16
 
 var (
@@ -13,8 +14,8 @@ var (
 )
 
 func sparseDot32Go(dense []float32, indices []int32, values []float32) float32 {
-	// This is what runs for longer vectors when the CPU doesn't have AVX512, like
-	// Ivy Bridge, see SparseDot32 for the short ones
+	// This is what runs for longer vectors when there isn't an assembly version
+	// for the CPU, see SparseDot32 for the short ones
 	//
 	// This adds into 4 separate sums instead of just 1. Every add has to wait for
 	// the one before it to finish when they all go into the same sum, and an add
