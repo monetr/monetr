@@ -40,6 +40,10 @@ services:
       # Make it so that monetr doesn't need any credentials to connect to PostgreSQL.
       POSTGRES_PASSWORD: ""
       POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      # Lets you connect to PostgreSQL from your host with psql or whatever. Only
+      # bound to localhost since there is no password.
+      - "127.0.0.1:15432:5432"
   haproxy:
     tty: true
     image: haproxy:latest

@@ -318,6 +318,7 @@ add_custom_target(
   COMMAND ${CMAKE_COMMAND} -E echo "-- monetr is now running locally."
   COMMAND ${CMAKE_COMMAND} -E echo "-- You can access monetr via ${LOCAL_PROTOCOL}://my.${MONETR_LOCAL_DOMAIN}"
   COMMAND ${CMAKE_COMMAND} -E echo "-- Emails sent during development can be seen at ${LOCAL_PROTOCOL}://mail.${MONETR_LOCAL_DOMAIN}"
+  COMMAND ${CMAKE_COMMAND} -E echo "-- PostgreSQL can be accessed from your host via: psql -h localhost -p 15432 -U postgres"
   COMMAND ${CMAKE_COMMAND} -E echo "--"
   COMMAND ${CMAKE_COMMAND} -E echo "-- Optional Services:"
   COMMAND ${CMAKE_COMMAND} -E echo "--  ${LOCAL_PROTOCOL}://ngrok.${MONETR_LOCAL_DOMAIN} External: https://${NGROK_HOSTNAME}"
