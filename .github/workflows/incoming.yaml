@@ -287,7 +287,7 @@ jobs:
       - name: Set up QEMU
         uses: step-security/setup-qemu-action@d21542abd2ae44772cf2276e75ee4ec531d598b6 # v4.4.0
       - name: Set up Docker Buildx
-        uses: step-security/setup-buildx-action@a4709e2865773e1792246433e8eb922f9743a875 # v4.2.0
+        uses: step-security/setup-buildx-action@e50058a0fcd8d1a7d626c905502d010a468bf238 # v4.4.1
       - name: Build monetr container
         run: |
           git config --global --add safe.directory ${PWD}
