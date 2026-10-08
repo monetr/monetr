@@ -19,6 +19,11 @@ func __sparseDot32_AVX(dense []float32, indices []int32, values []float32) float
 //go:noescape
 func __sparseDot32Scalar_AVX_FMA(dense *float32, indices *int32, values *float32, count int) float32
 
+// Nothing calls this yet either, same TODO as __sparseDot32Scalar_AVX_FMA
+//
+//go:noescape
+func __sparseDot32Scalar_AVX(dense *float32, indices *int32, values *float32, count int) float32
+
 func init() {
 	// The AVX512 version is built around VGATHERDPS. The AVX_FMA and AVX
 	// versions only need AVX (and FMA), same as the fourier and euclidean ones,

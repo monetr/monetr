@@ -341,6 +341,64 @@ TEXT ·__sparseDot32Scalar_AVX_FMA(SB), NOSPLIT, $0-36
     VMOVSS X0, ret+32(FP) // Store X0 as the return value
     RET                   // We are done, return
 
+// func __sparseDot32Scalar_AVX(dense *float32, indices *int32, values *float32, count int) float32
+//
+// This is __sparseDot32Scalar_AVX_FMA for CPUs that have AVX but not FMA, like
+// Ivy Bridge. Every FMA becomes a VMULSS and then a VADDSS, see the notes above
+// __sparseDot32Scalar_AVX_FMA for how the rest of it works
+//
+// The 2 separate sums matter even more here. An add on Ivy Bridge takes 3
+// cycles before the next add into the same sum can start, so with 1 sum (like
+// the Go loop) we can only do 1 entry every 3 cycles. With 2 sums it is 2
+// entries every 3 cycles, which is about as fast as Ivy Bridge's 2 load ports
+// can feed it anyway
+//   https://uops.info/html-instr/ADDSS_XMM_XMM.html
+TEXT ·__sparseDot32Scalar_AVX(SB), NOSPLIT, $0-36
+  MOVQ dense+0(FP),   AX // Load the pointer of dense into AX
+  MOVQ indices+8(FP), BX // Load the pointer of indices into BX
+  MOVQ values+16(FP), CX // Load the pointer of values into CX
+  MOVQ count+24(FP),  DX // Load the number of entries into DX
+
+  VXORPS X0, X0, X0 // Zero out X0, the sum for the first entry of each pair
+  VXORPS X1, X1, X1 // Zero out X1, the sum for the second entry of each pair
+
+  CMPQ DX, $2          // Do we have at least 2 entries?
+  JB   SINGLE_SCALARAVX // If we don't then jump straight to SINGLE_SCALARAVX
+
+  LOOP_SCALARAVX:
+    MOVQ    0(BX), R8 // Load the next 2 indicies into R8 at once, the first one is the low 32 bits and the second is the high 32 bits
+    MOVLQSX R8,    R9 // R9 = the low 32 bits of R8 sign extended, this is the first index
+    SARQ    $32,   R8 // Shift R8 right by 32 keeping the sign, now R8 is the second index
+
+    VMOVSS (AX)(R9*4), X2 // X2 = dense[R9]
+    VMOVSS (AX)(R8*4), X3 // X3 = dense[R8]
+
+    VMULSS 0(CX), X2, X2 // X2 = values[0] * X2
+    VMULSS 4(CX), X3, X3 // X3 = values[1] * X3
+    VADDSS X2,    X0, X0 // X0 = X0 + X2
+    VADDSS X3,    X1, X1 // X1 = X1 + X3
+
+    ADDQ $8, BX         // Add 8 (2 * 4) to BX. This moves indices forward by 2 int32s
+    ADDQ $8, CX         // Add 8 (2 * 4) to CX. This moves values forward by 2 float32s
+    SUBQ $2, DX         // Subtract 2 from DX since we just did 2 entries
+    CMPQ DX, $2         // Are there still at least 2 left?
+    JAE  LOOP_SCALARAVX // If there are then jump back to LOOP_SCALARAVX, otherwise fall through to SINGLE_SCALARAVX
+
+  // If the count was odd there is 1 entry left over
+  SINGLE_SCALARAVX:
+    TESTQ DX, DX         // Is DX zero?
+    JZ    DONE_SCALARAVX // If it is then there is nothing left, jump straight to DONE_SCALARAVX
+
+    MOVLQSX 0(BX),      R8 // Load the last index into R8
+    VMOVSS  (AX)(R8*4), X2 // X2 = dense[R8]
+    VMULSS  0(CX),  X2, X2 // X2 = values[0] * X2
+    VADDSS  X2,     X0, X0 // X0 = X0 + X2
+
+  DONE_SCALARAVX:
+    VADDSS X1, X0, X0     // X0 = X0 + X1, this is our dot product
+    VMOVSS X0, ret+32(FP) // Store X0 as the return value
+    RET                   // We are done, return
+
 // func __sparseDot32_AVX(dense []float32, indices []int32, values []float32) float32
 //
 // This is __sparseDot32_AVX_FMA for CPUs that have AVX but not FMA, like Ivy

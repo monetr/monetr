@@ -140,6 +140,34 @@ func TestSparseDot32Scalar_AVX_FMA(t *testing.T) {
 	}
 }
 
+func TestSparseDot32Scalar_AVX(t *testing.T) {
+	if !HasAVX() {
+		t.Skip("host does not support AVX")
+	}
+
+	// This one does 2 at a time and then 1 if the count is odd, so walk the odd
+	// and even lengths.
+	for _, nnz := range []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 16, 17, 31, 32, 33, 64, 100, 500} {
+		t.Run(fmt.Sprint(nnz), func(t *testing.T) {
+			rng := rand.New(rand.NewSource(int64(nnz)))
+			dense, indices, values := buildSparseVector(rng, 2048, nnz)
+			require.Len(t, indices, nnz, "must have built the requested number of entries")
+
+			assert.InDelta(t,
+				sparseDot32Go(dense, indices, values),
+				__sparseDot32Scalar_AVX(
+					unsafe.SliceData(dense),
+					unsafe.SliceData(indices),
+					unsafe.SliceData(values),
+					len(indices),
+				),
+				1e-6,
+				"the assembly implementation must agree with the go implementation",
+			)
+		})
+	}
+}
+
 // TestSparseDot32_MatchesEuclideanDistance32 proves the identity the sparse
 // kernel relies on. The squared euclidean distance between two vectors is
 // ||a||^2 + ||b||^2 - 2(a . b), so the dot product of one dense vector and one
@@ -262,6 +290,28 @@ func BenchmarkSparseDot32Scalar_AVX_FMA(bench *testing.B) {
 			bench.ResetTimer()
 			for bench.Loop() {
 				__sparseDot32Scalar_AVX_FMA(
+					unsafe.SliceData(dense),
+					unsafe.SliceData(indices),
+					unsafe.SliceData(values),
+					len(indices),
+				)
+			}
+		})
+	}
+}
+
+func BenchmarkSparseDot32Scalar_AVX(bench *testing.B) {
+	if !HasAVX() {
+		bench.Skip("host does not support AVX")
+	}
+
+	for _, nnz := range []int{2, 4, 8, 16, 32, 64, 128} {
+		bench.Run(fmt.Sprint(nnz), func(bench *testing.B) {
+			rng := rand.New(rand.NewSource(int64(nnz)))
+			dense, indices, values := buildSparseVector(rng, 2048, nnz)
+			bench.ResetTimer()
+			for bench.Loop() {
+				__sparseDot32Scalar_AVX(
 					unsafe.SliceData(dense),
 					unsafe.SliceData(indices),
 					unsafe.SliceData(values),
