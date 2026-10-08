@@ -150,6 +150,13 @@
       ]
     },
     {
+      "groupName": "bun",
+      "groupSlug": "bun",
+      "matchPackageNames": [
+        "github.com/uptrace/bun{/,}**"
+      ]
+    },
+    {
       "groupName": "sass",
       "groupSlug": "sass",
       "matchPackageNames": [
