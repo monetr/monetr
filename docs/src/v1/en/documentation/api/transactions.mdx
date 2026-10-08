@@ -3,7 +3,7 @@ title: "Transactions API"
 description: "List, create, update and delete transactions with monetr's REST API and assign them to budget envelopes, with curl examples."
 ---
 
-import { Badge } from "@rspress/core/theme";
+import { Badge, Tab, Tabs } from "@rspress/core/theme";
 
 # Transactions API
 
@@ -386,19 +386,34 @@ PATCH /api/bank_accounts/:bankAccountId/transactions/:transactionId
 
 Send only what you're changing. Everything is optional.
 
-| Attribute      | Type                    | Required | Description                                                                                                                          |
-| -------------- | ----------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `merchantName` | string                  | No       | Who you paid, for display. Editable on any link, including Plaid ones, because `originalMerchantName` keeps the bank's version safe. |
-| `name`         | string                  | No       | What to call it. Same deal, `originalName` is left alone.                                                                            |
-| `spendingId`   | string (ulid), nullable | No       | Which spending object it comes out of. Send null to move it back to free-to-use.                                                     |
+<Tabs>
+    <Tab label="Plaid">
+        | Attribute      | Type                    | Required | Description                                                                                                                          |
+        | -------------- | ----------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+        | `merchantName` | string                  | No       | Who you paid, for display. Editable on any link, including Plaid ones, because `originalMerchantName` keeps the bank's version safe. |
+        | `name`         | string                  | No       | What to call it. Same deal, `originalName` is left alone.                                                                            |
+        | `spendingId`   | string (ulid), nullable | No       | Which spending object it comes out of. Send null to move it back to free-to-use.                                                     |
+    </Tab>
+    <Tab label="Manual">
+        | Attribute      | Type                    | Required | Description                                                                                                                          |
+        | -------------- | ----------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+        | `amount`       | integer                 | No       | A new amount, in the smallest unit.                                                                                                  |
+        | `date`         | timestamp               | No       | A new date, RFC 3339.                                                                                                                |
+        | `isPending`    | boolean                 | No       | Whether it's still pending.                                                                                                          |
+        | `merchantName` | string                  | No       | Who you paid, for display. Editable on any link, including Plaid ones, because `originalMerchantName` keeps the bank's version safe. |
+        | `name`         | string                  | No       | What to call it. Same deal, `originalName` is left alone.                                                                            |
+        | `spendingId`   | string (ulid), nullable | No       | Which spending object it comes out of. Send null to move it back to free-to-use.                                                     |
+    </Tab>
+    <Tab label="Lunch Flow">
+        Same as a Plaid link.
 
-On manual links only, three more:
-
-| Attribute   | Type      | Required | Description                         |
-| ----------- | --------- | -------- | ----------------------------------- |
-| `amount`    | integer   | No       | A new amount, in the smallest unit. |
-| `date`      | timestamp | No       | A new date, RFC 3339.               |
-| `isPending` | boolean   | No       | Whether it's still pending.         |
+        | Attribute      | Type                    | Required | Description                                                                                                                          |
+        | -------------- | ----------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+        | `merchantName` | string                  | No       | Who you paid, for display. Editable on any link, including Plaid ones, because `originalMerchantName` keeps the bank's version safe. |
+        | `name`         | string                  | No       | What to call it. Same deal, `originalName` is left alone.                                                                            |
+        | `spendingId`   | string (ulid), nullable | No       | Which spending object it comes out of. Send null to move it back to free-to-use.                                                     |
+    </Tab>
+</Tabs>
 
 Sending `amount`, `date` or `isPending` on a Plaid link fails validation. `adjustsBalance` is rejected here on purpose,
 even on manual links: monetr doesn't recalculate balances when an amount changes yet, so rather than accept a flag it

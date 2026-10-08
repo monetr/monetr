@@ -3,7 +3,7 @@ title: "Spending API (Expenses and Goals)"
 description: "The envelope budgeting endpoints in monetr's API: create expenses and goals, fund them from a paycheck, and transfer money between envelopes."
 ---
 
-import { Badge } from "@rspress/core/theme";
+import { Badge, Tab, Tabs } from "@rspress/core/theme";
 
 # Spending API
 
@@ -264,24 +264,36 @@ POST /api/bank_accounts/:bankAccountId/spending
 
 ### Body
 
-Shared by both types:
+What you send depends on the `spendingType`.
 
-| Attribute           | Type          | Required | Description                                                                                                                                                                                     |
-| ------------------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `fundingScheduleId` | string (ulid) | Yes      | The funding schedule that'll fill this. Has to [already exist](./funding_schedules#create-a-funding-schedule) on the same bank account.                                                         |
-| `name`              | string        | Yes      | What to call it.                                                                                                                                                                                |
-| `nextRecurrence`    | timestamp     | Yes      | The due date. This one is fussy, see below.                                                                                                                                                     |
-| `spendingType`      | string        | Yes      | `expense` or `goal`.                                                                                                                                                                            |
-| `targetAmount`      | integer       | Yes      | How much you need by the due date, in the smallest unit. Must be greater than zero.                                                                                                             |
-| `currentAmount`     | integer       | No       | How much is already in it. Leave the key out and it starts at 0. Sending `0` explicitly is rejected with "Current amount must be greater than zero", so omit it rather than serializing a zero. |
-| `isPaused`          | boolean       | No       | Start it paused.                                                                                                                                                                                |
+<Tabs>
+    <Tab label="Expense">
+        | Attribute               | Type          | Required | Description                                                                                                                                                                                     |
+        | ----------------------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+        | `fundingScheduleId`     | string (ulid) | Yes      | The funding schedule that'll fill this. Has to [already exist](./funding_schedules#create-a-funding-schedule) on the same bank account.                                                         |
+        | `name`                  | string        | Yes      | What to call it.                                                                                                                                                                                |
+        | `nextRecurrence`        | timestamp     | Yes      | The due date. This one is fussy, see below.                                                                                                                                                     |
+        | `ruleset`               | string        | Yes      | The recurrence rule as an RFC 5545 string. See the [cookbook](./recurrence_rules#cookbook).                                                                                                     |
+        | `spendingType`          | string        | Yes      | Has to be `expense`.                                                                                                                                                                            |
+        | `targetAmount`          | integer       | Yes      | How much you need by the due date, in the smallest unit. Must be greater than zero.                                                                                                             |
+        | `autoCreateTransaction` | boolean       | No       | Have monetr write the transaction itself when this comes due. Manual links only.                                                                                                                |
+        | `currentAmount`         | integer       | No       | How much is already in it. Leave the key out and it starts at 0. Sending `0` explicitly is rejected with "Current amount must be greater than zero", so omit it rather than serializing a zero. |
+        | `isPaused`              | boolean       | No       | Start it paused.                                                                                                                                                                                |
+    </Tab>
+    <Tab label="Goal">
+        Goals don't repeat, so they don't take a `ruleset`. Sending one is rejected.
 
-Expenses also take:
-
-| Attribute               | Type    | Required | Description                                                                                                                          |
-| ----------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `ruleset`               | string  | Yes      | The recurrence rule as an RFC 5545 string. Required on expenses, rejected on goals. See the [cookbook](./recurrence_rules#cookbook). |
-| `autoCreateTransaction` | boolean | No       | Have monetr write the transaction itself when this comes due. Manual links only.                                                     |
+        | Attribute           | Type          | Required | Description                                                                                                                                                                                     |
+        | ------------------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+        | `fundingScheduleId` | string (ulid) | Yes      | The funding schedule that'll fill this. Has to [already exist](./funding_schedules#create-a-funding-schedule) on the same bank account.                                                         |
+        | `name`              | string        | Yes      | What to call it.                                                                                                                                                                                |
+        | `nextRecurrence`    | timestamp     | Yes      | The due date. This one is fussy, see below.                                                                                                                                                     |
+        | `spendingType`      | string        | Yes      | Has to be `goal`.                                                                                                                                                                               |
+        | `targetAmount`      | integer       | Yes      | How much you need by the due date, in the smallest unit. Must be greater than zero.                                                                                                             |
+        | `currentAmount`     | integer       | No       | How much is already in it. Leave the key out and it starts at 0. Sending `0` explicitly is rejected with "Current amount must be greater than zero", so omit it rather than serializing a zero. |
+        | `isPaused`          | boolean       | No       | Start it paused.                                                                                                                                                                                |
+    </Tab>
+</Tabs>
 
 `nextRecurrence` has two rules that catch people.
 
@@ -365,22 +377,28 @@ PATCH /api/bank_accounts/:bankAccountId/spending/:spendingId
 Everything is optional, but which keys are allowed depends on the existing object's `spendingType`. You can't change the
 type itself.
 
-On both:
-
-| Attribute           | Type          | Required | Description                                                     |
-| ------------------- | ------------- | -------- | --------------------------------------------------------------- |
-| `fundingScheduleId` | string (ulid) | No       | Move it to a different funding schedule.                        |
-| `name`              | string        | No       | Rename it.                                                      |
-| `nextRecurrence`    | timestamp     | No       | Change the due date. Gets snapped to midnight in your timezone. |
-| `targetAmount`      | integer       | No       | Change the target. Must be greater than zero.                   |
-| `isPaused`          | boolean       | No       | Stop or resume contributions.                                   |
-
-Expenses only:
-
-| Attribute               | Type    | Required | Description            |
-| ----------------------- | ------- | -------- | ---------------------- |
-| `autoCreateTransaction` | boolean | No       | Manual links only.     |
-| `ruleset`               | string  | No       | A new recurrence rule. |
+<Tabs>
+    <Tab label="Expense">
+        | Attribute               | Type          | Required | Description                                                     |
+        | ----------------------- | ------------- | -------- | --------------------------------------------------------------- |
+        | `autoCreateTransaction` | boolean       | No       | Manual links only.                                              |
+        | `fundingScheduleId`     | string (ulid) | No       | Move it to a different funding schedule.                        |
+        | `name`                  | string        | No       | Rename it.                                                      |
+        | `nextRecurrence`        | timestamp     | No       | Change the due date. Gets snapped to midnight in your timezone. |
+        | `ruleset`               | string        | No       | A new recurrence rule.                                          |
+        | `targetAmount`          | integer       | No       | Change the target. Must be greater than zero.                   |
+        | `isPaused`              | boolean       | No       | Stop or resume contributions.                                   |
+    </Tab>
+    <Tab label="Goal">
+        | Attribute           | Type          | Required | Description                                                     |
+        | ------------------- | ------------- | -------- | --------------------------------------------------------------- |
+        | `fundingScheduleId` | string (ulid) | No       | Move it to a different funding schedule.                        |
+        | `name`              | string        | No       | Rename it.                                                      |
+        | `nextRecurrence`    | timestamp     | No       | Change the due date. Gets snapped to midnight in your timezone. |
+        | `targetAmount`      | integer       | No       | Change the target. Must be greater than zero.                   |
+        | `isPaused`          | boolean       | No       | Stop or resume contributions.                                   |
+    </Tab>
+</Tabs>
 
 Changing `targetAmount`, `fundingScheduleId`, `nextRecurrence` or `ruleset` makes monetr recalculate
 `nextContributionAmount`. So does unpausing. Pausing doesn't, since the number would be stale by the time you unpause
