@@ -1,7 +1,9 @@
 package recurring
 
 import (
+	"maps"
 	"math"
+	"slices"
 	"sort"
 	"time"
 
@@ -103,7 +105,11 @@ func GenerateRuleSet(
 			Dtstart:   earliest,
 		}
 	case 15:
-		first, second := semiMonthlyMajorityDays(days)
+		first, second, err := semiMonthlyMajorityDays(days)
+		if err != nil {
+			return nil, err
+		}
+
 		options = rrule.ROption{
 			Freq:       rrule.MONTHLY,
 			Interval:   1,
@@ -186,7 +192,41 @@ func earliestOnCircle(
 // the most common day keeps it on the 15th. A day that is the last day of its
 // month counts as -1, so the 30th, 31st and the end of February all count
 // towards the same day.
-func semiMonthlyMajorityDays(days []time.Time) (int, int) {
+func semiMonthlyMajorityDays(days []time.Time) (int, int, error) {
+	// Splitting the month on the 15th doesn't work when both days are in the same
+	// half, like a payroll on the 1st and the 15th. The second half would be
+	// empty and come back as day 0. So instead put every day of the month we saw
+	// on a 31 day circle, the two largest gaps between them are where each half
+	// starts. For the 1st and the 15th the gaps are 14 and 17 days, so the halves
+	// start on the 1st and the 15th. Weekend shifts like the 13th or 14th only
+	// add 1 or 2 day gaps so they never move where the halves start.
+	present := map[int]bool{}
+	for _, day := range days {
+		present[day.Day()] = true
+	}
+	values := slices.Sorted(maps.Keys(present))
+	if len(values) < 2 {
+		return 0, 0, errors.New("cannot generate a twice a month ruleset from a single day of the month")
+	}
+
+	type gap struct {
+		start int
+		size  int
+	}
+	gaps := make([]gap, len(values))
+	for i := range values {
+		next := values[(i+1)%len(values)]
+		gaps[i] = gap{
+			start: next,
+			size:  (next - values[i] + 31) % 31,
+		}
+	}
+	sort.SliceStable(gaps, func(i, j int) bool {
+		return gaps[i].size > gaps[j].size
+	})
+	firstStart := gaps[0].start
+	firstLength := (gaps[1].start - firstStart + 31) % 31
+
 	first, second := map[int]int{}, map[int]int{}
 	for _, day := range days {
 		daysInMonth := time.Date(day.Year(), day.Month()+1, 0, 0, 0, 0, 0, day.Location()).Day()
@@ -197,14 +237,21 @@ func semiMonthlyMajorityDays(days []time.Time) (int, int) {
 			value = min(value, latestMonthDay)
 		}
 
-		if day.Day() <= 15 {
+		if (day.Day()-firstStart+31)%31 < firstLength {
 			first[value]++
 		} else {
 			second[value]++
 		}
 	}
 
-	return mostCommonDay(first), mostCommonDay(second)
+	// Either half could have been found first, keep the earlier day first so the
+	// rule always reads the same way
+	a, b := mostCommonDay(first), mostCommonDay(second)
+	if earlierDay(b, a) {
+		a, b = b, a
+	}
+
+	return a, b, nil
 }
 
 // mostCommonDay will return the day with the highest count, the earlier day

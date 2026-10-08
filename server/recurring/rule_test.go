@@ -325,6 +325,322 @@ func TestGenerateRuleSet(t *testing.T) {
 		assert.Equal(t, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=9,26", ruleset.GetRRule().OrigOptions.RRuleString(), "should be the most common day in each half of the month")
 	})
 
+	t.Run("twice a month first and fifteenth", func(t *testing.T) {
+		// Both days are in the first half of the month, this used to leave the second
+		// half empty and generate BYMONTHDAY=1,0 which rrule rejects.
+		// See: https://monetr.sentry.io/issues/7780473773/
+		transactions := []models.Transaction{
+			{
+				TransactionId: "txn_0",
+				Amount:        -500000,
+				Date:          time.Date(2026, 1, 1, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_1",
+				Amount:        -500000,
+				Date:          time.Date(2026, 1, 15, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_2",
+				Amount:        -500000,
+				Date:          time.Date(2026, 2, 1, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_3",
+				Amount:        -500000,
+				Date:          time.Date(2026, 2, 15, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_4",
+				Amount:        -500000,
+				Date:          time.Date(2026, 3, 1, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_5",
+				Amount:        -500000,
+				Date:          time.Date(2026, 3, 15, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_6",
+				Amount:        -500000,
+				Date:          time.Date(2026, 4, 1, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_7",
+				Amount:        -500000,
+				Date:          time.Date(2026, 4, 15, 0, 0, 0, 0, central),
+			},
+		}
+
+		ruleset, err := GenerateRuleSet(15, transactions, central)
+		require.NoError(t, err, "must be able to generate a ruleset")
+		assert.Equal(t, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1,15", ruleset.GetRRule().OrigOptions.RRuleString(), "should be the 1st and the 15th of the month")
+	})
+
+	t.Run("twice a month full year", func(t *testing.T) {
+		// Payroll on the 15th and the last day of the month for all of 2025, on the
+		// business day before when either one lands on a weekend. The 15th moves to
+		// the 13th or 14th but those days shouldn't change where the month is split.
+		transactions := []models.Transaction{
+			{
+				TransactionId: "txn_0",
+				Amount:        -500000,
+				Date:          time.Date(2025, 1, 15, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_1",
+				Amount:        -500000,
+				Date:          time.Date(2025, 1, 31, 0, 0, 0, 0, central),
+			},
+			// 15th was a Saturday
+			{
+				TransactionId: "txn_2",
+				Amount:        -500000,
+				Date:          time.Date(2025, 2, 14, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_3",
+				Amount:        -500000,
+				Date:          time.Date(2025, 2, 28, 0, 0, 0, 0, central),
+			},
+			// 15th was a Saturday
+			{
+				TransactionId: "txn_4",
+				Amount:        -500000,
+				Date:          time.Date(2025, 3, 14, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_5",
+				Amount:        -500000,
+				Date:          time.Date(2025, 3, 31, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_6",
+				Amount:        -500000,
+				Date:          time.Date(2025, 4, 15, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_7",
+				Amount:        -500000,
+				Date:          time.Date(2025, 4, 30, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_8",
+				Amount:        -500000,
+				Date:          time.Date(2025, 5, 15, 0, 0, 0, 0, central),
+			},
+			// 31st was a Saturday
+			{
+				TransactionId: "txn_9",
+				Amount:        -500000,
+				Date:          time.Date(2025, 5, 30, 0, 0, 0, 0, central),
+			},
+			// 15th was a Sunday
+			{
+				TransactionId: "txn_10",
+				Amount:        -500000,
+				Date:          time.Date(2025, 6, 13, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_11",
+				Amount:        -500000,
+				Date:          time.Date(2025, 6, 30, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_12",
+				Amount:        -500000,
+				Date:          time.Date(2025, 7, 15, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_13",
+				Amount:        -500000,
+				Date:          time.Date(2025, 7, 31, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_14",
+				Amount:        -500000,
+				Date:          time.Date(2025, 8, 15, 0, 0, 0, 0, central),
+			},
+			// 31st was a Sunday
+			{
+				TransactionId: "txn_15",
+				Amount:        -500000,
+				Date:          time.Date(2025, 8, 29, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_16",
+				Amount:        -500000,
+				Date:          time.Date(2025, 9, 15, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_17",
+				Amount:        -500000,
+				Date:          time.Date(2025, 9, 30, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_18",
+				Amount:        -500000,
+				Date:          time.Date(2025, 10, 15, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_19",
+				Amount:        -500000,
+				Date:          time.Date(2025, 10, 31, 0, 0, 0, 0, central),
+			},
+			// 15th was a Saturday
+			{
+				TransactionId: "txn_20",
+				Amount:        -500000,
+				Date:          time.Date(2025, 11, 14, 0, 0, 0, 0, central),
+			},
+			// 30th was a Sunday
+			{
+				TransactionId: "txn_21",
+				Amount:        -500000,
+				Date:          time.Date(2025, 11, 28, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_22",
+				Amount:        -500000,
+				Date:          time.Date(2025, 12, 15, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_23",
+				Amount:        -500000,
+				Date:          time.Date(2025, 12, 31, 0, 0, 0, 0, central),
+			},
+		}
+
+		ruleset, err := GenerateRuleSet(15, transactions, central)
+		require.NoError(t, err, "must be able to generate a ruleset")
+		assert.Equal(t, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", ruleset.GetRRule().OrigOptions.RRuleString(), "should be the 15th and the last day of the month")
+	})
+
+	t.Run("twice a month mostly the 14th", func(t *testing.T) {
+		// Made up so the shifted day is the most common one, the rule should land on
+		// it instead of the 15th.
+		transactions := []models.Transaction{
+			{
+				TransactionId: "txn_0",
+				Amount:        -500000,
+				Date:          time.Date(2026, 1, 14, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_1",
+				Amount:        -500000,
+				Date:          time.Date(2026, 1, 30, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_2",
+				Amount:        -500000,
+				Date:          time.Date(2026, 2, 13, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_3",
+				Amount:        -500000,
+				Date:          time.Date(2026, 2, 27, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_4",
+				Amount:        -500000,
+				Date:          time.Date(2026, 3, 14, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_5",
+				Amount:        -500000,
+				Date:          time.Date(2026, 3, 31, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_6",
+				Amount:        -500000,
+				Date:          time.Date(2026, 4, 15, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_7",
+				Amount:        -500000,
+				Date:          time.Date(2026, 4, 30, 0, 0, 0, 0, central),
+			},
+		}
+
+		ruleset, err := GenerateRuleSet(15, transactions, central)
+		require.NoError(t, err, "must be able to generate a ruleset")
+		assert.Equal(t, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=14,-1", ruleset.GetRRule().OrigOptions.RRuleString(), "should be the 14th and the last day of the month")
+	})
+
+	t.Run("twice a month mostly the 13th", func(t *testing.T) {
+		// Same as above but with the 13th.
+		transactions := []models.Transaction{
+			{
+				TransactionId: "txn_0",
+				Amount:        -500000,
+				Date:          time.Date(2026, 1, 13, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_1",
+				Amount:        -500000,
+				Date:          time.Date(2026, 1, 30, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_2",
+				Amount:        -500000,
+				Date:          time.Date(2026, 2, 13, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_3",
+				Amount:        -500000,
+				Date:          time.Date(2026, 2, 27, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_4",
+				Amount:        -500000,
+				Date:          time.Date(2026, 3, 13, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_5",
+				Amount:        -500000,
+				Date:          time.Date(2026, 3, 31, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_6",
+				Amount:        -500000,
+				Date:          time.Date(2026, 4, 15, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_7",
+				Amount:        -500000,
+				Date:          time.Date(2026, 4, 30, 0, 0, 0, 0, central),
+			},
+		}
+
+		ruleset, err := GenerateRuleSet(15, transactions, central)
+		require.NoError(t, err, "must be able to generate a ruleset")
+		assert.Equal(t, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=13,-1", ruleset.GetRRule().OrigOptions.RRuleString(), "should be the 13th and the last day of the month")
+	})
+
+	t.Run("twice a month single day", func(t *testing.T) {
+		transactions := []models.Transaction{
+			{
+				TransactionId: "txn_0",
+				Amount:        -500000,
+				Date:          time.Date(2026, 1, 15, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_1",
+				Amount:        -500000,
+				Date:          time.Date(2026, 2, 15, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_2",
+				Amount:        -500000,
+				Date:          time.Date(2026, 3, 15, 0, 0, 0, 0, central),
+			},
+		}
+
+		ruleset, err := GenerateRuleSet(15, transactions, central)
+		assert.EqualError(t, err, "cannot generate a twice a month ruleset from a single day of the month", "should not generate a twice a month rule from one day")
+		assert.Nil(t, ruleset, "should not return a ruleset")
+	})
+
 	t.Run("weekly", func(t *testing.T) {
 		// Crosses the end of daylight savings time on November 5th.
 		transactions := []models.Transaction{
