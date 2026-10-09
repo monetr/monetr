@@ -320,9 +320,9 @@ comes back filled in as `fundingSchedule`, an expense is just the `spendingId`.
 
 ## <Badge type="danger">DELETE</Badge> Mark as not recurring
 
-Tells monetr that something isn't actually recurring. It drops out of the [list](#list-recurring-transactions), any
-expense or funding schedule linked to it gets unlinked, and monetr won't link an expense to it for you anymore. There's
-no undoing this.
+Tells monetr that something isn't actually recurring. It drops out of the [list](#list-recurring-transactions), its
+link to an expense or funding schedule gets cleared, and monetr won't link an expense to it for you anymore. There's no
+undoing this.
 
 It doesn't really go away though. monetr keeps it around with `deletedAt` set so it remembers you said no, otherwise the
 next recalculation would just find the same schedule and bring it right back. You can still
