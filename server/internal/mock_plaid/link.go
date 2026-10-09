@@ -10,7 +10,7 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
-	"github.com/plaid/plaid-go/v47/plaid"
+	"github.com/plaid/plaid-go/v48/plaid"
 	"github.com/stretchr/testify/require"
 )
 
