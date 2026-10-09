@@ -28,7 +28,7 @@ services:
     networks:
       - monetr_network
   monetr:
-    image: ghcr.io/monetr/monetr:1.18.0 # x-release-please-version
+    image: ghcr.io/monetr/monetr:1.18.1 # x-release-please-version
     healthcheck:
       test: [ "CMD", "/usr/bin/monetr", "status" ]
       interval: 30s

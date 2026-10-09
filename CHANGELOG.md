@@ -1,5 +1,37 @@
 # Changelog
 
+## [1.18.1](https://github.com/monetr/monetr/compare/v1.18.0...v1.18.1) (2026-10-09)
+
+
+### Bug Fixes
+
+* **api:** Fixing bad recurring rule detection ([6dc720a](https://github.com/monetr/monetr/commit/6dc720a31ed22f74cda9a88276a9f108a83af5c6)), closes [#3595](https://github.com/monetr/monetr/issues/3595)
+* **api:** Use sparse vector for transaction similarity ([#3599](https://github.com/monetr/monetr/issues/3599)) ([4782c03](https://github.com/monetr/monetr/commit/4782c03ffe6c4b4d9d1e52371841a7772b81edb5))
+* **lunchflow:** You can now update lunch flow account types ([122452f](https://github.com/monetr/monetr/commit/122452f08aad31f981342a1a6526f9192f724288)), closes [#3601](https://github.com/monetr/monetr/issues/3601)
+* **ui:** Fixing bug in query client for network errors ([b507f17](https://github.com/monetr/monetr/commit/b507f175648be85683c0871d6144e7cd77c3589e)), closes [#3596](https://github.com/monetr/monetr/issues/3596)
+* **ui:** Replacing browser alert with proper modals ([4b0c448](https://github.com/monetr/monetr/commit/4b0c448ee8c8e583da30c9b3882080e44c7478ce))
+
+
+### Miscellaneous
+
+* Fixing uptrace/bun renovate PRs ([afe92d5](https://github.com/monetr/monetr/commit/afe92d544c4f6375aa9368c7b9813d04e79a3b7e))
+
+
+### Documentation
+
+* Adding umbrelOS as community self-host option ([cc3c2f6](https://github.com/monetr/monetr/commit/cc3c2f6a8fbd964aa092fa30870f525e5d85261c))
+* Format some patch endpoints better ([ab25439](https://github.com/monetr/monetr/commit/ab254393fde650625b4442611118fdb3ab310fe9))
+* Make it more clear what can be patched on bank acocunts ([1f9aad1](https://github.com/monetr/monetr/commit/1f9aad19bf4189ac2d7ad42640aa580fd941eae2))
+* Update documentation screenshots ([#3608](https://github.com/monetr/monetr/issues/3608)) ([e1d189b](https://github.com/monetr/monetr/commit/e1d189bd56163846ba0e947ec33b7e7dde74db67))
+
+
+### Dependencies
+
+* **api:** update module github.com/openbao/openbao/api/v2 to v2.7.1 ([#3593](https://github.com/monetr/monetr/issues/3593)) ([f2fd731](https://github.com/monetr/monetr/commit/f2fd731edc7bc0d945ff24c7d6e93f699c30a003))
+* **ui:** update dependency @rsbuild/core to v2.2.11 ([#3575](https://github.com/monetr/monetr/issues/3575)) ([cb77d99](https://github.com/monetr/monetr/commit/cb77d996d2291c71d612cb414c415779acdc349c))
+* **ui:** update dependency katex to v0.19.0 ([#3598](https://github.com/monetr/monetr/issues/3598)) ([12a50da](https://github.com/monetr/monetr/commit/12a50da375b4e5c8c895f6b248e9b47b0041ee01))
+* **ui:** update sentry-javascript monorepo to v11.2.0 ([#3606](https://github.com/monetr/monetr/issues/3606)) ([545bac7](https://github.com/monetr/monetr/commit/545bac70714db7c0ab5a6feec2411260c7eb48d5))
+
 ## [1.18.0](https://github.com/monetr/monetr/compare/v1.17.1...v1.18.0) (2026-10-07)
 
 This release includes monetr's new recurring transaction feature, available for all monetr data sources. This feature
