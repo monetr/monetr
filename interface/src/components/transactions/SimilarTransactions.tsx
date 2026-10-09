@@ -70,7 +70,8 @@ function ExpectedTransactionItem({ transaction }: SimilarTransactionsProps): Rea
   const { data: locale } = useLocale();
   const { data: localeCurrency } = useLocaleCurrency();
 
-  if (!recurring || recurring.ended || !locale || !localeCurrency) {
+  // Nothing to expect if it stopped or the user said it isn't recurring
+  if (!recurring || recurring.ended || recurring.deletedAt || !locale || !localeCurrency) {
     return null;
   }
 
