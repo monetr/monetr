@@ -54,7 +54,8 @@
 .headerText {
   display: flex;
   flex: 1;
-  // Once the title would get squished below this the confidence and details link wrap onto their own line instead
+  // Once the title would get squished below this the confidence and details
+  // link wrap onto their own line instead
   flex-basis: 40 * variables.$size;
   flex-direction: column;
   min-width: 0;
@@ -68,7 +69,8 @@
 }
 
 .notRecurringButton {
-  // When the header wraps only this goes over to the right, the confidence and details link stay on the left
+  // When the header wraps only this goes over to the right, the confidence and
+  // details link stay on the left
   margin-left: auto;
 }
 
@@ -156,6 +158,18 @@
   padding-right: 4 * variables.$size;
   padding-top: 3.5 * variables.$size;
   padding-bottom: 3.5 * variables.$size;
+}
+
+.footerActions {
+  display: flex;
+  align-items: center;
+  gap: 3 * variables.$size;
+}
+
+// The tooltip needs a span around the switch, as a plain inline span it sits on
+// the text baseline and the switch ends up off center
+.autoAssign {
+  display: flex;
 }
 
 .spentFrom {
