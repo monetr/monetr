@@ -465,4 +465,95 @@ func TestCalculateRecurringTransactions(t *testing.T) {
 		assert.Len(t, readRecurringByCluster(t, clock, first), 1, "the first cluster should recur")
 		assert.Len(t, readRecurringByCluster(t, clock, second), 1, "the second cluster should recur")
 	})
+
+	t.Run("enqueues auto assign", func(t *testing.T) {
+		clock := clock.NewMock()
+		clock.Set(time.Date(2026, 7, 1, 9, 0, 0, 0, time.UTC))
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(
+			t,
+			clock,
+			&link,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
+		expense := givenIHaveSpending(t, clock, bankAccount, models.SpendingTypeExpense, "Github")
+		cluster, _ := givenIHaveARecurringExpense(t, clock, bankAccount)
+		recurring := readRecurringByCluster(t, clock, cluster)[0]
+		recurring.SpendingId = &expense.SpendingId
+		recurring.AutoAssign = true
+		testutils.MustDBUpdate(t, &recurring)
+
+		// A new charge shows up in the cluster, this is the only transaction that
+		// is being added to the recurring transaction on the next run.
+		clock.Add(8 * 24 * time.Hour)
+		transaction := testutils.MustInsert(t, models.Transaction{
+			TransactionId:        models.NewID[models.Transaction](),
+			AccountId:            bankAccount.AccountId,
+			BankAccountId:        bankAccount.BankAccountId,
+			TransactionClusterId: &cluster.TransactionClusterId,
+			Amount:               800,
+			Date:                 time.Date(2026, 7, 8, 0, 0, 0, 0, accountTimezone(t, bankAccount)),
+			Name:                 "GITHUB INC",
+			OriginalName:         "GITHUB INC",
+			MerchantName:         "GITHUB INC",
+			OriginalMerchantName: "GITHUB INC",
+			Source:               models.TransactionSourceUpload,
+			CreatedAt:            clock.Now(),
+		})
+
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+		enqueuer.EXPECT().
+			EnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(recurring_jobs.AutoAssignRecurringTransactions),
+				gomock.Any(),
+				gomock.Eq(recurring_jobs.AutoAssignRecurringTransactionsArguments{
+					AccountId:     bankAccount.AccountId,
+					BankAccountId: bankAccount.BankAccountId,
+					TransactionIds: []models.ID[models.Transaction]{
+						transaction.TransactionId,
+					},
+				}),
+			).
+			Return(nil).
+			Times(1)
+		enqueuer.EXPECT().
+			EnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(recurring_jobs.MatchRecurringTransactionsToSpending),
+				gomock.Any(),
+				gomock.Eq(recurring_jobs.MatchRecurringTransactionsToSpendingArguments{
+					AccountId:     bankAccount.AccountId,
+					BankAccountId: bankAccount.BankAccountId,
+				}),
+			).
+			Return(nil).
+			Times(1)
+
+		context := mockgen.NewMockContext(ctrl)
+		context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+		context.EXPECT().Clock().Return(clock).AnyTimes()
+		context.EXPECT().DB().Return(testutils.GetPgDatabase(t)).AnyTimes()
+		context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
+		context.EXPECT().Log().Return(testutils.GetLog(t)).AnyTimes()
+
+		err := recurring_jobs.CalculateRecurringTransactions(
+			mockqueue.NewMockContext(context),
+			recurring_jobs.CalculateRecurringTransactionsArguments{
+				AccountId:     bankAccount.AccountId,
+				BankAccountId: bankAccount.BankAccountId,
+			},
+		)
+		require.NoError(t, err, "must be able to calculate recurring transactions")
+
+		stored := readTransactions(t, []models.Transaction{transaction})[transaction.TransactionId]
+		require.NotNil(t, stored.TransactionRecurringId, "new charge should be part of the recurring transaction")
+		assert.Equal(t, recurring.TransactionRecurringId, *stored.TransactionRecurringId, "new charge should be in the existing recurring transaction")
+		assert.Nil(t, stored.SpendingId, "calculating should not spend anything, the auto assign job does that")
+	})
 }
