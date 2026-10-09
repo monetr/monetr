@@ -19,5 +19,8 @@ var (
 				ValidID[models.FundingSchedule](),
 			),
 		).Required(Optional),
+		validation.Key("autoAssign",
+			Boolean(),
+		).Required(Optional),
 	)
 )
