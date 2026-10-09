@@ -13,7 +13,7 @@ import (
 	"github.com/monetr/monetr/server/internal/mockqueue"
 	"github.com/monetr/monetr/server/links/link_jobs"
 	"github.com/monetr/monetr/server/models"
-	"github.com/plaid/plaid-go/v47/plaid"
+	"github.com/plaid/plaid-go/v48/plaid"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )

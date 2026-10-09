@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/v47/plaid"
+	"github.com/plaid/plaid-go/v48/plaid"
 )
 
 const (
