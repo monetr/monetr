@@ -3,6 +3,7 @@
 
 .hero {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 4.5 * variables.$size;
 }
@@ -37,9 +38,16 @@
 .heroText {
   display: flex;
   flex: 1;
+  // Once the name would get squished below this the button wraps onto its own line instead
+  flex-basis: 40 * variables.$size;
   flex-direction: column;
   gap: 1 * variables.$size;
   min-width: 0;
+}
+
+.notRecurringButton {
+  // Stays over on the right even when it wraps onto its own line
+  margin-left: auto;
 }
 
 .memo {

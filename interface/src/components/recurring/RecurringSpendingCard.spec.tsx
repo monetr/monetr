@@ -50,6 +50,7 @@ describe('recurring spending card', () => {
       autoMatched: false,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-15T06:00:00Z',
+      deletedAt: null,
     });
 
     const world = testRenderer(<RecurringSpendingCard name='Github' recurring={recurring} />, {
@@ -106,6 +107,7 @@ describe('recurring spending card', () => {
       autoMatched: false,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-15T06:00:00Z',
+      deletedAt: null,
     });
 
     const world = testRenderer(<RecurringSpendingCard name='Github' recurring={recurring} />, {
@@ -162,6 +164,7 @@ describe('recurring spending card', () => {
       autoMatched: true,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-15T06:00:00Z',
+      deletedAt: null,
     });
 
     const world = testRenderer(<RecurringSpendingCard name='Github' recurring={recurring} />, {
@@ -196,6 +199,7 @@ describe('recurring spending card', () => {
       autoMatched: false,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-15T06:00:00Z',
+      deletedAt: null,
     });
 
     const world = testRenderer(<RecurringSpendingCard name='Github' recurring={recurring} />, {

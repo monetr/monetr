@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import { HeartCrack, Repeat } from 'lucide-react';
-import { useParams } from 'wouter';
+import { useLocation, useParams } from 'wouter';
 
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import RecurringChargeList from '@monetr/interface/components/recurring/RecurringChargeList';
@@ -10,6 +10,7 @@ import RecurringSummaryCard from '@monetr/interface/components/recurring/Recurri
 import Typography from '@monetr/interface/components/Typography';
 import { useRecurringTransaction } from '@monetr/interface/hooks/useRecurringTransaction';
 import { useTransactionCluster } from '@monetr/interface/hooks/useTransactionCluster';
+import { showMarkNotRecurringModal } from '@monetr/interface/modals/MarkNotRecurringModal';
 import type { ID } from '@monetr/interface/models/ID';
 import type TransactionRecurring from '@monetr/interface/models/TransactionRecurring';
 
@@ -20,6 +21,7 @@ export default function RecurringDetails(): React.JSX.Element | null {
   const { data: recurring, isLoading, isError } = useRecurringTransaction(transactionRecurringId);
   // The recurring transaction doesn't have a name of its own, it uses the name of its similar transactions group.
   const { data: cluster } = useTransactionCluster(recurring?.transactionClusterId ?? null);
+  const [, navigate] = useLocation();
 
   if (!transactionRecurringId) {
     return (
@@ -59,6 +61,17 @@ export default function RecurringDetails(): React.JSX.Element | null {
     tab = 'deposits';
   }
 
+  // It won't be in the list anymore once it's not recurring, so go back to where it was
+  function markNotRecurring() {
+    if (!recurring) {
+      return Promise.resolve();
+    }
+
+    return showMarkNotRecurringModal({
+      recurring: recurring,
+    }).then(() => navigate(`/bank/${recurring.bankAccountId}/recurring?tab=${tab}`));
+  }
+
   return (
     <Fragment>
       <MTopNavigation
@@ -69,7 +82,7 @@ export default function RecurringDetails(): React.JSX.Element | null {
       />
       <div className={styles.body}>
         <div className={styles.content}>
-          <RecurringSummaryCard recurring={recurring} />
+          <RecurringSummaryCard onMarkNotRecurring={markNotRecurring} recurring={recurring} />
           {recurring.direction === 'debit' && <RecurringSpendingCard name={name} recurring={recurring} />}
           {recurring.direction === 'credit' && <RecurringFundingCard name={name} recurring={recurring} />}
           <RecurringChargeList recurring={recurring} />

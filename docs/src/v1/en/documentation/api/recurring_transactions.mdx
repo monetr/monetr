@@ -62,6 +62,7 @@ A linked funding schedule comes back filled in as `fundingSchedule`, but a linke
 | `autoMatched`            | boolean                 | True when monetr linked the expense for you, because you kept spending its recent transactions from that expense. Goes back to false as soon as you change the link yourself.                                     |
 | `createdAt`              | timestamp               | When monetr first decided it was recurring.                                                                                                                                                                       |
 | `updatedAt`              | timestamp               | When it was last recalculated or linked. This changes on every recalculation, even when nothing about it did, so don't use it to spot changes.                                                                    |
+| `deletedAt`              | timestamp, nullable     | When you [marked it as not recurring](#mark-as-not-recurring). Null on everything else.                                                                                                                           |
 
 The `ruleset` keeps its `DTSTART` in UTC like every other ruleset in monetr, but the schedule is really in your
 account's timezone. If you want to pull dates out of it yourself, move `DTSTART` into your account's timezone first.
@@ -71,6 +72,9 @@ Skip that and something like `BYMONTHDAY=8` lands on the 9th for anyone east of 
 cluster stops recurring entirely, or the cluster itself goes away, the recurring transaction gets deleted. Its ID stops
 working and the transactions that were in it go back to a null `transactionRecurringId`. Whatever expense or funding
 schedule was linked to it sticks around, it just isn't linked to anything anymore.
+
+Marking something as [not recurring](#mark-as-not-recurring) is different again. It gets `deletedAt` set but sticks
+around, so its ID keeps working.
 
 Recalculating doesn't touch the links. They stay put until you change them, or until you delete the expense or funding
 schedule, which sets `spendingId` or `fundingScheduleId` back to null. The one exception is a debit that's still going
@@ -82,6 +86,8 @@ linked to that expense yet, monetr links it for you and sets `autoMatched`.
 Returns every recurring transaction on a bank account, a page at a time. Ones that are still going come first, sorted by
 when the next one is expected, then the ones that have ended. You can narrow it down to one direction, or to just the
 ones that are still going or just the ones that ended, so you're not paging through stuff you don't care about.
+
+Anything you've [marked as not recurring](#mark-as-not-recurring) is left out.
 
 If you ask for just the ended ones with `ended=true` they're sorted by when they were last seen instead, most recent
 first. `next` keeps getting worked out from the schedule even after something stops, so it doesn't say anything useful
@@ -144,7 +150,8 @@ curl --request GET \
     "lastAmount": 1549,
     "autoMatched": false,
     "createdAt": "2024-05-13T03:15:06.214Z",
-    "updatedAt": "2024-08-30T14:02:11.733Z"
+    "updatedAt": "2024-08-30T14:02:11.733Z",
+    "deletedAt": null
   }
 ]
 ```
@@ -162,6 +169,8 @@ transactions, or one that isn't yours, isn't an error. You just get back an empt
 
 Returns one recurring transaction. You'll usually get the ID from a transaction's `transactionRecurringId`, or from
 [listing them](#list-recurring-transactions).
+
+This still works for one you've marked as not recurring, it'll just have `deletedAt` set.
 
 **In the app:** Hovering the recurring icon next to a transaction, the recurring card on a transaction's details page,
 and the recurring transaction's own details page.
@@ -209,7 +218,8 @@ curl --request GET \
   "lastAmount": 1549,
   "autoMatched": false,
   "createdAt": "2024-05-13T03:15:06.214Z",
-  "updatedAt": "2024-08-30T03:15:05.902Z"
+  "updatedAt": "2024-08-30T03:15:05.902Z",
+  "deletedAt": null
 }
 ```
 
@@ -293,7 +303,8 @@ curl --request PATCH \
   "lastAmount": 1549,
   "autoMatched": false,
   "createdAt": "2024-05-13T03:15:06.214Z",
-  "updatedAt": "2024-08-30T14:02:11.733Z"
+  "updatedAt": "2024-08-30T14:02:11.733Z",
+  "deletedAt": null
 }
 ```
 
@@ -306,3 +317,50 @@ comes back filled in as `fundingSchedule`, an expense is just the `spendingId`.
 | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 400    | Either ID is malformed, the body has something other than `spendingId` or `fundingScheduleId`, you linked an expense to a credit or a funding schedule to a debit, you linked a goal, or that expense or funding schedule is already linked to a different recurring transaction. |
 | 404    | No recurring transaction with that ID on that bank account, or the expense or funding schedule you sent doesn't exist on that bank account.                                                                                                                                       |
+
+## <Badge type="danger">DELETE</Badge> Mark as not recurring
+
+Tells monetr that something isn't actually recurring. It drops out of the [list](#list-recurring-transactions), its
+link to an expense or funding schedule gets cleared, and monetr won't link an expense to it for you anymore. There's no
+undoing this.
+
+It doesn't really go away though. monetr keeps it around with `deletedAt` set so it remembers you said no, otherwise the
+next recalculation would just find the same schedule and bring it right back. You can still
+[get it](#get-a-recurring-transaction) by its ID, and its transactions still point at it with `transactionRecurringId`,
+so check `deletedAt` if you're following that ID from a transaction.
+
+The one way it can come back is if the cluster stops recurring entirely. Then it gets deleted for real like anything
+else, and if the cluster starts recurring again later you'll get a brand new one.
+
+**In the app:** The Not Recurring button on a recurring transaction's details page, or on the recurring card on a
+transaction's details page.
+
+```http
+DELETE /api/bank_accounts/:bankAccountId/recurring/:transactionRecurringId
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute                | Type          | Required | Description                                            |
+| ------------------------ | ------------- | -------- | ------------------------------------------------------ |
+| `bankAccountId`          | string (ulid) | Yes      | The bank account the recurring transaction belongs to. |
+| `transactionRecurringId` | string (ulid) | Yes      | The recurring transaction that isn't recurring.        |
+
+### Example
+
+```bash
+curl --request DELETE \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring/txrc_01j6b4n8w2kq5t9r3xm7vdc6ph" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+Returns 200 with an empty body.
+
+### Errors
+
+| Status | When                                                                  |
+| ------ | --------------------------------------------------------------------- |
+| 400    | Either ID is malformed, or it's already been marked as not recurring. |
+| 404    | No recurring transaction with that ID on that bank account.           |

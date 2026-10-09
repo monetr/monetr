@@ -289,6 +289,35 @@ func TestMatchRecurringTransactionsToSpending(t *testing.T) {
 		assert.False(t, result[0].AutoMatched, "should not be marked as auto matched")
 	})
 
+	t.Run("skips deleted", func(t *testing.T) {
+		clock := clock.NewMock()
+		clock.Set(time.Date(2026, 7, 1, 9, 0, 0, 0, time.UTC))
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(
+			t,
+			clock,
+			&link,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
+		expense := givenIHaveSpending(t, clock, bankAccount, models.SpendingTypeExpense, "Github")
+		cluster, transactions := givenIHaveARecurringExpense(t, clock, bankAccount)
+		recurring := readRecurringByCluster(t, clock, cluster)
+		recurring[0].DeletedAt = new(clock.Now())
+		testutils.MustDBUpdate(t, &recurring[0])
+		givenTheTransactionsWereSpentFrom(t, expense, transactions[3], transactions[4], transactions[5])
+
+		// The user said this isn't recurring, so it shouldn't get linked even
+		// though it would match the expense.
+		require.NoError(t, runMatchRecurringTransactionsToSpending(t, clock, bankAccount), "job must succeed")
+		result := readRecurringByCluster(t, clock, cluster)
+		require.Len(t, result, 1, "should still have a single recurring transaction")
+		assert.NotNil(t, result[0].DeletedAt, "should still be deleted")
+		assert.Nil(t, result[0].SpendingId, "deleted recurring transaction should not be linked")
+		assert.False(t, result[0].AutoMatched, "should not be marked as auto matched")
+	})
+
 	t.Run("no recurring transactions", func(t *testing.T) {
 		clock := clock.NewMock()
 		clock.Set(time.Date(2026, 7, 1, 9, 0, 0, 0, time.UTC))

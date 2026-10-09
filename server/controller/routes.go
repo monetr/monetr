@@ -337,6 +337,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/recurring", c.getRecurringTransactions)
 	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/recurring/:transactionRecurringId", c.getRecurringTransactionById)
 	billedKeyOrToken.PATCH("/bank_accounts/:bankAccountId/recurring/:transactionRecurringId", c.patchRecurringTransaction)
+	billedKeyOrToken.DELETE("/bank_accounts/:bankAccountId/recurring/:transactionRecurringId", c.deleteRecurringTransaction)
 	billedKeyOrToken.POST("/bank_accounts/:bankAccountId/transactions", c.postTransactions)
 	billedKeyOrToken.POST("/bank_accounts/:bankAccountId/transactions/upload", c.postTransactionUpload)
 	billedKeyOrToken.GET("/bank_accounts/:bankAccountId/transactions/upload/:transactionUploadId", c.getTransactionUploadById)

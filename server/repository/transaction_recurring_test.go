@@ -429,6 +429,36 @@ func TestRepositoryBase_GetTransactionRecurrings(t *testing.T) {
 		assert.Equal(t, recurring[1].TransactionRecurringId, result[0].TransactionRecurringId, "most recently seen should be first")
 		assert.Equal(t, recurring[0].TransactionRecurringId, result[1].TransactionRecurringId, "older should be second")
 	})
+
+	t.Run("skips deleted", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		deleted := newTransactionRecurring(t, givenIHaveATransactionCluster(t, bankAccount), models.DebitDirection, 900)
+		deleted.DeletedAt = new(clock.Now())
+		recurring := []models.TransactionRecurring{
+			newTransactionRecurring(t, givenIHaveATransactionCluster(t, bankAccount), models.DebitDirection, 800),
+			deleted,
+		}
+		err := repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, recurring)
+		require.NoError(t, err, "must be able to create recurring transactions")
+
+		result, err := repo.GetTransactionRecurrings(t.Context(), bankAccount.BankAccountId, nil, nil, 25, 0)
+		assert.NoError(t, err, "must be able to read recurring transactions")
+		require.Len(t, result, 1, "should not return the deleted one")
+		assert.Equal(t, recurring[0].TransactionRecurringId, result[0].TransactionRecurringId, "should return the one that isnt deleted")
+	})
 }
 
 func TestRepositoryBase_GetTransactionRecurringByCluster(t *testing.T) {
@@ -483,6 +513,72 @@ func TestRepositoryBase_GetTransactionRecurringByCluster(t *testing.T) {
 		result, err := repo.GetTransactionRecurringByCluster(t.Context(), bankAccount.BankAccountId, cluster.TransactionClusterId)
 		assert.NoError(t, err, "must be able to read recurring transactions")
 		assert.Empty(t, result, "there should be no recurring transactions")
+	})
+}
+
+func TestRepositoryBase_GetTransactionRecurringByBankAccount(t *testing.T) {
+	t.Run("happy path", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		otherBankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.SavingsBankAccountSubType)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		err := repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, []models.TransactionRecurring{
+			newTransactionRecurring(t, givenIHaveATransactionCluster(t, bankAccount), models.DebitDirection, 800),
+			newTransactionRecurring(t, givenIHaveATransactionCluster(t, bankAccount), models.DebitDirection, 900),
+		})
+		require.NoError(t, err, "must be able to create recurring transactions")
+		err = repo.UpsertTransactionRecurring(t.Context(), otherBankAccount.BankAccountId, []models.TransactionRecurring{
+			newTransactionRecurring(t, givenIHaveATransactionCluster(t, otherBankAccount), models.DebitDirection, 1000),
+		})
+		require.NoError(t, err, "must be able to create recurring transaction for the other bank account")
+
+		result, err := repo.GetTransactionRecurringByBankAccount(t.Context(), bankAccount.BankAccountId)
+		assert.NoError(t, err, "must be able to read recurring transactions")
+		require.Len(t, result, 2, "should only return the recurring transactions for the bank account")
+		for _, item := range result {
+			assert.Equal(t, bankAccount.BankAccountId, item.BankAccountId, "bank account should match")
+		}
+	})
+
+	t.Run("skips deleted", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		deleted := newTransactionRecurring(t, givenIHaveATransactionCluster(t, bankAccount), models.DebitDirection, 900)
+		deleted.DeletedAt = new(clock.Now())
+		recurring := []models.TransactionRecurring{
+			newTransactionRecurring(t, givenIHaveATransactionCluster(t, bankAccount), models.DebitDirection, 800),
+			deleted,
+		}
+		err := repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, recurring)
+		require.NoError(t, err, "must be able to create recurring transactions")
+
+		result, err := repo.GetTransactionRecurringByBankAccount(t.Context(), bankAccount.BankAccountId)
+		assert.NoError(t, err, "must be able to read recurring transactions")
+		require.Len(t, result, 1, "should not return the deleted one")
+		assert.Equal(t, recurring[0].TransactionRecurringId, result[0].TransactionRecurringId, "should return the one that isnt deleted")
 	})
 }
 
@@ -587,6 +683,45 @@ func TestRepositoryBase_UpsertTransactionRecurring(t *testing.T) {
 		result, err := repo.GetTransactionRecurringByCluster(t.Context(), bankAccount.BankAccountId, cluster.TransactionClusterId)
 		require.NoError(t, err, "must be able to read recurring transactions")
 		assert.Len(t, result, 2, "there should be one recurring transaction per direction")
+	})
+
+	t.Run("stays deleted", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		cluster := givenIHaveATransactionCluster(t, bankAccount)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		deleted := newTransactionRecurring(t, cluster, models.DebitDirection, 800)
+		deleted.DeletedAt = new(clock.Now())
+		original := []models.TransactionRecurring{
+			deleted,
+		}
+		err := repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, original)
+		require.NoError(t, err, "must be able to create recurring transaction")
+
+		// The user said this isn't recurring, so when it gets calculated again it
+		// needs to update the deleted one instead of bringing it back.
+		err = repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, []models.TransactionRecurring{
+			newTransactionRecurring(t, cluster, models.DebitDirection, 1000),
+		})
+		assert.NoError(t, err, "must be able to update recurring transaction")
+
+		result, err := repo.GetTransactionRecurringByCluster(t.Context(), bankAccount.BankAccountId, cluster.TransactionClusterId)
+		require.NoError(t, err, "must be able to read recurring transactions")
+		require.Len(t, result, 1, "there should still only be one recurring transaction")
+		assert.Equal(t, original[0].TransactionRecurringId, result[0].TransactionRecurringId, "should keep the existing id")
+		assert.NotNil(t, result[0].DeletedAt, "should still be deleted")
+		assert.EqualValues(t, 1000, result[0].LastAmount, "last amount should still be updated")
 	})
 }
 

@@ -1,8 +1,9 @@
 import { Fragment } from 'react';
 import { addDays } from 'date-fns';
-import { Check, CircleAlert, Repeat } from 'lucide-react';
+import { Check, CircleAlert, Repeat, RepeatOff } from 'lucide-react';
 import { rrulestr } from 'rrule';
 
+import { Button } from '@monetr/interface/components/Button';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import RecurringMemo from '@monetr/interface/components/recurring/RecurringMemo';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@monetr/interface/components/Tooltip';
@@ -20,6 +21,7 @@ import styles from './RecurringSummaryCard.module.scss';
 
 export interface RecurringSummaryCardProps {
   recurring: TransactionRecurring;
+  onMarkNotRecurring: () => void;
 }
 
 export default function RecurringSummaryCard(props: RecurringSummaryCardProps): React.JSX.Element | null {
@@ -95,6 +97,17 @@ export default function RecurringSummaryCard(props: RecurringSummaryCardProps): 
             </Tooltip>
           </div>
         </div>
+        {!props.recurring.deletedAt && (
+          <Button
+            className={styles.notRecurringButton}
+            data-testid='recurring-not-recurring'
+            onClick={props.onMarkNotRecurring}
+            variant='outlinedDestructive'
+          >
+            <RepeatOff />
+            Not Recurring
+          </Button>
+        )}
       </section>
 
       {!props.recurring.ended && (

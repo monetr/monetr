@@ -58,7 +58,8 @@ func (r *repositoryBase) GetTransactionRecurrings(
 		Model(&result).
 		Relation("FundingSchedule").
 		Where(`"transaction_recurring"."account_id" = ?`, r.AccountId()).
-		Where(`"transaction_recurring"."bank_account_id" = ?`, bankAccountId)
+		Where(`"transaction_recurring"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction_recurring"."deleted_at" IS NULL`)
 
 	if direction != nil {
 		query = query.Where(`"transaction_recurring"."direction" = ?`, *direction)
@@ -137,6 +138,7 @@ func (r *repositoryBase) GetTransactionRecurringByBankAccount(
 		Model(&result).
 		Where(`"transaction_recurring"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction_recurring"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction_recurring"."deleted_at" IS NULL`).
 		Scan(span.Context()); err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, crumbs.WrapError(

@@ -55,9 +55,10 @@ type TransactionRecurring struct {
 	LastAmount             int64                    `json:"lastAmount" bun:"last_amount,notnull,nullzero"`
 	// AutoMatched is true when the spending link was made by the matching job
 	// instead of the user. It is cleared whenever the user changes the links.
-	AutoMatched bool      `json:"autoMatched" bun:"auto_matched,notnull"`
-	CreatedAt   time.Time `json:"createdAt" bun:"created_at,notnull,default:now(),nullzero"`
-	UpdatedAt   time.Time `json:"updatedAt" bun:"updated_at,notnull,default:now(),nullzero"`
+	AutoMatched bool       `json:"autoMatched" bun:"auto_matched,notnull"`
+	CreatedAt   time.Time  `json:"createdAt" bun:"created_at,notnull,default:now(),nullzero"`
+	UpdatedAt   time.Time  `json:"updatedAt" bun:"updated_at,notnull,default:now(),nullzero"`
+	DeletedAt   *time.Time `json:"deletedAt" bun:"deleted_at"`
 }
 
 func (TransactionRecurring) IdentityPrefix() string {

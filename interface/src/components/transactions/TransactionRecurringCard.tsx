@@ -1,5 +1,5 @@
 import { isThisYear } from 'date-fns';
-import { CalendarSync, Plus, Repeat, Sparkles, Wallet } from 'lucide-react';
+import { CalendarSync, Plus, Repeat, RepeatOff, Sparkles, Wallet } from 'lucide-react';
 import { rrulestr } from 'rrule';
 import { Link } from 'wouter';
 
@@ -11,6 +11,7 @@ import { useRecurringTransaction } from '@monetr/interface/hooks/useRecurringTra
 import { useSpending } from '@monetr/interface/hooks/useSpending';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { useTransactionsForRecurring } from '@monetr/interface/hooks/useTransactionsForRecurring';
+import { showMarkNotRecurringModal } from '@monetr/interface/modals/MarkNotRecurringModal';
 import { showNewExpenseModal } from '@monetr/interface/modals/NewExpenseModal';
 import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
 import type Transaction from '@monetr/interface/models/Transaction';
@@ -36,6 +37,11 @@ export default function TransactionRecurringCard(props: TransactionRecurringCard
   // The card is just extra detail on top of the transaction, so instead of a skeleton just leave it out until
   // everything has loaded
   if (!recurring || !locale || !localeCurrency) {
+    return null;
+  }
+
+  // The user said this isn't recurring, so there is nothing to show
+  if (recurring.deletedAt) {
     return null;
   }
 
@@ -97,6 +103,19 @@ export default function TransactionRecurringCard(props: TransactionRecurringCard
             View Details
           </Link>
         </div>
+        <Button
+          className={styles.notRecurringButton}
+          data-testid='transaction-recurring-not-recurring'
+          onClick={() =>
+            showMarkNotRecurringModal({
+              recurring: recurring,
+            })
+          }
+          variant='outlinedDestructive'
+        >
+          <RepeatOff />
+          Not Recurring
+        </Button>
       </div>
 
       <div className={styles.stats}>
