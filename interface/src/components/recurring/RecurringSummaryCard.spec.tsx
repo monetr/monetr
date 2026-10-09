@@ -63,7 +63,7 @@ describe('recurring summary card', () => {
       deletedAt: null,
     });
 
-    const world = testRenderer(<RecurringSummaryCard recurring={recurring} />, {
+    const world = testRenderer(<RecurringSummaryCard onMarkNotRecurring={() => {}} recurring={recurring} />, {
       initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring/txrc_01hy4re7c1xc2v44cf6kx302jx/details',
     });
 
@@ -130,7 +130,7 @@ describe('recurring summary card', () => {
       deletedAt: null,
     });
 
-    const world = testRenderer(<RecurringSummaryCard recurring={recurring} />, {
+    const world = testRenderer(<RecurringSummaryCard onMarkNotRecurring={() => {}} recurring={recurring} />, {
       initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring/txrc_01hy4re7c1xc2v44cf6kx302jx/details',
     });
 
@@ -199,7 +199,7 @@ describe('recurring summary card', () => {
       deletedAt: null,
     });
 
-    const world = testRenderer(<RecurringSummaryCard recurring={recurring} />, {
+    const world = testRenderer(<RecurringSummaryCard onMarkNotRecurring={() => {}} recurring={recurring} />, {
       initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring/txrc_01hy4re7c1xc2v44cf6kx302jx/details',
     });
 
@@ -247,7 +247,7 @@ describe('recurring summary card', () => {
       deletedAt: null,
     });
 
-    const world = testRenderer(<RecurringSummaryCard recurring={recurring} />, {
+    const world = testRenderer(<RecurringSummaryCard onMarkNotRecurring={() => {}} recurring={recurring} />, {
       initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring/txrc_01hy4re7c1xc2v44cf6kx302jx/details',
     });
 

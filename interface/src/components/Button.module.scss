@@ -101,6 +101,25 @@
   }
 }
 
+.outlinedDestructive {
+  --ring-color: var(--destructive);
+  --ring-size: 1px;
+  @include mixins.inset-ring;
+  color: var(--destructive-subtle);
+
+  &:not(:disabled, [aria-disabled="true"]) {
+    &:focus-visible, &:hover {
+      --ring-color: var(--destructive-subtle);
+      --ring-size: 2px;
+    }
+  }
+
+  &:disabled, &[aria-disabled="true"] {
+    --ring-color: var(--border-subtle);
+    color: var(--content-muted);
+  }
+}
+
 .destructive {
   background-color: var(--destructive);
   color: var(--content-emphasis);

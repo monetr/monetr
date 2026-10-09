@@ -67,6 +67,11 @@
   gap: 3 * variables.$size;
 }
 
+.notRecurringButton {
+  // When the header wraps only this goes over to the right, the confidence and details link stay on the left
+  margin-left: auto;
+}
+
 .eyebrow {
   @include mixins.text-small;
   font-weight: var(--semibold);
