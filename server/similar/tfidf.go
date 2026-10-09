@@ -94,10 +94,26 @@ var (
 )
 
 type Document struct {
-	ID          models.ID[models.Transaction]
-	TF          map[string]float32
-	TFIDF       map[string]float32
-	Vector      []float32
+	ID     models.ID[models.Transaction]
+	TF     map[string]float32
+	TFIDF  map[string]float32
+	Vector []float32
+	// Indices and Values are Vector without all the zeros. Indices is every spot
+	// in Vector that isn't 0, smallest first, and Values is what Vector has at
+	// each of those spots. Vector is as wide as every word in the account but a
+	// transaction name only has a handful of words, so almost all of Vector is
+	// zeros that the distance calculation doesn't need to look at
+	Indices []int32
+	Values  []float32
+	// Norm2 is ||Vector||^2, every value in Vector squared and added up. Vector
+	// is normalized so this is really close to 1, but it won't be exactly 1 so we
+	// keep the real value for the distance calculation in dbscan
+	Norm2 float32
+	// Signature is a 64 bit bloom filter of Indices, each index sets one bit
+	// (index % 64). If two documents have no bits in common then they don't have
+	// any words in common either, so they can't be similar and we can skip
+	// calculating the distance between them
+	Signature   uint64
 	Tokens      []Token
 	Transaction *models.Transaction
 	Valid       bool
@@ -251,6 +267,45 @@ func (p *TFIDF) GetDocuments(ctx context.Context) []Document {
 
 		// Normalize the document's tfidf vector.
 		calc.NormalizeVector32(document.Vector)
+
+		// Then build the sparse version of that vector for the clustering. The
+		// TFIDF map already has every word this document uses, so we can get the
+		// indicies straight from it instead of scanning the whole vector for the
+		// few spots that aren't zero
+		indices := make([]int32, 0, words)
+		for word := range document.TFIDF {
+			index, exists := minified[word]
+			if !exists {
+				continue
+			}
+			indices = append(indices, int32(index))
+		}
+		// Map order is random, and the dot product adds these up in whatever order
+		// they are in. Float addition can give a slightly different answer in a
+		// different order, so sort them to get the same distance every run
+		sort.Slice(indices, func(i, j int) bool {
+			return indices[i] < indices[j]
+		})
+
+		// Read the values back out of the vector now that it is normalized. That
+		// way they are the exact same floats the dense vector has, instead of
+		// dividing them again ourselves and maybe being off in the last bit
+		document.Norm2, document.Signature = 0, 0
+		document.Indices = make([]int32, 0, len(indices))
+		document.Values = make([]float32, 0, len(indices))
+		for _, index := range indices {
+			value := document.Vector[index]
+			// A word can end up with a tfidf of 0. It adds nothing to the distance,
+			// and it would set a bit in the signature for no reason which makes it
+			// worse at skipping pairs
+			if value == 0 {
+				continue
+			}
+			document.Indices = append(document.Indices, index)
+			document.Values = append(document.Values, value)
+			document.Norm2 += value * value
+			document.Signature |= 1 << (uint64(index) % 64)
+		}
 
 		p.documents[i] = document
 		// Then store the document back in
