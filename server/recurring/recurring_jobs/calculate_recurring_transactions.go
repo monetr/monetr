@@ -2,6 +2,7 @@ package recurring_jobs
 
 import (
 	"log/slog"
+	"slices"
 	"time"
 
 	"github.com/monetr/monetr/server/crumbs"
@@ -179,7 +180,7 @@ func calculateRecurringTransactionsForCluster(
 	if err := repo.UpdateTransactionRecurringIds(
 		ctx,
 		bankAccountId,
-		diff.UpdateMembers,
+		slices.Concat(diff.InsertMembers, diff.UpdateMembers),
 	); err != nil {
 		return errors.Wrap(err, "failed to update transaction recurring ids")
 	}
@@ -196,6 +197,7 @@ func calculateRecurringTransactionsForCluster(
 	log.DebugContext(ctx, "finished updating recurring transactions for cluster",
 		"upsertRecurring", len(diff.UpsertRecurring),
 		"deleteRecurring", len(diff.DeleteRecurringIds),
+		"insertMembers", len(diff.InsertMembers),
 		"updateMembers", len(diff.UpdateMembers),
 	)
 
