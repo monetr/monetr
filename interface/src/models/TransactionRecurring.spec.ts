@@ -29,6 +29,7 @@ describe('transaction recurring', () => {
       fundingSchedule: null,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-16T06:00:00Z',
+      deletedAt: null,
     });
     expect(recurring.transactionRecurringId).toBe('txrc_test');
     expect(recurring.bankAccountId).toBe('bac_test');
@@ -58,12 +59,42 @@ describe('transaction recurring', () => {
       fundingSchedule: null,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-16T06:00:00Z',
+      deletedAt: null,
     });
     expect(recurring.first).toEqual(new Date('2026-01-15T06:00:00Z'));
     expect(recurring.last).toEqual(new Date('2026-03-15T05:00:00Z'));
     expect(recurring.next).toEqual(new Date('2026-04-15T05:00:00Z'));
     expect(recurring.createdAt).toEqual(new Date('2026-03-15T06:00:00Z'));
     expect(recurring.updatedAt).toEqual(new Date('2026-03-16T06:00:00Z'));
+    expect(recurring.deletedAt).toBeNull();
+  });
+
+  it('will parse when it was deleted', () => {
+    const recurring = new TransactionRecurring({
+      transactionRecurringId: ID.from<TransactionRecurring>('txrc_test'),
+      bankAccountId: ID.from<BankAccount>('bac_test'),
+      transactionClusterId: ID.from<TransactionCluster>('tcl_test'),
+      spendingId: null,
+      fundingScheduleId: null,
+      window: TransactionRecurringWindow.Monthly,
+      ruleset: 'DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15',
+      first: '2026-01-15T06:00:00Z',
+      last: '2026-03-15T05:00:00Z',
+      next: '2026-04-15T05:00:00Z',
+      ended: false,
+      confidence: 0.9,
+      direction: 'debit',
+      amounts: {
+        800: 3,
+      },
+      lastAmount: 800,
+      autoMatched: false,
+      fundingSchedule: null,
+      createdAt: '2026-03-15T06:00:00Z',
+      updatedAt: '2026-03-16T06:00:00Z',
+      deletedAt: '2026-03-17T06:00:00Z',
+    });
+    expect(recurring.deletedAt).toEqual(new Date('2026-03-17T06:00:00Z'));
   });
 
   it('will keep the window, direction and amounts', () => {
@@ -89,6 +120,7 @@ describe('transaction recurring', () => {
       fundingSchedule: null,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-16T06:00:00Z',
+      deletedAt: null,
     });
     expect(recurring.window).toBe(TransactionRecurringWindow.FifteenthAndLast);
     expect(recurring.direction).toBe('credit');
@@ -121,6 +153,7 @@ describe('transaction recurring', () => {
       fundingSchedule: null,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-16T06:00:00Z',
+      deletedAt: null,
     });
     expect(recurring.spendingId).toBeNull();
   });
@@ -148,6 +181,7 @@ describe('transaction recurring', () => {
       fundingSchedule: null,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-16T06:00:00Z',
+      deletedAt: null,
     });
     expect(recurring.spendingId).toBe('spnd_test');
   });
@@ -175,6 +209,7 @@ describe('transaction recurring', () => {
       fundingSchedule: null,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-16T06:00:00Z',
+      deletedAt: null,
     });
     expect(veryLikely.getConfidenceLabel()).toBe('Very likely');
     const likely = new TransactionRecurring({
@@ -199,6 +234,7 @@ describe('transaction recurring', () => {
       fundingSchedule: null,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-16T06:00:00Z',
+      deletedAt: null,
     });
     expect(likely.getConfidenceLabel()).toBe('Likely');
     const possibly = new TransactionRecurring({
@@ -223,6 +259,7 @@ describe('transaction recurring', () => {
       fundingSchedule: null,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-16T06:00:00Z',
+      deletedAt: null,
     });
     expect(possibly.getConfidenceLabel()).toBe('Possibly');
   });
@@ -250,6 +287,7 @@ describe('transaction recurring', () => {
       fundingSchedule: null,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-16T06:00:00Z',
+      deletedAt: null,
     });
     expect(recurring.fundingSchedule).toBeNull();
   });
@@ -289,6 +327,7 @@ describe('transaction recurring', () => {
       },
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-16T06:00:00Z',
+      deletedAt: null,
     });
     expect(recurring.fundingScheduleId).toBe('fund_test');
     expect(recurring.fundingSchedule).toBeInstanceOf(FundingSchedule);
@@ -321,6 +360,7 @@ describe('transaction recurring', () => {
           fundingSchedule: null,
           createdAt: '2026-03-15T06:00:00Z',
           updatedAt: '2026-03-16T06:00:00Z',
+          deletedAt: null,
         }),
     ).toThrow();
   });

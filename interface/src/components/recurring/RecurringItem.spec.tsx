@@ -59,6 +59,7 @@ describe('recurring item', () => {
       autoMatched: false,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-15T06:00:00Z',
+      deletedAt: null,
     });
 
     const world = testRenderer(<RecurringItem recurring={recurring} />, {
@@ -125,6 +126,7 @@ describe('recurring item', () => {
       autoMatched: false,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-15T06:00:00Z',
+      deletedAt: null,
     });
 
     const world = testRenderer(<RecurringItem recurring={recurring} />, {
@@ -192,6 +194,7 @@ describe('recurring item', () => {
       autoMatched: false,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-15T06:00:00Z',
+      deletedAt: null,
     });
 
     const world = testRenderer(<RecurringItem recurring={recurring} />, {
@@ -254,6 +257,7 @@ describe('recurring item', () => {
       autoMatched: false,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-15T06:00:00Z',
+      deletedAt: null,
     });
 
     const user = userEvent.setup();

@@ -47,6 +47,7 @@ export default class TransactionRecurring {
   readonly fundingSchedule: FundingSchedule | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
+  readonly deletedAt: Date | null;
 
   constructor(data: WithJsonValues<TransactionRecurring>) {
     this.transactionRecurringId = ID.from(data.transactionRecurringId);
@@ -68,6 +69,7 @@ export default class TransactionRecurring {
     this.fundingSchedule = data.fundingSchedule ? new FundingSchedule(data.fundingSchedule) : null;
     this.createdAt = parseDate(data.createdAt);
     this.updatedAt = parseDate(data.updatedAt);
+    this.deletedAt = data.deletedAt ? parseDate(data.deletedAt) : null;
   }
 
   // getConfidenceLabel is how sure monetr is that this actually recurs, in words instead of a number

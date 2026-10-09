@@ -60,6 +60,7 @@ describe('recurring summary card', () => {
       autoMatched: false,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-15T06:00:00Z',
+      deletedAt: null,
     });
 
     const world = testRenderer(<RecurringSummaryCard recurring={recurring} />, {
@@ -126,6 +127,7 @@ describe('recurring summary card', () => {
       autoMatched: false,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-15T06:00:00Z',
+      deletedAt: null,
     });
 
     const world = testRenderer(<RecurringSummaryCard recurring={recurring} />, {
@@ -194,6 +196,7 @@ describe('recurring summary card', () => {
       autoMatched: false,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-15T06:00:00Z',
+      deletedAt: null,
     });
 
     const world = testRenderer(<RecurringSummaryCard recurring={recurring} />, {
@@ -241,6 +244,7 @@ describe('recurring summary card', () => {
       autoMatched: false,
       createdAt: '2025-03-15T06:00:00Z',
       updatedAt: '2025-08-15T06:00:00Z',
+      deletedAt: null,
     });
 
     const world = testRenderer(<RecurringSummaryCard recurring={recurring} />, {

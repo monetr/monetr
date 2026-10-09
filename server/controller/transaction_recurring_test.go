@@ -795,3 +795,152 @@ func TestPatchRecurringTransaction(t *testing.T) {
 		response.Status(http.StatusUnauthorized)
 	})
 }
+
+func TestDeleteRecurringTransaction(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		recurring := GivenIHaveATransactionRecurring(t, bank)
+		token := GivenILogin(t, e, user.Login.Email, password)
+		app.Clock.Add(time.Hour)
+
+		response := e.DELETE("/api/bank_accounts/{bankAccountId}/recurring/{transactionRecurringId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionRecurringId", recurring.TransactionRecurringId).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusOK)
+
+		stored := testutils.MustDBRead(t, recurring)
+		if assert.NotNil(t, stored.DeletedAt, "deleted at should be stored") {
+			assert.WithinDuration(t, app.Clock.Now(), *stored.DeletedAt, time.Second, "deleted at should be now")
+		}
+
+		{ // It shouldn't show up in the list anymore
+			response := e.GET("/api/bank_accounts/{bankAccountId}/recurring").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().Length().IsEqual(0)
+		}
+	})
+
+	t.Run("clears the expense link", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		spending := GivenIHaveASpending(t, app.Clock, fundingSchedule, SpendingTypeExpense, "Github")
+		recurring := GivenIHaveATransactionRecurring(t, bank)
+		recurring.SpendingId = &spending.SpendingId
+		recurring.AutoMatched = true
+		testutils.MustDBUpdate(t, &recurring)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.DELETE("/api/bank_accounts/{bankAccountId}/recurring/{transactionRecurringId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionRecurringId", recurring.TransactionRecurringId).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusOK)
+
+		stored := testutils.MustDBRead(t, recurring)
+		assert.NotNil(t, stored.DeletedAt, "should be deleted")
+		assert.Nil(t, stored.SpendingId, "expense link should be cleared")
+		assert.False(t, stored.AutoMatched, "should not be auto matched anymore")
+
+		{ // The expense should be free to link to something else now
+			other := GivenIHaveATransactionRecurring(t, bank)
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}/recurring/{transactionRecurringId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("transactionRecurringId", other.TransactionRecurringId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"spendingId": spending.SpendingId,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.spendingId").IsEqual(spending.SpendingId)
+		}
+	})
+
+	t.Run("clears the funding schedule link", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		recurring := GivenIHaveATransactionRecurring(t, bank)
+		recurring.Direction = CreditDirection
+		recurring.FundingScheduleId = &fundingSchedule.FundingScheduleId
+		testutils.MustDBUpdate(t, &recurring)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.DELETE("/api/bank_accounts/{bankAccountId}/recurring/{transactionRecurringId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionRecurringId", recurring.TransactionRecurringId).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusOK)
+
+		stored := testutils.MustDBRead(t, recurring)
+		assert.NotNil(t, stored.DeletedAt, "should be deleted")
+		assert.Nil(t, stored.FundingScheduleId, "funding schedule link should be cleared")
+	})
+
+	t.Run("already deleted", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		recurring := GivenIHaveATransactionRecurring(t, bank)
+		recurring.DeletedAt = new(app.Clock.Now())
+		testutils.MustDBUpdate(t, &recurring)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.DELETE("/api/bank_accounts/{bankAccountId}/recurring/{transactionRecurringId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionRecurringId", recurring.TransactionRecurringId).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Recurring transaction is already deleted")
+	})
+
+	t.Run("cant delete someone elses recurring", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+
+		var bank BankAccount
+		var recurring TransactionRecurring
+		{ // Seed the recurring transaction under the first account
+			user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			recurring = GivenIHaveATransactionRecurring(t, bank)
+		}
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.DELETE("/api/bank_accounts/{bankAccountId}/recurring/{transactionRecurringId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionRecurringId", recurring.TransactionRecurringId).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+
+		stored := testutils.MustDBRead(t, recurring)
+		assert.Nil(t, stored.DeletedAt, "someone elses recurring should not be deleted")
+	})
+}

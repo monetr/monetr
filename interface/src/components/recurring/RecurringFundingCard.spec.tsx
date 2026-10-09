@@ -50,6 +50,7 @@ describe('recurring funding card', () => {
       autoMatched: false,
       createdAt: '2026-03-31T06:00:00Z',
       updatedAt: '2026-03-31T06:00:00Z',
+      deletedAt: null,
     });
 
     const world = testRenderer(<RecurringFundingCard name='Mercury Payroll' recurring={recurring} />, {
@@ -98,6 +99,7 @@ describe('recurring funding card', () => {
       autoMatched: false,
       createdAt: '2026-03-31T06:00:00Z',
       updatedAt: '2026-03-31T06:00:00Z',
+      deletedAt: null,
     });
 
     const world = testRenderer(<RecurringFundingCard name='Mercury Payroll' recurring={recurring} />, {

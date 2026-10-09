@@ -134,6 +134,7 @@ describe('new expense modal', () => {
             fundingSchedule: null,
             createdAt: '2026-01-15T06:00:00Z',
             updatedAt: '2026-03-16T06:00:00Z',
+            deletedAt: null,
           }),
           transaction: new Transaction({
             transactionId: ID.from<Transaction>('txn_01hy4rhqmy4wjy0vtrmqsc5c1m'),
@@ -319,6 +320,7 @@ describe('new expense modal', () => {
             fundingSchedule: null,
             createdAt: '2026-01-15T06:00:00Z',
             updatedAt: '2026-03-16T06:00:00Z',
+            deletedAt: null,
           }),
           transaction: new Transaction({
             transactionId: ID.from<Transaction>('txn_01hy4rhqmy4wjy0vtrmqsc5c1m'),
@@ -506,6 +508,7 @@ describe('new expense modal', () => {
             fundingSchedule: null,
             createdAt: '2026-01-15T06:00:00Z',
             updatedAt: '2026-03-16T06:00:00Z',
+            deletedAt: null,
           }),
           transaction: new Transaction({
             transactionId: ID.from<Transaction>('txn_01hy4rhqmy4wjy0vtrmqsc5c1m'),

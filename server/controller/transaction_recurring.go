@@ -183,3 +183,47 @@ func (c *Controller) patchRecurringTransaction(ctx *echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, result)
 }
+
+func (c *Controller) deleteRecurringTransaction(ctx *echo.Context) error {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
+		return c.badRequest(ctx, "Must specify a valid bank account Id")
+	}
+
+	transactionRecurringId, err := ParseID[TransactionRecurring](ctx.Param("transactionRecurringId"))
+	if err != nil || transactionRecurringId.IsZero() {
+		return c.badRequest(ctx, "Must specify a valid recurring transaction Id")
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	existing, err := repo.GetTransactionRecurringById(
+		c.getContext(ctx),
+		bankAccountId,
+		transactionRecurringId,
+	)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "Failed to retrieve recurring transaction")
+	}
+
+	if existing.DeletedAt != nil {
+		return c.badRequest(ctx, "Recurring transaction is already deleted")
+	}
+
+	// Drop the links too, otherwise the unique constraints keep that spending or
+	// funding schedule tied to something the user can't see anymore
+	existing.DeletedAt = new(c.Clock.Now())
+	existing.SpendingId = nil
+	existing.FundingScheduleId = nil
+	existing.AutoMatched = false
+
+	if err := repo.UpdateTransactionRecurring(
+		c.getContext(ctx),
+		bankAccountId,
+		existing,
+	); err != nil {
+		return c.wrapPgError(ctx, err, "Failed to update recurring transaction")
+	}
+
+	return ctx.NoContent(http.StatusOK)
+}
