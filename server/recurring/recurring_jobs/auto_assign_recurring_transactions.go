@@ -109,6 +109,15 @@ func AutoAssignRecurringTransactions(
 			// Don't spend transactions that happened before the spending even
 			// existed, those would have been paid for some other way.
 			if transaction.Date.Before(util.Midnight(item.CreatedAt, timezone)) {
+				log.DebugContext(ctx,
+					"skipping auto assing spending to transaction because transaction date is after spending was created",
+					"transactionId", transactionId,
+					"transactionRecurringId", recurring.TransactionRecurringId,
+					"spendingId", *recurring.SpendingId,
+					"transaction_date", transaction.Date,
+					"spending_createdAt", item.CreatedAt,
+					"spending_createdAt_adjusted", util.Midnight(item.CreatedAt, timezone),
+				)
 				continue
 			}
 
@@ -131,7 +140,8 @@ func AutoAssignRecurringTransactions(
 				return errors.Wrap(err, "failed to update transaction")
 			}
 
-			log.DebugContext(ctx, "auto assigned transaction to spending",
+			log.DebugContext(ctx,
+				"auto assigned transaction to spending",
 				"transactionId", transactionId,
 				"transactionRecurringId", recurring.TransactionRecurringId,
 				"spendingId", *recurring.SpendingId,
@@ -139,7 +149,8 @@ func AutoAssignRecurringTransactions(
 			assigned++
 		}
 
-		log.InfoContext(ctx, "finished auto assigning recurring transactions",
+		log.InfoContext(ctx,
+			"finished auto assigning recurring transactions",
 			"transactions", len(args.TransactionIds),
 			"assigned", assigned,
 		)

@@ -1021,6 +1021,7 @@ func TestDeleteRecurringTransaction(t *testing.T) {
 		recurring := GivenIHaveATransactionRecurring(t, bank)
 		recurring.SpendingId = &spending.SpendingId
 		recurring.AutoMatched = true
+		recurring.AutoAssign = true
 		testutils.MustDBUpdate(t, &recurring)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
@@ -1036,6 +1037,7 @@ func TestDeleteRecurringTransaction(t *testing.T) {
 		assert.NotNil(t, stored.DeletedAt, "should be deleted")
 		assert.Nil(t, stored.SpendingId, "expense link should be cleared")
 		assert.False(t, stored.AutoMatched, "should not be auto matched anymore")
+		assert.False(t, stored.AutoAssign, "auto assign should be turned off with the link")
 
 		{ // The expense should be free to link to something else now
 			other := GivenIHaveATransactionRecurring(t, bank)

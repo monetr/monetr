@@ -232,6 +232,7 @@ func (c *Controller) deleteRecurringTransaction(ctx *echo.Context) error {
 	existing.SpendingId = nil
 	existing.FundingScheduleId = nil
 	existing.AutoMatched = false
+	existing.AutoAssign = false
 
 	if err := repo.UpdateTransactionRecurring(
 		c.getContext(ctx),

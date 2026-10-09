@@ -39,6 +39,9 @@ or funding schedule.
 A linked funding schedule comes back filled in as `fundingSchedule`, but a linked expense is only ever its
 `spendingId`. If you need the expense itself, [look it up](./spending#get-a-spending-object) by that ID.
 
+Once a charge is linked to an expense you can also turn on `autoAssign`, and monetr will spend new charges from that
+expense for you as they show up. More on how that works below the object table.
+
 ## The recurring transaction object
 
 | Attribute                | Type                    | Description                                                                                                                                                                                                       |
@@ -60,6 +63,7 @@ A linked funding schedule comes back filled in as `fundingSchedule`, but a linke
 | `amounts`                | object                  | How many times each amount showed up. Keys are amounts in the currency's smallest unit, as strings since it's JSON, and values are counts. Handy for spotting a price change.                                     |
 | `lastAmount`             | integer                 | The amount of the most recent transaction, in the currency's smallest unit. Usually your best guess for what the next one will be. See [Currencies](./currencies#how-monetr-stores-money).                        |
 | `autoMatched`            | boolean                 | True when monetr linked the expense for you, because you kept spending its recent transactions from that expense. Goes back to false as soon as you change the link yourself.                                     |
+| `autoAssign`             | boolean                 | True when monetr spends new charges from the linked expense for you. Can only be on while an expense is linked, so it's always false on credits.                                                                  |
 | `createdAt`              | timestamp               | When monetr first decided it was recurring.                                                                                                                                                                       |
 | `updatedAt`              | timestamp               | When it was last recalculated or linked. This changes on every recalculation, even when nothing about it did, so don't use it to spot changes.                                                                    |
 | `deletedAt`              | timestamp, nullable     | When you [marked it as not recurring](#mark-as-not-recurring). Null on everything else.                                                                                                                           |
@@ -77,9 +81,20 @@ Marking something as [not recurring](#mark-as-not-recurring) is different again.
 around, so its ID keeps working.
 
 Recalculating doesn't touch the links. They stay put until you change them, or until you delete the expense or funding
-schedule, which sets `spendingId` or `fundingScheduleId` back to null. The one exception is a debit that's still going
-and has no links at all. If two of its last three transactions were spent from the same expense, and nothing else is
-linked to that expense yet, monetr links it for you and sets `autoMatched`.
+schedule, which sets `spendingId` or `fundingScheduleId` back to null. Deleting the expense turns `autoAssign` off
+too. The one exception is a debit that's still going and has no links at all. If two of its last three transactions
+were spent from the same expense, and nothing else is linked to that expense yet, monetr links it for you and sets
+`autoMatched`. It never turns on `autoAssign` for you though, that one's always your call.
+
+With `autoAssign` on, any time the recalculation adds a new transaction to the recurring transaction, monetr spends it
+from the linked expense. It's the same as picking the expense on the transaction yourself, so if the expense doesn't
+have enough in it you get whatever's there. This happens in another background job right after the recalculation, so
+give it a minute after new transactions show up.
+
+It only looks at transactions as they get added, turning it on doesn't go back over the ones that are already part of
+the recurring transaction. And it leaves a few alone even then. Anything that's already spent from something stays
+how it is, and anything from before the day the expense was created gets skipped, since that charge was covered some
+other way. It's expenses only for now, funding schedules don't get this yet.
 
 ## <Badge type="info">GET</Badge> List recurring transactions
 
@@ -149,6 +164,7 @@ curl --request GET \
     },
     "lastAmount": 1549,
     "autoMatched": false,
+    "autoAssign": false,
     "createdAt": "2024-05-13T03:15:06.214Z",
     "updatedAt": "2024-08-30T14:02:11.733Z",
     "deletedAt": null
@@ -217,6 +233,7 @@ curl --request GET \
   },
   "lastAmount": 1549,
   "autoMatched": false,
+  "autoAssign": false,
   "createdAt": "2024-05-13T03:15:06.214Z",
   "updatedAt": "2024-08-30T03:15:05.902Z",
   "deletedAt": null
@@ -235,15 +252,17 @@ two entries.
 
 ## <Badge type="warning">PATCH</Badge> Link an expense or funding schedule
 
-Links a recurring transaction to the expense or funding schedule that covers it, or clears that link. These are the
-only two things you can change on a recurring transaction, everything else comes from monetr working it out.
+Links a recurring transaction to the expense or funding schedule that covers it, or clears that link. This is also
+where you turn `autoAssign` on or off. Those are the only things you can change on a recurring transaction, everything
+else comes from monetr working it out.
 
 A debit can only be linked to an expense, not a goal. A credit can only be linked to a funding schedule. For now an
 expense or funding schedule can only be linked to one recurring transaction at a time.
 
 **In the app:** Picking or creating an expense or funding schedule on a recurring transaction's details page, the
 recurring page, or the recurring card on a transaction's details page. When it's a new one the app creates it first and
-then links it with this.
+then links it with this. Also the switch next to the expense on a recurring transaction's details page, which turns
+`autoAssign` on and off.
 
 ```http
 PATCH /api/bank_accounts/:bankAccountId/recurring/:transactionRecurringId
@@ -260,14 +279,17 @@ PATCH /api/bank_accounts/:bankAccountId/recurring/:transactionRecurringId
 
 ### Body
 
-Send the one you're changing. Anything else in the body gets rejected.
+Send whatever you're changing. Anything else in the body gets rejected.
 
 | Attribute           | Type                    | Required | Description                                                                                  |
 | ------------------- | ----------------------- | -------- | -------------------------------------------------------------------------------------------- |
+| `autoAssign`        | boolean                 | No       | Spend new charges from the linked expense for you. Needs an expense linked, so debits only.  |
 | `fundingScheduleId` | string (ulid), nullable | No       | The funding schedule to link, on the same bank account. Credits only. Send null to clear it. |
 | `spendingId`        | string (ulid), nullable | No       | The expense to link, on the same bank account. Debits only. Send null to clear it.           |
 
-Sending a different ID just moves the link over, you don't have to clear it first.
+Sending a different ID just moves the link over, you don't have to clear it first. Clearing `spendingId` turns
+`autoAssign` off along with it, since there's nothing left to spend from. You can link an expense and turn on
+`autoAssign` in the same request, like the example does.
 
 ### Example
 
@@ -277,7 +299,8 @@ curl --request PATCH \
   --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
   --header "Content-Type: application/json" \
   --data '{
-    "spendingId": "spnd_01j6b5q2h8ycz4n7w3tkr9vx5d"
+    "spendingId": "spnd_01j6b5q2h8ycz4n7w3tkr9vx5d",
+    "autoAssign": true
   }'
 ```
 
@@ -302,6 +325,7 @@ curl --request PATCH \
   },
   "lastAmount": 1549,
   "autoMatched": false,
+  "autoAssign": true,
   "createdAt": "2024-05-13T03:15:06.214Z",
   "updatedAt": "2024-08-30T14:02:11.733Z",
   "deletedAt": null
@@ -313,16 +337,16 @@ comes back filled in as `fundingSchedule`, an expense is just the `spendingId`.
 
 ### Errors
 
-| Status | When                                                                                                                                                                                                                                                                              |
-| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 400    | Either ID is malformed, the body has something other than `spendingId` or `fundingScheduleId`, you linked an expense to a credit or a funding schedule to a debit, you linked a goal, or that expense or funding schedule is already linked to a different recurring transaction. |
-| 404    | No recurring transaction with that ID on that bank account, or the expense or funding schedule you sent doesn't exist on that bank account.                                                                                                                                       |
+| Status | When                                                                                                                                                                                                                                                                                                                                                                 |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 400    | Either ID is malformed, the body has something other than `spendingId`, `fundingScheduleId` or `autoAssign`, you linked an expense to a credit or a funding schedule to a debit, you linked a goal, that expense or funding schedule is already linked to a different recurring transaction, or you turned on `autoAssign` without an expense linked or on a credit. |
+| 404    | No recurring transaction with that ID on that bank account, or the expense or funding schedule you sent doesn't exist on that bank account.                                                                                                                                                                                                                          |
 
 ## <Badge type="danger">DELETE</Badge> Mark as not recurring
 
 Tells monetr that something isn't actually recurring. It drops out of the [list](#list-recurring-transactions), its
-link to an expense or funding schedule gets cleared, and monetr won't link an expense to it for you anymore. There's no
-undoing this.
+link to an expense or funding schedule gets cleared along with `autoAssign`, and monetr won't link an expense to it for
+you anymore. There's no undoing this.
 
 It doesn't really go away though. monetr keeps it around with `deletedAt` set so it remembers you said no, otherwise the
 next recalculation would just find the same schedule and bring it right back. You can still
