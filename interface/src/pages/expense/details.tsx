@@ -21,10 +21,10 @@ import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import Typography from '@monetr/interface/components/Typography';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
-import { useRemoveSpending } from '@monetr/interface/hooks/useRemoveSpending';
 import { useSpending } from '@monetr/interface/hooks/useSpending';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { useUpdateSpending } from '@monetr/interface/hooks/useUpdateSpending';
+import { showRemoveExpenseModal } from '@monetr/interface/modals/RemoveExpenseModal';
 import { showTransferModal } from '@monetr/interface/modals/TransferModal';
 import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import type { ID } from '@monetr/interface/models/ID';
@@ -51,7 +51,6 @@ interface ExpenseValues {
 export default function ExpenseDetails(): React.JSX.Element | null {
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
-  const removeSpending = useRemoveSpending();
   const updateSpending = useUpdateSpending();
   const [, navigate] = useLocation();
   const { spendingId } = useParams<{ spendingId: ID<Spending> }>();
@@ -113,11 +112,7 @@ export default function ExpenseDetails(): React.JSX.Element | null {
       return Promise.resolve();
     }
 
-    if (window.confirm(`Are you sure you want to delete expense: ${spending.name}`)) {
-      return await removeSpending(spending.spendingId).then(() => backToExpenses());
-    }
-
-    return Promise.resolve();
+    return showRemoveExpenseModal({ spending }).then(() => backToExpenses());
   }
 
   async function submit(values: ExpenseValues, helpers: FormikHelpers<ExpenseValues>): Promise<void> {

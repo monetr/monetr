@@ -14,11 +14,11 @@ import SelectBankAccountSubType from '@monetr/interface/components/SelectBankAcc
 import SelectBankAccountType from '@monetr/interface/components/SelectBankAccountType';
 import SelectCurrency from '@monetr/interface/components/SelectCurrency';
 import Typography from '@monetr/interface/components/Typography';
-import { useArchiveBankAccount } from '@monetr/interface/hooks/useArchiveBankAccount';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { useUpdateBankAccount } from '@monetr/interface/hooks/useUpdateBankAccount';
+import { showArchiveBankAccountModal } from '@monetr/interface/modals/ArchiveBankAccountModal';
 import type { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
 import { amountToFriendly, friendlyToAmount } from '@monetr/interface/util/amounts';
 import type { APIError } from '@monetr/interface/util/request';
@@ -42,7 +42,6 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
   const { data: bankAccount, isLoading, isError } = useSelectedBankAccount();
   const { data: locale, isLoading: isLocaleLoading, isError: isLocaleError } = useLocaleCurrency();
   const updateBankAccount = useUpdateBankAccount();
-  const archiveBankAccount = useArchiveBankAccount();
   const { enqueueSnackbar } = useSnackbar();
   const [, navigate] = useLocation();
 
@@ -51,12 +50,8 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
       return Promise.resolve();
     }
 
-    if (window.confirm(`Are you sure you want to archive bank account: ${bankAccount.name}`)) {
-      return await archiveBankAccount(bankAccount.bankAccountId).then(() => navigate('/'));
-    }
-
-    return Promise.resolve();
-  }, [bankAccount, archiveBankAccount, navigate]);
+    return showArchiveBankAccountModal({ bankAccount }).then(() => navigate('/'));
+  }, [bankAccount, navigate]);
 
   if (isLoading || isLocaleLoading) {
     return (

@@ -22,8 +22,8 @@ import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { useFundingSchedule } from '@monetr/interface/hooks/useFundingSchedule';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { usePatchFundingSchedule } from '@monetr/interface/hooks/usePatchFundingSchedule';
-import { useRemoveFundingSchedule } from '@monetr/interface/hooks/useRemoveFundingSchedule';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
+import { showRemoveFundingModal } from '@monetr/interface/modals/RemoveFundingModal';
 import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import type { APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
@@ -52,7 +52,6 @@ export default function FundingDetails(): React.JSX.Element | null {
   const isManual = Boolean(link?.getIsManual());
   const [, navigate] = useLocation();
   const patchFundingSchedule = usePatchFundingSchedule();
-  const removeFundingSchedule = useRemoveFundingSchedule();
   const { enqueueSnackbar } = useSnackbar();
 
   if (!fundingId) {
@@ -149,19 +148,7 @@ export default function FundingDetails(): React.JSX.Element | null {
       return Promise.resolve();
     }
 
-    if (window.confirm(`Are you sure you want to delete funding schedule: ${funding.name}`)) {
-      return await removeFundingSchedule(funding)
-        .then(() => backToFunding())
-        .catch(
-          (error: ApiError<APIError>) =>
-            void enqueueSnackbar(error.response.data.error, {
-              variant: 'error',
-              disableWindowBlurListener: true,
-            }),
-        );
-    }
-
-    return Promise.resolve();
+    return showRemoveFundingModal({ funding }).then(() => backToFunding());
   }
 
   const initialValues: FundingValues = {

@@ -4,19 +4,24 @@ import { useLocation, useSearch } from 'wouter';
 import MLogo from '@monetr/interface/components/MLogo';
 import Typography from '@monetr/interface/components/Typography';
 import request from '@monetr/interface/util/request';
+import { useSnackbar, type VariantType } from '@monetr/notify';
 
 import styles from './email.module.scss';
 
 export default function VerifyEmail(): React.JSX.Element {
   const search = useSearch();
   const [, navigate] = useLocation();
+  const { enqueueSnackbar } = useSnackbar();
 
   const errorRedirect = useCallback(
-    (message: string, nextUrl: string = '/login') => {
-      window.alert(message);
+    (message: string, variant: VariantType, nextUrl: string = '/login') => {
+      enqueueSnackbar(message, {
+        variant: variant,
+        disableWindowBlurListener: true,
+      });
       navigate(nextUrl);
     },
-    [navigate],
+    [enqueueSnackbar, navigate],
   );
 
   const query = new URLSearchParams(search);
@@ -24,7 +29,7 @@ export default function VerifyEmail(): React.JSX.Element {
 
   useEffect(() => {
     if (!token) {
-      errorRedirect('Email verification link is not valid.');
+      errorRedirect('Email verification link is not valid.', 'error');
       return;
     }
 
@@ -38,12 +43,14 @@ export default function VerifyEmail(): React.JSX.Element {
       .then(result =>
         errorRedirect(
           result?.data?.message || 'Your email has been verified, please login.',
+          'success',
           result?.data?.nextUrl || '/login',
         ),
       )
       .catch(error =>
         errorRedirect(
           error?.response?.data?.error || 'Failed to verify email address.',
+          'error',
           error?.response?.data?.nextUrl,
         ),
       );

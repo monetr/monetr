@@ -5,6 +5,7 @@ import { useLocation, useSearch } from 'wouter';
 import Logo from '@monetr/interface/assets/Logo';
 import Typography from '@monetr/interface/components/Typography';
 import { useAfterCheckout } from '@monetr/interface/hooks/useAfterCheckout';
+import { useSnackbar } from '@monetr/notify';
 
 import styles from './after.module.scss';
 
@@ -12,6 +13,7 @@ export default function AfterCheckoutPage(): React.JSX.Element {
   const search = useSearch();
   const [, navigate] = useLocation();
   const afterCheckout = useAfterCheckout();
+  const { enqueueSnackbar } = useSnackbar();
 
   // As soon as the component mounts, call setup from checkout to get the subscription sorted out.
   useEffect(() => {
@@ -26,10 +28,18 @@ export default function AfterCheckoutPage(): React.JSX.Element {
         }
 
         // Otherwise, dispaly the message from the result of the afterCheckout call.
-        alert(result?.message || 'Subscription is not active');
+        enqueueSnackbar(result?.message || 'Subscription is not active', {
+          variant: 'error',
+          disableWindowBlurListener: true,
+        });
       })
-      .catch(() => alert('Unable to determine your subscription state, please contact support@monetr.app'));
-  }, [search, afterCheckout, navigate]);
+      .catch(() =>
+        enqueueSnackbar('Unable to determine your subscription state, please contact support@monetr.app', {
+          variant: 'error',
+          disableWindowBlurListener: true,
+        }),
+      );
+  }, [search, afterCheckout, navigate, enqueueSnackbar]);
 
   return (
     <div className={styles.root}>

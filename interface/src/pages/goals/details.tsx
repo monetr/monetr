@@ -19,10 +19,10 @@ import MSelectFunding from '@monetr/interface/components/MSelectFunding';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import Typography from '@monetr/interface/components/Typography';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
-import { useRemoveSpending } from '@monetr/interface/hooks/useRemoveSpending';
 import { useSpending } from '@monetr/interface/hooks/useSpending';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { useUpdateSpending } from '@monetr/interface/hooks/useUpdateSpending';
+import { showRemoveGoalModal } from '@monetr/interface/modals/RemoveGoalModal';
 import { showTransferModal } from '@monetr/interface/modals/TransferModal';
 import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import type { ID } from '@monetr/interface/models/ID';
@@ -45,7 +45,6 @@ interface GoalValues {
 export default function GoalDetails(): React.JSX.Element | null {
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
-  const removeSpending = useRemoveSpending();
   const updateSpending = useUpdateSpending();
   const [, navigate] = useLocation();
   const { spendingId } = useParams<{ spendingId: ID<Spending> }>();
@@ -105,11 +104,7 @@ export default function GoalDetails(): React.JSX.Element | null {
       return Promise.resolve();
     }
 
-    if (window.confirm(`Are you sure you want to delete goal: ${spending.name}`)) {
-      return await removeSpending(spending.spendingId).then(() => backToGoals());
-    }
-
-    return Promise.resolve();
+    return showRemoveGoalModal({ spending }).then(() => backToGoals());
   }
 
   async function submit(values: GoalValues, helpers: FormikHelpers<GoalValues>): Promise<void> {

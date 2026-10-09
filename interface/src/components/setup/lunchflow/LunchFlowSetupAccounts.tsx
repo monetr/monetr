@@ -17,6 +17,7 @@ import { useLunchFlowLink } from '@monetr/interface/hooks/useLunchFlowLink';
 import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
 import { LunchFlowBankAccountStatus } from '@monetr/interface/models/LunchFlowBankAccount';
 import { LunchFlowLinkStatus } from '@monetr/interface/models/LunchFlowLink';
+import { useSnackbar } from '@monetr/notify';
 
 export interface LunchFlowSetupAccountsForm {
   items: { [key: string]: boolean };
@@ -27,6 +28,7 @@ export default function LunchFlowSetupAccounts(): React.JSX.Element {
   const [, navigate] = useLocation();
   const createLink = useCreateLink();
   const createBankAccount = useCreateBankAccount();
+  const { enqueueSnackbar } = useSnackbar();
   // When the page loads, use the ID from the url params to trigger a refresh of bank accounts. This refresh will fail
   // if the ID is not valid which will prevent subsequent requests from happening. This refresh also populates the bank
   // account list in the API the first time it is called so it is necessary for this page.
@@ -53,10 +55,13 @@ export default function LunchFlowSetupAccounts(): React.JSX.Element {
   // If the lunch flow link is in an active status then this page should not work!
   useEffect(() => {
     if (lunchFlowLink && lunchFlowLink?.status !== LunchFlowLinkStatus.Pending) {
-      alert('Lunch Flow link is not in a pending status and cannot be setup this way. Redirecting you...');
+      enqueueSnackbar('Lunch Flow link is not in a pending status and cannot be setup this way. Redirecting you...', {
+        variant: 'warning',
+        disableWindowBlurListener: true,
+      });
       navigate('/');
     }
-  }, [lunchFlowLink, navigate]);
+  }, [lunchFlowLink, navigate, enqueueSnackbar]);
 
   const submit = useCallback(
     async (values: LunchFlowSetupAccountsForm, helpers: FormikHelpers<LunchFlowSetupAccountsForm>) => {
