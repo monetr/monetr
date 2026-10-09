@@ -45,6 +45,7 @@ describe('transaction recurring card', () => {
         },
         lastAmount: 800,
         autoMatched: false,
+        autoAssign: false,
         createdAt: '2026-03-15T06:00:00Z',
         updatedAt: '2026-03-15T06:00:00Z',
       });
@@ -123,6 +124,7 @@ describe('transaction recurring card', () => {
         },
         lastAmount: 800,
         autoMatched: false,
+        autoAssign: false,
         createdAt: '2026-03-15T06:00:00Z',
         updatedAt: '2026-03-15T06:00:00Z',
       });

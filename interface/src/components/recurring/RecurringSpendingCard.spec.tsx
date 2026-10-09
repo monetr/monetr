@@ -1,4 +1,5 @@
 import { waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import RecurringSpendingCard from '@monetr/interface/components/recurring/RecurringSpendingCard';
 import type BankAccount from '@monetr/interface/models/BankAccount';
@@ -48,6 +49,7 @@ describe('recurring spending card', () => {
       },
       lastAmount: 800,
       autoMatched: false,
+      autoAssign: false,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-15T06:00:00Z',
       deletedAt: null,
@@ -105,6 +107,7 @@ describe('recurring spending card', () => {
       },
       lastAmount: 800,
       autoMatched: false,
+      autoAssign: false,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-15T06:00:00Z',
       deletedAt: null,
@@ -162,6 +165,7 @@ describe('recurring spending card', () => {
       },
       lastAmount: 800,
       autoMatched: true,
+      autoAssign: false,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-15T06:00:00Z',
       deletedAt: null,
@@ -174,7 +178,7 @@ describe('recurring spending card', () => {
     await waitFor(() => expect(world.getByTestId('recurring-auto-matched')).toHaveTextContent('Github Copilot'));
   });
 
-  it('will have the auto spend switch turned off for now', async () => {
+  it('will disable the auto assign switch without an expense', async () => {
     apiSampleResponses(mockFetch);
 
     const recurring = new TransactionRecurring({
@@ -197,6 +201,7 @@ describe('recurring spending card', () => {
       },
       lastAmount: 800,
       autoMatched: false,
+      autoAssign: false,
       createdAt: '2026-03-15T06:00:00Z',
       updatedAt: '2026-03-15T06:00:00Z',
       deletedAt: null,
@@ -206,6 +211,77 @@ describe('recurring spending card', () => {
       initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring/txrc_01hy4re7c1xc2v44cf6kx302jx/details',
     });
 
-    await waitFor(() => expect(world.getByTestId('recurring-auto-spend')).toBeDisabled());
+    await waitFor(() => expect(world.getByTestId('recurring-auto-assign')).toBeDisabled());
+  });
+
+  it('will turn on auto assign', async () => {
+    const recurringResponse = {
+      transactionRecurringId: 'txrc_01hy4re7c1xc2v44cf6kx302jx',
+      bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
+      transactionClusterId: 'tcl_01hy4rf0p7mz9w2q3c4v5b6n7m',
+      spendingId: 'spnd_01hy4rkq0x3c6dtr9w1p2v5bns',
+      fundingScheduleId: null,
+      fundingSchedule: null,
+      window: TransactionRecurringWindow.Monthly,
+      ruleset: 'DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15',
+      first: '2026-01-15T06:00:00Z',
+      last: '2026-03-15T05:00:00Z',
+      next: '2099-04-15T05:00:00Z',
+      ended: false,
+      confidence: 0.9,
+      direction: 'debit',
+      amounts: {
+        800: 3,
+      },
+      lastAmount: 800,
+      autoMatched: false,
+      autoAssign: true,
+      createdAt: '2026-03-15T06:00:00Z',
+      updatedAt: '2026-03-15T06:00:00Z',
+      deletedAt: null,
+    };
+    mockFetch
+      .onPatch('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring/txrc_01hy4re7c1xc2v44cf6kx302jx')
+      .reply(200, recurringResponse);
+    apiSampleResponses(mockFetch);
+
+    const recurring = new TransactionRecurring({
+      transactionRecurringId: ID.from<TransactionRecurring>('txrc_01hy4re7c1xc2v44cf6kx302jx'),
+      bankAccountId: ID.from<BankAccount>('bac_01gds6eqsq7h5mgevwtmw3cyxb'),
+      transactionClusterId: ID.from<TransactionCluster>('tcl_01hy4rf0p7mz9w2q3c4v5b6n7m'),
+      spendingId: ID.from<Spending>('spnd_01hy4rkq0x3c6dtr9w1p2v5bns'),
+      fundingScheduleId: null,
+      fundingSchedule: null,
+      window: TransactionRecurringWindow.Monthly,
+      ruleset: 'DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15',
+      first: '2026-01-15T06:00:00Z',
+      last: '2026-03-15T05:00:00Z',
+      next: '2099-04-15T05:00:00Z',
+      ended: false,
+      confidence: 0.9,
+      direction: 'debit',
+      amounts: {
+        800: 3,
+      },
+      lastAmount: 800,
+      autoMatched: false,
+      autoAssign: false,
+      createdAt: '2026-03-15T06:00:00Z',
+      updatedAt: '2026-03-15T06:00:00Z',
+      deletedAt: null,
+    });
+
+    const user = userEvent.setup();
+    const world = testRenderer(<RecurringSpendingCard name='Github' recurring={recurring} />, {
+      initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/recurring/txrc_01hy4re7c1xc2v44cf6kx302jx/details',
+    });
+
+    await waitFor(() => expect(world.getByTestId('recurring-auto-assign')).toBeEnabled());
+    await user.click(world.getByTestId('recurring-auto-assign'));
+
+    await waitFor(() => expect(mockFetch.history.patch).toHaveLength(1));
+    expect(mockFetch.history.patch?.[0]?.data).toEqual({
+      autoAssign: true,
+    });
   });
 });

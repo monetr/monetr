@@ -104,6 +104,35 @@ export default function RecurringSpendingCard(props: RecurringSpendingCardProps)
       .finally(() => setSaving(false));
   }
 
+  async function toggleAutoAssign(autoAssign: boolean) {
+    setSaving(true);
+    return await patchTransactionRecurring({
+      transactionRecurringId: props.recurring.transactionRecurringId,
+      bankAccountId: props.recurring.bankAccountId,
+      autoAssign,
+    })
+      .then(
+        () =>
+          void enqueueSnackbar('Updated recurring transaction successfully', {
+            variant: 'success',
+            disableWindowBlurListener: true,
+          }),
+      )
+      .catch(
+        (error: ApiError<APIError>) =>
+          void enqueueSnackbar(error?.response?.data?.error || 'Failed to update recurring transaction', {
+            variant: 'error',
+            disableWindowBlurListener: true,
+          }),
+      )
+      .finally(() => setSaving(false));
+  }
+
+  let autoAssignTooltip = 'Automatically spend new charges from this expense when they show up.';
+  if (!props.recurring.spendingId) {
+    autoAssignTooltip = 'Pick an expense to automatically spend new charges from it.';
+  }
+
   return (
     <section className={styles.root}>
       <div className={styles.header}>
@@ -139,19 +168,19 @@ export default function RecurringSpendingCard(props: RecurringSpendingCardProps)
             placeholder={placeholder}
             value={hasExpenses ? value : undefined}
           />
-          {/* Automatically spending isn't a thing yet, the switch is here so its obvious where it will live */}
           <Tooltip delayDuration={100}>
             <TooltipTrigger asChild>
               <span>
                 <Switch
                   aria-label='Automatically spend charges on this schedule'
-                  checked={false}
-                  data-testid='recurring-auto-spend'
-                  disabled
+                  checked={props.recurring.autoAssign}
+                  data-testid='recurring-auto-assign'
+                  disabled={saving || !props.recurring.spendingId}
+                  onCheckedChange={toggleAutoAssign}
                 />
               </span>
             </TooltipTrigger>
-            <TooltipContent side='top'>Automatically spending new charges is coming soon.</TooltipContent>
+            <TooltipContent side='top'>{autoAssignTooltip}</TooltipContent>
           </Tooltip>
         </div>
       </div>

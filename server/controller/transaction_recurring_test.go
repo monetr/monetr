@@ -453,6 +453,37 @@ func TestPatchRecurringTransaction(t *testing.T) {
 		assert.Nil(t, stored.SpendingId, "spending id should be cleared")
 	})
 
+	t.Run("clearing the link turns off auto assign", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		spending := GivenIHaveASpending(t, app.Clock, fundingSchedule, SpendingTypeExpense, "Github")
+		recurring := GivenIHaveATransactionRecurring(t, bank)
+		recurring.SpendingId = &spending.SpendingId
+		recurring.AutoAssign = true
+		testutils.MustDBUpdate(t, &recurring)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/recurring/{transactionRecurringId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionRecurringId", recurring.TransactionRecurringId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"spendingId": nil,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.spendingId").IsNull()
+		response.JSON().Path("$.autoAssign").Boolean().IsFalse()
+
+		stored := testutils.MustDBRead(t, recurring)
+		assert.Nil(t, stored.SpendingId, "spending id should be cleared")
+		assert.False(t, stored.AutoAssign, "auto assign should be turned off with the link")
+	})
+
 	t.Run("change the linked expense", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
@@ -860,6 +891,40 @@ func TestPatchRecurringTransaction(t *testing.T) {
 		response.Status(http.StatusOK)
 		response.JSON().Path("$.spendingId").IsNull()
 		response.JSON().Object().NotContainsKey("spending")
+	})
+
+	t.Run("deleting expense turns off auto assign", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		spending := GivenIHaveASpending(t, app.Clock, fundingSchedule, SpendingTypeExpense, "Github")
+		recurring := GivenIHaveATransactionRecurring(t, bank)
+		recurring.SpendingId = &spending.SpendingId
+		recurring.AutoAssign = true
+		testutils.MustDBUpdate(t, &recurring)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		{ // Delete the expense
+			response := e.DELETE("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spending.SpendingId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+		}
+
+		response := e.GET("/api/bank_accounts/{bankAccountId}/recurring/{transactionRecurringId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionRecurringId", recurring.TransactionRecurringId).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.spendingId").IsNull()
+		response.JSON().Path("$.autoAssign").Boolean().IsFalse()
 	})
 
 	t.Run("cant patch someone elses recurring", func(t *testing.T) {

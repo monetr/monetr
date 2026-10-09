@@ -2,6 +2,7 @@ package link_jobs_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/internal/fixtures"
@@ -272,6 +273,110 @@ func TestRemoveLink(t *testing.T) {
 			testutils.MustDBNotExist(t, *bankAccount.PlaidBankAccount)
 			testutils.MustDBNotExist(t, bankAccount)
 			testutils.MustDBNotExist(t, *link.PlaidLink)
+			testutils.MustDBNotExist(t, link)
+		}
+	})
+
+	t.Run("with auto assigned recurring", func(t *testing.T) {
+		// Auto assign can't be on without a spending, deleting the spending as part
+		// of the cascade must not trip that check constraint.
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+		publisher := pubsub.NewPostgresPubSub(log, db)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveAPlaidBankAccount(
+			t,
+			clock,
+			&link,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
+
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(
+			t,
+			clock,
+			&bankAccount,
+			"FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15",
+			false,
+		)
+
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+		rule := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1", clock.Now())
+		spending := testutils.MustInsert(t, models.Spending{
+			AccountId:              bankAccount.AccountId,
+			BankAccountId:          bankAccount.BankAccountId,
+			FundingScheduleId:      fundingSchedule.FundingScheduleId,
+			SpendingType:           models.SpendingTypeExpense,
+			Name:                   "Test Spending",
+			TargetAmount:           10000,
+			CurrentAmount:          5000,
+			NextRecurrence:         rule.After(clock.Now(), false),
+			NextContributionAmount: 5000,
+			RuleSet:                rule,
+			CreatedAt:              clock.Now(),
+		})
+
+		cluster := testutils.MustInsert(t, models.TransactionCluster{
+			AccountId:     bankAccount.AccountId,
+			BankAccountId: bankAccount.BankAccountId,
+			Name:          "Github",
+			OriginalName:  "Github",
+			Members: []models.ID[models.Transaction]{
+				models.NewID[models.Transaction](),
+			},
+		})
+		recurring := testutils.MustInsert(t, models.TransactionRecurring{
+			AccountId:            bankAccount.AccountId,
+			BankAccountId:        bankAccount.BankAccountId,
+			TransactionClusterId: cluster.TransactionClusterId,
+			SpendingId:           &spending.SpendingId,
+			Direction:            models.DebitDirection,
+			Window:               models.MonthlyWindowType,
+			RuleSet: testutils.Must(
+				t,
+				models.NewRuleSet,
+				"DTSTART:20260101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15",
+			),
+			First:      time.Date(2026, 1, 15, 6, 0, 0, 0, time.UTC),
+			Last:       time.Date(2026, 3, 15, 5, 0, 0, 0, time.UTC),
+			Next:       time.Date(2026, 4, 15, 5, 0, 0, 0, time.UTC),
+			Confidence: 0.9,
+			Amounts: map[int64]int{
+				800: 3,
+			},
+			LastAmount: 800,
+			AutoAssign: true,
+		})
+
+		context := mockgen.NewMockContext(ctrl)
+		context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+		context.EXPECT().Clock().Return(clock).AnyTimes()
+		context.EXPECT().DB().Return(db).AnyTimes()
+		context.EXPECT().Log().Return(log).AnyTimes()
+		context.EXPECT().Publisher().Return(publisher).AnyTimes()
+
+		assert.NotPanics(t, func() {
+			err := link_jobs.RemoveLink(
+				mockqueue.NewMockContext(context),
+				link_jobs.RemoveLinkArguments{
+					AccountId: user.AccountId,
+					LinkId:    link.LinkId,
+				},
+			)
+			assert.NoError(t, err, "remove link job should succeed")
+		})
+
+		{ // Make sure all data has been removed
+			testutils.MustDBNotExist(t, recurring)
+			testutils.MustDBNotExist(t, cluster)
+			testutils.MustDBNotExist(t, spending)
+			testutils.MustDBNotExist(t, *fundingSchedule)
+			testutils.MustDBNotExist(t, bankAccount)
 			testutils.MustDBNotExist(t, link)
 		}
 	})

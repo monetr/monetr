@@ -160,6 +160,12 @@ func (c *Controller) patchRecurringTransaction(ctx *echo.Context) error {
 		}
 	}
 
+	// If the user unlinked the spending then there is nothing to auto assign to
+	// anymore, so just turn it off instead of making them do that first.
+	if existing.SpendingId != nil && recurring.SpendingId == nil {
+		recurring.AutoAssign = false
+	}
+
 	if recurring.Direction == CreditDirection && recurring.AutoAssign {
 		return c.badRequest(ctx, "Cannot auto assign recurring funding at this time")
 	}
