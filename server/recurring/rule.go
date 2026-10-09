@@ -18,6 +18,9 @@ const (
 	// skips a month entirely when the day doesn't exist. So days are capped at
 	// the 28th, which is never later than the real day.
 	latestMonthDay = 28
+	// Only this many of the most recent transactions are used to pick the day of
+	// a rule, see [GenerateRuleSet].
+	ruleSetRecentTransactions = 12
 )
 
 var (
@@ -46,6 +49,16 @@ func GenerateRuleSet(
 ) (*models.RuleSet, error) {
 	if len(members) == 0 {
 		return nil, errors.New("cannot generate a ruleset without any transactions")
+	}
+
+	// Only look at the most recent transactions, the members are already sorted
+	// by date so those are at the end. Older transactions would keep the rule on
+	// a day the transaction doesn't happen on anymore, like when a bill's due
+	// date moves. Or one odd transaction from years ago takes over the whole
+	// rule, a mortgage paid on the 2nd for three years got a rule on the 22nd
+	// because of a single payment on the 22nd back in 2023.
+	if len(members) > ruleSetRecentTransactions {
+		members = members[len(members)-ruleSetRecentTransactions:]
 	}
 
 	days := make([]time.Time, len(members))

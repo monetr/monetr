@@ -189,6 +189,226 @@ func TestGenerateRuleSet(t *testing.T) {
 		assertFundedInTime(t, ruleset, central, transactions, 3)
 	})
 
+	t.Run("old outlier on another day", func(t *testing.T) {
+		// A mortgage paid on the 2nd every month, but sometimes as late as the 5th.
+		// Back in 2023 there was one smaller payment on the 22nd. That 22nd is
+		// only 11 days before the 2nd but 17 days after the 5th, so on the circle
+		// it looked like the earliest day and the rule ended up on the 22nd.
+		transactions := []models.Transaction{
+			{
+				TransactionId: "txn_0",
+				Amount:        180000,
+				Date:          time.Date(2023, 6, 2, 0, 0, 0, 0, central),
+			},
+			// The one payment on the 22nd
+			{
+				TransactionId: "txn_1",
+				Amount:        17884,
+				Date:          time.Date(2023, 6, 22, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_2",
+				Amount:        180000,
+				Date:          time.Date(2023, 7, 3, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_3",
+				Amount:        181626,
+				Date:          time.Date(2023, 8, 2, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_4",
+				Amount:        180000,
+				Date:          time.Date(2023, 9, 5, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_5",
+				Amount:        180000,
+				Date:          time.Date(2023, 10, 2, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_6",
+				Amount:        180000,
+				Date:          time.Date(2023, 11, 2, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_7",
+				Amount:        180000,
+				Date:          time.Date(2023, 12, 4, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_8",
+				Amount:        180000,
+				Date:          time.Date(2024, 1, 2, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_9",
+				Amount:        180000,
+				Date:          time.Date(2024, 2, 2, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_10",
+				Amount:        180000,
+				Date:          time.Date(2024, 3, 4, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_11",
+				Amount:        180000,
+				Date:          time.Date(2024, 4, 2, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_12",
+				Amount:        180000,
+				Date:          time.Date(2024, 5, 2, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_13",
+				Amount:        180000,
+				Date:          time.Date(2024, 6, 3, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_14",
+				Amount:        180000,
+				Date:          time.Date(2024, 7, 2, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_15",
+				Amount:        190000,
+				Date:          time.Date(2024, 8, 2, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_16",
+				Amount:        190000,
+				Date:          time.Date(2024, 9, 3, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_17",
+				Amount:        190000,
+				Date:          time.Date(2024, 10, 2, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_18",
+				Amount:        190000,
+				Date:          time.Date(2024, 11, 4, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_19",
+				Amount:        190000,
+				Date:          time.Date(2024, 12, 2, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_20",
+				Amount:        190000,
+				Date:          time.Date(2025, 1, 2, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_21",
+				Amount:        190000,
+				Date:          time.Date(2025, 2, 3, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_22",
+				Amount:        190000,
+				Date:          time.Date(2025, 3, 3, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_23",
+				Amount:        190000,
+				Date:          time.Date(2025, 4, 2, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_24",
+				Amount:        190000,
+				Date:          time.Date(2025, 5, 2, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_25",
+				Amount:        190000,
+				Date:          time.Date(2025, 6, 2, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_26",
+				Amount:        190000,
+				Date:          time.Date(2025, 7, 2, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_27",
+				Amount:        200000,
+				Date:          time.Date(2025, 8, 4, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_28",
+				Amount:        200000,
+				Date:          time.Date(2025, 9, 2, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_29",
+				Amount:        200000,
+				Date:          time.Date(2025, 10, 2, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_30",
+				Amount:        200000,
+				Date:          time.Date(2025, 11, 3, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_31",
+				Amount:        200000,
+				Date:          time.Date(2025, 12, 2, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_32",
+				Amount:        200000,
+				Date:          time.Date(2026, 1, 2, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_33",
+				Amount:        200000,
+				Date:          time.Date(2026, 2, 2, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_34",
+				Amount:        200000,
+				Date:          time.Date(2026, 3, 2, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_35",
+				Amount:        200000,
+				Date:          time.Date(2026, 4, 2, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_36",
+				Amount:        200000,
+				Date:          time.Date(2026, 5, 4, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_37",
+				Amount:        200000,
+				Date:          time.Date(2026, 7, 3, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_38",
+				Amount:        200000,
+				Date:          time.Date(2026, 8, 3, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_39",
+				Amount:        200000,
+				Date:          time.Date(2026, 9, 3, 0, 0, 0, 0, central),
+			},
+			{
+				TransactionId: "txn_40",
+				Amount:        200000,
+				Date:          time.Date(2026, 10, 5, 0, 0, 0, 0, central),
+			},
+		}
+
+		ruleset, err := GenerateRuleSet(30, transactions, central)
+		require.NoError(t, err, "must be able to generate a ruleset")
+		assert.Equal(t, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=2", ruleset.GetRRule().OrigOptions.RRuleString(), "should use the 2nd, not the old payment on the 22nd")
+		assertFundedInTime(t, ruleset, central, transactions, 3)
+	})
+
 	t.Run("twice a month", func(t *testing.T) {
 		// Payroll on the 15th and the last day of the month, on the business day
 		// before when either one lands on a weekend.

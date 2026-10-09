@@ -391,7 +391,9 @@ func TestRecurringDetection(t *testing.T) {
 		assert.Len(t, result.Members, len(dates), "every charge should be a member")
 		require.NotNil(t, result.RuleSet, "a recurring result must have a ruleset")
 		assert.Equal(t, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=10", result.RuleSet.GetRRule().OrigOptions.RRuleString(), "should detect the same rule the charges were generated from")
-		assert.Equal(t, dates, inTimezone(result.RuleSet, central).Between(start, end, true), "the detected rule should generate the same dates")
+		// The rule is only built from the most recent charges, so it starts in 2025
+		// instead of 2024
+		assert.Equal(t, dates[len(dates)-ruleSetRecentTransactions:], inTimezone(result.RuleSet, central).Between(start, end, true), "the detected rule should generate the same dates")
 	})
 
 	t.Run("every other week from a rule", func(t *testing.T) {
