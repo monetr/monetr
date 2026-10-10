@@ -90,6 +90,13 @@ export default class Link {
     return this.plaidLink?.status === PlaidLinkStatus.Revoked;
   }
 
+  getIsDeactivated(): boolean {
+    return (
+      this.plaidLink?.status === PlaidLinkStatus.Deactivated ||
+      this.lunchFlowLink?.status === LunchFlowLinkStatus.Deactivated
+    );
+  }
+
   getErrorMessage(): string | null {
     const code = this.plaidLink?.status;
     if (!code) {

@@ -12,6 +12,7 @@ import {
 import { Skeleton } from '@monetr/interface/components/Skeleton';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
+import { useTriggerManualLunchFlowSync } from '@monetr/interface/hooks/useTriggerManualLunchFlowSync';
 import { useTriggerManualPlaidSync } from '@monetr/interface/hooks/useTriggerManualPlaidSync';
 import { showRemoveLinkModal } from '@monetr/interface/modals/RemoveLinkModal';
 import { showUpdatePlaidAccountOverlay } from '@monetr/interface/modals/UpdatePlaidAccountOverlay';
@@ -22,7 +23,8 @@ export default function BudgetingSidebarTitle(): React.JSX.Element {
   const { data: bankAccount } = useSelectedBankAccount();
   const { data: link } = useCurrentLink();
   const [, navigate] = useLocation();
-  const triggerSync = useTriggerManualPlaidSync();
+  const triggerPlaidSync = useTriggerManualPlaidSync();
+  const triggerLunchFlowSync = useTriggerManualLunchFlowSync();
 
   const handleReauthenticateLink = useCallback(() => {
     if (!link) {
@@ -37,8 +39,12 @@ export default function BudgetingSidebarTitle(): React.JSX.Element {
     if (!bankAccount?.linkId) {
       return;
     }
-    triggerSync(bankAccount.linkId);
-  }, [bankAccount?.linkId, triggerSync]);
+    if (link?.getIsLunchFlow()) {
+      triggerLunchFlowSync(bankAccount.linkId);
+      return;
+    }
+    triggerPlaidSync(bankAccount.linkId);
+  }, [bankAccount?.linkId, link, triggerLunchFlowSync, triggerPlaidSync]);
 
   const handleUpdateAccountSelection = useCallback(() => {
     if (!link) {
@@ -91,7 +97,10 @@ export default function BudgetingSidebarTitle(): React.JSX.Element {
             <Plug />
             Update Account Selection
           </MenuItem>
-          <MenuItem onClick={handleTriggerResync} visible={link.getIsPlaid() && !link.getIsRevoked()}>
+          <MenuItem
+            onClick={handleTriggerResync}
+            visible={(link.getIsPlaid() && !link.getIsRevoked()) || (link.getIsLunchFlow() && !link.getIsDeactivated())}
+          >
             <RefreshCw />
             Manually Resync
           </MenuItem>

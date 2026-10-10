@@ -1,0 +1,34 @@
+import { useQueryClient } from '@tanstack/react-query';
+
+import request from '@monetr/interface/util/request';
+import { useSnackbar } from '@monetr/notify';
+
+export function useTriggerManualLunchFlowSync(): (_linkId: string) => Promise<void> {
+  const { enqueueSnackbar } = useSnackbar();
+  const queryClient = useQueryClient();
+  return async (linkId: string): Promise<void> => {
+    return await request({
+      method: 'POST',
+      url: '/api/lunch_flow/link/sync',
+      data: {
+        linkId,
+      },
+    })
+      .then(
+        () =>
+          void enqueueSnackbar('Triggered a manual sync in the background!', {
+            variant: 'success',
+            disableWindowBlurListener: true,
+          }),
+      )
+      // Will make things like the "last attempted update" timestamp thing update.
+      .then(() => void setTimeout(() => queryClient.invalidateQueries({ queryKey: ['GET', '/api/links'] }), 2000))
+      .catch(
+        error =>
+          void enqueueSnackbar(`Failed to trigger a manual sync: ${error?.response?.data?.error || 'unknown error'}.`, {
+            variant: 'error',
+            disableWindowBlurListener: true,
+          }),
+      );
+  };
+}
