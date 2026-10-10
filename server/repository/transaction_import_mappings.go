@@ -71,8 +71,8 @@ func (r *repositoryBase) GetTransactionImportMappings(
 	err := r.txn.NewSelect().
 		Model(&result).
 		Where(`"account_id" = ?`, r.AccountId()).
-		Limit(limit).
-		Offset(offset).
+		Limit(int64(limit)).
+		Offset(int64(offset)).
 		Order("created_at DESC").
 		Scan(span.Context())
 	if err != nil {
@@ -98,8 +98,8 @@ func (r *repositoryBase) GetTransactionImportMappingsBySignature(
 		Model(&result).
 		Where(`"account_id" = ?`, r.AccountId()).
 		Where(`"signature" = ?`, signature).
-		Limit(limit).
-		Offset(offset).
+		Limit(int64(limit)).
+		Offset(int64(offset)).
 		Order("created_at DESC").
 		Scan(span.Context())
 	if err != nil {

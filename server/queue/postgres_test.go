@@ -449,7 +449,7 @@ func TestPostgresProcessor_EnqueueAndExecute(t *testing.T) {
 
 		count, err := db.NewSelect().Model(new(models.Job)).Count(t.Context())
 		assert.NoError(t, err)
-		assert.Equal(t, 1, count, "only one job row must exist despite two enqueue calls")
+		assert.EqualValues(t, 1, count, "only one job row must exist despite two enqueue calls")
 	})
 
 	t.Run("different queues with same timestamp and args are not deduplicated", func(t *testing.T) {
@@ -487,7 +487,7 @@ func TestPostgresProcessor_EnqueueAndExecute(t *testing.T) {
 
 		count, err := db.NewSelect().Model(new(models.Job)).Count(t.Context())
 		assert.NoError(t, err)
-		assert.Equal(t, 2, count, "both jobs must exist because they belong to different queues")
+		assert.EqualValues(t, 2, count, "both jobs must exist because they belong to different queues")
 	})
 
 	t.Run("cron job fires and is executed", func(t *testing.T) {
@@ -659,7 +659,7 @@ func TestPostgresProcessor_BulkEnqueueAt(t *testing.T) {
 			Where(`"queue" = ?`, "test-bulk-dupe").
 			Count(t.Context())
 		require.NoError(t, err)
-		assert.Equal(t, 2, count, "should skip the duplicate but still enqueue the new job")
+		assert.EqualValues(t, 2, count, "should skip the duplicate but still enqueue the new job")
 	})
 
 	t.Run("empty arguments do nothing", func(t *testing.T) {
@@ -1121,7 +1121,7 @@ func TestPostgresProcessor_Close(t *testing.T) {
 			Where(`"status" = ?`, models.CompletedJobStatus).
 			Count(t.Context())
 		assert.NoError(t, err)
-		assert.Equal(t, 1, count, "in-flight job must be completed after graceful shutdown")
+		assert.EqualValues(t, 1, count, "in-flight job must be completed after graceful shutdown")
 	})
 }
 
@@ -1242,7 +1242,7 @@ func TestPostgresProcessor_WakeNotification(t *testing.T) {
 		// All three jobs must exist despite the single notification.
 		count, err := db.NewSelect().Model(new(models.Job)).Count(t.Context())
 		assert.NoError(t, err)
-		assert.Equal(t, 3, count, "all three jobs must be enqueued within the transaction")
+		assert.EqualValues(t, 3, count, "all three jobs must be enqueued within the transaction")
 	})
 
 	t.Run("rolled back transaction does not send a wake notification", func(t *testing.T) {
@@ -1286,7 +1286,7 @@ func TestPostgresProcessor_WakeNotification(t *testing.T) {
 		// The job row must not exist because the transaction was rolled back.
 		count, err := db.NewSelect().Model(new(models.Job)).Count(t.Context())
 		assert.NoError(t, err)
-		assert.Equal(t, 0, count, "no jobs must exist after a rolled back transaction")
+		assert.EqualValues(t, 0, count, "no jobs must exist after a rolled back transaction")
 
 		// No wake notification should arrive. PostgreSQL discards pending NOTIFYs
 		// on ROLLBACK, so there is nothing to deliver.
