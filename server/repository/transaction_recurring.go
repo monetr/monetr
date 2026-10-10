@@ -76,8 +76,8 @@ func (r *repositoryBase) GetTransactionRecurrings(
 	}
 
 	err := query.
-		Limit(limit).
-		Offset(offset).
+		Limit(int64(limit)).
+		Offset(int64(offset)).
 		// Active ones first, then whatever is coming up next
 		Order(`transaction_recurring.ended ASC`).
 		Order(`transaction_recurring.next ASC`).

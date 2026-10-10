@@ -173,8 +173,8 @@ func (r *repositoryBase) GetTransactions(
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction"."deleted_at" IS NULL`).
-		Limit(limit).
-		Offset(offset).
+		Limit(int64(limit)).
+		Offset(int64(offset)).
 		Order(`date DESC`).
 		Order(`transaction_id DESC`).
 		Scan(span.Context())
@@ -245,8 +245,8 @@ func (r *repositoryBase) GetPendingTransactions(
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction"."is_pending" = ?`, true).
 		Where(`"transaction"."deleted_at" IS NULL`).
-		Limit(limit).
-		Offset(offset).
+		Limit(int64(limit)).
+		Offset(int64(offset)).
 		Order(`date DESC`).
 		Order(`transaction_id DESC`).
 		Scan(span.Context())
@@ -284,8 +284,8 @@ func (r *repositoryBase) GetTransactionsForSpending(
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction"."spending_id" = ?`, spendingId).
 		Where(`"transaction"."deleted_at" IS NULL`).
-		Limit(limit).
-		Offset(offset).
+		Limit(int64(limit)).
+		Offset(int64(offset)).
 		Order(`date DESC`).
 		Order(`transaction_id DESC`).
 		Scan(span.Context())
@@ -323,8 +323,8 @@ func (r *repositoryBase) GetTransactionsForRecurring(
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction"."transaction_recurring_id" = ?`, transactionRecurringId).
 		Where(`"transaction"."deleted_at" IS NULL`).
-		Limit(limit).
-		Offset(offset).
+		Limit(int64(limit)).
+		Offset(int64(offset)).
 		Order(`date DESC`).
 		Order(`transaction_id DESC`).
 		Scan(span.Context())

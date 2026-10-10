@@ -76,7 +76,7 @@ func adminKMSMigrate(parent *cobra.Command) {
 					Model(&secrets).
 					Order(`secret_id ASC`).
 					Limit(100).
-					Offset(offset).
+					Offset(int64(offset)).
 					Scan(context.Background())
 				if err != nil {
 					log.Error("failed to retrieve batch of secrets", "offset", offset, "err", err)

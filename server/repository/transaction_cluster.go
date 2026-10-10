@@ -29,8 +29,8 @@ func (r *repositoryBase) GetTransactionClusters(
 		Model(&result).
 		Where(`"transaction_cluster"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction_cluster"."bank_account_id" = ?`, bankAccountId).
-		Limit(limit).
-		Offset(offset).
+		Limit(int64(limit)).
+		Offset(int64(offset)).
 		// TODO Figure out some better ordering for this stuff
 		Order(`name DESC`).
 		Order(`transaction_cluster_id DESC`).
@@ -304,8 +304,8 @@ func (r *repositoryBase) GetTransactionsByCluster(
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction"."transaction_cluster_id" = ?`, transactionClusterId).
 		Where(`"transaction"."deleted_at" IS NULL`).
-		Limit(limit).
-		Offset(offset).
+		Limit(int64(limit)).
+		Offset(int64(offset)).
 		Order(`date DESC`).
 		Order(`transaction_id DESC`).
 		Scan(span.Context())

@@ -60,10 +60,10 @@ func (r *repositoryBase) GetNumberOfPlaidLinks(ctx context.Context) (int, error)
 		Where(`"link"."deleted_at" IS NULL`).
 		Count(span.Context())
 	if err != nil {
-		return count, crumbs.WrapError(span.Context(), err, "failed to retrieve links")
+		return int(count), crumbs.WrapError(span.Context(), err, "failed to retrieve links")
 	}
 
-	return count, nil
+	return int(count), nil
 }
 
 func (r *repositoryBase) GetLinkIsManualByBankAccountId(
