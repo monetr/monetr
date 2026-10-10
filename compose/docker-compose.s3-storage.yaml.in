@@ -1,7 +1,7 @@
 # vim: set ft=yaml
 services:
   s3:
-    image: rustfs/rustfs:1.0.0
+    image: rustfs/rustfs:1.0.1
     restart: always # If something goes wrong just restart the container, this is for development only.
     volumes:
       - s3Data:/data
