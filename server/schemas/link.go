@@ -35,5 +35,13 @@ var (
 				TextField(),
 			),
 		).Required(validators.Optional),
+		validation.Key("bankAccountOrder",
+			validation.Each(
+				ValidID[models.BankAccount](),
+				validation.Required,
+			),
+			validation.Length(0, 100),
+			validators.Unique[string](),
+		).Required(validators.Optional),
 	)
 )
