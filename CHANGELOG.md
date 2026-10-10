@@ -1,5 +1,39 @@
 # Changelog
 
+## [1.19.0](https://github.com/monetr/monetr/compare/v1.18.1...v1.19.0) (2026-10-10)
+
+
+### Features
+
+* Allow a transaction to be marked as not recurring ([#3613](https://github.com/monetr/monetr/issues/3613)) ([7fbb9db](https://github.com/monetr/monetr/commit/7fbb9db9400ca5445d0732c6b1f7eedca494aa1f))
+* Auto spend recurring transactions ([#3616](https://github.com/monetr/monetr/issues/3616)) ([5c39c27](https://github.com/monetr/monetr/commit/5c39c27f4354c6314655dd310bab2982fba16830))
+* **ui:** Allow lunch flow links to be manually synced ([185e630](https://github.com/monetr/monetr/commit/185e630832e9b7d63587841804ea209683dc812a)), closes [#3605](https://github.com/monetr/monetr/issues/3605)
+
+
+### Bug Fixes
+
+* **api:** Fixed bug with monthly recurring detection ([c5377ad](https://github.com/monetr/monetr/commit/c5377ad2d8262ac479a4ea99620578fa0303d8aa))
+
+
+### Documentation
+
+* Begin database config migration ([f08cbd6](https://github.com/monetr/monetr/commit/f08cbd6c66cf3363ddc855b817fbccc28e922179))
+
+
+### Dependencies
+
+* **api:** update bun to v1.3.0 ([#3600](https://github.com/monetr/monetr/issues/3600)) ([f1b1761](https://github.com/monetr/monetr/commit/f1b176145d28fa860dc116f7afdcc70166f9a8d1))
+* **api:** update module github.com/plaid/plaid-go/v47 to v48 ([#3615](https://github.com/monetr/monetr/issues/3615)) ([2d7d550](https://github.com/monetr/monetr/commit/2d7d5509b59d58771b3cd4a68ee3538c7eaff856))
+* **api:** update module golang.org/x/tools to v0.51.0 ([#3617](https://github.com/monetr/monetr/issues/3617)) ([c723d01](https://github.com/monetr/monetr/commit/c723d017fa1356e16137f1ccd15857c75916e5cd))
+* **containers:** update rustfs/rustfs docker tag to v1.0.1 ([#3618](https://github.com/monetr/monetr/issues/3618)) ([88efefa](https://github.com/monetr/monetr/commit/88efefa66f79981088e5cf144ae0e268637bafa3))
+* **ui:** update dependency @tanstack/react-query to v5.104.1 ([#3610](https://github.com/monetr/monetr/issues/3610)) ([1d6d54d](https://github.com/monetr/monetr/commit/1d6d54d5bb6597382049d2dc515e3ed756cd2864))
+* **ui:** update dependency @types/node to v24.19.1 ([#3567](https://github.com/monetr/monetr/issues/3567)) ([82a778a](https://github.com/monetr/monetr/commit/82a778a119970196d24d7b89327874860b3c92f0))
+* **ui:** update dependency lucide-react to v1.50.0 ([#3611](https://github.com/monetr/monetr/issues/3611)) ([3888171](https://github.com/monetr/monetr/commit/388817114fe812869badc33badc8cbc61e696233))
+* **ui:** update dependency react-day-picker to v10.0.2 ([#3587](https://github.com/monetr/monetr/issues/3587)) ([6c5e7a8](https://github.com/monetr/monetr/commit/6c5e7a8010c0ebefbb9b1ef365fd3d84597f5c27))
+* **ui:** update dependency satori to v0.35.0 ([#3609](https://github.com/monetr/monetr/issues/3609)) ([7369506](https://github.com/monetr/monetr/commit/7369506c524bdfc18dd63ce1f38564593704601e))
+* **ui:** update rspress to v2.0.23 ([#3576](https://github.com/monetr/monetr/issues/3576)) ([eb60c5b](https://github.com/monetr/monetr/commit/eb60c5ba3c268f353182a7d027cd901429a0cde4))
+* **ui:** update sentry-javascript monorepo to v11.4.0 ([#3612](https://github.com/monetr/monetr/issues/3612)) ([4533b2f](https://github.com/monetr/monetr/commit/4533b2fc651007f41d0af9970bd2c75ebe1c99a0))
+
 ## [1.18.1](https://github.com/monetr/monetr/compare/v1.18.0...v1.18.1) (2026-10-09)
 
 
