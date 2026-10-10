@@ -1,5 +1,7 @@
 import { Link } from 'wouter';
 
+import LunchFlowLogo from '@monetr/interface/components/Logo/LunchFlowLogo';
+import PlaidLogo from '@monetr/interface/components/Logo/PlaidLogo';
 import PlaidInstitutionLogo from '@monetr/interface/components/Plaid/InstitutionLogo';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@monetr/interface/components/Tooltip';
 import { useBankAccounts } from '@monetr/interface/hooks/useBankAccounts';
@@ -50,6 +52,7 @@ export default function BankSidebarItem({ link, sortable }: BankSidebarItemProps
         <div className={styles.indicator} data-active={String(active)} />
         <Link className={styles.link} draggable={false} to={linkPath}>
           <PlaidInstitutionLogo link={link} />
+          <LinkProviderBadge link={link} />
           <LinkWarningIndicator link={link} />
           <LinkRevokedIndicator link={link} />
         </Link>
@@ -57,6 +60,26 @@ export default function BankSidebarItem({ link, sortable }: BankSidebarItemProps
       <TooltipContent side='right'>{tooltip}</TooltipContent>
     </Tooltip>
   );
+}
+
+function LinkProviderBadge({ link }: { link: MonetrLink }): React.JSX.Element | null {
+  if (link.getIsPlaid()) {
+    return (
+      <span className={styles.providerBadge} data-provider='plaid'>
+        <PlaidLogo className={styles.providerLogo} iconOnly />
+      </span>
+    );
+  }
+
+  if (link.getIsLunchFlow()) {
+    return (
+      <span className={styles.providerBadge} data-provider='lunch_flow'>
+        <LunchFlowLogo className={styles.providerLogo} iconOnly />
+      </span>
+    );
+  }
+
+  return null;
 }
 
 function LinkWarningIndicator({ link }: { link: MonetrLink }): React.JSX.Element | null {
