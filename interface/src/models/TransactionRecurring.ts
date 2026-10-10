@@ -43,6 +43,8 @@ export default class TransactionRecurring {
   readonly lastAmount: number;
   // autoMatched is true when monetr linked the expense itself instead of the user picking it
   readonly autoMatched: boolean;
+  // autoAssign is true when new charges should be spent from the linked expense automatically, only for expenses
+  autoAssign: boolean;
   // fundingSchedule is the funding schedule tracking this recurring transaction, if there is one
   readonly fundingSchedule: FundingSchedule | null;
   readonly createdAt: Date;
@@ -66,6 +68,7 @@ export default class TransactionRecurring {
     this.amounts = data.amounts;
     this.lastAmount = data.lastAmount;
     this.autoMatched = data.autoMatched;
+    this.autoAssign = data.autoAssign;
     this.fundingSchedule = data.fundingSchedule ? new FundingSchedule(data.fundingSchedule) : null;
     this.createdAt = parseDate(data.createdAt);
     this.updatedAt = parseDate(data.updatedAt);

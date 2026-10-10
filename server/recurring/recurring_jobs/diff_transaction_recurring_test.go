@@ -504,8 +504,9 @@ func TestDiffTransactionRecurring(t *testing.T) {
 		recurringId := diff.UpsertRecurring[0].TransactionRecurringId
 		require.False(t, recurringId.IsZero(), "the new recurring transaction must have an ID")
 
-		require.Len(t, diff.UpdateMembers, 3, "every member should be updated")
-		for _, member := range diff.UpdateMembers {
+		assert.Empty(t, diff.UpdateMembers, "nothing was part of a recurring transaction before")
+		require.Len(t, diff.InsertMembers, 3, "every member should be inserted")
+		for _, member := range diff.InsertMembers {
 			require.NotNil(t, member.TransactionRecurringId, "member must point at a recurring transaction")
 			assert.Equal(t, recurringId, *member.TransactionRecurringId, "member must point at the new recurring transaction")
 		}
@@ -576,17 +577,23 @@ func TestDiffTransactionRecurring(t *testing.T) {
 		)
 		require.Len(t, diff.UpsertRecurring, 1, "should upsert the existing recurring transaction")
 
+		inserted := make(map[models.ID[models.Transaction]]*models.ID[models.TransactionRecurring], len(diff.InsertMembers))
+		for _, member := range diff.InsertMembers {
+			inserted[member.TransactionId] = member.TransactionRecurringId
+		}
 		updated := make(map[models.ID[models.Transaction]]*models.ID[models.TransactionRecurring], len(diff.UpdateMembers))
 		for _, member := range diff.UpdateMembers {
 			updated[member.TransactionId] = member.TransactionRecurringId
 		}
-		assert.Len(t, updated, 3, "only the members that changed should be updated")
+		assert.Len(t, inserted, 2, "only the new members should be inserted")
+		assert.Len(t, updated, 1, "only the old member should be updated")
+		assert.NotContains(t, inserted, models.ID[models.Transaction]("txn_0"), "txn_0 already points at the recurring transaction")
 		assert.NotContains(t, updated, models.ID[models.Transaction]("txn_0"), "txn_0 already points at the recurring transaction")
-		if assert.Contains(t, updated, models.ID[models.Transaction]("txn_1"), "txn_1 should be updated") {
-			assert.EqualValues(t, "txrc_debit", *updated["txn_1"], "txn_1 should point at the recurring transaction")
+		if assert.Contains(t, inserted, models.ID[models.Transaction]("txn_1"), "txn_1 should be inserted") {
+			assert.EqualValues(t, "txrc_debit", *inserted["txn_1"], "txn_1 should point at the recurring transaction")
 		}
-		if assert.Contains(t, updated, models.ID[models.Transaction]("txn_2"), "txn_2 should be updated") {
-			assert.EqualValues(t, "txrc_debit", *updated["txn_2"], "txn_2 should point at the recurring transaction")
+		if assert.Contains(t, inserted, models.ID[models.Transaction]("txn_2"), "txn_2 should be inserted") {
+			assert.EqualValues(t, "txrc_debit", *inserted["txn_2"], "txn_2 should point at the recurring transaction")
 		}
 		if assert.Contains(t, updated, models.ID[models.Transaction]("txn_3"), "txn_3 should be updated") {
 			assert.Nil(t, updated["txn_3"], "txn_3 is not a member anymore so it should not point at anything")
@@ -636,6 +643,7 @@ func TestDiffTransactionRecurring(t *testing.T) {
 			"tcl_test",
 		)
 		assert.Equal(t, []models.ID[models.TransactionRecurring]{"txrc_debit"}, diff.DeleteRecurringIds, "should delete the recurring transaction")
+		assert.Empty(t, diff.InsertMembers, "nothing should be inserted")
 		require.Len(t, diff.UpdateMembers, 2, "both old members should be updated")
 		for _, member := range diff.UpdateMembers {
 			assert.Nil(t, member.TransactionRecurringId, "old members should not point at anything")
@@ -747,15 +755,23 @@ func TestDiffTransactionRecurring(t *testing.T) {
 		assert.False(t, debitId.IsZero(), "the debits should get a new ID")
 		assert.NotEqualValues(t, "txrc_credit", debitId, "the debits must not reuse the credit ID")
 
-		updated := make(map[models.ID[models.Transaction]]*models.ID[models.TransactionRecurring], len(diff.UpdateMembers))
-		for _, member := range diff.UpdateMembers {
-			updated[member.TransactionId] = member.TransactionRecurringId
+		inserted := make(map[models.ID[models.Transaction]]*models.ID[models.TransactionRecurring], len(diff.InsertMembers))
+		for _, member := range diff.InsertMembers {
+			inserted[member.TransactionId] = member.TransactionRecurringId
 		}
-		assert.Len(t, updated, 3, "only the debit members should be updated, the credits already point at the right one")
-		for _, id := range []models.ID[models.Transaction]{"txn_0", "txn_1", "txn_2"} {
-			if assert.Contains(t, updated, id, "debit member should be updated") && assert.NotNil(t, updated[id], "debit member should point at something") {
-				assert.Equal(t, debitId, *updated[id], "debit member should point at the debit recurring transaction")
+		assert.Len(t, inserted, 2, "only the debit members without a recurring transaction should be inserted")
+		for _, id := range []models.ID[models.Transaction]{"txn_0", "txn_1"} {
+			if assert.Contains(t, inserted, id, "debit member should be inserted") && assert.NotNil(t, inserted[id], "debit member should point at something") {
+				assert.Equal(t, debitId, *inserted[id], "debit member should point at the debit recurring transaction")
 			}
+		}
+
+		// txn_2 was pointing at the credits, moving it over doesn't count as being
+		// added to a recurring transaction.
+		require.Len(t, diff.UpdateMembers, 1, "only the moved debit member should be updated, the credits already point at the right one")
+		assert.EqualValues(t, "txn_2", diff.UpdateMembers[0].TransactionId, "txn_2 should be updated")
+		if assert.NotNil(t, diff.UpdateMembers[0].TransactionRecurringId, "txn_2 should point at something") {
+			assert.Equal(t, debitId, *diff.UpdateMembers[0].TransactionRecurringId, "txn_2 should point at the debit recurring transaction")
 		}
 	})
 

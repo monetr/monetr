@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v5"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/schemas"
 )
@@ -159,9 +160,24 @@ func (c *Controller) patchRecurringTransaction(ctx *echo.Context) error {
 		}
 	}
 
-	// Whatever the links are now the user picked them, so this is no longer auto
-	// matched.
-	recurring.AutoMatched = false
+	// If the user unlinked the spending then there is nothing to auto assign to
+	// anymore, so just turn it off instead of making them do that first.
+	if existing.SpendingId != nil && recurring.SpendingId == nil {
+		recurring.AutoAssign = false
+	}
+
+	if recurring.Direction == CreditDirection && recurring.AutoAssign {
+		return c.badRequest(ctx, "Cannot auto assign recurring funding at this time")
+	}
+
+	if recurring.SpendingId == nil && recurring.AutoAssign {
+		return c.badRequest(ctx, "Must have a spending to auto assign to")
+	}
+
+	// If the user changed the spending then make sure auto matched is false.
+	if !myownsanity.PEqual(existing.SpendingId, recurring.SpendingId) {
+		recurring.AutoMatched = false
+	}
 
 	if err := repo.UpdateTransactionRecurring(
 		c.getContext(ctx),
@@ -216,6 +232,7 @@ func (c *Controller) deleteRecurringTransaction(ctx *echo.Context) error {
 	existing.SpendingId = nil
 	existing.FundingScheduleId = nil
 	existing.AutoMatched = false
+	existing.AutoAssign = false
 
 	if err := repo.UpdateTransactionRecurring(
 		c.getContext(ctx),

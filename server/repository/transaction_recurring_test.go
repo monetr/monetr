@@ -878,6 +878,46 @@ func TestRepositoryBase_UpdateTransactionRecurring(t *testing.T) {
 		assert.Equal(t, fundingSchedule.FundingScheduleId, *credit.FundingScheduleId, "should still be linked to the funding schedule")
 	})
 
+	t.Run("recalculation keeps auto assign", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		cluster := givenIHaveATransactionCluster(t, bankAccount)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, clock, &bankAccount, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15", false)
+		spending := givenIHaveAnExpense(t, clock, bankAccount, fundingSchedule, "Github")
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			testutils.GetPgDatabase(t),
+			log,
+		)
+
+		items := []models.TransactionRecurring{
+			newTransactionRecurring(t, cluster, models.DebitDirection, 800),
+		}
+		err := repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, items)
+		require.NoError(t, err, "must be able to create recurring transactions")
+		items[0].SpendingId = &spending.SpendingId
+		items[0].AutoAssign = true
+		require.NoError(t, repo.UpdateTransactionRecurring(t.Context(), bankAccount.BankAccountId, &items[0]), "must be able to turn on auto assign")
+		assert.True(t, testutils.MustDBRead(t, items[0]).AutoAssign, "auto assign should be stored")
+
+		// Same as the links, the fresh recurring transaction from the job doesn't
+		// know about auto assign and must not turn it off.
+		err = repo.UpsertTransactionRecurring(t.Context(), bankAccount.BankAccountId, []models.TransactionRecurring{
+			newTransactionRecurring(t, cluster, models.DebitDirection, 1000),
+		})
+		require.NoError(t, err, "must be able to recalculate recurring transactions")
+
+		debit := testutils.MustDBRead(t, items[0])
+		assert.EqualValues(t, 1000, debit.LastAmount, "recalculation should have updated the debit")
+		assert.True(t, debit.AutoAssign, "auto assign should survive recalculation")
+	})
+
 	t.Run("deleting spending clears link", func(t *testing.T) {
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)

@@ -195,6 +195,21 @@ func (r *repositoryBase) DeleteSpending(ctx context.Context, bankAccountId ID[Ba
 		return errors.Wrap(err, "failed to remove spending from any transactions")
 	}
 
+	// The FK will null out the spending ID on any recurring transactions linked
+	// to this, but auto assign can't be on without a spending so it has to be
+	// turned off first or the delete will fail the check constraint.
+	_, err = r.txn.NewUpdate().
+		Model(&TransactionRecurring{}).
+		Set(`"auto_assign" = false`).
+		Where(`"transaction_recurring"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction_recurring"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction_recurring"."spending_id" = ?`, spendingId).
+		Exec(span.Context())
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return errors.Wrap(err, "failed to turn off auto assign for recurring transactions")
+	}
+
 	result, err := r.txn.NewDelete().
 		Model(&Spending{}).
 		Where(`"spending"."account_id" = ?`, r.AccountId()).

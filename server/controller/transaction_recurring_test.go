@@ -453,6 +453,37 @@ func TestPatchRecurringTransaction(t *testing.T) {
 		assert.Nil(t, stored.SpendingId, "spending id should be cleared")
 	})
 
+	t.Run("clearing the link turns off auto assign", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		spending := GivenIHaveASpending(t, app.Clock, fundingSchedule, SpendingTypeExpense, "Github")
+		recurring := GivenIHaveATransactionRecurring(t, bank)
+		recurring.SpendingId = &spending.SpendingId
+		recurring.AutoAssign = true
+		testutils.MustDBUpdate(t, &recurring)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/recurring/{transactionRecurringId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionRecurringId", recurring.TransactionRecurringId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"spendingId": nil,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.spendingId").IsNull()
+		response.JSON().Path("$.autoAssign").Boolean().IsFalse()
+
+		stored := testutils.MustDBRead(t, recurring)
+		assert.Nil(t, stored.SpendingId, "spending id should be cleared")
+		assert.False(t, stored.AutoAssign, "auto assign should be turned off with the link")
+	})
+
 	t.Run("change the linked expense", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
@@ -518,6 +549,122 @@ func TestPatchRecurringTransaction(t *testing.T) {
 
 		stored := testutils.MustDBRead(t, recurring)
 		assert.False(t, stored.AutoMatched, "link the user picked should not be auto matched")
+	})
+
+	t.Run("same expense keeps auto matched", func(t *testing.T) {
+		// The spending ID is a pointer, sending the same expense back gives us a
+		// different pointer to the same value. That should not count as the user
+		// changing the expense.
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		spending := GivenIHaveASpending(t, app.Clock, fundingSchedule, SpendingTypeExpense, "Github")
+		recurring := GivenIHaveATransactionRecurring(t, bank)
+		recurring.SpendingId = &spending.SpendingId
+		recurring.AutoMatched = true
+		testutils.MustDBUpdate(t, &recurring)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/recurring/{transactionRecurringId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionRecurringId", recurring.TransactionRecurringId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"spendingId": spending.SpendingId,
+				"autoAssign": true,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.spendingId").IsEqual(spending.SpendingId)
+		response.JSON().Path("$.autoMatched").Boolean().IsTrue()
+		response.JSON().Path("$.autoAssign").Boolean().IsTrue()
+
+		stored := testutils.MustDBRead(t, recurring)
+		assert.True(t, stored.AutoMatched, "should still be auto matched")
+	})
+
+	t.Run("turns on auto assign", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		spending := GivenIHaveASpending(t, app.Clock, fundingSchedule, SpendingTypeExpense, "Github")
+		recurring := GivenIHaveATransactionRecurring(t, bank)
+		recurring.SpendingId = &spending.SpendingId
+		testutils.MustDBUpdate(t, &recurring)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/recurring/{transactionRecurringId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionRecurringId", recurring.TransactionRecurringId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"autoAssign": true,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.spendingId").IsEqual(spending.SpendingId)
+		response.JSON().Path("$.autoAssign").Boolean().IsTrue()
+
+		stored := testutils.MustDBRead(t, recurring)
+		assert.True(t, stored.AutoAssign, "auto assign should be stored")
+	})
+
+	t.Run("auto assign without an expense", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		recurring := GivenIHaveATransactionRecurring(t, bank)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/recurring/{transactionRecurringId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionRecurringId", recurring.TransactionRecurringId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"autoAssign": true,
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Must have a spending to auto assign to")
+
+		stored := testutils.MustDBRead(t, recurring)
+		assert.False(t, stored.AutoAssign, "auto assign should not be stored")
+	})
+
+	t.Run("auto assign on a credit", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		recurring := GivenIHaveATransactionRecurring(t, bank)
+		recurring.Direction = CreditDirection
+		recurring.FundingScheduleId = &fundingSchedule.FundingScheduleId
+		testutils.MustDBUpdate(t, &recurring)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/recurring/{transactionRecurringId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionRecurringId", recurring.TransactionRecurringId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"autoAssign": true,
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Cannot auto assign recurring funding at this time")
+
+		stored := testutils.MustDBRead(t, recurring)
+		assert.False(t, stored.AutoAssign, "auto assign should not be stored")
 	})
 
 	t.Run("expense already linked", func(t *testing.T) {
@@ -746,6 +893,40 @@ func TestPatchRecurringTransaction(t *testing.T) {
 		response.JSON().Object().NotContainsKey("spending")
 	})
 
+	t.Run("deleting expense turns off auto assign", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		spending := GivenIHaveASpending(t, app.Clock, fundingSchedule, SpendingTypeExpense, "Github")
+		recurring := GivenIHaveATransactionRecurring(t, bank)
+		recurring.SpendingId = &spending.SpendingId
+		recurring.AutoAssign = true
+		testutils.MustDBUpdate(t, &recurring)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		{ // Delete the expense
+			response := e.DELETE("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spending.SpendingId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+		}
+
+		response := e.GET("/api/bank_accounts/{bankAccountId}/recurring/{transactionRecurringId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionRecurringId", recurring.TransactionRecurringId).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.spendingId").IsNull()
+		response.JSON().Path("$.autoAssign").Boolean().IsFalse()
+	})
+
 	t.Run("cant patch someone elses recurring", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 
@@ -840,6 +1021,7 @@ func TestDeleteRecurringTransaction(t *testing.T) {
 		recurring := GivenIHaveATransactionRecurring(t, bank)
 		recurring.SpendingId = &spending.SpendingId
 		recurring.AutoMatched = true
+		recurring.AutoAssign = true
 		testutils.MustDBUpdate(t, &recurring)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
@@ -855,6 +1037,7 @@ func TestDeleteRecurringTransaction(t *testing.T) {
 		assert.NotNil(t, stored.DeletedAt, "should be deleted")
 		assert.Nil(t, stored.SpendingId, "expense link should be cleared")
 		assert.False(t, stored.AutoMatched, "should not be auto matched anymore")
+		assert.False(t, stored.AutoAssign, "auto assign should be turned off with the link")
 
 		{ // The expense should be free to link to something else now
 			other := GivenIHaveATransactionRecurring(t, bank)

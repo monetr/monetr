@@ -2,6 +2,7 @@ package recurring_jobs
 
 import (
 	"log/slog"
+	"slices"
 	"time"
 
 	"github.com/monetr/monetr/server/crumbs"
@@ -61,22 +62,41 @@ func CalculateRecurringTransactions(
 			return errors.Wrap(err, "failed to read transaction clusters")
 		}
 
+		autoAssignTransactionIds := make([]models.ID[models.Transaction], 0)
 		for _, transactionClusterId := range clusterIds {
-			if err := calculateRecurringTransactionsForCluster(
+			transactionIds, err := calculateRecurringTransactionsForCluster(
 				ctx,
 				log,
 				repo,
 				args.BankAccountId,
 				transactionClusterId,
 				timezone,
-			); err != nil {
+			)
+			if err != nil {
 				return err
 			}
+			autoAssignTransactionIds = append(autoAssignTransactionIds, transactionIds...)
 		}
 
 		log.InfoContext(ctx, "finished calculating recurring transactions",
 			"clusters", len(clusterIds),
+			"autoAssignTransactions", len(autoAssignTransactionIds),
 		)
+
+		if len(autoAssignTransactionIds) > 0 {
+			if err := queue.Enqueue(
+				ctx,
+				ctx.Enqueuer(),
+				AutoAssignRecurringTransactions,
+				AutoAssignRecurringTransactionsArguments{
+					AccountId:      args.AccountId,
+					BankAccountId:  args.BankAccountId,
+					TransactionIds: autoAssignTransactionIds,
+				},
+			); err != nil {
+				return errors.Wrap(err, "failed to enqueue auto assigning recurring transactions")
+			}
+		}
 
 		// This is enqueued inside the transaction so the job only runs once the
 		// recurring transactions are committed.
@@ -103,7 +123,7 @@ func calculateRecurringTransactionsForCluster(
 	bankAccountId models.ID[models.BankAccount],
 	transactionClusterId models.ID[models.TransactionCluster],
 	timezone *time.Location,
-) error {
+) ([]models.ID[models.Transaction], error) {
 	log = log.With("transactionClusterId", transactionClusterId)
 
 	// TODO This will need to change once I support merging clusters.
@@ -115,7 +135,7 @@ func calculateRecurringTransactionsForCluster(
 		0,
 	)
 	if err != nil {
-		return errors.Wrap(err, "failed to read transactions in cluster")
+		return nil, errors.Wrap(err, "failed to read transactions in cluster")
 	}
 
 	results, err := recurring.DetectRecurringTransactions(
@@ -141,7 +161,7 @@ func calculateRecurringTransactionsForCluster(
 				"transactionClusterId": transactionClusterId,
 			},
 		)
-		return nil
+		return nil, nil
 	}
 
 	existing, err := repo.GetTransactionRecurringByCluster(
@@ -150,7 +170,7 @@ func calculateRecurringTransactionsForCluster(
 		transactionClusterId,
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	diff := DiffTransactionRecurring(
@@ -173,15 +193,15 @@ func calculateRecurringTransactionsForCluster(
 		bankAccountId,
 		diff.UpsertRecurring,
 	); err != nil {
-		return errors.Wrap(err, "failed to upsert recurring transactions")
+		return nil, errors.Wrap(err, "failed to upsert recurring transactions")
 	}
 
 	if err := repo.UpdateTransactionRecurringIds(
 		ctx,
 		bankAccountId,
-		diff.UpdateMembers,
+		slices.Concat(diff.InsertMembers, diff.UpdateMembers),
 	); err != nil {
-		return errors.Wrap(err, "failed to update transaction recurring ids")
+		return nil, errors.Wrap(err, "failed to update transaction recurring ids")
 	}
 
 	if err := repo.DeleteTransactionRecurring(
@@ -189,15 +209,33 @@ func calculateRecurringTransactionsForCluster(
 		bankAccountId,
 		diff.DeleteRecurringIds,
 	); err != nil {
-		return errors.Wrap(err, "failed to delete obsolete recurring transactions")
+		return nil, errors.Wrap(err, "failed to delete obsolete recurring transactions")
 	}
 
 	// This runs for every cluster in the bank account, so keep it at debug.
 	log.DebugContext(ctx, "finished updating recurring transactions for cluster",
 		"upsertRecurring", len(diff.UpsertRecurring),
 		"deleteRecurring", len(diff.DeleteRecurringIds),
+		"insertMembers", len(diff.InsertMembers),
 		"updateMembers", len(diff.UpdateMembers),
 	)
 
-	return nil
+	// Only transactions that were just added to a recurring transaction the user
+	// wants auto assigned need to be looked at. New recurring transactions can't
+	// have auto assign turned on yet, so only the existing ones matter.
+	autoAssign := make(map[models.ID[models.TransactionRecurring]]bool, len(existing))
+	for _, item := range existing {
+		if item.AutoAssign && item.SpendingId != nil && item.DeletedAt == nil {
+			autoAssign[item.TransactionRecurringId] = true
+		}
+	}
+
+	autoAssignTransactionIds := make([]models.ID[models.Transaction], 0)
+	for _, member := range diff.InsertMembers {
+		if autoAssign[*member.TransactionRecurringId] {
+			autoAssignTransactionIds = append(autoAssignTransactionIds, member.TransactionId)
+		}
+	}
+
+	return autoAssignTransactionIds, nil
 }

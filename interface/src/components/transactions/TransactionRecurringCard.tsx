@@ -1,12 +1,16 @@
+import { useState } from 'react';
 import { isThisYear } from 'date-fns';
 import { CalendarSync, Plus, Repeat, RepeatOff, Sparkles, Wallet } from 'lucide-react';
 import { rrulestr } from 'rrule';
 import { Link } from 'wouter';
 
+import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
+import { Switch } from '@monetr/interface/components/Switch';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@monetr/interface/components/Tooltip';
 import { useLocale } from '@monetr/interface/hooks/useLocale';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import { usePatchTransactionRecurring } from '@monetr/interface/hooks/usePatchTransactionRecurring';
 import { useRecurringTransaction } from '@monetr/interface/hooks/useRecurringTransaction';
 import { useSpending } from '@monetr/interface/hooks/useSpending';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
@@ -19,6 +23,8 @@ import type TransactionRecurring from '@monetr/interface/models/TransactionRecur
 import { AmountType } from '@monetr/interface/util/amounts';
 import capitalize from '@monetr/interface/util/capitalize';
 import { formatRelativeDate } from '@monetr/interface/util/formatDate';
+import type { APIError } from '@monetr/interface/util/request';
+import { useSnackbar } from '@monetr/notify';
 
 import styles from './TransactionRecurringCard.module.scss';
 
@@ -33,6 +39,9 @@ export default function TransactionRecurringCard(props: TransactionRecurringCard
   const { timezone, inTimezone } = useTimezone();
   const { data: locale } = useLocale();
   const { data: localeCurrency } = useLocaleCurrency();
+  const patchTransactionRecurring = usePatchTransactionRecurring();
+  const { enqueueSnackbar } = useSnackbar();
+  const [saving, setSaving] = useState(false);
 
   // The card is just extra detail on top of the transaction, so instead of a skeleton just leave it out until
   // everything has loaded
@@ -78,6 +87,34 @@ export default function TransactionRecurringCard(props: TransactionRecurringCard
     year: 'numeric',
     timeZone: timezone,
   }).format(recurring.first);
+
+  async function toggleAutoAssign(autoAssign: boolean) {
+    if (!recurring) {
+      return;
+    }
+
+    setSaving(true);
+    return await patchTransactionRecurring({
+      transactionRecurringId: recurring.transactionRecurringId,
+      bankAccountId: recurring.bankAccountId,
+      autoAssign,
+    })
+      .then(
+        () =>
+          void enqueueSnackbar('Updated recurring transaction successfully', {
+            variant: 'success',
+            disableWindowBlurListener: true,
+          }),
+      )
+      .catch(
+        (error: ApiError<APIError>) =>
+          void enqueueSnackbar(error?.response?.data?.error || 'Failed to update recurring transaction', {
+            variant: 'error',
+            disableWindowBlurListener: true,
+          }),
+      )
+      .finally(() => setSaving(false));
+  }
 
   return (
     <section className={styles.card} data-testid='transaction-recurring-card'>
@@ -168,9 +205,25 @@ export default function TransactionRecurringCard(props: TransactionRecurringCard
               Budgeted with <strong>{spending?.name}</strong>
             </span>
           </span>
-          <Button asChild variant='secondary'>
-            <Link to={`/bank/${recurring.bankAccountId}/expenses/${recurring.spendingId}/details`}>View Expense</Link>
-          </Button>
+          <div className={styles.footerActions}>
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <span className={styles.autoAssign}>
+                  <Switch
+                    aria-label='Automatically spend charges on this schedule'
+                    checked={recurring.autoAssign}
+                    data-testid='transaction-recurring-auto-assign'
+                    disabled={saving}
+                    onCheckedChange={toggleAutoAssign}
+                  />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side='top'>Automatically spend new charges from {spending?.name}</TooltipContent>
+            </Tooltip>
+            <Button asChild variant='secondary'>
+              <Link to={`/bank/${recurring.bankAccountId}/expenses/${recurring.spendingId}/details`}>View Expense</Link>
+            </Button>
+          </div>
         </div>
       )}
       {isDebit && !recurring.spendingId && (

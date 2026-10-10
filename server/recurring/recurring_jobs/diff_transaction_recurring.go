@@ -14,13 +14,17 @@ import (
 // we have stored for a cluster and the ones we just detected. A detected one
 // keeps the existing ID if there was already one for the same direction, and
 // existing ones for a direction that doesn't recur anymore can just be deleted.
-// UpdateMembers only has the transactions in the cluster whose recurring ID
-// needs to change, members point at their recurring transaction and everything
-// else in the cluster has its recurring ID removed.
+// InsertMembers and UpdateMembers only have the transactions in the cluster
+// whose recurring ID needs to change, members point at their recurring
+// transaction and everything else in the cluster has its recurring ID removed.
 type RecurringDiff struct {
 	UpsertRecurring    []models.TransactionRecurring
 	DeleteRecurringIds []models.ID[models.TransactionRecurring]
-	UpdateMembers      []models.Transaction
+	// Transactions that weren't part of any recurring transaction before.
+	InsertMembers []models.Transaction
+	// Transactions that moved to a different recurring transaction or aren't part
+	// of one anymore.
+	UpdateMembers []models.Transaction
 }
 
 // DiffTransactionRecurring will figure out what needs to be written to get the
@@ -51,6 +55,7 @@ func DiffTransactionRecurring(
 	diff := RecurringDiff{
 		UpsertRecurring:    make([]models.TransactionRecurring, 0, len(results)),
 		DeleteRecurringIds: make([]models.ID[models.TransactionRecurring], 0, len(existing)),
+		InsertMembers:      make([]models.Transaction, 0, len(transactions)),
 		UpdateMembers:      make([]models.Transaction, 0, len(transactions)),
 	}
 	// Which recurring transaction each member should point at.
@@ -107,10 +112,17 @@ func DiffTransactionRecurring(
 			continue
 		}
 
-		diff.UpdateMembers = append(diff.UpdateMembers, models.Transaction{
+		member := models.Transaction{
 			TransactionId:          txn.TransactionId,
 			TransactionRecurringId: expected,
-		})
+		}
+		// Keeping inserts separate lets us act on the transactions that are being
+		// added to a recurring transaction, moves don't count as being added.
+		if current == nil {
+			diff.InsertMembers = append(diff.InsertMembers, member)
+		} else {
+			diff.UpdateMembers = append(diff.UpdateMembers, member)
+		}
 	}
 
 	return diff
