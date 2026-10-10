@@ -41,7 +41,7 @@ export default function LinkAlerts(props: LinkAlertsProps): React.JSX.Element | 
   return (
     <Fragment>
       {props.link.getIsPendingExpiration() && (
-        <div className={styles.alert} data-variant='warning' role='status'>
+        <div className={styles.alert} data-testid='link-alert-expiring' data-variant='warning' role='status'>
           <Clock className={styles.icon} />
           <div className={styles.text}>
             <Typography color='emphasis' component='p' weight='semibold'>
@@ -56,7 +56,7 @@ export default function LinkAlerts(props: LinkAlertsProps): React.JSX.Element | 
         </div>
       )}
       {props.link.getIsError() && (
-        <div className={styles.alert} data-variant='error' role='alert'>
+        <div className={styles.alert} data-testid='link-alert-error' data-variant='error' role='alert'>
           <TriangleAlert className={styles.icon} />
           <div className={styles.text}>
             <Typography color='emphasis' component='p' weight='semibold'>
@@ -70,7 +70,7 @@ export default function LinkAlerts(props: LinkAlertsProps): React.JSX.Element | 
         </div>
       )}
       {props.link.getCanUpdateAccountSelection() && (
-        <div className={styles.alert} data-variant='brand' role='status'>
+        <div className={styles.alert} data-testid='link-alert-new-accounts' data-variant='brand' role='status'>
           <Plug className={styles.icon} />
           <div className={styles.text}>
             <Typography color='emphasis' component='p' weight='semibold'>

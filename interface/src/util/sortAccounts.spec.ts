@@ -158,4 +158,86 @@ describe('sort accounts', () => {
     expect(result[4]).toBe(savingsAccountInactive);
     expect(result[5]).toBe(checkingAccountInactive);
   });
+
+  it('will use the saved order over the account types', () => {
+    const checkingAccount = fixture({
+      bankAccountId: ID.from<BankAccount, string>('bac_01hy4rcmadc01d2kzv7vynbxxx'),
+      mask: '2982',
+      name: 'Mercury Checking',
+      accountType: BankAccountType.Depository,
+      accountSubType: BankAccountSubType.Checking,
+    });
+    const savingsAccount = fixture({
+      bankAccountId: ID.from<BankAccount, string>('bac_01hy4rcmadc01d2kzv7vynbyyy'),
+      mask: '4410',
+      name: 'Mercury Savings',
+      accountType: BankAccountType.Depository,
+      accountSubType: BankAccountSubType.Savings,
+    });
+    const accounts = [checkingAccount, savingsAccount];
+
+    // Savings would normally come after checking, but the user dragged it to the top.
+    const result = sortAccounts(accounts, [savingsAccount.bankAccountId, checkingAccount.bankAccountId]);
+    expect(result[0]).toBe(savingsAccount);
+    expect(result[1]).toBe(checkingAccount);
+  });
+
+  it('will put accounts missing from the saved order at the end', () => {
+    const checkingAccount = fixture({
+      bankAccountId: ID.from<BankAccount, string>('bac_01hy4rcmadc01d2kzv7vynbxxx'),
+      mask: '2982',
+      name: 'Mercury Checking',
+      accountType: BankAccountType.Depository,
+      accountSubType: BankAccountSubType.Checking,
+    });
+    const savingsAccount = fixture({
+      bankAccountId: ID.from<BankAccount, string>('bac_01hy4rcmadc01d2kzv7vynbyyy'),
+      mask: '4410',
+      name: 'Mercury Savings',
+      accountType: BankAccountType.Depository,
+      accountSubType: BankAccountSubType.Savings,
+    });
+    const creditCard = fixture({
+      bankAccountId: ID.from<BankAccount, string>('bac_01hy4rcmadc01d2kzv7vynbzzz'),
+      mask: '7712',
+      name: 'Mercury Credit Card',
+      accountType: BankAccountType.Credit,
+      accountSubType: BankAccountSubType.CreditCard,
+    });
+    const accounts = [creditCard, checkingAccount, savingsAccount];
+
+    // The credit card was added after the user reordered things, so it isn't in the order yet.
+    const result = sortAccounts(accounts, [savingsAccount.bankAccountId, checkingAccount.bankAccountId]);
+    expect(result[0]).toBe(savingsAccount);
+    expect(result[1]).toBe(checkingAccount);
+    expect(result[2]).toBe(creditCard);
+  });
+
+  it('will skip accounts in the saved order that no longer exist', () => {
+    const checkingAccount = fixture({
+      bankAccountId: ID.from<BankAccount, string>('bac_01hy4rcmadc01d2kzv7vynbxxx'),
+      mask: '2982',
+      name: 'Mercury Checking',
+      accountType: BankAccountType.Depository,
+      accountSubType: BankAccountSubType.Checking,
+    });
+    const savingsAccount = fixture({
+      bankAccountId: ID.from<BankAccount, string>('bac_01hy4rcmadc01d2kzv7vynbyyy'),
+      mask: '4410',
+      name: 'Mercury Savings',
+      accountType: BankAccountType.Depository,
+      accountSubType: BankAccountSubType.Savings,
+    });
+    const accounts = [checkingAccount, savingsAccount];
+
+    // The first account in the order was removed after the user reordered things.
+    const result = sortAccounts(accounts, [
+      ID.from<BankAccount, string>('bac_01hy4rcmadc01d2kzv7vynbaaa'),
+      savingsAccount.bankAccountId,
+      checkingAccount.bankAccountId,
+    ]);
+    expect(result).toHaveLength(2);
+    expect(result[0]).toBe(savingsAccount);
+    expect(result[1]).toBe(checkingAccount);
+  });
 });

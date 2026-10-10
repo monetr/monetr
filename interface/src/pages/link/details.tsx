@@ -45,7 +45,9 @@ export default function LinkDetails(): React.JSX.Element {
 
       return await patchLink({
         linkId: linkId,
-        ...values,
+        institutionName: values.institutionName,
+        // The API wants null to clear the description, an empty string would just get stored as is.
+        description: values.description || null,
       })
         .then(() =>
           enqueueSnackbar('Updated link successfully', {
@@ -118,6 +120,7 @@ export default function LinkDetails(): React.JSX.Element {
               <FormTextField
                 className={layoutVariants({ width: 'full' })}
                 data-1p-ignore
+                data-testid='link-details-name'
                 label='Instituion / Budget Name'
                 name='institutionName'
                 placeholder='Budget Name'
@@ -126,12 +129,13 @@ export default function LinkDetails(): React.JSX.Element {
               <FormTextField
                 className={layoutVariants({ width: 'full' })}
                 data-1p-ignore
+                data-testid='link-details-description'
                 label='Description'
                 name='description'
                 placeholder='Optional notes, like whose login this is'
               />
               <div className={styles.saveDesktop}>
-                <FormButton role='form' type='submit' variant='primary'>
+                <FormButton data-testid='link-details-save' role='form' type='submit' variant='primary'>
                   <Save />
                   Save Changes
                 </FormButton>

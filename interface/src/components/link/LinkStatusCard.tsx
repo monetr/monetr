@@ -73,7 +73,7 @@ export default function LinkStatusCard(props: LinkStatusCardProps): React.JSX.El
   }
 
   return (
-    <section className={styles.card}>
+    <section className={styles.card} data-testid='link-status'>
       <div className={styles.header}>
         <div className={styles.summary}>
           <div className={styles.icon} data-error={isError}>
@@ -95,7 +95,7 @@ export default function LinkStatusCard(props: LinkStatusCardProps): React.JSX.El
           </div>
         </div>
         {canSync && (
-          <Button onClick={triggerSync} variant='secondary'>
+          <Button data-testid='link-status-sync' onClick={triggerSync} variant='secondary'>
             <RefreshCw />
             Sync Now
           </Button>

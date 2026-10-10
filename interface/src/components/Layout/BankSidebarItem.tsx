@@ -50,7 +50,12 @@ export default function BankSidebarItem({ link, sortable }: BankSidebarItemProps
     <Tooltip delayDuration={100}>
       <TooltipTrigger {...sortable} className={styles.root} data-testid={`bank-sidebar-item-${link.linkId}`}>
         <div className={styles.indicator} data-active={String(active)} />
-        <Link className={styles.link} draggable={false} to={linkPath}>
+        <Link
+          className={styles.link}
+          data-testid={`bank-sidebar-item-${link.linkId}-link`}
+          draggable={false}
+          to={linkPath}
+        >
           <PlaidInstitutionLogo link={link} />
           <LinkProviderBadge link={link} />
           <LinkWarningIndicator link={link} />
@@ -65,7 +70,11 @@ export default function BankSidebarItem({ link, sortable }: BankSidebarItemProps
 function LinkProviderBadge({ link }: { link: MonetrLink }): React.JSX.Element | null {
   if (link.getIsPlaid()) {
     return (
-      <span className={styles.providerBadge} data-provider='plaid'>
+      <span
+        className={styles.providerBadge}
+        data-provider='plaid'
+        data-testid={`bank-sidebar-item-${link.linkId}-plaid`}
+      >
         <PlaidLogo className={styles.providerLogo} iconOnly />
       </span>
     );
@@ -73,7 +82,11 @@ function LinkProviderBadge({ link }: { link: MonetrLink }): React.JSX.Element | 
 
   if (link.getIsLunchFlow()) {
     return (
-      <span className={styles.providerBadge} data-provider='lunch_flow'>
+      <span
+        className={styles.providerBadge}
+        data-provider='lunch_flow'
+        data-testid={`bank-sidebar-item-${link.linkId}-lunch-flow`}
+      >
         <LunchFlowLogo className={styles.providerLogo} iconOnly />
       </span>
     );

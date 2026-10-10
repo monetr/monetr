@@ -63,7 +63,7 @@ export default function LinkAccountList(props: LinkAccountListProps): React.JSX.
         </Typography>
         <Badge size='xs'>{accountsSorted.length}</Badge>
       </div>
-      <div className={styles.list} ref={sortable.containerRef}>
+      <div className={styles.list} data-testid='link-accounts' ref={sortable.containerRef}>
         {sortable.items.map(bankAccount => (
           <BankAccountItem
             bankAccount={bankAccount}
@@ -73,7 +73,7 @@ export default function LinkAccountList(props: LinkAccountListProps): React.JSX.
         ))}
       </div>
       {archived.length > 0 && (
-        <details className={styles.archived}>
+        <details className={styles.archived} data-testid='link-accounts-archived'>
           <summary className={styles.archivedSummary}>Archived ({archived.length})</summary>
           <div className={styles.list}>
             {archived.map(bankAccount => (

@@ -844,6 +844,56 @@ func TestPatchLink(t *testing.T) {
 		}
 	})
 
+	t.Run("rename keeps bank account order", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var linkId models.ID[models.Link]
+		{ // Create the manual link via the API
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			linkId = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
+		}
+
+		first := models.NewID[models.BankAccount]().String()
+		second := models.NewID[models.BankAccount]().String()
+
+		{ // Reorder the accounts like a drag on the link details page would
+			response := e.PATCH("/api/links/{linkId}").
+				WithPath("linkId", linkId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"bankAccountOrder": []string{second, first},
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.bankAccountOrder").Array().IsEqual([]string{second, first})
+		}
+
+		{ // Then save the details form, which only sends the name and description
+			response := e.PATCH("/api/links/{linkId}").
+				WithPath("linkId", linkId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "US Bank",
+					"description":     nil,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.institutionName").String().IsEqual("US Bank")
+			// The order should not be wiped out just because it wasn't in the body.
+			response.JSON().Path("$.bankAccountOrder").Array().IsEqual([]string{second, first})
+		}
+	})
+
 	t.Run("duplicate bank account ids", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
