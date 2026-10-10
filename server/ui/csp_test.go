@@ -108,7 +108,7 @@ func TestApplyContentSecurityPolicy(t *testing.T) {
 
 		assert.Equal(
 			t,
-			"blocked-destinations=(script style), endpoints=(csp-endpoint)",
+			"blocked-destinations=(script), endpoints=(csp-endpoint)",
 			headers.Get("Integrity-Policy-Report-Only"),
 		)
 	})
