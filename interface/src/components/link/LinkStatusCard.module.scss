@@ -1,0 +1,108 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 4 * variables.$size;
+  padding-left: 4 * variables.$size;
+  padding-right: 4 * variables.$size;
+  padding-top: 4 * variables.$size;
+  padding-bottom: 4 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 5 * variables.$size;
+    padding-right: 5 * variables.$size;
+    padding-top: 5 * variables.$size;
+    padding-bottom: 5 * variables.$size;
+  }
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  gap: 4 * variables.$size;
+  min-width: 0;
+}
+
+.icon {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 11 * variables.$size; // 44px
+  height: 11 * variables.$size;
+  border-radius: 9999px;
+  color: var(--amount-positive);
+  background-color: color-mix(in srgb, var(--amount-positive) 14%, transparent);
+
+  &[data-error="true"] {
+    color: var(--error);
+    background-color: color-mix(in srgb, var(--error) 14%, transparent);
+  }
+}
+
+.summaryText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.providerRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2 * variables.$size;
+}
+
+.provider {
+  text-transform: uppercase;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid var(--border);
+
+  @media (min-width: variables.$mediumScreen) {
+    grid-template-columns: repeat(auto-fit, minmax(50 * variables.$size, 1fr));
+  }
+}
+
+.fact {
+  padding-left: 4 * variables.$size;
+  padding-right: 4 * variables.$size;
+  padding-top: 3 * variables.$size;
+  padding-bottom: 3 * variables.$size;
+
+  &:not(:last-child) {
+    border-right: 1px solid var(--border-subtle);
+  }
+
+  @media (min-width: variables.$mediumScreen) {
+    padding-left: 5 * variables.$size;
+    padding-right: 5 * variables.$size;
+  }
+}
+
+.factLabel {
+  @include mixins.text-extra-small;
+  color: var(--content-subtle);
+}
+
+.factValue {
+  font-weight: var(--semibold);
+  color: var(--content-emphasis);
+
+  &[data-warning="true"] {
+    color: var(--warning);
+  }
+}

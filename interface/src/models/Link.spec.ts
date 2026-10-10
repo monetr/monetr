@@ -12,6 +12,7 @@ function fixture(overrides: Partial<WithJsonValues<Link>>): Link {
     linkType: LinkType.Plaid,
     institutionName: 'Test Institution',
     description: null,
+    bankAccountOrder: [],
     updatedAt: new Date().toISOString(),
     createdAt: new Date().toISOString(),
     createdBy: ID.from<User>('user_test'),

@@ -798,6 +798,111 @@ func TestPatchLink(t *testing.T) {
 		}
 	})
 
+	t.Run("update bank account order", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var linkId models.ID[models.Link]
+		{ // Create the manual link via the API
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			linkId = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
+		}
+
+		first := models.NewID[models.BankAccount]().String()
+		second := models.NewID[models.BankAccount]().String()
+
+		{ // Set the bank account order on the link
+			response := e.PATCH("/api/links/{linkId}").
+				WithPath("linkId", linkId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"bankAccountOrder": []string{second, first},
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").IsEqual(linkId)
+			response.JSON().Path("$.institutionName").String().IsEqual("U.S. Bank")
+			response.JSON().Path("$.bankAccountOrder").Array().IsEqual([]string{second, first})
+		}
+
+		{ // Then make sure the order was persisted
+			response := e.GET("/api/links/{linkId}").
+				WithPath("linkId", linkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.bankAccountOrder").Array().IsEqual([]string{second, first})
+		}
+	})
+
+	t.Run("duplicate bank account ids", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var linkId models.ID[models.Link]
+		{ // Create the manual link via the API
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			linkId = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
+		}
+
+		bankAccountId := models.NewID[models.BankAccount]().String()
+		response := e.PATCH("/api/links/{linkId}").
+			WithPath("linkId", linkId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"bankAccountOrder": []string{bankAccountId, bankAccountId},
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+	})
+
+	t.Run("invalid bank account id", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var linkId models.ID[models.Link]
+		{ // Create the manual link via the API
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			linkId = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
+		}
+
+		response := e.PATCH("/api/links/{linkId}").
+			WithPath("linkId", linkId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"bankAccountOrder": []string{"not-a-bank-account-id"},
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+	})
+
 	t.Run("unauthenticated", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)

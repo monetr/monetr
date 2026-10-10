@@ -257,6 +257,14 @@ body {
       overflow: hidden;
     }
   }
+
+  // Radix locks scrolling when a dropdown or dialog opens and adds a margin-right the size of the scrollbar so things
+  // don't shift. But it measures that off of the html element, which already reserves the space with scrollbar-gutter
+  // above, so the margin just shoves everything over. The html prefix is so this beats the style tag it injects.
+  // See: https://github.com/theKashey/react-remove-scroll-bar
+  html &[data-scroll-locked] {
+    margin-right: 0 !important;
+  }
 }
 
 // iOS 27 draws a progressive blur over the top of installed web apps that use
