@@ -21,6 +21,7 @@ environment: "<string>"
 allowSignUp: <true|false>
 
 cors: { ... }          # CORS configuration
+database: { ... }      # Database configuration
 email: { ... }         # Email/SMTP configuration
 keyManagement: { ... } # KMS/Encryption configuration
 links: { ... }         # Connected/Manual Links configuration
@@ -140,6 +141,12 @@ Each of the sub-configurations noted above are documented in more detail in the 
   title="CORS"
   description="Set up cross-origin resource sharing (CORS) to manage API access from different origins."
   href="/documentation/configure/cors"
+/>
+<Cards.Card
+  icon={<Database />}
+  title="Database"
+  description="Set up and manage the database backing monetr."
+  href="/documentation/configure/database"
 />
 <Cards.Card
   icon={<Mail />}

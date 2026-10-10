@@ -1,5 +1,6 @@
 [
   { "type": "file", "name": "cors", "label": "CORS" },
+  { "type": "file", "name": "database", "label": "Database" },
   { "type": "file", "name": "email", "label": "Email" },
   { "type": "file", "name": "kms", "label": "Key Management" },
   { "type": "file", "name": "links", "label": "Links" },

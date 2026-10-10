@@ -38,11 +38,15 @@ type Configuration struct {
 	// configFile is not an actual configuration variable, but is used to let
 	// usages know what file was loaded for the configuration.
 	configFile string `yaml:"-"`
+	// legacyPostgreSQL is true when the old top level postgreSql block was used
+	// from the config file instead of database.postgreSql.
+	legacyPostgreSQL bool `yaml:"-"`
 
 	Environment   string        `yaml:"environment"`
 	AllowSignUp   bool          `yaml:"allowSignUp"`
 	Beta          Beta          `yaml:"beta"`
 	CORS          CORS          `yaml:"cors"`
+	Database      Database      `yaml:"database"`
 	Email         Email         `yaml:"email"`
 	Features      Features      `yaml:"transactionImports"`
 	KeyManagement KeyManagement `yaml:"keyManagement"`
@@ -62,6 +66,10 @@ type Configuration struct {
 
 func (c Configuration) GetConfigFileName() string {
 	return c.configFile
+}
+
+func (c Configuration) IsUsingLegacyPostgreSQL() bool {
+	return c.legacyPostgreSQL
 }
 
 type Storage struct {
@@ -107,20 +115,6 @@ type Security struct {
 	// PrivateKey is the path to the file containing the ED22519 private key in
 	// pem format.
 	PrivateKey string `yaml:"privateKey"`
-}
-
-type PostgreSQL struct {
-	Address            string `yaml:"address"`
-	Port               int    `yaml:"port"`
-	Username           string `yaml:"username"`
-	Password           string `yaml:"password"`
-	Database           string `yaml:"database"`
-	TLS                bool   `yaml:"tls"`
-	InsecureSkipVerify bool   `yaml:"insecureSkipVerify"`
-	CACertificatePath  string `yaml:"caCertificatePath"`
-	KeyPath            string `yaml:"keyPath"`
-	CertificatePath    string `yaml:"certificatePath"`
-	Migrate            bool   `yaml:"migrate"`
 }
 
 // ProofOfWork gates the unauthenticated auth endpoints (register, login, forgot
@@ -361,6 +355,28 @@ func LoadConfigurationEx(v *viper.Viper) (config Configuration) {
 
 	config.configFile = v.ConfigFileUsed()
 
+	// Until everything reads from the new database block, copy the old
+	// postgresql block into it as long as the new block wasn't actually written
+	// in the config file. We can't just check the address on the old block
+	// because it has a default, so look at where it came from instead. The env
+	// vars are bound to both blocks so if one of those set the address then the
+	// new block won't be nil here.
+	if !v.InConfig("database.postgresql") {
+		addressDefined := v.InConfig("postgresql.address") ||
+			(config.Database.PostgreSQL != nil && config.Database.PostgreSQL.Address != "")
+		if addressDefined || config.Database.Kind == DatabaseKindPostgreSQL {
+			postgresql := config.PostgreSQL
+			config.Database.PostgreSQL = &postgresql
+			config.legacyPostgreSQL = v.InConfig("postgresql")
+		}
+	}
+
+	// Can't use a viper default for this one, it would make the new postgresql
+	// block always be non-nil and we need nil to know nothing was configured
+	if config.Database.PostgreSQL != nil && config.Database.PostgreSQL.Port == 0 {
+		config.Database.PostgreSQL.Port = 5432
+	}
+
 	privateKey, err := util.ExpandHomePath(config.Security.PrivateKey)
 	if err != nil {
 		panic(err)
@@ -445,6 +461,19 @@ func setupEnv(v *viper.Viper) {
 	v.MustBindEnv("Plaid.WebhooksEnabled", "MONETR_PLAID_WEBHOOKS_ENABLED")
 	v.MustBindEnv("Plaid.WebhooksDomain", "MONETR_PLAID_WEBHOOKS_DOMAIN")
 	v.MustBindEnv("Plaid.OAuthDomain", "MONETR_PLAID_OAUTH_DOMAIN")
+
+	// New database config setup
+	v.MustBindEnv("Database.PostgreSQL.Address", "MONETR_PG_ADDRESS")
+	v.MustBindEnv("Database.PostgreSQL.Port", "MONETR_PG_PORT")
+	v.MustBindEnv("Database.PostgreSQL.Username", "MONETR_PG_USERNAME")
+	v.MustBindEnv("Database.PostgreSQL.Password", "MONETR_PG_PASSWORD")
+	v.MustBindEnv("Database.PostgreSQL.Database", "MONETR_PG_DATABASE")
+	v.MustBindEnv("Database.PostgreSQL.TLS", "MONETR_PG_TLS")
+	v.MustBindEnv("Database.PostgreSQL.InsecureSkipVerify", "MONETR_PG_INSECURE_SKIP_VERIFY")
+	v.MustBindEnv("Database.PostgreSQL.CACertificatePath", "MONETR_PG_CA_PATH")
+	v.MustBindEnv("Database.PostgreSQL.CertificatePath", "MONETR_PG_CERT_PATH")
+	v.MustBindEnv("Database.PostgreSQL.KeyPath", "MONETR_PG_KEY_PATH")
+
 	v.MustBindEnv("PostgreSQL.Address", "MONETR_PG_ADDRESS")
 	v.MustBindEnv("PostgreSQL.Port", "MONETR_PG_PORT")
 	v.MustBindEnv("PostgreSQL.Username", "MONETR_PG_USERNAME")

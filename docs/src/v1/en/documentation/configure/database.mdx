@@ -1,34 +1,42 @@
 ---
-title: "PostgreSQL"
+title: "Database"
 ---
 
-# PostgreSQL Configuration
+# Database Configuration
 
-:::warning
-monetr is migrating from using this configuration to a new config layout, this configuration will continue to work for
-the next few releases but will eventually stop working and require configuration files to be updated. If you are
-configuring your server via environment variables you should be fine.
+monetr now configures it's database connection via the database config block. This is to enable more database backends
+in the near future. The long term goal is for monetr to support (and default to) SQLite as the database backend for new
+installations. To that end, this is monetr's new method of configuring a database connection for the server.
 
-See [Database Configuration](./database) for more details.
-:::
+```yaml title="config.yaml"
+database:
+  kind: postgresql # Can only be postgresql at the moment
+  postgreSql: { ... } # PostgreSQL configuration
+```
 
-monetr's primary database is PostgreSQL and is required in order for monetr to run. monetr also uses PostgreSQL as a
-basic pub-sub system via `LISTEN` and `NOTIFY` commands.
+At the moment this configuration is a no-op, however following the
+[v1.19.0](https://github.com/monetr/monetr/releases/tag/v1.19.0) you will start receiving warnings if this block is not
+configured. In a following release monetr will switch over to using this config block instead of the PostgreSQL config
+block that exists today.
+
+## PostgreSQL Configuration
 
 Officially monetr supports PostgreSQL version 16 and higher.
 
 ```yaml title="config.yaml"
-postgresql:
-  address: "localhost"
-  port: 5432
-  username: "monetr"
-  password: "..."
-  database: "monetr"
-  tls: false
-  insecureSkipVerify: false
-  caCertificatePath: "</tls/ca.cert>"
-  keyPath: "</tls/tls.key>"
-  certificatePath: "</tls/tls.cert>"
+database:
+  # ...
+  postgresql:
+    address: "localhost"
+    port: 5432
+    username: "monetr"
+    password: "..."
+    database: "monetr"
+    tls: false
+    insecureSkipVerify: false
+    caCertificatePath: "</tls/ca.cert>"
+    keyPath: "</tls/tls.key>"
+    certificatePath: "</tls/tls.cert>"
 ```
 
 | **Name**             | **Type** | **Default** | **Description**                                                                                                                                                                                       |
@@ -55,16 +63,20 @@ The following environment variables map to the following configuration file fiel
 
 | Variable                         | Config File Field               |
 | ---                              | ---                             |
-| `MONETR_PG_ADDRESS`              | `postgresql.address`            |
-| `MONETR_PG_PORT`                 | `postgresql.port`               |
-| `MONETR_PG_USERNAME`             | `postgresql.username`           |
-| `MONETR_PG_PASSWORD`             | `postgresql.password`           |
-| `MONETR_PG_DATABASE`             | `postgresql.database`           |
-| `MONETR_PG_TLS`                  | `postgresql.tls`                |
-| `MONETR_PG_INSECURE_SKIP_VERIFY` | `postgresql.insecureSkipVerify` |
-| `MONETR_PG_CA_PATH`              | `postgresql.caCertificatePath`  |
-| `MONETR_PG_KEY_PATH`             | `postgresql.keyPath`            |
-| `MONETR_PG_CERT_PATH`            | `postgresql.certificatePath`    |
+| `MONETR_PG_ADDRESS`              | `database.postgresql.address`            |
+| `MONETR_PG_PORT`                 | `database.postgresql.port`               |
+| `MONETR_PG_USERNAME`             | `database.postgresql.username`           |
+| `MONETR_PG_PASSWORD`             | `database.postgresql.password`           |
+| `MONETR_PG_DATABASE`             | `database.postgresql.database`           |
+| `MONETR_PG_TLS`                  | `database.postgresql.tls`                |
+| `MONETR_PG_INSECURE_SKIP_VERIFY` | `database.postgresql.insecureSkipVerify` |
+| `MONETR_PG_CA_PATH`              | `database.postgresql.caCertificatePath`  |
+| `MONETR_PG_KEY_PATH`             | `database.postgresql.keyPath`            |
+| `MONETR_PG_CERT_PATH`            | `database.postgresql.certificatePath`    |
+
+## SQLite Configuration
+
+**Coming Soon!**
 
 ## Database Migrations
 

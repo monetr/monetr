@@ -26,6 +26,10 @@ func GetDatabase(
 	configuration config.Configuration,
 	stats *metrics.Stats,
 ) (*bun.DB, error) {
+	if configuration.IsUsingLegacyPostgreSQL() {
+		log.Warn("Config warning! database.postgresql is not configured, please migrate your configuration to the new settings going forward! If you do not migrate your config then this will break in an upcoming release!")
+	}
+
 	options := []pgdriver.Option{
 		pgdriver.WithNetwork("tcp"),
 		pgdriver.WithAddr(net.JoinHostPort(
