@@ -20,7 +20,10 @@ export default function BankSidebarItem({ link, sortable }: BankSidebarItemProps
   const { data: bankAccounts } = useBankAccounts();
   const active = selectBankAccount.data?.linkId === link.linkId;
 
-  const destinationBankAccounts = sortAccounts(bankAccounts?.filter(bankAccount => bankAccount.linkId === link.linkId));
+  const destinationBankAccounts = sortAccounts(
+    bankAccounts?.filter(bankAccount => bankAccount.linkId === link.linkId),
+    link.bankAccountOrder,
+  );
 
   const destinationBankAccount = destinationBankAccounts.length > 0 ? destinationBankAccounts[0] : null;
 

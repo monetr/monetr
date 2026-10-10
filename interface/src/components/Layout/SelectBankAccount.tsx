@@ -34,11 +34,13 @@ export default function SelectBankAccount(): React.JSX.Element {
   const [, navigate] = useLocation();
   const { data: allBankAccounts, isLoading: allIsLoading } = useBankAccounts();
   const { data: selectedBankAccount, isLoading: selectedIsLoading } = useSelectedBankAccount();
+  const { data: link } = useCurrentLink();
   const [open, setOpen] = React.useState(false);
   const isMobile = useIsMobile();
 
   const accounts: Array<SelectBankAccountPickerOption> = sortAccounts(
     allBankAccounts?.filter(account => account.linkId === selectedBankAccount?.linkId),
+    link?.bankAccountOrder,
   ).map(account => ({
     label: account.name,
     value: account.bankAccountId,
