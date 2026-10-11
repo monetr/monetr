@@ -19,19 +19,20 @@ SDK that an API key can't drive, so it lives in [internal endpoints](./internal)
 
 ## The link object
 
-| Attribute         | Type                | Description                                                                                                  |
-| ----------------- | ------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `linkId`          | string (ulid)       | Identifies the link.                                                                                         |
-| `linkType`        | string              | `plaid`, `manual`, `lunch_flow`, or `unknown`.                                                               |
-| `plaidLink`       | object              | Sync state for Plaid links, described below. Absent on every other kind.                                     |
-| `lunchFlowLinkId` | string (ulid)       | The Lunch Flow link behind this one. Only on Lunch Flow links.                                               |
-| `lunchFlowLink`   | object              | The upstream Lunch Flow link. Only on Lunch Flow links.                                                      |
-| `institutionName` | string              | The bank's name. On a manual link this is whatever you called it, and it's the label you see in the sidebar. |
-| `description`     | string, nullable    | Your own note about the link. Null when you haven't set one.                                                 |
-| `createdAt`       | timestamp           | When the link was made.                                                                                      |
-| `createdBy`       | string (ulid)       | The user who made it.                                                                                        |
-| `updatedAt`       | timestamp           | When the link last changed.                                                                                  |
-| `deletedAt`       | timestamp, nullable | When the link was removed. Always null in list responses, which filter deleted links out entirely.           |
+| Attribute          | Type                       | Description                                                                                                  |
+| ------------------ | -------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `linkId`           | string (ulid)              | Identifies the link.                                                                                         |
+| `linkType`         | string                     | `plaid`, `manual`, `lunch_flow`, or `unknown`.                                                               |
+| `plaidLink`        | object                     | Sync state for Plaid links, described below. Absent on every other kind.                                     |
+| `lunchFlowLinkId`  | string (ulid)              | The Lunch Flow link behind this one. Only on Lunch Flow links.                                               |
+| `lunchFlowLink`    | object                     | The upstream Lunch Flow link. Only on Lunch Flow links.                                                      |
+| `institutionName`  | string                     | The bank's name. On a manual link this is whatever you called it, and it's the label you see in the sidebar. |
+| `description`      | string, nullable           | Your own note about the link. Null when you haven't set one.                                                 |
+| `bankAccountOrder` | array of strings, nullable | Bank account IDs in the order you put them in. Null until you've reordered them.                             |
+| `createdAt`        | timestamp                  | When the link was made.                                                                                      |
+| `createdBy`        | string (ulid)              | The user who made it.                                                                                        |
+| `updatedAt`        | timestamp                  | When the link last changed.                                                                                  |
+| `deletedAt`        | timestamp, nullable        | When the link was removed. Always null in list responses, which filter deleted links out entirely.           |
 
 ### The `plaidLink` object
 
@@ -232,10 +233,10 @@ curl --request POST \
 
 ## <Badge type="warning">PATCH</Badge> Update a link
 
-Renames a link or changes its description. Works on any link type, including Plaid ones, since these two fields are
-yours rather than the bank's.
+Renames a link, changes its description, or changes the order its bank accounts show up in. Works on any link type,
+including Plaid ones, since these fields are yours rather than the bank's.
 
-**In the app:** Renaming a link or editing its description on the link details page.
+**In the app:** Renaming a link, editing its description or dragging its accounts around on the link details page.
 
 ```http
 PATCH /api/links/:linkId
@@ -251,10 +252,11 @@ PATCH /api/links/:linkId
 
 ### Body
 
-| Attribute         | Type             | Required | Description                              |
-| ----------------- | ---------------- | -------- | ---------------------------------------- |
-| `description`     | string, nullable | No       | A note to yourself, or null to clear it. |
-| `institutionName` | string           | No       | A new name for the link.                 |
+| Attribute          | Type             | Required | Description                                                                                                                                                                                                             |
+| ------------------ | ---------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `description`      | string, nullable | No       | A note to yourself, or null to clear it.                                                                                                                                                                                |
+| `institutionName`  | string           | No       | A new name for the link.                                                                                                                                                                                                |
+| `bankAccountOrder` | array of strings | No       | Bank account IDs in the order you want them. Up to 100, no repeats. The whole list gets replaced, so send every account you care about. The IDs aren't checked against the link's accounts, so stale ones stick around. |
 
 ### Example
 
@@ -284,10 +286,11 @@ curl --request PATCH \
 
 ### Errors
 
-| Status | When                                  |
-| ------ | ------------------------------------- |
-| 400    | `institutionName` was sent but blank. |
-| 404    | No such link.                         |
+| Status | When                                                                            |
+| ------ | ------------------------------------------------------------------------------- |
+| 400    | `institutionName` was sent but blank.                                           |
+| 400    | A bank account ID is malformed or repeated, or there are more than 100 of them. |
+| 404    | No such link.                                                                   |
 
 ## <Badge type="danger">DELETE</Badge> Remove a link
 

@@ -1,0 +1,119 @@
+@use '@monetr/interface/variables';
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 3 * variables.$size;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 2 * variables.$size;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5 * variables.$size;
+}
+
+.item {
+  position: relative;
+  width: 100%;
+  border-radius: var(--border-radius);
+  background-color: var(--background);
+
+  &[data-dragging="true"] {
+    z-index: 10;
+    cursor: grabbing;
+    box-shadow: 0 2 * variables.$size 3 * variables.$size rgb(0 0 0 / 0.3);
+
+    .itemLink {
+      background-color: var(--background-subtle);
+    }
+  }
+}
+
+.itemLink {
+  display: flex;
+  gap: 2 * variables.$size;
+  border-radius: var(--border-radius);
+  padding-left: 3 * variables.$size;
+  padding-right: 3 * variables.$size;
+  padding-top: 2.5 * variables.$size;
+  padding-bottom: 2.5 * variables.$size;
+  align-items: center;
+
+  @media (min-width: variables.$mediumScreen) {
+    gap: 4 * variables.$size;
+  }
+
+  .item:hover & {
+    background-color: var(--background-subtle);
+  }
+}
+
+// Only shows up on hover so it's clear the row can be dragged, it still takes up its space the rest of the time so the
+// row doesn't shift around.
+.itemGrip {
+  flex: none;
+  margin-left: -1 * variables.$size;
+  margin-right: -1 * variables.$size;
+  color: var(--content-subtle);
+  visibility: hidden;
+  cursor: grab;
+
+  .item:hover &,
+  .item[data-dragging="true"] & {
+    visibility: visible;
+  }
+}
+
+.itemText {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  overflow: hidden;
+  flex-grow: 1;
+}
+
+.itemNameRow {
+  display: flex;
+  gap: 2 * variables.$size;
+}
+
+.itemName {
+  .item:hover & {
+    text-decoration: underline;
+  }
+}
+
+.itemBalance {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: flex-end;
+  font-variant-numeric: tabular-nums;
+}
+
+.itemChevron {
+  flex: none;
+  color: var(--content-subtle);
+
+  .item:hover & {
+    color: var(--content-emphasis);
+  }
+}
+
+.archived {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 2 * variables.$size;
+}
+
+.archivedSummary {
+  cursor: pointer;
+  color: var(--content-subtle);
+  padding-top: 2 * variables.$size;
+  padding-bottom: 2 * variables.$size;
+}

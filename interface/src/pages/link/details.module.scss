@@ -32,124 +32,135 @@
   }
 }
 
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 6 * variables.$size;
+  width: 100%;
+  // At least as tall as the scrolling body so the remove section can sit at the bottom when the page is short. Not vh
+  // since the body is below the top nav, it would always overflow.
+  min-height: 100%;
+}
+
 // Two-column responsive row.
 .columns {
   display: flex;
   flex-direction: column;
   width: 100%;
   gap: 8 * variables.$size;
-  align-items: center;
 
   @media (min-width: variables.$mediumScreen) {
     flex-direction: row;
-    align-items: stretch;
+    align-items: flex-start;
   }
 }
 
-// Left column.
-.column {
+// No gap here, the form fields already pad themselves for their error text.
+.columnDetails {
   width: 100%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
 
   @media (min-width: variables.$mediumScreen) {
-    width: 50%;
+    flex: 1 1 0;
   }
 }
 
-// Right column.
+// On phones the accounts come before the details, there's more reason to look at them than to rename the link.
 .columnAccounts {
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 2 * variables.$size;
+  min-width: 0;
+  order: -1;
 
   @media (min-width: variables.$mediumScreen) {
-    width: 50%;
+    flex: 1.4 1 0;
+    order: 0;
   }
 }
 
-// Details heading.
-.headingFull {
-  margin-top: 2 * variables.$size;
-  margin-bottom: 2 * variables.$size;
-  width: 100%;
+.saveDesktop {
+  display: none;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: flex;
+    justify-content: flex-end;
+  }
 }
 
-// Accounts heading.
-.heading {
-  margin-top: 2 * variables.$size;
-  margin-bottom: 2 * variables.$size;
-}
-
-// Visible on mobile, hidden md+.
-.dividerMobile {
-  display: block;
-  width: 50%;
+.saveMobile {
+  flex: none;
+  padding-left: 4 * variables.$size;
+  padding-right: 4 * variables.$size;
+  padding-top: 3 * variables.$size;
+  padding-bottom: 6 * variables.$size;
+  border-top: 1px solid var(--border-subtle);
+  background-color: var(--background-darker);
 
   @media (min-width: variables.$mediumScreen) {
     display: none;
   }
 }
 
-.accountList {
-  display: flex;
-  flex-direction: column;
-  gap: 2 * variables.$size;
-}
-
-// Acts as the hover group for its row.
-.item {
-  position: relative;
+.saveMobileButton {
   width: 100%;
 }
 
-.itemLink {
-  display: flex;
-  height: 100%;
-  gap: 1 * variables.$size;
-  border-radius: var(--border-radius);
-  padding-left: 2 * variables.$size;
-  padding-right: 2 * variables.$size;
-  padding-top: 1 * variables.$size;
-  padding-bottom: 1 * variables.$size;
+.heading {
+  margin-bottom: 2 * variables.$size;
+}
+
+.connectionHeading {
+  margin-top: 2 * variables.$size;
+  margin-bottom: 2 * variables.$size;
+}
+
+.connection {
+  display: grid;
+  grid-template-columns: max-content 1fr;
   align-items: center;
+  column-gap: 6 * variables.$size;
+  row-gap: 2 * variables.$size;
+  margin-bottom: 4 * variables.$size;
 
-  @media (min-width: variables.$mediumScreen) {
-    gap: 4 * variables.$size;
+  dt {
+    color: var(--content-subtle);
   }
 
-  // group-hover:bg-zinc-600
-  .item:hover & {
-    background-color: var(--background-active);
+  dd {
+    min-width: 0;
   }
 }
 
-.itemText {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  overflow: hidden;
-  flex-grow: 1;
+// Same as the values on the about page, shrinks to the content instead of filling the row.
+.connectionValue {
+  max-width: fit-content;
 }
 
-.itemNameRow {
+.connectionButtons {
   display: flex;
+  flex-wrap: wrap;
   gap: 2 * variables.$size;
 }
 
-// Account name.
-.itemName {
-  .item:hover & {
-    text-decoration: underline;
+.remove {
+  display: flex;
+  flex-direction: column;
+  gap: 3 * variables.$size;
+  margin-top: auto;
+  padding-top: 6 * variables.$size;
+  border-top: 1px solid var(--border-subtle);
+
+  @media (min-width: variables.$mediumScreen) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6 * variables.$size;
   }
 }
 
-.itemChevron {
-  color: var(--content-subtle);
-
-  .item:hover & {
-    color: var(--content-emphasis);
-  }
+.removeText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }

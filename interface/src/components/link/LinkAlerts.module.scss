@@ -1,0 +1,50 @@
+@use '@monetr/interface/variables';
+
+.alert {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3 * variables.$size;
+  padding-left: 4 * variables.$size;
+  padding-right: 4 * variables.$size;
+  padding-top: 3 * variables.$size;
+  padding-bottom: 3 * variables.$size;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border);
+
+  &[data-variant="warning"] {
+    border-color: var(--warning);
+    background-color: color-mix(in srgb, var(--warning) 12%, transparent);
+
+    .icon {
+      color: var(--warning);
+    }
+  }
+
+  &[data-variant="error"] {
+    border-color: var(--error);
+    background-color: color-mix(in srgb, var(--error) 12%, transparent);
+
+    .icon {
+      color: var(--error);
+    }
+  }
+
+  &[data-variant="brand"] {
+    border-color: var(--brand-subtle);
+    background-color: color-mix(in srgb, var(--brand-muted) 12%, transparent);
+
+    .icon {
+      color: var(--brand-faint);
+    }
+  }
+}
+
+.icon {
+  flex: none;
+}
+
+.text {
+  flex: 1 1 80 * variables.$size;
+  min-width: 0;
+}

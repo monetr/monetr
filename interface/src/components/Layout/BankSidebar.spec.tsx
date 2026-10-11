@@ -445,4 +445,220 @@ describe('bank sidebar', () => {
     await waitFor(() => expect(world.queryByTestId('bank-sidebar-item-4-logo')).not.toBeInTheDocument());
     await waitFor(() => expect(world.getByTestId('bank-sidebar-item-4-logo-missing')).toBeVisible());
   });
+
+  it('will show which provider each link uses', async () => {
+    mockFetch.onGet('/api/config').reply(200, {
+      allowForgotPassword: true,
+      allowSignUp: true,
+      iconsEnabled: true,
+      billingEnabled: false,
+    });
+    mockFetch.onGet('/api/users/me').reply(200, {
+      hasSubscription: true,
+      isActive: true,
+      isSetup: true,
+      defaultCurrency: 'USD',
+      user: {
+        account: {
+          accountId: 'acct_01hy4r9b8gnb1a1d2r0z6t2k8x',
+          subscriptionActiveUntil: '2026-11-26T00:31:38Z',
+          subscriptionStatus: 'active',
+          timezone: 'America/Chicago',
+          locale: 'en_US',
+        },
+        accountId: 'acct_01hy4r9b8gnb1a1d2r0z6t2k8x',
+        login: {
+          email: 'example@example.com',
+          firstName: 'Elliot',
+          lastName: 'Courant',
+          isEmailVerified: true,
+          loginId: 'lgn_01hy4r9b8gnb1a1d2r0z6t2k8x',
+          totpEnabledAt: null,
+        },
+        loginId: 'lgn_01hy4r9b8gnb1a1d2r0z6t2k8x',
+        userId: 'user_01hym36e8ewaq0hxssb1m3k4ha',
+        role: 'owner',
+        linkOrder: null,
+      },
+    });
+    mockFetch.onGet('/api/links').reply(200, [
+      {
+        linkId: 'link_01hy4rbb1gjdek7h2xmgy5pnwk',
+        linkType: 'plaid',
+        plaidLink: {
+          products: ['transactions'],
+          status: 'setup',
+          errorCode: null,
+          expirationDate: null,
+          newAccountsAvailable: false,
+          institutionId: 'ins_116794',
+          institutionName: 'Mercury',
+          lastManualSync: '2026-10-08T19:56:34Z',
+          lastSuccessfulUpdate: '2026-10-10T04:22:52Z',
+          lastAttemptedUpdate: '2026-10-10T04:22:52Z',
+          updatedAt: '2026-10-10T04:22:52Z',
+          createdAt: '2026-01-12T02:08:40Z',
+          createdBy: 'user_01hym36e8ewaq0hxssb1m3k4ha',
+        },
+        institutionName: 'Mercury',
+        description: null,
+        bankAccountOrder: null,
+        createdAt: '2026-01-12T02:08:40Z',
+        createdBy: 'user_01hym36e8ewaq0hxssb1m3k4ha',
+        updatedAt: '2026-10-10T04:22:52Z',
+        deletedAt: null,
+      },
+      {
+        linkId: 'link_01hy4rbb1gjdek7h2xmgy5pnyy',
+        lunchFlowLinkId: 'lfx_01hy4rbb1gjdek7h2xmgy5pnwk',
+        linkType: 'lunch_flow',
+        lunchFlowLink: {
+          lunchFlowLinkId: 'lfx_01hy4rbb1gjdek7h2xmgy5pnwk',
+          name: 'Personal',
+          apiUrl: 'https://www.lunchflow.app/api/v1',
+          status: 'active',
+          lastManualSync: null,
+          lastSuccessfulUpdate: '2026-10-10T04:22:52Z',
+          lastAttemptedUpdate: '2026-10-10T04:22:52Z',
+          updatedAt: '2026-10-10T04:22:52Z',
+          createdAt: '2026-03-02T02:08:40Z',
+          deletedAt: null,
+          createdBy: 'user_01hym36e8ewaq0hxssb1m3k4ha',
+        },
+        institutionName: 'Ally',
+        description: null,
+        bankAccountOrder: null,
+        createdAt: '2026-03-02T02:08:40Z',
+        createdBy: 'user_01hym36e8ewaq0hxssb1m3k4ha',
+        updatedAt: '2026-10-10T04:22:52Z',
+        deletedAt: null,
+      },
+      {
+        linkId: 'link_01hy4rbb1gjdek7h2xmgy5pnzz',
+        linkType: 'manual',
+        institutionName: 'Cash Budget',
+        description: null,
+        bankAccountOrder: null,
+        createdAt: '2026-01-12T02:08:40Z',
+        createdBy: 'user_01hym36e8ewaq0hxssb1m3k4ha',
+        updatedAt: '2026-10-10T04:22:52Z',
+        deletedAt: null,
+      },
+    ]);
+    mockFetch.onGet('/api/bank_accounts').reply(200, []);
+
+    const world = testRenderer(<BankSidebar />, { initialRoute: '/link/link_01hy4rbb1gjdek7h2xmgy5pnwk/details' });
+
+    await waitFor(() => expect(world.getByTestId('bank-sidebar-item-link_01hy4rbb1gjdek7h2xmgy5pnwk')).toBeVisible());
+    await waitFor(() =>
+      expect(world.getByTestId('bank-sidebar-item-link_01hy4rbb1gjdek7h2xmgy5pnwk-plaid')).toBeVisible(),
+    );
+    await waitFor(() =>
+      expect(world.getByTestId('bank-sidebar-item-link_01hy4rbb1gjdek7h2xmgy5pnyy-lunch-flow')).toBeVisible(),
+    );
+    // Manual links don't come from a provider so they don't get a badge.
+    await waitFor(() => expect(world.getByTestId('bank-sidebar-item-link_01hy4rbb1gjdek7h2xmgy5pnzz')).toBeVisible());
+    await waitFor(() =>
+      expect(world.queryByTestId('bank-sidebar-item-link_01hy4rbb1gjdek7h2xmgy5pnzz-plaid')).not.toBeInTheDocument(),
+    );
+    await waitFor(() =>
+      expect(
+        world.queryByTestId('bank-sidebar-item-link_01hy4rbb1gjdek7h2xmgy5pnzz-lunch-flow'),
+      ).not.toBeInTheDocument(),
+    );
+  });
+
+  it('will link to the first account in the saved order', async () => {
+    mockFetch.onGet('/api/config').reply(200, {
+      allowForgotPassword: true,
+      allowSignUp: true,
+      iconsEnabled: true,
+      billingEnabled: false,
+    });
+    mockFetch.onGet('/api/users/me').reply(200, {
+      hasSubscription: true,
+      isActive: true,
+      isSetup: true,
+      defaultCurrency: 'USD',
+      user: {
+        account: {
+          accountId: 'acct_01hy4r9b8gnb1a1d2r0z6t2k8x',
+          subscriptionActiveUntil: '2026-11-26T00:31:38Z',
+          subscriptionStatus: 'active',
+          timezone: 'America/Chicago',
+          locale: 'en_US',
+        },
+        accountId: 'acct_01hy4r9b8gnb1a1d2r0z6t2k8x',
+        login: {
+          email: 'example@example.com',
+          firstName: 'Elliot',
+          lastName: 'Courant',
+          isEmailVerified: true,
+          loginId: 'lgn_01hy4r9b8gnb1a1d2r0z6t2k8x',
+          totpEnabledAt: null,
+        },
+        loginId: 'lgn_01hy4r9b8gnb1a1d2r0z6t2k8x',
+        userId: 'user_01hym36e8ewaq0hxssb1m3k4ha',
+        role: 'owner',
+        linkOrder: null,
+      },
+    });
+    mockFetch.onGet('/api/links').reply(200, [
+      {
+        linkId: 'link_01hy4rbb1gjdek7h2xmgy5pnzz',
+        linkType: 'manual',
+        institutionName: 'Cash Budget',
+        description: null,
+        bankAccountOrder: ['bac_01hy4rcmadc01d2kzv7vynbyyy', 'bac_01hy4rcmadc01d2kzv7vynbxxx'],
+        createdAt: '2026-01-12T02:08:40Z',
+        createdBy: 'user_01hym36e8ewaq0hxssb1m3k4ha',
+        updatedAt: '2026-10-10T04:22:52Z',
+        deletedAt: null,
+      },
+    ]);
+    mockFetch.onGet('/api/bank_accounts').reply(200, [
+      {
+        bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
+        linkId: 'link_01hy4rbb1gjdek7h2xmgy5pnzz',
+        availableBalance: 12000,
+        currentBalance: 12000,
+        mask: null,
+        name: 'Envelope Checking',
+        originalName: 'Envelope Checking',
+        accountType: 'depository',
+        accountSubType: 'checking',
+        status: 'active',
+        currency: 'USD',
+        lastUpdated: '2026-10-10T04:22:52Z',
+        createdAt: '2026-01-12T02:08:40Z',
+        deletedAt: null,
+      },
+      {
+        bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbyyy',
+        linkId: 'link_01hy4rbb1gjdek7h2xmgy5pnzz',
+        availableBalance: 250000,
+        currentBalance: 250000,
+        mask: null,
+        name: 'Envelope Savings',
+        originalName: 'Envelope Savings',
+        accountType: 'depository',
+        accountSubType: 'savings',
+        status: 'active',
+        currency: 'USD',
+        lastUpdated: '2026-10-10T04:22:52Z',
+        createdAt: '2026-01-12T02:08:40Z',
+        deletedAt: null,
+      },
+    ]);
+
+    const world = testRenderer(<BankSidebar />, { initialRoute: '/link/link_01hy4rbb1gjdek7h2xmgy5pnzz/details' });
+
+    // Checking would normally come first, but savings was dragged to the top on the link details page.
+    await waitFor(() =>
+      expect(world.getByTestId('bank-sidebar-item-link_01hy4rbb1gjdek7h2xmgy5pnzz-link')).toHaveAttribute(
+        'href',
+        '/bank/bac_01hy4rcmadc01d2kzv7vynbyyy/transactions',
+      ),
+    );
+  });
 });

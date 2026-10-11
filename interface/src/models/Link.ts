@@ -1,3 +1,4 @@
+import type BankAccount from '@monetr/interface/models/BankAccount';
 import { ID, idPrefix } from '@monetr/interface/models/ID';
 import LunchFlowLink, { LunchFlowLinkStatus } from '@monetr/interface/models/LunchFlowLink';
 import PlaidLink, { PlaidLinkStatus } from '@monetr/interface/models/PlaidLink';
@@ -34,6 +35,7 @@ export default class Link {
   readonly linkType: LinkType;
   institutionName: string;
   description: string | null;
+  bankAccountOrder: Array<ID<BankAccount>>;
   readonly updatedAt: Date;
   readonly createdAt: Date;
   readonly createdBy: ID<User>;
@@ -47,6 +49,7 @@ export default class Link {
     this.linkType = data.linkType;
     this.institutionName = data.institutionName;
     this.description = data.description ?? null;
+    this.bankAccountOrder = data.bankAccountOrder ?? [];
     this.updatedAt = parseDate(data.updatedAt);
     this.createdAt = parseDate(data.createdAt);
     this.createdBy = ID.from(data.createdBy);
