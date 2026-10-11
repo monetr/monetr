@@ -93,12 +93,14 @@ To verify a monetr container image using cosign, first make sure you have cosign
 Once cosign is installed you can run the following command against the desired container image version to verify it's
 signature.
 
+{/* x-release-please-start-version */}
 ```shell title="Shell"
 cosign verify \
   --certificate-identity-regexp '^https://github.com/monetr/monetr/' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  ghcr.io/monetr/monetr:1.14.0
+  ghcr.io/monetr/monetr:1.18.1
 ```
+{/* x-release-please-end */}
 
 Make sure to replace the version of the container image with the version you want to verify. This can also be used to
 verify container images from any of the supported container registries that monetr pushes to.
@@ -108,11 +110,13 @@ verify container images from any of the supported container registries that mone
 Verifying the container image using the GitHub CLI is similar, once it is installed you can run the following command.
 Replacing the version of the container with the version you are trying to verify.
 
+{/* x-release-please-start-version */}
 ```shell title="Shell"
 gh attestation verify \
   --repo monetr/monetr \
-  oci://ghcr.io/monetr/monetr:1.14.0
+  oci://ghcr.io/monetr/monetr:1.18.1
 ```
+{/* x-release-please-end */}
 
 ## What’s Next?
 

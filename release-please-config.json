@@ -20,7 +20,9 @@
       "component": "",
       "version-file": "version.txt",
       "extra-files": [
-        { "type": "generic", "path": "docker-compose.yaml" }
+        { "type": "generic", "path": "docker-compose.yaml" },
+        { "type": "generic", "path": "docs/src/v1/en/documentation/install.mdx" },
+        { "type": "generic", "path": "docs/src/v1/en/documentation/install/docker.mdx" }
       ]
     }
   }
