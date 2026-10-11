@@ -52,7 +52,7 @@ export default function RecurringChargeItem(props: RecurringChargeItemProps): Re
         </ItemContent>
         <ItemContent align='center' flex='grow' justify='end' shrink='none' width='fit'>
           {!props.transaction.getIsAddition() && (
-            <span className={styles.spentFrom}>Spent from {spending?.name || 'Free-To-Use'}</span>
+            <span className={styles.spentFrom}>Spent from {spending?.name ?? 'Free-To-Use'}</span>
           )}
           <TransactionAmount transaction={props.transaction} />
         </ItemContent>

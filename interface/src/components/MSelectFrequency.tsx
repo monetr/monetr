@@ -74,7 +74,7 @@ export default function MSelectFrequency<T extends FormValues<T>>(props: MSelect
   return (
     <Select<string>
       {...props}
-      disabled={props.disabled || formikContext.isSubmitting}
+      disabled={Boolean(props.disabled) || formikContext.isSubmitting}
       error={formikContext.errors[props.name] as string | undefined}
       label={props.label}
       name={props.name}

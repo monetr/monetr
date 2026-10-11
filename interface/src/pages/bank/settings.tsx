@@ -87,7 +87,7 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
     return await updateBankAccount({
       bankAccountId: bankAccount.bankAccountId,
       name: values.name,
-      ...((link?.getIsManual() || link?.getIsLunchFlow()) && {
+      ...((Boolean(link?.getIsManual()) || link?.getIsLunchFlow()) && {
         mask: values.mask || null,
         accountType: values.accountType,
         accountSubType: values.accountSubType,

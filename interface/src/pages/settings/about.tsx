@@ -22,7 +22,7 @@ export default function SettingsAbout(): React.JSX.Element {
             Version
           </Typography>
           <Typography className={styles.rowValue} component='code' size='lg'>
-            {release || 'Unknown'}
+            {release ? release : 'Unknown'}
           </Typography>
         </div>
         <Divider />
