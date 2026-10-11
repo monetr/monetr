@@ -233,6 +233,9 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
         />
         <SelectIndicator disabled={props.disabled} isLoading={props.isLoading} open={isOpen} />
       </div>
+      {props.required && !props.value && !props.disabled && (
+        <SelectRequiredInput onFocus={() => inputRef.current?.focus()} />
+      )}
       <ErrorText description={props.description} error={props.error} />
       <ul
         className={selectStyles.unorderedList}
@@ -266,6 +269,7 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
 }
 
 export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState<boolean>(false);
   const onChange = useCallback(
     (option: SelectOption<V>) => {
@@ -290,6 +294,7 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
             aria-disabled={props.disabled}
             className={mergeClasses(inputStyles.input, selectStyles.select)}
             disabled={props.disabled}
+            ref={buttonRef}
             type='button'
           >
             <span
@@ -326,8 +331,33 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
           </DrawerWrapper>
         </DrawerContent>
       </Drawer>
+      {props.required && !props.value && !props.disabled && (
+        <SelectRequiredInput onFocus={() => buttonRef.current?.focus()} />
+      )}
       <ErrorText description={props.description} error={props.error} />
     </div>
+  );
+}
+
+interface SelectRequiredInputProps {
+  onFocus: () => void;
+}
+
+// SelectRequiredInput is a hidden input that is only rendered while a required select has nothing picked. There isn't a
+// real form input behind our select, so without this the browser will happily submit the form with it empty.
+// react-select did the same thing for us and we lost it when we moved off of it. When the browser focuses this to show
+// the "please fill out this field" bubble, we hand focus over to the actual select.
+function SelectRequiredInput(props: SelectRequiredInputProps): React.JSX.Element {
+  return (
+    <input
+      aria-hidden='true'
+      className={selectStyles.requiredInput}
+      onChange={() => {}}
+      onFocus={props.onFocus}
+      required
+      tabIndex={-1}
+      value=''
+    />
   );
 }
 
