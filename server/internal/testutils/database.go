@@ -13,7 +13,7 @@ import (
 
 	"log/slog"
 
-	"github.com/brianvoe/gofakeit/v6"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/metrics"

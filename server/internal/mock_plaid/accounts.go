@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/brianvoe/gofakeit/v6"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/plaid/plaid-go/v48/plaid"
@@ -55,7 +55,7 @@ func BankAccountFixture(t *testing.T) plaid.AccountBase {
 	limit := gofakeit.Float64Range(current, current+100)
 
 	return plaid.AccountBase{
-		AccountId: gofakeit.Generate("????????????????"),
+		AccountId: gofakeit.Lexify("????????????????"),
 		Balances: plaid.AccountBalance{
 			Available:              *plaid.NewNullableFloat64(new(available)),
 			Current:                *plaid.NewNullableFloat64(new(current)),

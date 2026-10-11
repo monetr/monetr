@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/benbjohnson/clock"
-	"github.com/brianvoe/gofakeit/v6"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/internal/testutils"
@@ -51,14 +51,14 @@ func GivenIHaveAPlaidLink(t *testing.T, clock clock.Clock, user User) Link {
 	plaidLink := PlaidLink{
 		AccountId:            user.AccountId,
 		SecretId:             secret.SecretId,
-		PlaidId:              gofakeit.Generate("???????????????????????????????????"),
+		PlaidId:              gofakeit.Lexify("???????????????????????????????????"),
 		Products:             consts.PlaidProductStrings(),
 		Status:               PlaidLinkStatusSetup,
 		ErrorCode:            nil,
 		ExpirationDate:       nil,
 		NewAccountsAvailable: false,
 		WebhookUrl:           "https://monetr.mini/api/plaid/webhook",
-		InstitutionId:        gofakeit.Generate("ins_######"),
+		InstitutionId:        gofakeit.Numerify("ins_######"),
 		InstitutionName:      fmt.Sprintf("Bank Of %s", gofakeit.City()),
 		LastManualSync:       nil,
 		LastSuccessfulUpdate: nil,

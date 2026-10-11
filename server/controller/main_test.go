@@ -15,7 +15,7 @@ import (
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/benbjohnson/clock"
-	"github.com/brianvoe/gofakeit/v6"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/gavv/httpexpect/v2"
 	"github.com/gomodule/redigo/redis"
 	"github.com/monetr/monetr/server/application"

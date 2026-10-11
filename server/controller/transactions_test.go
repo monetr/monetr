@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brianvoe/gofakeit/v6"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/testutils"
 	. "github.com/monetr/monetr/server/models"
@@ -1014,7 +1014,7 @@ func TestPatchTransaction(t *testing.T) {
 		_, e := NewTestApplication(t)
 
 		response := e.PATCH(`/api/bank_accounts/bac_bogus/transactions/txn_bogus`).
-			WithCookie(TestCookieName, gofakeit.Generate("????????")).
+			WithCookie(TestCookieName, gofakeit.Lexify("????????")).
 			WithJSON(map[string]any{
 				"name": "PayPal",
 			}).
@@ -1679,7 +1679,7 @@ func TestPatchTransaction(t *testing.T) {
 			WithPath("transactionId", originalTransaction.TransactionId).
 			WithCookie(TestCookieName, token).
 			WithJSON(map[string]any{
-				"name": gofakeit.Sentence(250),
+				"name": gofakeit.LoremIpsumSentence(250),
 			}).
 			Expect()
 
@@ -1768,7 +1768,7 @@ func TestPatchTransaction(t *testing.T) {
 			WithPath("transactionId", originalTransaction.TransactionId).
 			WithCookie(TestCookieName, token).
 			WithJSON(map[string]any{
-				"merchantName": gofakeit.Sentence(250),
+				"merchantName": gofakeit.LoremIpsumSentence(250),
 			}).
 			Expect()
 
@@ -2770,7 +2770,7 @@ func TestDeleteTransactions(t *testing.T) {
 		_, e := NewTestApplication(t)
 
 		response := e.DELETE(`/api/bank_accounts/bac_bogus/transactions/txn_bogus`).
-			WithCookie(TestCookieName, gofakeit.Generate("????????")).
+			WithCookie(TestCookieName, gofakeit.Lexify("????????")).
 			WithJSON(map[string]any{
 				"adjustsBalance": false,
 			}).

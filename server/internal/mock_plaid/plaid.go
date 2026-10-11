@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/brianvoe/gofakeit/v6"
+	"github.com/brianvoe/gofakeit/v7"
 )
 
 func PlaidHeaders(_ *testing.T, _ *http.Request, _ any, _ int) map[string][]string {

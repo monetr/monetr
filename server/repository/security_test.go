@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
-	"github.com/brianvoe/gofakeit/v6"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/repository"
@@ -44,7 +44,7 @@ func TestBaseSecurityRepository_Login(t *testing.T) {
 		clock := clock.NewMock()
 		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock)
 		email := testutils.GetUniqueEmail(t)
-		password := gofakeit.Generate("????????")
+		password := gofakeit.Lexify("????????")
 
 		result, _, err := repo.Login(t.Context(), email, password)
 		assert.EqualError(t, err, "invalid credentials provided")
@@ -67,7 +67,7 @@ func TestBaseSecurityRepository_ChangePassword(t *testing.T) {
 	t.Run("successful", func(t *testing.T) {
 		clock := clock.NewMock()
 		login, password := fixtures.GivenIHaveLogin(t, clock)
-		newPassword := gofakeit.Generate("?????????????")
+		newPassword := gofakeit.Lexify("?????????????")
 
 		assert.NotEqual(t, password, newPassword, "passwords must be different")
 
@@ -103,9 +103,9 @@ func TestBaseSecurityRepository_ChangePassword(t *testing.T) {
 	t.Run("cannot change with bad old password", func(t *testing.T) {
 		clock := clock.NewMock()
 		login, password := fixtures.GivenIHaveLogin(t, clock)
-		bogusPassword := gofakeit.Generate("?????????????")
+		bogusPassword := gofakeit.Lexify("?????????????")
 		assert.NotEqual(t, password, bogusPassword, "bogus password cannot match the real one")
-		newPassword := gofakeit.Generate("?????????????")
+		newPassword := gofakeit.Lexify("?????????????")
 		assert.NotEqual(t, password, newPassword, "new password cannot match the current password")
 
 		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock)
@@ -141,8 +141,8 @@ func TestBaseSecurityRepository_ChangePassword(t *testing.T) {
 	t.Run("bad database connection", func(t *testing.T) {
 		clock := clock.NewMock()
 		repo := repository.NewSecurityRepository(testutils.GetBadPgDatabase(t), clock)
-		bogusPassword := gofakeit.Generate("?????????????")
-		newPassword := gofakeit.Generate("?????????????")
+		bogusPassword := gofakeit.Lexify("?????????????")
+		newPassword := gofakeit.Lexify("?????????????")
 
 		err := repo.ChangePassword(t.Context(), "user_bogus", bogusPassword, newPassword)
 		assert.EqualError(t, err, "failed to find login record to change password: forcing a bad connection")

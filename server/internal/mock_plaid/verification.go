@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
-	"github.com/brianvoe/gofakeit/v6"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
 	"github.com/monetr/monetr/server/internal/myownsanity"

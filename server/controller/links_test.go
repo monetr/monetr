@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
-	"github.com/brianvoe/gofakeit/v6"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mock_plaid"
@@ -98,7 +98,7 @@ func TestPostLink(t *testing.T) {
 		response := e.POST("/api/links").
 			WithCookie(TestCookieName, token).
 			WithJSON(map[string]any{
-				"institutionName": gofakeit.Sentence(301),
+				"institutionName": gofakeit.LoremIpsumSentence(301),
 				"description":     "My personal link",
 			}).
 			Expect()
@@ -132,7 +132,7 @@ func TestPostLink(t *testing.T) {
 			WithCookie(TestCookieName, token).
 			WithJSON(map[string]any{
 				"institutionName": "U.S. Bank",
-				"description":     gofakeit.Sentence(301),
+				"description":     gofakeit.LoremIpsumSentence(301),
 			}).
 			Expect()
 

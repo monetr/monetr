@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brianvoe/gofakeit/v6"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/testutils"
 	. "github.com/monetr/monetr/server/models"
@@ -177,7 +177,7 @@ func TestPostSpending(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"name":              gofakeit.Sentence(250),
+					"name":              gofakeit.LoremIpsumSentence(250),
 					"ruleset":           FirstDayOfEveryMonth,
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      1000,
@@ -4068,7 +4068,7 @@ func TestPatchSpending(t *testing.T) {
 		_, e := NewTestApplication(t)
 
 		response := e.PATCH(`/api/bank_accounts/bac_bogus/spending/spnd_bogus`).
-			WithCookie(TestCookieName, gofakeit.Generate("????????")).
+			WithCookie(TestCookieName, gofakeit.Lexify("????????")).
 			WithJSON(map[string]any{
 				"name": "Does not matter",
 			}).
@@ -4251,7 +4251,7 @@ func TestPatchSpending(t *testing.T) {
 				WithPath("spendingId", spendingId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"name": gofakeit.Sentence(250),
+					"name": gofakeit.LoremIpsumSentence(250),
 				}).
 				Expect()
 

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brianvoe/gofakeit/v6"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/gavv/httpexpect/v2"
 	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/application"

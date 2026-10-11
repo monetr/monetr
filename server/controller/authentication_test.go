@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brianvoe/gofakeit/v6"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/gavv/httpexpect/v2"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/internal/fixtures"
@@ -1745,7 +1745,7 @@ func TestResetPassword(t *testing.T) {
 		}
 
 		// Generate a new password to reset to.
-		newPassword := gofakeit.Generate("????????")
+		newPassword := gofakeit.Lexify("????????")
 		assert.NotEqual(t, password, newPassword, "make sure the new password does not match the old one")
 
 		{ // Reset the password.
@@ -1834,7 +1834,7 @@ func TestResetPassword(t *testing.T) {
 		app.Clock.Add(1 * time.Second)
 
 		// Generate a new password to reset to.
-		newPassword := gofakeit.Generate("????????")
+		newPassword := gofakeit.Lexify("????????")
 
 		MustSendPasswordChangedEmail(t, app, 1, user.Login.Email)
 
@@ -1883,7 +1883,7 @@ func TestResetPassword(t *testing.T) {
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
 		// Generate a new password to reset to.
-		newPassword := gofakeit.Generate("????????")
+		newPassword := gofakeit.Lexify("????????")
 
 		MustSendPasswordChangedEmail(t, app, 1, user.Login.Email)
 
@@ -1935,7 +1935,7 @@ func TestResetPassword(t *testing.T) {
 		app.Clock.Add(30 * time.Second)
 
 		// Generate a new password to reset to.
-		newPassword := gofakeit.Generate("????????")
+		newPassword := gofakeit.Lexify("????????")
 
 		MustSendPasswordChangedEmail(t, app, 0)
 

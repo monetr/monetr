@@ -4,14 +4,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brianvoe/gofakeit/v6"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPlaidTransaction_GetDates(t *testing.T) {
 	transaction := PlaidTransaction{
 		Amount:        128.00,
-		BankAccountId: gofakeit.Generate("?????"),
+		BankAccountId: gofakeit.Lexify("?????"),
 		Category: []string{
 			"Bank Fee",
 		},
@@ -23,7 +23,7 @@ func TestPlaidTransaction_GetDates(t *testing.T) {
 		Name:                   "Arby's",
 		OriginalDescription:    "ARBYS",
 		PendingTransactionId:   nil,
-		TransactionId:          gofakeit.Generate("??????????"),
+		TransactionId:          gofakeit.Lexify("??????????"),
 	}
 
 	timezone, err := time.LoadLocation("America/Chicago")

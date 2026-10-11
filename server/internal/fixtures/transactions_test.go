@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/benbjohnson/clock"
-	"github.com/brianvoe/gofakeit/v6"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
@@ -107,7 +107,7 @@ func TestCountPendingTransactions(t *testing.T) {
 		date := util.Midnight(clock.Now(), timezone)
 
 		prefix := gofakeit.RandomString([]string{
-			fmt.Sprintf("DEBIT FOR CHECKCARD XXXXXX%s %s", gofakeit.Generate("####"), date.Format("01/02/06")),
+			fmt.Sprintf("DEBIT FOR CHECKCARD XXXXXX%s %s", gofakeit.Numerify("####"), date.Format("01/02/06")),
 			"DEBIT FOR PAYPAL INST XFER CO REF- ",
 			"CHECKCARD PURCHASE - ",
 		})

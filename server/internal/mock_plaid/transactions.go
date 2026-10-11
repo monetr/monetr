@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brianvoe/gofakeit/v6"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/plaid/plaid-go/v48/plaid"
@@ -33,7 +33,7 @@ func GenerateTransactions(_ *testing.T, start, end time.Time, numberOfTransactio
 
 		transaction.SetDate(down.Format("2006-01-02"))
 		transaction.SetName(gofakeit.Company())
-		transaction.SetTransactionId(gofakeit.Generate("?????????????????????"))
+		transaction.SetTransactionId(gofakeit.Lexify("?????????????????????"))
 
 		transactions[i] = transaction
 	}

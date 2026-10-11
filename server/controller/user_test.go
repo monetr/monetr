@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brianvoe/gofakeit/v6"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mock_stripe"
@@ -220,7 +220,7 @@ func TestChangePassword(t *testing.T) {
 	t.Run("successful", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, currentPassword := fixtures.GivenIHaveABasicAccount(t, app.Clock)
-		newPassword := gofakeit.Generate("????????")
+		newPassword := gofakeit.Lexify("????????")
 
 		var token string
 		{ // Login to the user with their current password.
@@ -291,8 +291,8 @@ func TestChangePassword(t *testing.T) {
 	t.Run("wrong password", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, currentPassword := fixtures.GivenIHaveABasicAccount(t, app.Clock)
-		wrongCurrentPassword := gofakeit.Generate("????????")
-		newPassword := gofakeit.Generate("????????")
+		wrongCurrentPassword := gofakeit.Lexify("????????")
+		newPassword := gofakeit.Lexify("????????")
 
 		var token string
 		{ // Login to the user with their current password.
@@ -351,7 +351,7 @@ func TestChangePassword(t *testing.T) {
 	t.Run("bad new password", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, currentPassword := fixtures.GivenIHaveABasicAccount(t, app.Clock)
-		newPassword := gofakeit.Generate("????")
+		newPassword := gofakeit.Lexify("????")
 
 		var token string
 		{ // Login to the user with their current password.
@@ -463,8 +463,8 @@ func TestChangePassword(t *testing.T) {
 		)
 		assert.NoError(t, err, "should not have an error generating a bogus token")
 
-		bogusCurrentPassword := gofakeit.Generate("????????")
-		bogusNewPassword := gofakeit.Generate("????????")
+		bogusCurrentPassword := gofakeit.Lexify("????????")
+		bogusNewPassword := gofakeit.Lexify("????????")
 
 		MustSendPasswordChangedEmail(t, app, 0)
 
@@ -490,8 +490,8 @@ func TestChangePassword(t *testing.T) {
 		response := e.PUT(`/api/users/security/password`).
 			WithCookie(TestCookieName, gofakeit.UUID()).
 			WithJSON(map[string]any{
-				"currentPassword": gofakeit.Generate("????????"),
-				"newPassword":     gofakeit.Generate("????????"),
+				"currentPassword": gofakeit.Lexify("????????"),
+				"newPassword":     gofakeit.Lexify("????????"),
 			}).
 			Expect()
 
@@ -505,8 +505,8 @@ func TestChangePassword(t *testing.T) {
 
 		response := e.PUT(`/api/users/security/password`).
 			WithJSON(map[string]any{
-				"currentPassword": gofakeit.Generate("????????"),
-				"newPassword":     gofakeit.Generate("????????"),
+				"currentPassword": gofakeit.Lexify("????????"),
+				"newPassword":     gofakeit.Lexify("????????"),
 			}).
 			Expect()
 
@@ -523,8 +523,8 @@ func TestChangePassword(t *testing.T) {
 		e.PUT(`/api/users/security/password`).
 			WithBasicAuth(apiKeyId, apiKeySecret).
 			WithJSON(map[string]any{
-				"currentPassword": gofakeit.Generate("????????"),
-				"newPassword":     gofakeit.Generate("????????"),
+				"currentPassword": gofakeit.Lexify("????????"),
+				"newPassword":     gofakeit.Lexify("????????"),
 			}).
 			Expect().
 			Status(http.StatusUnauthorized)

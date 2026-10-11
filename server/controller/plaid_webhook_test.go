@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brianvoe/gofakeit/v6"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/server/controller"

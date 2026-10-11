@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/benbjohnson/clock"
-	"github.com/brianvoe/gofakeit/v6"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
@@ -73,7 +73,7 @@ func GivenIHaveABankAccount(
 			AvailableBalance: available,
 			CurrentBalance:   current,
 			Currency:         "USD",
-			Mask:             new(gofakeit.Generate("####")),
+			Mask:             new(gofakeit.Numerify("####")),
 			Name:             "E-ACCOUNT",
 			AccountType:      accountType,
 			AccountSubType:   subType,
@@ -119,7 +119,7 @@ func GivenIHaveAPlaidBankAccount(
 		PlaidId:      gofakeit.UUID(),
 		Name:         "E-ACCOUNT",
 		OfficialName: "E-ACCOUNT",
-		Mask:         gofakeit.Generate("####"),
+		Mask:         gofakeit.Numerify("####"),
 		CreatedAt:    clock.Now(),
 		CreatedBy:    link.CreatedBy,
 	}
@@ -138,7 +138,7 @@ func GivenIHaveAPlaidBankAccount(
 		PlaidBankAccount:   &plaidBankAccount,
 		AvailableBalance:   available,
 		CurrentBalance:     current,
-		Mask:               new(gofakeit.Generate("####")),
+		Mask:               new(gofakeit.Numerify("####")),
 		Name:               "E-ACCOUNT",
 		AccountType:        accountType,
 		AccountSubType:     subType,
@@ -210,7 +210,7 @@ func GivenIHaveALunchFlowBankAccount(
 		LunchFlowBankAccount:   &lunchFlowBankAccount,
 		AvailableBalance:       available,
 		CurrentBalance:         current,
-		Mask:                   new(gofakeit.Generate("####")),
+		Mask:                   new(gofakeit.Numerify("####")),
 		Name:                   "E-ACCOUNT",
 		AccountType:            models.DepositoryBankAccountType,
 		AccountSubType:         models.CheckingBankAccountSubType,

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brianvoe/gofakeit/v6"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
@@ -73,7 +73,7 @@ func TestPostFundingSchedules(t *testing.T) {
 			WithPath("bankAccountId", bank.BankAccountId).
 			WithCookie(TestCookieName, token).
 			WithJSON(map[string]any{
-				"name":        gofakeit.Sentence(250),
+				"name":        gofakeit.LoremIpsumSentence(250),
 				"description": "15th and the Last day of every month",
 				"ruleset":     FifthteenthAndLastDayOfEveryMonth,
 			}).
@@ -96,7 +96,7 @@ func TestPostFundingSchedules(t *testing.T) {
 			WithCookie(TestCookieName, token).
 			WithJSON(map[string]any{
 				"name":        "Testing description",
-				"description": gofakeit.Sentence(250),
+				"description": gofakeit.LoremIpsumSentence(250),
 				"ruleset":     FifthteenthAndLastDayOfEveryMonth,
 			}).
 			Expect()

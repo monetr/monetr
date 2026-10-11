@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/benbjohnson/clock"
-	"github.com/brianvoe/gofakeit/v6"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
@@ -47,8 +47,8 @@ func GivenIHaveAFundingSchedule(
 		Account:                bankAccount.Account,
 		BankAccountId:          bankAccount.BankAccountId,
 		BankAccount:            bankAccount,
-		Name:                   gofakeit.Generate("Payday {uuid}"),
-		Description:            gofakeit.Generate("{sentence:5}"),
+		Name:                   "Payday " + gofakeit.UUID(),
+		Description:            gofakeit.LoremIpsumSentence(5),
 		RuleSet:                rule,
 		ExcludeWeekends:        excludeWeekends,
 		LastRecurrence:         nil,
