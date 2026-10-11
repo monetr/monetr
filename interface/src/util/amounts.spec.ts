@@ -83,7 +83,7 @@ describe('amounts', () => {
 
     it('will format euro', () => {
       const euroNetherlands = formatAmount(-1001234, AmountType.Stored, 'nl-NL', 'EUR');
-      expect(euroNetherlands).toBe('€ -10.012,34');
+      expect(euroNetherlands).toBe('€\u00a0-10.012,34');
 
       const euroUK = formatAmount(-1001234, AmountType.Stored, 'en-UK', 'EUR');
       expect(euroUK).toBe('-€10,012.34');

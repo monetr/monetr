@@ -290,7 +290,7 @@ func TestGetSeparators(t *testing.T) {
 			{"de", "EUR", ",", "."},
 			{"de-CH", "CHF", ".", "'"},
 			// This one is a narrow no-break space, not a regular space
-			{"fr", "EUR", ",", " "},
+			{"fr", "EUR", ",", "\u202f"},
 			// ar-EG defaults to arabic-indic digits but we only use latin ones
 			{"ar-EG", "EGP", ".", ","},
 		}
