@@ -228,9 +228,7 @@ export function createDragController(host: DragHost): DragController {
       }
       activate();
     }
-    if (s.frame === null) {
-      s.frame = requestAnimationFrame(update);
-    }
+    s.frame ??= requestAnimationFrame(update);
   }
 
   function onPointerUp(event: PointerEvent): void {

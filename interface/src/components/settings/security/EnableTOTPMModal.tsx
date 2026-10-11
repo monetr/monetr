@@ -89,7 +89,7 @@ function EnableTOTPModal(): React.JSX.Element {
                 <Typography size='md'>Scan the following QR code with your preferred authenticator app</Typography>
                 <div>
                   <div className={styles.qrBox}>
-                    <QRCode value={totpState?.uri || ''} />
+                    <QRCode value={totpState?.uri ?? ''} />
                   </div>
                 </div>
                 <Typography size='md'>Or enter the secret manually</Typography>

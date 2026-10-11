@@ -84,7 +84,7 @@ function ExpectedTransactionItem({ transaction }: SimilarTransactionsProps): Rea
         </div>
         <ItemContent align='default' flex='shrink' gap='none' justify='start' orientation='column' shrink='default'>
           <Typography component='p' ellipsis size='md' weight='semibold'>
-            {cluster?.name || transaction.getName()}
+            {cluster?.name ?? transaction.getName()}
           </Typography>
           <Typography color='subtle' component='p' ellipsis size='sm' weight='medium'>
             Expected {formatDate(recurring.next, inTimezone, locale, DateLength.Long)}

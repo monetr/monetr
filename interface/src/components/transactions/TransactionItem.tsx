@@ -88,7 +88,7 @@ function BudgetingInfo({ transaction, className }: BudgetingInfoProps): React.JS
       <span className={itemStyles.spentFromLabel}>Spent from</span>
       &nbsp;
       <span className={itemStyles.spentFromValue} data-hasspending={String(Boolean(transaction.spendingId))}>
-        {spending?.name || 'Free-To-Use'}
+        {spending?.name ?? 'Free-To-Use'}
       </span>
     </span>
   );

@@ -62,7 +62,7 @@ function NewFundingModal(props: NewFundingModalProps): React.JSX.Element {
   const { data: cluster, isLoading: clusterIsLoading } = useTransactionCluster(
     props.recurring?.transactionClusterId ?? null,
   );
-  const name = cluster?.name || props.transaction?.getName();
+  const name = cluster?.name ?? props.transaction?.getName();
 
   // The form only reads its initial values once, so wait for everything the recurring deposit fills in
   if (props.recurring && (!locale || clusterIsLoading)) {

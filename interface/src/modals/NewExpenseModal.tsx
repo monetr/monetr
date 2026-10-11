@@ -70,7 +70,7 @@ function NewExpenseModal(props: NewExpenseModalProps): React.JSX.Element {
   const { data: cluster, isLoading: clusterIsLoading } = useTransactionCluster(
     props.recurring?.transactionClusterId ?? null,
   );
-  const name = cluster?.name || props.transaction?.getName();
+  const name = cluster?.name ?? props.transaction?.getName();
 
   const ref = useRef<MModalRef>(null);
 

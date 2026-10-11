@@ -22,7 +22,7 @@ export function useAuthentication(): UseQueryResult<Authentication | undefined, 
   const select = useCallback(
     (data: Partial<Authentication>) => ({
       user: (data?.user && new User(data.user)) ?? null,
-      defaultCurrency: data?.defaultCurrency || DefaultCurrency,
+      defaultCurrency: data?.defaultCurrency ?? DefaultCurrency,
       mfaPending: Boolean(data?.mfaPending),
       isSetup: Boolean(data?.isSetup),
       isActive: Boolean(data?.isActive),
