@@ -23,6 +23,7 @@ describe('billing settings page', () => {
   let assignSpy: ReturnType<typeof rs.spyOn>;
 
   beforeAll(() => {
+    // biome-ignore lint/suspicious/noExplicitAny: This is a jsdom internal, there isn't a type for it
     assignSpy = rs.spyOn((window.location as any)[implSymbol], 'assign').mockImplementation(locationAssignMock);
   });
 
