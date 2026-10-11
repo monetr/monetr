@@ -51,7 +51,6 @@ func GivenSentryIsCapturing(t *testing.T) *captureTransport {
 		Transport:     transport,
 		Integrations:  func([]sentry.Integration) []sentry.Integration { return nil },
 		SampleRate:    1.0,
-		DisableLogs:   true,
 		EnableTracing: false,
 	})
 	require.NoError(t, err, "must be able to build the capturing sentry client")
