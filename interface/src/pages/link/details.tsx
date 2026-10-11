@@ -117,7 +117,7 @@ export default function LinkDetails(): React.JSX.Element {
               <Typography className={styles.heading} color='emphasis' component='h3' size='xl' weight='semibold'>
                 Details
               </Typography>
-              <FormTextField
+              <FormTextField<LinkValues>
                 className={layoutVariants({ width: 'full' })}
                 data-1p-ignore
                 data-testid='link-details-name'
@@ -126,7 +126,7 @@ export default function LinkDetails(): React.JSX.Element {
                 placeholder='Budget Name'
                 required
               />
-              <FormTextField
+              <FormTextField<LinkValues>
                 className={layoutVariants({ width: 'full' })}
                 data-1p-ignore
                 data-testid='link-details-description'

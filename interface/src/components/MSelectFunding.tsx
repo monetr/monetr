@@ -7,20 +7,22 @@ import Label from '@monetr/interface/components/Label';
 import Select, { type SelectOption } from '@monetr/interface/components/Select';
 import { useFundingSchedules } from '@monetr/interface/hooks/useFundingSchedules';
 import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
+import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { ID } from '@monetr/interface/models/ID';
+import type { FormFieldName, FormValues } from '@monetr/interface/util/typescriptEvils';
 
 import styles from './MSelectFunding.module.scss';
 
-export interface MSelectFundingProps {
+export interface MSelectFundingProps<T extends FormValues<T>> {
   label?: string;
-  name: string;
+  name: FormFieldName<T, ID<FundingSchedule>>;
   required?: boolean;
   className?: string;
   menuPortalTarget?: HTMLElement;
 }
 
-export default function MSelectFunding(props: MSelectFundingProps): React.JSX.Element {
-  const formikContext = useFormikContext<Record<string, any>>();
+export default function MSelectFunding<T extends FormValues<T>>(props: MSelectFundingProps<T>): React.JSX.Element {
+  const formikContext = useFormikContext<T>();
   const { data: funding, isLoading: fundingIsLoading, isError: fundingIsError } = useFundingSchedules();
   const label = props.label ?? 'Select a funding schedule';
 

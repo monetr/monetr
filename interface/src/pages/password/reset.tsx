@@ -99,7 +99,7 @@ export default function PasswordResetNew(): React.JSX.Element {
         <Typography className={styles.message} size='inherit'>
           {message}
         </Typography>
-        <FormTextField
+        <FormTextField<ResetPasswordValues>
           autoComplete='current-password'
           autoFocus
           className={styles.input}
@@ -109,7 +109,7 @@ export default function PasswordResetNew(): React.JSX.Element {
           required
           type='password'
         />
-        <FormTextField
+        <FormTextField<ResetPasswordValues>
           autoComplete='current-password'
           className={styles.input}
           data-testid='reset-verify-password'

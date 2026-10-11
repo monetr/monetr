@@ -94,7 +94,7 @@ export default function LunchFlowSetupIntro(): React.JSX.Element {
         <Typography align='center' color='subtle' size='lg'>
           Let us know what you want to call this budget, and what your Lunch Flow API key is.
         </Typography>
-        <FormTextField
+        <FormTextField<LunchFlowSetupIntroValues>
           autoComplete='off'
           autoFocus
           className={layoutVariants({ width: 'full' })}
@@ -104,7 +104,7 @@ export default function LunchFlowSetupIntro(): React.JSX.Element {
           placeholder='Lunch Flow'
           required
         />
-        <FormTextField
+        <FormTextField<LunchFlowSetupIntroValues>
           autoComplete='off'
           className={layoutVariants({ width: 'full' })}
           data-1p-ignore
@@ -147,7 +147,7 @@ function LunchFlowURLField({ allowedAPIURLs }: LunchFlowURLFieldProps): React.JS
   }
 
   return (
-    <FormTextField
+    <FormTextField<LunchFlowSetupIntroValues>
       className={layoutVariants({ width: 'full' })}
       data-1p-ignore
       disabled

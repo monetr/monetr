@@ -46,7 +46,7 @@ export default function ManualLinkSetupIntroName(): React.JSX.Element {
       <Typography align='center' color='subtle' size='lg'>
         Let&apos;s create a new budget to get started. What do you want to call this budget?
       </Typography>
-      <FormTextField
+      <FormTextField<ManualLinkSetupIntroNameValues>
         autoFocus
         className={layoutVariants({ width: 'full' })}
         label='Bank or Budget Name'

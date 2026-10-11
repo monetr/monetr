@@ -54,8 +54,8 @@ export default function ManualLinkSetupBalances(): React.JSX.Element {
             What is your current available balance? monetr will use this as a starting point, you can modify this at any
             time later on.
           </Typography>
-          <SelectCurrency className={styles.field} name='currency' />
-          <FormAmountField
+          <SelectCurrency<ManualLinkSetupBalancesValues> className={styles.field} name='currency' />
+          <FormAmountField<ManualLinkSetupBalancesValues>
             allowNegative
             className={styles.field}
             currency={currency}

@@ -6,6 +6,7 @@ import ErrorText from '@monetr/interface/components/ErrorText';
 import Label, { type LabelDecorator, type LabelDecoratorProps } from '@monetr/interface/components/Label';
 import { Skeleton } from '@monetr/interface/components/Skeleton';
 import mergeClasses from '@monetr/interface/util/mergeClasses';
+import type { FormFieldName, FormValues } from '@monetr/interface/util/typescriptEvils';
 
 import errorTextStyles from './ErrorText.module.scss';
 import inputStyles from './FormTextField.module.scss';
@@ -13,7 +14,8 @@ import selectStyles from './Select.module.scss';
 
 type InputProps = React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
 
-export interface FormTextFieldProps extends InputProps {
+export interface FormTextFieldProps<T extends FormValues<T>> extends Omit<InputProps, 'name'> {
+  name?: FormFieldName<T, string | null | undefined>;
   label?: string;
   error?: string;
   uppercasetext?: boolean;
@@ -21,16 +23,18 @@ export interface FormTextFieldProps extends InputProps {
   isLoading?: boolean;
 }
 
-const FormTextFieldPropsDefaults: Omit<FormTextFieldProps, 'InputProps'> = {
+const FormTextFieldPropsDefaults: Omit<FormTextFieldProps<object>, 'name'> = {
   label: undefined,
   labelDecorator: (_: LabelDecoratorProps) => null,
   disabled: false,
   uppercasetext: undefined,
 };
 
-export default function FormTextField(props: FormTextFieldProps = FormTextFieldPropsDefaults): React.JSX.Element {
+export default function FormTextField<T extends FormValues<T>>(
+  props: FormTextFieldProps<T> = FormTextFieldPropsDefaults,
+): React.JSX.Element {
   const id = useId();
-  const formikContext = useFormikContext<Record<string, any>>();
+  const formikContext = useFormikContext<T>();
   const getFormikError = (): string | undefined => {
     if (!props?.name || !formikContext?.touched[props.name]) {
       return;

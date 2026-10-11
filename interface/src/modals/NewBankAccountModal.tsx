@@ -96,7 +96,7 @@ function NewBankAccountModal(): React.JSX.Element {
               <Typography className={styles.heading} size='xl' weight='bold'>
                 Create A New Bank Account
               </Typography>
-              <FormTextField
+              <FormTextField<NewBankAccountValues>
                 autoComplete='off'
                 data-1p-ignore
                 data-testid='bank-account-name'
@@ -105,13 +105,13 @@ function NewBankAccountModal(): React.JSX.Element {
                 placeholder='Personal Checking...'
                 required
               />
-              <SelectCurrency
+              <SelectCurrency<NewBankAccountValues>
                 className={layoutVariants({ width: 'full' })}
                 menuPortalTarget={document.body}
                 name='currency'
                 required
               />
-              <FormAmountField
+              <FormAmountField<NewBankAccountValues>
                 allowNegative
                 currency={values.currency}
                 data-1p-ignore

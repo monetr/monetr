@@ -181,14 +181,14 @@ export default function FundingDetails(): React.JSX.Element | null {
       <div className={styles.body}>
         <div className={styles.columns}>
           <div className={styles.column}>
-            <FormTextField
+            <FormTextField<FundingValues>
               className={layoutVariants({ width: 'full' })}
               id={`${nameId}-funding-name-search`}
               label='Name'
               name='name'
               required
             />
-            <FormDatePicker
+            <FormDatePicker<FundingValues>
               className={layoutVariants({ width: 'full' })}
               data-testid='funding-details-date-picker'
               label='Next Recurrence'
@@ -199,7 +199,7 @@ export default function FundingDetails(): React.JSX.Element | null {
               name='nextRecurrence'
               required
             />
-            <MSelectFrequency
+            <MSelectFrequency<FundingValues>
               className={layoutVariants({ width: 'full' })}
               dateFrom='nextRecurrence'
               label='How often does this funding happen?'
@@ -213,7 +213,7 @@ export default function FundingDetails(): React.JSX.Element | null {
               label='Exclude weekends'
               name='excludeWeekends'
             />
-            <FormAmountField
+            <FormAmountField<FundingValues>
               allowNegative={false}
               label='Estimated Deposit'
               name='estimatedDeposit'

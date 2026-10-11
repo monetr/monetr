@@ -87,7 +87,7 @@ export default function Login(): React.JSX.Element {
       <Typography align='center' component='p'>
         Sign into your monetr account
       </Typography>
-      <FormTextField
+      <FormTextField<LoginValues>
         autoComplete='email'
         autoFocus
         className={styles.input}
@@ -97,7 +97,7 @@ export default function Login(): React.JSX.Element {
         required
         type='email'
       />
-      <FormTextField
+      <FormTextField<LoginValues>
         autoComplete='current-password'
         className={styles.input}
         data-testid='login-password'

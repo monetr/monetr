@@ -107,7 +107,7 @@ export default function ForgotPasswordNew(): React.JSX.Element {
           We can email you a link to reset it.
         </Typography>
       </div>
-      <FormTextField
+      <FormTextField<Values>
         autoComplete='username'
         autoFocus
         className={styles.input}

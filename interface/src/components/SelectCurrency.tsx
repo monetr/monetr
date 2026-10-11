@@ -3,17 +3,18 @@ import { useFormikContext } from 'formik';
 
 import Select, { type SelectOption } from '@monetr/interface/components/Select';
 import { useInstalledCurrencies } from '@monetr/interface/hooks/useInstalledCurrencies';
+import type { FormFieldName, FormValues } from '@monetr/interface/util/typescriptEvils';
 
-interface SelectCurrencyProps {
-  name: string;
+interface SelectCurrencyProps<T extends FormValues<T>> {
+  name: FormFieldName<T, string>;
   required?: boolean;
   className?: string;
   menuPortalTarget?: HTMLElement;
   disabled?: boolean;
 }
 
-export default function SelectCurrency(props: SelectCurrencyProps): React.JSX.Element {
-  const formikContext = useFormikContext<Record<string, any>>();
+export default function SelectCurrency<T extends FormValues<T>>(props: SelectCurrencyProps<T>): React.JSX.Element {
+  const formikContext = useFormikContext<T>();
   const { data: currencies, isLoading: currenciesLoading } = useInstalledCurrencies();
   const onChange = useCallback(
     (option: SelectOption<string>) => {

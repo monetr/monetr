@@ -146,14 +146,14 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
             <div className={styles.row}>
               <div className={styles.column}>
                 <div className={styles.inputRow}>
-                  <FormTextField
+                  <FormTextField<BankAccountValues>
                     className={styles.input}
                     data-1p-ignore
                     label='Name'
                     name='name'
                     placeholder='Bank account name...'
                   />
-                  <FormTextField
+                  <FormTextField<BankAccountValues>
                     className={styles.maskInput}
                     data-1p-ignore
                     disabled={!link?.getIsManual() && !link?.getIsLunchFlow()}
@@ -164,7 +164,11 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
                     placeholder='1234'
                   />
                 </div>
-                <SelectCurrency className={styles.input} disabled={link?.getIsPlaid()} name='currency' />
+                <SelectCurrency<BankAccountValues>
+                  className={styles.input}
+                  disabled={link?.getIsPlaid()}
+                  name='currency'
+                />
                 <div className={styles.inputRow}>
                   <SelectBankAccountType
                     className={styles.input}
@@ -177,21 +181,21 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
                     name='accountSubType'
                   />
                 </div>
-                <FormAmountField
+                <FormAmountField<BankAccountValues>
                   className={styles.input}
                   currency={currency}
                   disabled={!link?.getIsManual()}
                   label='Available Balance'
                   name='availableBalance'
                 />
-                <FormAmountField
+                <FormAmountField<BankAccountValues>
                   className={styles.input}
                   currency={currency}
                   disabled={!link?.getIsManual()}
                   label='Current Balance'
                   name='currentBalance'
                 />
-                <FormAmountField
+                <FormAmountField<BankAccountValues>
                   className={styles.input}
                   currency={currency}
                   disabled={!link?.getIsManual()}

@@ -19,6 +19,7 @@ import {
   intlNumberFormatter,
 } from '@monetr/interface/util/amounts';
 import mergeClasses from '@monetr/interface/util/mergeClasses';
+import type { FormFieldName, FormValues } from '@monetr/interface/util/typescriptEvils';
 
 import errorTextStyles from './ErrorText.module.scss';
 import inputStyles from './FormTextField.module.scss';
@@ -26,10 +27,11 @@ import selectStyles from './Select.module.scss';
 
 type NumericField = Omit<
   NumericFormatProps<InputAttributes>,
-  'decimalScale' | 'fixedDecimalScale' | 'prefix' | 'type' | 'onChange' | 'onValueChange'
+  'decimalScale' | 'fixedDecimalScale' | 'prefix' | 'type' | 'onChange' | 'onValueChange' | 'name'
 >;
 
-export interface MAmountFieldProps extends NumericField {
+export interface MAmountFieldProps<T extends FormValues<T>> extends NumericField {
+  name?: FormFieldName<T, number | null | undefined>;
   label?: string;
   error?: string;
   description?: string;
@@ -38,16 +40,18 @@ export interface MAmountFieldProps extends NumericField {
   isLoading?: boolean;
 }
 
-const MAmountFieldPropsDefaults: MAmountFieldProps = {
+const MAmountFieldPropsDefaults: Omit<MAmountFieldProps<object>, 'name'> = {
   label: undefined,
   labelDecorator: (_: LabelDecoratorProps) => null,
   disabled: false,
 };
 
-export default function MAmountField(props: MAmountFieldProps = MAmountFieldPropsDefaults): React.JSX.Element {
+export default function MAmountField<T extends FormValues<T>>(
+  props: MAmountFieldProps<T> = MAmountFieldPropsDefaults,
+): React.JSX.Element {
   const id = useId();
   const { data: localeInfo } = useLocaleCurrency(props.currency);
-  const formikContext = useFormikContext<Record<string, any>>();
+  const formikContext = useFormikContext<T>();
   const getFormikError = (): string | undefined => {
     if (!props?.name || !formikContext?.touched[props.name]) {
       return;

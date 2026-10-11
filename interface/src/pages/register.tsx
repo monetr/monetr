@@ -23,7 +23,7 @@ import { useSnackbar } from '@monetr/notify';
 
 import styles from './register.module.scss';
 
-interface RegisterValues {
+export interface RegisterValues {
   firstName: string;
   lastName: string;
   email: string;
@@ -179,7 +179,7 @@ export default function Register(): React.JSX.Element {
           </Typography>
         </Flex>
         <Flex gap='sm' orientation='stackSmall'>
-          <FormTextField
+          <FormTextField<RegisterValues>
             autoFocus
             className={styles.input}
             data-testid='register-first-name'
@@ -188,7 +188,7 @@ export default function Register(): React.JSX.Element {
             required
             type='text'
           />
-          <FormTextField
+          <FormTextField<RegisterValues>
             className={styles.input}
             data-testid='register-last-name'
             label='Last Name'
@@ -197,7 +197,7 @@ export default function Register(): React.JSX.Element {
             type='text'
           />
         </Flex>
-        <FormTextField
+        <FormTextField<RegisterValues>
           autoComplete='email'
           className={styles.input}
           data-testid='register-email'
@@ -206,7 +206,7 @@ export default function Register(): React.JSX.Element {
           required
           type='email'
         />
-        <FormTextField
+        <FormTextField<RegisterValues>
           autoComplete='new-password'
           className={styles.input}
           data-testid='register-password'
@@ -215,7 +215,7 @@ export default function Register(): React.JSX.Element {
           required
           type='password'
         />
-        <FormTextField
+        <FormTextField<RegisterValues>
           autoComplete='new-password'
           className={styles.input}
           data-testid='register-confirm-password'

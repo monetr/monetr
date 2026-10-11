@@ -169,7 +169,7 @@ function NewExpenseModal(props: NewExpenseModalProps): React.JSX.Element {
               </Typography>
             </div>
           )}
-          <FormTextField
+          <FormTextField<NewExpenseValues>
             autoComplete='off'
             autoFocus
             data-1p-ignore
@@ -179,7 +179,7 @@ function NewExpenseModal(props: NewExpenseModalProps): React.JSX.Element {
             required
           />
           <div className={styles.fieldRow}>
-            <FormAmountField
+            <FormAmountField<NewExpenseValues>
               allowNegative={false}
               className={styles.fieldRowItem}
               description={props.recurring && 'Your last charge.'}
@@ -187,7 +187,7 @@ function NewExpenseModal(props: NewExpenseModalProps): React.JSX.Element {
               name='amount'
               required
             />
-            <FormDatePicker
+            <FormDatePicker<NewExpenseValues>
               className={styles.fieldRowItem}
               description={props.recurring && 'When the next charge is expected.'}
               label='When do you need it next?'
@@ -198,13 +198,13 @@ function NewExpenseModal(props: NewExpenseModalProps): React.JSX.Element {
               required
             />
           </div>
-          <MSelectFunding
+          <MSelectFunding<NewExpenseValues>
             label='When do you want to fund the expense?'
             menuPortalTarget={document.body}
             name='fundingScheduleId'
             required
           />
-          <MSelectFrequency
+          <MSelectFrequency<NewExpenseValues>
             dateFrom='nextOccurrence'
             description={props.recurring && `Matches when ${name ?? 'it'} charges you.`}
             label='How frequently do you need this expense?'

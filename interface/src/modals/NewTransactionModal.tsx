@@ -130,7 +130,7 @@ function NewTransactionModal(): React.JSX.Element {
                   </TabsTrigger>
                 </TabsList>
                 <TabsContent value='debit'>
-                  <FormTextField
+                  <FormTextField<NewTransactionValues>
                     autoComplete='off'
                     autoFocus
                     data-1p-ignore
@@ -140,16 +140,21 @@ function NewTransactionModal(): React.JSX.Element {
                     required
                   />
                   <div className={styles.fieldRow}>
-                    <FormAmountField
+                    <FormAmountField<NewTransactionValues>
                       allowNegative={false}
                       className={styles.fieldRowItem}
                       label='Amount'
                       name='amount'
                       required
                     />
-                    <FormDatePicker className={styles.fieldRowItem} label='Date' name='date' required />
+                    <FormDatePicker<NewTransactionValues>
+                      className={styles.fieldRowItem}
+                      label='Date'
+                      name='date'
+                      required
+                    />
                   </div>
-                  <MSelectSpending className={styles.spendingSelect} name='spendingId' />
+                  <MSelectSpending<NewTransactionValues> className={styles.spendingSelect} name='spendingId' />
                   <FormSwitch
                     className={styles.adjustsBalanceSpaced}
                     description='Update your account balance for this transaction?'
@@ -158,7 +163,7 @@ function NewTransactionModal(): React.JSX.Element {
                   />
                 </TabsContent>
                 <TabsContent value='credit'>
-                  <FormTextField
+                  <FormTextField<NewTransactionValues>
                     autoComplete='off'
                     data-1p-ignore
                     label='Name / Description'
@@ -167,14 +172,19 @@ function NewTransactionModal(): React.JSX.Element {
                     required
                   />
                   <div className={styles.fieldRow}>
-                    <FormAmountField
+                    <FormAmountField<NewTransactionValues>
                       allowNegative={false}
                       className={styles.fieldRowItem}
                       label='Amount'
                       name='amount'
                       required
                     />
-                    <FormDatePicker className={styles.fieldRowItem} label='Date' name='date' required />
+                    <FormDatePicker<NewTransactionValues>
+                      className={styles.fieldRowItem}
+                      label='Date'
+                      name='date'
+                      required
+                    />
                   </div>
                   <FormSwitch
                     description='Update your account balance for this transaction?'

@@ -87,7 +87,7 @@ function NewGoalModal(): React.JSX.Element {
           <Typography className={styles.heading} size='xl' weight='bold'>
             Create A New Goal
           </Typography>
-          <FormTextField
+          <FormTextField<NewGoalValues>
             autoComplete='off'
             autoFocus
             data-1p-ignore
@@ -97,14 +97,14 @@ function NewGoalModal(): React.JSX.Element {
             required
           />
           <div className={styles.fieldRow}>
-            <FormAmountField
+            <FormAmountField<NewGoalValues>
               allowNegative={false}
               className={styles.fieldRowItem}
               label='How much do you need?'
               name='amount'
               required
             />
-            <FormDatePicker
+            <FormDatePicker<NewGoalValues>
               className={styles.fieldRowItem}
               label='How soon will you need it?'
               min={startOfTomorrow({
@@ -114,7 +114,7 @@ function NewGoalModal(): React.JSX.Element {
               required
             />
           </div>
-          <MSelectFunding
+          <MSelectFunding<NewGoalValues>
             label='When do you want to fund the goal?'
             menuPortalTarget={document.body}
             name='fundingScheduleId'

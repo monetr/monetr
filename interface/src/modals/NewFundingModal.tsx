@@ -156,7 +156,7 @@ function NewFundingModal(props: NewFundingModalProps): React.JSX.Element {
               </Typography>
             </div>
           )}
-          <FormTextField
+          <FormTextField<NewFundingValues>
             autoComplete='off'
             autoFocus
             data-1p-ignore
@@ -165,7 +165,7 @@ function NewFundingModal(props: NewFundingModalProps): React.JSX.Element {
             placeholder='Example: Payday...'
             required
           />
-          <FormDatePicker
+          <FormDatePicker<NewFundingValues>
             description={props.recurring && 'When the next deposit is expected.'}
             label='When do you get paid next?'
             min={startOfTomorrow({
@@ -174,7 +174,7 @@ function NewFundingModal(props: NewFundingModalProps): React.JSX.Element {
             name='nextOccurrence'
             required
           />
-          <MSelectFrequency
+          <MSelectFrequency<NewFundingValues>
             dateFrom='nextOccurrence'
             description={props.recurring && `Matches when ${name ?? 'it'} pays you.`}
             label='How often do you get paid?'
@@ -182,7 +182,7 @@ function NewFundingModal(props: NewFundingModalProps): React.JSX.Element {
             placeholder='Select a funding frequency...'
             required
           />
-          <FormAmountField
+          <FormAmountField<NewFundingValues>
             allowNegative={false}
             description={props.recurring && 'Your last deposit.'}
             label='Estimated Deposit'

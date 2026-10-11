@@ -88,7 +88,7 @@ function ChangePasswordModal(): React.JSX.Element {
           <Typography className={styles.heading} size='xl' weight='bold'>
             Change Your Password
           </Typography>
-          <FormTextField
+          <FormTextField<ChangePasswordValues>
             autoComplete='current-password'
             autoFocus
             className={styles.field}
@@ -97,7 +97,7 @@ function ChangePasswordModal(): React.JSX.Element {
             placeholder='********'
             type='password'
           />
-          <FormTextField
+          <FormTextField<ChangePasswordValues>
             autoComplete='new-password'
             className={styles.field}
             label='New Password'
@@ -105,7 +105,7 @@ function ChangePasswordModal(): React.JSX.Element {
             placeholder='********'
             type='password'
           />
-          <FormTextField
+          <FormTextField<ChangePasswordValues>
             autoComplete='new-password'
             className={styles.field}
             label='Repeat Password'

@@ -112,7 +112,7 @@ export default function ManualLinkSetupIncome(): React.JSX.Element {
             How often do you get paid and how much do you get paid typically? monetr uses this to forecast balances
             based on the budgets you create.
           </Typography>
-          <FormDatePicker
+          <FormDatePicker<ManualLinkSetupIncomeValues>
             autoFocus
             className={styles.field}
             label='When do you get paid next?'
@@ -122,7 +122,7 @@ export default function ManualLinkSetupIncome(): React.JSX.Element {
             name='nextPayday'
             required
           />
-          <MSelectFrequency
+          <MSelectFrequency<ManualLinkSetupIncomeValues>
             className={styles.frequencyField}
             dateFrom='nextPayday'
             label='How often do you get paid?'
@@ -130,7 +130,7 @@ export default function ManualLinkSetupIncome(): React.JSX.Element {
             placeholder='Select a funding frequency...'
             required
           />
-          <FormAmountField
+          <FormAmountField<ManualLinkSetupIncomeValues>
             allowNegative={false}
             className={styles.field}
             currency={currency}

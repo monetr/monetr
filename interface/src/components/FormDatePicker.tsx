@@ -11,6 +11,7 @@ import { Skeleton } from '@monetr/interface/components/Skeleton';
 import { useLocale } from '@monetr/interface/hooks/useLocale';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import mergeClasses from '@monetr/interface/util/mergeClasses';
+import type { FormFieldName, FormValues } from '@monetr/interface/util/typescriptEvils';
 
 import errorTextStyles from './ErrorText.module.scss';
 import datePickerStyles from './FormDatePicker.module.scss';
@@ -18,7 +19,8 @@ import inputStyles from './FormTextField.module.scss';
 import selectStyles from './Select.module.scss';
 import typographyStyles from './Typography.module.scss';
 
-export interface FormDatePickerProps extends Omit<React.HTMLAttributes<HTMLButtonElement>, 'value' | 'defaultValue'> {
+export interface FormDatePickerProps<T extends FormValues<T>>
+  extends Omit<React.HTMLAttributes<HTMLButtonElement>, 'value' | 'defaultValue'> {
   value?: Date;
   min?: Date;
   max?: Date;
@@ -30,20 +32,20 @@ export interface FormDatePickerProps extends Omit<React.HTMLAttributes<HTMLButto
   description?: string;
   label?: string;
   labelDecorator?: LabelDecorator;
-  name?: string;
+  name?: FormFieldName<T, Date | null>;
   placeholder?: string;
   required?: boolean;
   'data-testid'?: string;
 }
 
-export default function FormDatePicker(props: FormDatePickerProps): React.JSX.Element {
+export default function FormDatePicker<T extends FormValues<T>>(props: FormDatePickerProps<T>): React.JSX.Element {
   const { inTimezone } = useTimezone();
   const today = startOfToday({
     in: inTimezone,
   });
   // Load the locale data files so we can format dates with them.
   const { data: locale, isLoading: localeIsLoading } = useLocale();
-  const formikContext = useFormikContext<Record<string, any>>();
+  const formikContext = useFormikContext<T>();
 
   const getFormikError = (): string | undefined => {
     if (!props?.name || !formikContext?.touched[props.name]) {

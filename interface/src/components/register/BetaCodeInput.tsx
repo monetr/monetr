@@ -1,5 +1,6 @@
 import FormTextField from '@monetr/interface/components/FormTextField';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
+import type { RegisterValues } from '@monetr/interface/pages/register';
 
 import styles from './BetaCodeInput.module.scss';
 
@@ -10,6 +11,13 @@ export default function BetaCodeInput(): React.JSX.Element | null {
   }
 
   return (
-    <FormTextField className={styles.input} label='Beta Code' name='betaCode' required type='text' uppercasetext />
+    <FormTextField<RegisterValues>
+      className={styles.input}
+      label='Beta Code'
+      name='betaCode'
+      required
+      type='text'
+      uppercasetext
+    />
   );
 }

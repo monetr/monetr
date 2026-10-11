@@ -198,7 +198,7 @@ export default function ExpenseDetails(): React.JSX.Element | null {
 
             <Divider className={styles.dividerHalf} />
 
-            <FormTextField
+            <FormTextField<ExpenseValues>
               autoComplete='off'
               className={layoutVariants({ width: 'full' })}
               data-1p-ignore
@@ -206,14 +206,14 @@ export default function ExpenseDetails(): React.JSX.Element | null {
               name='name'
               required
             />
-            <FormAmountField
+            <FormAmountField<ExpenseValues>
               allowNegative={false}
               className={layoutVariants({ width: 'full' })}
               label='Amount'
               name='amount'
               required
             />
-            <FormDatePicker
+            <FormDatePicker<ExpenseValues>
               className={layoutVariants({ width: 'full' })}
               label='Next Occurrence'
               min={startOfTomorrow({
@@ -222,14 +222,14 @@ export default function ExpenseDetails(): React.JSX.Element | null {
               name='nextRecurrence'
               required
             />
-            <MSelectFunding
+            <MSelectFunding<ExpenseValues>
               className={layoutVariants({ width: 'full' })}
               label='When do you want to fund the expense?'
               menuPortalTarget={document.body}
               name='fundingScheduleId'
               required
             />
-            <MSelectFrequency
+            <MSelectFrequency<ExpenseValues>
               className={layoutVariants({ width: 'full' })}
               dateFrom='nextRecurrence'
               label='How often do you need this expense?'

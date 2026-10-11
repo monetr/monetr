@@ -119,7 +119,7 @@ export default function TransactionDetails(): React.JSX.Element {
               <Flex justify='center'>
                 <MerchantIcon name={transaction?.name ?? undefined} />
               </Flex>
-              <FormTextField
+              <FormTextField<TransactionValues>
                 autoComplete='off'
                 className={layoutVariants({ width: 'full' })}
                 data-1p-ignore
@@ -128,7 +128,7 @@ export default function TransactionDetails(): React.JSX.Element {
                 name='name'
                 placeholder='Transaction name...'
               />
-              <FormTextField
+              <FormTextField<TransactionValues>
                 autoComplete='off'
                 className={layoutVariants({ width: 'full' })}
                 disabled
@@ -137,14 +137,19 @@ export default function TransactionDetails(): React.JSX.Element {
                 name='originalName'
                 placeholder='No original name...?'
               />
-              <FormAmountField
+              <FormAmountField<TransactionValues>
                 className={layoutVariants({ width: 'full' })}
                 disabled
                 isLoading
                 label='Amount'
                 name='amount'
               />
-              <FormDatePicker className={layoutVariants({ width: 'full' })} disabled label='Date' name='date' />
+              <FormDatePicker<TransactionValues>
+                className={layoutVariants({ width: 'full' })}
+                disabled
+                label='Date'
+                name='date'
+              />
               <FormSwitch
                 className={layoutVariants({ width: 'full' })}
                 data-testid='transaction-details-pending'
@@ -153,7 +158,11 @@ export default function TransactionDetails(): React.JSX.Element {
                 label='Is Pending'
                 name='isPending'
               />
-              <MSelectSpending className={layoutVariants({ width: 'full' })} isLoading name='spendingId' />
+              <MSelectSpending<TransactionValues>
+                className={layoutVariants({ width: 'full' })}
+                isLoading
+                name='spendingId'
+              />
               <div className={styles.formButtons}>
                 <Button disabled variant='destructive'>
                   <Trash />
@@ -219,7 +228,7 @@ export default function TransactionDetails(): React.JSX.Element {
                 transactionRecurringId={transaction.transactionRecurringId}
               />
             </Flex>
-            <FormTextField
+            <FormTextField<TransactionValues>
               autoComplete='off'
               className={layoutVariants({ width: 'full' })}
               data-1p-ignore
@@ -227,7 +236,7 @@ export default function TransactionDetails(): React.JSX.Element {
               name='name'
               placeholder='Transaction name...'
             />
-            <FormTextField
+            <FormTextField<TransactionValues>
               autoComplete='off'
               className={layoutVariants({ width: 'full' })}
               disabled
@@ -235,8 +244,13 @@ export default function TransactionDetails(): React.JSX.Element {
               name='originalName'
               placeholder='No original name...?'
             />
-            <FormAmountField className={layoutVariants({ width: 'full' })} disabled label='Amount' name='amount' />
-            <FormDatePicker
+            <FormAmountField<TransactionValues>
+              className={layoutVariants({ width: 'full' })}
+              disabled
+              label='Amount'
+              name='amount'
+            />
+            <FormDatePicker<TransactionValues>
               className={layoutVariants({ width: 'full' })}
               disabled={!link?.getIsManual()}
               label='Date'
@@ -260,7 +274,7 @@ export default function TransactionDetails(): React.JSX.Element {
                 value={depositOption}
               />
             ) : (
-              <MSelectSpending className={layoutVariants({ width: 'full' })} name='spendingId' />
+              <MSelectSpending<TransactionValues> className={layoutVariants({ width: 'full' })} name='spendingId' />
             )}
             <div className={styles.formButtons}>
               <RemoveTransactionButton transaction={transaction} />

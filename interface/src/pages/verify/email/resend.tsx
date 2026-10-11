@@ -97,7 +97,7 @@ export default function ResendVerificationPage(): React.JSX.Element {
       <div className={styles.panel}>
         <MLogo className={styles.logo} />
         <RouteStateMessage hasEmail={Boolean(emailFromQuery)} />
-        <FormTextField
+        <FormTextField<ResendValues>
           autoComplete='username'
           autoFocus
           className={styles.field}

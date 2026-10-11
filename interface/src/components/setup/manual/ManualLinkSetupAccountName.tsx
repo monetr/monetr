@@ -43,7 +43,7 @@ export default function ManualLinkSetupAccountName(): React.JSX.Element {
       <Typography align='center' color='subtle' size='lg'>
         What do you want to call the primary account you want to use for budgeting? For example; your checking account?
       </Typography>
-      <FormTextField
+      <FormTextField<ManualLinkSetupAccountNameValues>
         autoFocus
         className={layoutVariants({ width: 'full' })}
         label='Account Name'

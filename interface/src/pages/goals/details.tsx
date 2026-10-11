@@ -203,21 +203,21 @@ export default function GoalDetails(): React.JSX.Element | null {
 
             <Divider className={styles.dividerHalf} />
 
-            <FormTextField
+            <FormTextField<GoalValues>
               className={layoutVariants({ width: 'full' })}
               data-1p-ignore
               label='Expense'
               name='name'
               required
             />
-            <FormAmountField
+            <FormAmountField<GoalValues>
               allowNegative={false}
               className={layoutVariants({ width: 'full' })}
               label='Amount'
               name='amount'
               required
             />
-            <FormDatePicker
+            <FormDatePicker<GoalValues>
               className={layoutVariants({ width: 'full' })}
               label='Target Date'
               min={startOfTomorrow({
@@ -226,7 +226,7 @@ export default function GoalDetails(): React.JSX.Element | null {
               name='nextRecurrence'
               required
             />
-            <MSelectFunding
+            <MSelectFunding<GoalValues>
               className={layoutVariants({ width: 'full' })}
               label='When do you want to fund the expense?'
               menuPortalTarget={document.body}

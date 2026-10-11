@@ -74,7 +74,7 @@ export default function CreateAPIKeyModalNameForm(): React.JSX.Element {
           </ModalTitle>
           <ModalDescription>You'll see the secret once. Store it somewhere safe before closing.</ModalDescription>
         </div>
-        <FormTextField
+        <FormTextField<CreateAPIKeyModalValues>
           autoComplete='off'
           data-1p-ignore
           data-testid='create-api-key-name'

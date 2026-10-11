@@ -15,23 +15,25 @@ import { useSpendings } from '@monetr/interface/hooks/useSpendings';
 import type Spending from '@monetr/interface/models/Spending';
 import { FREE_TO_USE, FreeToUse, SpendingType } from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
+import type { FormFieldName, FormValues } from '@monetr/interface/util/typescriptEvils';
 
 import styles from './MSelectSpending.module.scss';
 
 type SpendingOption = Pick<Spending | FreeToUse, 'spendingId' | 'spendingType' | 'currentAmount' | 'name'>;
 
 // Remove the props that we do not want to allow the caller to pass in.
-type MSelectSpendingBaseProps = Omit<SelectProps<SpendingOption>, 'options' | 'value' | 'onChange'>;
+type MSelectSpendingBaseProps = Omit<SelectProps<SpendingOption>, 'options' | 'value' | 'onChange' | 'name'>;
 
-export interface MSelectSpendingProps extends MSelectSpendingBaseProps {
+export interface MSelectSpendingProps<T extends FormValues<T>> extends MSelectSpendingBaseProps {
+  name?: FormFieldName<T, string | null>;
   // excludeFrom will take the name of another item in the form. The value of that item in the form will be excluded
   // from the list of options presented as part of this select. This is used in the transfer dialog to make sure that
   // both the to and the from selects cannot be the same value.
-  excludeFrom?: string;
+  excludeFrom?: FormFieldName<T, string | null>;
 }
 
-export default function MSelectSpending(props: MSelectSpendingProps): React.JSX.Element {
-  const formikContext = useFormikContext<Record<string, any>>();
+export default function MSelectSpending<T extends FormValues<T>>(props: MSelectSpendingProps<T>): React.JSX.Element {
+  const formikContext = useFormikContext<T>();
   const {
     data: spending,
     isLoading: isSpendingsLoading,

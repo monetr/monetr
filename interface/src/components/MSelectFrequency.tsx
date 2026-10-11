@@ -4,17 +4,19 @@ import { useFormikContext } from 'formik';
 import Select, { type SelectOption, type SelectProps } from '@monetr/interface/components/Select';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import getRecurrencesForDate from '@monetr/interface/util/getRecurrencesForDate';
+import type { FormFieldName, FormValues } from '@monetr/interface/util/typescriptEvils';
 
-export interface MSelectFrequencyProps extends Omit<SelectProps<string>, 'onChange' | 'options'> {
-  name: string;
+export interface MSelectFrequencyProps<T extends FormValues<T>>
+  extends Omit<SelectProps<string>, 'onChange' | 'options' | 'name'> {
+  name: FormFieldName<T, string | null>;
   label: string;
-  dateFrom: string;
+  dateFrom: FormFieldName<T, Date | null>;
 }
 
-export default function MSelectFrequency(props: MSelectFrequencyProps): React.JSX.Element {
+export default function MSelectFrequency<T extends FormValues<T>>(props: MSelectFrequencyProps<T>): React.JSX.Element {
   const { timezone } = useTimezone();
   const [selectedSignature, setSelectedSignature] = useState<string | null>(null);
-  const formikContext = useFormikContext<Record<string, any>>();
+  const formikContext = useFormikContext<T>();
 
   const date = useMemo(() => formikContext.values[props.dateFrom], [props.dateFrom, formikContext.values]);
 

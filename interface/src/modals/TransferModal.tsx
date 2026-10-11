@@ -140,20 +140,20 @@ function TransferModal(props: TransferModalProps): React.JSX.Element {
               Move funds between your budgets
             </Typography>
           </div>
-          <MSelectSpending
+          <MSelectSpending<TransferValues>
             excludeFrom='toSpendingId'
             label='From'
             labelDecorator={TransferSelectDecorator}
             name='fromSpendingId'
           />
           <ReverseTargetsButton />
-          <MSelectSpending
+          <MSelectSpending<TransferValues>
             excludeFrom='fromSpendingId'
             label='To'
             labelDecorator={TransferSelectDecorator}
             name='toSpendingId'
           />
-          <FormAmountField
+          <FormAmountField<TransferValues>
             allowNegative={false}
             label='Amount'
             name='amount'
