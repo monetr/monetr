@@ -1,3 +1,4 @@
+import ogImages from './plugins/ogImages';
 import rehypeMathPostProcess from './plugins/rehypeMathPostProcess';
 import trailingSlashRedirects from './plugins/trailingSlashRedirects';
 
@@ -144,6 +145,7 @@ export default defineConfig({
       },
     }),
     trailingSlashRedirects({ siteUrl: 'https://monetr.app' }),
+    ogImages(),
     readingTimeDataPlugin,
     mermaid({
       // Colors mirror the --mtr-* tokens in styles/globals.scss so diagrams
