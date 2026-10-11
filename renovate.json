@@ -43,7 +43,8 @@
     {
       "matchPackageNames": [
         "@types/.+",
-        "renovate"
+        "renovate",
+        "lucide-react"
       ],
       "extends": [
         "schedule:monthly"
