@@ -17,6 +17,12 @@
       "at any time"
     ]
   },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "extends": [
+      "schedule:monthly"
+    ]
+  },
   "postUpdateOptions": [
     "gomodUpdateImportPaths",
     "gomodTidy"
