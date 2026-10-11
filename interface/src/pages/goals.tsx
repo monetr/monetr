@@ -7,6 +7,7 @@ import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import Typography from '@monetr/interface/components/Typography';
 import { useSpendingFiltered } from '@monetr/interface/hooks/useSpendingFiltered';
 import { showNewGoalModal } from '@monetr/interface/modals/NewGoalModal';
+import type Spending from '@monetr/interface/models/Spending';
 import { SpendingType } from '@monetr/interface/models/Spending';
 
 import styles from './goals.module.scss';
@@ -32,22 +33,6 @@ export default function Goals(): React.JSX.Element {
     );
   }
 
-  function ListContent(): React.JSX.Element {
-    if ((goals ?? []).length === 0) {
-      return <EmptyState />;
-    }
-
-    return (
-      <ul className={styles.list}>
-        {goals
-          ?.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1))
-          .map(item => (
-            <GoalItem key={item.spendingId} spending={item} />
-          ))}
-      </ul>
-    );
-  }
-
   return (
     <Fragment>
       <MTopNavigation icon={PiggyBank} title='Goals'>
@@ -57,9 +42,29 @@ export default function Goals(): React.JSX.Element {
         </Button>
       </MTopNavigation>
       <div className={styles.content}>
-        <ListContent />
+        <ListContent goals={goals} />
       </div>
     </Fragment>
+  );
+}
+
+interface ListContentProps {
+  goals?: Array<Spending>;
+}
+
+function ListContent(props: ListContentProps): React.JSX.Element {
+  if ((props.goals ?? []).length === 0) {
+    return <EmptyState />;
+  }
+
+  return (
+    <ul className={styles.list}>
+      {props.goals
+        ?.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1))
+        .map(item => (
+          <GoalItem key={item.spendingId} spending={item} />
+        ))}
+    </ul>
   );
 }
 

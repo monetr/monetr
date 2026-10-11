@@ -56,32 +56,6 @@ function Greeting(props: GreetingProps): React.JSX.Element {
   const { data: config } = useAppConfiguration();
   const [active, setActive] = useState<'plaid' | 'lunchflow' | 'manual' | null>(null);
 
-  function Banner(): React.JSX.Element {
-    if (!props.alreadyOnboarded) {
-      return (
-        <Flex align='center' gap='lg' justify='center' orientation='column'>
-          <Typography align='center' size='2xl' weight='medium'>
-            Welcome to monetr!
-          </Typography>
-          <Typography align='center' color='subtle' size='lg'>
-            Before we get started, please select how you would like to continue.
-          </Typography>
-        </Flex>
-      );
-    }
-
-    return (
-      <Flex align='center' gap='lg' justify='center' orientation='column'>
-        <Typography size='2xl' weight='medium'>
-          Adding another bank?
-        </Typography>
-        <Typography align='center' color='subtle' size='lg'>
-          Please select what type of bank you want to setup below.
-        </Typography>
-      </Flex>
-    );
-  }
-
   return (
     <div
       className={mergeClasses(
@@ -96,7 +70,7 @@ function Greeting(props: GreetingProps): React.JSX.Element {
       )}
     >
       <Logo className={styles.logo} />
-      <Banner />
+      <Banner alreadyOnboarded={props.alreadyOnboarded} />
       <Flex gap='lg' justify='center' orientation='stackMedium'>
         <OnboardingTile
           active={active === 'plaid'}
@@ -133,6 +107,36 @@ function Greeting(props: GreetingProps): React.JSX.Element {
       {!props.alreadyOnboarded && <SetupBillingButton />}
       {!props.alreadyOnboarded && <LogoutFooter />}
     </div>
+  );
+}
+
+interface BannerProps {
+  alreadyOnboarded?: boolean;
+}
+
+function Banner(props: BannerProps): React.JSX.Element {
+  if (!props.alreadyOnboarded) {
+    return (
+      <Flex align='center' gap='lg' justify='center' orientation='column'>
+        <Typography align='center' size='2xl' weight='medium'>
+          Welcome to monetr!
+        </Typography>
+        <Typography align='center' color='subtle' size='lg'>
+          Before we get started, please select how you would like to continue.
+        </Typography>
+      </Flex>
+    );
+  }
+
+  return (
+    <Flex align='center' gap='lg' justify='center' orientation='column'>
+      <Typography size='2xl' weight='medium'>
+        Adding another bank?
+      </Typography>
+      <Typography align='center' color='subtle' size='lg'>
+        Please select what type of bank you want to setup below.
+      </Typography>
+    </Flex>
   );
 }
 

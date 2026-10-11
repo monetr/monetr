@@ -250,19 +250,11 @@ export default function PlaidSetup(props: PlaidProps): React.JSX.Element {
     );
   }
 
-  function Footer(): React.JSX.Element | null {
-    if (props.alreadyOnboarded) {
-      return null;
-    }
-
-    return <LogoutFooter />;
-  }
-
   return (
     <div className={styles.root}>
       <MLogo className={styles.logo} />
       {inner}
-      <Footer />
+      {!props.alreadyOnboarded && <LogoutFooter />}
     </div>
   );
 }

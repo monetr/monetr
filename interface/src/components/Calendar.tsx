@@ -87,6 +87,7 @@ function Calendar({
         PreviousMonthButton: () => <></>,
         // biome-ignore lint/correctness/noNestedComponentDefinitions: Easier to structure it this way.
         NextMonthButton: () => <></>,
+        // biome-ignore lint/correctness/noNestedComponentDefinitions: Easier to structure it this way.
         Nav: () => <></>,
       }}
       locale={locale}

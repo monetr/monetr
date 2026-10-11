@@ -7,6 +7,7 @@ import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import Typography from '@monetr/interface/components/Typography';
 import { useFundingSchedules } from '@monetr/interface/hooks/useFundingSchedules';
 import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
+import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 
 import styles from './funding.module.scss';
 
@@ -25,22 +26,6 @@ export default function Funding(): React.JSX.Element {
     return <Typography size='inherit'>Error...</Typography>;
   }
 
-  function ListContent(): React.JSX.Element {
-    if ((funding ?? []).length === 0) {
-      return <EmptyState />;
-    }
-
-    return (
-      <ul className={styles.list}>
-        {funding
-          ?.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1))
-          .map(item => (
-            <FundingItem funding={item} key={item.fundingScheduleId} />
-          ))}
-      </ul>
-    );
-  }
-
   return (
     <Fragment>
       <MTopNavigation icon={CalendarSync} title='Funding Schedules'>
@@ -50,9 +35,29 @@ export default function Funding(): React.JSX.Element {
         </Button>
       </MTopNavigation>
       <div className={styles.content}>
-        <ListContent />
+        <ListContent funding={funding} />
       </div>
     </Fragment>
+  );
+}
+
+interface ListContentProps {
+  funding?: Array<FundingSchedule>;
+}
+
+function ListContent(props: ListContentProps): React.JSX.Element {
+  if ((props.funding ?? []).length === 0) {
+    return <EmptyState />;
+  }
+
+  return (
+    <ul className={styles.list}>
+      {props.funding
+        ?.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1))
+        .map(item => (
+          <FundingItem funding={item} key={item.fundingScheduleId} />
+        ))}
+    </ul>
   );
 }
 
