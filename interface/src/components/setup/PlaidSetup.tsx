@@ -103,7 +103,7 @@ export default function PlaidSetup(props: PlaidProps): React.JSX.Element {
     }
   }
 
-  async function onPlaidSuccess(public_token: string, metadata: PlaidLinkOnSuccessMetadata) {
+  async function onPlaidSuccess(public_token: string | null, metadata: PlaidLinkOnSuccessMetadata) {
     return await request<{ linkId: number }>({
       method: 'POST',
       url: '/api/plaid/link/token/callback',

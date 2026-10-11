@@ -88,7 +88,7 @@ export default function OauthReturn(): React.JSX.Element {
     return navigate('/');
   }
 
-  async function plaidLinkSuccess(public_token: string, metadata: PlaidLinkOnSuccessMetadata): Promise<void> {
+  async function plaidLinkSuccess(public_token: string | null, metadata: PlaidLinkOnSuccessMetadata): Promise<void> {
     setState({ loading: true });
 
     return void request<{ linkId: number }>({
