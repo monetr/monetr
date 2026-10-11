@@ -9,6 +9,8 @@ export interface Author {
 
 export type DocPageData = {
   authors: Array<Author>;
+  // Set by the og images plugin when the page doesn't have an ogImage in its frontmatter.
+  ogImage?: string;
 } & BaseRuntimePageInfo;
 
 function isAuthor(value: unknown): value is Author {

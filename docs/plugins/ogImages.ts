@@ -4,12 +4,15 @@
 // an `ogImage` field on their page data (not the frontmatter, the runtime reads frontmatter from the MDX module so
 // changing it here does nothing) and PageMetadata falls back to that when there is no frontmatter ogImage.
 //
-// Images are only generated for production builds. They get emitted as assets of the web build, the same way rspress
-// emits its own search index.
+// Images get emitted as assets of the web build (dev and production), the same way rspress emits its own search index.
+// Rendering is slow-ish so every PNG is cached on disk, named by a hash of its title and description. An image is only
+// rendered again when one of those changes, or when this file changes since that is where the layout lives.
 
 import type { ReactNode } from 'react';
 
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { Resvg } from '@resvg/resvg-js';
 import type { RsbuildPlugin } from '@rsbuild/core';
@@ -18,6 +21,7 @@ import satori from 'satori';
 
 const WIDTH = 1200;
 const HEIGHT = 630;
+const CACHE_DIR = path.resolve(__dirname, '../node_modules/.cache/monetr-og-images');
 
 interface OgImage {
   path: string;
@@ -31,10 +35,7 @@ export default function ogImages(): RspressPlugin {
 
   return {
     name: 'monetr-og-images',
-    async extendPageData(pageData, isProd) {
-      if (!isProd) {
-        return;
-      }
+    async extendPageData(pageData) {
       if (pageData.frontmatter?.ogImage || pageData.frontmatter?.pageType === '404') {
         return;
       }
@@ -65,11 +66,24 @@ export default function ogImages(): RspressPlugin {
               if (images.size === 0) {
                 return;
               }
+              await mkdir(CACHE_DIR, { recursive: true });
+              const template = readFileSync(__filename);
               const fonts = loadFonts();
               const logo = readFileSync(path.resolve(__dirname, '../src/public/logo192.png')).toString('base64');
               await Promise.all(
                 Array.from(images.values()).map(async image => {
-                  const png = await renderImage(image, fonts, logo);
+                  const key = createHash('sha256')
+                    .update(template)
+                    .update(JSON.stringify([image.title, image.description]))
+                    .digest('hex');
+                  const cachePath = path.join(CACHE_DIR, `${key}.png`);
+                  let png: Buffer;
+                  try {
+                    png = await readFile(cachePath);
+                  } catch {
+                    png = await renderImage(image, fonts, logo);
+                    await writeFile(cachePath, png);
+                  }
                   // Asset names are relative to the output directory, no leading slash.
                   compilation.emitAsset(image.path.slice(1), new sources.RawSource(png));
                 }),
