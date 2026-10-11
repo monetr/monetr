@@ -1,4 +1,4 @@
-1Password
+1Password.*
 3D
 AED
 AFN
@@ -38,7 +38,7 @@ Crypto
 DBSCAN
 DNS
 DNT
-DSN
+DSN.*
 DockerHub
 ES256
 EUR
