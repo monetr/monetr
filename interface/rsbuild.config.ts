@@ -115,6 +115,10 @@ export default defineConfig({
           font: `[name].${filename}[ext]`,
         },
     cleanDistPath: false, // Handled by cmake
+    // Small font subsets were getting base64'd into the main CSS, keep them as files so they only load when needed.
+    dataUriLimit: {
+      font: 0,
+    },
     charset: 'utf8',
     filenameHash: true,
     manifest: false,
