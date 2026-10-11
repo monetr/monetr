@@ -88,7 +88,6 @@ const Layout = () => {
   return (
     <Fragment>
       <FundingBar />
-      <PageMetadata />
       <QueryClientWrapper>
         <BasicLayout
           afterNavMenu={<NavExtras />}
@@ -114,6 +113,8 @@ const Layout = () => {
           navTitle={<NavTitle />}
         />
       </QueryClientWrapper>
+      {/* Must come after the layout so its head tags override the ones rspress adds. */}
+      <PageMetadata />
     </Fragment>
   );
 };

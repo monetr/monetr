@@ -6,6 +6,8 @@ import realUrl from '@monetr/docs/components/utils/realUrl';
 import { Head, usePage } from '@rspress/core/runtime';
 import { Fragment } from 'react/jsx-runtime';
 
+// This has to render after the rspress layout in theme/index.tsx so that anything here wins over the tags rspress adds
+// itself.
 export default function PageMetadata(): React.JSX.Element {
   const { page } = usePage();
   const { frontmatter } = page;
@@ -21,21 +23,26 @@ export default function PageMetadata(): React.JSX.Element {
   }
   const authors = buildAuthors(page);
 
+  // rspress only uses the frontmatter title on doc pages, custom pages (home, pricing, blog) always just get "monetr".
+  // So for custom pages we use the frontmatter title as is, the frontmatter should include monetr in it.
+  const customTitle = page.pageType === 'custom' && frontmatter?.title ? (frontmatter.title as string) : null;
+
   return (
     <Head>
       {/* canonical */}
       <link href={url} rel='canonical' />
+      {customTitle ? (
+        <Fragment>
+          <title>{customTitle}</title>
+          <meta content={customTitle} property='og:title' />
+        </Fragment>
+      ) : null}
       {/* opengraph things */}
       <meta content={type} property='og:type' />
       <meta content={url} property='og:url' />
+      <meta content='monetr' property='og:site_name' />
+      <meta content='en_US' property='og:locale' />
       <meta content={page.title} name='title' />
-      <meta content={page.title} name='og:title' /> {/* TODO This doesn't work! */}
-      {page.description ? (
-        <Fragment>
-          <meta content={page.description} name='description' />
-          <meta content={page.description} name='og:description' />
-        </Fragment>
-      ) : null}
       {frontmatter?.ogImage ? <meta content={realUrl(frontmatter.ogImage as string)} property='og:image' /> : null}
       {/* misc? */}
       <meta content={page.lang} httpEquiv='Content-Language' />
@@ -49,18 +56,17 @@ export default function PageMetadata(): React.JSX.Element {
       {modified.map(timestamp => (
         <meta content={timestamp} key={timestamp} property='article:modified_time' />
       ))}
-      {/* Twitter bullshit */}
+      {/* Twitter bullshit, title and description fall back to the og tags */}
       <meta content='monetr.app' property='twitter:domain' />
       <meta content={url} property='twitter:url' />
-      <meta content={page.frontmatter?.title} name='twitter:title' />
-      {/* TODO Doesn't work the same as the HeadTags description */}
-      <meta content={page.frontmatter?.description} name='twitter:description' />{' '}
       {frontmatter?.ogImage ? (
         <Fragment>
           <meta content='summary_large_image' name='twitter:card' />
           <meta content={realUrl(frontmatter?.ogImage as string)} name='twitter:image' />
         </Fragment>
-      ) : null}
+      ) : (
+        <meta content='summary' name='twitter:card' />
+      )}
     </Head>
   );
 }
