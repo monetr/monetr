@@ -63,7 +63,7 @@ function UpdatePlaidAccountOverlay({
   }, [link, updateAccountSelection]);
 
   const plaidOnSuccess = useCallback(
-    async (token: string, metadata: PlaidLinkOnSuccessMetadata) => {
+    async (token: string | null, metadata: PlaidLinkOnSuccessMetadata) => {
       console.log('plaidOnSuccess', {
         token,
         metadata,
