@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"runtime/debug"
+	"strconv"
 	"time"
 
 	"github.com/getsentry/sentry-go"
@@ -17,6 +18,7 @@ import (
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/uptrace/bun"
 )
 
@@ -40,17 +42,28 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 
 	api := app.Group(APIPath, middleware.Gzip())
 
-	if c.Stats != nil {
-		app.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-			return func(ctx *echo.Context) error {
-				start := time.Now()
-				defer func() {
-					c.Stats.FinishedRequest(ctx, time.Since(start))
-				}()
-				return next(ctx)
-			}
-		})
-	}
+	app.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(ctx *echo.Context) error {
+			start := time.Now()
+			defer func() {
+				// In echo v5 ctx.Response() is just an http.ResponseWriter, the status
+				// code lives on the *echo.Response behind it which we have to unwrap to
+				// read.
+				var status int
+				if response, err := echo.UnwrapResponse(ctx.Response()); err == nil {
+					status = response.Status
+				}
+				labels := prometheus.Labels{
+					"path":   ctx.Path(),
+					"method": ctx.Request().Method,
+					"status": strconv.Itoa(status),
+				}
+				httpRequests.With(labels).Inc()
+				httpResponseTime.With(labels).Observe(float64(time.Since(start).Milliseconds()))
+			}()
+			return next(ctx)
+		}
+	})
 
 	// Generic request logger, log the request being made with a debug level.
 	api.Use(func(next echo.HandlerFunc) echo.HandlerFunc {

@@ -8,7 +8,6 @@ import (
 	"log/slog"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/monetr/monetr/server/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/uptrace/bun"
 )
@@ -18,14 +17,12 @@ var (
 )
 
 type PostgresHooks struct {
-	log   *slog.Logger
-	stats *metrics.Stats
+	log *slog.Logger
 }
 
-func NewPostgresHooks(log *slog.Logger, stats *metrics.Stats) bun.QueryHook {
+func NewPostgresHooks(log *slog.Logger) bun.QueryHook {
 	return &PostgresHooks{
-		log:   log,
-		stats: stats,
+		log: log,
 	}
 }
 
@@ -106,9 +103,10 @@ func (h *PostgresHooks) AfterQuery(ctx context.Context, event *bun.QueryEvent) {
 		}
 	}
 
-	if h.stats != nil {
-		h.stats.Queries.With(prometheus.Labels{
-			"stmt": queryType,
-		}).Inc()
-	}
+	queries.With(prometheus.Labels{
+		"stmt": queryType,
+	}).Inc()
+	queryTime.With(prometheus.Labels{
+		"stmt": queryType,
+	}).Observe(float64(endTime.Sub(event.StartTime).Milliseconds()))
 }

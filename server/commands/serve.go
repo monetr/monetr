@@ -213,7 +213,7 @@ func ServeCommand(parent *cobra.Command) {
 				defer sentry.Flush(10 * time.Second)
 			}
 
-			db, err := database.GetDatabase(log, configuration, stats)
+			db, err := database.GetDatabase(log, configuration)
 			if err != nil {
 				log.Error("failed to setup database connection", "err", err)
 				return err
@@ -309,7 +309,6 @@ func ServeCommand(parent *cobra.Command) {
 				log,
 				redisCache,
 				clock,
-				stats,
 				powSecret,
 				configuration.ProofOfWork.Difficulty,
 				configuration.ProofOfWork.Lifetime,
@@ -373,7 +372,6 @@ func ServeCommand(parent *cobra.Command) {
 					PlaidWebhookVerification: plaidWebhooks,
 					PubSub:                   pubSub,
 					Queue:                    jobQueue,
-					Stats:                    stats,
 					Stripe:                   stripe,
 				},
 				ui.NewUIController(log, configuration),

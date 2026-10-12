@@ -14,7 +14,6 @@ import (
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/internal/sentryecho"
-	"github.com/monetr/monetr/server/metrics"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/powchallenge"
 	"github.com/monetr/monetr/server/pubsub"
@@ -48,7 +47,6 @@ type Controller struct {
 	PlaidInstitutions        platypus.PlaidInstitutions
 	PlaidWebhookVerification platypus.WebhookVerification
 	PubSub                   pubsub.PublishSubscribe
-	Stats                    *metrics.Stats
 	Stripe                   stripe_helper.Stripe
 }
 

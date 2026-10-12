@@ -2,33 +2,22 @@ package metrics
 
 import (
 	"net/http"
-	"strconv"
 	"sync"
 	"time"
 
-	"github.com/labstack/echo/v5"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-const metricsNamespace = "monetr"
+const (
+	// Namespace is prefixed onto every metric monetr exposes. Metrics themselves
+	// are declared as package level vars in the package that uses them.
+	Namespace = "monetr"
+)
 
 type Stats struct {
 	mux                 *http.ServeMux
 	server              *http.Server
 	listenAndServerSync sync.Once
-	JobsEnqueued        *prometheus.CounterVec
-	JobsProcessed       *prometheus.CounterVec
-	JobsFailed          *prometheus.CounterVec
-	JobRunTime          *prometheus.HistogramVec
-	Queries             *prometheus.CounterVec
-	QueryTime           *prometheus.HistogramVec
-	HTTPRequests        *prometheus.CounterVec
-	HTTPResponseTime    *prometheus.HistogramVec
-	PowIssued           *prometheus.CounterVec
-	PowVerified         *prometheus.CounterVec
-	PowVerifyTime       *prometheus.HistogramVec
 }
 
 func NewStats() *Stats {
@@ -36,89 +25,6 @@ func NewStats() *Stats {
 	mux.Handle("/metrics", promhttp.Handler())
 	return &Stats{
 		mux: mux,
-		JobsEnqueued: promauto.NewCounterVec(prometheus.CounterOpts{
-			Namespace:   metricsNamespace,
-			Name:        "jobs_enqueued",
-			Help:        "Number of jobs that have been enqueued for background work.",
-			ConstLabels: map[string]string{},
-		}, []string{
-			"job_name",
-		}),
-		JobsProcessed: promauto.NewCounterVec(prometheus.CounterOpts{
-			Namespace:   metricsNamespace,
-			Name:        "jobs_processed",
-			Help:        "Number of jobs that have been processed, processed jobs are jobs that have succeeded or failed.",
-			ConstLabels: map[string]string{},
-		}, []string{
-			"job_name",
-		}),
-		JobsFailed: promauto.NewCounterVec(prometheus.CounterOpts{
-			Namespace:   metricsNamespace,
-			Name:        "jobs_failed",
-			Help:        "Number of jobs that have failed.",
-			ConstLabels: map[string]string{},
-		}, []string{
-			"job_name",
-		}),
-		JobRunTime: promauto.NewHistogramVec(prometheus.HistogramOpts{
-			Namespace: metricsNamespace,
-			Name:      "job_run_time",
-			Help:      "The amount of time it takes for jobs to run.",
-			Buckets:   []float64{1, 50, 100, 500, 1000, 10000},
-		}, []string{
-			"job_name",
-			"account_id",
-		}),
-		Queries: promauto.NewCounterVec(prometheus.CounterOpts{
-			Namespace:   metricsNamespace,
-			Name:        "queries",
-			Help:        "Number of SQL queries issued. This excludes BEGIN, COMMIT and ROLLBACK. Essentially each PostgreSQL round trip.",
-			ConstLabels: map[string]string{},
-		}, []string{
-			"stmt",
-		}),
-		HTTPRequests: promauto.NewCounterVec(prometheus.CounterOpts{
-			Namespace:   metricsNamespace,
-			Name:        "http_requests",
-			Help:        "Number of HTTP requests received.",
-			ConstLabels: map[string]string{},
-		}, []string{
-			"path",
-			"method",
-			"status",
-		}),
-		HTTPResponseTime: promauto.NewHistogramVec(prometheus.HistogramOpts{
-			Namespace: metricsNamespace,
-			Name:      "http_response_time",
-			Help:      "Time it takes for an HTTP request to be completed.",
-			Buckets:   []float64{1, 50, 100, 500, 1000, 10000},
-		}, []string{
-			"path",
-			"method",
-			"status",
-		}),
-		PowIssued: promauto.NewCounterVec(prometheus.CounterOpts{
-			Namespace:   metricsNamespace,
-			Name:        "pow_issued",
-			Help:        "Number of proof of work challenges that have been issued to clients.",
-			ConstLabels: map[string]string{},
-		}, []string{}),
-		PowVerified: promauto.NewCounterVec(prometheus.CounterOpts{
-			Namespace:   metricsNamespace,
-			Name:        "pow_verified",
-			Help:        "Number of proof of work challenge verifications, labeled by the result of the verification.",
-			ConstLabels: map[string]string{},
-		}, []string{
-			"result",
-		}),
-		PowVerifyTime: promauto.NewHistogramVec(prometheus.HistogramOpts{
-			Namespace: metricsNamespace,
-			Name:      "pow_verify_time",
-			Help:      "Time it takes to verify a proof of work challenge.",
-			Buckets:   []float64{1, 50, 100, 500, 1000, 10000},
-		}, []string{
-			"result",
-		}),
 	}
 }
 
@@ -140,24 +46,4 @@ func (s *Stats) Close() error {
 	}
 
 	return nil
-}
-
-func (s *Stats) JobEnqueued(name string) {
-	s.JobsEnqueued.With(prometheus.Labels{
-		"job_name": name,
-	}).Inc()
-}
-
-func (s *Stats) FinishedRequest(ctx *echo.Context, responseTime time.Duration) {
-	// In echo v5 ctx.Response() is just an http.ResponseWriter, the status code
-	// lives on the *echo.Response behind it which we have to unwrap to read.
-	var status int
-	if response, err := echo.UnwrapResponse(ctx.Response()); err == nil {
-		status = response.Status
-	}
-	s.HTTPResponseTime.With(prometheus.Labels{
-		"path":   ctx.Path(),
-		"method": ctx.Request().Method,
-		"status": strconv.FormatInt(int64(status), 10),
-	}).Observe(float64(responseTime.Milliseconds()))
 }

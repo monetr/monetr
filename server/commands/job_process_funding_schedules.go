@@ -20,7 +20,7 @@ func jobProcessFundingSchedules(parent *cobra.Command) {
 			configuration := config.LoadConfiguration()
 			log := logging.NewLoggerWithConfig(configuration.Logging)
 
-			db, err := database.GetDatabase(log, configuration, nil)
+			db, err := database.GetDatabase(log, configuration)
 			if err != nil {
 				return errors.Wrap(err, "failed to get database instance")
 			}

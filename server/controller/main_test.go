@@ -217,7 +217,6 @@ func newTestApplication(
 		log,
 		cachePool,
 		clock,
-		nil,
 		powchallenge.DeriveSecret(privateKey.Seed()),
 		configuration.ProofOfWork.Difficulty,
 		configuration.ProofOfWork.Lifetime,
@@ -241,7 +240,6 @@ func newTestApplication(
 		PlaidWebhookVerification: plaidWebhooks,
 		PubSub:                   pubSub,
 		Queue:                    queue,
-		Stats:                    nil,
 		Stripe:                   stripeHelper,
 	}
 

@@ -28,7 +28,7 @@ func adminRegisterCode(parent *cobra.Command) {
 			if configFileName := configuration.GetConfigFileName(); configFileName != "" {
 				log.Info("config file loaded", "config", configFileName)
 			}
-			db, err := database.GetDatabase(log, configuration, nil)
+			db, err := database.GetDatabase(log, configuration)
 			if err != nil {
 				log.Error("failed to establish database connection", "err", err)
 				return err

@@ -28,7 +28,7 @@ func developmentCleanPlaid(parent *cobra.Command) {
 				log.Info("config file loaded", "config", configFileName)
 			}
 
-			db, err := database.GetDatabase(log, configuration, nil)
+			db, err := database.GetDatabase(log, configuration)
 			if err != nil {
 				log.Error("failed to setup database", "err", err)
 				return err

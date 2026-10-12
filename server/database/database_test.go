@@ -32,7 +32,7 @@ func TestGetDatabase(t *testing.T) {
 			},
 		}
 
-		db, err := database.GetDatabase(log, config, nil)
+		db, err := database.GetDatabase(log, config)
 		assert.NoError(t, err, "must be able to connect to database")
 		assert.NoError(t, db.PingContext(t.Context()), "must be able to ping database")
 		assert.NoError(t, db.Close(), "must be able to close db connection")

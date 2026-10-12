@@ -18,7 +18,7 @@ func databaseVersion(parent *cobra.Command) {
 			configuration := config.LoadConfiguration()
 			log := logging.NewLoggerWithConfig(configuration.Logging)
 			configuration.PostgreSQL.Migrate = false
-			db, err := database.GetDatabase(log, configuration, nil)
+			db, err := database.GetDatabase(log, configuration)
 			if err != nil {
 				log.Error("failed to setup database", "err", err)
 				return err

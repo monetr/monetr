@@ -101,7 +101,6 @@ func newTestChallenger(t *testing.T, difficulty int) (powchallenge.Challenger, *
 		testutils.GetLog(t),
 		newTestCache(t),
 		clk,
-		nil,
 		secret,
 		difficulty,
 		5*time.Minute,
@@ -241,8 +240,8 @@ func TestChallenger_IssueAndVerify(t *testing.T) {
 		sharedCache := newTestCache(t)
 		ctx := t.Context()
 
-		issuer := powchallenge.NewChallenger(testutils.GetLog(t), sharedCache, clk, nil, secret, 4, 5*time.Minute)
-		verifier := powchallenge.NewChallenger(testutils.GetLog(t), sharedCache, clk, nil, secret, 8, 5*time.Minute)
+		issuer := powchallenge.NewChallenger(testutils.GetLog(t), sharedCache, clk, secret, 4, 5*time.Minute)
+		verifier := powchallenge.NewChallenger(testutils.GetLog(t), sharedCache, clk, secret, 8, 5*time.Minute)
 
 		challenge, err := issuer.Issue(ctx, powchallenge.PurposeRegister)
 		require.NoError(t, err, "must be able to issue a low difficulty challenge")
@@ -302,7 +301,6 @@ func TestChallenger_IssueAndVerify(t *testing.T) {
 			testutils.GetLog(t),
 			compareAndSwapErrorCache{Cache: newTestCache(t)},
 			clk,
-			nil,
 			secret,
 			testDifficulty,
 			5*time.Minute,

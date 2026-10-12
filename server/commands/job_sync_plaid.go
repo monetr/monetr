@@ -49,7 +49,7 @@ func jobSyncPlaid(parent *cobra.Command) {
 				log.Warn("--link flag does nothing when --all is specified")
 			}
 
-			db, err := database.GetDatabase(log, configuration, nil)
+			db, err := database.GetDatabase(log, configuration)
 			if err != nil {
 				return errors.Wrap(err, "failed to get database instance")
 			}

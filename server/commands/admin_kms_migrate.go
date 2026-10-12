@@ -56,7 +56,7 @@ func adminKMSMigrate(parent *cobra.Command) {
 				return err
 			}
 
-			db, err := database.GetDatabase(log, configuration, nil)
+			db, err := database.GetDatabase(log, configuration)
 			if err != nil {
 				log.Error("failed to initialze database", "err", err)
 				return errors.Wrap(err, "failed to initialize database")

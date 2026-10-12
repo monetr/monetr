@@ -16,10 +16,8 @@ import (
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
-	"github.com/monetr/monetr/server/metrics"
 	"github.com/monetr/monetr/server/migrations"
 	"github.com/pkg/errors"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/require"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
@@ -31,8 +29,7 @@ var (
 )
 
 type queryHook struct {
-	log   *slog.Logger
-	stats *metrics.Stats
+	log *slog.Logger
 }
 
 func (q *queryHook) BeforeQuery(ctx context.Context, event *bun.QueryEvent) context.Context {
@@ -51,10 +48,6 @@ func (q *queryHook) BeforeQuery(ctx context.Context, event *bun.QueryEvent) cont
 }
 
 func (q *queryHook) AfterQuery(ctx context.Context, event *bun.QueryEvent) {
-	if q.stats != nil {
-		q.stats.Queries.With(prometheus.Labels{}).Inc()
-	}
-
 	if event.Err != nil {
 		log := q.log
 		if event.Stash != nil {

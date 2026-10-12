@@ -17,7 +17,6 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/cache"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/metrics"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -125,7 +124,6 @@ type challengerBase struct {
 	log        *slog.Logger
 	cache      cache.Cache
 	clock      clock.Clock
-	stats      *metrics.Stats
 	secret     []byte
 	difficulty int
 	lifetime   time.Duration
@@ -135,7 +133,6 @@ func NewChallenger(
 	log *slog.Logger,
 	cache cache.Cache,
 	clk clock.Clock,
-	stats *metrics.Stats,
 	secret []byte,
 	difficulty int,
 	lifetime time.Duration,
@@ -144,7 +141,6 @@ func NewChallenger(
 		log:        log,
 		cache:      cache,
 		clock:      clk,
-		stats:      stats,
 		secret:     secret,
 		difficulty: difficulty,
 		lifetime:   lifetime,
@@ -208,9 +204,7 @@ func (c *challengerBase) Issue(
 		return nil, errors.Wrap(err, "failed to persist proof of work challenge marker")
 	}
 
-	if c.stats != nil {
-		c.stats.PowIssued.With(prometheus.Labels{}).Inc()
-	}
+	powIssued.With(prometheus.Labels{}).Inc()
 
 	c.log.DebugContext(span.Context(), "issued proof of work challenge", "purpose", purpose, "difficulty", c.difficulty)
 
@@ -308,15 +302,11 @@ func (c *challengerBase) Verify(
 	return nil
 }
 
-// recordVerify emits the verification metrics; stats is nil in many tests.
 func (c *challengerBase) recordVerify(result string, duration time.Duration) {
-	if c.stats == nil {
-		return
-	}
-	c.stats.PowVerified.With(prometheus.Labels{
+	powVerified.With(prometheus.Labels{
 		"result": result,
 	}).Inc()
-	c.stats.PowVerifyTime.With(prometheus.Labels{
+	powVerifyTime.With(prometheus.Labels{
 		"result": result,
 	}).Observe(float64(duration.Milliseconds()))
 }

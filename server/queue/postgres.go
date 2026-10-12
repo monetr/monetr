@@ -52,6 +52,7 @@ import (
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/storage"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/robfig/cron"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/driver/pgdriver"
@@ -385,12 +386,20 @@ func (p *postgresProcessor) BulkEnqueueAt(
 	// Actually insert the jobs into the queue. Any job that conflicts on its
 	// queue and signature has already been enqueued, so skip it rather than
 	// failing the entire batch.
-	_, err = p.db.NewInsert().
+	result, err := p.db.NewInsert().
 		Model(&jobs).
 		On(`CONFLICT ("queue", "signature") DO NOTHING`).
 		Exec(span.Context())
 	if err != nil {
 		return errors.Wrap(err, "failed to enqueue jobs")
+	}
+
+	// Only count the jobs that actually got inserted, the ones that conflicted
+	// were already enqueued before.
+	if inserted, err := result.RowsAffected(); err == nil {
+		jobsEnqueued.With(prometheus.Labels{
+			"job_name": queue,
+		}).Add(float64(inserted))
 	}
 
 	log.DebugContext(span.Context(), "successfully bulk enqueued jobs")
@@ -502,6 +511,10 @@ func (p *postgresProcessor) EnqueueAt(
 		}
 		return errors.Wrap(err, "failed to enqueue job")
 	}
+
+	jobsEnqueued.With(prometheus.Labels{
+		"job_name": queue,
+	}).Inc()
 
 	log = p.log.With(
 		"jobId", job.JobId,
@@ -1391,6 +1404,7 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 		scope.SetTag("queue", job.Queue)
 	})
 
+	start := p.clock.Now()
 	var err error
 	defer func() {
 		now := p.clock.Now()
@@ -1487,6 +1501,16 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 			})
 			span.Status = sentry.SpanStatusOK
 		}
+
+		labels := prometheus.Labels{
+			"job_name": job.Queue,
+		}
+		jobsProcessed.With(labels).Inc()
+		// Panics set err above so this counts those too.
+		if err != nil {
+			jobsFailed.With(labels).Inc()
+		}
+		jobRunTime.With(labels).Observe(float64(now.Sub(start).Milliseconds()))
 
 		span.Finish()
 	}()

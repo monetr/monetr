@@ -36,7 +36,7 @@ func adminPlaidUpdateWebhook(parent *cobra.Command) {
 				return cmd.Help()
 			}
 
-			db, err := database.GetDatabase(log, configuration, nil)
+			db, err := database.GetDatabase(log, configuration)
 			if err != nil {
 				log.Error("failed to setup database", "err", err)
 				return err

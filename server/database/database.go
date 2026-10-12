@@ -13,7 +13,6 @@ import (
 	"github.com/monetr/monetr/server/certs"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/logging"
-	"github.com/monetr/monetr/server/metrics"
 	"github.com/monetr/monetr/server/migrations"
 	"github.com/pkg/errors"
 	"github.com/uptrace/bun"
@@ -24,7 +23,6 @@ import (
 func GetDatabase(
 	log *slog.Logger,
 	configuration config.Configuration,
-	stats *metrics.Stats,
 ) (*bun.DB, error) {
 	if configuration.IsUsingLegacyPostgreSQL() {
 		log.Warn("Config warning! database.postgresql is not configured, please migrate your configuration to the new settings going forward! If you do not migrate your config then this will break in an upcoming release!")
@@ -82,7 +80,7 @@ func GetDatabase(
 	sqldb.SetConnMaxLifetime(9 * time.Minute)
 
 	db := bun.NewDB(sqldb, pgdialect.New())
-	db.AddQueryHook(logging.NewPostgresHooks(log, stats))
+	db.AddQueryHook(logging.NewPostgresHooks(log))
 
 	if err := db.PingContext(context.Background()); err != nil {
 		return db, errors.Wrap(err, "failed to ping postgresql")
