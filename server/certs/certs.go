@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/pem"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 // defaultDebounce is how long the watcher waits after the last filesystem event
@@ -64,7 +66,10 @@ var (
 )
 
 type material struct {
-	checksum    []byte
+	checksum []byte
+	// files is the raw contents of each file by its path, this way we can tell
+	// which specific file changed when we reload.
+	files       map[string][]byte
 	roots       *x509.CertPool
 	certificate *tls.Certificate
 }
@@ -223,40 +228,92 @@ func (f *fileSource) verifyConnection(state tls.ConnectionState) error {
 
 func (f *fileSource) Reload() error {
 	var checksum []byte
-	next := &material{}
+	next := &material{
+		files: map[string][]byte{},
+	}
+	notAfter := map[string]time.Time{}
 
-	if f.options.CACertificatePath != "" {
-		caCert, err := os.ReadFile(f.options.CACertificatePath)
+	if path := f.options.CACertificatePath; path != "" {
+		caCert, err := os.ReadFile(path)
 		if err != nil {
+			certificateReloadFailures.With(prometheus.Labels{
+				"path": path,
+			}).Inc()
 			return errors.Wrap(err, "failed to load ca certificate")
 		}
 
 		roots := x509.NewCertPool()
 		if !roots.AppendCertsFromPEM(caCert) {
+			certificateReloadFailures.With(prometheus.Labels{
+				"path": path,
+			}).Inc()
 			return errors.New("failed to parse ca certificate")
 		}
 		next.roots = roots
+		next.files[path] = caCert
 		checksum = append(checksum, caCert...)
+
+		// The cert pool doesn't give us the certificates back, so parse them again
+		// just to find the one that expires first. AppendCertsFromPEM skips blocks
+		// it can't parse so we do the same here.
+		rest := caCert
+		for {
+			var block *pem.Block
+			block, rest = pem.Decode(rest)
+			if block == nil {
+				break
+			}
+			if block.Type != "CERTIFICATE" {
+				continue
+			}
+
+			parsed, err := x509.ParseCertificate(block.Bytes)
+			if err != nil {
+				continue
+			}
+
+			if expires, ok := notAfter[path]; !ok || parsed.NotAfter.Before(expires) {
+				notAfter[path] = parsed.NotAfter
+			}
+		}
 	}
 
 	if f.options.KeyPath != "" {
 		certificate, err := os.ReadFile(f.options.CertificatePath)
 		if err != nil {
+			certificateReloadFailures.With(prometheus.Labels{
+				"path": f.options.CertificatePath,
+			}).Inc()
 			return errors.Wrap(err, "failed to load client certificate")
 		}
 
 		key, err := os.ReadFile(f.options.KeyPath)
 		if err != nil {
+			certificateReloadFailures.With(prometheus.Labels{
+				"path": f.options.KeyPath,
+			}).Inc()
 			return errors.Wrap(err, "failed to load client key")
 		}
 
 		pair, err := tls.X509KeyPair(certificate, key)
 		if err != nil {
+			// This could be either file, like if the key doesn't match the
+			// certificate. But just count it against the certificate.
+			certificateReloadFailures.With(prometheus.Labels{
+				"path": f.options.CertificatePath,
+			}).Inc()
 			return errors.Wrap(err, "failed to parse client certificate")
 		}
 		next.certificate = &pair
+		next.files[f.options.CertificatePath] = certificate
+		next.files[f.options.KeyPath] = key
 		checksum = append(checksum, certificate...)
 		checksum = append(checksum, key...)
+
+		// X509KeyPair fills in the leaf as of Go 1.23
+		if pair.Leaf != nil {
+			notAfter[f.options.CertificatePath] = pair.Leaf.NotAfter
+		}
 	}
 	next.checksum = checksum
 
@@ -267,9 +324,25 @@ func (f *fileSource) Reload() error {
 			return nil
 		}
 		f.log.Info("reloaded TLS certificates")
+
+		// Only count the files that actually changed, rotation might only replace
+		// some of them.
+		for path, content := range next.files {
+			if !bytes.Equal(current.files[path], content) {
+				certificateRotations.With(prometheus.Labels{
+					"path": path,
+				}).Inc()
+			}
+		}
 	}
 
 	f.material.Store(next)
+
+	for path, expires := range notAfter {
+		certificateNotAfter.With(prometheus.Labels{
+			"path": path,
+		}).Set(float64(expires.Unix()))
+	}
 
 	return nil
 }
