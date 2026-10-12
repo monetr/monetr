@@ -42,6 +42,8 @@ import (
 	"github.com/monetr/monetr/server/ui"
 	"github.com/monetr/monetr/server/zoneinfo"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -228,6 +230,13 @@ func ServeCommand(parent *cobra.Command) {
 			defer redisController.Close()
 
 			redisCache := cache.NewCache(log, redisController.Pool())
+
+			// These read their values when prometheus scrapes us, so they only need
+			// to be registered once here.
+			prometheus.MustRegister(
+				collectors.NewDBStatsCollector(db.DB, metrics.Namespace),
+				cache.NewPoolCollector(redisController.Pool()),
+			)
 
 			fileStorage, err := storage.GetStorage(log, configuration)
 			if err != nil {

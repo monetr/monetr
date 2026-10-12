@@ -81,6 +81,7 @@ func NewOpenBaoTransit(
 			request *http.Request,
 			_ *http.Response,
 			err error,
+			_ time.Duration,
 		) {
 			logEntry := log.With(slog.Group("openbao",
 				"method", request.Method,

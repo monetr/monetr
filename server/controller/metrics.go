@@ -29,6 +29,14 @@ var (
 	})
 
 	// Users and authentication
+	logins = promauto.NewCounterVec(prometheus.CounterOpts{
+		Namespace:   metrics.Namespace,
+		Name:        "logins",
+		Help:        "Number of login attempts, labeled by the result (success, invalid_credentials, email_not_verified, password_change_required, mfa_required, error). Attempts that fail proof of work are not counted here.",
+		ConstLabels: map[string]string{},
+	}, []string{
+		"result",
+	})
 	usersCreated = promauto.NewCounter(prometheus.CounterOpts{
 		Namespace: metrics.Namespace,
 		Name:      "users_created",

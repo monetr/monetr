@@ -141,6 +141,15 @@ func (c *Controller) postLogin(ctx *echo.Context) error {
 		return err // validateProofOfWork returns a valid http error.
 	}
 
+	// Anything that bails out without setting a more specific result is some kind
+	// of server side problem, so start with error.
+	loginResult := "error"
+	defer func() {
+		logins.With(prometheus.Labels{
+			"result": loginResult,
+		}).Inc()
+	}()
+
 	secureRepo := c.mustGetSecurityRepository(ctx)
 	login, requiresPasswordChange, err := secureRepo.Login(
 		c.getContext(ctx),
@@ -149,6 +158,7 @@ func (c *Controller) postLogin(ctx *echo.Context) error {
 	)
 	switch errors.Cause(err) {
 	case repository.ErrInvalidCredentials:
+		loginResult = "invalid_credentials"
 		return c.returnError(
 			ctx,
 			http.StatusUnauthorized,
@@ -176,6 +186,7 @@ func (c *Controller) postLogin(ctx *echo.Context) error {
 			c.getContext(ctx),
 			"login email address is not verified, please verify before continuing",
 		)
+		loginResult = "email_not_verified"
 		return c.failure(ctx, http.StatusPreconditionRequired, EmailNotVerifiedError{})
 	}
 
@@ -213,6 +224,7 @@ func (c *Controller) postLogin(ctx *echo.Context) error {
 		})
 
 		log.InfoContext(c.getContext(ctx), "login requires a password change")
+		loginResult = "password_change_required"
 		return c.failure(
 			ctx,
 			http.StatusPreconditionRequired,
@@ -265,6 +277,7 @@ func (c *Controller) postLogin(ctx *echo.Context) error {
 			}
 			c.updateAuthenticationCookie(ctx, token)
 
+			loginResult = "mfa_required"
 			return c.failure(ctx, http.StatusPreconditionRequired, MFARequiredError{})
 		}
 
@@ -303,6 +316,7 @@ func (c *Controller) postLogin(ctx *echo.Context) error {
 
 		if !c.Configuration.Stripe.IsBillingEnabled() {
 			// Return their account token.
+			loginResult = "success"
 			return ctx.JSON(http.StatusOK, result)
 		}
 
@@ -325,6 +339,7 @@ func (c *Controller) postLogin(ctx *echo.Context) error {
 			result["nextUrl"] = "/account/subscribe"
 		}
 
+		loginResult = "success"
 		return ctx.JSON(http.StatusOK, result)
 	default:
 		// If the login has more than one user then we want to generate a temp

@@ -8,6 +8,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/benbjohnson/clock"
@@ -21,6 +22,7 @@ import (
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/v48/plaid"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/uptrace/bun"
 )
 
@@ -83,6 +85,7 @@ func NewPlaid(
 				request *http.Request,
 				response *http.Response,
 				_ error,
+				duration time.Duration,
 			) {
 				requestLog := log.With(
 					"plaid_method", request.Method,
@@ -90,8 +93,15 @@ func NewPlaid(
 				)
 				var statusCode int
 				var requestId string
+				// Plaid endpoints are all fixed paths like /transactions/sync so this
+				// is safe to use as a label.
+				endpoint := request.URL.Path
+				// If we never got a response then the request didn't make it to Plaid
+				// at all, like a timeout.
+				status := "error"
 				if response != nil {
 					statusCode = response.StatusCode
+					status = strconv.Itoa(statusCode)
 					requestLog = requestLog.With("plaid_statusCode", statusCode)
 
 					var responseData map[string]any
@@ -99,9 +109,17 @@ func NewPlaid(
 					tee := io.TeeReader(response.Body, buffer)
 					if err := json.NewDecoder(tee).Decode(&responseData); err != nil {
 						log.WarnContext(ctx, "failed to decode plaid response as json for logging", "err", err)
-					} else if id, ok := responseData["request_id"].(string); ok {
-						requestId = id
-						requestLog = requestLog.With("plaid_requestId", requestId)
+					} else {
+						if id, ok := responseData["request_id"].(string); ok {
+							requestId = id
+							requestLog = requestLog.With("plaid_requestId", requestId)
+						}
+						if errorCode, ok := responseData["error_code"].(string); ok && errorCode != "" {
+							plaidApiErrors.With(prometheus.Labels{
+								"endpoint":   endpoint,
+								"error_code": errorCode,
+							}).Inc()
+						}
 					}
 
 					// Close the existing body before we replace it.
@@ -109,6 +127,14 @@ func NewPlaid(
 					// Then swap out the body
 					response.Body = io.NopCloser(buffer)
 				}
+
+				plaidApiRequests.With(prometheus.Labels{
+					"endpoint": endpoint,
+					"status":   status,
+				}).Inc()
+				plaidApiRequestTime.With(prometheus.Labels{
+					"endpoint": endpoint,
+				}).Observe(float64(duration.Milliseconds()))
 
 				// If you get a nil reference panic here during testing, its probably because you forgot to mock a certain endpoint.
 				// Check to see if the error is a "no responder found" error.

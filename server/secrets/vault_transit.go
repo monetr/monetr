@@ -80,7 +80,7 @@ func NewVaultTransit(
 	}
 	trip := round.NewObservabilityRoundTripper(
 		transport,
-		func(ctx context.Context, request *http.Request, _ *http.Response, err error) {
+		func(ctx context.Context, request *http.Request, _ *http.Response, err error, _ time.Duration) {
 			logEntry := log.With(slog.Group("vault",
 				"method", request.Method,
 				"url", request.URL.String(),

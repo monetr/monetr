@@ -3,6 +3,7 @@ package cache
 import (
 	"time"
 
+	"github.com/gomodule/redigo/redis"
 	"github.com/monetr/monetr/server/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -39,4 +40,78 @@ func recordOperation(operation, result string, start time.Time) {
 	// instead of using Milliseconds() like the other metrics do. Otherwise
 	// everything would just be 0.
 	cacheOperationTime.With(labels).Observe(float64(time.Since(start)) / float64(time.Millisecond))
+}
+
+var (
+	_ prometheus.Collector = &poolCollector{}
+)
+
+var (
+	poolActiveDesc = prometheus.NewDesc(
+		prometheus.BuildFQName(metrics.Namespace, "", "cache_pool_connections"),
+		"Number of connections in the cache connection pool, including idle ones.",
+		nil,
+		nil,
+	)
+	poolIdleDesc = prometheus.NewDesc(
+		prometheus.BuildFQName(metrics.Namespace, "", "cache_pool_idle_connections"),
+		"Number of idle connections in the cache connection pool.",
+		nil,
+		nil,
+	)
+	poolWaitCountDesc = prometheus.NewDesc(
+		prometheus.BuildFQName(metrics.Namespace, "", "cache_pool_waits"),
+		"Number of times something had to wait for a connection from the cache connection pool.",
+		nil,
+		nil,
+	)
+	poolWaitTimeDesc = prometheus.NewDesc(
+		prometheus.BuildFQName(metrics.Namespace, "", "cache_pool_wait_time"),
+		"Total time spent waiting for a connection from the cache connection pool, in milliseconds.",
+		nil,
+		nil,
+	)
+)
+
+// poolCollector reads the stats off of the connection pool whenever prometheus
+// scrapes us, the pool already keeps track of all of this for us.
+type poolCollector struct {
+	pool *redis.Pool
+}
+
+func NewPoolCollector(pool *redis.Pool) prometheus.Collector {
+	return &poolCollector{
+		pool: pool,
+	}
+}
+
+func (p *poolCollector) Describe(descs chan<- *prometheus.Desc) {
+	descs <- poolActiveDesc
+	descs <- poolIdleDesc
+	descs <- poolWaitCountDesc
+	descs <- poolWaitTimeDesc
+}
+
+func (p *poolCollector) Collect(collected chan<- prometheus.Metric) {
+	stats := p.pool.Stats()
+	collected <- prometheus.MustNewConstMetric(
+		poolActiveDesc,
+		prometheus.GaugeValue,
+		float64(stats.ActiveCount),
+	)
+	collected <- prometheus.MustNewConstMetric(
+		poolIdleDesc,
+		prometheus.GaugeValue,
+		float64(stats.IdleCount),
+	)
+	collected <- prometheus.MustNewConstMetric(
+		poolWaitCountDesc,
+		prometheus.CounterValue,
+		float64(stats.WaitCount),
+	)
+	collected <- prometheus.MustNewConstMetric(
+		poolWaitTimeDesc,
+		prometheus.CounterValue,
+		float64(stats.WaitDuration)/float64(time.Millisecond),
+	)
 }

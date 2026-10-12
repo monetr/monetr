@@ -6,6 +6,7 @@ import (
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 const (
@@ -70,6 +71,12 @@ func RecoverStalledJobsCron(ctx queue.Context) error {
 
 		retriedCount, _ := retried.RowsAffected()
 		failedCount, _ := failed.RowsAffected()
+		jobsStalled.With(prometheus.Labels{
+			"result": "retried",
+		}).Add(float64(retriedCount))
+		jobsStalled.With(prometheus.Labels{
+			"result": "failed",
+		}).Add(float64(failedCount))
 		if retriedCount > 0 || failedCount > 0 {
 			log.WarnContext(ctx, "recovered stalled jobs",
 				"retried", retriedCount,

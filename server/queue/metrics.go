@@ -39,4 +39,12 @@ var (
 	}, []string{
 		"job_name",
 	})
+	jobWaitTime = promauto.NewHistogramVec(prometheus.HistogramOpts{
+		Namespace: metrics.Namespace,
+		Name:      "job_wait_time",
+		Help:      "Time between when a job was due to run and when a worker started it, in whole milliseconds. Jobs are scheduled to the second so this is only accurate to about a second.",
+		Buckets:   []float64{1000, 5000, 10000, 30000, 60000, 300000, 900000},
+	}, []string{
+		"job_name",
+	})
 )

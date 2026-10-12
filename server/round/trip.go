@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/crumbs"
@@ -20,6 +21,7 @@ type Handler func(
 	request *http.Request,
 	response *http.Response,
 	err error,
+	duration time.Duration,
 )
 
 type ObservabilityRoundTripper struct {
@@ -48,7 +50,9 @@ func (o *ObservabilityRoundTripper) RoundTrip(
 	span.SetTag("net.peer.name", request.URL.Host)
 	span.SetData("net.peer.name", request.URL.Host)
 
+	start := time.Now()
 	response, err := o.inner.RoundTrip(request)
+	duration := time.Since(start)
 	if response != nil {
 		span.SetTag("http.response.status_code", fmt.Sprint(response.StatusCode))
 		span.SetData("http.response.status_code", fmt.Sprint(response.StatusCode))
@@ -74,7 +78,7 @@ func (o *ObservabilityRoundTripper) RoundTrip(
 		}
 	}
 
-	o.handler(request.Context(), request, response, err)
+	o.handler(request.Context(), request, response, err, duration)
 
 	return response, err
 }

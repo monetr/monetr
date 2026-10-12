@@ -122,6 +122,7 @@ func (*stripeBase) stripeRoundTripper(
 	request *http.Request,
 	response *http.Response,
 	_ error,
+	_ time.Duration,
 ) {
 	var statusCode int
 	var requestId string

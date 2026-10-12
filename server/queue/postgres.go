@@ -1405,6 +1405,12 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 	})
 
 	start := p.clock.Now()
+	// Priority is the unix timestamp the job was due to run at, retries push it
+	// back too. So this is how long the job sat ready without a worker.
+	jobWaitTime.With(prometheus.Labels{
+		"job_name": job.Queue,
+	}).Observe(float64(start.Sub(time.Unix(job.Priority, 0)).Milliseconds()))
+
 	var err error
 	defer func() {
 		now := p.clock.Now()
