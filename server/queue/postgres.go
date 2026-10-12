@@ -753,6 +753,19 @@ func (p *postgresProcessor) Start() error {
 		return err
 	}
 
+	// Create every job's metrics up front so they show up as 0 instead of being
+	// missing until the job runs for the first time.
+	for _, queue := range p.queues {
+		labels := prometheus.Labels{
+			"job_name": queue,
+		}
+		jobsEnqueued.With(labels)
+		jobsProcessed.With(labels)
+		jobsFailed.With(labels)
+		jobRunTime.With(labels)
+		jobWaitTime.With(labels)
+	}
+
 	// Unbuffered channel so that way jobs must be consumed!
 	p.dispatch = make(chan *models.Job)
 
