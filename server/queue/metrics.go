@@ -34,7 +34,7 @@ var (
 	jobRunTime = promauto.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: metrics.Namespace,
 		Name:      "job_run_time",
-		Help:      "The amount of time it takes for jobs to run.",
+		Help:      "The amount of time it takes for jobs to run, in whole milliseconds.",
 		Buckets:   []float64{1, 50, 100, 500, 1000, 10000},
 	}, []string{
 		"job_name",

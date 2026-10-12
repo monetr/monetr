@@ -21,7 +21,7 @@ var (
 	cacheOperationTime = promauto.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: metrics.Namespace,
 		Name:      "cache_operation_time",
-		Help:      "Time it takes for a cache operation to be completed.",
+		Help:      "Time it takes for a cache operation to be completed, in milliseconds. Keeps fractions of a millisecond.",
 		Buckets:   []float64{0.5, 1, 5, 10, 50, 100, 500},
 	}, []string{
 		"operation",

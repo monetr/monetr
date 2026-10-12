@@ -26,7 +26,7 @@ var (
 	certificateNotAfter = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace:   metrics.Namespace,
 		Name:        "certificate_not_after",
-		Help:        "Unix timestamp of when the currently loaded certificate expires. For a CA file with multiple certificates this is the one that expires first.",
+		Help:        "Unix timestamp in seconds of when the currently loaded certificate expires. For a CA file with multiple certificates this is the one that expires first.",
 		ConstLabels: map[string]string{},
 	}, []string{
 		"path",

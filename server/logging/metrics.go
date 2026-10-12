@@ -18,7 +18,7 @@ var (
 	queryTime = promauto.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: metrics.Namespace,
 		Name:      "query_time",
-		Help:      "Time it takes for a SQL query to be completed. This excludes BEGIN, COMMIT and ROLLBACK.",
+		Help:      "Time it takes for a SQL query to be completed, in whole milliseconds. This excludes BEGIN, COMMIT and ROLLBACK.",
 		Buckets:   []float64{1, 5, 10, 50, 100, 500, 1000},
 	}, []string{
 		"stmt",

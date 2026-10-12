@@ -20,7 +20,7 @@ var (
 	httpResponseTime = promauto.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: metrics.Namespace,
 		Name:      "http_response_time",
-		Help:      "Time it takes for an HTTP request to be completed.",
+		Help:      "Time it takes for an HTTP request to be completed, in whole milliseconds.",
 		Buckets:   []float64{1, 50, 100, 500, 1000, 10000},
 	}, []string{
 		"path",

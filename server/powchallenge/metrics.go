@@ -24,7 +24,7 @@ var (
 	powVerifyTime = promauto.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: metrics.Namespace,
 		Name:      "pow_verify_time",
-		Help:      "Time it takes to verify a proof of work challenge.",
+		Help:      "Time it takes to verify a proof of work challenge, in whole milliseconds.",
 		Buckets:   []float64{1, 50, 100, 500, 1000, 10000},
 	}, []string{
 		"result",
