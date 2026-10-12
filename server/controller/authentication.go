@@ -18,6 +18,7 @@ import (
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/zoneinfo"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 const ClearAuthentication = ""
@@ -357,8 +358,14 @@ func (c *Controller) postMultifactor(ctx *echo.Context) error {
 	}
 
 	if err := me.Login.VerifyTOTP(request.TOTP, c.Clock.Now()); err != nil {
+		totpVerifications.With(prometheus.Labels{
+			"result": "invalid",
+		}).Inc()
 		return c.returnError(ctx, http.StatusUnauthorized, "Invalid TOTP code")
 	}
+	totpVerifications.With(prometheus.Labels{
+		"result": "valid",
+	}).Inc()
 
 	token, err := c.ClientTokens.Create(
 		14*24*time.Hour,
@@ -621,6 +628,8 @@ func (c *Controller) postRegister(ctx *echo.Context) error {
 			return err
 		}
 
+		usersCreated.Inc()
+
 		return ctx.JSON(http.StatusOK, map[string]any{
 			"message":             "A verification email has been sent to your email address, please verify your email.",
 			"requireVerification": true,
@@ -648,6 +657,8 @@ func (c *Controller) postRegister(ctx *echo.Context) error {
 	user.Account = &account
 
 	c.updateAuthenticationCookie(ctx, token)
+
+	usersCreated.Inc()
 
 	return ctx.JSON(http.StatusOK, map[string]any{
 		"nextUrl":             "/setup",
@@ -685,6 +696,8 @@ func (c *Controller) verifyEndpoint(ctx *echo.Context) error {
 	if err := repo.SetEmailVerified(c.getContext(ctx), claims.EmailAddress); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Invalid email verification")
 	}
+
+	emailsVerified.Inc()
 
 	return ctx.JSON(http.StatusOK, map[string]any{
 		"nextUrl": "/login",
@@ -927,6 +940,8 @@ func (c *Controller) resetPassword(ctx *echo.Context) error {
 			)
 		}
 	}
+
+	passwordResets.Inc()
 
 	return ctx.NoContent(http.StatusOK)
 }

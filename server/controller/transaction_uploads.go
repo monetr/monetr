@@ -11,6 +11,7 @@ import (
 	"github.com/monetr/monetr/server/datasources/ofx/ofx_jobs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
+	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/net/websocket"
 )
 
@@ -70,6 +71,15 @@ func (c *Controller) postTransactionUpload(ctx *echo.Context) error {
 			"Failed to enqueue upload for processing",
 		)
 	}
+
+	fileUploads.With(prometheus.Labels{
+		"kind":         file.Kind,
+		"content_type": string(file.ContentType),
+	}).Inc()
+	fileUploadSize.With(prometheus.Labels{
+		"kind":         file.Kind,
+		"content_type": string(file.ContentType),
+	}).Observe(float64(file.Size))
 
 	return ctx.JSON(http.StatusOK, upload)
 }

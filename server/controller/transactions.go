@@ -279,6 +279,8 @@ func (c *Controller) postTransactions(ctx *echo.Context) error {
 		returnedObject["spending"] = *updatedSpending
 	}
 
+	transactionsCreated.Inc()
+
 	return ctx.JSON(http.StatusOK, returnedObject)
 }
 
@@ -371,6 +373,8 @@ func (c *Controller) patchTransaction(ctx *echo.Context) error {
 	if updatedExpenses != nil {
 		result["spending"] = updatedExpenses
 	}
+
+	transactionsUpdated.Inc()
 
 	return ctx.JSON(http.StatusOK, result)
 }
@@ -484,6 +488,8 @@ func (c *Controller) deleteTransactions(ctx *echo.Context) error {
 	if err != nil {
 		return c.wrapPgError(ctx, err, "could not get updated balances")
 	}
+
+	transactionsDeleted.Inc()
 
 	return ctx.JSON(http.StatusOK, map[string]any{
 		"balance":  balance,

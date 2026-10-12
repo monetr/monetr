@@ -16,6 +16,7 @@ import (
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/wneessen/go-mail"
 )
 
@@ -70,7 +71,16 @@ func (e *emailCommunicationBase) SendEmail(ctx context.Context, params Email) er
 	m.SetBodyTextTemplate(text, params)
 	m.AddAlternativeHTMLTemplate(html, params)
 
-	return e.sendMessage(span.Context(), m)
+	labels := prometheus.Labels{
+		"template": params.Template(),
+	}
+	if err := e.sendMessage(span.Context(), m); err != nil {
+		emailFailures.With(labels).Inc()
+		return err
+	}
+	emailsSent.With(labels).Inc()
+
+	return nil
 }
 
 func (*emailCommunicationBase) getTemplates(name string) (html *htmlTemplate.Template, text *textTemplate.Template) {

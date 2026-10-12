@@ -202,6 +202,8 @@ func (c *Controller) postConfirmTOTP(ctx *echo.Context) error {
 		}
 	}
 
+	totpEnabled.Inc()
+
 	return ctx.NoContent(http.StatusOK)
 }
 

@@ -19,6 +19,7 @@ import (
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 type PlaidWebhook struct {
@@ -152,6 +153,13 @@ func (c *Controller) postPlaidWebhook(ctx *echo.Context) error {
 		)
 		return c.returnError(ctx, http.StatusUnauthorized, "unauthorized")
 	}
+
+	// Only count webhooks once they have been verified, this way the labels are
+	// always something that actually came from Plaid.
+	plaidWebhooks.With(prometheus.Labels{
+		"webhook_type": hook.WebhookType,
+		"webhook_code": hook.WebhookCode,
+	}).Inc()
 
 	if err = c.processWebhook(ctx, hook); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to handle webhook")

@@ -17,6 +17,7 @@ import (
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/similar/similar_jobs"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 func LunchFlowSyncNotifcationChannel(
@@ -485,11 +486,21 @@ func (s *syncLunchFlowContext) syncBalances(ctx queue.Context) error {
 	return nil
 }
 
-func SyncLunchFlow(ctx queue.Context, args SyncLunchFlowArguments) error {
+func SyncLunchFlow(ctx queue.Context, args SyncLunchFlowArguments) (err error) {
 	if !ctx.Configuration().LunchFlow.Enabled {
 		ctx.Log().InfoContext(ctx, "lunch flow is not enabled")
 		return nil
 	}
+
+	defer func() {
+		result := "success"
+		if err != nil {
+			result = "failure"
+		}
+		lunchFlowSyncs.With(prometheus.Labels{
+			"result": result,
+		}).Inc()
+	}()
 
 	crumbs.IncludeUserInScope(ctx, args.AccountId)
 

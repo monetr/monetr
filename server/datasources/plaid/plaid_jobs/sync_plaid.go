@@ -19,6 +19,7 @@ import (
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/similar/similar_jobs"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 type SyncAction string
@@ -617,7 +618,17 @@ func SyncPlaidCron(ctx queue.Context) error {
 	return nil
 }
 
-func SyncPlaid(ctx queue.Context, args SyncPlaidArguments) error {
+func SyncPlaid(ctx queue.Context, args SyncPlaidArguments) (err error) {
+	defer func() {
+		result := "success"
+		if err != nil {
+			result = "failure"
+		}
+		plaidSyncs.With(prometheus.Labels{
+			"result": result,
+		}).Inc()
+	}()
+
 	crumbs.IncludeUserInScope(ctx, args.AccountId)
 	return ctx.RunInTransaction(ctx, func(ctx queue.Context) error {
 		span := sentry.SpanFromContext(ctx)

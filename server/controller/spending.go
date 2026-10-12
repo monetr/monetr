@@ -154,6 +154,8 @@ func (c *Controller) postSpending(ctx *echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to create spending")
 	}
 
+	spendingCreated.Inc()
+
 	return ctx.JSON(http.StatusOK, spending)
 }
 
@@ -436,6 +438,8 @@ func (c *Controller) deleteSpending(ctx *echo.Context) error {
 	if err := repo.DeleteSpending(c.getContext(ctx), bankAccountId, spendingId); err != nil {
 		return c.wrapPgError(ctx, err, "failed to delete spending")
 	}
+
+	spendingDeleted.Inc()
 
 	return ctx.NoContent(http.StatusOK)
 }

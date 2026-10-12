@@ -18,6 +18,7 @@ import (
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 func (c *Controller) storeLinkTokenInCache(
@@ -561,6 +562,15 @@ func (c *Controller) postPlaidTokenCallback(ctx *echo.Context) error {
 				"failed to pull initial transactions",
 			)
 		}
+	}
+
+	linksCreated.With(prometheus.Labels{
+		"link_type": string(link.LinkType),
+	}).Inc()
+	for _, product := range plaidLink.Products {
+		plaidLinksCreated.With(prometheus.Labels{
+			"product": product,
+		}).Inc()
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]any{

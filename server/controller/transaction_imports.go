@@ -10,6 +10,7 @@ import (
 	"github.com/monetr/monetr/server/datasources/csv/csv_jobs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/schemas"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 func (c *Controller) postTransactionImport(ctx *echo.Context) error {
@@ -107,6 +108,15 @@ func (c *Controller) postTransactionImport(ctx *echo.Context) error {
 	); err != nil {
 		return c.wrapPgError(ctx, err, "Failed to create transaction import")
 	}
+
+	fileUploads.With(prometheus.Labels{
+		"kind":         transactionImport.File.Kind,
+		"content_type": string(transactionImport.File.ContentType),
+	}).Inc()
+	fileUploadSize.With(prometheus.Labels{
+		"kind":         transactionImport.File.Kind,
+		"content_type": string(transactionImport.File.ContentType),
+	}).Observe(float64(transactionImport.File.Size))
 
 	return ctx.JSON(http.StatusOK, transactionImport)
 }

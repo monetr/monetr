@@ -9,6 +9,7 @@ import (
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/schemas"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 func (c *Controller) getLinks(ctx *echo.Context) error {
@@ -89,6 +90,10 @@ func (c *Controller) postLinks(ctx *echo.Context) error {
 	if err := repo.CreateLink(c.getContext(ctx), link); err != nil {
 		return c.wrapPgError(ctx, err, "Could not create a manual link")
 	}
+
+	linksCreated.With(prometheus.Labels{
+		"link_type": string(link.LinkType),
+	}).Inc()
 
 	return ctx.JSON(http.StatusOK, link)
 }
@@ -248,6 +253,10 @@ func (c *Controller) deleteLink(ctx *echo.Context) error {
 			"failed to enqueue link removal job",
 		)
 	}
+
+	linksDeleted.With(prometheus.Labels{
+		"link_type": string(link.LinkType),
+	}).Inc()
 
 	return ctx.NoContent(http.StatusOK)
 }
