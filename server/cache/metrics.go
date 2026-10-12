@@ -30,6 +30,40 @@ var (
 	})
 )
 
+// Create every operation and result we can record up front so they start at 0,
+// otherwise prometheus can't see the first one.
+func init() {
+	for operation, results := range map[string][]string{
+		"get": {
+			"hit",
+			"miss",
+			"error",
+		},
+		"set": {
+			"ok",
+			"error",
+		},
+		"delete": {
+			"ok",
+			"error",
+		},
+		"compare_and_swap": {
+			"swapped",
+			"not_swapped",
+			"error",
+		},
+	} {
+		for _, result := range results {
+			labels := prometheus.Labels{
+				"operation": operation,
+				"result":    result,
+			}
+			cacheOperations.With(labels)
+			cacheOperationTime.With(labels)
+		}
+	}
+}
+
 func recordOperation(operation, result string, start time.Time) {
 	labels := prometheus.Labels{
 		"operation": operation,

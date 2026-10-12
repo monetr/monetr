@@ -24,3 +24,20 @@ var (
 		"stmt",
 	})
 )
+
+// Start the common statements at 0. Anything else bun reports, like NOTIFY,
+// will still start at 1 but those are busy enough that it doesn't matter.
+func init() {
+	for _, stmt := range []string{
+		"SELECT",
+		"INSERT",
+		"UPDATE",
+		"DELETE",
+	} {
+		labels := prometheus.Labels{
+			"stmt": stmt,
+		}
+		queries.With(labels)
+		queryTime.With(labels)
+	}
+}

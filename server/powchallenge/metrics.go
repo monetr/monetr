@@ -30,3 +30,23 @@ var (
 		"result",
 	})
 )
+
+// Create every result Verify can record up front so they start at 0, otherwise
+// prometheus can't see the first one.
+func init() {
+	powIssued.With(prometheus.Labels{})
+	for _, result := range []string{
+		"ok",
+		"invalid",
+		"expired",
+		"insufficient",
+		"error",
+		"replay",
+	} {
+		labels := prometheus.Labels{
+			"result": result,
+		}
+		powVerified.With(labels)
+		powVerifyTime.With(labels)
+	}
+}

@@ -97,6 +97,24 @@ func NewFileSource(log *slog.Logger, options Options) (Source, error) {
 		cancelChannel: make(chan chan error),
 	}
 
+	// Start the metrics for each file at 0, otherwise prometheus can't see the
+	// first rotation or failure.
+	for _, path := range []string{
+		options.CACertificatePath,
+		options.CertificatePath,
+		options.KeyPath,
+	} {
+		if path == "" {
+			continue
+		}
+
+		labels := prometheus.Labels{
+			"path": path,
+		}
+		certificateRotations.With(labels)
+		certificateReloadFailures.With(labels)
+	}
+
 	// Load the certificates up front so bad paths are caught at startup rather
 	// than on the first connection.
 	if err := source.Reload(); err != nil {

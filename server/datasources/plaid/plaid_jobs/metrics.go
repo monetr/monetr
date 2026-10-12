@@ -16,3 +16,15 @@ var (
 		"result",
 	})
 )
+
+// Start both results at 0 so prometheus can see the first sync.
+func init() {
+	for _, result := range []string{
+		"success",
+		"failure",
+	} {
+		plaidSyncs.With(prometheus.Labels{
+			"result": result,
+		})
+	}
+}

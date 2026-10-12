@@ -34,3 +34,29 @@ var (
 		"error_code",
 	})
 )
+
+// Start every Plaid endpoint we call at 0 for successful requests. Other status
+// codes and error codes come from Plaid so those will still start at 1. If a
+// new Plaid API call gets added it should be added here too.
+func init() {
+	for _, endpoint := range []string{
+		"/accounts/get",
+		"/institutions/get_by_id",
+		"/item/public_token/exchange",
+		"/item/remove",
+		"/item/webhook/update",
+		"/link/token/create",
+		"/transactions/get",
+		"/transactions/refresh",
+		"/transactions/sync",
+		"/webhook_verification_key/get",
+	} {
+		plaidApiRequests.With(prometheus.Labels{
+			"endpoint": endpoint,
+			"status":   "200",
+		})
+		plaidApiRequestTime.With(prometheus.Labels{
+			"endpoint": endpoint,
+		})
+	}
+}

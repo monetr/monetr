@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/metrics"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
@@ -149,3 +151,89 @@ var (
 		"content_type",
 	})
 )
+
+// Create the metrics for every label value we know about ahead of time. A
+// counter that only shows up on its first increment starts at 1, prometheus
+// can't see that first increase so the event just gets lost. HTTP metrics are
+// left out since seeding every route and status would be a ton of series.
+func init() {
+	for _, result := range []string{
+		"success",
+		"invalid_credentials",
+		"email_not_verified",
+		"password_change_required",
+		"mfa_required",
+		"error",
+	} {
+		logins.With(prometheus.Labels{
+			"result": result,
+		})
+	}
+
+	for _, result := range []string{
+		"valid",
+		"invalid",
+	} {
+		totpVerifications.With(prometheus.Labels{
+			"result": result,
+		})
+	}
+
+	for _, linkType := range []LinkType{
+		ManualLinkType,
+		PlaidLinkType,
+		LunchFlowLinkType,
+	} {
+		labels := prometheus.Labels{
+			"link_type": string(linkType),
+		}
+		linksCreated.With(labels)
+		linksDeleted.With(labels)
+	}
+
+	for _, product := range consts.PlaidProductStrings() {
+		plaidLinksCreated.With(prometheus.Labels{
+			"product": product,
+		})
+	}
+
+	// These are the webhooks we actually handle in processWebhook, anything else
+	// Plaid sends us will still start at 1.
+	for webhookType, webhookCodes := range map[string][]string{
+		"TRANSACTIONS": {
+			"SYNC_UPDATES_AVAILABLE",
+			"INITIAL_UPDATE",
+			"HISTORICAL_UPDATE",
+			"RECURRING_TRANSACTIONS_UPDATE",
+		},
+		"ITEM": {
+			"LOGIN_REPAIRED",
+			"ERROR",
+			"PENDING_EXPIRATION",
+			"USER_PERMISSION_REVOKED",
+			"USER_ACCOUNT_REVOKED",
+			"WEBHOOK_UPDATE_ACKNOWLEDGED",
+			"NEW_ACCOUNTS_AVAILABLE",
+		},
+	} {
+		for _, webhookCode := range webhookCodes {
+			plaidWebhooks.With(prometheus.Labels{
+				"webhook_type": webhookType,
+				"webhook_code": webhookCode,
+			})
+		}
+	}
+
+	// Transaction uploads only accept OFX files and imports only accept CSV.
+	for kind, contentType := range map[string]ContentType{
+		TransactionUpload{}.FileKind(): IntuitQFXContentType,
+		TransactionImport{}.FileKind(): TextCSVContentType,
+	} {
+		labels := prometheus.Labels{
+			"kind":         kind,
+			"content_type": string(contentType),
+		}
+		fileUploads.With(labels)
+		fileUploadSize.With(labels)
+	}
+}
