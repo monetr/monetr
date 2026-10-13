@@ -129,7 +129,6 @@ export default function RecurringFundingCard(props: RecurringFundingCardProps): 
       {!props.recurring.fundingSchedule && !props.recurring.ended && (
         <div className={styles.footer}>
           <Button
-            className={styles.createButton}
             data-testid='recurring-new-funding'
             disabled={saving}
             onClick={() =>

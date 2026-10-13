@@ -116,12 +116,6 @@
   border-top: 1px solid var(--border-subtle);
 }
 
-// Same height as the select
-.createButton {
-  @include mixins.text-small;
-  height: 9.5 * variables.$size;
-}
-
 .viewLink {
   @include mixins.text-small;
   font-weight: var(--medium);

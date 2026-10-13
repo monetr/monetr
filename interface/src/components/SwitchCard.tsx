@@ -1,7 +1,6 @@
 import { useId } from 'react';
-import type { SwitchProps } from '@radix-ui/react-switch';
 
-import { Switch } from '@monetr/interface/components/Switch';
+import { Switch, type SwitchProps } from '@monetr/interface/components/Switch';
 
 import styles from './SwitchCard.module.scss';
 

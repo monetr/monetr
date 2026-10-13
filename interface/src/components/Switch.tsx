@@ -1,18 +1,32 @@
-import * as React from 'react';
-import * as SwitchPrimitives from '@radix-ui/react-switch';
+import type { ButtonHTMLAttributes } from 'react';
 
 import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './Switch.module.scss';
 
-const Switch = React.forwardRef<
-  React.ElementRef<typeof SwitchPrimitives.Root>,
-  React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>
->(({ className, ...props }, ref) => (
-  <SwitchPrimitives.Root className={mergeClasses(styles.switchRoot, className)} {...props} ref={ref}>
-    <SwitchPrimitives.Thumb className={styles.switchThumb} />
-  </SwitchPrimitives.Root>
-));
-Switch.displayName = SwitchPrimitives.Root.displayName;
+export interface SwitchProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+}
 
-export { Switch };
+export function Switch({ className, checked, onCheckedChange, ...props }: SwitchProps): React.JSX.Element {
+  const state = checked ? 'checked' : 'unchecked';
+
+  function toggle() {
+    onCheckedChange(!checked);
+  }
+
+  return (
+    <button
+      {...props}
+      aria-checked={checked}
+      className={mergeClasses(styles.switchRoot, className)}
+      data-state={state}
+      onClick={toggle}
+      role='switch'
+      type='button'
+    >
+      <span className={styles.switchThumb} data-state={state} />
+    </button>
+  );
+}
