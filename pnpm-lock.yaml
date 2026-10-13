@@ -273,8 +273,8 @@ importers:
         specifier: 1.105.1
         version: 1.105.1
       satori:
-        specifier: 0.35.0
-        version: 0.35.0
+        specifier: 0.35.1
+        version: 0.35.1
       spellchecker-cli:
         specifier: 7.0.4
         version: 7.0.4(supports-color@9.4.0)
@@ -2646,9 +2646,6 @@ packages:
   fflate@0.7.3:
     resolution: {integrity: sha512-0Zz1jOzJWERhyhsimS54VTqOteCNwRtIlh8isdL0AXLo0g7xNTfTL7oWrkmCnPhZGocKIkWHBistBrrpoNH3aw==}
 
-  fflate@0.7.4:
-    resolution: {integrity: sha512-5u2V/CDW15QM1XbbgS+0DfPxVB+jUKhWEKuuFuHncbk3tEEqzmoXL+2KyOFuKGqOnmdIy0/davWF1CkuwtibCw==}
-
   file-selector@5.0.1:
     resolution: {integrity: sha512-v0g/PTeuQgvKCBrVRsfVudvwXlRHSWHEQkVgKawgCGHkEpKA1clp3Om5jvEVhz8G9W/mOYjJH9FhkH4C888PgQ==}
     engines: {node: '>= 22'}
@@ -4012,8 +4009,8 @@ packages:
     engines: {node: '>=20.19.0'}
     hasBin: true
 
-  satori@0.35.0:
-    resolution: {integrity: sha512-YyoP7axF2T93XOWXQXLH4t+cvLgZ+MeYV/xruXJfPa/czpcRqaG41/8Bz3mzgYj/7NxdrqJOx3YtzWy1MLtG5g==}
+  satori@0.35.1:
+    resolution: {integrity: sha512-y2GHiXg2o+WNdH2kcjC30kW6tzSLRLOG+gJ7YGkZM8fC7Atj7C+otpGRH7H/c0GLRGWUKivd5dv50vqg6m1aQA==}
     engines: {node: '>=16'}
 
   sax@1.6.0:
@@ -5658,7 +5655,7 @@ snapshots:
 
   '@shuding/opentype.js@1.4.0-beta.0':
     dependencies:
-      fflate: 0.7.4
+      fflate: 0.7.3
       string.prototype.codepointat: 0.2.1
 
   '@sindresorhus/merge-streams@4.0.0': {}
@@ -6551,8 +6548,6 @@ snapshots:
       xml-js: 1.6.11
 
   fflate@0.7.3: {}
-
-  fflate@0.7.4: {}
 
   file-selector@5.0.1: {}
 
@@ -8648,7 +8643,7 @@ snapshots:
     optionalDependencies:
       '@parcel/watcher': 2.4.1
 
-  satori@0.35.0:
+  satori@0.35.1:
     dependencies:
       '@shuding/opentype.js': 1.4.0-beta.0
       css-background-parser: 0.1.0
