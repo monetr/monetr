@@ -1,5 +1,4 @@
-import React from 'react';
-import * as AvatarPrimitive from '@radix-ui/react-avatar';
+import type { HTMLAttributes } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import mergeClasses from '@monetr/interface/util/mergeClasses';
@@ -18,28 +17,16 @@ const avatarVariants = cva([styles.avatar], {
   },
 });
 
-const Avatar = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & VariantProps<typeof avatarVariants>
->(({ className, size, ...props }, ref) => (
-  <AvatarPrimitive.Root className={mergeClasses(avatarVariants({ size }), className)} ref={ref} {...props} />
-));
-Avatar.displayName = AvatarPrimitive.Root.displayName;
+export type AvatarProps = HTMLAttributes<HTMLSpanElement> & VariantProps<typeof avatarVariants>;
 
-const AvatarImage = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Image>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Image className={mergeClasses(styles.avatarImage, className)} ref={ref} {...props} />
-));
-AvatarImage.displayName = AvatarPrimitive.Image.displayName;
+function Avatar({ className, size, ...props }: AvatarProps): React.JSX.Element {
+  return <span className={mergeClasses(avatarVariants({ size }), className)} {...props} />;
+}
 
-const AvatarFallback = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Fallback>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Fallback className={mergeClasses(styles.avatarFallback, className)} ref={ref} {...props} />
-));
-AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName;
+export type AvatarFallbackProps = HTMLAttributes<HTMLSpanElement>;
 
-export { Avatar, AvatarFallback, AvatarImage, avatarVariants };
+function AvatarFallback({ className, ...props }: AvatarFallbackProps): React.JSX.Element {
+  return <span className={mergeClasses(styles.avatarFallback, className)} {...props} />;
+}
+
+export { Avatar, AvatarFallback, avatarVariants };
