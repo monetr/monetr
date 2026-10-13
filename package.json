@@ -7,7 +7,7 @@
     "node": ">=24.0.0",
     "pnpm": ">=9"
   },
-  "packageManager": "pnpm@12.10.0",
+  "packageManager": "pnpm@12.10.1",
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
     "typescript": "7.0.2"
