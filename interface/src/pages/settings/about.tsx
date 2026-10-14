@@ -1,6 +1,10 @@
+import { Fragment } from 'react';
 import { format } from 'date-fns';
+import { ArrowUpRight, Book, BookOpen, Globe, Info, LinkIcon, Mail } from 'lucide-react';
 
-import Divider from '@monetr/interface/components/Divider';
+import { Avatar, AvatarFallback } from '@monetr/interface/components/Avatar';
+import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import { SettingsRow, SettingsSection } from '@monetr/interface/components/settings/SettingsSection';
 import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 
@@ -11,122 +15,104 @@ export default function SettingsAbout(): React.JSX.Element {
   const { release, revision, buildType, buildTime } = config ?? {};
 
   return (
-    <div className={styles.root}>
-      <div className={styles.section}>
-        <Typography className={styles.sectionTitle} color='emphasis' size='2xl' weight='bold'>
-          About monetr
-        </Typography>
-        <Divider />
-        <div className={styles.row}>
-          <Typography className={styles.rowLabel} size='lg' weight='semibold'>
-            Version
-          </Typography>
-          <Typography className={styles.rowValue} component='code' size='lg'>
-            {release ? release : 'Unknown'}
-          </Typography>
-        </div>
-        <Divider />
+    <Fragment>
+      <MTopNavigation icon={Info} title='About' />
+      <div className={styles.root}>
+        <SettingsSection description='What this server is running.' title='About monetr'>
+          <SettingsRow label='Version'>
+            <Typography size='sm' weight='medium'>
+              {release ? release : 'Unknown'}
+            </Typography>
+          </SettingsRow>
+          <SettingsRow label='Revision'>
+            <Typography component='code' size='sm'>
+              {revision ? revision.slice(0, 7) : 'Unknown'}
+            </Typography>
+          </SettingsRow>
+          <SettingsRow label='Build Type'>
+            <Typography size='sm' weight='medium'>
+              {buildType || 'Unknown'}
+            </Typography>
+          </SettingsRow>
+          <SettingsRow label='Build Time'>
+            <Typography size='sm' weight='medium'>
+              {buildTime ? format(buildTime, 'LLLL do yyyy, h:mmaaa OOOO') : 'Unknown'}
+            </Typography>
+          </SettingsRow>
+        </SettingsSection>
 
-        <div className={styles.row}>
-          <Typography className={styles.rowLabel} size='lg' weight='semibold'>
-            Revision
-          </Typography>
-          <Typography className={styles.rowValue} component='code' size='lg'>
-            {revision ? revision.slice(0, 7) : 'Unknown'}
-          </Typography>
-        </div>
-        <Divider />
+        <SettingsSection title='Need Help?'>
+          <div className={styles.links}>
+            <AboutLink description='monetr.app' href='https://monetr.app' icon={Globe} title='Website' />
+            <AboutLink
+              description='Learn how to use monetr'
+              href='https://monetr.app/documentation'
+              icon={BookOpen}
+              title='Documentation'
+            />
+            <AboutLink
+              description='github.com/monetr/monetr'
+              href='https://github.com/monetr/monetr'
+              icon={Book}
+              title='Source Code'
+            />
+            <AboutLink description='support@monetr.app' href='mailto:support@monetr.app' icon={Mail} title='Email' />
+            <AboutLink
+              description='Ask questions, share ideas'
+              href='https://github.com/monetr/monetr/discussions'
+              icon={LinkIcon}
+              title='GitHub Discussions'
+            />
+            <AboutLink
+              description='Join Discord Server'
+              href='https://discord.gg/68wTCXrhuq'
+              icon={LinkIcon}
+              title='Discord'
+            />
+          </div>
+        </SettingsSection>
 
-        <div className={styles.row}>
-          <Typography className={styles.rowLabel} size='lg' weight='semibold'>
-            Build Type
-          </Typography>
-          <Typography className={styles.rowValue} component='code' size='lg'>
-            {buildType || 'Unknown'}
-          </Typography>
-        </div>
-        <Divider />
-
-        <div className={styles.row}>
-          <Typography className={styles.rowLabel} size='lg' weight='semibold'>
-            Build Time
-          </Typography>
-          <Typography className={styles.rowValue} component='code' ellipsis size='lg'>
-            {buildTime ? format(buildTime, 'LLLL do yyyy, h:mmaaa OOOO') : 'Unknown'}
-          </Typography>
-        </div>
-        <Divider />
+        <SettingsSection title='Legal'>
+          <div className={styles.links}>
+            <AboutLink href='https://monetr.app/policy/terms' title='Terms And Conditions' />
+            <AboutLink href='https://monetr.app/policy/privacy' title='Privacy Policy' />
+          </div>
+        </SettingsSection>
       </div>
-
-      <div className={styles.section}>
-        <Typography className={styles.sectionTitle} color='emphasis' size='2xl' weight='bold'>
-          Need Help?
-        </Typography>
-        <Divider />
-
-        <div className={styles.row}>
-          <Typography className={styles.rowLabel} size='lg' weight='semibold'>
-            Source Code
-          </Typography>
-          <AboutHyperlink href='https://github.com/monetr/monetr'>https://github.com/monetr/monetr</AboutHyperlink>
-        </div>
-        <Divider />
-
-        <div className={styles.row}>
-          <Typography className={styles.rowLabel} size='lg' weight='semibold'>
-            Email
-          </Typography>
-          <AboutHyperlink href='mailto:support@monetr.app'>support@monetr.app</AboutHyperlink>
-        </div>
-        <Divider />
-
-        <div className={styles.row}>
-          <Typography className={styles.rowLabel} size='lg' weight='semibold'>
-            Github Discussions
-          </Typography>
-          <AboutHyperlink href='https://github.com/monetr/monetr/discussions'>
-            https://github.com/monetr/monetr/discussions
-          </AboutHyperlink>
-        </div>
-        <Divider />
-
-        <div className={styles.row}>
-          <Typography className={styles.rowLabel} size='lg' weight='semibold'>
-            Discord
-          </Typography>
-          <AboutHyperlink href='https://discord.gg/68wTCXrhuq'>Join Discord Server</AboutHyperlink>
-        </div>
-        <Divider />
-
-        <div className={styles.row}>
-          <Typography className={styles.rowLabel} size='lg' weight='semibold'>
-            Terms & Conditions
-          </Typography>
-          <AboutHyperlink href='https://monetr.app/policy/terms'>https://monetr.app/policy/terms</AboutHyperlink>
-        </div>
-        <Divider />
-
-        <div className={styles.row}>
-          <Typography className={styles.rowLabel} size='lg' weight='semibold'>
-            Privacy Policy
-          </Typography>
-          <AboutHyperlink href='https://monetr.app/policy/privacy'>https://monetr.app/policy/privacy</AboutHyperlink>
-        </div>
-        <Divider />
-      </div>
-    </div>
+    </Fragment>
   );
 }
 
-interface AboutHyperlinkProps {
+interface AboutLinkProps {
   href: string;
-  children: React.ReactNode;
+  title: string;
+  description?: string;
+  icon?: React.FC;
 }
 
-function AboutHyperlink(props: AboutHyperlinkProps): React.JSX.Element {
+function AboutLink(props: AboutLinkProps): React.JSX.Element {
+  const Icon = props.icon;
+
   return (
-    <a className={styles.hyperlink} href={props.href} rel='noopener noreferrer' target='_blank'>
-      {props.children}
+    <a className={styles.link} href={props.href} rel='noopener noreferrer' target='_blank'>
+      {Icon && (
+        <Avatar>
+          <AvatarFallback>
+            <Icon />
+          </AvatarFallback>
+        </Avatar>
+      )}
+      <span className={styles.linkText}>
+        <Typography color='emphasis' ellipsis size='sm' weight='semibold'>
+          {props.title}
+        </Typography>
+        {Boolean(props.description) && (
+          <Typography color='subtle' ellipsis size='xs'>
+            {props.description}
+          </Typography>
+        )}
+      </span>
+      <ArrowUpRight className={styles.linkArrow} />
     </a>
   );
 }

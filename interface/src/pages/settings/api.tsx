@@ -1,8 +1,9 @@
-import { useCallback } from 'react';
+import { Fragment, useCallback } from 'react';
 import { Book, KeyRound, Plus, RefreshCcw, ServerCrash } from 'lucide-react';
 
 import { Button } from '@monetr/interface/components/Button';
 import Card from '@monetr/interface/components/Card';
+import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { Skeleton } from '@monetr/interface/components/Skeleton';
 import APIKeyItem from '@monetr/interface/components/settings/SettingsAPI/APIKeyItem';
 import { showCreateAPIKeyModal } from '@monetr/interface/components/settings/SettingsAPI/CreateAPIKeyModal';
@@ -20,91 +21,104 @@ export default function SettingsAPIKeys(): React.JSX.Element {
 
   if (isLoading) {
     return (
-      <div className={styles.root}>
-        <SettingsAPIHeader />
-        {[0, 1, 2].map(i => (
-          <Card className={itemStyles.itemSkeleton} key={i}>
-            <div className={itemStyles.itemSkeletonContent}>
-              <Skeleton className={itemStyles.itemSkeletonName} />
-              <Skeleton className={itemStyles.itemSkeletonKeyId} />
-              <div className={itemStyles.itemSkeletonMeta}>
-                <Skeleton className={itemStyles.itemSkeletonMetaLine} />
-                <Skeleton className={itemStyles.itemSkeletonMetaLine} />
+      <Fragment>
+        <MTopNavigation icon={KeyRound} title='API Keys' />
+        <div className={styles.root}>
+          <SettingsAPIHeader />
+          {[0, 1, 2].map(i => (
+            <Card className={itemStyles.itemSkeleton} key={i}>
+              <div className={itemStyles.itemSkeletonContent}>
+                <Skeleton className={itemStyles.itemSkeletonName} />
+                <Skeleton className={itemStyles.itemSkeletonKeyId} />
+                <div className={itemStyles.itemSkeletonMeta}>
+                  <Skeleton className={itemStyles.itemSkeletonMetaLine} />
+                  <Skeleton className={itemStyles.itemSkeletonMetaLine} />
+                </div>
               </div>
-            </div>
-            <Skeleton className={itemStyles.itemSkeletonAction} />
-          </Card>
-        ))}
-      </div>
+              <Skeleton className={itemStyles.itemSkeletonAction} />
+            </Card>
+          ))}
+        </div>
+      </Fragment>
     );
   }
 
   if (isError || !isSuccess) {
     return (
-      <div className={styles.root}>
-        <SettingsAPIHeader />
-        <Card className={styles.cardRoot} data-testid='api-keys-error'>
-          <ServerCrash className={styles.errorLogo} />
-          <div className={styles.cardEmptyText}>
-            <Typography size='lg' weight='bold'>
-              We couldn't load your keys
-            </Typography>
-            <Typography color='subtle' size='lg' weight='normal'>
-              monetr didn't respond as expected; your keys are safe and nothing was changed. Try again in just a moment.
-            </Typography>
-          </div>
-          <div className={styles.cardEmptyActions}>
-            <Button data-testid='api-keys-retry' disabled={isFetching} onClick={refresh}>
-              <RefreshCcw />
-              Try Again
-            </Button>
-          </div>
-        </Card>
-      </div>
+      <Fragment>
+        <MTopNavigation icon={KeyRound} title='API Keys' />
+        <div className={styles.root}>
+          <SettingsAPIHeader />
+          <Card className={styles.cardRoot} data-testid='api-keys-error'>
+            <ServerCrash className={styles.errorLogo} />
+            <div className={styles.cardEmptyText}>
+              <Typography size='lg' weight='bold'>
+                We couldn't load your keys
+              </Typography>
+              <Typography color='subtle' size='lg' weight='normal'>
+                monetr didn't respond as expected; your keys are safe and nothing was changed. Try again in just a
+                moment.
+              </Typography>
+            </div>
+            <div className={styles.cardEmptyActions}>
+              <Button data-testid='api-keys-retry' disabled={isFetching} onClick={refresh}>
+                <RefreshCcw />
+                Try Again
+              </Button>
+            </div>
+          </Card>
+        </div>
+      </Fragment>
     );
   }
 
   if (keys.length === 0) {
     return (
-      <div className={styles.root}>
-        <SettingsAPIHeader />
-        <Card className={styles.cardRoot} data-testid='api-keys-empty'>
-          <div className={styles.keyLogos}>
-            <KeyRound className={styles.keyLogosBack} />
-            <KeyRound className={styles.keyLogosFront} />
-          </div>
-          <div className={styles.cardEmptyText}>
-            <Typography size='lg' weight='bold'>
-              No API Keys yet
-            </Typography>
-            <Typography color='subtle' size='lg' weight='normal'>
-              API Keys let scripts and tools read your monetr data and manage it on your behalf. You'll only see the
-              secret once at creation time...
-            </Typography>
-          </div>
-          <div className={styles.cardEmptyActions}>
-            <Button asChild variant='outlined'>
-              <a href='https://monetr.app/documentation/use/api_keys' rel='noopener noreferrer' target='_blank'>
-                <Book />
-                Read the Docs
-              </a>
-            </Button>
-            <Button data-testid='api-keys-empty-create' onClick={showCreateAPIKeyModal}>
-              <Plus />
-              Create your first API Key
-            </Button>
-          </div>
-        </Card>
-      </div>
+      <Fragment>
+        <MTopNavigation icon={KeyRound} title='API Keys' />
+        <div className={styles.root}>
+          <SettingsAPIHeader />
+          <Card className={styles.cardRoot} data-testid='api-keys-empty'>
+            <div className={styles.keyLogos}>
+              <KeyRound className={styles.keyLogosBack} />
+              <KeyRound className={styles.keyLogosFront} />
+            </div>
+            <div className={styles.cardEmptyText}>
+              <Typography size='lg' weight='bold'>
+                No API Keys yet
+              </Typography>
+              <Typography color='subtle' size='lg' weight='normal'>
+                API Keys let scripts and tools read your monetr data and manage it on your behalf. You'll only see the
+                secret once at creation time...
+              </Typography>
+            </div>
+            <div className={styles.cardEmptyActions}>
+              <Button asChild variant='outlined'>
+                <a href='https://monetr.app/documentation/use/api_keys' rel='noopener noreferrer' target='_blank'>
+                  <Book />
+                  Read the Docs
+                </a>
+              </Button>
+              <Button data-testid='api-keys-empty-create' onClick={showCreateAPIKeyModal}>
+                <Plus />
+                Create your first API Key
+              </Button>
+            </div>
+          </Card>
+        </div>
+      </Fragment>
     );
   }
 
   return (
-    <div className={styles.root}>
-      <SettingsAPIHeader />
-      {keys.map(item => (
-        <APIKeyItem apiKey={item} key={item.apiKeyId} />
-      ))}
-    </div>
+    <Fragment>
+      <MTopNavigation icon={KeyRound} title='API Keys' />
+      <div className={styles.root}>
+        <SettingsAPIHeader />
+        {keys.map(item => (
+          <APIKeyItem apiKey={item} key={item.apiKeyId} />
+        ))}
+      </div>
+    </Fragment>
   );
 }

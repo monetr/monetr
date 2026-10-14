@@ -3,6 +3,7 @@
 
 .titleSkeletonRow {
   display: flex;
+  flex-shrink: 0;
   height: 12 * variables.$size;
   width: 100%;
   align-items: center;
@@ -21,6 +22,8 @@
 
 .trigger {
   display: flex;
+  // The sidebar content below is height 100%, without this the title gets squished by a pixel or two.
+  flex-shrink: 0;
   height: 12 * variables.$size;
   width: 100%;
   align-items: center;

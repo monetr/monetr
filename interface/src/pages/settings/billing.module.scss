@@ -2,25 +2,14 @@
 
 .root {
   width: 100%;
+  max-width: 190 * variables.$size; // 760px
   display: flex;
   flex-direction: column;
-  padding: 4 * variables.$size;
-  max-width: 36rem; // max-w-xl
-}
-
-.heading {
-  margin-bottom: 4 * variables.$size;
-}
-
-.statusRow {
-  display: flex;
-  justify-content: space-between;
+  gap: 8 * variables.$size;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 4 * variables.$size;
+  padding-right: 4 * variables.$size;
   padding-top: 4 * variables.$size;
   padding-bottom: 4 * variables.$size;
-}
-
-.subscribeButton {
-  margin-left: auto;
-  margin-top: 4 * variables.$size;
-  max-width: 20rem; // max-w-xs
 }

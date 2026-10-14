@@ -2,6 +2,7 @@ import { ID, idPrefix } from '@monetr/interface/models/ID';
 import type Link from '@monetr/interface/models/Link';
 import Login from '@monetr/interface/models/Login';
 import type { WithJsonValues } from '@monetr/interface/util/json';
+import parseDate from '@monetr/interface/util/parseDate';
 
 export default class User {
   readonly [idPrefix] = 'user';
@@ -15,6 +16,7 @@ export default class User {
     subscriptionStatus: string;
     timezone: string;
     locale: string;
+    createdAt: Date;
   };
   readonly login: Login;
   readonly role: 'member' | 'owner';
@@ -24,7 +26,10 @@ export default class User {
     this.userId = ID.from(data.userId);
     this.loginId = data.loginId;
     this.accountId = data.accountId;
-    this.account = data.account;
+    this.account = {
+      ...data.account,
+      createdAt: parseDate(data.account.createdAt),
+    };
     this.login = new Login(data.login);
     this.role = data.role;
     this.linkOrder = data.linkOrder ?? [];

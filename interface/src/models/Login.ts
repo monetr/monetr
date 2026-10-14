@@ -9,6 +9,8 @@ export default class Login {
   email: string;
   firstName: string;
   lastName: string;
+  isEmailVerified: boolean;
+  emailVerifiedAt: Date | null;
   totpEnabledAt: Date | null;
 
   constructor(data: WithJsonValues<Login>) {
@@ -16,6 +18,13 @@ export default class Login {
     this.email = data.email;
     this.firstName = data.firstName;
     this.lastName = data.lastName;
+    this.isEmailVerified = data.isEmailVerified;
+    this.emailVerifiedAt = parseDate(data.emailVerifiedAt);
     this.totpEnabledAt = parseDate(data.totpEnabledAt);
+  }
+
+  // Same as GetEmailIsVerified on the server
+  getIsEmailVerified(): boolean {
+    return this.isEmailVerified && this.emailVerifiedAt !== null;
   }
 }
