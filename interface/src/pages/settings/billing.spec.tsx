@@ -105,6 +105,9 @@ describe('billing settings page', () => {
 
     await waitFor(() => expect(world.getByTestId('billing-subscription-trialing')).toBeVisible());
     await waitFor(() => expect(world.getByText('Subscribe Early')).toBeVisible());
+    await waitFor(() =>
+      expect(world.getByText('Set up your subscription now so nothing stops when the trial ends.')).toBeVisible(),
+    );
 
     await act(() => userEvent.click(world.getByTestId('billing-subscribe')));
 
@@ -178,6 +181,9 @@ describe('billing settings page', () => {
 
     await waitFor(() => expect(world.getByTestId('billing-subscription-active')).toBeVisible());
     await waitFor(() => expect(world.getByText('Manage Your Subscription')).toBeVisible());
+    await waitFor(() =>
+      expect(world.getByText('Update your payment method or cancel your subscription.')).toBeVisible(),
+    );
 
     await act(() => userEvent.click(world.getByTestId('billing-subscribe')));
 
@@ -248,5 +254,8 @@ describe('billing settings page', () => {
 
     await waitFor(() => expect(world.getByTestId('billing-subscription-expired')).toBeVisible());
     await waitFor(() => expect(world.getByText('Manage Your Subscription')).toBeVisible());
+    await waitFor(() =>
+      expect(world.getByText('Update your payment method or cancel your subscription.')).toBeVisible(),
+    );
   });
 });

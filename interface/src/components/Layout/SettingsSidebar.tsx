@@ -57,9 +57,21 @@ export default function SettingsSidebar(): React.JSX.Element {
           title='Security'
           to='/settings/security'
         />
-        <NavigationItem caption={apiKeysCaption} icon={KeyRound} title='API Keys' to='/settings/api' />
+        <NavigationItem
+          caption={apiKeysCaption}
+          data-testid='settings-sidebar-api-keys'
+          icon={KeyRound}
+          title='API Keys'
+          to='/settings/api'
+        />
         {config?.billingEnabled && (
-          <NavigationItem caption={billingCaption} icon={CreditCard} title='Billing' to='/settings/billing' />
+          <NavigationItem
+            caption={billingCaption}
+            data-testid='settings-sidebar-billing'
+            icon={CreditCard}
+            title='Billing'
+            to='/settings/billing'
+          />
         )}
         <NavigationItem caption='Version and server info' icon={Info} title='About' to='/settings/about' />
       </div>
@@ -72,6 +84,7 @@ interface NavigationItemProps {
   title: string;
   caption?: string;
   to: string;
+  'data-testid'?: string;
 }
 
 function NavigationItem(props: NavigationItemProps): React.JSX.Element {
@@ -88,7 +101,13 @@ function NavigationItem(props: NavigationItemProps): React.JSX.Element {
   };
 
   return (
-    <Link className={styles.navItem} data-active={active} onClick={onClick} to={props.to}>
+    <Link
+      className={styles.navItem}
+      data-active={active}
+      data-testid={props['data-testid']}
+      onClick={onClick}
+      to={props.to}
+    >
       <Icon className={styles.navItemIcon} />
       <span className={styles.navItemText}>
         <Typography color='inherit' ellipsis size='lg' weight='medium'>

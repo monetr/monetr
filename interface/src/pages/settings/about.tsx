@@ -4,7 +4,8 @@ import { ArrowUpRight, Book, BookOpen, Globe, Info, LinkIcon, Mail } from 'lucid
 
 import { Avatar, AvatarFallback } from '@monetr/interface/components/Avatar';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
-import { SettingsRow, SettingsSection } from '@monetr/interface/components/settings/SettingsSection';
+import SettingsRow from '@monetr/interface/components/settings/SettingsRow';
+import SettingsSection from '@monetr/interface/components/settings/SettingsSection';
 import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 

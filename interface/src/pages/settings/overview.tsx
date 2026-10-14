@@ -4,7 +4,8 @@ import { CircleCheck, Copy, User } from 'lucide-react';
 import Badge from '@monetr/interface/components/Badge';
 import { Button } from '@monetr/interface/components/Button';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
-import { SettingsRow, SettingsSection } from '@monetr/interface/components/settings/SettingsSection';
+import SettingsRow from '@monetr/interface/components/settings/SettingsRow';
+import SettingsSection from '@monetr/interface/components/settings/SettingsSection';
 import Typography from '@monetr/interface/components/Typography';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import { useLocale } from '@monetr/interface/hooks/useLocale';
@@ -50,11 +51,11 @@ export default function SettingsOverview(): React.JSX.Element {
             </Typography>
           </SettingsRow>
           <SettingsRow description='Where receipts and sign in emails go.' label='Email Address'>
-            <Typography size='sm' weight='medium'>
+            <Typography data-testid='settings-overview-email' size='sm' weight='medium'>
               {me?.user?.login?.email}
             </Typography>
             {me?.user?.login?.getIsEmailVerified() && (
-              <Badge size='sm' variant='success'>
+              <Badge data-testid='settings-overview-email-verified' size='sm' variant='success'>
                 <CircleCheck />
                 Verified
               </Badge>
