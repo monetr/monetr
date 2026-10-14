@@ -1,0 +1,17 @@
+@use '@monetr/interface/variables';
+
+.settingsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 3 * variables.$size;
+}
+
+.settingsSectionHeader {
+  display: flex;
+  flex-direction: column;
+}
+
+.settingsSectionCard {
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius);
+}

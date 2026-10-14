@@ -1,14 +1,18 @@
-import { useCallback, useState } from 'react';
+import { Fragment, useCallback, useState } from 'react';
 import { format, isFuture, isThisYear } from 'date-fns';
-import { Clock } from 'lucide-react';
+import { Clock, CreditCard, ExternalLink } from 'lucide-react';
 import { useLocation } from 'wouter';
 
 import type { ApiResponse } from '@monetr/interface/api/client';
 import Badge from '@monetr/interface/components/Badge';
 import { Button } from '@monetr/interface/components/Button';
-import Divider from '@monetr/interface/components/Divider';
-import Typography from '@monetr/interface/components/Typography';
+import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import SettingsRow from '@monetr/interface/components/settings/SettingsRow';
+import SettingsSection from '@monetr/interface/components/settings/SettingsSection';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
+import { useLocale } from '@monetr/interface/hooks/useLocale';
+import useTimezone from '@monetr/interface/hooks/useTimezone';
+import { formatRelativeDate } from '@monetr/interface/util/formatDate';
 import request from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
 
@@ -19,6 +23,8 @@ export default function SettingsBilling(): React.JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
   const { data: auth } = useAuthentication();
+  const { data: locale } = useLocale();
+  const { inTimezone } = useTimezone();
   const handleManageSubscription = useCallback(async () => {
     setLoading(true);
     let promise: Promise<ApiResponse<{ url: string }>>;
@@ -50,29 +56,40 @@ export default function SettingsBilling(): React.JSX.Element {
 
   const manageSubscriptionText = auth?.hasSubscription ? 'Manage Your Subscription' : 'Subscribe Early';
 
+  let manageSubscriptionDescription = 'Subscribe to keep using monetr.';
+  if (auth?.hasSubscription) {
+    manageSubscriptionDescription = 'Update your payment method or cancel your subscription.';
+  } else if (auth?.trialingUntil && isFuture(auth.trialingUntil)) {
+    manageSubscriptionDescription = 'Set up your subscription now so nothing stops when the trial ends.';
+  }
+
+  let statusDescription = '';
+  if (!auth?.hasSubscription && auth?.trialingUntil && isFuture(auth.trialingUntil) && locale) {
+    statusDescription = `Your free trial ends ${formatRelativeDate(auth.trialingUntil, inTimezone, locale)}.`;
+  }
+
   return (
-    <div className={styles.root}>
-      <Typography className={styles.heading} color='emphasis' size='2xl' weight='bold'>
-        Billing
-      </Typography>
-      <Divider />
-
-      <div className={styles.statusRow}>
-        <Typography size='inherit'>Subscription Status</Typography>
-        <SubscriptionStatusBadge />
+    <Fragment>
+      <MTopNavigation icon={CreditCard} title='Billing' />
+      <div className={styles.root}>
+        <SettingsSection description='Billing is handled by Stripe.' title='Subscription'>
+          <SettingsRow description={statusDescription} label='Status'>
+            <SubscriptionStatusBadge />
+          </SettingsRow>
+          <SettingsRow description={manageSubscriptionDescription} label='Payment'>
+            <Button
+              data-testid='billing-subscribe'
+              disabled={loading}
+              onClick={handleManageSubscription}
+              variant='primary'
+            >
+              {manageSubscriptionText}
+              <ExternalLink />
+            </Button>
+          </SettingsRow>
+        </SettingsSection>
       </div>
-      <Divider />
-
-      <Button
-        className={styles.subscribeButton}
-        data-testid='billing-subscribe'
-        disabled={loading}
-        onClick={handleManageSubscription}
-        variant='primary'
-      >
-        {manageSubscriptionText}
-      </Button>
-    </div>
+    </Fragment>
   );
 }
 
