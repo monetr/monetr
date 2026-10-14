@@ -1,0 +1,36 @@
+@use '@monetr/interface/variables';
+
+.settingsSidebarItem {
+  cursor: pointer;
+  display: flex;
+  gap: 2 * variables.$size;
+  align-items: center;
+  padding-left: 2 * variables.$size;
+  padding-right: 2 * variables.$size;
+  padding-top: 1 * variables.$size;
+  padding-bottom: 1 * variables.$size;
+  border-radius: var(--border-radius);
+  width: 100%;
+  color: var(--content-subtle);
+
+  &:hover {
+    background-color: var(--background-emphasis);
+    color: var(--content-emphasis);
+  }
+
+  &[data-active="true"] {
+    background-color: var(--background-emphasis);
+    color: var(--content-emphasis);
+  }
+}
+
+// None of the lucide icons should ever shrink!
+.settingsSidebarItemIcon {
+  flex-shrink: 0;
+}
+
+.settingsSidebarItemText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
