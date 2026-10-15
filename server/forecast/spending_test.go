@@ -611,6 +611,47 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 		assert.Nil(t, result, "result should be nil because the goal is completed as of the start timestamp")
 	})
 
+	t.Run("behind when nothing allocated before spending", func(t *testing.T) {
+		// We have $0 allocated but the expense is due on the 8th and we won't get
+		// funding again until the 15th. So we are behind until we get funded.
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		spendingRule := testutils.NewRuleSet(t, 2022, 1, 8, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=8")
+		now := time.Date(2022, 1, 2, 0, 0, 0, 0, timezone)
+		log := testutils.GetLog(t)
+		fundingInstructions := NewFundingScheduleFundingInstructions(
+			log,
+			models.FundingSchedule{
+				RuleSet:         fundingRule,
+				ExcludeWeekends: false,
+				NextRecurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
+			},
+		)
+		spendingInstructions := NewSpendingInstructions(
+			log,
+			models.Spending{
+				SpendingType:   models.SpendingTypeExpense,
+				TargetAmount:   10000,
+				CurrentAmount:  0,
+				NextRecurrence: time.Date(2022, 1, 8, 0, 0, 0, 0, timezone),
+				RuleSet:        spendingRule,
+			},
+			fundingInstructions,
+		)
+
+		events, err := spendingInstructions.GetSpendingEventsBetween(t.Context(), now, time.Date(2022, 2, 1, 0, 0, 0, 0, timezone), timezone)
+		assert.NoError(t, err, "should not return an error")
+		require.Len(t, events, 3, "should have 1 spending event and 2 funding events")
+		assert.Equal(t, SpendingEvent{
+			Date:               time.Date(2022, 1, 8, 0, 0, 0, 0, timezone),
+			IsBehind:           true,
+			TransactionAmount:  10000,
+			ContributionAmount: 0,
+			RollingAllocation:  -10000,
+			Funding:            []FundingEvent{},
+		}, events[0])
+	})
+
 	t.Run("odd goal contribution repro", func(t *testing.T) {
 		// This test makes sure that even when we are avoiding weekends that we are
 		// staying consistent in how we are contributing to a budget.

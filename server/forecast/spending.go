@@ -16,6 +16,7 @@ import (
 
 type SpendingEvent struct {
 	Date               time.Time      `json:"date"`
+	IsBehind           bool           `json:"isBehind"`
 	TransactionAmount  int64          `json:"transactionAmount"`
 	ContributionAmount int64          `json:"contributionAmount"`
 	RollingAllocation  int64          `json:"rollingAllocation"`
@@ -41,7 +42,7 @@ type SpendingInstructions interface {
 		ctx context.Context,
 		input time.Time,
 		timezone *time.Location,
-	) ([]SpendingEvent, error)
+	) (SpendingContribution, error)
 }
 
 type spendingInstructionBase struct {
@@ -286,7 +287,12 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(
 
 	var eventsBeforeFirst, eventsBeforeSecond int64
 	{
-		beforeFirst, err := s.GetRecurrencesBetween(ctx, input, fundingFirst.Date, timezone)
+		beforeFirst, err := s.GetRecurrencesBetween(
+			ctx,
+			input,
+			fundingFirst.Date,
+			timezone,
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -299,7 +305,12 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(
 		// spending event between now and the next funding event.
 		eventsBeforeFirst = int64(len(beforeFirst))
 
-		beforeSecond, err := s.GetRecurrencesBetween(ctx, fundingFirst.Date, fundingSecond.Date, timezone)
+		beforeSecond, err := s.GetRecurrencesBetween(
+			ctx,
+			fundingFirst.Date,
+			fundingSecond.Date,
+			timezone,
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -321,19 +332,30 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(
 		// change the target. We assume that spending from a goal is progress
 		// towards that goal. Basically for a completed goal we don't need to make
 		// any contributions to it.
-		perSpendingAmount = myownsanity.Max(s.spending.TargetAmount-s.spending.UsedAmount, 0)
+		perSpendingAmount = max(
+			s.spending.TargetAmount-s.spending.UsedAmount,
+			0,
+		)
 	}
 	// The amount of funds currently allocated towards this spending item. This is
 	// not increased until the next funding event, or the user transfers funds to
 	// this spending item.
 
 	event := SpendingEvent{
-		Date:               time.Time{},
+		Date: time.Time{},
+		// If we do not have enough allocated before we would get funding next then
+		// we are behind
+		IsBehind:           eventsBeforeFirst > 0 && (perSpendingAmount*eventsBeforeFirst) > balance,
 		TransactionAmount:  0,
 		ContributionAmount: 0,
-		RollingAllocation:  balance,
-		Funding:            make([]FundingEvent, 0),
-		SpendingId:         s.spending.SpendingId,
+		// Basically this means that ONCE an allocation can go negative if we are
+		// behind, essentially indicating that we would be spending that amount from
+		// free-to-use, in the future it might be better to break the transaction
+		// amount into two numbers; budgeted transaction amount and unbudgeted
+		// transaction amount and represent free-to-use spend as unbudgeted.
+		RollingAllocation: max(balance, 0),
+		Funding:           make([]FundingEvent, 0),
+		SpendingId:        s.spending.SpendingId,
 	}
 
 	// The total contribution amount is the amount of money that needs to be
@@ -356,7 +378,10 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(
 		// though. We have $5 allocated but between now and the next funding we need
 		// to spend $5. So we cannot take the $5 we currently have into account when
 		// we calculate how much will be needed for the next funding event.
-		amountAfterCurrentSpending := myownsanity.Max(0, balance-(perSpendingAmount*eventsBeforeFirst))
+		amountAfterCurrentSpending := max(
+			0,
+			balance-(perSpendingAmount*eventsBeforeFirst),
+		)
 		// The total amount we need is determined by how many times we will need the
 		// target amount during the next period between funding events multiplied by
 		// how much each spending event costs. If the current spending object is
@@ -367,11 +392,17 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(
 		// By taking the min of the amount we will have allocated and the amount
 		// needed. We can safely arrive at a 0 contribution amount when we are
 		// over-allocated.
-		totalContributionAmount = nextSpendingPeriodTotal - myownsanity.Min(amountAfterCurrentSpending, nextSpendingPeriodTotal)
+		totalContributionAmount = nextSpendingPeriodTotal - min(
+			amountAfterCurrentSpending,
+			nextSpendingPeriodTotal,
+		)
 	} else {
 		// Otherwise we can simply look at how much we need vs how much we already
 		// have.
-		amountNeeded := myownsanity.Max(0, perSpendingAmount-balance)
+		amountNeeded := max(
+			0,
+			perSpendingAmount-balance,
+		)
 		// And how many times we will have a funding event before our due date. But
 		// we add one second to the input time because `input` might be the exact
 		// same timestamp of a contribution that is today per se. By adding one
@@ -388,7 +419,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(
 			return nil, err
 		}
 		// Then determine how much we would need at each of those funding events.
-		totalContributionAmount = amountNeeded / myownsanity.Max(1, numberOfContributions)
+		totalContributionAmount = amountNeeded / max(1, numberOfContributions)
 	}
 
 	switch {
@@ -467,28 +498,52 @@ func (s *spendingInstructionBase) GetNextInflowEventAfter(
 	}
 }
 
+type SpendingContribution struct {
+	IsBehind       bool
+	Amount         int64
+	NextRecurrence time.Time
+}
+
 func (s *spendingInstructionBase) CalculateNextContribution(
 	ctx context.Context,
 	input time.Time,
 	timezone *time.Location,
-) ([]SpendingEvent, error) {
+) (SpendingContribution, error) {
 	fundingEvent, err := s.funding.GetNextFundingEventAfter(ctx, input, timezone)
 	if err != nil {
-		return nil, err
+		return SpendingContribution{}, err
 	}
 
-	return s.GetSpendingEventsBetween(
+	events, err := s.GetSpendingEventsBetween(
 		ctx,
 		input,
 		fundingEvent.Date,
 		timezone,
 	)
-}
+	if err != nil {
+		return SpendingContribution{}, err
+	}
 
-type SpendingContribution struct {
-	IsBehind       bool
-	Amount         int64
-	NextRecurrence time.Time
+	isBehind := false
+
+	for _, event := range events {
+		// If any of the events up to the contribution event register as behind then
+		// we are behind.
+		if event.IsBehind {
+			isBehind = true
+		}
+
+		if event.ContributionAmount > 0 {
+			return SpendingContribution{
+				IsBehind: isBehind,
+				Amount:   event.ContributionAmount,
+				// TODO Figure out where to get thuis?
+				NextRecurrence: time.Time{},
+			}, nil
+		}
+	}
+
+	panic("shits broke")
 }
 
 func (s *spendingInstructionBase) CalculateNextNContributions(
