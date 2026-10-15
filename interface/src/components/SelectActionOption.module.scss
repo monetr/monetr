@@ -1,0 +1,26 @@
+@use '@monetr/interface/variables';
+
+.actionOptionRow {
+  display: flex;
+  align-items: center;
+  gap: 2 * variables.$size;
+}
+
+.actionOptionIcon {
+  flex-shrink: 0;
+  max-height: 6 * variables.$size; // 24px
+}
+
+.actionOptionText {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;
+  min-width: 0;
+}
+
+.actionOptionChevron {
+  flex-shrink: 0;
+  width: 5 * variables.$size;
+  height: 5 * variables.$size;
+  color: var(--content-subtle);
+}

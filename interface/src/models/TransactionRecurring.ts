@@ -86,6 +86,11 @@ export default class TransactionRecurring {
     return 'Possibly';
   }
 
+  // getCanCreateExpense is true for a charge that is still happening and nothing is budgeting for it yet
+  getCanCreateExpense(): boolean {
+    return this.direction === 'debit' && !this.ended && !this.deletedAt && !this.spendingId;
+  }
+
   // getNextRecurrence will return when this is next expected, but never before tomorrow. next only gets updated when
   // the server recalculates it so it can already be in the past. In that case use the next occurrence of the rule
   // instead, since an expense or funding schedule can't be due in the past.

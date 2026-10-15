@@ -1,3 +1,4 @@
+@use '@monetr/interface/mixins';
 @use '@monetr/interface/variables';
 
 $basePadding: 4 * variables.$size;
@@ -135,6 +136,28 @@ $basePadding: 4 * variables.$size;
   }
 
   padding-bottom: calc($basePadding + env(safe-area-inset-bottom));
+}
+
+// Small header above a group of options, like the suggested expense.
+.groupHeader {
+  @include mixins.text-small;
+  color: var(--content-subtle);
+  font-weight: var(--semibold);
+  padding-top: variables.$size;
+  padding-left: 2 * variables.$size;
+  padding-right: 2 * variables.$size;
+}
+
+// Splits a group from the plain options below it.
+.separator {
+  height: 1px;
+  background-color: var(--border);
+
+  // The lists put a half size gap on every row, this needs the list in the selector to win over that
+  :is(.unorderedList, .unorderedListMobile) > & {
+    margin-top: 2 * variables.$size;
+    margin-bottom: 2 * variables.$size;
+  }
 }
 
 // A single option row in the dropdown / drawer list.
