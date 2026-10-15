@@ -2,13 +2,21 @@
 
 .optionRow {
   display: flex;
+  align-items: center;
   justify-content: space-between;
 }
 
 .spendingName {
   display: flex;
+  align-items: center;
   min-width: 0;
   gap: 2 * variables.$size;
+}
+
+.spendingText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .badges {

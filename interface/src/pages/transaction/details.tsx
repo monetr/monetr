@@ -274,7 +274,11 @@ export default function TransactionDetails(): React.JSX.Element {
                 value={depositOption}
               />
             ) : (
-              <MSelectSpending<TransactionValues> className={layoutVariants({ width: 'full' })} name='spendingId' />
+              <MSelectSpending<TransactionValues>
+                className={layoutVariants({ width: 'full' })}
+                name='spendingId'
+                transaction={transaction}
+              />
             )}
             <div className={styles.formButtons}>
               <RemoveTransactionButton transaction={transaction} />

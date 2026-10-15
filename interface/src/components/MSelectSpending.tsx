@@ -1,9 +1,11 @@
 import { useMemo } from 'react';
 import { useFormikContext } from 'formik';
-import { PiggyBank, Receipt, Wallet } from 'lucide-react';
+import { PiggyBank, Plus, Receipt, Wallet } from 'lucide-react';
+import { rrulestr } from 'rrule';
 
 import Badge from '@monetr/interface/components/Badge';
 import Select, {
+  type SelectAction,
   type SelectOption,
   type SelectOptionComponentProps,
   type SelectProps,
@@ -11,9 +13,13 @@ import Select, {
 import Typography from '@monetr/interface/components/Typography';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import { useRecurringTransaction } from '@monetr/interface/hooks/useRecurringTransaction';
 import { useSpendings } from '@monetr/interface/hooks/useSpendings';
+import { showNewExpenseModal } from '@monetr/interface/modals/NewExpenseModal';
+import type { ID } from '@monetr/interface/models/ID';
 import type Spending from '@monetr/interface/models/Spending';
 import { FREE_TO_USE, FreeToUse, SpendingType } from '@monetr/interface/models/Spending';
+import type Transaction from '@monetr/interface/models/Transaction';
 import { AmountType } from '@monetr/interface/util/amounts';
 import type { FormFieldName, FormValues } from '@monetr/interface/util/typescriptEvils';
 
@@ -30,6 +36,9 @@ export interface MSelectSpendingProps<T extends FormValues<T>> extends MSelectSp
   // from the list of options presented as part of this select. This is used in the transfer dialog to make sure that
   // both the to and the from selects cannot be the same value.
   excludeFrom?: FormFieldName<T, string | null>;
+  // transaction is the one being spent. If it is recurring then the select will suggest the expense its charges are
+  // linked to, or offer to create one from it if there isn't one yet.
+  transaction?: Transaction;
 }
 
 export default function MSelectSpending<T extends FormValues<T>>(props: MSelectSpendingProps<T>): React.JSX.Element {
@@ -46,6 +55,8 @@ export default function MSelectSpending<T extends FormValues<T>>(props: MSelectS
     isError: isBalancesError,
     isSuccess: isBalancesSuccess,
   } = useCurrentBalance();
+  const { data: recurring } = useRecurringTransaction(props.transaction?.transactionRecurringId ?? null);
+  const { data: locale } = useLocaleCurrency();
 
   props = {
     label: 'Spent From',
@@ -78,7 +89,7 @@ export default function MSelectSpending<T extends FormValues<T>>(props: MSelectS
 
   const excludedFrom = props.excludeFrom ? formikContext.values[props.excludeFrom] : undefined;
 
-  const options: Array<SelectOption<SpendingOption>> = [
+  let options: Array<SelectOption<SpendingOption>> = [
     freeToUse,
     // Labels will be unique. So we only need 1 | -1
     ...items.sort((a, b) => (a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1)),
@@ -100,6 +111,45 @@ export default function MSelectSpending<T extends FormValues<T>>(props: MSelectS
   });
 
   const value: string | undefined = props.name ? formikContext.values[props.name] : undefined;
+
+  // If the recurring charges are linked to an expense then move that expense to the top as a suggestion. Unless it's
+  // already the one picked, then there is nothing to suggest.
+  let suggestedSpendingId: ID<Spending> | null = null;
+  if (recurring && !recurring.deletedAt && recurring.spendingId !== value) {
+    suggestedSpendingId = recurring.spendingId;
+  }
+  const suggested = options.find(item => suggestedSpendingId && item.value.spendingId === suggestedSpendingId);
+  if (props.transaction && recurring && suggested) {
+    let description = `Linked to your ${props.transaction.getName()} charges`;
+    if (recurring.autoMatched) {
+      description = `monetr picked this since your recent ${props.transaction.getName()} charges were spent from it`;
+    }
+
+    options = [
+      {
+        ...suggested,
+        group: 'Suggested',
+        description,
+      },
+      ...options.filter(item => item !== suggested),
+    ];
+  }
+
+  const actions: Array<SelectAction> = [];
+  if (props.transaction && recurring?.getCanCreateExpense()) {
+    const transaction = props.transaction;
+    actions.push({
+      group: `This charge repeats ${rrulestr(recurring.ruleset).toText()}`,
+      label: `Create Expense From ${transaction.getName()}`,
+      description: locale?.formatAmount(Math.abs(recurring.lastAmount), AmountType.Stored),
+      icon: Plus,
+      onSelect: () =>
+        showNewExpenseModal({
+          recurring,
+          transaction,
+        }),
+    });
+  }
   // Determine the current value, if there is not a current value then use null. Null here represents Free to use, which
   // is a non existant spending item that we patch in to represent an unbudgeted transaction.
   const current = options.find(item => item.value.spendingId === (value ?? FREE_TO_USE));
@@ -119,6 +169,7 @@ export default function MSelectSpending<T extends FormValues<T>>(props: MSelectS
   return (
     <Select
       {...props}
+      actions={actions}
       onChange={onSelect}
       optionComponent={SelectSpendingOptionComponent}
       options={options}
@@ -149,9 +200,16 @@ export function SelectSpendingOptionComponent(props: SelectOptionComponentProps<
             <Receipt />
           </Badge>
         )}
-        <Typography color='emphasis' ellipsis size='md'>
-          {props.label}
-        </Typography>
+        <div className={styles.spendingText}>
+          <Typography color='emphasis' ellipsis size='md'>
+            {props.label}
+          </Typography>
+          {props.description && (
+            <Typography color='subtle' ellipsis size='sm'>
+              {props.description}
+            </Typography>
+          )}
+        </div>
       </div>
       <div className={styles.badges}>
         <Badge size='sm'>{amount}</Badge>
