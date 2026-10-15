@@ -32,6 +32,13 @@ $basePadding: 2 * variables.$size;
   inset: 0px;
   z-index: 10;
   overflow-y: auto;
+  // There is no backdrop on small screens, without this the page behind shows
+  // through the scrollbar
+  background-color: var(--background);
+
+  @media (min-width: variables.$smallScreen) {
+    background-color: transparent;
+  }
 }
 
 .modalWindowWrapper {
@@ -53,8 +60,9 @@ $basePadding: 2 * variables.$size;
   background-color: var(--background);
   position: absolute;
   top: 0px;
-  min-height: fit-content;
-  height: 100%;
+  // Let the window grow with its content so the background follows it when the
+  // modal is taller than the screen
+  min-height: 100%;
   width: 100%;
   border-radius: 0px;
   // Handle screen edges on mobile devices.
@@ -66,7 +74,7 @@ $basePadding: 2 * variables.$size;
   @media (min-width: variables.$smallScreen) {
     position: relative;
     border-radius: var(--border-radius);
-    height: auto;
+    min-height: auto;
     width: 100%;
     max-width: 128 * variables.$size;
     padding: $basePadding;
