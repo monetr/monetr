@@ -31,6 +31,17 @@ type SpendingInstructions interface {
 	GetNextNSpendingEventsAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) ([]SpendingEvent, error)
 	GetSpendingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) ([]SpendingEvent, error)
 	GetNextInflowEventAfter(ctx context.Context, input time.Time, timezone *time.Location) (*SpendingEvent, error)
+	CalculateNextNContributions(
+		ctx context.Context,
+		n int,
+		input time.Time,
+		timezone *time.Location,
+	) ([]SpendingContribution, error)
+	CalculateNextContribution(
+		ctx context.Context,
+		input time.Time,
+		timezone *time.Location,
+	) ([]SpendingEvent, error)
 }
 
 type spendingInstructionBase struct {
@@ -456,38 +467,183 @@ func (s *spendingInstructionBase) GetNextInflowEventAfter(
 	}
 }
 
-type SpendingContribution struct {
-	Amount int64
-}
-
-func CalculateSpendingContributionAfter(
+func (s *spendingInstructionBase) CalculateNextContribution(
 	ctx context.Context,
-	log *slog.Logger,
-	spending Spending,
-	funding FundingSchedule,
 	input time.Time,
 	timezone *time.Location,
-) (SpendingContribution, error) {
+) ([]SpendingEvent, error) {
+	fundingEvent, err := s.funding.GetNextFundingEventAfter(ctx, input, timezone)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.GetSpendingEventsBetween(
+		ctx,
+		input,
+		fundingEvent.Date,
+		timezone,
+	)
+}
+
+type SpendingContribution struct {
+	IsBehind       bool
+	Amount         int64
+	NextRecurrence time.Time
+}
+
+func (s *spendingInstructionBase) CalculateNextNContributions(
+	ctx context.Context,
+	n int,
+	input time.Time,
+	timezone *time.Location,
+) ([]SpendingContribution, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	fundingInstructions := NewFundingScheduleFundingInstructions(log, funding)
-	spendingInstructions := NewSpendingInstructions(log, spending, fundingInstructions)
+	input = input.In(timezone)
 
-	result, err := spendingInstructions.GetNextInflowEventAfter(ctx, input, timezone)
-	if err != nil {
-		return SpendingContribution{
-			Amount: 0,
-		}, err
+	var rule *RuleSet
+	if s.spending.RuleSet != nil {
+		rule = s.spending.RuleSet.Clone()
+		rule.DTStart(rule.GetDTStart().In(timezone))
 	}
 
-	if result == nil {
-		return SpendingContribution{
-			Amount: 0,
-		}, nil
+	// The amount of funds currently allocated towards this spending item. This
+	// is not increased until the next funding event, or the user transfers
+	// funds to this spending item.
+	currentAmount := s.spending.GetProgressAmount()
+
+	result := make([]SpendingContribution, n)
+	for i := 0; i < n; i++ {
+		fundingEvents, err := s.funding.GetNFundingEventsAfter(
+			span.Context(),
+			2,
+			input,
+			timezone,
+		)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to retrieve the next two funding events for next contribution calculation")
+		}
+
+		switch len(fundingEvents) {
+		case 2:
+		default:
+			return nil, errors.Errorf("didn't receive the expected number of funding events, expected 2 got %d", len(fundingEvents))
+		}
+
+		// TODO: Should I use the adjusted date instead?
+		fundingFirstDate := fundingEvents[0].OriginalDate
+		fundingSecondDate := fundingEvents[1].OriginalDate
+
+		nextRecurrence := util.Midnight(s.spending.NextRecurrence, timezone)
+		if rule != nil {
+			// Basically if we aren't a goal then calculate relative to the provided
+			// time and we'll walk forward
+			nextRecurrence = rule.After(input, false)
+		}
+
+		// The number of times this item will be spent before it receives funding
+		// again. This is considered the current funding period. This is used to
+		// determine if the spending is currently behind. As the total amount that
+		// will be spent must be <= the amount currently allocated to this spending
+		// item. If it is not then there will not be enough funds to cover each
+		// spending event between now and the next funding event.
+		// TODO Make sure this matches the behavior from the old one
+		eventsBeforeFirst, err := s.GetRecurrencesBetween(
+			span.Context(),
+			input,
+			fundingFirstDate,
+			timezone,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		// The number of times this item will be spent in the subsequent funding
+		// period. This is used to determine how much needs to be allocated at the
+		// beginning of the next funding period.
+		eventsBeforeSecond, err := s.GetRecurrencesBetween(
+			span.Context(),
+			fundingFirstDate,
+			fundingSecondDate,
+			timezone,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		numberOfEventsBeforeFirst := int64(len(eventsBeforeFirst))
+		numberOfEventsBeforeSecond := int64(len(eventsBeforeSecond))
+
+		// The amount of funds needed for each individual spending event.
+		perSpendingAmount := s.spending.TargetAmount
+
+		// We are behind if we do not currently have enough funds for all the
+		// spending events between now and the next time this spending object will
+		// receive funding.
+		isBehind := numberOfEventsBeforeFirst > 0 &&
+			(perSpendingAmount*numberOfEventsBeforeFirst) > currentAmount
+
+		// The total contribution amount is the amount of money that needs to be
+		// allocated to this spending item during the next funding event in order to
+		// cover all the spending events that will happen between then and the
+		// subsequent funding event.
+		var totalContributionAmount int64
+
+		// If there are spending events in the next funding period then we need to
+		// make sure that we calculate for those.
+		if numberOfEventsBeforeSecond > 0 {
+			// We need to subtract the spending that will happen before the next period
+			// though. We have $5 allocated but between now and the next funding we need
+			// to spend $5. So we cannot take the $5 we currently have into account when
+			// we calculate how much will be needed for the next funding event.
+			amountAfterCurrentSpending := max(
+				0,
+				currentAmount-(perSpendingAmount*numberOfEventsBeforeFirst),
+			)
+			// The total amount we need is determined by how many times we will need the
+			// target amount during the next period between funding events multiplied by
+			// how much each spending event costs. If the current spending object is
+			// over-allocated for this funding period and the next funding period then
+			// this can result in a negative contribution amount. Because we would be
+			// subtracting more than the calculated amount that we need.
+			nextSpendingPeriodTotal := perSpendingAmount * numberOfEventsBeforeFirst
+			// By taking the min of the amount we will have allocated and the amount
+			// needed. We can safely arrive at a 0 contribution amount when we are
+			// over-allocated.
+			totalContributionAmount = nextSpendingPeriodTotal - min(
+				amountAfterCurrentSpending,
+				nextSpendingPeriodTotal,
+			)
+		} else {
+			// Otherwise we can simply look at how much we need vs how much we already
+			// have.
+			amountNeeded := max(0, perSpendingAmount-currentAmount)
+			// And how many times we will have a funding event before our due date.
+			contributions, err := s.funding.GetFundingEventsBetween(
+				span.Context(),
+				input,
+				nextRecurrence,
+				timezone,
+			)
+			if err != nil {
+				return nil, err
+			}
+			// Then determine how much we would need at each of those funding events.
+			totalContributionAmount = amountNeeded / max(1, int64(len(contributions)))
+		}
+
+		// Add our result indicating whether the spending will be behind at this
+		// point in time and what the contribution amount needs to be.
+		result[i] = SpendingContribution{
+			IsBehind:       isBehind,
+			Amount:         totalContributionAmount,
+			NextRecurrence: nextRecurrence,
+		}
+
+		input = nextRecurrence
+		currentAmount += totalContributionAmount
 	}
 
-	return SpendingContribution{
-		Amount: result.ContributionAmount,
-	}, nil
+	return result, nil
 }

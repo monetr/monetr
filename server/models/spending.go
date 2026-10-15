@@ -93,7 +93,10 @@ func (e Spending) GetProgressAmount() int64 {
 // short of before, so an event that lands right on before belongs to the next
 // window instead of this one. Goals will at most return a single time if the
 // goal is due within that window.
-func (e *Spending) GetRecurrencesBefore(now, before time.Time, timezone *time.Location) []time.Time {
+func (e *Spending) GetRecurrencesBefore(
+	now, before time.Time,
+	timezone *time.Location,
+) []time.Time {
 	switch e.SpendingType {
 	case SpendingTypeExpense:
 		// Make sure that the rule increments relative to midnight in the user's

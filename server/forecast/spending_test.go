@@ -826,3 +826,100 @@ func TestSpendingInstructionBase_GetNextInflowEventAfter(t *testing.T) {
 		assert.EqualValues(t, 9020, event.ContributionAmount, "next contribution amount should be half of the total needed to reach the target")
 	})
 }
+
+func TestSpendingInstructionBase_CalculateNextNContributions(t *testing.T) {
+	t.Run("next funding in the past updated", func(t *testing.T) {
+		log := testutils.GetLog(t)
+		today := util.Midnight(time.Now(), time.UTC)
+		// dayAfterTomorrow := util.Midnight(today.Add(48*time.Hour), time.UTC)
+		dayAfterDayAfterTomorrow := util.Midnight(time.Now().Add(72*time.Hour), time.UTC)
+		assert.True(t, dayAfterDayAfterTomorrow.After(today), "dayAfterDayAfterTomorrow timestamp must come after today's")
+
+		ruleset := testutils.RuleToSet(t, time.UTC, "FREQ=WEEKLY;INTERVAL=2;BYDAY=FR", today)
+		spending := models.Spending{
+			SpendingType:   models.SpendingTypeGoal,
+			TargetAmount:   100,
+			CurrentAmount:  0,
+			NextRecurrence: dayAfterDayAfterTomorrow,
+		}
+		funding := models.FundingSchedule{
+			FundingScheduleId: "fund_bogus",
+			Name:              "Bogus Funding Schedule",
+			Description:       "Bogus",
+			RuleSet:           ruleset,
+			NextRecurrence:    dayAfterDayAfterTomorrow.UTC(),
+		}
+
+		fundingInstructions := NewFundingScheduleFundingInstructions(log, funding)
+		spendingInstructions := NewSpendingInstructions(log, spending, fundingInstructions)
+
+		result, err := spendingInstructions.CalculateNextNContributions(
+			t.Context(),
+			1,
+			dayAfterDayAfterTomorrow,
+			// spending.NextRecurrence,
+			time.UTC,
+		)
+		assert.NoError(t, err)
+		assert.Len(t, result, 1)
+		assert.False(t, result[0].IsBehind, "should not be behind because it will be funded before it is spent")
+		assert.EqualValues(t, spending.TargetAmount, result[0].Amount, "next contribution should be the entire amount")
+	})
+
+	t.Run("timezone near midnight", func(t *testing.T) {
+		log := testutils.GetLog(t)
+		// This test is here to prove a fix for https://github.com/monetr/monetr/issues/937
+		// Basically, we want to make sure that if the user is close to their
+		// funding schedule such that the server is already on the next day; that we
+		// still calculate everything correctly. This was not happening, this test
+		// accompanies a fix to remedy that situation.
+		central, err := time.LoadLocation("America/Chicago")
+		require.NoError(t, err, "must be able to load timezone")
+		now := time.Date(2022, 06, 14, 22, 37, 43, 0, central)
+		nextFunding := time.Date(2022, 06, 15, 0, 0, 0, 0, central)
+		nextRecurrence := time.Date(2022, 7, 8, 0, 0, 0, 0, central)
+
+		fundingRule := testutils.RuleToSet(t, central, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", now)
+		spendingRule := testutils.RuleToSet(t, central, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=8", now)
+
+		spending := models.Spending{
+			SpendingType:   models.SpendingTypeExpense,
+			TargetAmount:   25000,
+			CurrentAmount:  6960,
+			RuleSet:        spendingRule,
+			NextRecurrence: nextRecurrence.UTC(),
+		}
+
+		funding := models.FundingSchedule{
+			FundingScheduleId: "fund_bogus",
+			Name:              "Bogus Funding Schedule",
+			Description:       "Bogus",
+			RuleSet:           fundingRule,
+			NextRecurrence:    nextFunding.UTC(),
+		}
+
+		fundingInstructions := NewFundingScheduleFundingInstructions(log, funding)
+		spendingInstructions := NewSpendingInstructions(log, spending, fundingInstructions)
+
+		result, err := spendingInstructions.CalculateNextNContributions(
+			t.Context(),
+			5,
+			now,
+			// spending.NextRecurrence,
+			central,
+		)
+		assert.NoError(t, err)
+		// assert.Len(t, result, 1)
+
+		debug, err := spendingInstructions.CalculateNextContribution(
+			t.Context(),
+			now,
+			central,
+		)
+		assert.NotEmpty(t, debug)
+		assert.NoError(t, err)
+
+		assert.EqualValues(t, 9020, result[0].Amount, "next contribution amount should be half of the total needed to reach the target")
+	})
+
+}
