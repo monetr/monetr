@@ -80,7 +80,7 @@ func newTestCache(t *testing.T) cache.Cache {
 		require.NoError(t, pool.Close())
 		miniRedis.Close()
 	})
-	return cache.NewCache(testutils.GetLog(t), pool)
+	return cache.NewValkeyCacheOld(testutils.GetLog(t), pool)
 }
 
 func newTestClock() *clock.Mock {

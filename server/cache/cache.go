@@ -2,138 +2,73 @@ package cache
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
-	"net"
-	"strconv"
+	"strings"
 	"time"
 
-	"github.com/alicebob/miniredis/v2"
-	"github.com/gomodule/redigo/redis"
-	"github.com/monetr/monetr/server/certs"
+	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/pkg/errors"
 )
 
-type RedisController struct {
-	mini         *miniredis.Miniredis
-	pool         *redis.Pool
-	certificates certs.Source
+type Cache interface {
+	Set(ctx context.Context, key string, value []byte) error
+	SetTTL(ctx context.Context, key string, value []byte, lifetime time.Duration) error
+	SetEz(ctx context.Context, key string, object any) error
+	SetEzTTL(ctx context.Context, key string, object any, lifetime time.Duration) error
+	Get(ctx context.Context, key string) ([]byte, error)
+	GetEz(ctx context.Context, key string, output any) error
+	Delete(ctx context.Context, key string) error
+	// CompareAndSwap atomically sets key to next only if its current value equals
+	// expected; a missing key or mismatch writes nothing and returns false. On a
+	// swap the expiry is refreshed to ttl, or kept (KEEPTTL) when ttl <= 0.
+	CompareAndSwap(ctx context.Context, key string, expected, next []byte, ttl time.Duration) (swapped bool, err error)
+	Close() error
 }
 
-func NewRedisCache(
+func GetCache(
+	ctx context.Context,
 	log *slog.Logger,
-	conf config.Redis,
-) (*RedisController, error) {
-	controller := &RedisController{}
-	var redisAddress string
-	var err error
-	dialOptions := []redis.DialOption{
-		redis.DialUsername(conf.Username),
-		redis.DialPassword(conf.Password),
-		redis.DialDatabase(conf.Database),
-	}
-	if conf.Enabled {
-		redisAddress = net.JoinHostPort(conf.Address, strconv.Itoa(conf.Port))
-		log.DebugContext(context.Background(), fmt.Sprintf("connecting to redis at: %s", redisAddress))
+	clock clock.Clock,
+	configuration config.Configuration,
+) (Cache, error) {
+	log.Log(ctx, logging.LevelTrace, "setting up caching interface")
 
-		// If no CA certificate is provided then the server certificate is
-		// verified against the system certificate authorities instead.
-		if conf.TLS ||
-			conf.CACertificatePath != "" ||
-			conf.CertificatePath != "" ||
-			conf.KeyPath != "" {
-			controller.certificates, err = certs.NewFileSource(log, certs.Options{
-				CACertificatePath:  conf.CACertificatePath,
-				CertificatePath:    conf.CertificatePath,
-				KeyPath:            conf.KeyPath,
-				ServerName:         conf.Address,
-				InsecureSkipVerify: conf.InsecureSkipVerify,
-			})
-			if err != nil {
-				log.ErrorContext(context.Background(), "failed to load redis TLS certificates", "err", err)
-				return nil, errors.Wrap(err, "failed to load redis TLS certificates")
-			}
-			// The certificates are watched for the lifetime of the controller, new
-			// connections will pick up rotated certificates without swapping the
-			// TLS config.
-			if err = controller.certificates.Start(); err != nil {
-				return nil, errors.Wrap(err, "failed to watch redis TLS certificates")
-			}
-
-			dialOptions = append(dialOptions,
-				redis.DialUseTLS(true),
-				redis.DialTLSConfig(controller.certificates.ClientConfig()),
-			)
+	// Migration from the old config to the new, if the user does not have kind
+	// configured right now then we will show a warning telling them to configure
+	// it. In the mean time we will try to infer it from the existing (deprecated)
+	// redis config
+	kind := configuration.Cache.Kind
+	if kind == "" {
+		log.WarnContext(ctx,
+			"Config warning! cache.kind is unset, monetr will fallback to the redis configuration for now but in a future update will default to an in memory cache if none is configured",
+			"documentation", "https://monetr.app/documentation/configure/cache",
+		)
+		//
+		if configuration.Redis.Enabled {
+			// Use the deprecated value to signal that it is the old config
+			kind = "redis"
+		} else {
+			kind = "memory"
 		}
-	} else {
-		controller.mini, err = miniredis.Run()
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to run miniredis")
-		}
-
-		if conf.Username != "" && conf.Password != "" {
-			controller.mini.RequireUserAuth(conf.Username, conf.Password)
-		} else if conf.Password != "" {
-			controller.mini.RequireAuth(conf.Password)
-		}
-
-		// Store our "embedded" redis address for use below.
-		redisAddress = controller.mini.Server().Addr().String()
-		log.InfoContext(context.Background(), "no redis config was provided, using miniredis!")
 	}
 
-	// Setup the redis pool for running jobs.
-	controller.pool = &redis.Pool{
-		MaxIdle:   10,
-		MaxActive: 50,
-		Dial: func() (redis.Conn, error) {
-			// TODO (elliotcourant) Eventually support other networks besides
-			//  tcp? Can redis even run on a unix socket?
-			return redis.Dial("tcp", redisAddress, dialOptions...)
-		},
+	if !configuration.Redis.Enabled == false {
+
 	}
 
-	// This will try to ping redis to make sure its up and running.
-	if err = waitForRedis(log, 10, controller.pool); err != nil {
-		log.ErrorContext(context.Background(), "failed to wait for redis to be available", "err", err)
-		return nil, err
+	switch strings.ToLower(configuration.Cache.Kind) {
+	case "redis":
+		log.WarnContext(ctx,
+			"Config warning! redis.enabled is true and the config has not been migrated to use cache.valkey instead!",
+			"documentation", "https://monetr.app/documentation/configure/cache",
+		)
+	case "valkey":
+
+	case "memory":
+		return NewLRUCache(log, clock), nil
+	default:
+		return nil, errors.Errorf("invalid cache kind configured: %s", kind)
 	}
-
-	log.DebugContext(context.Background(), "successfully setup redis pool")
-
-	return controller, nil
-}
-
-func waitForRedis(log *slog.Logger, maxAttempts int, pool *redis.Pool) error {
-	for i := range maxAttempts {
-		log.Log(context.Background(), logging.LevelTrace, "pinging redis")
-		result, err := pool.Get().Do("PING")
-		if err != nil {
-			log.ErrorContext(context.Background(), fmt.Sprintf("failed to ping redis, attempt: %d", i+1), "err", err)
-			time.Sleep(time.Duration(i+1) * time.Second)
-			continue
-		}
-
-		log.DebugContext(context.Background(), fmt.Sprintf("response from redis: %v", result))
-		return nil
-	}
-
-	return errors.Errorf("failed to connect to redis after %d attempt(s)", maxAttempts)
-}
-
-func (r *RedisController) Pool() *redis.Pool {
-	return r.pool
-}
-
-func (r *RedisController) Close() error {
-	err := r.pool.Close()
-	if r.mini != nil {
-		r.mini.Close()
-	}
-	if r.certificates != nil {
-		r.certificates.Stop()
-	}
-	return errors.Wrap(err, "failed to close pool gracefully")
 }

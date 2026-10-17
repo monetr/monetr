@@ -93,7 +93,7 @@ func TestNewRedisCache(t *testing.T) {
 		require.NoError(t, os.WriteFile(certPath, clientCertPEM, 0600), "must write client cert")
 		require.NoError(t, os.WriteFile(keyPath, clientKeyPEM, 0600), "must write client key")
 
-		controller, err := cache.NewRedisCache(testutils.GetLog(t), config.Redis{
+		controller, err := cache.NewValkeyController(testutils.GetLog(t), config.Redis{
 			Enabled:           true,
 			Address:           "localhost",
 			Port:              mini.Server().Addr().Port,

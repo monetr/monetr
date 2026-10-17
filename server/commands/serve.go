@@ -222,14 +222,14 @@ func ServeCommand(parent *cobra.Command) {
 			}
 			defer db.Close()
 
-			redisController, err := cache.NewRedisCache(log, configuration.Redis)
+			redisController, err := cache.NewValkeyController(log, configuration.Redis)
 			if err != nil {
 				log.Error("failed to create redis cache", "err", err)
 				return err
 			}
 			defer redisController.Close()
 
-			redisCache := cache.NewCache(log, redisController.Pool())
+			redisCache := cache.NewValkeyCacheOld(log, redisController.Pool())
 
 			// These read their values when prometheus scrapes us, so they only need
 			// to be registered once here.

@@ -56,7 +56,7 @@ func jobSyncPlaid(parent *cobra.Command) {
 
 			ctx := context.Background()
 
-			redisController, err := cache.NewRedisCache(log, configuration.Redis)
+			redisController, err := cache.NewValkeyController(log, configuration.Redis)
 			if err != nil {
 				log.Error("failed to create redis cache", "err", err)
 				return err
