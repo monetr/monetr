@@ -9,9 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/alicebob/miniredis/v2"
 	"github.com/benbjohnson/clock"
-	"github.com/gomodule/redigo/redis"
 	"github.com/monetr/monetr/server/cache"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/powchallenge"
@@ -68,21 +66,6 @@ func solveTestProof(t *testing.T, challenge string, difficulty int) uint64 {
 	return 0
 }
 
-func newTestCache(t *testing.T) cache.Cache {
-	miniRedis := miniredis.NewMiniRedis()
-	require.NoError(t, miniRedis.Start())
-	pool := &redis.Pool{
-		Dial: func() (redis.Conn, error) {
-			return redis.Dial("tcp", miniRedis.Server().Addr().String())
-		},
-	}
-	t.Cleanup(func() {
-		require.NoError(t, pool.Close())
-		miniRedis.Close()
-	})
-	return cache.NewCache(testutils.GetLog(t), pool)
-}
-
 func newTestClock() *clock.Mock {
 	clk := clock.NewMock()
 	clk.Set(time.Date(2023, 10, 9, 13, 32, 0, 0, time.UTC))
@@ -99,7 +82,7 @@ func newTestChallenger(t *testing.T, difficulty int) (powchallenge.Challenger, *
 	secret := powchallenge.DeriveSecret([]byte("test-seed-for-proof-of-work"))
 	challenger := powchallenge.NewChallenger(
 		testutils.GetLog(t),
-		newTestCache(t),
+		testutils.GetCache(t),
 		clk,
 		secret,
 		difficulty,
@@ -237,7 +220,7 @@ func TestChallenger_IssueAndVerify(t *testing.T) {
 		// that differs is the configured difficulty.
 		clk := newTestClock()
 		secret := powchallenge.DeriveSecret([]byte("shared-secret-for-difficulty-test"))
-		sharedCache := newTestCache(t)
+		sharedCache := testutils.GetCache(t)
 		ctx := t.Context()
 
 		issuer := powchallenge.NewChallenger(testutils.GetLog(t), sharedCache, clk, secret, 4, 5*time.Minute)
@@ -299,7 +282,7 @@ func TestChallenger_IssueAndVerify(t *testing.T) {
 		// cache that errors on CompareAndSwap.
 		challenger := powchallenge.NewChallenger(
 			testutils.GetLog(t),
-			compareAndSwapErrorCache{Cache: newTestCache(t)},
+			compareAndSwapErrorCache{Cache: testutils.GetCache(t)},
 			clk,
 			secret,
 			testDifficulty,

@@ -1,0 +1,109 @@
+---
+title: "Cache Configuration"
+description: "Configure monetr's in-memory, Valkey or other Redis-compatible cache for self-hosted instances."
+---
+
+# Cache Configuration
+
+monetr requires the ability to cache some data temporarily in order to reduce outgoing API calls to things like Plaid or
+to have some basic shared state between requests for things like [Proof-of-work](./proof_of_work). To do this monetr
+supports using an external cache such as Valkey or any Redis-compatible server, or it will fall back to an internal LRU
+cache that is specific to that single instance of monetr.
+
+If you are running more than one instance of monetr you should configure a Valkey server for all of the instances to
+share so that way shared-state cached data can be accessed to prevent odd bugs.
+
+:::info
+At the moment monetr still supports the [Redis](./redis) configuration block, but this will be deprecated in the future.
+If your `cache.kind` value is unset monetr will fallback to the `redis` configuration instead for now. But this will
+break in an upcoming release and will instead default to `memory` if you do not update your configuration.
+:::
+
+```yaml title="config.yaml"
+cache:
+  kind: "<memory|valkey>" # Cache implementation to use, defaults to nothing for now.
+  memory: { ... } # In memory cache configuration, only used when `kind: memory`
+  valkey: { ... } # Valkey and Redis-compatible cache configuration, only used when `kind: valkey`
+```
+
+The following environment variables map to the following configuration file fields. Each field is documented below.
+
+| Variable            | Config File Field |
+| ---                 | ---               |
+| `MONETR_CACHE_KIND` | `cache.kind`      |
+
+## Memory
+
+When `memory` is specified as the cache implementation, monetr will cache data in it's own memory. This data does not
+persist between server restarts which means that things like proof of work data for a login session might get lost in a
+server restart. This is the preferred and recommended cache implementation for self-hosting. However you should only use
+this if you are running a single monetr server.
+
+```yaml title="config.yaml"
+cache:
+  kind: "memory"
+  memory:
+    maxKeys: 128 # The max number of items to be cached at any given time
+```
+
+monetr's internal cache is an LRU, so if the max number of items is reached then the least recently used items will be
+evicted first from the cache.
+
+| **Name**  | **Type** | **Default** | **Description**                                                                                                                                                   |
+| ---       | ---      | ---         | ---                                                                                                                                                               |
+| `maxKeys` | Number   | `128`       | The max number of items that can be cached at any given time, items are evicted based on how recently they were used once this limit is reached within the cache. |
+
+## Valkey
+
+monetr can work with any Redis-compatible server, however Valkey is recommended and is provided in the docker compose
+monetr distributes for self-hosted installations.
+
+```yaml title="config.yaml"
+cache:
+  kind: "valkey"
+  valkey:
+    address: "localhost"
+    port: 6379
+    database: 0
+    username: ""
+    password: ""
+    tls: false
+    insecureSkipVerify: false
+    caCertificatePath: "</tls/ca.cert>"
+    keyPath: "</tls/tls.key>"
+    certificatePath: "</tls/tls.cert>"
+```
+
+| **Name**             | **Type** | **Default** | **Description**                                                                                                                                                                                       |
+| ---                  | ---      | ---         | ---                                                                                                                                                                                                   |
+| `address`            | String   |             | The IP, or DNS resolvable address of your Redis-compatible cache server.                                                                                                                              |
+| `port`               | Number   | `6379`      | Port that the Redis-compatible cache server can be reached at.                                                                                                                                        |
+| `database`           | Number   | `0`         | Database number that you want monetr to use for caching. Defaults to `0`.                                                                                                                             |
+| `username`           | String   |             | Username used to authenticate to the Redis-compatible server, defaults to an empty string.                                                                                                            |
+| `password`           | String   |             | Password used to authenticate to the Redis-compatible server, defaults to an empty string.                                                                                                            |
+| `tls`                | Boolean  | `false`     | If true then monetr will connect to the cache server using TLS. TLS is also used if any of the certificate paths below are provided.                                                                  |
+| `insecureSkipVerify` | Boolean  | `false`     | If you are using TLS with the cache server but are not distributing a certificate authority file, then you may need to skip TLS verification.                                                         |
+| `caCertificatePath`  | String   |             | Path to the certificate authority certificate file. If you are verifying your TLS connection then this is required or the server certificate must be among the hosts certificate authorities already. |
+| `keyPath`            | String   |             | Path to the client TLS key that monetr should use to connect to the cache server.                                                                                                                     |
+| `certificatePath`    | String   |             | Path to the client TLS certificate that monetr should use to connect to the cache server.                                                                                                             |
+
+:::info
+monetr watches the certificate files for changes, so certificates can be rotated without restarting the server. New
+connections to the cache server will use the new certificates right away.
+:::
+
+The following environment variables map to the following configuration file fields. Each field is documented below.
+
+| Variable                             | Config File Field                 |
+| ---                                  | ---                               |
+| `MONETR_VALKEY_ADDRESS`              | `cache.valkey.address`            |
+| `MONETR_VALKEY_PORT`                 | `cache.valkey.port`               |
+| `MONETR_VALKEY_DATABASE`             | `cache.valkey.database`           |
+| `MONETR_VALKEY_USERNAME`             | `cache.valkey.username`           |
+| `MONETR_VALKEY_PASSWORD`             | `cache.valkey.password`           |
+| `MONETR_VALKEY_TLS`                  | `cache.valkey.tls`                |
+| `MONETR_VALKEY_INSECURE_SKIP_VERIFY` | `cache.valkey.insecureSkipVerify` |
+| `MONETR_VALKEY_CA_PATH`              | `cache.valkey.caCertificatePath`  |
+| `MONETR_VALKEY_KEY_PATH`             | `cache.valkey.keyPath`            |
+| `MONETR_VALKEY_CERT_PATH`            | `cache.valkey.certificatePath`    |
+

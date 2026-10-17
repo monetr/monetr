@@ -64,6 +64,7 @@ JSON
 JWT
 KMS.*
 LLC
+LRU
 Levenshtein
 Leyna
 Lindstrom

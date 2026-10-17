@@ -3,52 +3,137 @@ package cache
 import (
 	"context"
 	"fmt"
+	"net"
+	"strconv"
 	"time"
 
 	"log/slog"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/gomodule/redigo/redis"
+	"github.com/monetr/monetr/server/certs"
+	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/logging"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/vmihailenco/msgpack/v5"
 )
 
-type Cache interface {
-	Set(ctx context.Context, key string, value []byte) error
-	SetTTL(ctx context.Context, key string, value []byte, lifetime time.Duration) error
-	SetEz(ctx context.Context, key string, object any) error
-	SetEzTTL(ctx context.Context, key string, object any, lifetime time.Duration) error
-	Get(ctx context.Context, key string) ([]byte, error)
-	GetEz(ctx context.Context, key string, output any) error
-	Delete(ctx context.Context, key string) error
-	// CompareAndSwap atomically sets key to next only if its current value equals
-	// expected; a missing key or mismatch writes nothing and returns false. On a
-	// swap the expiry is refreshed to ttl, or kept (KEEPTTL) when ttl <= 0.
-	CompareAndSwap(ctx context.Context, key string, expected, next []byte, ttl time.Duration) (swapped bool, err error)
-}
-
 var (
-	_ Cache = &redisCache{}
+	_ Cache = &valkeyCache{}
 )
+
+func waitForRedis(log *slog.Logger, maxAttempts int, pool *redis.Pool) error {
+	for i := range maxAttempts {
+		log.Log(context.Background(), logging.LevelTrace, "pinging redis")
+		result, err := pool.Get().Do("PING")
+		if err != nil {
+			log.ErrorContext(context.Background(), fmt.Sprintf("failed to ping redis, attempt: %d", i+1), "err", err)
+			time.Sleep(time.Duration(i+1) * time.Second)
+			continue
+		}
+
+		log.DebugContext(context.Background(), fmt.Sprintf("response from redis: %v", result))
+		return nil
+	}
+
+	return errors.Errorf("failed to connect to redis after %d attempt(s)", maxAttempts)
+}
 
 var (
 	ErrBlankKey = errors.New("key is blank")
 )
 
-type redisCache struct {
-	log    *slog.Logger
-	client *redis.Pool
+type valkeyCache struct {
+	log          *slog.Logger
+	client       *redis.Pool
+	certificates certs.Source
 }
 
-func NewCache(log *slog.Logger, client *redis.Pool) Cache {
-	return &redisCache{
-		log:    log,
-		client: client,
+func NewValkeyCache(
+	ctx context.Context,
+	log *slog.Logger,
+	conf config.Valkey,
+) (Cache, error) {
+	cache := &valkeyCache{
+		log: log,
 	}
+	var address string
+	var err error
+	dialOptions := []redis.DialOption{
+		redis.DialUsername(conf.Username),
+		redis.DialPassword(conf.Password),
+		redis.DialDatabase(conf.Database),
+	}
+
+	address = net.JoinHostPort(conf.Address, strconv.Itoa(conf.Port))
+	log.DebugContext(ctx, "connecting to valkey", "address", address)
+
+	// If no CA certificate is provided then the server certificate is verified
+	// against the system certificate authorities instead.
+	if conf.TLS ||
+		conf.CACertificatePath != "" ||
+		conf.CertificatePath != "" ||
+		conf.KeyPath != "" {
+		cache.certificates, err = certs.NewFileSource(log, certs.Options{
+			CACertificatePath:  conf.CACertificatePath,
+			CertificatePath:    conf.CertificatePath,
+			KeyPath:            conf.KeyPath,
+			ServerName:         conf.Address,
+			InsecureSkipVerify: conf.InsecureSkipVerify,
+		})
+		if err != nil {
+			log.ErrorContext(ctx, "failed to load valkey TLS certificates", "err", err)
+			return nil, errors.Wrap(err, "failed to load valkey TLS certificates")
+		}
+		// The certificates are watched for the lifetime of the controller, new
+		// connections will pick up rotated certificates without swapping the TLS
+		// config.
+		if err = cache.certificates.Start(); err != nil {
+			return nil, errors.Wrap(err, "failed to watch valkey TLS certificates")
+		}
+
+		dialOptions = append(dialOptions,
+			redis.DialUseTLS(true),
+			redis.DialTLSConfig(cache.certificates.ClientConfig()),
+		)
+	}
+
+	// Setup the redis pool for running jobs.
+	cache.client = &redis.Pool{
+		MaxIdle:   10,
+		MaxActive: 50,
+		Dial: func() (redis.Conn, error) {
+			// TODO (elliotcourant) Eventually support other networks besides tcp? Can
+			// valkey even run on a unix socket?
+			return redis.Dial("tcp", address, dialOptions...)
+		},
+	}
+
+	// This will try to ping valkey to make sure its up and running.
+	if err = waitForRedis(log, 10, cache.client); err != nil {
+		log.ErrorContext(ctx, "failed to wait for valkey to be available", "err", err)
+		return nil, err
+	}
+
+	if err := prometheus.Register(NewPoolCollector(cache.client)); err != nil {
+		var already prometheus.AlreadyRegisteredError
+		if !errors.As(err, &already) {
+			return nil, errors.Wrap(err, "failed to register valkey pool metrics")
+		}
+		log.WarnContext(ctx,
+			"valkey pool metrics collector could not be registered, there might be missing metrics!",
+			"err", err,
+		)
+	}
+
+	log.DebugContext(ctx, "successfully setup valkey pool")
+
+	return cache, nil
 }
 
-func (r *redisCache) do(ctx context.Context, commandName string, args ...any) (any, error) {
+func (r *valkeyCache) do(ctx context.Context, commandName string, args ...any) (any, error) {
 	conn, err := r.client.GetContext(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve connection from pool")
@@ -62,7 +147,7 @@ func (r *redisCache) do(ctx context.Context, commandName string, args ...any) (a
 	return conn.Do(commandName, args...)
 }
 
-func (r *redisCache) Set(ctx context.Context, key string, value []byte) error {
+func (r *valkeyCache) Set(ctx context.Context, key string, value []byte) error {
 	if key == "" {
 		return errors.WithStack(ErrBlankKey)
 	}
@@ -85,7 +170,7 @@ func (r *redisCache) Set(ctx context.Context, key string, value []byte) error {
 	return nil
 }
 
-func (r *redisCache) SetTTL(ctx context.Context, key string, value []byte, lifetime time.Duration) error {
+func (r *valkeyCache) SetTTL(ctx context.Context, key string, value []byte, lifetime time.Duration) error {
 	if key == "" {
 		return errors.WithStack(ErrBlankKey)
 	}
@@ -112,7 +197,7 @@ func (r *redisCache) SetTTL(ctx context.Context, key string, value []byte, lifet
 	return nil
 }
 
-func (r *redisCache) SetEz(ctx context.Context, key string, object any) error {
+func (r *valkeyCache) SetEz(ctx context.Context, key string, object any) error {
 	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
 	span.Description = ""
@@ -125,7 +210,7 @@ func (r *redisCache) SetEz(ctx context.Context, key string, object any) error {
 	return r.Set(span.Context(), key, data)
 }
 
-func (r *redisCache) SetEzTTL(ctx context.Context, key string, object any, lifetime time.Duration) error {
+func (r *valkeyCache) SetEzTTL(ctx context.Context, key string, object any, lifetime time.Duration) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -137,7 +222,7 @@ func (r *redisCache) SetEzTTL(ctx context.Context, key string, object any, lifet
 	return r.SetTTL(span.Context(), key, data, lifetime)
 }
 
-func (r *redisCache) Get(ctx context.Context, key string) ([]byte, error) {
+func (r *valkeyCache) Get(ctx context.Context, key string) ([]byte, error) {
 	span := sentry.StartSpan(ctx, "cache.get")
 	defer span.Finish()
 
@@ -183,7 +268,7 @@ func (r *redisCache) Get(ctx context.Context, key string) ([]byte, error) {
 	}
 }
 
-func (r *redisCache) GetEz(ctx context.Context, key string, output any) error {
+func (r *valkeyCache) GetEz(ctx context.Context, key string, output any) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 	span.Status = sentry.SpanStatusOK
@@ -226,7 +311,7 @@ end
 return 0
 `
 
-func (r *redisCache) CompareAndSwap(ctx context.Context, key string, expected, next []byte, ttl time.Duration) (bool, error) {
+func (r *valkeyCache) CompareAndSwap(ctx context.Context, key string, expected, next []byte, ttl time.Duration) (bool, error) {
 	if key == "" {
 		return false, errors.WithStack(ErrBlankKey)
 	}
@@ -267,7 +352,7 @@ func (r *redisCache) CompareAndSwap(ctx context.Context, key string, expected, n
 	return swapped == 1, nil
 }
 
-func (r *redisCache) Delete(ctx context.Context, key string) error {
+func (r *valkeyCache) Delete(ctx context.Context, key string) error {
 	if key == "" {
 		return errors.WithStack(ErrBlankKey)
 	}
@@ -289,4 +374,12 @@ func (r *redisCache) Delete(ctx context.Context, key string) error {
 	span.SetData("cache.success", true)
 	recordOperation("delete", "ok", start)
 	return nil
+}
+
+func (r *valkeyCache) Close() error {
+	err := r.client.Close()
+	if r.certificates != nil {
+		r.certificates.Stop()
+	}
+	return errors.Wrap(err, "failed to close pool gracefully")
 }

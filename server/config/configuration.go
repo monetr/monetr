@@ -46,6 +46,7 @@ type Configuration struct {
 	AllowSignUp   bool          `yaml:"allowSignUp"`
 	Beta          Beta          `yaml:"beta"`
 	CORS          CORS          `yaml:"cors"`
+	Cache         Cache         `yaml:"cache"`
 	Database      Database      `yaml:"database"`
 	Email         Email         `yaml:"email"`
 	Features      Features      `yaml:"transactionImports"`
@@ -377,6 +378,17 @@ func LoadConfigurationEx(v *viper.Viper) (config Configuration) {
 		config.Database.PostgreSQL.Port = 5432
 	}
 
+	// If the value for cache kind was manually specified then it must be one of
+	// the valid kinds. Technically redis is accepted in the cache code, but is
+	// used as a migration path
+	if v.InConfig("cache.kind") {
+		switch strings.ToLower(config.Cache.Kind) {
+		case "", "valkey", "memory": // Blank is valid too for now
+		default:
+			panic(fmt.Sprintf("invalid value for cache.kind: %s", config.Cache.Kind))
+		}
+	}
+
 	privateKey, err := util.ExpandHomePath(config.Security.PrivateKey)
 	if err != nil {
 		panic(err)
@@ -389,6 +401,9 @@ func LoadConfigurationEx(v *viper.Viper) (config Configuration) {
 func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Environment", "development")
 	v.SetDefault("AllowSignUp", true)
+	v.SetDefault("Cache.Memory.MaxKeys", 128)
+	v.SetDefault("Cache.Valkey.Port", 6379)
+	v.SetDefault("Cache.Valkey.Database", 0)
 	v.SetDefault("Email.ForgotPassword.TokenLifetime", 10*time.Minute)
 	v.SetDefault("Email.Verification.TokenLifetime", 10*time.Minute)
 	v.SetDefault("Logging.Format", "text")
@@ -429,8 +444,23 @@ func setupEnv(v *viper.Viper) {
 	v.MustBindEnv("Environment", "MONETR_ENVIRONMENT")
 	v.MustBindEnv("AllowSignUp", "MONETR_ALLOW_SIGN_UP")
 	v.MustBindEnv("Beta.EnableBetaCodes", "MONETR_ENABLE_BETA_CODES")
+
+	// New cache variables
+	v.MustBindEnv("Cache.Kind", "MONETR_CACHE_KIND")
+	v.MustBindEnv("Cache.Valkey.Address", "MONETR_VALKEY_ADDRESS")
+	v.MustBindEnv("Cache.Valkey.Port", "MONETR_VALKEY_PORT")
+	v.MustBindEnv("Cache.Valkey.Database", "MONETR_VALKEY_DATABASE")
+	v.MustBindEnv("Cache.Valkey.Username", "MONETR_VALKEY_USERNAME")
+	v.MustBindEnv("Cache.Valkey.Password", "MONETR_VALKEY_PASSWORD")
+	v.MustBindEnv("Cache.Valkey.TLS", "MONETR_VALKEY_TLS")
+	v.MustBindEnv("Cache.Valkey.InsecureSkipVerify", "MONETR_VALKEY_INSECURE_SKIP_VERIFY")
+	v.MustBindEnv("Cache.Valkey.CACertificatePath", "MONETR_VALKEY_CA_PATH")
+	v.MustBindEnv("Cache.Valkey.CertificatePath", "MONETR_VALKEY_CERT_PATH")
+	v.MustBindEnv("Cache.Valkey.KeyPath", "MONETR_VALKEY_KEY_PATH")
+
 	v.MustBindEnv("Cors.AllowedOrigins", "MONETR_CORS_ALLOWED_ORIGINS")
 	v.MustBindEnv("Cors.Debug", "MONETR_CORS_DEBUG")
+
 	v.MustBindEnv("Email.Enabled", "MONETR_EMAIL_ENABLED")
 	v.MustBindEnv("Email.Domain", "MONETR_EMAIL_DOMAIN")
 	v.MustBindEnv("Email.Verification.Enabled", "MONETR_EMAIL_VERIFICATION_ENABLED")

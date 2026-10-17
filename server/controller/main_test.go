@@ -17,7 +17,6 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/gavv/httpexpect/v2"
-	"github.com/gomodule/redigo/redis"
 	"github.com/monetr/monetr/server/application"
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/cache"
@@ -171,13 +170,21 @@ func newTestApplication(
 
 	miniRedis := miniredis.NewMiniRedis()
 	require.NoError(t, miniRedis.Start())
-	redisPool := &redis.Pool{
-		Dial: func() (redis.Conn, error) {
-			return redis.Dial("tcp", miniRedis.Server().Addr().String())
+
+	dataCache, err := cache.GetCache(t.Context(), log, clock, config.Configuration{
+		Cache: config.Cache{
+			Kind: "valkey",
+			Valkey: config.Valkey{
+				Address:  miniRedis.Server().Addr().IP.String(),
+				Port:     miniRedis.Server().Addr().Port,
+				Database: 0,
+			},
 		},
-	}
+	})
+	require.NoError(t, err, "must be able to setup miniredis/valkey for test")
+
 	t.Cleanup(func() {
-		require.NoError(t, redisPool.Close())
+		require.NoError(t, dataCache.Close())
 		miniRedis.Close()
 	})
 
@@ -190,14 +197,13 @@ func newTestApplication(
 	queue := mockgen.NewMockEnqueuer(mockController)
 	email := mockgen.NewMockEmailCommunication(mockController)
 
-	cachePool := cache.NewCache(log, redisPool)
-	accountsRepo := repository.NewAccountRepository(log, cachePool, db)
+	accountsRepo := repository.NewAccountRepository(log, dataCache, db)
 	stripeHelper := stripe_helper.NewStripeHelper(log, gofakeit.UUID())
 	pubSub := pubsub.NewPostgresPubSub(log, db)
 	plaidInstitutions := platypus.NewPlaidInstitutionWrapper(
 		log,
 		plaidClient,
-		cachePool,
+		dataCache,
 	)
 
 	bill := billing.NewBilling(
@@ -215,7 +221,7 @@ func newTestApplication(
 	// by the tests that opt in.
 	challenger := powchallenge.NewChallenger(
 		log,
-		cachePool,
+		dataCache,
 		clock,
 		powchallenge.DeriveSecret(privateKey.Seed()),
 		configuration.ProofOfWork.Difficulty,
@@ -225,7 +231,7 @@ func newTestApplication(
 	c := &controller.Controller{
 		Accounts:                 accountsRepo,
 		Billing:                  bill,
-		Cache:                    cachePool,
+		Cache:                    dataCache,
 		Challenger:               challenger,
 		ClientTokens:             clientTokens,
 		Clock:                    clock,

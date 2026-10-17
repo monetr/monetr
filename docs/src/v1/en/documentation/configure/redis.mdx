@@ -5,6 +5,14 @@ description: "Configure a Redis or Valkey cache for self-hosted monetr. Optional
 
 # Redis Configuration
 
+:::warning
+monetr is migrating away from using this configuration to a new config layout, this configuration will continue to work
+for the next few releases but will eventually break and default to an in memory cache setup. If you're setup requires a
+shared cache server then please add the new [cache](./cache) block to your configuration file. If your setup does not
+require a shared cache server then no action is required from you, and monetr will simply default to the in memory cache
+in an upcoming release.
+:::
+
 monetr can use any cache that is compatible with Redis's wire protocol. In the provided Docker compose file, local
 development environment as well as in production [valkey](https://github.com/valkey-io/valkey) is used.
 

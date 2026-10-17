@@ -64,7 +64,7 @@ func issueTestCertificate(
 	return certificate, key, certPEM, keyPEM
 }
 
-func TestNewRedisCache(t *testing.T) {
+func TestNewValkeyCache(t *testing.T) {
 	t.Run("mutual tls", func(t *testing.T) {
 		authority, authorityKey, authorityPEM, _ := issueTestCertificate(t, nil, nil)
 		_, _, serverCertPEM, serverKeyPEM := issueTestCertificate(t, authority, authorityKey)
@@ -93,8 +93,7 @@ func TestNewRedisCache(t *testing.T) {
 		require.NoError(t, os.WriteFile(certPath, clientCertPEM, 0600), "must write client cert")
 		require.NoError(t, os.WriteFile(keyPath, clientKeyPEM, 0600), "must write client key")
 
-		controller, err := cache.NewRedisCache(testutils.GetLog(t), config.Redis{
-			Enabled:           true,
+		valkeyCache, err := cache.NewValkeyCache(t.Context(), testutils.GetLog(t), config.Valkey{
 			Address:           "localhost",
 			Port:              mini.Server().Addr().Port,
 			TLS:               true,
@@ -102,14 +101,12 @@ func TestNewRedisCache(t *testing.T) {
 			CertificatePath:   certPath,
 			KeyPath:           keyPath,
 		})
-		require.NoError(t, err, "must create redis cache over tls")
+		require.NoError(t, err, "must create valkey cache over tls")
 		t.Cleanup(func() {
-			assert.NoError(t, controller.Close(), "must close redis cache")
+			assert.NoError(t, valkeyCache.Close(), "must close valkey cache")
 		})
 
-		connection := controller.Pool().Get()
-		defer connection.Close()
-		_, err = connection.Do("SET", "key", "value")
+		err = valkeyCache.Set(t.Context(), "key", []byte("value"))
 		require.NoError(t, err, "must set key over tls")
 		value, err := mini.Get("key")
 		require.NoError(t, err, "must read key from miniredis")
