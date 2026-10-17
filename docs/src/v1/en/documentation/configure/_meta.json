@@ -1,4 +1,5 @@
 [
+  { "type": "file", "name": "cache", "label": "Cache" },
   { "type": "file", "name": "cors", "label": "CORS" },
   { "type": "file", "name": "database", "label": "Database" },
   { "type": "file", "name": "email", "label": "Email" },

@@ -442,8 +442,23 @@ func setupEnv(v *viper.Viper) {
 	v.MustBindEnv("Environment", "MONETR_ENVIRONMENT")
 	v.MustBindEnv("AllowSignUp", "MONETR_ALLOW_SIGN_UP")
 	v.MustBindEnv("Beta.EnableBetaCodes", "MONETR_ENABLE_BETA_CODES")
+
+	// New cache variables
+	v.MustBindEnv("Cache.Kind", "MONETR_CACHE_KIND")
+	v.MustBindEnv("Cache.Valkey.Address", "MONETR_VALKEY_ADDRESS")
+	v.MustBindEnv("Cache.Valkey.Port", "MONETR_VALKEY_PORT")
+	v.MustBindEnv("Cache.Valkey.Database", "MONETR_VALKEY_DATABASE")
+	v.MustBindEnv("Cache.Valkey.Username", "MONETR_VALKEY_USERNAME")
+	v.MustBindEnv("Cache.Valkey.Password", "MONETR_VALKEY_PASSWORD")
+	v.MustBindEnv("Cache.Valkey.TLS", "MONETR_VALKEY_TLS")
+	v.MustBindEnv("Cache.Valkey.InsecureSkipVerify", "MONETR_VALKEY_INSECURE_SKIP_VERIFY")
+	v.MustBindEnv("Cache.Valkey.CACertificatePath", "MONETR_VALKEY_CA_PATH")
+	v.MustBindEnv("Cache.Valkey.CertificatePath", "MONETR_VALKEY_CERT_PATH")
+	v.MustBindEnv("Cache.Valkey.KeyPath", "MONETR_VALKEY_KEY_PATH")
+
 	v.MustBindEnv("Cors.AllowedOrigins", "MONETR_CORS_ALLOWED_ORIGINS")
 	v.MustBindEnv("Cors.Debug", "MONETR_CORS_DEBUG")
+
 	v.MustBindEnv("Email.Enabled", "MONETR_EMAIL_ENABLED")
 	v.MustBindEnv("Email.Domain", "MONETR_EMAIL_DOMAIN")
 	v.MustBindEnv("Email.Verification.Enabled", "MONETR_EMAIL_VERIFICATION_ENABLED")

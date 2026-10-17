@@ -20,6 +20,7 @@ The root structure of this YAML file is:
 environment: "<string>"
 allowSignUp: <true|false>
 
+cache: { ... }         # Cache configuration
 cors: { ... }          # CORS configuration
 database: { ... }      # Database configuration
 email: { ... }         # Email/SMTP configuration
@@ -59,6 +60,8 @@ Below is a complete config file example with default values set or with values c
 environment: ""
 allowSignUp: true
 
+cache:
+  kind: memory
 email:
   enabled: false
   domain: "" # Does not need to match your `externalUrl` domain.
@@ -136,6 +139,12 @@ storage:
 
 Each of the sub-configurations noted above are documented in more detail in the following guides:
 
+<Cards.Card
+  icon={<Terminal />}
+  title="Cache"
+  description="Configure cache for improved performance and shared application state."
+  href="/documentation/configure/cache"
+/>
 <Cards.Card
   icon={<Network />}
   title="CORS"
