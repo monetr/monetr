@@ -378,6 +378,17 @@ func LoadConfigurationEx(v *viper.Viper) (config Configuration) {
 		config.Database.PostgreSQL.Port = 5432
 	}
 
+	// If the value for cache kind was manually specified then it must be one of
+	// the valid kinds. Technically redis is accepted in the cache code, but is
+	// used as a migration path
+	if v.InConfig("cache.kind") {
+		switch strings.ToLower(config.Cache.Kind) {
+		case "valkey", "memory":
+		default:
+			panic(fmt.Sprintf("invalid value for cache.kind: %s", config.Cache.Kind))
+		}
+	}
+
 	privateKey, err := util.ExpandHomePath(config.Security.PrivateKey)
 	if err != nil {
 		panic(err)
@@ -390,6 +401,7 @@ func LoadConfigurationEx(v *viper.Viper) (config Configuration) {
 func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Environment", "development")
 	v.SetDefault("AllowSignUp", true)
+	v.SetDefault("Cache.Memory.MaxKeys", 128)
 	v.SetDefault("Email.ForgotPassword.TokenLifetime", 10*time.Minute)
 	v.SetDefault("Email.Verification.TokenLifetime", 10*time.Minute)
 	v.SetDefault("Logging.Format", "text")

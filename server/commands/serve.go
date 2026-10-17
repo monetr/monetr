@@ -222,21 +222,25 @@ func ServeCommand(parent *cobra.Command) {
 			}
 			defer db.Close()
 
-			redisController, err := cache.NewValkeyController(log, configuration.Redis)
-			if err != nil {
-				log.Error("failed to create redis cache", "err", err)
-				return err
-			}
-			defer redisController.Close()
-
-			redisCache := cache.NewValkeyCacheOld(log, redisController.Pool())
-
 			// These read their values when prometheus scrapes us, so they only need
 			// to be registered once here.
 			prometheus.MustRegister(
 				collectors.NewDBStatsCollector(db.DB, metrics.Namespace),
-				cache.NewPoolCollector(redisController.Pool()),
+				// Note, redis/valkey used to register their collector here, but the new
+				// code registers it in the client wrapper itself
 			)
+
+			dataCache, err := cache.GetCache(
+				cmd.Context(),
+				log,
+				clock,
+				configuration,
+			)
+			if err != nil {
+				log.Error("failed to create cache", "err", err)
+				return err
+			}
+			defer dataCache.Close()
 
 			fileStorage, err := storage.GetStorage(log, configuration)
 			if err != nil {
@@ -253,7 +257,7 @@ func ServeCommand(parent *cobra.Command) {
 			{ // Create the accounts repository that will be used by many things.
 				accountsRepo = repository.NewAccountRepository(
 					log,
-					redisCache,
+					dataCache,
 					db,
 				)
 			}
@@ -265,7 +269,7 @@ func ServeCommand(parent *cobra.Command) {
 				stripe = stripe_helper.NewStripeHelperWithCache(
 					log,
 					configuration.Stripe.APIKey,
-					redisCache,
+					dataCache,
 				)
 
 				bill = billing.NewBilling(
@@ -296,7 +300,7 @@ func ServeCommand(parent *cobra.Command) {
 			plaidInstitutions := platypus.NewPlaidInstitutionWrapper(
 				log,
 				plaidClient,
-				redisCache,
+				dataCache,
 			)
 
 			plaidWebhooks := platypus.NewInMemoryWebhookVerification(
@@ -316,7 +320,7 @@ func ServeCommand(parent *cobra.Command) {
 			powSecret := powchallenge.DeriveSecret(privateKey.Seed())
 			challenger := powchallenge.NewChallenger(
 				log,
-				redisCache,
+				dataCache,
 				clock,
 				powSecret,
 				configuration.ProofOfWork.Difficulty,
@@ -366,7 +370,7 @@ func ServeCommand(parent *cobra.Command) {
 				&controller.Controller{
 					Accounts:                 accountsRepo,
 					Billing:                  bill,
-					Cache:                    redisCache,
+					Cache:                    dataCache,
 					Challenger:               challenger,
 					ClientTokens:             clientTokens,
 					Clock:                    clock,

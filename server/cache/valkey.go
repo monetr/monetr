@@ -17,6 +17,7 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/vmihailenco/msgpack/v5"
 )
 
@@ -230,6 +231,8 @@ func NewValkeyCache(
 		log.ErrorContext(ctx, "failed to wait for valkey to be available", "err", err)
 		return nil, err
 	}
+
+	prometheus.MustRegister(NewPoolCollector(cache.client))
 
 	log.DebugContext(ctx, "successfully setup valkey pool")
 

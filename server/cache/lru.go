@@ -10,6 +10,7 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/hashicorp/golang-lru/v2/expirable"
+	"github.com/monetr/monetr/server/config"
 	"github.com/pkg/errors"
 	"github.com/vmihailenco/msgpack/v5"
 )
@@ -26,13 +27,17 @@ type lruCache struct {
 	lru   *expirable.LRU[string, *lruCacheEntry]
 }
 
-func NewLRUCache(log *slog.Logger, clock clock.Clock) Cache {
+func NewLRUCache(
+	log *slog.Logger,
+	clock clock.Clock,
+	conf config.MemoryCache,
+) Cache {
 	return &lruCache{
 		log:   log,
 		clock: clock,
 		cas:   sync.RWMutex{},
 		// Basically gives us a max TTL of 1 hour regardless.
-		lru: expirable.NewLRU[string, *lruCacheEntry](128, nil, time.Hour),
+		lru: expirable.NewLRU[string, *lruCacheEntry](conf.MaxKeys, nil, time.Hour),
 	}
 }
 

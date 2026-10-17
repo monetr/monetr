@@ -45,17 +45,26 @@ func GetCache(
 			"Config warning! cache.kind is unset, monetr will fallback to the redis configuration for now but in a future update will default to an in memory cache if none is configured",
 			"documentation", "https://monetr.app/documentation/configure/cache",
 		)
-		//
 		if configuration.Redis.Enabled {
 			// Use the deprecated value to signal that it is the old config
 			kind = "redis"
+			// If redis is enabled then we will use the configuration from the old
+			// config for now. As we get further along and move to deprecate the redis
+			// configuration block, this will stop working and instead user's will
+			// encounter an error or we will fall back to in memory caching
+			configuration.Cache.Valkey.Address = configuration.Redis.Address
+			configuration.Cache.Valkey.Port = configuration.Redis.Port
+			configuration.Cache.Valkey.Database = configuration.Redis.Database
+			configuration.Cache.Valkey.Username = configuration.Redis.Username
+			configuration.Cache.Valkey.Password = configuration.Redis.Password
+			configuration.Cache.Valkey.TLS = configuration.Redis.TLS
+			configuration.Cache.Valkey.InsecureSkipVerify = configuration.Redis.InsecureSkipVerify
+			configuration.Cache.Valkey.CACertificatePath = configuration.Redis.CACertificatePath
+			configuration.Cache.Valkey.KeyPath = configuration.Redis.KeyPath
+			configuration.Cache.Valkey.CertificatePath = configuration.Redis.CertificatePath
 		} else {
 			kind = "memory"
 		}
-	}
-
-	if !configuration.Redis.Enabled == false {
-
 	}
 
 	switch strings.ToLower(configuration.Cache.Kind) {
@@ -64,10 +73,11 @@ func GetCache(
 			"Config warning! redis.enabled is true and the config has not been migrated to use cache.valkey instead!",
 			"documentation", "https://monetr.app/documentation/configure/cache",
 		)
+		fallthrough
 	case "valkey":
-
+		return NewValkeyCache(ctx, log, configuration.Cache.Valkey)
 	case "memory":
-		return NewLRUCache(log, clock), nil
+		return NewLRUCache(log, clock, configuration.Cache.Memory), nil
 	default:
 		return nil, errors.Errorf("invalid cache kind configured: %s", kind)
 	}
