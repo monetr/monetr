@@ -4,11 +4,12 @@ import (
 	"context"
 	"time"
 
+	"log/slog"
+
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
-	"log/slog"
 )
 
 type FundingEvent struct {
@@ -24,10 +25,27 @@ var (
 )
 
 type FundingInstructions interface {
-	GetNFundingEventsAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) ([]FundingEvent, error)
-	GetNumberOfFundingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) (int64, error)
-	GetNextFundingEventAfter(ctx context.Context, input time.Time, timezone *time.Location) (FundingEvent, error)
-	GetFundingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) ([]FundingEvent, error)
+	GetNFundingEventsAfter(
+		ctx context.Context,
+		n int,
+		input time.Time,
+		timezone *time.Location,
+	) ([]FundingEvent, error)
+	GetNumberOfFundingEventsBetween(
+		ctx context.Context,
+		start, end time.Time,
+		timezone *time.Location,
+	) (int64, error)
+	GetNextFundingEventAfter(
+		ctx context.Context,
+		input time.Time,
+		timezone *time.Location,
+	) (FundingEvent, error)
+	GetFundingEventsBetween(
+		ctx context.Context,
+		start, end time.Time,
+		timezone *time.Location,
+	) ([]FundingEvent, error)
 }
 
 type fundingScheduleBase struct {
@@ -182,10 +200,10 @@ func (f *fundingScheduleBase) GetFundingEventsBetween(
 	end time.Time,
 	timezone *time.Location,
 ) ([]FundingEvent, error) {
-	rule := f.fundingSchedule.RuleSet.Set
-	// Make sure that the rule is using the timezone of the dates provided. This is an easy way to force that.
-	// We also need to truncate the hours on the start time. To make sure that we are operating relative to
-	// midnight.
+	rule := f.fundingSchedule.RuleSet.Clone()
+	// Make sure that the rule is using the timezone of the dates provided. This
+	// is an easy way to force that. We also need to truncate the hours on the
+	// start time. To make sure that we are operating relative to midnight.
 	rule.DTStart(rule.GetDTStart().In(timezone))
 
 	// TODO Technically we should add 2 days to the "end" here if exclude weekend

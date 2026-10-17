@@ -51,7 +51,12 @@ func TestSpending_GetProgressAmount(t *testing.T) {
 }
 
 // Same as testutils.NewRuleSet because of cyclical imports.
-func RuleToSet(t *testing.T, timezone *time.Location, ruleString string, potentialNow ...time.Time) *RuleSet {
+func RuleToSet(
+	t *testing.T,
+	timezone *time.Location,
+	ruleString string,
+	potentialNow ...time.Time,
+) *RuleSet {
 	rule, err := rrule.StrToRRule(ruleString)
 	require.NoError(t, err, "must be able to parse rule string")
 
