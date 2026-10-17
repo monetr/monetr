@@ -232,7 +232,16 @@ func NewValkeyCache(
 		return nil, err
 	}
 
-	prometheus.MustRegister(NewPoolCollector(cache.client))
+	if err := prometheus.Register(NewPoolCollector(cache.client)); err != nil {
+		var already prometheus.AlreadyRegisteredError
+		if !errors.As(err, &already) {
+			return nil, errors.Wrap(err, "failed to register valkey pool metrics")
+		}
+		log.WarnContext(ctx,
+			"valkey pool metrics collector could not be registered, there might be missing metrics!",
+			"err", err,
+		)
+	}
 
 	log.DebugContext(ctx, "successfully setup valkey pool")
 

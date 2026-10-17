@@ -13,7 +13,6 @@ func DevelopmentCommand(parent *cobra.Command) {
 		},
 	}
 
-	developmentCacheFlush(developmentCommand)
 	developmentCleanPlaid(developmentCommand)
 	developmentCleanStripe(developmentCommand)
 
