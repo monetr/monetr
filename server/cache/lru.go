@@ -81,9 +81,14 @@ func (l *lruCache) CompareAndSwap(
 		subtle.ConstantTimeCompare(value.Data, expected) == 1 {
 		// If the current value matches then overwrite it with the new value
 		// TODO HAndle the evicted return value?
+		expiration := value.Expiration
+		// If no TTL is specified then use the TTL of the original entry
+		if ttl > 0 {
+			expiration = l.clock.Now().Add(ttl)
+		}
 		l.lru.Add(key, &lruCacheEntry{
 			Data:       next,
-			Expiration: l.clock.Now().Add(ttl),
+			Expiration: expiration,
 		})
 		span.SetData("cache.swapped", true)
 		recordOperation("compare_and_swap", "swapped", start)
