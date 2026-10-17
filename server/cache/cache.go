@@ -41,10 +41,6 @@ func GetCache(
 	// redis config
 	kind := configuration.Cache.Kind
 	if kind == "" {
-		log.WarnContext(ctx,
-			"Config warning! cache.kind is unset, monetr will fallback to the redis configuration for now but in a future update will default to an in memory cache if none is configured",
-			"documentation", "https://monetr.app/documentation/configure/cache",
-		)
 		if configuration.Redis.Enabled {
 			// Use the deprecated value to signal that it is the old config
 			kind = "redis"
@@ -63,11 +59,15 @@ func GetCache(
 			configuration.Cache.Valkey.KeyPath = configuration.Redis.KeyPath
 			configuration.Cache.Valkey.CertificatePath = configuration.Redis.CertificatePath
 		} else {
+			log.WarnContext(ctx,
+				"Config warning! cache.kind is unset and redis is not enabled, monetr will use an in memory cache. Set cache.kind to memory or valkey to remove this warning",
+				"documentation", "https://monetr.app/documentation/configure/cache",
+			)
 			kind = "memory"
 		}
 	}
 
-	switch strings.ToLower(configuration.Cache.Kind) {
+	switch strings.ToLower(kind) {
 	case "redis":
 		log.WarnContext(ctx,
 			"Config warning! redis.enabled is true and the config has not been migrated to use cache.valkey instead!",

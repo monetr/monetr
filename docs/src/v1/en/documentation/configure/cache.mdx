@@ -61,7 +61,7 @@ monetr distributes for self-hosted installations.
 ```yaml title="config.yaml"
 cache:
   kind: "valkey"
-  redis:
+  valkey:
     address: "localhost"
     port: 6379
     database: 0
@@ -76,7 +76,6 @@ cache:
 
 | **Name**             | **Type** | **Default** | **Description**                                                                                                                                                                                       |
 | ---                  | ---      | ---         | ---                                                                                                                                                                                                   |
-| `enabled`            | Boolean  | `false`     | Enable a dedicated cache server, if this is set to `false` then an embedded miniredis instance is used instead.                                                                                       |
 | `address`            | String   |             | The IP, or DNS resolvable address of your Redis-compatible cache server.                                                                                                                              |
 | `port`               | Number   | `6379`      | Port that the Redis-compatible cache server can be reached at.                                                                                                                                        |
 | `database`           | Number   | `0`         | Database number that you want monetr to use for caching. Defaults to `0`.                                                                                                                             |
@@ -90,8 +89,7 @@ cache:
 
 :::info
 monetr watches the certificate files for changes, so certificates can be rotated without restarting the server. New
-connections to the cache server will use the new certificates right away. The TLS settings are ignored when `enabled` is
-`false`.
+connections to the cache server will use the new certificates right away.
 :::
 
 The following environment variables map to the following configuration file fields. Each field is documented below.

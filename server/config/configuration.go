@@ -383,7 +383,7 @@ func LoadConfigurationEx(v *viper.Viper) (config Configuration) {
 	// used as a migration path
 	if v.InConfig("cache.kind") {
 		switch strings.ToLower(config.Cache.Kind) {
-		case "valkey", "memory":
+		case "", "valkey", "memory": // Blank is valid too for now
 		default:
 			panic(fmt.Sprintf("invalid value for cache.kind: %s", config.Cache.Kind))
 		}
@@ -402,6 +402,8 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Environment", "development")
 	v.SetDefault("AllowSignUp", true)
 	v.SetDefault("Cache.Memory.MaxKeys", 128)
+	v.SetDefault("Cache.Valkey.Port", 6379)
+	v.SetDefault("Cache.Valkey.Database", 0)
 	v.SetDefault("Email.ForgotPassword.TokenLifetime", 10*time.Minute)
 	v.SetDefault("Email.Verification.TokenLifetime", 10*time.Minute)
 	v.SetDefault("Logging.Format", "text")
