@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/alicebob/miniredis/v2"
-	"github.com/gomodule/redigo/redis"
 	"github.com/monetr/monetr/server/cache"
+	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -17,25 +17,9 @@ var (
 	TestValue = []byte("Hello World!")
 )
 
-func NewTestRedisPool(t *testing.T) *redis.Pool {
-	miniRedis := miniredis.NewMiniRedis()
-	require.NoError(t, miniRedis.Start())
-	redisPool := &redis.Pool{
-		Dial: func() (redis.Conn, error) {
-			return redis.Dial("tcp", miniRedis.Server().Addr().String())
-		},
-	}
-
-	t.Cleanup(func() {
-		require.NoError(t, redisPool.Close(), "must close miniredis pool successfully")
-		miniRedis.Close()
-	})
-
-	return redisPool
-}
-
 func NewTestCache(t *testing.T) cache.Cache {
-	return cache.NewValkeyCacheOld(testutils.GetLog(t), NewTestRedisPool(t))
+	valkeyCache, _ := NewTestCacheWithRedis(t)
+	return valkeyCache
 }
 
 // NewTestCacheWithRedis is like NewTestCache but it also hands back the
@@ -45,18 +29,20 @@ func NewTestCache(t *testing.T) cache.Cache {
 func NewTestCacheWithRedis(t *testing.T) (cache.Cache, *miniredis.Miniredis) {
 	miniRedis := miniredis.NewMiniRedis()
 	require.NoError(t, miniRedis.Start())
-	redisPool := &redis.Pool{
-		Dial: func() (redis.Conn, error) {
-			return redis.Dial("tcp", miniRedis.Server().Addr().String())
-		},
-	}
+
+	valkeyCache, err := cache.NewValkeyCache(t.Context(), testutils.GetLog(t), config.Valkey{
+		Address:  miniRedis.Server().Addr().IP.String(),
+		Port:     miniRedis.Server().Addr().Port,
+		Database: 0,
+	})
+	require.NoError(t, err, "must be able to setup miniredis/valkey for test")
 
 	t.Cleanup(func() {
-		require.NoError(t, redisPool.Close(), "must close miniredis pool successfully")
+		require.NoError(t, valkeyCache.Close(), "must close valkey cache successfully")
 		miniRedis.Close()
 	})
 
-	return cache.NewValkeyCacheOld(testutils.GetLog(t), redisPool), miniRedis
+	return valkeyCache, miniRedis
 }
 
 func TestRedisCache_Set(t *testing.T) {
