@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.20.0](https://github.com/monetr/monetr/compare/v1.19.0...v1.20.0) (2026-10-17)
+
+
+### Features
+
+* Allow creating an expense from a transaction in the select spending dropdown/drawer ([05a3429](https://github.com/monetr/monetr/commit/05a34294e69ef060e45fc3963fb330543ded072d))
+* Settings pages have been redesigned to make them a bit more consistent and pleasant to use, as well as making them more maintainable going forward. ([6107260](https://github.com/monetr/monetr/commit/6107260a3469da1ee0031b703b8a3824d48a4797))
+* Suggest expense for recurring transactions in the spending dropdown/drawer ([05a3429](https://github.com/monetr/monetr/commit/05a34294e69ef060e45fc3963fb330543ded072d))
+* **ui:** Redesigned the settings pages ([#3637](https://github.com/monetr/monetr/issues/3637)) ([6107260](https://github.com/monetr/monetr/commit/6107260a3469da1ee0031b703b8a3824d48a4797))
+* **ui:** Spending recommendations ([#3643](https://github.com/monetr/monetr/issues/3643)) ([05a3429](https://github.com/monetr/monetr/commit/05a34294e69ef060e45fc3963fb330543ded072d))
+
+
+### Bug Fixes
+
+* **ui:** Fixed issue with models showing wrong on small screens ([96f6077](https://github.com/monetr/monetr/commit/96f607757e9dae0c5527a9f40baf743dddedbd3b))
+
+
+### Dependencies
+
+* **api:** update golang.org/x ([#3650](https://github.com/monetr/monetr/issues/3650)) ([3e6a6c6](https://github.com/monetr/monetr/commit/3e6a6c664954d177059f99b5ff9f63dad8e483bf))
+* **api:** update module github.com/getsentry/sentry-go to v0.50.0 ([#3642](https://github.com/monetr/monetr/issues/3642)) ([9bd46d4](https://github.com/monetr/monetr/commit/9bd46d4bd5274aa08f49bc2a55b4f9c73c0c2b2a))
+* **api:** update module github.com/prometheus/client_golang to v1.25.0 ([#3645](https://github.com/monetr/monetr/issues/3645)) ([c02bbf3](https://github.com/monetr/monetr/commit/c02bbf3404f4c4506e93c7f5894fd5f560fad0f9))
+* **api:** update module golang.org/x/net to v0.60.0 ([#3646](https://github.com/monetr/monetr/issues/3646)) ([d34d00f](https://github.com/monetr/monetr/commit/d34d00fbaeebf4a84cc1c3c35f475bc193ee3b5e))
+* **ui:** update dependency @tanstack/react-virtual to v3.14.14 ([#3649](https://github.com/monetr/monetr/issues/3649)) ([6dfec68](https://github.com/monetr/monetr/commit/6dfec682a630613d1e83d61a8efb21b339b49b04))
+* **ui:** update dependency pnpm to v12.11.1 ([#3648](https://github.com/monetr/monetr/issues/3648)) ([3dbfa83](https://github.com/monetr/monetr/commit/3dbfa83df7a46b67f46e25d8531a29f7f7675eac))
+* **ui:** update dependency pnpm to v12.11.2 ([#3653](https://github.com/monetr/monetr/issues/3653)) ([f66056e](https://github.com/monetr/monetr/commit/f66056eeb1de316ed6927275c72d3d76317b12f6))
+* **ui:** update dependency react-dropzone to v20.1.3 ([#3654](https://github.com/monetr/monetr/issues/3654)) ([08728e3](https://github.com/monetr/monetr/commit/08728e39c549f4db528f86acdd6ce48a5b852fc1))
+
 ## [1.19.0](https://github.com/monetr/monetr/compare/v1.18.1...v1.19.0) (2026-10-14)
 
 
