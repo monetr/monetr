@@ -46,6 +46,7 @@ type Configuration struct {
 	AllowSignUp   bool          `yaml:"allowSignUp"`
 	Beta          Beta          `yaml:"beta"`
 	CORS          CORS          `yaml:"cors"`
+	Cache         Cache         `yaml:"cache"`
 	Database      Database      `yaml:"database"`
 	Email         Email         `yaml:"email"`
 	Features      Features      `yaml:"transactionImports"`

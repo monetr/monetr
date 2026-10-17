@@ -1,5 +1,33 @@
 package config
 
+type Cache struct {
+	// Kind can be `memory` or `valkey`, it currently defaults to in-memory
+	Kind   string      `yaml:"kind"`
+	Memory MemoryCache `yaml:"memory"`
+	Valkey Valkey      `yaml:"valkey"`
+}
+
+type MemoryCache struct {
+	// MaxKeys is the most number of entries that monetr will keep in its LRU
+	// cache before evicting items.
+	MaxKeys int `yaml:"maxKeys"`
+}
+
+type Valkey struct {
+	Address  string `yaml:"address"`
+	Port     int    `yaml:"port"`
+	Database int    `yaml:"database"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+	// TLS will enable TLS for the connection to the redis server. TLS is also
+	// used if any of the certificate paths are provided.
+	TLS                bool   `yaml:"tls"`
+	InsecureSkipVerify bool   `yaml:"insecureSkipVerify"`
+	CACertificatePath  string `yaml:"caCertificatePath"`
+	KeyPath            string `yaml:"keyPath"`
+	CertificatePath    string `yaml:"certificatePath"`
+}
+
 // Redis defines the config used to connect to a redis for our worker pool. If
 // these are left blank or default then we will instead use a mock redis pool
 // that is internal only. This is fine for single instance deployments, but

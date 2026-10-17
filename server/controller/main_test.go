@@ -190,7 +190,7 @@ func newTestApplication(
 	queue := mockgen.NewMockEnqueuer(mockController)
 	email := mockgen.NewMockEmailCommunication(mockController)
 
-	cachePool := cache.NewCache(log, redisPool)
+	cachePool := cache.NewValkeyCache(log, redisPool)
 	accountsRepo := repository.NewAccountRepository(log, cachePool, db)
 	stripeHelper := stripe_helper.NewStripeHelper(log, gofakeit.UUID())
 	pubSub := pubsub.NewPostgresPubSub(log, db)

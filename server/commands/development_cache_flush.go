@@ -21,7 +21,7 @@ func developmentCacheFlush(parent *cobra.Command) {
 				log.Info("config file loaded", "config", configFileName)
 			}
 
-			redisController, err := cache.NewRedisCache(log, configuration.Redis)
+			redisController, err := cache.NewValkeyController(log, configuration.Redis)
 			if err != nil {
 				log.Error("failed to create redis cache", "err", err)
 				return err

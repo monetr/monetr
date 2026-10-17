@@ -33,5 +33,5 @@ func GetRedisPool(t *testing.T) *redis.Pool {
 func GetCache(t *testing.T) cache.Cache {
 	log := GetLog(t)
 	redisPool := GetRedisPool(t)
-	return cache.NewCache(log, redisPool)
+	return cache.NewValkeyCache(log, redisPool)
 }
