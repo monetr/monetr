@@ -151,15 +151,89 @@ var (
 )
 
 type valkeyCache struct {
-	log    *slog.Logger
-	client *redis.Pool
+	log          *slog.Logger
+	client       *redis.Pool
+	certificates certs.Source
 }
 
-func NewValkeyCache(log *slog.Logger, client *redis.Pool) Cache {
+// NewValkeyCacheOld
+// Deprecated: Use [NewValkeyCache] instead!
+func NewValkeyCacheOld(log *slog.Logger, client *redis.Pool) Cache {
 	return &valkeyCache{
 		log:    log,
 		client: client,
 	}
+}
+
+func NewValkeyCache(
+	ctx context.Context,
+	log *slog.Logger,
+	conf config.Valkey,
+) (Cache, error) {
+	cache := &valkeyCache{
+		log: log,
+	}
+	var address string
+	var err error
+	dialOptions := []redis.DialOption{
+		redis.DialUsername(conf.Username),
+		redis.DialPassword(conf.Password),
+		redis.DialDatabase(conf.Database),
+	}
+
+	address = net.JoinHostPort(conf.Address, strconv.Itoa(conf.Port))
+	log.DebugContext(ctx, "connecting to valkey", "address", address)
+
+	// If no CA certificate is provided then the server certificate is verified
+	// against the system certificate authorities instead.
+	if conf.TLS ||
+		conf.CACertificatePath != "" ||
+		conf.CertificatePath != "" ||
+		conf.KeyPath != "" {
+		cache.certificates, err = certs.NewFileSource(log, certs.Options{
+			CACertificatePath:  conf.CACertificatePath,
+			CertificatePath:    conf.CertificatePath,
+			KeyPath:            conf.KeyPath,
+			ServerName:         conf.Address,
+			InsecureSkipVerify: conf.InsecureSkipVerify,
+		})
+		if err != nil {
+			log.ErrorContext(ctx, "failed to load valkey TLS certificates", "err", err)
+			return nil, errors.Wrap(err, "failed to load valkey TLS certificates")
+		}
+		// The certificates are watched for the lifetime of the controller, new
+		// connections will pick up rotated certificates without swapping the TLS
+		// config.
+		if err = cache.certificates.Start(); err != nil {
+			return nil, errors.Wrap(err, "failed to watch valkey TLS certificates")
+		}
+
+		dialOptions = append(dialOptions,
+			redis.DialUseTLS(true),
+			redis.DialTLSConfig(cache.certificates.ClientConfig()),
+		)
+	}
+
+	// Setup the redis pool for running jobs.
+	cache.client = &redis.Pool{
+		MaxIdle:   10,
+		MaxActive: 50,
+		Dial: func() (redis.Conn, error) {
+			// TODO (elliotcourant) Eventually support other networks besides tcp? Can
+			// valkey even run on a unix socket?
+			return redis.Dial("tcp", address, dialOptions...)
+		},
+	}
+
+	// This will try to ping valkey to make sure its up and running.
+	if err = waitForRedis(log, 10, cache.client); err != nil {
+		log.ErrorContext(ctx, "failed to wait for valkey to be available", "err", err)
+		return nil, err
+	}
+
+	log.DebugContext(ctx, "successfully setup valkey pool")
+
+	return cache, nil
 }
 
 func (r *valkeyCache) do(ctx context.Context, commandName string, args ...any) (any, error) {
@@ -406,16 +480,9 @@ func (r *valkeyCache) Delete(ctx context.Context, key string) error {
 }
 
 func (r *valkeyCache) Close() error {
-	r.client.Close()
-	// err := r.pool.Close()
-	// TODO Implement closing the certs too
-	// if r.mini != nil {
-	// 	r.mini.Close()
-	// }
-	// if r.certificates != nil {
-	// 	r.certificates.Stop()
-	// }
-	return nil
-	// TODO Return errors?
-	// return errors.Wrap(err, "failed to close pool gracefully")
+	err := r.client.Close()
+	if r.certificates != nil {
+		r.certificates.Stop()
+	}
+	return errors.Wrap(err, "failed to close pool gracefully")
 }

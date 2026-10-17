@@ -229,7 +229,7 @@ func ServeCommand(parent *cobra.Command) {
 			}
 			defer redisController.Close()
 
-			redisCache := cache.NewValkeyCache(log, redisController.Pool())
+			redisCache := cache.NewValkeyCacheOld(log, redisController.Pool())
 
 			// These read their values when prometheus scrapes us, so they only need
 			// to be registered once here.

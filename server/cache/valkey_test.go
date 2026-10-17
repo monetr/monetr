@@ -35,7 +35,7 @@ func NewTestRedisPool(t *testing.T) *redis.Pool {
 }
 
 func NewTestCache(t *testing.T) cache.Cache {
-	return cache.NewValkeyCache(testutils.GetLog(t), NewTestRedisPool(t))
+	return cache.NewValkeyCacheOld(testutils.GetLog(t), NewTestRedisPool(t))
 }
 
 // NewTestCacheWithRedis is like NewTestCache but it also hands back the
@@ -56,7 +56,7 @@ func NewTestCacheWithRedis(t *testing.T) (cache.Cache, *miniredis.Miniredis) {
 		miniRedis.Close()
 	})
 
-	return cache.NewValkeyCache(testutils.GetLog(t), redisPool), miniRedis
+	return cache.NewValkeyCacheOld(testutils.GetLog(t), redisPool), miniRedis
 }
 
 func TestRedisCache_Set(t *testing.T) {
