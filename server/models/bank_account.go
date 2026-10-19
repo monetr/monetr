@@ -2,14 +2,8 @@ package models
 
 import (
 	"context"
-	"encoding/json"
-	"io"
 	"time"
 
-	"github.com/monetr/monetr/server/merge"
-	"github.com/monetr/monetr/server/validators"
-	"github.com/monetr/validation"
-	"github.com/pkg/errors"
 	"github.com/uptrace/bun"
 )
 
@@ -22,19 +16,6 @@ const (
 	InvestmentBankAccountType BankAccountType = "investment"
 	OtherBankAccountType      BankAccountType = "other"
 )
-
-func ParseBankAccountType[T string | BankAccountType](input T) BankAccountType {
-	value := BankAccountType(input)
-	switch value {
-	case DepositoryBankAccountType,
-		CreditBankAccountType,
-		LoanBankAccountType,
-		InvestmentBankAccountType:
-		return value
-	default:
-		return OtherBankAccountType
-	}
-}
 
 type BankAccountSubType string
 
@@ -58,26 +39,6 @@ const (
 	OtherBankAccountSubType BankAccountSubType = "other"
 )
 
-func ParseBankAccountSubType[T string | BankAccountSubType](input T) BankAccountSubType {
-	value := BankAccountSubType(input)
-	switch value {
-	case CheckingBankAccountSubType,
-		SavingsBankAccountSubType,
-		HSABankAccountSubType,
-		CDBankAccountSubType,
-		MoneyMarketBankAccountSubType,
-		PayPalBankAccountSubType,
-		PrepaidBankAccountSubType,
-		CashManagementBankAccountSubType,
-		EBTBankAccountSubType,
-		CreditCardBankAccountSubType,
-		AutoBankAccountSubType:
-		return value
-	default:
-		return OtherBankAccountSubType
-	}
-}
-
 type BankAccountStatus string
 
 const (
@@ -85,20 +46,6 @@ const (
 	BankAccountStatusActive   BankAccountStatus = "active"
 	BankAccountStatusInactive BankAccountStatus = "inactive"
 )
-
-// ParseBankAccountStatus takes a string or a BankAccountStatus value and
-// validates it against the known values. If the status is valid then it is
-// returned as a BankAccountStatus. If it is invalid it is returned as
-// UnknownBankAccountStatus.
-func ParseBankAccountStatus[T string | BankAccountStatus](input T) BankAccountStatus {
-	value := BankAccountStatus(input)
-	switch value {
-	case BankAccountStatusActive, BankAccountStatusInactive:
-		return value
-	default:
-		return BankAccountStatusUnknown
-	}
-}
 
 var (
 	_ bun.BeforeAppendModelHook = (*BankAccount)(nil)
@@ -152,98 +99,6 @@ func (o *BankAccount) BeforeAppendModel(ctx context.Context, query bun.Query) er
 		if o.UpdatedAt.IsZero() {
 			o.UpdatedAt = now
 		}
-	}
-
-	return nil
-}
-
-// UpdateValidator returns an array of validation rules that can be used to
-// validate requests to PATCH endpoints.
-func (o *BankAccount) UpdateValidator() []*validation.KeyRules[string] {
-	if o.PlaidBankAccountId != nil {
-		return []*validation.KeyRules[string]{
-			validators.Name(false),
-		}
-	}
-
-	return []*validation.KeyRules[string]{
-		validators.Mask(),
-		validators.Name(validators.Optional),
-		validators.CurrencyCode(validators.Optional),
-		validators.LimitBalance("limitBalance"),
-		validators.Balance("currentBalance"),
-		validators.Balance("availableBalance"),
-		validation.Key(
-			"status",
-			validation.In(
-				string(BankAccountStatusActive),
-				string(BankAccountStatusInactive),
-				string(BankAccountStatusUnknown),
-			).Error("Invalid bank account status"),
-		).Required(validators.Optional),
-		validation.Key(
-			"accountType",
-			validation.In(
-				string(DepositoryBankAccountType),
-				string(CreditBankAccountType),
-				string(LoanBankAccountType),
-				string(InvestmentBankAccountType),
-				string(OtherBankAccountType),
-			).Error("Invalid bank account type"),
-		).Required(validators.Optional),
-		validation.Key(
-			"accountSubType",
-			validation.In(
-				string(CheckingBankAccountSubType),
-				string(SavingsBankAccountSubType),
-				string(HSABankAccountSubType),
-				string(CDBankAccountSubType),
-				string(MoneyMarketBankAccountSubType),
-				string(PayPalBankAccountSubType),
-				string(PrepaidBankAccountSubType),
-				string(CashManagementBankAccountSubType),
-				string(EBTBankAccountSubType),
-				string(CreditCardBankAccountSubType),
-				string(AutoBankAccountSubType),
-				string(OtherBankAccountSubType),
-			).Error("Invalid bank account sub type"),
-		).Required(validators.Optional),
-	}
-}
-
-// UnmarshalRequest consumes a request body and an array of validation rules in
-// order to create an object that can be persisted to the database. For updates,
-// this function should be called on the existing object that is already stored
-// in the database. The provided validators should prevent key or sensitive
-// fields from being overwritten by the client's request body. For creates, the
-// initial object can be left blank; or default values can be specified ahead of
-// calling this function in case some fields are omitted in the intial request.
-func (o *BankAccount) UnmarshalRequest(
-	ctx context.Context,
-	reader io.Reader,
-	validators ...*validation.KeyRules[string],
-) error {
-	rawData := map[string]any{}
-	decoder := json.NewDecoder(reader)
-	decoder.UseNumber()
-	if err := decoder.Decode(&rawData); err != nil {
-		return errors.WithStack(err)
-	}
-
-	if err := validation.ValidateWithContext(
-		ctx,
-		&rawData,
-		validation.Map(
-			validators...,
-		),
-	); err != nil {
-		return err
-	}
-
-	if err := merge.Merge(
-		o, rawData, merge.ErrorOnUnknownField,
-	); err != nil {
-		return errors.Wrap(err, "failed to merge patched data")
 	}
 
 	return nil
