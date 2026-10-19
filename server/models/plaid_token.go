@@ -4,6 +4,7 @@ import (
 	"github.com/uptrace/bun"
 )
 
+// Deprecated: This is stored in secret instead now.
 type PlaidToken struct {
 	bun.BaseModel `bun:"table:plaid_tokens,alias:plaid_token"`
 

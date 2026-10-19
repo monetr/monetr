@@ -365,7 +365,7 @@ func LoadConfigurationEx(v *viper.Viper) (config Configuration) {
 	if !v.InConfig("database.postgresql") {
 		addressDefined := v.InConfig("postgresql.address") ||
 			(config.Database.PostgreSQL != nil && config.Database.PostgreSQL.Address != "")
-		if addressDefined || config.Database.Kind == DatabaseKindPostgreSQL {
+		if addressDefined || config.Database.Kind == "postgresql" {
 			postgresql := config.PostgreSQL
 			config.Database.PostgreSQL = &postgresql
 			config.legacyPostgreSQL = v.InConfig("postgresql")
