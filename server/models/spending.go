@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/util"
 	"github.com/uptrace/bun"
 )
@@ -254,7 +253,10 @@ func calculateNextContribution(
 		// though. We have $5 allocated but between now and the next funding we need
 		// to spend $5. So we cannot take the $5 we currently have into account when
 		// we calculate how much will be needed for the next funding event.
-		amountAfterCurrentSpending := myownsanity.Max(0, currentAmount-(perSpendingAmount*eventsBeforeFirst))
+		amountAfterCurrentSpending := max(
+			0,
+			currentAmount-(perSpendingAmount*eventsBeforeFirst),
+		)
 		// The total amount we need is determined by how many times we will need the
 		// target amount during the next period between funding events multiplied by
 		// how much each spending event costs. If the current spending object is
@@ -265,15 +267,22 @@ func calculateNextContribution(
 		// By taking the min of the amount we will have allocated and the amount
 		// needed. We can safely arrive at a 0 contribution amount when we are
 		// over-allocated.
-		totalContributionAmount = nextSpendingPeriodTotal - myownsanity.Min(amountAfterCurrentSpending, nextSpendingPeriodTotal)
+		totalContributionAmount = nextSpendingPeriodTotal - min(
+			amountAfterCurrentSpending,
+			nextSpendingPeriodTotal,
+		)
 	} else {
 		// Otherwise we can simply look at how much we need vs how much we already
 		// have.
-		amountNeeded := myownsanity.Max(0, perSpendingAmount-currentAmount)
+		amountNeeded := max(0, perSpendingAmount-currentAmount)
 		// And how many times we will have a funding event before our due date.
-		numberOfContributions := fundingSchedule.GetNumberOfContributionsBetween(now, nextRecurrence, timezone)
+		numberOfContributions := fundingSchedule.GetNumberOfContributionsBetween(
+			now,
+			nextRecurrence,
+			timezone,
+		)
 		// Then determine how much we would need at each of those funding events.
-		totalContributionAmount = amountNeeded / myownsanity.Max(1, numberOfContributions)
+		totalContributionAmount = amountNeeded / max(1, numberOfContributions)
 	}
 
 	// Update the spending item with our calculated contribution amount.

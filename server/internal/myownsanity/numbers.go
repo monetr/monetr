@@ -6,6 +6,7 @@ type Number interface {
 	int | int32 | int64
 }
 
+// Deprecated: Use [max] instead!
 func Max[T Number](a, b T) T {
 	if a > b {
 		return a
@@ -14,6 +15,7 @@ func Max[T Number](a, b T) T {
 	return b
 }
 
+// Deprecated: Use [min] instead!
 func Min[T Number](a, b T) T {
 	if a < b {
 		return a
