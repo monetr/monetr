@@ -102,3 +102,26 @@ func (r *repositoryBase) GetLunchFlowBankAccountsByLunchFlowLink(
 
 	return result, nil
 }
+
+// GetAllLunchFlowBankAccountsByLunchFlowLink is the same as
+// [GetLunchFlowBankAccountsByLunchFlowLink] except this function does not
+// exclude deleted items, this is specifically used for matching against what
+// the lunch flow API has versus what we have to prevent duplicates.
+func (r *repositoryBase) GetAllLunchFlowBankAccountsByLunchFlowLink(
+	ctx context.Context, id ID[LunchFlowLink],
+) ([]LunchFlowBankAccount, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	result := make([]LunchFlowBankAccount, 0)
+	err := r.txn.NewSelect().Model(&result).
+		Where(`"lunch_flow_bank_account"."account_id" = ?`, r.AccountId()).
+		Where(`"lunch_flow_bank_account"."lunch_flow_link_id" = ?`, id).
+		Order(`lunch_flow_bank_account_id DESC`).
+		Scan(span.Context(), &result)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve Lunch Flow bank account")
+	}
+
+	return result, nil
+}

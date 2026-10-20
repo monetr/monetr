@@ -296,6 +296,9 @@ type BaseRepository interface {
 	GetLunchFlowBankAccountsByLunchFlowLink(
 		ctx context.Context, id ID[LunchFlowLink],
 	) ([]LunchFlowBankAccount, error)
+	GetAllLunchFlowBankAccountsByLunchFlowLink(
+		ctx context.Context, id ID[LunchFlowLink],
+	) ([]LunchFlowBankAccount, error)
 	GetLunchFlowBankAccount(
 		ctx context.Context,
 		id ID[LunchFlowBankAccount],

@@ -148,7 +148,7 @@ func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx *echo.Context) err
 		)
 	}
 
-	lunchFlowAccounts, err := repo.GetLunchFlowBankAccountsByLunchFlowLink(
+	lunchFlowAccounts, err := repo.GetAllLunchFlowBankAccountsByLunchFlowLink(
 		c.getContext(ctx),
 		link.LunchFlowLinkId,
 	)
@@ -220,7 +220,12 @@ func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx *echo.Context) err
 			// that there is a bug and you should report it via github issues on
 			// monetr. You may be asked to provide additional information upon
 			// reporting this bug!
-			log.ErrorContext(c.getContext(ctx), "multiple Lunch Flow bank accounts found for the same external ID, this should not be possible!", "bug", true, "lunchFlowId", joined.From.Id, "count", len(joined.Join))
+			log.ErrorContext(c.getContext(ctx),
+				"multiple Lunch Flow bank accounts found for the same external ID, this should not be possible!",
+				"bug", true,
+				"lunchFlowId", joined.From.Id,
+				"count", len(joined.Join),
+			)
 			crumbs.IndicateBug(
 				c.getContext(ctx),
 				"Multiple Lunch Flow Bank Accounts found for the same external ID, this should not be possible!",
