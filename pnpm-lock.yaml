@@ -262,7 +262,7 @@ importers:
         version: 3.0.5
       '@types/node':
         specifier: ^24.0.0
-        version: 24.19.1
+        version: 24.19.2
       '@types/react':
         specifier: 19.3.0
         version: 19.3.0
@@ -7614,7 +7614,7 @@ snapshots:
 
   micromark-factory-space@2.0.1:
     dependencies:
-      micromark-util-character: 2.1.0
+      micromark-util-character: 2.1.1
       micromark-util-types: 2.0.2
 
   micromark-factory-title@1.1.0:
