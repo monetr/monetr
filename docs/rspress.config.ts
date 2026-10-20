@@ -1,4 +1,5 @@
 import ogImages from './plugins/ogImages';
+import rehypeImageSize from './plugins/rehypeImageSize';
 import rehypeMathPostProcess from './plugins/rehypeMathPostProcess';
 import trailingSlashRedirects from './plugins/trailingSlashRedirects';
 
@@ -68,7 +69,16 @@ export default defineConfig({
   },
   markdown: {
     remarkPlugins: [remarkMath],
-    rehypePlugins: [rehypeKatex, rehypeMathPostProcess],
+    rehypePlugins: [
+      rehypeKatex,
+      rehypeMathPostProcess,
+      [
+        rehypeImageSize,
+        {
+          publicDir: path.join(__dirname, 'src/public'),
+        },
+      ],
+    ],
     shiki: {
       langs: [
         {
@@ -89,18 +99,24 @@ export default defineConfig({
     },
   },
   plugins: [
-    pluginSitemap({ siteUrl: 'https://monetr.app' }),
+    pluginSitemap({
+      siteUrl: 'https://monetr.app',
+    }),
     pluginRss({
       siteUrl: 'https://monetr.app',
       // Use RSS 2.0; override the default .rss extension to the more familiar .xml so the feed sits at /rss/blog.xml.
-      output: { type: 'rss' },
+      output: {
+        type: 'rss',
+      },
       feed: {
         id: 'blog',
         test: '/blog/',
         title: 'monetr Blog',
         description: 'Blog posts and announcements from monetr.',
         language: 'en',
-        output: { filename: 'blog.xml' },
+        output: {
+          filename: 'blog.xml',
+        },
         // TODO: channel <link> defaults to siteUrl ("https://monetr.app"); per RSS 2.0 it should point to the HTML page
         // corresponding to the feed ("https://monetr.app/blog"). Override by adding `link` here.
         // TODO: emit <atom:link rel="self">. The feed lib only does so when `feed: '<self URL>'` is set on the channel
@@ -144,7 +160,9 @@ export default defineConfig({
         },
       },
     }),
-    trailingSlashRedirects({ siteUrl: 'https://monetr.app' }),
+    trailingSlashRedirects({
+      siteUrl: 'https://monetr.app',
+    }),
     ogImages(),
     readingTimeDataPlugin,
     mermaid({
