@@ -1,16 +1,10 @@
 package config
 
-type DatabaseKind string
-
-const (
-	DatabaseKindPostgreSQL DatabaseKind = "postgresql"
-)
-
 type Database struct {
 	// Kind is the type of database used for monetr, currently only postgresql is
 	// supported but in the future sqlite will be as well.
-	Kind       DatabaseKind `yaml:"kind"`
-	PostgreSQL *PostgreSQL  `yaml:"postgreSql"`
+	Kind       string      `yaml:"kind"`
+	PostgreSQL *PostgreSQL `yaml:"postgreSql"`
 }
 
 type PostgreSQL struct {
