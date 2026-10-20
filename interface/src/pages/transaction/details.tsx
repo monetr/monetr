@@ -6,14 +6,12 @@ import { useParams } from 'wouter';
 
 import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
-import Flex from '@monetr/interface/components/Flex';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
 import FormSwitch from '@monetr/interface/components/FormSwitch';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import { layoutVariants } from '@monetr/interface/components/Layout';
-import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import MForm from '@monetr/interface/components/MForm';
 import MSelectSpending from '@monetr/interface/components/MSelectSpending';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
@@ -21,7 +19,7 @@ import Select, { type SelectOption } from '@monetr/interface/components/Select';
 import Typography from '@monetr/interface/components/Typography';
 import RemoveTransactionButton from '@monetr/interface/components/transactions/RemoveTransactionButton';
 import SimilarTransactions from '@monetr/interface/components/transactions/SimilarTransactions';
-import TransactionMerchantIcon from '@monetr/interface/components/transactions/TransactionMerchantIcon';
+import TransactionHeader from '@monetr/interface/components/transactions/TransactionHeader';
 import TransactionRecurringCard from '@monetr/interface/components/transactions/TransactionRecurringCard';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
@@ -114,11 +112,9 @@ export default function TransactionDetails(): React.JSX.Element {
           title='Transactions'
         />
         <div className={styles.body}>
+          <TransactionHeader />
           <div className={styles.columns}>
             <div className={styles.column}>
-              <Flex justify='center'>
-                <MerchantIcon name={transaction?.name ?? undefined} />
-              </Flex>
               <FormTextField<TransactionValues>
                 autoComplete='off'
                 className={layoutVariants({ width: 'full' })}
@@ -219,15 +215,9 @@ export default function TransactionDetails(): React.JSX.Element {
         title='Transactions'
       />
       <div className={styles.body}>
+        <TransactionHeader transaction={transaction} />
         <div className={styles.columns}>
           <div className={styles.column}>
-            <Flex justify='center'>
-              <TransactionMerchantIcon
-                name={transaction?.name ?? undefined}
-                pending={transaction.isPending}
-                transactionRecurringId={transaction.transactionRecurringId}
-              />
-            </Flex>
             <FormTextField<TransactionValues>
               autoComplete='off'
               className={layoutVariants({ width: 'full' })}

@@ -367,6 +367,9 @@ svg.lucide {
   --semibold: 600;
   --bold: 700;
 
+  /* Fonts */
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+
   --bank-sidebar-width-static: #{16 * variables.$size};
   --budget-sidebar-width: #{72 * variables.$size};
 }

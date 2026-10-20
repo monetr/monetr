@@ -92,6 +92,29 @@
   white-space: nowrap;
 }
 
+// Long text scrolls sideways on mobile so you can still read the whole thing,
+// there's room for the ellipsis on desktop
+.ellipsisMobileScroll {
+  display: block;
+  min-width: 0px;
+  white-space: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  // Fade out the right edge so it's obvious there's more, the padding lets the
+  // end of the text scroll out of the fade
+  // TODO If monetr ever supports RTL/LTR switching is this going to be a
+  // nightmare?
+  padding-right: 8 * variables.$size;
+  mask-image: linear-gradient(to right, black calc(100% - 8 * variables.$size), transparent);
+
+  @media (min-width: variables.$mediumScreen) {
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    padding-right: 0;
+    mask-image: none;
+  }
+}
+
 .weightNormal {
   font-weight: var(--normal);
 }

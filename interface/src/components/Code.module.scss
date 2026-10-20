@@ -23,7 +23,7 @@
 .code {
   flex: 1;
   flex-shrink: 1;
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-family: var(--mono);
   line-height: normal;
   overflow: hidden;
   align-self: center;

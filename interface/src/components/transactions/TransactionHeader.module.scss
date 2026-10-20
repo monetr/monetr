@@ -1,0 +1,60 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 4.5 * variables.$size;
+  width: 100%;
+}
+
+.icon {
+  position: relative;
+  flex: none;
+}
+
+.heroText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1 * variables.$size;
+  min-width: 0;
+}
+
+// Monospace so it reads like the bank statement, same as the memo on recurring transactions
+.originalName {
+  font-family: var(--mono);
+}
+
+.detailsRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2 * variables.$size;
+  padding-top: 1 * variables.$size;
+}
+
+.details {
+  @include mixins.text-large;
+  color: var(--content-emphasis);
+}
+
+.pendingBadge {
+  @include mixins.text-extra-small;
+  font-weight: var(--semibold);
+  padding-top: 0;
+  padding-right: 2 * variables.$size;
+  padding-bottom: 0;
+  padding-left: 2 * variables.$size;
+  border-radius: var(--border-radius);
+  color: var(--blue);
+  background-color: color-mix(in srgb, var(--blue) 20%, transparent);
+}
+
+.titlePlaceholder {
+  width: 60%;
+}
+
+.detailsPlaceholder {
+  width: 40%;
+}

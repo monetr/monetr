@@ -44,6 +44,7 @@ export const textVariants = cva([styles.root], {
     ellipsis: {
       true: styles.ellipsis,
       false: undefined,
+      mobileScroll: styles.ellipsisMobileScroll,
     },
     size: textSizes,
     weight: textWeights,
