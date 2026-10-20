@@ -378,8 +378,8 @@ importers:
         specifier: 5.104.2
         version: 5.104.2(react@19.3.0)
       '@tanstack/react-virtual':
-        specifier: 3.14.17
-        version: 3.14.17(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        specifier: 3.14.18
+        version: 3.14.18(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       class-variance-authority:
         specifier: 0.7.1
         version: 0.7.1
@@ -1690,14 +1690,14 @@ packages:
     peerDependencies:
       react: ^18 || ^19
 
-  '@tanstack/react-virtual@3.14.17':
-    resolution: {integrity: sha512-b7b5LwydgQAWcsAWEZyd3iZkN5/QcC6S0K5E1zNheyFoSZl7E78foepGeDHlX2+JuXilA+VIGGFsUYPFddOrig==}
+  '@tanstack/react-virtual@3.14.18':
+    resolution: {integrity: sha512-zuSuxQTfeLhvdS0LOi1MjQ/FrG4MVeVT2w+Iy33fviGFqjpWV9kbyNQOrNJXckyO0iNko2NlW3TaThcg2Cz9qA==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
-  '@tanstack/virtual-core@3.19.2':
-    resolution: {integrity: sha512-Ch+e8t097FdTfuihfRwBMqz/OfRZKHOH/C213dbM1lXDZ8bv6r330Bcc9k9XCrP6NkoMYy0/ZCHcddOAPihW4w==}
+  '@tanstack/virtual-core@3.19.3':
+    resolution: {integrity: sha512-jPxPiyBaUn+IChc8sfYNKn7B2SCOxYO1mCJrh7U4ldmrMxun19q/iw+jHRYk2cR/KNEjW8ABJrufX41m342Sqw==}
 
   '@testing-library/dom@10.4.0':
     resolution: {integrity: sha512-pemlzrSESWbdAloYml3bAJMEfNh1Z7EduzqPKprCH5S341frlpYnUEW0H72dLxa6IsYr+mPno20GiSm+h9dEdQ==}
@@ -1811,9 +1811,6 @@ packages:
 
   '@types/nlcst@2.0.3':
     resolution: {integrity: sha512-vSYNSDe6Ix3q+6Z7ri9lyWqgGhJTmzRjZRqyq15N0Z/1/UnVsno9G/N40NBijoYx2seFDIl0+B2mgAb9mezUCA==}
-
-  '@types/node@24.19.1':
-    resolution: {integrity: sha512-aS3/DG0oM05K0RIXXP+hKjinGG5IgSSVGzswZxW3O0sS3pH4/fycXundUC9XsszgKCk4gHXylTEK6hyFxVxnoQ==}
 
   '@types/node@24.19.2':
     resolution: {integrity: sha512-93d49wCWJkCyN87MxLpNN6KXPCwFw7bVUg79mGUV1OS40JGWwVCr8n61DXCSqz7CV6/VfPkb7xec7uP2M+QHWQ==}
@@ -5677,13 +5674,13 @@ snapshots:
       '@tanstack/query-core': 5.104.2
       react: 19.3.0
 
-  '@tanstack/react-virtual@3.14.17(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
+  '@tanstack/react-virtual@3.14.18(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
     dependencies:
-      '@tanstack/virtual-core': 3.19.2
+      '@tanstack/virtual-core': 3.19.3
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
 
-  '@tanstack/virtual-core@3.19.2': {}
+  '@tanstack/virtual-core@3.19.3': {}
 
   '@testing-library/dom@10.4.0':
     dependencies:
@@ -5815,10 +5812,6 @@ snapshots:
   '@types/nlcst@2.0.3':
     dependencies:
       '@types/unist': 3.0.3
-
-  '@types/node@24.19.1':
-    dependencies:
-      undici-types: 7.24.6
 
   '@types/node@24.19.2':
     dependencies:
