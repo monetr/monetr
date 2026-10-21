@@ -25,7 +25,10 @@ export default function TransactionHeader(props: TransactionHeaderProps): React.
         <MerchantIcon size='large' />
         <div className={styles.heroText}>
           <Skeleton className={styles.titlePlaceholder} />
-          <Skeleton className={styles.detailsPlaceholder} />
+          <Skeleton className={styles.originalNamePlaceholder} />
+          <div className={styles.detailsRow}>
+            <Skeleton className={styles.detailsPlaceholder} />
+          </div>
         </div>
       </section>
     );
@@ -43,17 +46,15 @@ export default function TransactionHeader(props: TransactionHeaderProps): React.
         <Typography color='emphasis' component='h1' ellipsis='mobileScroll' size='3xl' weight='bold'>
           {props.transaction.name}
         </Typography>
-        {props.transaction.originalName && (
-          <Typography
-            className={styles.originalName}
-            color='subtle'
-            ellipsis='mobileScroll'
-            size='xs'
-            title={props.transaction.originalName}
-          >
-            {props.transaction.originalName}
-          </Typography>
-        )}
+        <Typography
+          className={styles.originalName}
+          color='subtle'
+          ellipsis='mobileScroll'
+          size='xs'
+          title={props.transaction.originalName}
+        >
+          {props.transaction.originalName}
+        </Typography>
         <div className={styles.detailsRow}>
           <span className={styles.details}>
             <TransactionAmount transaction={props.transaction} />{' '}

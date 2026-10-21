@@ -21,7 +21,8 @@
   min-width: 0;
 }
 
-// Monospace so it reads like the bank statement, same as the memo on recurring transactions
+// Monospace so it reads like the bank statement, same as the memo on recurring
+// transactions
 .originalName {
   font-family: var(--mono);
 }
@@ -51,10 +52,21 @@
   background-color: color-mix(in srgb, var(--blue) 20%, transparent);
 }
 
+// Placeholder heights match the line heights of the text they stand in for so
+// the header doesn't jump once it loads
 .titlePlaceholder {
   width: 60%;
+  height: 9 * variables.$size; // 36px
+}
+
+.originalNamePlaceholder {
+  width: 50%;
+  height: 4 * variables.$size; // 16px
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .detailsPlaceholder {
   width: 40%;
+  height: 7 * variables.$size; // 28px
 }
