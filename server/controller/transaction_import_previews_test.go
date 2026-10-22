@@ -58,7 +58,7 @@ func TestGetTransactionImportPreviewByTransactionImportId(t *testing.T) {
 				OriginalMerchantName: "COFFEE SHOP",
 				IsPending:            false,
 				Source:               TransactionSourceUpload,
-				UploadIdentifier:     myownsanity.Pointer("COFFEE SHOP"),
+				UploadIdentifier:     new("COFFEE SHOP"),
 				CreatedAt:            app.Clock.Now(),
 			})
 		}

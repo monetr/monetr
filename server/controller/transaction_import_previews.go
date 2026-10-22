@@ -3,11 +3,11 @@ package controller
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	. "github.com/monetr/monetr/server/models"
 )
 
-func (c *Controller) getTransactionImportPreviewByTransactionImportId(ctx echo.Context) error {
+func (c *Controller) getTransactionImportPreviewByTransactionImportId(ctx *echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")

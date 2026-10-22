@@ -18,12 +18,13 @@ func (r *repositoryBase) GetTransactionImportPreviewByTransactionImportId(
 	defer span.Finish()
 
 	var item TransactionImportPreview
-	err := r.txn.ModelContext(span.Context(), &item).
+	err := r.txn.NewSelect().
+		Model(&item).
 		Where(`"account_id" = ?`, r.AccountId()).
 		Where(`"bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction_import_id" = ?`, transactionImportId).
 		Limit(1).
-		Select(&item)
+		Scan(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve transaction import preview")
@@ -45,8 +46,10 @@ func (r *repositoryBase) CreateTransactionImportPreview(
 	transactionImportPreview.AccountId = r.AccountId()
 	transactionImportPreview.BankAccountId = bankAccountId
 	transactionImportPreview.CreatedAt = r.clock.Now().UTC()
-	_, err := r.txn.ModelContext(span.Context(), transactionImportPreview).
-		Insert(transactionImportPreview)
+	_, err := r.txn.NewInsert().
+		Model(transactionImportPreview).
+		Returning("*").
+		Exec(span.Context())
 	if err != nil {
 		return errors.Wrap(err, "failed to create transaction import record")
 	}

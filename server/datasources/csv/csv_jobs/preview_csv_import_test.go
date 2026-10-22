@@ -11,7 +11,6 @@ import (
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mockgen"
 	"github.com/monetr/monetr/server/internal/mockqueue"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	. "github.com/monetr/monetr/server/models"
@@ -28,12 +27,13 @@ func GetTransactionImportPreview(
 ) *TransactionImportPreview {
 	db := testutils.GetPgDatabase(t)
 	var preview TransactionImportPreview
-	err := db.ModelContext(t.Context(), &preview).
+	err := db.NewSelect().
+		Model(&preview).
 		Where(`"account_id" = ?`, bankAccount.AccountId).
 		Where(`"bank_account_id" = ?`, bankAccount.BankAccountId).
 		Where(`"transaction_import_id" = ?`, transactionImportId).
 		Limit(1).
-		Select(&preview)
+		Scan(t.Context())
 	require.NoError(t, err, "must be able to find transaction import preview")
 	require.NotEmpty(
 		t,
@@ -79,18 +79,18 @@ func TestPreviewCSVImport(t *testing.T) {
 		// Description. The native single-field IDSpec means the row id will
 		// equal the column value verbatim.
 		existingTransaction := testutils.MustInsert(t, Transaction{
-			AccountId:        bankAccount.AccountId,
-			BankAccountId:    bankAccount.BankAccountId,
-			Amount:           450,
-			Date:             clock.Now(),
-			Name:             "COFFEE SHOP",
-			OriginalName:     "COFFEE SHOP",
-			MerchantName:     "COFFEE SHOP",
+			AccountId:            bankAccount.AccountId,
+			BankAccountId:        bankAccount.BankAccountId,
+			Amount:               450,
+			Date:                 clock.Now(),
+			Name:                 "COFFEE SHOP",
+			OriginalName:         "COFFEE SHOP",
+			MerchantName:         "COFFEE SHOP",
 			OriginalMerchantName: "COFFEE SHOP",
-			IsPending:        false,
-			Source:           TransactionSourceUpload,
-			UploadIdentifier: myownsanity.Pointer("COFFEE SHOP"),
-			CreatedAt:        clock.Now(),
+			IsPending:            false,
+			Source:               TransactionSourceUpload,
+			UploadIdentifier:     new("COFFEE SHOP"),
+			CreatedAt:            clock.Now(),
 		})
 
 		file := testutils.MustInsert(t, File{
