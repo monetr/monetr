@@ -176,7 +176,7 @@ func newTransactionRecurring(
 		RuleSet:              result.RuleSet,
 		First:                first.Date,
 		Last:                 last.Date,
-		Next:                 rule.After(now, false),
+		Next:                 expected,
 		Ended:                ended,
 		Confidence:           result.Best.Confidence,
 		Direction:            result.Direction,

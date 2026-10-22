@@ -85,7 +85,7 @@ func TestDiffTransactionRecurring(t *testing.T) {
 		assert.Equal(t, models.MonthlyWindowType, item.Window, "should be monthly")
 		assert.Equal(t, time.Date(2026, 1, 20, 0, 0, 0, 0, time.UTC), item.First, "first should be the earliest member")
 		assert.Equal(t, time.Date(2026, 3, 20, 0, 0, 0, 0, time.UTC), item.Last, "last should be the latest member")
-		assert.Equal(t, time.Date(2026, 4, 20, 0, 0, 0, 0, time.UTC), item.Next, "next should be the next occurrence after now")
+		assert.Equal(t, time.Date(2026, 4, 20, 0, 0, 0, 0, time.UTC), item.Next, "next should be the next occurrence after the last transaction")
 		assert.False(t, item.Ended, "the next occurrence hasn't happened yet so it hasn't ended")
 		assert.Equal(t, float32(0.9), item.Confidence, "should keep the confidence")
 		assert.Equal(t, map[int64]int{
