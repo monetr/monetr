@@ -1,9 +1,9 @@
 import { rs } from '@rstest/core';
 
 import {
-  COMMIT,
-  COMMIT_MIN_PX,
   clamp,
+  commitFraction,
+  commitMinimum,
   commitThreshold,
   createMotion,
   type Motion,
@@ -11,23 +11,21 @@ import {
   resolveAxis,
   rubber,
   type Sample,
-  SLOP_EDGE,
-  SLOP_PAGE,
+  slopEdge,
+  slopPage,
   swipeBlocked,
-  TIME_STEP,
-  VELOCITY_WINDOW,
+  timeStep,
   velocityOf,
+  velocityWindow,
 } from '@monetr/interface/components/Layout/swipeMotion';
 
-// The integrator runs on requestAnimationFrame and jsdom drives that off real time. Swapping it for a queue lets a
-// test hand the loop an exact frame cadence, which is the only way to prove the physics doesn't depend on one.
+// jsdom runs requestAnimationFrame off of real time. This swaps it for a queue so tests can control every frame.
 interface FrameHarness {
   motion: Motion;
   rendered: Array<number>;
   restCount: () => number;
   errors: Array<unknown>;
-  // Runs `count` frames, each one `delta` ms after the last. Note the first frame after any start() only sets up the
-  // clock, elapsed is 0 so no physics step runs. Tests that care about step counts need count + 1.
+  // The first frame after start() only sets the clock and doesn't step, so tests counting steps need count + 1.
   advance: (count: number, delta?: number) => void;
   pending: () => boolean;
 }
@@ -114,17 +112,17 @@ describe('swipeMotion', () => {
 
     it('will apply the pixel floor on a mid width panel', () => {
       // 0.42 * 100 is 42px which is below the floor, so the floor wins.
-      expect(commitThreshold(100) * 100).toBeCloseTo(COMMIT_MIN_PX, 5);
+      expect(commitThreshold(100) * 100).toBeCloseTo(commitMinimum, 5);
     });
 
     it('will cap the floor rather than make a narrow panel unopenable', () => {
-      // On the 64px rail the floor alone would demand 56 of 64px; the cap pulls that back to ~38px.
+      // On the 64px rail the floor would be 56 of 64px, the cap brings that back to about 38px.
       const threshold = commitThreshold(64);
       expect(threshold).toBeCloseTo(0.6, 5);
       expect(threshold * 64).toBeCloseTo(38.4, 5);
       // Travel past the slop goes from 14.9px to 26.4px.
-      expect(COMMIT * 64 - SLOP_PAGE).toBeCloseTo(14.88, 2);
-      expect(threshold * 64 - SLOP_PAGE).toBeCloseTo(26.4, 2);
+      expect(commitFraction * 64 - slopPage).toBeCloseTo(14.88, 2);
+      expect(threshold * 64 - slopPage).toBeCloseTo(26.4, 2);
     });
 
     it('will not divide by zero on an unmeasured panel', () => {
@@ -134,13 +132,13 @@ describe('swipeMotion', () => {
 
   describe('resolveAxis', () => {
     it('will wait until movement passes the slop', () => {
-      expect(resolveAxis('loose', SLOP_EDGE - 1, 0)).toBeNull();
-      expect(resolveAxis('page', SLOP_PAGE - 1, 0)).toBeNull();
+      expect(resolveAxis('loose', slopEdge - 1, 0)).toBeNull();
+      expect(resolveAxis('page', slopPage - 1, 0)).toBeNull();
     });
 
     it('will use a tighter slop at the edge than out in the page', () => {
       // The same movement arms at the edge but is still undecided out in the page.
-      const dx = (SLOP_EDGE + SLOP_PAGE) / 2;
+      const dx = (slopEdge + slopPage) / 2;
       expect(resolveAxis('loose', dx, 0)).toBe('x');
       expect(resolveAxis('page', dx, 0)).toBeNull();
     });
@@ -185,8 +183,8 @@ describe('swipeMotion', () => {
       // The first sample is way outside the window and would halve the result if we counted it.
       const samples: Array<Sample> = [
         { x: 0, t: 0 },
-        { x: 0, t: VELOCITY_WINDOW * 4 },
-        { x: 50, t: VELOCITY_WINDOW * 4 + 50 },
+        { x: 0, t: velocityWindow * 4 },
+        { x: 50, t: velocityWindow * 4 + 50 },
       ];
       expect(velocityOf(samples)).toBe(1000);
     });
@@ -226,51 +224,47 @@ describe('swipeMotion', () => {
     }
 
     it('will not block a plain anchor', () => {
-      // The `draggable` property is true for every <a href>, so reading the property instead of the attribute would
-      // block the gesture over every list row in the app.
       const root = mount('<a href="/somewhere" id="link">row</a>');
       const link = root.querySelector('#link');
       expect(link).not.toBeNull();
-      expect((link as HTMLAnchorElement).draggable).toBe(true);
-      expect(swipeBlocked(link, root)).toBe(false);
+      expect((link as HTMLAnchorElement).draggable).toBeTruthy();
+      expect(swipeBlocked(link, root)).toBeFalsy();
     });
 
     it('will block an element explicitly marked draggable', () => {
       const root = mount('<div draggable="true" id="target">handle</div>');
-      expect(swipeBlocked(root.querySelector('#target'), root)).toBe(true);
+      expect(swipeBlocked(root.querySelector('#target'), root)).toBeTruthy();
     });
 
     it('will block anything under data-no-swipe', () => {
       const root = mount('<div data-no-swipe><span id="target">nope</span></div>');
-      expect(swipeBlocked(root.querySelector('#target'), root)).toBe(true);
+      expect(swipeBlocked(root.querySelector('#target'), root)).toBeTruthy();
     });
 
     it('will block form controls', () => {
       const root = mount('<input id="text" type="text" /><textarea id="area"></textarea><select id="pick"></select>');
-      expect(swipeBlocked(root.querySelector('#text'), root)).toBe(true);
-      expect(swipeBlocked(root.querySelector('#area'), root)).toBe(true);
-      expect(swipeBlocked(root.querySelector('#pick'), root)).toBe(true);
+      expect(swipeBlocked(root.querySelector('#text'), root)).toBeTruthy();
+      expect(swipeBlocked(root.querySelector('#area'), root)).toBeTruthy();
+      expect(swipeBlocked(root.querySelector('#pick'), root)).toBeTruthy();
     });
 
     it('will block a horizontal scroller', () => {
-      // jsdom reports every element as 0x0, so we have to stub the overflow measurement or this branch is
-      // unreachable.
+      // jsdom reports every element as 0x0, so we need to stub the size.
       const root = mount('<div id="scroller" style="overflow-x: auto"><span id="target">wide</span></div>');
       const scroller = root.querySelector('#scroller');
       expect(scroller).not.toBeNull();
       Object.defineProperty(scroller, 'scrollWidth', { configurable: true, value: 900 });
       Object.defineProperty(scroller, 'clientWidth', { configurable: true, value: 300 });
-      expect(swipeBlocked(root.querySelector('#target'), root)).toBe(true);
+      expect(swipeBlocked(root.querySelector('#target'), root)).toBeTruthy();
     });
 
     it('will not block an element that merely clips its overflow', () => {
-      // Ellipsized text overflows horizontally without being a scroller, and our Typography does this on nearly
-      // every row.
+      // Truncated text overflows without being a scroller, Typography does this on most rows.
       const root = mount('<div id="clipped" style="overflow: hidden"><span id="target">ellipsized</span></div>');
       const clipped = root.querySelector('#clipped');
       Object.defineProperty(clipped, 'scrollWidth', { configurable: true, value: 900 });
       Object.defineProperty(clipped, 'clientWidth', { configurable: true, value: 300 });
-      expect(swipeBlocked(root.querySelector('#target'), root)).toBe(false);
+      expect(swipeBlocked(root.querySelector('#target'), root)).toBeFalsy();
     });
 
     it('will stop walking at the root it was given', () => {
@@ -281,14 +275,13 @@ describe('swipeMotion', () => {
       root.append(target);
       outer.append(root);
       document.body.append(outer);
-      // The blocking attribute is above the root so we should never even look at it.
-      expect(swipeBlocked(target, root)).toBe(false);
+      // The attribute is above the root so it should not be checked.
+      expect(swipeBlocked(target, root)).toBeFalsy();
     });
   });
 
   describe('createMotion', () => {
-    // harness() swaps the global requestAnimationFrame for a manual queue. Restore it from describe level hooks; a
-    // hook registered inside a test body never runs.
+    // harness() replaces requestAnimationFrame, so put it back after each test.
     let originalRaf: typeof globalThis.requestAnimationFrame;
     let originalCancel: typeof globalThis.cancelAnimationFrame;
 
@@ -305,41 +298,39 @@ describe('swipeMotion', () => {
     it('will start at rest and do nothing until asked', () => {
       const world = harness();
       expect(world.motion.location()).toBe(0);
-      expect(world.motion.isRunning()).toBe(false);
-      expect(world.pending()).toBe(false);
+      expect(world.motion.isRunning()).toBeFalsy();
+      expect(world.pending()).toBeFalsy();
     });
 
     it('will converge on the target and land exactly', () => {
       const world = harness();
       world.motion.release(1);
-      expect(world.motion.isRunning()).toBe(true);
+      expect(world.motion.isRunning()).toBeTruthy();
 
       world.advance(200);
 
       expect(world.motion.location()).toBe(1);
       expect(world.motion.target()).toBe(1);
-      expect(world.motion.isRunning()).toBe(false);
+      expect(world.motion.isRunning()).toBeFalsy();
       expect(world.restCount()).toBe(1);
-      // The last thing painted is the exact resting position and not an interpolated guess at it.
       expect(world.rendered.at(-1)).toBe(1);
     });
 
     it('will run the same physics regardless of frame cadence', () => {
-      // Compare at equal simulated time rather than equal frame counts. The time is deliberately 10.5 steps rather
-      // than a whole number, so float residue at a step boundary can't decide how many steps each cadence ran.
+      // Compare at the same simulated time, not the same number of frames. We use 10.5 steps instead of a whole
+      // number, this way floating point error at a step boundary can't change how many steps each one ran.
       const simulated = 10.5;
       const positions = [0.25, 0.5, 0.75, 1.5].map(multiple => {
         const world = harness();
         world.motion.release(1);
-        // The first frame only sets the clock and runs no step, hence the extra one.
-        world.advance(simulated / multiple + 1, TIME_STEP * multiple);
+        world.advance(simulated / multiple + 1, timeStep * multiple);
         return world.motion.location();
       });
 
       for (const position of positions) {
         expect(position).toBeCloseTo(positions[0] ?? 0, 6);
       }
-      // Must still be mid flight, otherwise the cadences would be indistinguishable.
+      // If it already landed then this test wouldn't prove anything.
       expect(positions[0]).toBeGreaterThan(0.5);
       expect(positions[0]).toBeLessThan(0.999);
     });
@@ -347,15 +338,14 @@ describe('swipeMotion', () => {
     it('will interpolate between physics steps rather than jumping', () => {
       const world = harness();
       world.motion.release(1);
-      // The clock frame, then a frame worth one and a half steps. One step runs and half a step is left over in the
-      // accumulator, so the frame we paint sits exactly halfway between the position before the step and after it.
+      // The clock frame, then a frame worth 1.5 steps. One step runs and half a step is left over, so we should paint
+      // halfway between the last two steps.
       world.advance(1);
-      world.advance(1, TIME_STEP * 1.5);
+      world.advance(1, timeStep * 1.5);
 
       const painted = world.rendered.at(-1) ?? 0;
       const physics = world.motion.location();
       expect(physics).toBeGreaterThan(0);
-      // Painting the raw physics position instead would put this exactly on `physics`.
       expect(painted).toBeCloseTo(physics / 2, 10);
       expect(painted).toBeLessThan(physics);
     });
@@ -363,22 +353,19 @@ describe('swipeMotion', () => {
     it('will not owe several seconds of physics after a long stall', () => {
       const stalled = harness();
       stalled.motion.release(1);
-      // A clock frame, then one frame ten seconds later. That second frame owes 600 steps and MAX_CATCHUP caps how
-      // many it is allowed to actually run.
+      // A clock frame, then one frame ten seconds later. That would be 600 steps without the cap.
       stalled.advance(2, 10_000);
 
       const normal = harness();
       normal.motion.release(1);
-      // A clock frame plus MAX_CATCHUP ordinary ones.
+      // A clock frame plus 5 normal ones.
       normal.advance(6);
 
-      // Bounded catch up is what matters, not exact equality. Clamping elapsed leaves float residue just under the
-      // last step's threshold, so the stalled frame runs MAX_CATCHUP steps or one fewer.
+      // Floating point error can leave the stalled frame one step short, so this isn't an exact match.
       expect(stalled.motion.location()).toBeLessThanOrEqual(normal.motion.location());
       expect(stalled.motion.location()).toBeGreaterThan(normal.motion.location() * 0.75);
-      // Nowhere near arriving, which is what 600 unclamped steps would have done.
       expect(stalled.motion.location()).toBeLessThan(0.75);
-      expect(stalled.motion.isRunning()).toBe(true);
+      expect(stalled.motion.isRunning()).toBeTruthy();
     });
 
     it('will carry drag velocity through the release with no hand-off', () => {
@@ -391,20 +378,20 @@ describe('swipeMotion', () => {
       }
 
       const before = world.motion.location();
-      // The drag loop is already running, so this is one real step with no clock frame in front of it.
+      // The drag loop is already running, so this is one real step.
       world.motion.release(1);
       world.advance(1);
       const flung = world.motion.location() - before;
 
-      // The same single step, from the same position, with nothing carried into it. release() starts a fresh loop
-      // here, so the extra frame is the clock frame that runs no step.
+      // The same step from the same position but with no velocity. release() starts a new loop, so it needs the
+      // extra clock frame.
       const control = harness();
       control.motion.snap(before);
       control.motion.release(1);
       control.advance(2);
       const fromRest = control.motion.location() - before;
 
-      // Both did exactly one settle step from the same place, so anything extra is the speed the finger had.
+      // Both ran one step from the same place, the difference is the speed the finger had.
       expect(flung).toBeGreaterThan(fromRest * 1.2);
     });
 
@@ -415,7 +402,6 @@ describe('swipeMotion', () => {
       // A clock frame plus one real step.
       world.advance(2);
 
-      // The slack pair means location lags target, and that gap is what soaks up uneven touch sampling.
       expect(world.motion.location()).toBeGreaterThan(0);
       expect(world.motion.location()).toBeLessThan(1);
       expect(world.motion.target()).toBe(1);
@@ -428,7 +414,7 @@ describe('swipeMotion', () => {
       const caught = world.motion.location();
 
       world.motion.hold();
-      expect(world.motion.isRunning()).toBe(false);
+      expect(world.motion.isRunning()).toBeFalsy();
       expect(world.motion.location()).toBe(caught);
       expect(world.motion.target()).toBe(caught);
 
@@ -455,9 +441,8 @@ describe('swipeMotion', () => {
       world.motion.snap(0);
       expect(world.motion.location()).toBe(0);
       expect(world.motion.target()).toBe(0);
-      expect(world.motion.isRunning()).toBe(false);
-      // Rest has to fire here because we flush deferred work off it, like resizing the panel, and a snap never
-      // animates its way there on its own.
+      expect(world.motion.isRunning()).toBeFalsy();
+      // We resize the panel when it rests, so a snap needs to report rest too.
       expect(world.restCount()).toBe(1);
       expect(world.rendered.at(-1)).toBe(0);
     });
@@ -476,7 +461,7 @@ describe('swipeMotion', () => {
         const world = harness();
         world.motion.release(1);
         expect(world.motion.location()).toBe(1);
-        expect(world.motion.isRunning()).toBe(false);
+        expect(world.motion.isRunning()).toBeFalsy();
         expect(world.restCount()).toBe(1);
       } finally {
         Object.defineProperty(window, 'matchMedia', { configurable: true, writable: true, value: original });
@@ -489,15 +474,13 @@ describe('swipeMotion', () => {
       world.advance(3);
       world.motion.destroy();
 
-      expect(world.motion.isRunning()).toBe(false);
+      expect(world.motion.isRunning()).toBeFalsy();
       const painted = world.rendered.length;
       world.advance(10);
       expect(world.rendered.length).toBe(painted);
     });
 
     it('will contain a throw from render instead of dying silently', () => {
-      // A throw inside the frame callback would otherwise kill the loop for good and strand the page inert with the
-      // body scroll locked.
       let shouldThrow = false;
       const world = harness({
         render: () => {
@@ -513,8 +496,8 @@ describe('swipeMotion', () => {
       world.advance(1);
 
       expect(world.errors).toHaveLength(1);
-      expect(world.motion.isRunning()).toBe(false);
-      expect(world.pending()).toBe(false);
+      expect(world.motion.isRunning()).toBeFalsy();
+      expect(world.pending()).toBeFalsy();
     });
 
     it('will contain a throw from a manual repaint', () => {
@@ -527,7 +510,7 @@ describe('swipeMotion', () => {
       world.motion.repaint();
 
       expect(world.errors).toHaveLength(1);
-      expect(world.motion.isRunning()).toBe(false);
+      expect(world.motion.isRunning()).toBeFalsy();
     });
   });
 });

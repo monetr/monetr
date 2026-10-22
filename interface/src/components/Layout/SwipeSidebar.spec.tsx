@@ -10,18 +10,15 @@ import { installPointerEvents } from '@monetr/interface/testutils/pointerEvents'
 import testRenderer from '@monetr/interface/testutils/renderer';
 import { isSidebarGestureActive, setSidebarGestureActive } from '@monetr/interface/util/sidebarGesture';
 
-const HOME = '/bank/bac_123/transactions';
+const homeRoute = '/bank/bac_123/transactions';
 
 function Panel(): React.JSX.Element {
   return (
     <div data-sidebar-secondary data-testid='panel-content'>
       <MSidebarToggle />
-      {/* A real wouter Link so the same-route case behaves like the app: a pushState with an identical pathname and
-      no re-render. */}
-      <Link data-testid='panel-link' to={HOME}>
+      <Link data-testid='panel-link' to={homeRoute}>
         Transactions
       </Link>
-      {/* The account picker and link menu portal to the body while staying React children of the panel. */}
       {createPortal(
         <div data-testid='portalled'>
           <button type='button'>Pick an account</button>
@@ -32,8 +29,7 @@ function Panel(): React.JSX.Element {
   );
 }
 
-// Lets a test navigate the way a <Redirect> or an action button would, without a click the drag suppression would
-// swallow.
+// This lets a test navigate like a <Redirect> would, without a click.
 let navigateFromPage: ((to: string) => void) | null = null;
 
 function Page(): React.JSX.Element {
@@ -45,7 +41,6 @@ function Page(): React.JSX.Element {
       <button data-testid='page-button' type='button'>
         Page button
       </button>
-      {/* Stands in for a transaction row, an anchor covering the whole thing. */}
       <a data-testid='page-row' href='/bank/bac_123/transactions/txn_1/details'>
         A row
       </a>
@@ -54,17 +49,17 @@ function Page(): React.JSX.Element {
   );
 }
 
-// jsdom reports every element as 0x0, which would make the panel measure 1px and the rubber band eat every drag.
-const PANEL_WIDTH = 320;
-// What paint writes at rest closed. The panel always carries a transform, so "never moved" means still this.
-const CLOSED = `translate3d(-${PANEL_WIDTH}px,0,0)`;
+// jsdom reports every element as 0x0, which would make the panel 1px wide.
+const panelWidth = 320;
+// What paint writes when the drawer is closed.
+const closedTransform = `translate3d(-${panelWidth}px,0,0)`;
 
 function stubPanelWidth(): () => void {
   const original = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth');
   Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
     configurable: true,
     get(this: HTMLElement) {
-      return this.getAttribute('role') === 'dialog' ? PANEL_WIDTH : 0;
+      return this.getAttribute('role') === 'dialog' ? panelWidth : 0;
     },
   });
   return () => {
@@ -79,11 +74,8 @@ interface DragStep {
   y?: number;
 }
 
-// A drag is a pointerdown, some moves and a pointerup, all on the same pointerId. Nothing here waits for a frame: the
-// commit decision reads the integrator's target, which pointermove sets synchronously.
-//
-// `msPerStep` is the fake gap between samples and decides which commit path gets exercised. The default is slow
-// enough that velocity stays well under the 420px/s fling threshold, so the decision falls through to position.
+// The default msPerStep is slow enough that it never counts as a fling, so the drawer opens or closes based on how
+// far it was dragged.
 function drag(
   element: Element,
   from: DragStep,
@@ -109,12 +101,11 @@ function renderSidebar(): RenderResult {
     <SwipeSidebar panel={<Panel />}>
       <Page />
     </SwipeSidebar>,
-    { initialRoute: HOME },
+    { initialRoute: homeRoute },
   );
 }
 
-// The toggle in the page is the one a user actually presses; the one inside the panel is only reachable once it's
-// already open.
+// The toggle in the page, not the one in the panel.
 function pageToggle(world: RenderResult): HTMLElement {
   const toggle = world.container.querySelector('.page-toggle');
   if (!(toggle instanceof HTMLElement)) {
@@ -156,8 +147,6 @@ describe('SwipeSidebar', () => {
       const world = renderSidebar();
       const panel = panelElement(world);
 
-      // display: contents keeps the element in the accessibility tree, so a permanent dialog role would hide the
-      // real sidebars from screen readers.
       expect(panel).not.toHaveAttribute('role');
       expect(panel).not.toHaveAttribute('aria-hidden');
       expect(panel).not.toHaveAttribute('aria-modal');
@@ -227,7 +216,7 @@ describe('SwipeSidebar', () => {
       expect(document.activeElement).toBe(panelElement(world));
 
       fireEvent.click(pageToggle(world));
-      // Grabbed when open() ran, not in an effect; React commits `inert` before effects and that blurs this.
+      // This has to be remembered in open(), by the time an effect runs inert has already blurred it.
       expect(document.activeElement).toBe(toggle);
     });
 
@@ -244,7 +233,7 @@ describe('SwipeSidebar', () => {
       const world = renderSidebar();
       fireEvent.click(pageToggle(world));
 
-      // A dropdown or bottom drawer opened from inside the panel portals to the body and owns escape while it's up.
+      // A dropdown opened from the panel portals to the body and handles its own escape.
       fireEvent.keyDown(document.body, { key: 'Escape' });
 
       expect(panelElement(world)).toHaveAttribute('aria-hidden', 'false');
@@ -254,7 +243,7 @@ describe('SwipeSidebar', () => {
       const world = renderSidebar();
       fireEvent.click(pageToggle(world));
 
-      // Same route, so the pathname doesn't change and the close-on-navigation effect never runs.
+      // Same route, so the pathname doesn't change.
       fireEvent.click(world.getByTestId('panel-link'));
 
       expect(panelElement(world)).toHaveAttribute('aria-hidden', 'true');
@@ -284,7 +273,7 @@ describe('SwipeSidebar', () => {
 
     it('will open on a horizontal drag from the middle of the page', () => {
       const world = renderSidebar();
-      // Nowhere near the left edge; the gesture is armed across the whole page.
+      // Nowhere near the left edge.
       drag(world.getByTestId('page-row'), { x: 200 }, [{ x: 260 }, { x: 340 }]);
 
       expect(panelElement(world)).toHaveAttribute('aria-hidden', 'false');
@@ -300,7 +289,7 @@ describe('SwipeSidebar', () => {
 
     it('will open on a flick that never reaches the commit point', () => {
       const world = renderSidebar();
-      // The same 60px but thrown: 30px per 16ms is ~1875px/s, well past the fling threshold, so direction wins.
+      // The same 60px but thrown. 30px per 16ms is about 1875px/s, well past the fling threshold.
       drag(world.getByTestId('page-row'), { x: 200 }, [{ x: 230 }, { x: 260 }], { msPerStep: 16 });
 
       expect(panelElement(world)).toHaveAttribute('aria-hidden', 'false');
@@ -309,16 +298,14 @@ describe('SwipeSidebar', () => {
     it('will leave a vertical drag alone', () => {
       const world = renderSidebar();
       const panel = panelElement(world);
-      // Enough sideways movement to open if the axis resolved wrong, but far more downward.
       drag(world.getByTestId('page-row'), { x: 200, y: 700 }, [
         { x: 260, y: 500 },
         { x: 340, y: 200 },
       ]);
 
       expect(panel).toHaveAttribute('aria-hidden', 'true');
-      // The panel never moved at all. The gesture flag after pointerup proves nothing, releaseDrag clears it
-      // whatever the axis was.
-      expect(panel.style.transform).toBe(CLOSED);
+      // Check the panel and not the gesture flag, the flag is always cleared on pointerup.
+      expect(panel.style.transform).toBe(closedTransform);
     });
 
     it('will refuse a rightward drag that is not clearly horizontal', () => {
@@ -334,10 +321,9 @@ describe('SwipeSidebar', () => {
       const panel = panelElement(world);
       drag(world.getByTestId('page-row'), { x: 300 }, [{ x: 200 }, { x: 100 }], { up: false });
 
-      // Checked while the finger is still down; after pointerup an unclaimed and a claimed-then-settled drag look
-      // identical.
-      expect(isSidebarGestureActive()).toBe(false);
-      expect(panel.style.transform).toBe(CLOSED);
+      // Check while the finger is still down, after pointerup the flag is always cleared.
+      expect(isSidebarGestureActive()).toBeFalsy();
+      expect(panel.style.transform).toBe(closedTransform);
     });
 
     it('will close on a leftward drag once open', () => {
@@ -345,7 +331,6 @@ describe('SwipeSidebar', () => {
       fireEvent.click(pageToggle(world));
       expect(panelElement(world)).toHaveAttribute('aria-hidden', 'false');
 
-      // Being open puts every surface in loose mode, so leftward closes it from anywhere.
       drag(panelElement(world), { x: 300 }, [{ x: 200 }, { x: 60 }]);
 
       expect(panelElement(world)).toHaveAttribute('aria-hidden', 'true');
@@ -356,8 +341,7 @@ describe('SwipeSidebar', () => {
       const panel = panelElement(world);
       expect(panel.style.visibility).toBe('hidden');
 
-      // One pixel is under the slop, so no axis resolves. The press still promoted layers and made the panel
-      // visible, and stopping the loop without a render would leave it that way.
+      // One pixel is under the slop. But the press still made the panel visible, so it needs to be hidden again.
       drag(world.getByTestId('page-row'), { x: 200 }, [{ x: 201 }]);
 
       expect(panel.style.visibility).toBe('hidden');
@@ -365,7 +349,7 @@ describe('SwipeSidebar', () => {
     });
 
     it('will carry on to the nearest end when a press interrupts an animation', async () => {
-      // Reduced motion has to be off or the open is instant and there is nothing in flight to interrupt.
+      // Reduced motion needs to be off, otherwise there is no animation to interrupt.
       media.restore();
       media = installMatchMedia({ mobile: true, reducedMotion: false });
       const world = renderSidebar();
@@ -377,7 +361,7 @@ describe('SwipeSidebar', () => {
       const midFlight = panel.style.transform;
       expect(midFlight).not.toBe('translate3d(0px,0,0)');
 
-      // pointerdown freezes the motion where it is; a press that never becomes a drag must not strand it there.
+      // pointerdown freezes the animation, a press that isn't a drag should let it finish.
       await act(async () => {
         drag(panel, { x: 200 }, [{ x: 201 }]);
         await new Promise(resolve => setTimeout(resolve, 800));
@@ -402,34 +386,31 @@ describe('SwipeSidebar', () => {
       const click = new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 });
       row.dispatchEvent(click);
 
-      // preventDefault is the half that matters. wouter's Link calls preventDefault in its own onClick, so only
-      // stopping propagation would let the browser do a native navigation, a full reload.
-      expect(click.defaultPrevented).toBe(true);
+      // If this isn't prevented then the browser follows the link and reloads the page.
+      expect(click.defaultPrevented).toBeTruthy();
     });
 
     it('will not eat a keyboard activation left over from a touch drag', () => {
       const world = renderSidebar();
-      // A touch drag preventDefaults the touchmove, so no click is synthesised and the suppression stays armed.
+      // A touch drag doesn't make a click, so the suppression is still set after it.
       drag(world.getByTestId('page-row'), { x: 200 }, [{ x: 260 }, { x: 340 }]);
 
-      // Keyboard activations arrive with detail 0. Dispatched on a button rather than a link, since wouter's Link
-      // calls preventDefault itself.
+      // Keyboard clicks have a detail of 0. This uses a button since wouter's Link prevents default on its own.
       const activation = new MouseEvent('click', { bubbles: true, cancelable: true, detail: 0 });
       world.getByTestId('page-button').dispatchEvent(activation);
 
-      expect(activation.defaultPrevented).toBe(false);
+      expect(activation.defaultPrevented).toBeFalsy();
     });
 
     it('will let a tap through untouched', () => {
       const world = renderSidebar();
       const row = world.getByTestId('page-row');
-      // A press and release with no movement isn't a drag.
       drag(row, { x: 200 }, []);
 
       const click = new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 });
       row.dispatchEvent(click);
 
-      expect(click.defaultPrevented).toBe(false);
+      expect(click.defaultPrevented).toBeFalsy();
     });
 
     it('will ignore pointers from portalled content that is not a DOM descendant', () => {
@@ -438,9 +419,8 @@ describe('SwipeSidebar', () => {
       const panel = panelElement(world);
       const portalled = world.getByTestId('portalled');
 
-      // A real portal, so React routes these events to the panel's handlers even though the node lives under
-      // document.body. Flicking through the account list must not drag the sidebar underneath it.
-      expect(panel.contains(portalled)).toBe(false);
+      // React sends these to the panel's handlers even though the portal is under document.body.
+      expect(panel.contains(portalled)).toBeFalsy();
       drag(portalled, { x: 300 }, [{ x: 200 }, { x: 60 }]);
 
       expect(panel).toHaveAttribute('aria-hidden', 'false');
@@ -465,24 +445,23 @@ describe('SwipeSidebar', () => {
       const world = renderSidebar();
       const row = world.getByTestId('page-row');
       drag(row, { x: 200 }, [{ x: 300 }], { up: false });
-      expect(isSidebarGestureActive()).toBe(true);
+      expect(isSidebarGestureActive()).toBeTruthy();
 
-      // A <Redirect> or an action button can navigate with a finger still down. Left live, the drag either gets the
-      // settle spring swapped in mid gesture or carries on from a stale origin after a snap.
+      // A <Redirect> can navigate while a finger is still down.
       act(() => navigateFromPage?.('/bank/bac_123/expenses'));
 
-      expect(isSidebarGestureActive()).toBe(false);
+      expect(isSidebarGestureActive()).toBeFalsy();
     });
 
     it('will clear the gesture flag when unmounted mid drag', () => {
       const world = renderSidebar();
       drag(world.getByTestId('page-row'), { x: 200 }, [{ x: 300 }], { up: false });
-      expect(isSidebarGestureActive()).toBe(true);
+      expect(isSidebarGestureActive()).toBeTruthy();
 
       world.unmount();
 
-      // Left set, this kills pull to refresh for the rest of the session.
-      expect(isSidebarGestureActive()).toBe(false);
+      // If this stayed set then pull to refresh would be broken until a reload.
+      expect(isSidebarGestureActive()).toBeFalsy();
       expect(document.body.style.overflow).toBe('');
       expect(document.body.style.userSelect).toBe('');
     });
@@ -500,7 +479,7 @@ describe('SwipeSidebar', () => {
 
       act(() => media.setMobile(false));
 
-      // visibility inherits, so a leftover `hidden` here would blank out the real desktop sidebars.
+      // A leftover visibility: hidden would hide the desktop sidebars.
       const panel = panelElement(world);
       expect(panel.style.visibility).toBe('');
       expect(panel.style.transform).toBe('');
@@ -515,8 +494,7 @@ describe('SwipeSidebar', () => {
 
       act(() => media.setMobile(false));
 
-      // Same DOM node, so React didn't unmount the routed page. Swapping components here would reset every page's
-      // state on a tablet rotation or a window resize.
+      // Same DOM node, so the page wasn't remounted. Otherwise rotating a tablet would reset the page.
       expect(world.getByTestId('page-button')).toBe(before);
     });
   });

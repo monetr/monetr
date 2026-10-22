@@ -10,7 +10,7 @@ import BalanceCurrentAmount from '@monetr/interface/components/Layout/BalanceCur
 import BalanceFreeToUseAmount from '@monetr/interface/components/Layout/BalanceFreeToUseAmount';
 import BalanceLimitAmount from '@monetr/interface/components/Layout/BalanceLimitAmount';
 import LunchFlowLastUpdatedCard from '@monetr/interface/components/Layout/LunchFlowLastUpdatedCard';
-import { MobileSidebarContext } from '@monetr/interface/components/Layout/MobileSidebarContextProvider';
+import { MobileSidebarContext } from '@monetr/interface/components/Layout/MobileSidebarContext';
 import PlaidBankStatusCard from '@monetr/interface/components/Layout/PlaidBankStatusCard';
 import PlaidLastUpdatedCard from '@monetr/interface/components/Layout/PlaidLastUpdatedCard';
 import SelectBankAccount from '@monetr/interface/components/Layout/SelectBankAccount';
@@ -41,7 +41,6 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): React.JS
   }
 
   return (
-    // Marks the panel's secondary column; the mobile drawer derives its width and close behavior from this.
     <div className={mergeClasses(styles.budgetSidebarRoot, props.className)} data-sidebar-secondary>
       <BudgetingSidebarTitle />
       <div className={styles.content}>
@@ -113,13 +112,13 @@ interface NavigationItemProps {
 function NavigationItem(props: NavigationItemProps): React.JSX.Element {
   const [pathname] = useLocation();
   const active = pathname.endsWith(props.to.replaceAll('.', ''));
-  const { setIsOpen } = useContext(MobileSidebarContext);
+  const { close } = useContext(MobileSidebarContext);
   // Clicking the page we're already on just closes the mobile sidebar. Skipping the navigation avoids
   // scrolling back to the top of the page.
   const onClick = (event: React.MouseEvent) => {
     if (active) {
       event.preventDefault();
-      setIsOpen(false);
+      close();
     }
   };
 

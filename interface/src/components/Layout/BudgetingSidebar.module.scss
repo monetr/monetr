@@ -1,10 +1,6 @@
 @use '@monetr/interface/mixins';
 @use '@monetr/interface/variables';
 
-// Below the large breakpoint this is the swipe drawer's secondary column. Its layout in that slot comes from
-// SwipeSidebar.module.scss off the data-sidebar-secondary attribute this component renders, so that any other sidebar
-// we drop into the same slot later gets it without new CSS.
-
 // On large screens we are just always visible.
 @media (min-width: variables.$largeScreenUp) {
   .budgetSidebarRoot {

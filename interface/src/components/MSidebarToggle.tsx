@@ -37,8 +37,7 @@ export default function MSidebarToggle(props: MSidebarToggleProps): React.JSX.El
     );
   }
 
-  // Both glyphs render and CSS swaps them off the drawer's live position, so the icon stays right mid drag without a
-  // re-render on the frame path.
+  // Both icons render and CSS picks which one to show. This way the icon follows the drag without a re-render.
   return (
     <button className={className} onClick={onClick} type='button'>
       <PanelLeft className={styles.iconClosed} />

@@ -44,9 +44,8 @@ const DONE_DISPLAY_TIME = 650;
 const ERROR_DISPLAY_TIME = 1400;
 // How long it takes to slide everything back up. This needs to match --ptr-dur in PullToRefresh.module.scss.
 const RETRACT_TIME = 380;
-// A dialog is open, so stand down. The `:not` matters: the mobile sidebar's panel carries role="dialog" permanently
-// and is aria-hidden while closed, while Radix and vaul dialogs set no aria-hidden at all.
-const OPEN_DIALOG = '[role="dialog"]:not([aria-hidden="true"])';
+// The mobile sidebar is always a dialog but is aria-hidden when it is closed, so it shouldn't count as open.
+const openDialogSelector = '[role="dialog"]:not([aria-hidden="true"])';
 
 // The progress ring is an SVG circle, we draw it in by changing the stroke dash offset. So we need the circumference to
 // know how much of the circle to show.
@@ -349,7 +348,7 @@ export default function PullToRefreshGesture(props: PullToRefreshGestureProps): 
       }
       // If there is a dialog open then do nothing, pulling on a dialog should never refresh the page behind it. This
       // covers the mobile sidebar too when its open.
-      if (document.querySelector(OPEN_DIALOG)) {
+      if (document.querySelector(openDialogSelector)) {
         return;
       }
       if (window.scrollY > 0 || isBlockedFromPulling(event.target, root)) {
@@ -374,8 +373,8 @@ export default function PullToRefreshGesture(props: PullToRefreshGestureProps): 
       if (!ourTouch) {
         return;
       }
-      // The sidebar took this gesture horizontally, it only picks an axis after ~12px so we might have already started
-      // pulling. Put everything back and let the sidebar have it.
+      // If the sidebar took this drag then put everything back. The sidebar needs a few px of movement before it
+      // decides, and we might have already started pulling by then.
       if (isSidebarGestureActive()) {
         const wasPulling = touch.phase === 'pulling';
         resetTouch();

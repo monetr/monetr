@@ -1,9 +1,6 @@
 @use '@monetr/interface/mixins';
 @use '@monetr/interface/variables';
 
-// Below the large breakpoint this rail is the left hand column of the swipe drawer's panel rather than a sidebar on
-// its own, so it has no show/hide or overlay styles in here. SwipeSidebar owns all of that.
-
 .bankSidebarWrapperRoot {
   z-index: 41;
   position: sticky;

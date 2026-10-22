@@ -17,8 +17,6 @@
   }
 }
 
-// The glyph follows the drawer's live position, published as a data attribute
-// on the document element, so a drag never re-renders the icon.
 .iconOpen {
   display: none;
 }

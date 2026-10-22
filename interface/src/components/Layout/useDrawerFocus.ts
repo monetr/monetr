@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 
-const FOCUSABLE = [
+const focusableSelector = [
   'a[href]',
   'button:not([disabled])',
   'input:not([disabled])',
@@ -17,12 +17,11 @@ export interface DrawerFocusOptions {
 }
 
 export interface DrawerFocus {
-  // Record the currently focused element so it can be restored when the drawer closes. This has to run before React
-  // commits `inert` onto the page, which blurs the focused element before any effect gets a look at it.
+  // rememberFocus needs to be called before React sets inert on the page. Inert blurs whatever has focus before any of
+  // our effects run, so by then we wouldn't know what to give focus back to when the drawer closes.
   rememberFocus(): void;
 }
 
-// Scroll lock, focus trap and keyboard handling for the open drawer.
 export default function useDrawerFocus(options: DrawerFocusOptions): DrawerFocus {
   const { isMobile, isOpen, panelRef, close } = options;
 
@@ -32,7 +31,6 @@ export default function useDrawerFocus(options: DrawerFocusOptions): DrawerFocus
     restoreFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   }, []);
 
-  // Scroll lock and focus hand off.
   useEffect(() => {
     if (!isMobile) {
       return;
@@ -58,8 +56,8 @@ export default function useDrawerFocus(options: DrawerFocusOptions): DrawerFocus
 
     const onKeyDown = (event: KeyboardEvent) => {
       const panel = panelRef.current;
-      // Dropdowns, bottom drawers and modals opened from inside the panel portal outside it (Radix and vaul to the
-      // body, NiceModal to the app root) and own the keyboard while they are up.
+      // If the key press came from a dropdown or modal that was opened from the panel then leave it alone. Those portal
+      // outside of the panel and handle their own keyboard.
       if (!panel?.contains(event.target as Node)) {
         return;
       }
@@ -72,7 +70,7 @@ export default function useDrawerFocus(options: DrawerFocusOptions): DrawerFocus
         return;
       }
 
-      const focusable = panel.querySelectorAll<HTMLElement>(FOCUSABLE);
+      const focusable = panel.querySelectorAll<HTMLElement>(focusableSelector);
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
       if (!first || !last) {

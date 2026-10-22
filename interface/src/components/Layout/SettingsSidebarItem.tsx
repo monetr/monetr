@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import { Link, useLocation } from 'wouter';
 
-import { MobileSidebarContext } from '@monetr/interface/components/Layout/MobileSidebarContextProvider';
+import { MobileSidebarContext } from '@monetr/interface/components/Layout/MobileSidebarContext';
 import Typography from '@monetr/interface/components/Typography';
 
 import styles from './SettingsSidebarItem.module.scss';
@@ -18,12 +18,12 @@ export default function SettingsSidebarItem(props: SettingsSidebarItemProps): Re
   const Icon = props.icon;
   const [pathname] = useLocation();
   const active = pathname === props.to;
-  const { setIsOpen } = useContext(MobileSidebarContext);
+  const { close } = useContext(MobileSidebarContext);
   // Same as the budgeting sidebar, clicking the page we're already on just closes the mobile sidebar.
   const onClick = (event: React.MouseEvent) => {
     if (active) {
       event.preventDefault();
-      setIsOpen(false);
+      close();
     }
   };
 
