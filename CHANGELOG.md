@@ -2,6 +2,13 @@
 
 ## [1.20.0](https://github.com/monetr/monetr/compare/v1.19.0...v1.20.0) (2026-10-22)
 
+This release includes several UX improvements. The sidebar can now be opened by swiping from the left to right on mobile
+instead of needing to tap the button to toggle at the top of the screen, it can also be swiped to be closed. The
+settings pages have also gotten a bit of a UX layout shift and more settings will be available there in the future,
+including the ability to update your user's name and hopefully soon their email address. Among the UX improvements, I've
+also improved the header at the top of the transaction details pages, this is based on the UX added in the recurring
+transactions interface. Other improvements include proper floating action buttons on the expense, goal, and funding
+schedule pages such that there is no longer an akward button to create them on mobile versus on desktop.
 
 ### Features
 
