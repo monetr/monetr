@@ -124,15 +124,6 @@ export default function TransactionDetails(): React.JSX.Element {
                 name='name'
                 placeholder='Transaction name...'
               />
-              <FormTextField<TransactionValues>
-                autoComplete='off'
-                className={layoutVariants({ width: 'full' })}
-                disabled
-                isLoading
-                label='Original Name'
-                name='originalName'
-                placeholder='No original name...?'
-              />
               <FormAmountField<TransactionValues>
                 className={layoutVariants({ width: 'full' })}
                 disabled
@@ -225,14 +216,6 @@ export default function TransactionDetails(): React.JSX.Element {
               label='Name'
               name='name'
               placeholder='Transaction name...'
-            />
-            <FormTextField<TransactionValues>
-              autoComplete='off'
-              className={layoutVariants({ width: 'full' })}
-              disabled
-              label='Original Name'
-              name='originalName'
-              placeholder='No original name...?'
             />
             <FormAmountField<TransactionValues>
               className={layoutVariants({ width: 'full' })}
