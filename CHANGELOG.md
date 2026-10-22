@@ -10,6 +10,15 @@ also improved the header at the top of the transaction details pages, this is ba
 transactions interface. Other improvements include proper floating action buttons on the expense, goal, and funding
 schedule pages such that there is no longer an akward button to create them on mobile versus on desktop.
 
+This release also includes some changes to help make self-hosting easier in the near future for monetr. A Valkey/Redis
+instance is no longer required (though previously monetr would use [miniredis](https://github.com/alicebob/miniredis)
+when one was not configured, this is intended for testing, not for actual use though). The docker compose provided will
+be updated after this release to exclude the valkey instance to make the overall install simpler for users. This is part
+of an ongoing effort to add support for SQLite as well, with the end goal of having monetr be so simple to install for
+users that it can be done in a single docker run command someday. As part of this change though, you may see warnings in
+your logs when monetr first starts, nothing should break for you and you can follow the documentation
+[here](https://monetr.app/documentation/configure/cache) to resolve those warnings.
+
 ### Features
 
 * Add built in in-memory cache when redis/valkey is not configured ([cbfba82](https://github.com/monetr/monetr/commit/cbfba8286f02e01ae1c4240de71633a6fb5c3d46))
