@@ -116,7 +116,7 @@ $duration: 150ms;
 
 .content {
   z-index: 50;
-  min-width: 32 * variables.$size; // min-w-[8rem]
+  min-width: 48 * variables.$size;
   padding: 0;
   overflow: hidden;
   // rounded-md

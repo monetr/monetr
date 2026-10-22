@@ -79,3 +79,18 @@
   justify-content: end;
   gap: 2 * variables.$size;
 }
+
+.menuTrigger {
+  // Square it up since there is only an icon inside
+  padding-left: 2 * variables.$size;
+  padding-right: 2 * variables.$size;
+
+  // Keep the hover background while the menu is open
+  &[data-state="open"] {
+    background-color: var(--background-emphasis);
+  }
+}
+
+.removeIcon {
+  color: var(--destructive-subtle);
+}
