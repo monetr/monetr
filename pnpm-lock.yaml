@@ -276,8 +276,8 @@ importers:
         specifier: 1.105.1
         version: 1.105.1
       satori:
-        specifier: 0.57.2
-        version: 0.57.2
+        specifier: 0.60.0
+        version: 0.60.0
       spellchecker-cli:
         specifier: 7.0.4
         version: 7.0.4(supports-color@9.4.0)
@@ -4017,8 +4017,8 @@ packages:
     engines: {node: '>=20.19.0'}
     hasBin: true
 
-  satori@0.57.2:
-    resolution: {integrity: sha512-o0jtXN4OR/P316fCykOkxcMJKfBdpwV/w84VMpBgHNFO6zzsM+4XGycuvKyMix+yA0Ax713ELFd/eDC8P6uCfQ==}
+  satori@0.60.0:
+    resolution: {integrity: sha512-OSnpxSr166mj2M9i6Cm3kFWYG6i36FnYDfQU0SR8nsZe5zgp/PskLkyfNAqV8phdGkDfQdFHyJZvrtdss3HAVw==}
     engines: {node: '>=16'}
 
   sax@1.6.0:
@@ -8653,7 +8653,7 @@ snapshots:
     optionalDependencies:
       '@parcel/watcher': 2.4.1
 
-  satori@0.57.2:
+  satori@0.60.0:
     dependencies:
       '@shuding/opentype.js': 1.4.0-beta.0
       css-background-parser: 0.1.0
