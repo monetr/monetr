@@ -92,6 +92,8 @@ func (j *previewCSVImport) loadFile(
 
 	tableReader := table.NewTable(
 		csvReader,
+		j.bankAccount.Currency,
+		j.timezone,
 		&j.transactionImport.TransactionImportMapping.Mapping,
 		true, // Store this too?
 	)
