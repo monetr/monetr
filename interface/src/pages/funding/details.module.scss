@@ -24,14 +24,6 @@
   height: 24 * variables.$size;
 }
 
-.saveButton {
-  gap: 1 * variables.$size;
-  padding-top: 1 * variables.$size;
-  padding-bottom: 1 * variables.$size;
-  padding-left: 2 * variables.$size;
-  padding-right: 2 * variables.$size;
-}
-
 // Scrolling body wrapper.
 .body {
   width: 100%;
@@ -96,4 +88,12 @@
 .timelineTitle {
   margin-top: 2 * variables.$size;
   margin-bottom: 2 * variables.$size;
+}
+
+.formButtons {
+  width: 100%;
+  display: flex;
+  align-items: end;
+  justify-content: end;
+  gap: 2 * variables.$size;
 }

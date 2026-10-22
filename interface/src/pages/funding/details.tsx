@@ -168,16 +168,7 @@ export default function FundingDetails(): React.JSX.Element | null {
         breadcrumb={funding.name}
         icon={CalendarSync}
         title='Funding Schedules'
-      >
-        <Button onClick={removeFunding} variant='destructive'>
-          <Trash />
-          Remove
-        </Button>
-        <FormButton className={styles.saveButton} role='form' type='submit' variant='primary'>
-          <Save />
-          Save
-        </FormButton>
-      </MTopNavigation>
+      />
       <div className={styles.body}>
         <div className={styles.columns}>
           <div className={styles.column}>
@@ -220,6 +211,16 @@ export default function FundingDetails(): React.JSX.Element | null {
               placeholder='Example: $ 1,000.00'
             />
             {isManual && <AutoCreateTransactionToggle />}
+            <div className={styles.formButtons}>
+              <Button onClick={removeFunding} variant='destructive'>
+                <Trash />
+                Remove
+              </Button>
+              <FormButton role='form' type='submit' variant='primary'>
+                <Save />
+                Save
+              </FormButton>
+            </div>
           </div>
           <Divider className={styles.dividerMobile} />
           <div className={styles.columnTimeline}>
