@@ -40,7 +40,7 @@ export default function SettingsSidebar(): React.JSX.Element {
   }
 
   return (
-    <div className={styles.settingsSidebarRoot}>
+    <div className={styles.settingsSidebarRoot} data-sidebar-secondary>
       <div className={styles.title}>
         <Typography color='emphasis' ellipsis size='xl' weight='semibold'>
           Settings
