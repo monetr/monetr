@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
-import { HeartCrack, PiggyBank, Plus } from 'lucide-react';
+import { HeartCrack, PiggyBank } from 'lucide-react';
 
-import { Button } from '@monetr/interface/components/Button';
+import FloatingActionButton from '@monetr/interface/components/FloatingActionButton';
 import GoalItem from '@monetr/interface/components/goals/GoalItem';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import Typography from '@monetr/interface/components/Typography';
@@ -35,12 +35,8 @@ export default function Goals(): React.JSX.Element {
 
   return (
     <Fragment>
-      <MTopNavigation icon={PiggyBank} title='Goals'>
-        <Button onClick={showNewGoalModal} variant='primary'>
-          <Plus />
-          New Goal
-        </Button>
-      </MTopNavigation>
+      <MTopNavigation icon={PiggyBank} title='Goals' />
+      <FloatingActionButton onClick={showNewGoalModal} />
       <div className={styles.content}>
         <ListContent goals={goals} />
       </div>

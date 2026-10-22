@@ -1,9 +1,10 @@
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useWindowVirtualizer, type VirtualItem } from '@tanstack/react-virtual';
 import { format, parse } from 'date-fns';
-import { HeartCrack, Plus, ShoppingCart, Upload } from 'lucide-react';
+import { HeartCrack, ShoppingCart, Upload } from 'lucide-react';
 
 import { Button } from '@monetr/interface/components/Button';
+import FloatingActionButton from '@monetr/interface/components/FloatingActionButton';
 import BalanceFreeToUseAmount from '@monetr/interface/components/Layout/BalanceFreeToUseAmount';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import Typography from '@monetr/interface/components/Typography';
@@ -297,11 +298,7 @@ function AddTransactionButton(): React.JSX.Element | null {
     return null;
   }
 
-  return (
-    <button className={styles.addButton} onClick={showNewTransactionModal} type='button'>
-      <Plus className={styles.addButtonIcon} />
-    </button>
-  );
+  return <FloatingActionButton className={styles.floatingActionButton} onClick={showNewTransactionModal} />;
 }
 
 function UploadButtonMaybe(): React.JSX.Element | null {

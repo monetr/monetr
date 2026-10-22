@@ -1,8 +1,8 @@
 import { Fragment } from 'react';
-import { HeartCrack, Plus, Receipt } from 'lucide-react';
+import { HeartCrack, Receipt } from 'lucide-react';
 
-import { Button } from '@monetr/interface/components/Button';
 import ExpenseItem from '@monetr/interface/components/expenses/ExpenseItem';
+import FloatingActionButton from '@monetr/interface/components/FloatingActionButton';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import Typography from '@monetr/interface/components/Typography';
 import { useSpendingFiltered } from '@monetr/interface/hooks/useSpendingFiltered';
@@ -34,12 +34,8 @@ export default function Expenses(): React.JSX.Element {
 
   return (
     <Fragment>
-      <MTopNavigation icon={Receipt} title='Expenses'>
-        <Button onClick={() => showNewExpenseModal()} variant='primary'>
-          <Plus />
-          New Expense
-        </Button>
-      </MTopNavigation>
+      <MTopNavigation icon={Receipt} title='Expenses' />
+      <FloatingActionButton onClick={showNewExpenseModal} />
       <div className={styles.content}>
         {(expenses ?? []).length === 0 && <EmptyState />}
         {(expenses?.length ?? 0) > 0 && (

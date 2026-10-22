@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
-import { CalendarSync, Plus } from 'lucide-react';
+import { CalendarSync } from 'lucide-react';
 
-import { Button } from '@monetr/interface/components/Button';
+import FloatingActionButton from '@monetr/interface/components/FloatingActionButton';
 import FundingItem from '@monetr/interface/components/funding/FundingItem';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import Typography from '@monetr/interface/components/Typography';
@@ -28,12 +28,8 @@ export default function Funding(): React.JSX.Element {
 
   return (
     <Fragment>
-      <MTopNavigation icon={CalendarSync} title='Funding Schedules'>
-        <Button onClick={() => showNewFundingModal()} variant='primary'>
-          <Plus />
-          New Funding Schedule
-        </Button>
-      </MTopNavigation>
+      <MTopNavigation icon={CalendarSync} title='Funding Schedules' />
+      <FloatingActionButton onClick={showNewFundingModal} />
       <div className={styles.content}>
         <ListContent funding={funding} />
       </div>

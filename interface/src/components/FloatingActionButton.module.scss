@@ -1,0 +1,26 @@
+@use '@monetr/interface/variables';
+
+.floatingActionButton {
+  position: fixed;
+  bottom: calc(4 * variables.$size + env(safe-area-inset-bottom));
+  right: calc(4 * variables.$size + env(safe-area-inset-right));
+  width: 14 * variables.$size;
+  height: 14 * variables.$size;
+  border-radius: 9999px;
+  background-color: rgb(93 31 193 / 0.75);
+  backdrop-filter: blur(4px) brightness(2);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:active {
+    backdrop-filter: blur(4px) brightness(0.5);
+  }
+}
+
+.floatingActionButtonIcon {
+  color: var(--content);
+  width: 12 * variables.$size;
+  height: 12 * variables.$size;
+}

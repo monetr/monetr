@@ -107,34 +107,14 @@
   opacity: 0.7;
 }
 
-// Floating add-transaction button.
-.addButton {
-  position: fixed;
-  bottom: 14 * variables.$size;
-  right: 4 * variables.$size;
-  width: 14 * variables.$size;
-  height: 14 * variables.$size;
-  border-radius: 9999px;
-  background-color: rgb(93 31 193 / 0.75);
-  backdrop-filter: blur(4px) brightness(2);
-  z-index: 30;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  &:active {
-    backdrop-filter: blur(4px) brightness(0.5);
-  }
+// On mobile the free to use bar sits at the bottom of the screen, so the button
+// needs to go above it instead
+.floatingActionButton {
+  bottom: 20 * variables.$size;
 
   @media (min-width: variables.$mediumScreen) {
-    bottom: 4 * variables.$size;
+    bottom: calc(4 * variables.$size + env(safe-area-inset-bottom));
   }
-}
-
-.addButtonIcon {
-  color: var(--content);
-  width: 12 * variables.$size;
-  height: 12 * variables.$size;
 }
 
 // Upload button is hidden on mobile, flex from md up.
