@@ -1,27 +1,6 @@
 @use '@monetr/interface/variables';
 
-// Same toggle behavior as the budgeting sidebar, on smaller screens this is only shown when the mobile sidebar is
-// open.
-@media (max-width: variables.$largeScreen) {
-  :global(.sidebar-open) {
-    .settingsSidebarRoot {
-      width: 100%;
-      display: flex;
-      background-color: color-mix(in srgb, var(--background) 50%, transparent);
-      backdrop-filter: blur(4px) brightness(0.3);
-      padding-left: var(--bank-sidebar-width-static);
-      position: fixed;
-    }
-  }
-
-  :global(.sidebar-close) {
-    .settingsSidebarRoot {
-      display: none;
-    }
-  }
-}
-
-@media (min-width: variables.$largeScreen) {
+@media (min-width: variables.$largeScreenUp) {
   .settingsSidebarRoot {
     display: flex;
   }

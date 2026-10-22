@@ -1,23 +1,6 @@
 @use '@monetr/interface/mixins';
 @use '@monetr/interface/variables';
 
-@media (max-width: variables.$largeScreen) {
-  :global(.sidebar-open) {
-    .bankSidebarWrapperRoot {
-      background-color: color-mix(in srgb, var(--background) 50%, transparent);
-      backdrop-filter: blur(4px) brightness(0.3);
-      position: fixed;
-      display: flex;
-    }
-  }
-
-  :global(.sidebar-close) {
-    .bankSidebarWrapperRoot {
-      display: none;
-    }
-  }
-}
-
 .bankSidebarWrapperRoot {
   z-index: 41;
   position: sticky;
@@ -43,7 +26,7 @@
 .toggle {
   display: flex;
 
-  @media (min-width: variables.$largeScreen) {
+  @media (min-width: variables.$largeScreenUp) {
     display: none;
   }
 }

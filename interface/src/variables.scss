@@ -6,4 +6,7 @@ $size: 0.25rem; // 4px
 $smallScreen: 640px; // 160 -> 32
 $mediumScreen: 768px; // 192 -> 64
 $largeScreen: 1024px; // 256 -> 64
+// useIsMobile is max-width: 1024px, which includes 1024px itself. Use this for
+// min-width so desktop styles don't also apply at 1024px itself.
+$largeScreenUp: 1024.02px;
 $extraLargeScreen: 1280px; // 320

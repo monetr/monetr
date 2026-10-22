@@ -1,7 +1,7 @@
 @use 'sass:color';
 @use '@monetr/interface/variables';
 
-// Base reset. Reproduces the Preflight defaults the modules rely on — notably
+// Base reset. Reproduces the Preflight defaults the modules rely on, notably
 // `border-style: solid` + `border-width: 0`, since rules set border width and
 // color but never style.
 *,
@@ -252,12 +252,6 @@ body {
     overflow: hidden;
   }
 
-  @media (max-width: variables.$largeScreen) {
-    &:has(> #root.sidebar-open) {
-      overflow: hidden;
-    }
-  }
-
   // Radix locks scrolling when a dropdown or dialog opens and adds a margin-right the size of the scrollbar so things
   // don't shift. But it measures that off of the html element, which already reserves the space with scrollbar-gutter
   // above, so the margin just shoves everything over. The html prefix is so this beats the style tag it injects.
@@ -340,6 +334,7 @@ svg.lucide {
   --background-emphasis: #3f3f46;
   --background-darker: #131118;
   --background-active: #52525b;
+  --scrim: #000000;
 
   --border: #3f3f46;
   --border-subtle: #27272a;
@@ -372,6 +367,10 @@ svg.lucide {
 
   --bank-sidebar-width-static: #{16 * variables.$size};
   --budget-sidebar-width: #{72 * variables.$size};
+  /* Width of the sidebar's secondary column. An alias today, but the mobile
+  drawer sizes itself off "rail + secondary" rather than off any particular
+  sidebar, so a second kind of secondary column gets reconciled here. */
+  --sidebar-secondary-width: var(--budget-sidebar-width);
 }
 
 // Custom scrollbar styles

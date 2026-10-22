@@ -5,7 +5,7 @@ import { Link } from 'wouter';
 import Logo from '@monetr/interface/assets/Logo';
 import Divider from '@monetr/interface/components/Divider';
 import BankSidebarItem from '@monetr/interface/components/Layout/BankSidebarItem';
-import { MobileSidebarContext } from '@monetr/interface/components/Layout/MobileSidebarContextProvider';
+import { MobileSidebarContext } from '@monetr/interface/components/Layout/MobileSidebarContext';
 import MSidebarToggle from '@monetr/interface/components/MSidebarToggle';
 import Typography from '@monetr/interface/components/Typography';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';

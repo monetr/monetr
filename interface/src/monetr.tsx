@@ -1,10 +1,10 @@
 import { Redirect, Route, Switch } from 'wouter';
 
 import BudgetingLayout from '@monetr/interface/components/Layout/BudgetLayout';
-import MobileSidebarContextProvider from '@monetr/interface/components/Layout/MobileSidebarContextProvider';
 import SettingsLayout from '@monetr/interface/components/Layout/SettingsLayout';
 import Sidebar from '@monetr/interface/components/Layout/Sidebar';
 import SidebarPaddingLayout from '@monetr/interface/components/Layout/SidebarPaddingLayout';
+import SwipeSidebar from '@monetr/interface/components/Layout/SwipeSidebar';
 import LunchFlowSetupAccounts from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupAccounts';
 import LunchFlowSetupIntro from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupIntro';
 import LunchFlowSetupSync from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupSync';
@@ -141,8 +141,7 @@ export default function Monetr(): React.JSX.Element {
   }
 
   return (
-    <MobileSidebarContextProvider>
-      <Sidebar />
+    <SwipeSidebar panel={<Sidebar />}>
       <Switch>
         <Route path='/bank/:bankAccountId/*'>
           <BudgetingLayout>
@@ -225,7 +224,7 @@ export default function Monetr(): React.JSX.Element {
           </SidebarPaddingLayout>
         </Route>
       </Switch>
-    </MobileSidebarContextProvider>
+    </SwipeSidebar>
   );
 }
 

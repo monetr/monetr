@@ -1,0 +1,117 @@
+@use '@monetr/interface/variables';
+
+// This is desktop first because on desktop the panel and the page are just
+// display: contents, and the sidebars inside of them are the real layout.
+
+.panel {
+  display: contents;
+  // Visibility inherits. If we don't reset it here then the sidebars are blank
+  // on desktop.
+  visibility: visible;
+
+  @media (max-width: variables.$largeScreen) {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 42;
+    display: flex;
+    flex-direction: row;
+    width: var(--bank-sidebar-width-static);
+    // We hide the closed panel with visibility and not opacity, this is what
+    // keeps it out of the tab order.
+    visibility: hidden;
+    transform: translate3d(-100%, 0, 0);
+    background-color: var(--background);
+    border-right: 1px solid var(--border);
+    outline: none;
+    touch-action: pan-y pinch-zoom;
+
+    &[data-secondary] {
+      width: min(calc(var(--bank-sidebar-width-static) + var(--sidebar-secondary-width)), 86vw);
+    }
+
+    // The rail is 100dvh, which is taller than the panel when the URL bar is
+    // showing.
+    > * {
+      height: 100%;
+      min-height: 0;
+    }
+
+    // This is (0,2,0) and beats the (0,1,0) in the sidebar module.
+    :global([data-sidebar-secondary]) {
+      display: flex;
+      position: relative;
+      width: auto;
+      flex: 1 1 auto;
+      min-width: 0;
+      height: 100%;
+      border-right: none;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding-top: env(safe-area-inset-top);
+    }
+  }
+}
+
+.page {
+  display: contents;
+
+  @media (max-width: variables.$largeScreen) {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+    // This can't be auto. iOS starts a native pan before the drawer has moved
+    // far enough to pick an axis, and once Safari is scrolling it ignores
+    // preventDefault. This also means nothing inside the page can scroll
+    // horizontally, since touch-action applies to everything under it.
+    touch-action: pan-y pinch-zoom;
+  }
+}
+
+.scrim {
+  display: none;
+
+  @media (max-width: variables.$largeScreen) {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background-color: var(--scrim);
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.edge {
+  display: none;
+
+  @media (max-width: variables.$largeScreen) {
+    display: block;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 6 * variables.$size; // 24px
+    z-index: 41;
+    visibility: hidden;
+    pointer-events: none;
+    background: linear-gradient(to right, color-mix(in srgb, var(--scrim) 42%, transparent), transparent);
+  }
+}
+
+.catcher {
+  display: none;
+
+  @media (max-width: variables.$largeScreen) {
+    display: block;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    z-index: 41;
+    touch-action: none;
+    pointer-events: none;
+  }
+}

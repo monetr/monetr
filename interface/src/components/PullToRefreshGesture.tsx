@@ -3,6 +3,8 @@ import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { ArrowDown, Check, RotateCw, X } from 'lucide-react';
 
+import { isSidebarGestureActive } from '@monetr/interface/util/sidebarGesture';
+
 import styles from './PullToRefreshGesture.module.scss';
 
 // This is the actual pull to refresh behavior, its lazy loaded by PullToRefresh once the page has finished loading so
@@ -42,6 +44,8 @@ const DONE_DISPLAY_TIME = 650;
 const ERROR_DISPLAY_TIME = 1400;
 // How long it takes to slide everything back up. This needs to match --ptr-dur in PullToRefresh.module.scss.
 const RETRACT_TIME = 380;
+// The mobile sidebar is always a dialog but is aria-hidden when it is closed, so it shouldn't count as open.
+const openDialogSelector = '[role="dialog"]:not([aria-hidden="true"])';
 
 // The progress ring is an SVG circle, we draw it in by changing the stroke dash offset. So we need the circumference to
 // know how much of the circle to show.
@@ -342,12 +346,9 @@ export default function PullToRefreshGesture(props: PullToRefreshGestureProps): 
           updateStatus('idle');
         }
       }
-      // If there is a dialog open then do nothing, pulling on a dialog should never refresh the page behind it.
-      if (document.querySelector('[role="dialog"]')) {
-        return;
-      }
-      // Same thing for the mobile sidebar, when its open pulling anywhere should never refresh the page.
-      if (document.querySelector('#root.sidebar-open')) {
+      // If there is a dialog open then do nothing, pulling on a dialog should never refresh the page behind it. This
+      // covers the mobile sidebar too when its open.
+      if (document.querySelector(openDialogSelector)) {
         return;
       }
       if (window.scrollY > 0 || isBlockedFromPulling(event.target, root)) {
@@ -370,6 +371,17 @@ export default function PullToRefreshGesture(props: PullToRefreshGestureProps): 
       }
       const ourTouch = findOurTouch(event.touches);
       if (!ourTouch) {
+        return;
+      }
+      // If the sidebar took this drag then put everything back. The sidebar needs a few px of movement before it
+      // decides, and we might have already started pulling by then.
+      if (isSidebarGestureActive()) {
+        const wasPulling = touch.phase === 'pulling';
+        resetTouch();
+        if (wasPulling) {
+          drawPull(0, true);
+          updateStatus('idle');
+        }
         return;
       }
 

@@ -12,7 +12,21 @@
   color: var(--content-emphasis);
 
   // `lg:hidden`
-  @media (min-width: variables.$largeScreen) {
+  @media (min-width: variables.$largeScreenUp) {
     display: none;
+  }
+}
+
+.iconOpen {
+  display: none;
+}
+
+:global(html[data-sidebar-past='true']) {
+  .iconClosed {
+    display: none;
+  }
+
+  .iconOpen {
+    display: block;
   }
 }
