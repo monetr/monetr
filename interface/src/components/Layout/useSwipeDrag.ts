@@ -6,6 +6,8 @@ import {
   type DragMode,
   edgeZone,
   flingVelocity,
+  iosDeadZoneFraction,
+  isIos,
   type Motion,
   resolveAxis,
   rubber,
@@ -98,6 +100,12 @@ export default function useSwipeDrag(options: SwipeDragOptions): SwipeDrag {
       }
 
       const position = motion.location();
+      // The back swipe on iOS starts from the left side of the screen and we break it if we take the drag there. So
+      // while the drawer is closed we leave the left quarter of the screen alone.
+      if (position < 0.001 && isIos() && event.clientX < iosDeadZoneFraction * window.innerWidth) {
+        return;
+      }
+
       let mode: DragMode = 'loose';
       if (position < 0.001 && event.clientX > edgeZone) {
         if (swipeBlocked(event.target, pageRef.current)) {

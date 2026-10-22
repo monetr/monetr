@@ -36,6 +36,7 @@ export const flingVelocity = 420;
 export const commitFraction = 0.42;
 export const commitMinimum = 56;
 export const commitMaximumFraction = 0.6;
+export const iosDeadZoneFraction = 0.25;
 export const velocityWindow = 90;
 export const layerHold = 450;
 export const scrimOpacity = 0.62;
@@ -88,6 +89,17 @@ export function prefersReducedMotion(): boolean {
     return false;
   }
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+export function isIos(): boolean {
+  if (typeof navigator === 'undefined') {
+    return false;
+  }
+  // iPadOS says it's a Mac, the touch points are how we tell them apart.
+  return (
+    /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+    (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1)
+  );
 }
 
 export function tick(): void {
