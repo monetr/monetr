@@ -18,7 +18,7 @@ export default defineConfig({
       delete config.security;
       // Remove PWA plugin (only added in production builds anyway, but be explicit).
       // TODO Find a way to make this less hacky?
-      config.plugins = config.plugins?.filter(p => p && (p as { name: string }).name !== 'rsbuild-plugin-pwa');
+      config.plugins = config.plugins?.filter(p => p && (p as { name: string }).name !== 'pwa');
       // React DOM checks `typeof IS_REACT_ACT_ENVIRONMENT !== 'undefined'` as a bare identifier. Define it at compile
       // time so the check resolves correctly inside Rspack's bundled function scope.
       config.source ??= {};

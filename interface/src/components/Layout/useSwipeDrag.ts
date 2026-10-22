@@ -118,10 +118,7 @@ export default function useSwipeDrag(options: SwipeDragOptions): SwipeDrag {
         rememberFocus();
       }
 
-      // Promote the layers now while the finger is still. If we waited for the first move then the raster cost would
-      // land right when the user is watching it.
       motion.hold();
-      lift(true);
       dragRef.current = {
         pointerId: event.pointerId,
         el: event.currentTarget,
@@ -140,7 +137,7 @@ export default function useSwipeDrag(options: SwipeDragOptions): SwipeDrag {
         ],
       };
     },
-    [motion, lift, mobileRef, pageRef, rememberFocus],
+    [motion, mobileRef, pageRef, rememberFocus],
   );
 
   const onPointerMove = useCallback(
@@ -177,6 +174,10 @@ export default function useSwipeDrag(options: SwipeDragOptions): SwipeDrag {
           drag.selectionLocked = true;
           document.body.style.userSelect = 'none';
         }
+        // Don't lift on pointerdown even though it would save the raster on the first frame. lift makes the panel
+        // visible, and if iOS sees content become visible during a tap it treats the tap as a hover and never sends the
+        // click. Then every link on the page needs to be tapped twice.
+        lift(true);
         motion.beginDrag();
       }
 
@@ -213,7 +214,7 @@ export default function useSwipeDrag(options: SwipeDragOptions): SwipeDrag {
         event.preventDefault();
       }
     },
-    [motion, widthRef, releaseDrag, settleFromTap],
+    [motion, lift, widthRef, releaseDrag, settleFromTap],
   );
 
   const onPointerUp = useCallback(
