@@ -25,7 +25,7 @@ interface FrameHarness {
   rendered: Array<number>;
   restCount: () => number;
   errors: Array<unknown>;
-  // The first frame after start() only sets the clock and doesn't step, so tests counting steps need count + 1.
+  // The first frame after start() only sets the clock and doesn't step. Tests counting steps need count + 1.
   advance: (count: number, delta?: number) => void;
   pending: () => boolean;
 }
@@ -111,7 +111,7 @@ describe('swipeMotion', () => {
     });
 
     it('will apply the pixel floor on a mid width panel', () => {
-      // 0.42 * 100 is 42px which is below the floor, so the floor wins.
+      // 0.42 * 100 is 42px which is below the floor. The floor wins.
       expect(commitThreshold(100) * 100).toBeCloseTo(commitMinimum, 5);
     });
 
@@ -249,7 +249,7 @@ describe('swipeMotion', () => {
     });
 
     it('will block a horizontal scroller', () => {
-      // jsdom reports every element as 0x0, so we need to stub the size.
+      // jsdom reports every element as 0x0, we need to stub the size.
       const root = mount('<div id="scroller" style="overflow-x: auto"><span id="target">wide</span></div>');
       const scroller = root.querySelector('#scroller');
       expect(scroller).not.toBeNull();
@@ -275,13 +275,13 @@ describe('swipeMotion', () => {
       root.append(target);
       outer.append(root);
       document.body.append(outer);
-      // The attribute is above the root so it should not be checked.
+      // The attribute is above the root and should not be checked.
       expect(swipeBlocked(target, root)).toBeFalsy();
     });
   });
 
   describe('createMotion', () => {
-    // harness() replaces requestAnimationFrame, so put it back after each test.
+    // harness() replaces requestAnimationFrame. Put it back after each test.
     let originalRaf: typeof globalThis.requestAnimationFrame;
     let originalCancel: typeof globalThis.cancelAnimationFrame;
 
@@ -338,7 +338,7 @@ describe('swipeMotion', () => {
     it('will interpolate between physics steps rather than jumping', () => {
       const world = harness();
       world.motion.release(1);
-      // The clock frame, then a frame worth 1.5 steps. One step runs and half a step is left over, so we should paint
+      // The clock frame, then a frame worth 1.5 steps. One step runs and half a step is left over. We should paint
       // halfway between the last two steps.
       world.advance(1);
       world.advance(1, timeStep * 1.5);
@@ -361,7 +361,7 @@ describe('swipeMotion', () => {
       // A clock frame plus 5 normal ones.
       normal.advance(6);
 
-      // Floating point error can leave the stalled frame one step short, so this isn't an exact match.
+      // This isn't an exact match. Floating point error can leave the stalled frame one step short.
       expect(stalled.motion.location()).toBeLessThanOrEqual(normal.motion.location());
       expect(stalled.motion.location()).toBeGreaterThan(normal.motion.location() * 0.75);
       expect(stalled.motion.location()).toBeLessThan(0.75);
@@ -378,12 +378,12 @@ describe('swipeMotion', () => {
       }
 
       const before = world.motion.location();
-      // The drag loop is already running, so this is one real step.
+      // The drag loop is already running. This is one real step.
       world.motion.release(1);
       world.advance(1);
       const flung = world.motion.location() - before;
 
-      // The same step from the same position but with no velocity. release() starts a new loop, so it needs the
+      // The same step from the same position but with no velocity. release() starts a new loop and needs the
       // extra clock frame.
       const control = harness();
       control.motion.snap(before);
@@ -442,7 +442,7 @@ describe('swipeMotion', () => {
       expect(world.motion.location()).toBe(0);
       expect(world.motion.target()).toBe(0);
       expect(world.motion.isRunning()).toBeFalsy();
-      // We resize the panel when it rests, so a snap needs to report rest too.
+      // We resize the panel when it rests. A snap needs to report rest too.
       expect(world.restCount()).toBe(1);
       expect(world.rendered.at(-1)).toBe(0);
     });

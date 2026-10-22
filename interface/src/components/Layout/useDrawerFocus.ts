@@ -17,8 +17,8 @@ export interface DrawerFocusOptions {
 }
 
 export interface DrawerFocus {
-  // rememberFocus needs to be called before React sets inert on the page. Inert blurs whatever has focus before any of
-  // our effects run, so by then we wouldn't know what to give focus back to when the drawer closes.
+  // rememberFocus needs to be called before React sets inert on the page. Inert blurs the focused element before any of
+  // our effects run, and by then we wouldn't know what to give focus back to when the drawer closes.
   rememberFocus(): void;
 }
 

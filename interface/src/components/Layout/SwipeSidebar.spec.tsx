@@ -74,8 +74,8 @@ interface DragStep {
   y?: number;
 }
 
-// The default msPerStep is slow enough that it never counts as a fling, so the drawer opens or closes based on how
-// far it was dragged.
+// The default msPerStep is slow enough that it never counts as a fling. This way the drawer opens or closes based on
+// how far it was dragged.
 function drag(
   element: Element,
   from: DragStep,
@@ -216,7 +216,7 @@ describe('SwipeSidebar', () => {
       expect(document.activeElement).toBe(panelElement(world));
 
       fireEvent.click(pageToggle(world));
-      // This has to be remembered in open(), by the time an effect runs inert has already blurred it.
+      // This needs to be remembered in open(). By the time an effect runs inert has already blurred it.
       expect(document.activeElement).toBe(toggle);
     });
 
@@ -233,7 +233,7 @@ describe('SwipeSidebar', () => {
       const world = renderSidebar();
       fireEvent.click(pageToggle(world));
 
-      // A dropdown opened from the panel portals to the body and handles its own escape.
+      // A dropdown opened from the panel portals to the body and handles escape itself.
       fireEvent.keyDown(document.body, { key: 'Escape' });
 
       expect(panelElement(world)).toHaveAttribute('aria-hidden', 'false');
@@ -243,7 +243,7 @@ describe('SwipeSidebar', () => {
       const world = renderSidebar();
       fireEvent.click(pageToggle(world));
 
-      // Same route, so the pathname doesn't change.
+      // Same route, the pathname doesn't change.
       fireEvent.click(world.getByTestId('panel-link'));
 
       expect(panelElement(world)).toHaveAttribute('aria-hidden', 'true');
@@ -341,7 +341,7 @@ describe('SwipeSidebar', () => {
       const panel = panelElement(world);
       expect(panel.style.visibility).toBe('hidden');
 
-      // One pixel is under the slop. But the press still made the panel visible, so it needs to be hidden again.
+      // One pixel is under the slop. But the press still made the panel visible and it needs to be hidden again.
       drag(world.getByTestId('page-row'), { x: 200 }, [{ x: 201 }]);
 
       expect(panel.style.visibility).toBe('hidden');
@@ -349,7 +349,7 @@ describe('SwipeSidebar', () => {
     });
 
     it('will carry on to the nearest end when a press interrupts an animation', async () => {
-      // Reduced motion needs to be off, otherwise there is no animation to interrupt.
+      // Reduced motion needs to be off or there is no animation to interrupt.
       media.restore();
       media = installMatchMedia({ mobile: true, reducedMotion: false });
       const world = renderSidebar();
@@ -392,10 +392,10 @@ describe('SwipeSidebar', () => {
 
     it('will not eat a keyboard activation left over from a touch drag', () => {
       const world = renderSidebar();
-      // A touch drag doesn't make a click, so the suppression is still set after it.
+      // A touch drag doesn't make a click, which leaves the suppression set.
       drag(world.getByTestId('page-row'), { x: 200 }, [{ x: 260 }, { x: 340 }]);
 
-      // Keyboard clicks have a detail of 0. This uses a button since wouter's Link prevents default on its own.
+      // Keyboard clicks have a detail of 0. This uses a button since wouter's Link prevents default itself.
       const activation = new MouseEvent('click', { bubbles: true, cancelable: true, detail: 0 });
       world.getByTestId('page-button').dispatchEvent(activation);
 
@@ -494,7 +494,7 @@ describe('SwipeSidebar', () => {
 
       act(() => media.setMobile(false));
 
-      // Same DOM node, so the page wasn't remounted. Otherwise rotating a tablet would reset the page.
+      // Same DOM node, the page wasn't remounted. If it was then rotating a tablet would reset the page.
       expect(world.getByTestId('page-button')).toBe(before);
     });
   });

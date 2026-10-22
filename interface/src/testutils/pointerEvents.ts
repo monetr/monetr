@@ -1,4 +1,4 @@
-// jsdom doesn't have PointerEvent, so testing-library falls back to a plain Event and drops clientX and everything
+// jsdom doesn't have PointerEvent. testing-library falls back to a plain Event and drops clientX and everything
 // else. MouseEvent already has the coordinates, this just adds the pointer fields on top.
 export class TestPointerEvent extends MouseEvent {
   public readonly pointerId: number;

@@ -77,7 +77,7 @@ export default function useSwipeDrag(options: SwipeDragOptions): SwipeDrag {
     return drag;
   }, []);
 
-  // A press that never turned into a horizontal drag goes back to whatever state we were already in, not the nearest
+  // A press that never turned into a horizontal drag goes back to the state we were already in, not the nearest
   // end. If they tap in the middle of an animation then the animation should just finish. We can't use cancelDrag here,
   // at rest it stops the loop without rendering, and a panel that lift() made visible would be stuck on screen.
   const settleFromTap = useCallback(() => {
@@ -89,7 +89,7 @@ export default function useSwipeDrag(options: SwipeDragOptions): SwipeDrag {
       if (!mobileRef.current || !event.isPrimary || event.button > 0 || dragRef.current) {
         return;
       }
-      // Reset this before the portal check below, otherwise a tap on portalled content would leave a stale one.
+      // Reset this before the portal check below. A tap on portalled content would leave a stale one if we didn't.
       suppressClickRef.current = false;
       // Portalled content (like the account picker) still bubbles through the React tree even though it is not inside
       // the panel in the DOM. Those should never start a drag.
@@ -164,7 +164,7 @@ export default function useSwipeDrag(options: SwipeDragOptions): SwipeDrag {
         // would get retargeted.
         drag.el.setPointerCapture?.(drag.pointerId);
         drag.captured = true;
-        // Touch never selects text when dragging, and writing to body.style makes the whole document recalculate.
+        // Touch never selects text when dragging, and writing to body.style makes the entire document recalculate.
         if (event.pointerType !== 'touch') {
           drag.selectionLocked = true;
           document.body.style.userSelect = 'none';
@@ -264,20 +264,20 @@ export default function useSwipeDrag(options: SwipeDragOptions): SwipeDrag {
     if (!suppressClickRef.current) {
       return;
     }
-    // Keyboard and screen reader clicks have a detail of 0. A touch drag never makes a click at all since we prevent
-    // the touchmove, so the flag is still set when they get here and we have to let them through.
+    // Keyboard and screen reader clicks have a detail of 0, let those through. A touch drag never makes a click since
+    // we prevent the touchmove, which means the flag can still be set when one of these comes in.
     if (event.detail === 0) {
       return;
     }
     suppressClickRef.current = false;
-    // wouter's Link is a real <a href> and only calls preventDefault in its own onClick. If we only stopped propagation
-    // then the browser would follow the link and reload the whole page.
+    // wouter's Link is a real <a href> and only calls preventDefault in the Link's onClick. If we only stopped
+    // propagation then the browser would follow the link and reload the page.
     event.preventDefault();
     event.stopPropagation();
   }, []);
 
-  // React attaches touchmove as a passive listener, so calling preventDefault in onTouchMove does nothing. This is the
-  // listener that actually stops the page from scrolling while dragging.
+  // React attaches touchmove as a passive listener and preventDefault does nothing in there. This is the listener that
+  // stops the page from scrolling while dragging.
   useEffect(() => {
     if (!isMobile) {
       return;

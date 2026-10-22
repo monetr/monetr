@@ -72,9 +72,9 @@ export function rubber(over: number, dimension: number, c: number = 0.5): number
   return (1 - 1 / ((over * c) / dimension + 1)) * dimension;
 }
 
-// commitThreshold will return the fraction of the panel width past which letting go opens the drawer. On a narrow
-// panel 42% would only be about 15px, so there is a floor in px. But the floor is capped too, otherwise a really
-// narrow panel could never be opened.
+// commitThreshold will return the fraction of the panel width past which letting go opens the drawer. On the 64px rail
+// 42% is only about 27px, which is just 15px of travel after the slop. That's why there is a floor in px. The floor is
+// capped too, if it wasn't then a narrow panel could never be opened.
 export function commitThreshold(width: number): number {
   if (width <= 0) {
     return commitFraction;
@@ -108,8 +108,8 @@ export function swipeBlocked(target: EventTarget | null, root: Element | null): 
     if (node.hasAttribute('data-no-swipe')) {
       return true;
     }
-    // Check the attribute and not the draggable property. The property is true for every <a href>, and the rows in the
-    // mobile lists are covered by links, so the property would block the swipe on most of the app.
+    // Check the attribute and not the draggable property. The property is true for every <a href> and the rows in the
+    // mobile lists are covered by links. Using the property would block the swipe on most of the app.
     if (node.getAttribute('draggable') === 'true') {
       return true;
     }
@@ -156,8 +156,8 @@ export function resolveAxis(mode: DragMode, dx: number, dy: number): Axis | null
   return ax > ay ? 'x' : 'y';
 }
 
-// Measure over a short window instead of just the last two samples. Otherwise one late event can decide the whole
-// fling.
+// Measure over a short window instead of just the last two samples. If we only used two then one late event could
+// decide the entire fling.
 export function velocityOf(samples: Array<Sample>): number {
   const last = samples.at(-1);
   const previous = samples.at(-2);
@@ -209,7 +209,7 @@ export interface MotionCallbacks {
 //
 // This way uneven touch sampling doesn't turn into judder. Dragging uses a loose friction and duration so location
 // trails the finger, and letting go swaps in a stiff pair that lands without wobbling. The velocity carries over when
-// we swap, which is why a fling doesn't need to be handled on its own.
+// we swap, which is why a fling doesn't need any special handling.
 export function createMotion(callbacks: MotionCallbacks): Motion {
   let location = 0;
   let previous = 0;

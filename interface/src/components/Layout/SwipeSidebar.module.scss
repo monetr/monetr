@@ -5,7 +5,7 @@
 
 .panel {
   display: contents;
-  // Visibility inherits, so it has to be reset here or the sidebars are blank
+  // Visibility inherits. If we don't reset it here then the sidebars are blank
   // on desktop.
   visibility: visible;
 
@@ -38,7 +38,7 @@
       min-height: 0;
     }
 
-    // This is (0,2,0) so it beats the (0,1,0) in the sidebar's own module.
+    // This is (0,2,0) and beats the (0,1,0) in the sidebar module.
     :global([data-sidebar-secondary]) {
       display: flex;
       position: relative;

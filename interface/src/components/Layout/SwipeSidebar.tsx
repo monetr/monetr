@@ -20,8 +20,8 @@ import styles from './SwipeSidebar.module.scss';
 
 type PanelShape = 'rail' | 'wide';
 
-// If whatever is in the panel has a secondary column then the drawer needs to be wide. We look for the marker instead
-// of checking the route, this way another secondary sidebar only needs to add data-sidebar-secondary.
+// If the panel has a secondary column then the drawer needs to be wide. We look for data-sidebar-secondary instead of
+// checking the route. This way another secondary sidebar doesn't need any changes in here.
 function resolvePanelShape(panel: HTMLElement | null): PanelShape {
   if (!panel) {
     return 'rail';
@@ -84,15 +84,14 @@ export default function SwipeSidebar(props: SwipeSidebarProps): React.JSX.Elemen
     catcher.style.transform = `translate3d(${visible * width}px,0,0)`;
     edge.style.opacity = String(visible);
 
-    // These only get written when they change instead of every frame.
     const previous = previousRef.current;
     const offscreen = visible <= 0.001;
     if (previous.offscreen !== offscreen) {
       previous.offscreen = offscreen;
       panel.style.visibility = offscreen ? 'hidden' : 'visible';
       edge.style.visibility = offscreen ? 'hidden' : 'visible';
-      // This needs to be based on being offscreen and not on being past halfway. We commit to open at 0.42, so halfway
-      // would leave a gap where the page is inert but nothing is catching taps.
+      // This needs to be based on being offscreen and not on being past halfway. We commit to open at 0.42, and between
+      // that and halfway the page would be inert with nothing catching taps.
       catcher.style.pointerEvents = offscreen ? 'none' : 'auto';
     }
 
@@ -113,8 +112,8 @@ export default function SwipeSidebar(props: SwipeSidebarProps): React.JSX.Elemen
     });
   }, []);
 
-  // lift promotes everything that moves to its own layer while we animate. We hold onto the layers for a moment after
-  // things stop, this way a quick open, close and open again doesn't pay for promoting them each time.
+  // lift promotes everything that moves while we animate. We hold onto the layers for a moment after things stop. This
+  // way a quick open, close and open again doesn't pay for promoting them each time.
   const lift = useCallback((on: boolean) => {
     if (!mobileRef.current) {
       return;
@@ -132,7 +131,7 @@ export default function SwipeSidebar(props: SwipeSidebarProps): React.JSX.Elemen
       if (scrimRef.current) {
         scrimRef.current.style.willChange = on ? 'opacity' : 'auto';
       }
-      // If the rows aren't promoted too then the whole panel gets re-rastered every frame.
+      // If the rows aren't promoted too then the entire panel gets rastered again every frame.
       staggerRef.current.forEach(item => {
         item.style.willChange = on ? 'transform, opacity' : 'auto';
       });
@@ -143,11 +142,11 @@ export default function SwipeSidebar(props: SwipeSidebarProps): React.JSX.Elemen
       return;
     }
 
-    // The rows in the panel change with the route and as queries load, so find them again each time.
+    // Find the rows again each time, they change with the route and as queries load.
     staggerRef.current = Array.from(panelRef.current?.querySelectorAll<HTMLElement>('[data-stagger]') ?? []);
     reducedRef.current = prefersReducedMotion();
-    // Show the panel before anything moves. Browsers don't raster hidden content, so otherwise the first frame would
-    // have to raster the entire panel.
+    // Show the panel before anything moves. Browsers don't raster hidden content, and we don't want the first frame
+    // to have to raster the entire panel.
     if (panelRef.current) {
       panelRef.current.style.visibility = 'visible';
     }
@@ -190,8 +189,7 @@ export default function SwipeSidebar(props: SwipeSidebarProps): React.JSX.Elemen
     staggerRef.current = [];
   }, []);
 
-  // The motion only gets created once, so its callbacks go through this ref. Otherwise it would keep calling the paint
-  // from the first render.
+  // The motion only gets created once. Its callbacks go through this ref, this way it always calls the latest paint.
   const sinkRef = useRef<MotionCallbacks>({
     render: () => {},
     onRest: () => {},
@@ -206,7 +204,7 @@ export default function SwipeSidebar(props: SwipeSidebarProps): React.JSX.Elemen
   const motion = motionRef.current;
 
   // The width itself comes from CSS, this just picks which one and then measures it. If we are in the middle of an
-  // animation then wait until it is done, otherwise the panel would visibly jump to the new width.
+  // animation then wait until it is done. The panel would visibly jump to the new width if we didn't.
   const applyShape = useCallback(() => {
     const panel = panelRef.current;
     if (!panel || !mobileRef.current) {
@@ -221,7 +219,7 @@ export default function SwipeSidebar(props: SwipeSidebarProps): React.JSX.Elemen
     shapeRef.current = next;
     panel.toggleAttribute('data-secondary', next === 'wide');
     widthRef.current = Math.max(1, panel.offsetWidth);
-    // The resting transform was written using the old width, so we need to paint again.
+    // Paint again since the resting transform used the old width.
     motion.repaint();
   }, [motion]);
 
@@ -282,8 +280,8 @@ export default function SwipeSidebar(props: SwipeSidebarProps): React.JSX.Elemen
   });
 
   // If something throws in the animation loop then the drawer would be stuck with the page inert and scrolling locked.
-  // Clearing the inline styles puts it back to closed. We need to release the drag too, otherwise the next pointermove
-  // would just run into the same error again.
+  // Clearing the inline styles puts it back to closed. We need to release the drag too. If we don't then the next
+  // pointermove would run into the same error again.
   const handleError = useCallback(
     (error: unknown) => {
       captureException(error);
@@ -332,12 +330,12 @@ export default function SwipeSidebar(props: SwipeSidebarProps): React.JSX.Elemen
     if (!isMobile || !pathname) {
       return;
     }
-    // A <Redirect> or an action button can navigate while a finger is still down, so release the drag first.
+    // Release the drag first. A <Redirect> or an action button can navigate while a finger is still down.
     const drag = releaseDrag();
 
     const shapeChanged = resolvePanelShape(panelRef.current) !== shapeRef.current;
 
-    // Check the target and whether the loop is running, not just the location. The location trails the target, so
+    // Check the target and whether the loop is running, not just the location. The location trails the target, and
     // right after a drag starts it can still be 0 while the drawer is on its way open.
     if (motion.isRunning() || motion.location() > 0.001 || motion.target() > 0.001) {
       lift(true);
@@ -348,7 +346,7 @@ export default function SwipeSidebar(props: SwipeSidebarProps): React.JSX.Elemen
         motion.release(0);
       }
     } else if (drag) {
-      // The press promoted the layers but never moved anything, so nothing is going to rest and give them back.
+      // The press promoted the layers but never moved anything. Nothing is going to rest and give them back.
       lift(false);
     }
     setIsOpen(false);
@@ -378,8 +376,8 @@ export default function SwipeSidebar(props: SwipeSidebarProps): React.JSX.Elemen
     [motion, releaseDrag],
   );
 
-  // Tapping the link for the page you are already on doesn't change the pathname, so the navigation effect wouldn't
-  // close the drawer.
+  // Tapping the link for the page you are already on doesn't change the pathname. The navigation effect won't run,
+  // we have to close the drawer here.
   function closeOnLinkClick(event: React.MouseEvent<HTMLElement>) {
     if (!mobileRef.current) {
       return;
@@ -397,8 +395,8 @@ export default function SwipeSidebar(props: SwipeSidebarProps): React.JSX.Elemen
     toggle,
   };
 
-  // The panel is always mounted, and on desktop display: contents keeps it in the accessibility tree. So the dialog
-  // role only goes on when we are on mobile, otherwise it would hide the desktop sidebars.
+  // Only make the panel a dialog on mobile. It is always mounted, and on desktop display: contents keeps it in the
+  // accessibility tree where a dialog role would hide the desktop sidebars.
   const dialogProps = isMobile
     ? ({
         'aria-hidden': !isOpen,
