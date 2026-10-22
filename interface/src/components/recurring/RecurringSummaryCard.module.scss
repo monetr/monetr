@@ -50,8 +50,9 @@
   margin-left: auto;
 }
 
-.memo {
-  @include mixins.text-small;
+// Monospace so it reads like the bank statement
+.originalMemo {
+  font-family: var(--mono);
 }
 
 .scheduleRow {
@@ -96,6 +97,25 @@
   @extend .badge;
   color: var(--content-emphasis);
   background-color: var(--background-emphasis);
+}
+
+// Placeholder heights match the line heights of the text they stand in for so
+// the header doesn't jump once it loads
+.titlePlaceholder {
+  width: 60%;
+  height: 9 * variables.$size; // 36px
+}
+
+.originalMemoPlaceholder {
+  width: 50%;
+  height: 4 * variables.$size; // 16px
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.schedulePlaceholder {
+  width: 40%;
+  height: 7 * variables.$size; // 28px
 }
 
 // Coverage drops under the dates on mobile, sits on the right once there's room

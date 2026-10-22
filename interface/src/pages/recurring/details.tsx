@@ -11,13 +11,17 @@ import Typography from '@monetr/interface/components/Typography';
 import { useRecurringTransaction } from '@monetr/interface/hooks/useRecurringTransaction';
 import { useTransactionCluster } from '@monetr/interface/hooks/useTransactionCluster';
 import { showMarkNotRecurringModal } from '@monetr/interface/modals/MarkNotRecurringModal';
+import type BankAccount from '@monetr/interface/models/BankAccount';
 import type { ID } from '@monetr/interface/models/ID';
 import type TransactionRecurring from '@monetr/interface/models/TransactionRecurring';
 
 import styles from './details.module.scss';
 
 export default function RecurringDetails(): React.JSX.Element | null {
-  const { transactionRecurringId } = useParams<{ transactionRecurringId: ID<TransactionRecurring> }>();
+  const { bankAccountId, transactionRecurringId } = useParams<{
+    bankAccountId: ID<BankAccount>;
+    transactionRecurringId: ID<TransactionRecurring>;
+  }>();
   const { data: recurring, isLoading, isError } = useRecurringTransaction(transactionRecurringId);
   // The recurring transaction doesn't have a name of its own, it uses the name of its similar transactions group.
   const { data: cluster } = useTransactionCluster(recurring?.transactionClusterId ?? null);
@@ -35,9 +39,14 @@ export default function RecurringDetails(): React.JSX.Element | null {
 
   if (isLoading) {
     return (
-      <div className={styles.centerState}>
-        <Typography size='5xl'>One moment...</Typography>
-      </div>
+      <Fragment>
+        <MTopNavigation base={`/bank/${bankAccountId}/recurring`} icon={Repeat} title='Recurring' />
+        <div className={styles.body}>
+          <div className={styles.content}>
+            <RecurringSummaryCard />
+          </div>
+        </div>
+      </Fragment>
     );
   }
 

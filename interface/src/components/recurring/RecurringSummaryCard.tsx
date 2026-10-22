@@ -5,7 +5,7 @@ import { rrulestr } from 'rrule';
 
 import { Button } from '@monetr/interface/components/Button';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
-import RecurringMemo from '@monetr/interface/components/recurring/RecurringMemo';
+import { Skeleton } from '@monetr/interface/components/Skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@monetr/interface/components/Tooltip';
 import Typography from '@monetr/interface/components/Typography';
 import { useLocale } from '@monetr/interface/hooks/useLocale';
@@ -20,19 +20,31 @@ import { DateLength, formatDate, formatRelativeDate } from '@monetr/interface/ut
 import styles from './RecurringSummaryCard.module.scss';
 
 export interface RecurringSummaryCardProps {
-  recurring: TransactionRecurring;
-  onMarkNotRecurring: () => void;
+  // Will show a placeholder while the recurring transaction is still loading
+  recurring?: TransactionRecurring;
+  onMarkNotRecurring?: () => void;
 }
 
 export default function RecurringSummaryCard(props: RecurringSummaryCardProps): React.JSX.Element | null {
   const { data: locale } = useLocaleCurrency();
   const { data: dateLocale } = useLocale();
   const { inTimezone } = useTimezone();
-  const { data: cluster } = useTransactionCluster(props.recurring.transactionClusterId);
-  const { data: spending } = useSpending(props.recurring.spendingId);
+  const { data: cluster } = useTransactionCluster(props.recurring?.transactionClusterId ?? null);
+  const { data: spending } = useSpending(props.recurring?.spendingId ?? null);
 
-  if (!locale || !dateLocale) {
-    return null;
+  if (!props.recurring || !cluster || !locale || !dateLocale) {
+    return (
+      <section className={styles.hero}>
+        <MerchantIcon size='large' />
+        <div className={styles.heroText}>
+          <Skeleton className={styles.titlePlaceholder} />
+          <Skeleton className={styles.originalMemoPlaceholder} />
+          <div className={styles.scheduleRow}>
+            <Skeleton className={styles.schedulePlaceholder} />
+          </div>
+        </div>
+      </section>
+    );
   }
 
   let nextLabel = 'Next Deposit';
@@ -68,16 +80,24 @@ export default function RecurringSummaryCard(props: RecurringSummaryCardProps): 
     <Fragment>
       <section className={styles.hero}>
         <div className={styles.icon}>
-          <MerchantIcon name={cluster?.name} size='large' />
+          <MerchantIcon name={cluster.name} size='large' />
           <span className={styles.iconBadge} title='Recurring'>
             <Repeat />
           </span>
         </div>
         <div className={styles.heroText}>
-          <Typography color='emphasis' component='h1' ellipsis size='3xl' weight='bold'>
-            {cluster?.name}
+          <Typography color='emphasis' component='h1' ellipsis='mobileScroll' size='3xl' weight='bold'>
+            {cluster.name}
           </Typography>
-          {cluster?.originalMemo && <RecurringMemo className={styles.memo} memo={cluster.originalMemo} />}
+          <Typography
+            className={styles.originalMemo}
+            color='subtle'
+            ellipsis='mobileScroll'
+            size='xs'
+            title={cluster.originalMemo}
+          >
+            {cluster.originalMemo}
+          </Typography>
           <div className={styles.scheduleRow}>
             <span className={styles.schedule}>
               <strong>{amount}</strong> {rule.toText()}
