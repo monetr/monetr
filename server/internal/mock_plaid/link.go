@@ -10,7 +10,7 @@ import (
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
 	"github.com/stretchr/testify/require"
 )
 
@@ -35,7 +35,7 @@ func MockCreateLinkToken(t *testing.T, callbacks ...func(t *testing.T, request p
 			require.Equal(t, consts.PlaidClientName, createLinkTokenRequest.ClientName, "client name must match the shared const")
 			require.NotEmpty(t, createLinkTokenRequest.Language, "language is required")
 
-			if createLinkTokenRequest.AccessToken.IsSet() {
+			if createLinkTokenRequest.AccessToken != nil {
 				require.Empty(t, createLinkTokenRequest.Products, "products array must be empty when updating a link")
 			}
 
@@ -45,10 +45,10 @@ func MockCreateLinkToken(t *testing.T, callbacks ...func(t *testing.T, request p
 				require.NotEmpty(t, webhookUrl.String(), "webhook URL must be properly parsed")
 			}
 
-			return plaid.LinkTokenCreateResponse{
+			return &plaid.LinkTokenCreateResponse{
 				LinkToken:  gofakeit.UUID(),
 				Expiration: time.Now().Add(30 * time.Second),
-				RequestId:  gofakeit.UUID(),
+				RequestID:  gofakeit.UUID(),
 			}, http.StatusOK
 		},
 		PlaidHeaders,
@@ -66,15 +66,15 @@ func MockCreateLinkTokenFailure(t *testing.T) {
 			require.Equal(t, consts.PlaidClientName, createLinkTokenRequest.ClientName, "client name must match the shared const")
 			require.NotEmpty(t, createLinkTokenRequest.Language, "language is required")
 
-			if createLinkTokenRequest.AccessToken.IsSet() {
+			if createLinkTokenRequest.AccessToken != nil {
 				require.Empty(t, createLinkTokenRequest.Products, "products array must be empty when updating a link")
 			}
 
-			return plaid.PlaidError{
+			return &plaid.PlaidError{
 				ErrorType:      "API_ERROR",
 				ErrorCode:      "INTERNAL_SERVER_ERROR",
-				DisplayMessage: *plaid.NewNullableString(new("Something went wrong.")),
-				RequestId:      new(gofakeit.UUID()),
+				DisplayMessage: new("Something went wrong."),
+				RequestID:      new(gofakeit.UUID()),
 			}, http.StatusInternalServerError
 		},
 		PlaidHeaders,

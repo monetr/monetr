@@ -13,7 +13,7 @@ import (
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/ui"
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -43,7 +43,7 @@ func TestNewApp(t *testing.T) {
 			Enabled:      true,
 			ClientID:     gofakeit.UUID(),
 			ClientSecret: gofakeit.UUID(),
-			Environment:  plaid.Sandbox,
+			Environment:  plaid.Environments.Sandbox,
 		},
 		CORS: config.CORS{
 			Debug: false,

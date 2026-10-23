@@ -4,7 +4,7 @@ import (
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/currency"
 	"github.com/monetr/monetr/server/internal/myownsanity"
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
 )
 
 type (
@@ -55,19 +55,19 @@ var (
 )
 
 func NewPlaidBankAccountBalances(
-	balances plaid.AccountBalance,
+	balances *plaid.AccountBalance,
 ) (PlaidBankAccountBalances, error) {
 	available, _ := currency.ParseFloatToAmount(
-		balances.GetAvailable(),
-		balances.GetIsoCurrencyCode(),
+		deref(balances.GetAvailable()),
+		deref(balances.GetIsoCurrencyCode()),
 	)
 	current, _ := currency.ParseFloatToAmount(
-		balances.GetCurrent(),
-		balances.GetIsoCurrencyCode(),
+		deref(balances.GetCurrent()),
+		deref(balances.GetIsoCurrencyCode()),
 	)
 	limit, _ := currency.ParseFloatToAmount(
-		balances.GetLimit(),
-		balances.GetIsoCurrencyCode(),
+		deref(balances.GetLimit()),
+		deref(balances.GetIsoCurrencyCode()),
 	)
 
 	return PlaidBankAccountBalances{
@@ -76,8 +76,8 @@ func NewPlaidBankAccountBalances(
 		Available:              available,
 		Current:                current,
 		Limit:                  limit,
-		IsoCurrencyCode:        balances.GetIsoCurrencyCode(),
-		UnofficialCurrencyCode: balances.GetUnofficialCurrencyCode(),
+		IsoCurrencyCode:        deref(balances.GetIsoCurrencyCode()),
+		UnofficialCurrencyCode: deref(balances.GetUnofficialCurrencyCode()),
 	}, nil
 }
 
@@ -114,7 +114,7 @@ var (
 )
 
 func NewPlaidBankAccount(
-	bankAccount plaid.AccountBase,
+	bankAccount *plaid.AccountBase,
 ) (PlaidBankAccount, error) {
 	balances, err := NewPlaidBankAccountBalances(bankAccount.GetBalances())
 	if err != nil {
@@ -122,13 +122,13 @@ func NewPlaidBankAccount(
 	}
 
 	return PlaidBankAccount{
-		AccountId:    bankAccount.GetAccountId(),
+		AccountId:    bankAccount.GetAccountID(),
 		Balances:     balances,
-		Mask:         bankAccount.GetMask(),
+		Mask:         deref(bankAccount.GetMask()),
 		Name:         bankAccount.GetName(),
-		OfficialName: bankAccount.GetOfficialName(),
+		OfficialName: deref(bankAccount.GetOfficialName()),
 		Type:         string(bankAccount.GetType()),
-		SubType:      string(bankAccount.GetSubtype()),
+		SubType:      string(deref(bankAccount.GetSubtype())),
 		// Set the currency code of the bank account to be the first non-empty
 		// currency code we get from Plaid, or fall back to USD as a default.
 		Currency: myownsanity.CoalesceStrings(

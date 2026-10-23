@@ -21,7 +21,9 @@ import (
 	"github.com/monetr/monetr/server/round"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
+	"github.com/plaid/plaid-go/v49/client"
+	"github.com/plaid/plaid-go/v49/option"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/uptrace/bun"
 )
@@ -43,27 +45,37 @@ type (
 // after is a wrapper around some of the basic operations we would want to perform after each request. Mainly that we
 // want to keep track of things like the request Id and some information about the request itself. It also handles error
 // wrapping.
-func after(span *sentry.Span, _ *http.Response, err error, _, errorMessage string) error {
-	switch e := err.(type) {
-	case nil:
+func after(span *sentry.Span, err error, _, errorMessage string) error {
+	if err == nil {
 		span.Status = sentry.SpanStatusOK
-	case plaid.GenericOpenAPIError:
-		span.Status = sentry.SpanStatusInternalError
-		var plaidError plaid.PlaidError
-		if jsonErr := json.Unmarshal(e.Body(), &plaidError); jsonErr != nil {
-			return errors.Wrap(err, errorMessage)
-		}
-
-		return errors.Wrap(
-			&PlatypusError{plaidError},
-			errorMessage,
-		)
-	default:
-		span.Status = sentry.SpanStatusInternalError
-		return errors.Wrap(err, errorMessage)
+		return nil
 	}
 
-	return nil
+	span.Status = sentry.SpanStatusInternalError
+
+	// Plaid returns a different error type for each status code, but they all
+	// have the parsed Plaid error on them. If the body wasn't a Plaid error then
+	// this is nil and we just wrap whatever we got.
+	var plaidErr interface{ GetBody() *plaid.PlaidError }
+	if errors.As(err, &plaidErr) && plaidErr.GetBody() != nil {
+		return errors.Wrap(
+			&PlatypusError{*plaidErr.GetBody()},
+			errorMessage,
+		)
+	}
+
+	return errors.Wrap(err, errorMessage)
+}
+
+// deref will return the value the pointer points to, or the zero value if the
+// pointer is nil. Plaid's SDK gives us pointers for anything nullable.
+func deref[T any](input *T) T {
+	var result T
+	if input != nil {
+		result = *input
+	}
+
+	return result
 }
 
 var (
@@ -152,17 +164,14 @@ func NewPlaid(
 			}),
 	}
 
-	conf := plaid.NewConfiguration()
-	conf.HTTPClient = httpClient
-	conf.UseEnvironment(options.Environment)
-	conf.AddDefaultHeader("PLAID-CLIENT-ID", options.ClientID)
-	conf.AddDefaultHeader("PLAID-SECRET", options.ClientSecret)
-
-	client := plaid.NewAPIClient(conf)
-
 	return &Plaid{
-		clock:  clock,
-		client: client,
+		clock: clock,
+		client: client.NewClient(
+			option.WithHTTPClient(httpClient),
+			option.WithBaseURL(options.Environment),
+			option.WithClientID(new(options.ClientID)),
+			option.WithSecret(options.ClientSecret),
+		),
 		db:     db,
 		log:    log,
 		kms:    kms,
@@ -173,7 +182,7 @@ func NewPlaid(
 
 type Plaid struct {
 	clock  clock.Clock
-	client *plaid.APIClient
+	client *client.Client
 	db     bun.IDB
 	log    *slog.Logger
 	kms    secrets.KeyManagement
@@ -201,43 +210,41 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 		}
 	}
 
-	request := p.client.PlaidApi.
-		LinkTokenCreate(span.Context()).
-		LinkTokenCreateRequest(plaid.LinkTokenCreateRequest{
+	result, err := p.client.Link.CreateToken(
+		span.Context(),
+		&plaid.LinkTokenCreateRequest{
 			ClientName:   consts.PlaidClientName,
 			Language:     consts.PlaidLanguage,
 			CountryCodes: p.config.CountryCodes,
 			User: &plaid.LinkTokenCreateRequestUser{
-				ClientUserId:             options.ClientUserID,
+				ClientUserID:             options.ClientUserID,
 				LegalName:                &options.LegalName,
 				PhoneNumber:              options.PhoneNumber,
-				PhoneNumberVerifiedTime:  *plaid.NewNullableTime(options.PhoneNumberVerifiedTime),
+				PhoneNumberVerifiedTime:  options.PhoneNumberVerifiedTime,
 				EmailAddress:             &options.EmailAddress,
-				EmailAddressVerifiedTime: *plaid.NewNullableTime(options.EmailAddressVerifiedTime),
+				EmailAddressVerifiedTime: options.EmailAddressVerifiedTime,
 				Ssn:                      nil,
-				DateOfBirth:              *plaid.NewNullableString(nil),
+				DateOfBirth:              nil,
 			},
 			Products:              consts.PlaidProducts,
 			Webhook:               webhooksUrl,
-			AccessToken:           *plaid.NewNullableString(nil),
+			AccessToken:           nil,
 			LinkCustomizationName: nil,
-			RedirectUri:           redirectUri,
+			RedirectURI:           redirectUri,
 			AndroidPackageName:    nil,
 			AccountFilters:        nil,
 			EuConfig:              nil,
-			InstitutionId:         nil,
+			InstitutionID:         nil,
 			PaymentInitiation:     nil,
 			IncomeVerification:    nil,
 			Auth:                  nil,
 			Transactions: &plaid.LinkTokenTransactions{
-				DaysRequested: new(int32(2 * 365)), // 2 years
+				DaysRequested: new(2 * 365), // 2 years
 			},
-		})
-
-	result, response, err := request.Execute()
+		},
+	)
 	if err = after(
 		span,
-		response,
 		err,
 		"Creating link token with Plaid",
 		"failed to create link token",
@@ -258,16 +265,14 @@ func (p *Plaid) ExchangePublicToken(ctx context.Context, publicToken string) (*I
 
 	log := p.log
 
-	request := p.client.PlaidApi.
-		ItemPublicTokenExchange(span.Context()).
-		ItemPublicTokenExchangeRequest(plaid.ItemPublicTokenExchangeRequest{
+	result, err := p.client.Item.ExchangePublicToken(
+		span.Context(),
+		&plaid.ItemPublicTokenExchangeRequest{
 			PublicToken: publicToken,
-		})
-
-	result, response, err := request.Execute()
+		},
+	)
 	if err = after(
 		span,
-		response,
 		err,
 		"Exchanging public token with Plaid",
 		"failed to exchange public token with Plaid",
@@ -290,16 +295,14 @@ func (p *Plaid) GetWebhookVerificationKey(ctx context.Context, keyId string) (*W
 
 	log := p.log
 
-	request := p.client.PlaidApi.
-		WebhookVerificationKeyGet(span.Context()).
-		WebhookVerificationKeyGetRequest(plaid.WebhookVerificationKeyGetRequest{
-			KeyId: keyId,
-		})
-
-	result, response, err := request.Execute()
+	result, err := p.client.Webhook.GetVerificationKey(
+		span.Context(),
+		&plaid.WebhookVerificationKeyGetRequest{
+			KeyID: keyId,
+		},
+	)
 	if err = after(
 		span,
-		response,
 		err,
 		"Retrieving webhook verification key",
 		"failed to retrieve webhook verification key from Plaid",
@@ -322,23 +325,21 @@ func (p *Plaid) GetInstitution(ctx context.Context, institutionId string) (*plai
 
 	log := p.log
 
-	request := p.client.PlaidApi.
-		InstitutionsGetById(span.Context()).
-		InstitutionsGetByIdRequest(plaid.InstitutionsGetByIdRequest{
-			InstitutionId: institutionId,
+	result, err := p.client.Institutions.GetByID(
+		span.Context(),
+		&plaid.InstitutionsGetByIDRequest{
+			InstitutionID: institutionId,
 			CountryCodes:  p.config.CountryCodes,
-			Options: &plaid.InstitutionsGetByIdRequestOptions{
+			Options: &plaid.InstitutionsGetByIDRequestOptions{
 				IncludeOptionalMetadata:          new(true),
 				IncludeStatus:                    new(true),
 				IncludeAuthMetadata:              new(false),
 				IncludePaymentInitiationMetadata: new(false),
 			},
-		})
-
-	result, response, err := request.Execute()
+		},
+	)
 	if err = after(
 		span,
-		response,
 		err,
 		"Retrieving Plaid institution status",
 		"failed to retrieve Plaid institution status",
@@ -347,7 +348,7 @@ func (p *Plaid) GetInstitution(ctx context.Context, institutionId string) (*plai
 		return nil, err
 	}
 
-	return &result.Institution, nil
+	return result.Institution, nil
 }
 
 func (p *Plaid) NewClientFromItemId(ctx context.Context, itemId string) (Client, error) {

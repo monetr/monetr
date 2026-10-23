@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v7"
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,14 +15,13 @@ func TestNewPlaidBankAccountBalances(t *testing.T) {
 		current = 110.25
 		limit = 500.13
 
-		plaidBalances := plaid.AccountBalance{
-			Available:              *plaid.NewNullableFloat64(&available),
-			Current:                *plaid.NewNullableFloat64(&current),
-			Limit:                  *plaid.NewNullableFloat64(&limit),
-			IsoCurrencyCode:        *plaid.NewNullableString(new("USD")),
-			UnofficialCurrencyCode: *plaid.NewNullableString(new("USD")),
-			LastUpdatedDatetime:    plaid.NullableTime{}, // Leave this be so that is has no value.
-			AdditionalProperties:   map[string]any{},
+		plaidBalances := &plaid.AccountBalance{
+			Available:              &available,
+			Current:                &current,
+			Limit:                  &limit,
+			IsoCurrencyCode:        new("USD"),
+			UnofficialCurrencyCode: new("USD"),
+			LastUpdatedDatetime:    nil, // Leave this be so that is has no value.
 		}
 
 		balances, err := NewPlaidBankAccountBalances(plaidBalances)
@@ -36,12 +35,12 @@ func TestNewPlaidBankAccountBalances(t *testing.T) {
 	})
 
 	t.Run("missing value", func(t *testing.T) {
-		plaidBalances := plaid.AccountBalance{
-			Available:              *plaid.NewNullableFloat64(nil),
-			Current:                *plaid.NewNullableFloat64(nil),
-			Limit:                  *plaid.NewNullableFloat64(nil),
-			IsoCurrencyCode:        *plaid.NewNullableString(nil),
-			UnofficialCurrencyCode: *plaid.NewNullableString(nil),
+		plaidBalances := &plaid.AccountBalance{
+			Available:              nil,
+			Current:                nil,
+			Limit:                  nil,
+			IsoCurrencyCode:        nil,
+			UnofficialCurrencyCode: nil,
 		}
 
 		balances, err := NewPlaidBankAccountBalances(plaidBalances)
@@ -56,21 +55,21 @@ func TestNewPlaidBankAccountBalances(t *testing.T) {
 
 func TestNewPlaidBankAccount(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
-		subType := plaid.ACCOUNTSUBTYPE_CHECKING
-		plaidBank := plaid.AccountBase{
-			AccountId:    gofakeit.UUID(),
-			Balances:     plaid.AccountBalance{},
-			Mask:         *plaid.NewNullableString(new("1234")),
+		subType := plaid.AccountSubtypeChecking
+		plaidBank := &plaid.AccountBase{
+			AccountID:    gofakeit.UUID(),
+			Balances:     &plaid.AccountBalance{},
+			Mask:         new("1234"),
 			Name:         "Checking Account",
-			OfficialName: *plaid.NewNullableString(new("CHECKING - 1234")),
-			Type:         plaid.ACCOUNTTYPE_DEPOSITORY,
-			Subtype:      *plaid.NewNullableAccountSubtype(&subType),
+			OfficialName: new("CHECKING - 1234"),
+			Type:         plaid.AccountTypeDepository,
+			Subtype:      &subType,
 		}
 
 		bank, err := NewPlaidBankAccount(plaidBank)
 		assert.NoError(t, err, "must be able to convert bank account")
 		assert.NotEmpty(t, bank, "bank account must not be empty")
-		assert.EqualValues(t, plaidBank.GetAccountId(), bank.GetAccountId(), "account Id must match")
+		assert.EqualValues(t, plaidBank.GetAccountID(), bank.GetAccountId(), "account Id must match")
 		assert.EqualValues(t, "1234", bank.GetMask(), "mask must match")
 		assert.EqualValues(t, "Checking Account", bank.GetName(), "name must match")
 		assert.EqualValues(t, "CHECKING - 1234", bank.GetOfficialName(), "official name must match")

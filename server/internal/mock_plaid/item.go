@@ -7,7 +7,7 @@ import (
 
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
 	"github.com/stretchr/testify/require"
 )
 
@@ -20,8 +20,8 @@ func MockDeactivateItemTokenSuccess(t *testing.T) {
 			var itemRemoveRequest plaid.ItemRemoveRequest
 			require.NoError(t, json.NewDecoder(request.Body).Decode(&itemRemoveRequest), "must decode request")
 
-			return plaid.ItemRemoveResponse{
-				RequestId: gofakeit.UUID(),
+			return &plaid.ItemRemoveResponse{
+				RequestID: gofakeit.UUID(),
 			}, http.StatusOK
 		},
 		PlaidHeaders,
@@ -38,13 +38,13 @@ func MockDeactivateItemTokenError(t *testing.T, plaidError plaid.PlaidError) {
 			require.NoError(t, json.NewDecoder(request.Body).Decode(&itemRemoveRequest), "must decode request")
 
 			var status int
-			if s := plaidError.Status.Get(); s != nil {
-				status = int(*s)
+			if s := plaidError.Status; s != nil {
+				status = *s
 			} else {
 				status = http.StatusInternalServerError
 			}
 
-			return plaidError, status
+			return &plaidError, status
 		},
 		PlaidHeaders,
 	)

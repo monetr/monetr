@@ -15,7 +15,7 @@ import (
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -52,7 +52,7 @@ func TestPlaidSync(t *testing.T) {
 		platypus := NewPlaid(log, clock, kms, db, config.Plaid{
 			ClientID:     gofakeit.UUID(),
 			ClientSecret: gofakeit.UUID(),
-			Environment:  plaid.Sandbox,
+			Environment:  plaid.Environments.Sandbox,
 			OAuthDomain:  "localhost",
 		})
 
@@ -104,7 +104,7 @@ func TestPlaidSync(t *testing.T) {
 		platypus := NewPlaid(log, clock, kms, db, config.Plaid{
 			ClientID:     gofakeit.UUID(),
 			ClientSecret: gofakeit.UUID(),
-			Environment:  plaid.Sandbox,
+			Environment:  plaid.Environments.Sandbox,
 			OAuthDomain:  "localhost",
 		})
 

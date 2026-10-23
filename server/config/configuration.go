@@ -13,7 +13,7 @@ import (
 	"github.com/go-viper/mapstructure/v2"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/util"
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
 	"github.com/spf13/viper"
 )
 
@@ -135,10 +135,10 @@ type ProofOfWork struct {
 }
 
 type Plaid struct {
-	Enabled      bool              `yaml:"enabled"`
-	ClientID     string            `yaml:"clientId"`
-	ClientSecret string            `yaml:"clientSecret"`
-	Environment  plaid.Environment `yaml:"environment"`
+	Enabled      bool   `yaml:"enabled"`
+	ClientID     string `yaml:"clientId"`
+	ClientSecret string `yaml:"clientSecret"`
+	Environment  string `yaml:"environment"`
 	// EnableReturningUserExperience changes the required data for sign up. If
 	// this is enabled then the user must provide their full legal name as well
 	// as their phone number.
@@ -413,7 +413,8 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("LunchFlow.AllowedApiUrls", []string{DefaultLunchFlowAPIURL})
 	v.SetDefault("KeyManagement.Provider", "plaintext")
 	v.SetDefault("Plaid.Enabled", true)
-	v.SetDefault("Plaid.CountryCodes", []plaid.CountryCode{plaid.COUNTRYCODE_US})
+	v.SetDefault("Plaid.Environment", plaid.Environments.Production)
+	v.SetDefault("Plaid.CountryCodes", []plaid.CountryCode{plaid.CountryCodeUs})
 	v.SetDefault("ProofOfWork.Enabled", true)
 	v.SetDefault("ProofOfWork.Difficulty", 16)
 	v.SetDefault("ProofOfWork.Lifetime", 5*time.Minute)

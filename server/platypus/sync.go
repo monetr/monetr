@@ -5,7 +5,7 @@ import (
 
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/logging"
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
 )
 
 type SyncResult struct {
@@ -30,28 +30,21 @@ func (p *PlaidClient) Sync(ctx context.Context, cursor *string) (*SyncResult, er
 
 	log.Log(span.Context(), logging.LevelTrace, "syncing with plaid")
 
-	request := p.client.PlaidApi.
-		TransactionsSync(span.Context()).
-		TransactionsSyncRequest(plaid.TransactionsSyncRequest{
+	result, err := p.client.Transactions.Sync(
+		span.Context(),
+		&plaid.TransactionsSyncRequest{
 			AccessToken: p.accessToken,
 			Cursor:      cursor,
-			Count:       new(int32(500)),
+			Count:       new(500),
 			Options: &plaid.TransactionsSyncRequestOptions{
-				// Why does the constructor for the nullable bool return a pointer to a
-				// nullable wrapper type? What the fuck? Absolutely fucking garbage
-				// openapi code generator.
-				IncludeOriginalDescription: *plaid.NewNullableBool(new(true)),
-				// Why the fuck is this a boolean pointer, but the field above is a
-				// nullable boolean.
+				IncludeOriginalDescription:     new(true),
 				IncludePersonalFinanceCategory: new(true),
 				IncludeLogoAndCounterpartyBeta: new(true),
 			},
-		})
-
-	result, response, err := request.Execute()
+		},
+	)
 	if err = after(
 		span,
-		response,
 		err,
 		"Syncing with Plaid",
 		"failed to sync data with Plaid",
@@ -59,7 +52,7 @@ func (p *PlaidClient) Sync(ctx context.Context, cursor *string) (*SyncResult, er
 		log.WarnContext(span.Context(), "failed to sync data with Plaid", "err", err)
 		return nil, err
 	}
-	span.SetTag("plaid.requestId", result.GetRequestId())
+	span.SetTag("plaid.requestId", result.RequestID)
 
 	added := make([]Transaction, len(result.Added))
 	for i, transaction := range result.Added {
@@ -79,10 +72,10 @@ func (p *PlaidClient) Sync(ctx context.Context, cursor *string) (*SyncResult, er
 
 	removed := make([]string, len(result.Removed))
 	for i, transaction := range result.Removed {
-		removed[i] = transaction.GetTransactionId()
+		removed[i] = transaction.GetTransactionID()
 	}
 
-	plaidAccounts := result.GetAccounts()
+	plaidAccounts := result.Accounts
 	accounts := make([]BankAccount, len(plaidAccounts))
 
 	// Once we have our data, convert all of the results from our request to our own bank account interface.
@@ -91,7 +84,7 @@ func (p *PlaidClient) Sync(ctx context.Context, cursor *string) (*SyncResult, er
 		if err != nil {
 			log.ErrorContext(span.Context(), "failed to convert bank account",
 				"err", err,
-				"bankAccountId", plaidAccount.GetAccountId(),
+				"bankAccountId", plaidAccount.GetAccountID(),
 			)
 			crumbs.Error(span.Context(), "failed to convert bank account", "debug", map[string]any{
 				// Maybe we don't want to report the entire account object here, but it'll sure save us a ton of time
@@ -114,8 +107,8 @@ func (p *PlaidClient) Sync(ctx context.Context, cursor *string) (*SyncResult, er
 	}
 
 	return &SyncResult{
-		NextCursor: result.GetNextCursor(),
-		HasMore:    result.GetHasMore(),
+		NextCursor: result.NextCursor,
+		HasMore:    result.HasMore,
 		New:        added,
 		Updated:    modified,
 		Deleted:    removed,

@@ -12,7 +12,8 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
+	"github.com/plaid/plaid-go/v49/client"
 )
 
 //go:generate go run go.uber.org/mock/mockgen@v0.6.0 -source=client.go -package=mockgen -destination=../internal/mockgen/platypus_client.go Client
@@ -45,7 +46,7 @@ type PlaidClient struct {
 	accessToken string
 	itemId      string
 	log         *slog.Logger
-	client      *plaid.APIClient
+	client      *client.Client
 	config      config.Plaid
 }
 
@@ -81,24 +82,21 @@ func (p *PlaidClient) GetAccounts(ctx context.Context, accountIds ...string) ([]
 	if len(accountIds) > 0 {
 		span.Data["accountIds"] = accountIds
 		options = &plaid.AccountsGetRequestOptions{
-			AccountIds: &accountIds,
+			AccountIDs: accountIds,
 		}
 	}
 
-	// Build the get accounts request.
-	request := p.client.PlaidApi.
-		AccountsGet(span.Context()).
-		AccountsGetRequest(plaid.AccountsGetRequest{
+	// Send the request.
+	result, err := p.client.Accounts.Get(
+		span.Context(),
+		&plaid.AccountsGetRequest{
 			AccessToken: p.accessToken,
 			Options:     options,
-		})
-
-	// Send the request.
-	result, response, err := request.Execute()
+		},
+	)
 	// And handle the response.
 	if err = after(
 		span,
-		response,
 		err,
 		"Retrieving bank accounts from Plaid",
 		"failed to retrieve bank accounts from plaid",
@@ -107,7 +105,7 @@ func (p *PlaidClient) GetAccounts(ctx context.Context, accountIds ...string) ([]
 		return nil, err
 	}
 
-	plaidAccounts := result.GetAccounts()
+	plaidAccounts := result.Accounts
 	accounts := make([]BankAccount, len(plaidAccounts))
 
 	// Once we have our data, convert all of the results from our request to our own bank account interface.
@@ -116,7 +114,7 @@ func (p *PlaidClient) GetAccounts(ctx context.Context, accountIds ...string) ([]
 		if err != nil {
 			log.ErrorContext(span.Context(), "failed to convert bank account",
 				"err", err,
-				"bankAccountId", plaidAccount.GetAccountId(),
+				"bankAccountId", plaidAccount.GetAccountID(),
 			)
 			crumbs.Error(span.Context(), "failed to convert bank account", "debug", map[string]any{
 				// Maybe we don't want to report the entire account object here, but it'll sure save us a ton of time
@@ -189,26 +187,24 @@ func (p *PlaidClient) GetTransactions(
 
 	log.Log(span.Context(), logging.LevelTrace, "retrieving transactions")
 
-	request := p.client.PlaidApi.
-		TransactionsGet(span.Context()).
-		TransactionsGetRequest(plaid.TransactionsGetRequest{
+	// Send the request.
+	result, err := p.client.Transactions.Get(
+		span.Context(),
+		&plaid.TransactionsGetRequest{
 			Options: &plaid.TransactionsGetRequestOptions{
-				AccountIds:                 &bankAccountIds,
-				Count:                      &count,
-				Offset:                     &offset,
-				IncludeOriginalDescription: plaid.NullableBool{},
+				AccountIDs:                 bankAccountIds,
+				Count:                      new(int(count)),
+				Offset:                     new(int(offset)),
+				IncludeOriginalDescription: nil,
 			},
 			AccessToken: p.accessToken,
-			StartDate:   start.Format("2006-01-02"),
-			EndDate:     end.Format("2006-01-02"),
-		})
-
-	// Send the request.
-	result, response, err := request.Execute()
+			StartDate:   start,
+			EndDate:     end,
+		},
+	)
 	// And handle the response.
 	if err = after(
 		span,
-		response,
 		err,
 		"Retrieving transactions from Plaid",
 		"failed to retrieve transactions from plaid",
@@ -217,8 +213,10 @@ func (p *PlaidClient) GetTransactions(
 		return nil, err
 	}
 
-	transactions := make([]Transaction, len(result.Transactions))
-	for i, transaction := range result.Transactions {
+	// We do our own paging in GetAllTransactions, so we only want the results
+	// from this single page.
+	transactions := make([]Transaction, len(result.Results))
+	for i, transaction := range result.Results {
 		transactions[i], err = NewTransactionFromPlaid(transaction)
 		if err != nil {
 			return nil, err
@@ -262,29 +260,27 @@ func (p *PlaidClient) UpdateItem(
 
 	log.Log(span.Context(), logging.LevelTrace, "creating link token for update")
 
-	request := p.client.PlaidApi.
-		LinkTokenCreate(span.Context()).
-		LinkTokenCreateRequest(plaid.LinkTokenCreateRequest{
+	result, err := p.client.Link.CreateToken(
+		span.Context(),
+		&plaid.LinkTokenCreateRequest{
 			ClientName:   consts.PlaidClientName,
 			Language:     consts.PlaidLanguage,
 			CountryCodes: p.config.CountryCodes,
 			User: &plaid.LinkTokenCreateRequestUser{
-				ClientUserId: p.accountId.String(),
+				ClientUserID: p.accountId.String(),
 				EmailAddress: nil,
 			},
 			Webhook:               webhooksUrl,
-			AccessToken:           *plaid.NewNullableString(&p.accessToken),
+			AccessToken:           &p.accessToken,
 			LinkCustomizationName: nil,
-			RedirectUri:           redirectUri,
+			RedirectURI:           redirectUri,
 			Update: &plaid.LinkTokenCreateRequestUpdate{
 				AccountSelectionEnabled: new(updateAccountSelection),
 			},
-		})
-
-	result, response, err := request.Execute()
+		},
+	)
 	if err = after(
 		span,
-		response,
 		err,
 		"Updating Plaid link token",
 		"failed to update Plaid link token",
@@ -309,19 +305,16 @@ func (p *PlaidClient) RemoveItem(ctx context.Context) error {
 
 	log.DebugContext(span.Context(), "removing item from Plaid")
 
-	// Build the get accounts request.
-	request := p.client.PlaidApi.
-		ItemRemove(span.Context()).
-		ItemRemoveRequest(plaid.ItemRemoveRequest{
-			AccessToken: p.accessToken,
-		})
-
 	// Send the request.
-	_, response, err := request.Execute()
+	_, err := p.client.Item.Remove(
+		span.Context(),
+		&plaid.ItemRemoveRequest{
+			AccessToken: p.accessToken,
+		},
+	)
 	// And handle the response.
 	if err = after(
 		span,
-		response,
 		err,
 		"Removing Plaid item",
 		"failed to remove Plaid item",
@@ -344,18 +337,16 @@ func (p *PlaidClient) RefeshTransactions(ctx context.Context) error {
 
 	log.Log(span.Context(), logging.LevelTrace, "force refreshing transactions for item")
 
-	request := p.client.PlaidApi.
-		TransactionsRefresh(span.Context()).
-		TransactionsRefreshRequest(plaid.TransactionsRefreshRequest{
-			AccessToken: p.accessToken,
-		})
-
 	// Send the request.
-	_, response, err := request.Execute()
+	_, err := p.client.Transactions.Refresh(
+		span.Context(),
+		&plaid.TransactionsRefreshRequest{
+			AccessToken: p.accessToken,
+		},
+	)
 	// And handle the response.
 	if err = after(
 		span,
-		response,
 		err,
 		"Triggering transaction refresh for Plaid item",
 		"failed to trigger transaction refresh for Plaid item",
@@ -385,17 +376,17 @@ func (p *PlaidClient) UpdateWebhook(ctx context.Context) error {
 
 	log.InfoContext(span.Context(), "updating webhook URL for plaid link")
 
-	request := p.client.PlaidApi.
-		ItemWebhookUpdate(span.Context()).
-		ItemWebhookUpdateRequest(plaid.ItemWebhookUpdateRequest{
-			AccessToken: p.accessToken,
-			Webhook:     *plaid.NewNullableString(webhookUrl),
-		})
+	request := &plaid.ItemWebhookUpdateRequest{
+		AccessToken: p.accessToken,
+	}
+	// Plaid removes the webhook from the item when we send null, but the SDK
+	// leaves nil fields off entirely. The setter makes sure null is actually sent
+	// when webhooks are disabled.
+	request.SetWebhook(webhookUrl)
 
-	_, response, err := request.Execute()
+	_, err := p.client.Item.UpdateWebhook(span.Context(), request)
 	if err = after(
 		span,
-		response,
 		err,
 		"Updating webhook URL for Plaid link",
 		"failed to update webhook url for plaid link",

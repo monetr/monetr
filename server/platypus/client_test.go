@@ -14,7 +14,7 @@ import (
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -42,14 +42,14 @@ func TestPlaidClient_GetAccount(t *testing.T) {
 
 		account := mock_plaid.BankAccountFixture(t)
 
-		mock_plaid.MockGetAccounts(t, []plaid.AccountBase{
+		mock_plaid.MockGetAccounts(t, []*plaid.AccountBase{
 			account,
 		})
 
 		client := NewPlaid(log, clock, secrets.NewPlaintextKMS(), nil, config.Plaid{
 			ClientID:     gofakeit.UUID(),
 			ClientSecret: gofakeit.UUID(),
-			Environment:  plaid.Sandbox,
+			Environment:  plaid.Environments.Sandbox,
 		})
 
 		link := &models.Link{
@@ -66,7 +66,7 @@ func TestPlaidClient_GetAccount(t *testing.T) {
 		assert.NoError(t, err, "should create platypus")
 		assert.NotNil(t, platypus, "should not be nil")
 
-		accounts, err := platypus.GetAccounts(t.Context(), account.GetAccountId())
+		accounts, err := platypus.GetAccounts(t.Context(), account.GetAccountID())
 		assert.NoError(t, err, "should not return an error retrieving accounts")
 		assert.NotEmpty(t, accounts, "should return some accounts")
 	})
@@ -99,13 +99,13 @@ func TestPlaidClient_GetAllTransactions(t *testing.T) {
 		end := time.Now()
 		start := end.Add(-7 * 24 * time.Hour)
 		mock_plaid.MockGetRandomTransactions(t, start, end, 5000, []string{
-			account.GetAccountId(),
+			account.GetAccountID(),
 		})
 
 		platypus := NewPlaid(log, clock, kms, db, config.Plaid{
 			ClientID:     gofakeit.UUID(),
 			ClientSecret: gofakeit.UUID(),
-			Environment:  plaid.Sandbox,
+			Environment:  plaid.Environments.Sandbox,
 		})
 
 		link := &models.Link{
@@ -127,7 +127,7 @@ func TestPlaidClient_GetAllTransactions(t *testing.T) {
 			start,
 			end,
 			[]string{
-				account.GetAccountId(),
+				account.GetAccountID(),
 			},
 		)
 		assert.NoError(t, err, "should not return an error")
@@ -165,7 +165,7 @@ func TestPlaidClient_UpdateItem(t *testing.T) {
 		platypus := NewPlaid(log, clock, kms, db, config.Plaid{
 			ClientID:     gofakeit.UUID(),
 			ClientSecret: gofakeit.UUID(),
-			Environment:  plaid.Sandbox,
+			Environment:  plaid.Environments.Sandbox,
 			OAuthDomain:  "localhost",
 		})
 

@@ -10,38 +10,38 @@ import (
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
 	"github.com/monetr/monetr/server/internal/testutils"
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
 	"github.com/stretchr/testify/require"
 )
 
-func BankAccountFixture(t *testing.T) plaid.AccountBase {
+func BankAccountFixture(t *testing.T) *plaid.AccountBase {
 	accountNumber := gofakeit.AchAccount()
 	require.NotEmpty(t, accountNumber, "account number cannot be empty")
 
 	accountType := gofakeit.RandomString([]string{
-		string(plaid.ACCOUNTTYPE_DEPOSITORY),
-		string(plaid.ACCOUNTTYPE_CREDIT),
-		string(plaid.ACCOUNTTYPE_INVESTMENT),
-		string(plaid.ACCOUNTTYPE_LOAN),
+		string(plaid.AccountTypeDepository),
+		string(plaid.AccountTypeCredit),
+		string(plaid.AccountTypeInvestment),
+		string(plaid.AccountTypeLoan),
 	})
 
 	accountSubTypes := map[plaid.AccountType]plaid.AccountSubtype{
-		plaid.ACCOUNTTYPE_DEPOSITORY: plaid.AccountSubtype(gofakeit.RandomString([]string{
-			string(plaid.ACCOUNTSUBTYPE_CHECKING),
-			string(plaid.ACCOUNTSUBTYPE_SAVINGS),
-			string(plaid.ACCOUNTSUBTYPE_PAYPAL),
+		plaid.AccountTypeDepository: plaid.AccountSubtype(gofakeit.RandomString([]string{
+			string(plaid.AccountSubtypeChecking),
+			string(plaid.AccountSubtypeSavings),
+			string(plaid.AccountSubtypePaypal),
 		})),
-		plaid.ACCOUNTTYPE_CREDIT: plaid.AccountSubtype(gofakeit.RandomString([]string{
-			string(plaid.ACCOUNTSUBTYPE_CREDIT_CARD),
-			string(plaid.ACCOUNTSUBTYPE_PAYPAL),
+		plaid.AccountTypeCredit: plaid.AccountSubtype(gofakeit.RandomString([]string{
+			string(plaid.AccountSubtypeCreditCard),
+			string(plaid.AccountSubtypePaypal),
 		})),
-		plaid.ACCOUNTTYPE_INVESTMENT: plaid.AccountSubtype(gofakeit.RandomString([]string{
-			string(plaid.ACCOUNTSUBTYPE_IRA),
-			string(plaid.ACCOUNTSUBTYPE_ROTH),
+		plaid.AccountTypeInvestment: plaid.AccountSubtype(gofakeit.RandomString([]string{
+			string(plaid.AccountSubtypeIra),
+			string(plaid.AccountSubtypeRoth),
 		})),
-		plaid.ACCOUNTTYPE_LOAN: plaid.AccountSubtype(gofakeit.RandomString([]string{
-			string(plaid.ACCOUNTSUBTYPE_AUTO),
-			string(plaid.ACCOUNTSUBTYPE_MORTGAGE),
+		plaid.AccountTypeLoan: plaid.AccountSubtype(gofakeit.RandomString([]string{
+			string(plaid.AccountSubtypeAuto),
+			string(plaid.AccountSubtypeMortgage),
 		})),
 	}
 	accountSubType := accountSubTypes[plaid.AccountType(accountType)]
@@ -54,20 +54,20 @@ func BankAccountFixture(t *testing.T) plaid.AccountBase {
 	available := gofakeit.Float64Range(current-10, current)
 	limit := gofakeit.Float64Range(current, current+100)
 
-	return plaid.AccountBase{
-		AccountId: gofakeit.Lexify("????????????????"),
-		Balances: plaid.AccountBalance{
-			Available:              *plaid.NewNullableFloat64(new(available)),
-			Current:                *plaid.NewNullableFloat64(new(current)),
-			Limit:                  *plaid.NewNullableFloat64(new(limit)),
-			IsoCurrencyCode:        *plaid.NewNullableString(new(currencyCode)),
-			UnofficialCurrencyCode: *plaid.NewNullableString(new(currencyCode)),
+	return &plaid.AccountBase{
+		AccountID: gofakeit.Lexify("????????????????"),
+		Balances: &plaid.AccountBalance{
+			Available:              new(available),
+			Current:                new(current),
+			Limit:                  new(limit),
+			IsoCurrencyCode:        new(currencyCode),
+			UnofficialCurrencyCode: new(currencyCode),
 		},
-		Mask:         *plaid.NewNullableString(new(mask)),
+		Mask:         new(mask),
 		Name:         fmt.Sprintf("Personal Account - %s", mask),
-		OfficialName: *plaid.NewNullableString(new(fmt.Sprintf("%s - %s", strings.ToUpper(accountType), mask))),
+		OfficialName: new(fmt.Sprintf("%s - %s", strings.ToUpper(accountType), mask)),
 		Type:         plaid.AccountType(accountType),
-		Subtype:      *plaid.NewNullableAccountSubtype(&accountSubType),
+		Subtype:      &accountSubType,
 	}
 }
 
@@ -87,10 +87,10 @@ func MockGetAccountsExtended(t *testing.T, plaidData *testutils.MockPlaidData) {
 			accounts, ok := plaidData.BankAccounts[accessToken]
 			require.True(t, ok, "invalid access token mocking not implemented")
 
-			response := plaid.AccountsGetResponse{
-				RequestId: gofakeit.UUID(),
-				Accounts:  make([]plaid.AccountBase, 0),
-				Item:      plaid.Item{}, // Not yet populating this.
+			response := &plaid.AccountsGetResponse{
+				RequestID: gofakeit.UUID(),
+				Accounts:  make([]*plaid.AccountBase, 0),
+				Item:      &plaid.Item{}, // Not yet populating this.
 			}
 			for _, accountId := range getAccountsRequest.Options.AccountIds {
 				account, ok := accounts[accountId]
@@ -107,7 +107,7 @@ func MockGetAccountsExtended(t *testing.T, plaidData *testutils.MockPlaidData) {
 	)
 }
 
-func MockGetAccounts(t *testing.T, accounts []plaid.AccountBase) {
+func MockGetAccounts(t *testing.T, accounts []*plaid.AccountBase) {
 	mock_http_helper.NewHttpMockJsonResponder(
 		t,
 		"POST", Path(t, "/accounts/get"),
@@ -146,13 +146,13 @@ func MockGetAccountsError(t *testing.T, plaidError plaid.PlaidError) {
 			require.NoError(t, json.NewDecoder(request.Body).Decode(&getAccountsRequest), "must decode request")
 
 			var status int
-			if s := plaidError.Status.Get(); s != nil {
-				status = int(*s)
+			if s := plaidError.Status; s != nil {
+				status = *s
 			} else {
 				status = http.StatusInternalServerError
 			}
 
-			return plaidError, status
+			return &plaidError, status
 		},
 		PlaidHeaders,
 	)
