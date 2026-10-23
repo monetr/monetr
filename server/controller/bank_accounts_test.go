@@ -2074,6 +2074,53 @@ func TestDeleteBankAccount(t *testing.T) {
 		}
 	})
 
+	t.Run("delete inactive Plaid account", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveAPlaidBankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		// The sync marks the account as inactive when Plaid stops returning it, we
+		// don't have a way to do that through the API so just do it here.
+		bank.Status = BankAccountStatusInactive
+		testutils.MustDBUpdate(t, &bank)
+
+		{ // Delete the bank account
+			response := e.DELETE("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.Body().IsEmpty()
+		}
+
+		{ // Should not be in the list anymore
+			response := e.GET("/api/bank_accounts").
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().Length().IsEqual(0)
+		}
+
+		{ // But we can still read it directly
+			response := e.GET("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.bankAccountId").String().IsEqual(bank.BankAccountId.String())
+			response.JSON().Path("$.status").String().IsEqual(string(BankAccountStatusInactive))
+			response.JSON().Path("$.deletedAt").String().NotEmpty()
+		}
+	})
+
 	t.Run("cant delete someone elses bank account", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		var token string

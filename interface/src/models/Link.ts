@@ -73,8 +73,9 @@ export default class Link {
     return this.linkType === LinkType.LunchFlow && Boolean(this.lunchFlowLink);
   }
 
-  getCanArchiveBankAccount(): boolean {
-    return this.getIsManual() || this.getIsLunchFlow();
+  getCanArchiveBankAccount(bankAccount: BankAccount): boolean {
+    // Plaid accounts can only be archived once Plaid stops returning them to us.
+    return this.getIsManual() || this.getIsLunchFlow() || (this.getIsPlaid() && bankAccount.status === 'inactive');
   }
 
   getCanUpdateAccountSelection(): boolean {

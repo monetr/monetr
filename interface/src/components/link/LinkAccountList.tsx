@@ -108,6 +108,11 @@ function BankAccountItem(props: BankAccountItemProps): React.JSX.Element {
               {props.bankAccount.name}
             </Typography>
             {Boolean(props.bankAccount.deletedAt) && <Badge size='sm'>Archived</Badge>}
+            {props.bankAccount.status === 'inactive' && !props.bankAccount.deletedAt && (
+              <Badge size='sm' variant='warning'>
+                Inactive
+              </Badge>
+            )}
           </div>
           <Typography color='default' ellipsis size='sm' weight='medium'>
             {capitalize(props.bankAccount.accountSubType)}
