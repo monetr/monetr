@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useFormikContext } from 'formik';
-import { PiggyBank, Plus, Receipt, Wallet } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { rrulestr } from 'rrule';
 
 import Badge from '@monetr/interface/components/Badge';
@@ -10,6 +10,7 @@ import Select, {
   type SelectOptionComponentProps,
   type SelectProps,
 } from '@monetr/interface/components/Select';
+import SelectSpendingIcon from '@monetr/interface/components/SelectSpendingIcon';
 import Typography from '@monetr/interface/components/Typography';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
@@ -18,7 +19,7 @@ import { useSpendings } from '@monetr/interface/hooks/useSpendings';
 import { showNewExpenseModal } from '@monetr/interface/modals/NewExpenseModal';
 import type { ID } from '@monetr/interface/models/ID';
 import type Spending from '@monetr/interface/models/Spending';
-import { FREE_TO_USE, FreeToUse, SpendingType } from '@monetr/interface/models/Spending';
+import { FREE_TO_USE, FreeToUse } from '@monetr/interface/models/Spending';
 import type Transaction from '@monetr/interface/models/Transaction';
 import { AmountType } from '@monetr/interface/util/amounts';
 import type { FormFieldName, FormValues } from '@monetr/interface/util/typescriptEvils';
@@ -170,6 +171,7 @@ export default function MSelectSpending<T extends FormValues<T>>(props: MSelectS
     <Select
       {...props}
       actions={actions}
+      icon={current && <SelectSpendingIcon spending={current.value} />}
       onChange={onSelect}
       optionComponent={SelectSpendingOptionComponent}
       options={options}
@@ -185,21 +187,7 @@ export function SelectSpendingOptionComponent(props: SelectOptionComponentProps<
   return (
     <div className={styles.optionRow}>
       <div className={styles.spendingName}>
-        {props.value?.spendingType === SpendingType.FreeToUse && (
-          <Badge className={styles.iconBadge} size='sm' variant='brand'>
-            <Wallet />
-          </Badge>
-        )}
-        {props.value?.spendingType === SpendingType.Goal && (
-          <Badge className={styles.iconBadge} size='sm' variant='info'>
-            <PiggyBank />
-          </Badge>
-        )}
-        {props.value?.spendingType === SpendingType.Expense && (
-          <Badge className={styles.iconBadge} size='sm' variant='positive'>
-            <Receipt />
-          </Badge>
-        )}
+        <SelectSpendingIcon spending={props.value} />
         <div className={styles.spendingText}>
           <Typography color='emphasis' ellipsis size='md'>
             {props.label}

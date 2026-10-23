@@ -11,6 +11,12 @@
   border-radius: 100%;
 }
 
+.sizeSmall {
+  @include mixins.text-extra-small;
+  height: 6 * variables.$size; // 24px
+  width: 6 * variables.$size;
+}
+
 .sizeLarge {
   @include mixins.text-2-extra-large;
   height: 14 * variables.$size; // 56px

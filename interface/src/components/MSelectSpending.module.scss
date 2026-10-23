@@ -10,7 +10,7 @@
   display: flex;
   align-items: center;
   min-width: 0;
-  gap: 2 * variables.$size;
+  gap: 3 * variables.$size;
 }
 
 .spendingText {
@@ -22,8 +22,4 @@
 .badges {
   display: flex;
   gap: 2 * variables.$size;
-}
-
-.iconBadge {
-  max-height: 24px;
 }

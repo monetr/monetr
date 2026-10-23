@@ -9,6 +9,7 @@ const avatarVariants = cva([styles.avatar], {
   variants: {
     size: {
       default: undefined,
+      small: styles.sizeSmall,
       large: styles.sizeLarge,
     },
   },

@@ -73,6 +73,14 @@ $basePadding: 4 * variables.$size;
   }
 }
 
+// Wraps the icon in front of the selected value, the select's own gap is a bit
+// tight next to the text
+.icon {
+  display: flex;
+  flex: none;
+  margin-right: variables.$size;
+}
+
 .indicator {
   color: var(--content-placeholder);
   width: 5 * variables.$size;

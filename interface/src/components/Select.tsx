@@ -64,6 +64,8 @@ export interface SelectProps<V = unknown> {
   disabled?: boolean;
   isLoading?: boolean;
   value?: SelectOption<V>;
+  // icon is shown in front of the selected value
+  icon?: React.ReactNode;
   options: Array<SelectOption<V>>;
   // actions are shown above the options, see SelectAction
   actions?: Array<SelectAction>;
@@ -297,6 +299,7 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
         onClick={onOpenClickHandler}
         ref={inputWrapperRef}
       >
+        {props.icon && <span className={selectStyles.icon}>{props.icon}</span>}
         <input
           {...getInputProps({
             disabled: props.disabled,
@@ -414,6 +417,7 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
             ref={buttonRef}
             type='button'
           >
+            {props.icon && <span className={selectStyles.icon}>{props.icon}</span>}
             <span
               aria-disabled={props.disabled}
               className={selectStyles.selectText}

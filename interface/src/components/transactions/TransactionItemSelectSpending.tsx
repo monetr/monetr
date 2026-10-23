@@ -20,6 +20,7 @@ import {
   type SelectOption,
 } from '@monetr/interface/components/Select';
 import SelectActionOption from '@monetr/interface/components/SelectActionOption';
+import SelectSpendingIcon from '@monetr/interface/components/SelectSpendingIcon';
 import { Skeleton } from '@monetr/interface/components/Skeleton';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
@@ -331,6 +332,11 @@ function InnerSelect({
           onMouseEnter={onEngage}
           ref={inputWrapperRef}
         >
+          {value && (
+            <span className={selectStyles.icon}>
+              <SelectSpendingIcon spending={value.value} />
+            </span>
+          )}
           <input
             {...getInputProps({
               id,

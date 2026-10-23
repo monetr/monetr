@@ -1,0 +1,6 @@
+@use '@monetr/interface/variables';
+
+.walletIcon {
+  width: 4 * variables.$size;
+  height: 4 * variables.$size;
+}

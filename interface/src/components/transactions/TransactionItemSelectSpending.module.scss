@@ -35,7 +35,9 @@
   --ring-size: 0px;
   transition-duration: 0ms;
 
-  svg {
+  // Only the dropdown indicator, otherwise the Free-To-Use wallet would be hidden
+  // too
+  > svg {
     opacity: 0%;
   }
 
