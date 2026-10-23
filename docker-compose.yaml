@@ -16,17 +16,6 @@ services:
     restart: unless-stopped
     networks:
       - monetr_network
-  valkey:
-    image: valkey/valkey:9
-    healthcheck:
-      test: [ "CMD", "valkey-cli", "ping" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 5s
-    restart: unless-stopped
-    networks:
-      - monetr_network
   monetr:
     image: ghcr.io/monetr/monetr:1.20.0 # x-release-please-version
     healthcheck:
@@ -45,8 +34,6 @@ services:
     ports:
       - "4000:4000"
     depends_on:
-      valkey:
-        condition: service_healthy
       postgres:
         condition: service_healthy
     volumes:
@@ -61,8 +48,7 @@ services:
       MONETR_PG_PASSWORD: superSecretPasswordPleaseChangeMe
       MONETR_PG_DATABASE: monetr
       MONETR_PG_ADDRESS: postgres
-      MONETR_REDIS_ENABLED: "true"
-      MONETR_REDIS_ADDRESS: valkey
+      MONETR_CACHE_KIND: memory
       MONETR_STORAGE_ENABLED: ${MONETR_STORAGE_ENABLED:-true}
       MONETR_STORAGE_PROVIDER: ${MONETR_STORAGE_PROVIDER:-filesystem}
     networks:
