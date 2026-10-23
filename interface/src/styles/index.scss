@@ -21,6 +21,9 @@ html {
   font-family: 'Inter Variable', sans-serif;
   font-feature-settings: normal;
   font-variation-settings: normal;
+  // Every digit is the same width, that way amounts line up with each other in
+  // lists instead of shifting around based on which digits they have
+  font-variant-numeric: tabular-nums;
   // Preflight suppressed the mobile tap highlight; without it, holding a button
   // (or any clickable element) flashes the browser's default grey overlay.
   -webkit-tap-highlight-color: transparent;
@@ -109,6 +112,7 @@ textarea {
   font-family: inherit;
   font-feature-settings: inherit;
   font-variation-settings: inherit;
+  font-variant-numeric: inherit;
   font-size: 100%;
   font-weight: inherit;
   line-height: inherit;
