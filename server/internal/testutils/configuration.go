@@ -6,7 +6,7 @@ import (
 
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/monetr/monetr/server/config"
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
 )
 
 const (
@@ -58,7 +58,7 @@ func GetConfig(_ *testing.T) config.Configuration {
 			Enabled:      true,
 			ClientID:     gofakeit.UUID(),
 			ClientSecret: gofakeit.UUID(),
-			Environment:  plaid.Sandbox,
+			Environment:  plaid.Environments.Sandbox,
 		},
 		CORS: config.CORS{
 			Debug: false,

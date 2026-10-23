@@ -13,7 +13,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
 	"github.com/monetr/monetr/server/internal/myownsanity"
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,13 +24,13 @@ func MockGetWebhookVerificationKey(t *testing.T, clk clock.Clock, kid string, pu
 			ValidatePlaidAuthentication(t, request, DoNotRequireAccessToken)
 			var requestBody plaid.WebhookVerificationKeyGetRequest
 			require.NoError(t, json.NewDecoder(request.Body).Decode(&requestBody), "must decode request")
-			require.Equal(t, kid, requestBody.KeyId, "key ID in request must match expected kid")
+			require.Equal(t, kid, requestBody.KeyID, "key ID in request must match expected kid")
 
 			x := base64.RawURLEncoding.EncodeToString(publicKey.X.Bytes())
 			y := base64.RawURLEncoding.EncodeToString(publicKey.Y.Bytes())
 
-			return plaid.WebhookVerificationKeyGetResponse{
-				Key: plaid.JWKPublicKey{
+			return &plaid.WebhookVerificationKeyGetResponse{
+				Key: &plaid.JwkPublicKey{
 					Alg:       "ES256",
 					Crv:       "P-256",
 					Kid:       kid,
@@ -38,11 +38,10 @@ func MockGetWebhookVerificationKey(t *testing.T, clk clock.Clock, kid string, pu
 					Use:       "sig",
 					X:         x,
 					Y:         y,
-					CreatedAt: int32(clk.Now().Unix()),
-					ExpiredAt: *plaid.NewNullableInt32(new(int32(clk.Now().Add(30 * time.Minute).Unix()))),
+					CreatedAt: int(clk.Now().Unix()),
+					ExpiredAt: new(int(clk.Now().Add(30 * time.Minute).Unix())),
 				},
-				RequestId:            gofakeit.UUID(),
-				AdditionalProperties: nil,
+				RequestID: gofakeit.UUID(),
 			}, http.StatusOK
 		},
 		PlaidHeaders,
@@ -57,11 +56,11 @@ func MockGetWebhookVerificationKeyFailure(t *testing.T) {
 			var requestBody plaid.WebhookVerificationKeyGetRequest
 			require.NoError(t, json.NewDecoder(request.Body).Decode(&requestBody), "must decode request")
 
-			return plaid.PlaidError{
+			return &plaid.PlaidError{
 				ErrorType:      "API_ERROR",
 				ErrorCode:      "INTERNAL_SERVER_ERROR",
-				DisplayMessage: *plaid.NewNullableString(new("Something went wrong.")),
-				RequestId:      new(gofakeit.UUID()),
+				DisplayMessage: new("Something went wrong."),
+				RequestID:      new(gofakeit.UUID()),
 			}, http.StatusInternalServerError
 		},
 		PlaidHeaders,

@@ -13,7 +13,7 @@ import (
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/secrets"
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
@@ -217,8 +217,8 @@ func TestSyncPlaidAccounts(t *testing.T) {
 				[]platypus.BankAccount{
 					// Since we only return the checking account, the savings account should
 					// get deactivated.
-					testutils.Must(t, platypus.NewPlaidBankAccount, plaid.AccountBase{
-						AccountId: checkingAccount.PlaidBankAccount.PlaidId,
+					testutils.Must(t, platypus.NewPlaidBankAccount, &plaid.AccountBase{
+						AccountID: checkingAccount.PlaidBankAccount.PlaidId,
 					}),
 				},
 				nil,
@@ -310,11 +310,11 @@ func TestSyncPlaidAccounts(t *testing.T) {
 			).
 			Return(
 				[]platypus.BankAccount{
-					testutils.Must(t, platypus.NewPlaidBankAccount, plaid.AccountBase{
-						AccountId: checkingAccount.PlaidBankAccount.PlaidId,
+					testutils.Must(t, platypus.NewPlaidBankAccount, &plaid.AccountBase{
+						AccountID: checkingAccount.PlaidBankAccount.PlaidId,
 					}),
-					testutils.Must(t, platypus.NewPlaidBankAccount, plaid.AccountBase{
-						AccountId: savingsAccount.PlaidBankAccount.PlaidId,
+					testutils.Must(t, platypus.NewPlaidBankAccount, &plaid.AccountBase{
+						AccountID: savingsAccount.PlaidBankAccount.PlaidId,
 					}),
 				},
 				nil,

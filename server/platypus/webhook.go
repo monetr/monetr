@@ -17,7 +17,7 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
 )
 
 type WebhookVerificationKey struct {
@@ -39,7 +39,12 @@ type WebhookVerificationKey struct {
 	ExpiredAt *int32 `json:"expired_at"`
 }
 
-func NewWebhookVerificationKeyFromPlaid(input plaid.JWKPublicKey) (WebhookVerificationKey, error) {
+func NewWebhookVerificationKeyFromPlaid(input *plaid.JwkPublicKey) (WebhookVerificationKey, error) {
+	var expiredAt *int32
+	if input.GetExpiredAt() != nil {
+		expiredAt = new(int32(*input.GetExpiredAt()))
+	}
+
 	return WebhookVerificationKey{
 		Alg:       input.GetAlg(),
 		Crv:       input.GetCrv(),
@@ -48,8 +53,8 @@ func NewWebhookVerificationKeyFromPlaid(input plaid.JWKPublicKey) (WebhookVerifi
 		Use:       input.GetUse(),
 		X:         input.GetX(),
 		Y:         input.GetY(),
-		CreatedAt: input.GetCreatedAt(),
-		ExpiredAt: new(input.GetExpiredAt()),
+		CreatedAt: int32(input.GetCreatedAt()),
+		ExpiredAt: expiredAt,
 	}, nil
 }
 

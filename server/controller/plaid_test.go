@@ -11,7 +11,7 @@ import (
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mock_plaid"
 	"github.com/monetr/monetr/server/internal/mockqueue"
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
@@ -55,8 +55,8 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		mock_plaid.MockCreateLinkToken(t, func(t *testing.T, request plaid.LinkTokenCreateRequest) {
-			assert.NotNil(t, request.GetUpdate().AccountSelectionEnabled, "account selection enabled cannot be nil")
-			assert.True(t, *request.GetUpdate().AccountSelectionEnabled, "account selection enabled must be true")
+			assert.NotNil(t, request.Update.AccountSelectionEnabled, "account selection enabled cannot be nil")
+			assert.True(t, *request.Update.AccountSelectionEnabled, "account selection enabled must be true")
 		})
 
 		response := e.PUT("/api/plaid/link/update/{linkId}").
@@ -82,8 +82,8 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		mock_plaid.MockCreateLinkToken(t, func(t *testing.T, request plaid.LinkTokenCreateRequest) {
-			assert.NotNil(t, request.GetUpdate().AccountSelectionEnabled, "account selection enabled cannot be nil")
-			assert.False(t, *request.GetUpdate().AccountSelectionEnabled, "account selection enabled must be false")
+			assert.NotNil(t, request.Update.AccountSelectionEnabled, "account selection enabled cannot be nil")
+			assert.False(t, *request.Update.AccountSelectionEnabled, "account selection enabled must be false")
 		})
 
 		response := e.PUT("/api/plaid/link/update/{linkId}").

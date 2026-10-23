@@ -10,7 +10,7 @@ import (
 	"github.com/monetr/monetr/server/internal/mock_plaid"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/secrets"
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -30,7 +30,7 @@ func TestPlaid_CreateLinkToken(t *testing.T) {
 		platypus := NewPlaid(log, clock, kms, db, config.Plaid{
 			ClientID:     gofakeit.UUID(),
 			ClientSecret: gofakeit.UUID(),
-			Environment:  plaid.Sandbox,
+			Environment:  plaid.Environments.Sandbox,
 			OAuthDomain:  "localhost",
 		})
 
@@ -65,7 +65,7 @@ func TestPlaid_CreateLinkToken(t *testing.T) {
 		platypus := NewPlaid(log, clock, kms, db, config.Plaid{
 			ClientID:        gofakeit.UUID(),
 			ClientSecret:    gofakeit.UUID(),
-			Environment:     plaid.Sandbox,
+			Environment:     plaid.Environments.Sandbox,
 			OAuthDomain:     "localhost",
 			WebhooksEnabled: true,
 			WebhooksDomain:  "monetr.mini",
@@ -102,7 +102,7 @@ func TestPlaid_CreateLinkToken(t *testing.T) {
 		platypus := NewPlaid(log, clock, kms, db, config.Plaid{
 			ClientID:     gofakeit.UUID(),
 			ClientSecret: gofakeit.UUID(),
-			Environment:  plaid.Sandbox,
+			Environment:  plaid.Environments.Sandbox,
 			OAuthDomain:  "localhost",
 		})
 

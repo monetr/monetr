@@ -18,8 +18,8 @@ func TestGenerateTransactions(t *testing.T) {
 		start := time.Now().Add(-25 * time.Hour)
 		transactions := GenerateTransactions(t, start, end, numberOfTransactions, bankAccounts)
 		assert.Len(t, transactions, len(bankAccounts)*numberOfTransactions)
-		assert.Equal(t, end.Format("2006-01-02"), transactions[0].GetDate(), "date of first transaction should be end")
-		assert.Equal(t, start.Format("2006-01-02"), transactions[len(transactions)-1].GetDate(), "date of last transaction should be start")
+		assert.Equal(t, end.Format("2006-01-02"), transactions[0].GetDate().Format("2006-01-02"), "date of first transaction should be end")
+		assert.Equal(t, start.Format("2006-01-02"), transactions[len(transactions)-1].GetDate().Format("2006-01-02"), "date of last transaction should be start")
 	})
 
 	t.Run("30 days", func(t *testing.T) {
@@ -32,7 +32,7 @@ func TestGenerateTransactions(t *testing.T) {
 		start := time.Now().UTC().Add(-30 * 24 * time.Hour).Truncate(time.Hour)
 		transactions := GenerateTransactions(t, start, end, numberOfTransactions, bankAccounts)
 		assert.Len(t, transactions, len(bankAccounts)*numberOfTransactions)
-		assert.Equal(t, end.Format("2006-01-02"), transactions[0].GetDate(), "date of first transaction should be end")
-		assert.Equal(t, start.Format("2006-01-02"), transactions[len(transactions)-1].GetDate(), "date of last transaction should be start")
+		assert.Equal(t, end.Format("2006-01-02"), transactions[0].GetDate().Format("2006-01-02"), "date of first transaction should be end")
+		assert.Equal(t, start.Format("2006-01-02"), transactions[len(transactions)-1].GetDate().Format("2006-01-02"), "date of last transaction should be start")
 	})
 }

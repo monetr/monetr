@@ -5,8 +5,7 @@ import (
 
 	"github.com/monetr/monetr/server/currency"
 	"github.com/monetr/monetr/server/util"
-	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
 )
 
 type Transaction interface {
@@ -46,31 +45,25 @@ type PlaidTransaction struct {
 	TransactionId          string
 }
 
-func NewTransactionFromPlaid(input plaid.Transaction) (Transaction, error) {
-	date, err := time.Parse("2006-01-02", input.GetDate())
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse transaction date")
-	}
-	pendingTransactionId, _ := input.GetPendingTransactionIdOk()
-
+func NewTransactionFromPlaid(input *plaid.Transaction) (Transaction, error) {
 	amount, _ := currency.ParseFloatToAmount(
 		input.GetAmount(),
-		input.GetIsoCurrencyCode(),
+		deref(input.GetIsoCurrencyCode()),
 	)
 	transaction := PlaidTransaction{
 		Amount:                 amount,
-		BankAccountId:          input.GetAccountId(),
+		BankAccountId:          input.GetAccountID(),
 		Category:               input.GetCategory(),
-		CategoryDetail:         input.GetPersonalFinanceCategory().Detailed,
-		Date:                   date,
-		ISOCurrencyCode:        input.GetIsoCurrencyCode(),
-		UnofficialCurrencyCode: input.GetUnofficialCurrencyCode(),
+		CategoryDetail:         input.GetPersonalFinanceCategory().GetDetailed(),
+		Date:                   input.GetDate(),
+		ISOCurrencyCode:        deref(input.GetIsoCurrencyCode()),
+		UnofficialCurrencyCode: deref(input.GetUnofficialCurrencyCode()),
 		IsPending:              input.GetPending(),
-		MerchantName:           input.GetMerchantName(),
+		MerchantName:           deref(input.GetMerchantName()),
 		Name:                   input.GetName(),
-		OriginalDescription:    input.GetOriginalDescription(),
-		PendingTransactionId:   pendingTransactionId,
-		TransactionId:          input.GetTransactionId(),
+		OriginalDescription:    deref(input.GetOriginalDescription()),
+		PendingTransactionId:   input.GetPendingTransactionID(),
+		TransactionId:          input.GetTransactionID(),
 	}
 
 	return transaction, nil

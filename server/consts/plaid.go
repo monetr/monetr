@@ -1,14 +1,14 @@
 package consts
 
 import (
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
 )
 
 var (
 	PlaidClientName = "monetr"
 	PlaidLanguage   = "en"
 	PlaidProducts   = []plaid.Products{
-		plaid.PRODUCTS_TRANSACTIONS,
+		plaid.ProductsTransactions,
 	}
 )
 

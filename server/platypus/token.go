@@ -3,7 +3,7 @@ package platypus
 import (
 	"time"
 
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
 )
 
 type ItemToken struct {
@@ -12,11 +12,11 @@ type ItemToken struct {
 }
 
 func NewItemTokenFromPlaid(
-	input plaid.ItemPublicTokenExchangeResponse,
+	input *plaid.ItemPublicTokenExchangeResponse,
 ) (ItemToken, error) {
 	return ItemToken{
 		AccessToken: input.GetAccessToken(),
-		ItemId:      input.GetItemId(),
+		ItemId:      input.GetItemID(),
 	}, nil
 }
 

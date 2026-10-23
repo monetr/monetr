@@ -8,11 +8,11 @@ import (
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
 	"github.com/monetr/monetr/server/internal/myownsanity"
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
 	"github.com/stretchr/testify/require"
 )
 
-func MockSync(t *testing.T, transactions []plaid.Transaction) {
+func MockSync(t *testing.T, transactions []*plaid.Transaction) {
 	mock_http_helper.NewHttpMockJsonResponder(
 		t,
 		"POST", Path(t, "/transactions/sync"),
@@ -25,18 +25,17 @@ func MockSync(t *testing.T, transactions []plaid.Transaction) {
 			require.NoError(t, json.NewDecoder(request.Body).Decode(&syncTransactionsRequest), "must decode request")
 			count := syncTransactionsRequest.Count
 
-			filteredTransactions := make([]plaid.Transaction, 0, len(transactions))
+			filteredTransactions := make([]*plaid.Transaction, 0, len(transactions))
 			filteredTransactions = append(filteredTransactions, transactions...)
 
 			endingOffset := myownsanity.Min(len(filteredTransactions), count)
 			data := filteredTransactions[0:endingOffset]
 
-			return plaid.TransactionsSyncResponse{
-				Accounts:             nil, // Add some basic reporting here too
-				Added:                data,
-				HasMore:              false,
-				RequestId:            gofakeit.UUID(),
-				AdditionalProperties: nil,
+			return &plaid.TransactionsSyncResponse{
+				Accounts:  nil, // Add some basic reporting here too
+				Added:     data,
+				HasMore:   false,
+				RequestID: gofakeit.UUID(),
 			}, http.StatusOK
 		},
 		PlaidHeaders,
@@ -56,13 +55,13 @@ func MockSyncError(t *testing.T, plaidError plaid.PlaidError) {
 			require.NoError(t, json.NewDecoder(request.Body).Decode(&syncTransactionsRequest), "must decode request")
 
 			var status int
-			if s := plaidError.Status.Get(); s != nil {
-				status = int(*s)
+			if s := plaidError.Status; s != nil {
+				status = *s
 			} else {
 				status = http.StatusInternalServerError
 			}
 
-			return plaidError, status
+			return &plaidError, status
 		},
 		PlaidHeaders,
 	)

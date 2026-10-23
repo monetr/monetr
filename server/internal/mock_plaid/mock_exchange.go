@@ -7,7 +7,7 @@ import (
 
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
 	"github.com/stretchr/testify/require"
 )
 
@@ -29,20 +29,20 @@ func MockExchangePublicToken(t *testing.T) string {
 
 			requestId := gofakeit.UUID()
 			if exchangeRequest.PublicToken != publicToken {
-				return plaid.PlaidError{
-					RequestId:      &requestId,
+				return &plaid.PlaidError{
+					RequestID:      &requestId,
 					ErrorType:      "INVALID_REQUEST",
 					ErrorCode:      "1234",
 					ErrorMessage:   "public_token is not valid",
-					DisplayMessage: *plaid.NewNullableString(new("public_token is not valid")),
-					Status:         *plaid.NewNullableInt32(new(int32(http.StatusBadRequest))),
+					DisplayMessage: new("public_token is not valid"),
+					Status:         new(http.StatusBadRequest),
 				}, http.StatusBadRequest
 			}
 
-			return plaid.ItemPublicTokenExchangeResponse{
-				RequestId:   requestId,
+			return &plaid.ItemPublicTokenExchangeResponse{
+				RequestID:   requestId,
 				AccessToken: gofakeit.UUID(),
-				ItemId:      gofakeit.UUID(),
+				ItemID:      gofakeit.UUID(),
 			}, http.StatusOK
 		},
 		PlaidHeaders,

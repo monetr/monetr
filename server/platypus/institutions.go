@@ -8,7 +8,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/cache"
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
 )
 
 type PlaidInstitutions interface {
@@ -31,34 +31,34 @@ type PlaidInstitution struct {
 }
 
 type Status struct {
-	ItemLogins          plaid.ProductStatus `json:"item_logins,omitempty"`
-	TransactionsUpdates plaid.ProductStatus `json:"transactions_updates,omitempty"`
-	Auth                plaid.ProductStatus `json:"auth,omitempty"`
-	Identity            plaid.ProductStatus `json:"identity,omitempty"`
-	InvestmentsUpdates  plaid.ProductStatus `json:"investments_updates,omitempty"`
-	LiabilitiesUpdates  plaid.ProductStatus `json:"liabilities_updates,omitempty"`
-	Liabilities         plaid.ProductStatus `json:"liabilities,omitempty"`
-	Investments         plaid.ProductStatus `json:"investments,omitempty"`
+	ItemLogins          *plaid.ProductStatus `json:"item_logins,omitempty"`
+	TransactionsUpdates *plaid.ProductStatus `json:"transactions_updates,omitempty"`
+	Auth                *plaid.ProductStatus `json:"auth,omitempty"`
+	Identity            *plaid.ProductStatus `json:"identity,omitempty"`
+	InvestmentsUpdates  *plaid.ProductStatus `json:"investments_updates,omitempty"`
+	LiabilitiesUpdates  *plaid.ProductStatus `json:"liabilities_updates,omitempty"`
+	Liabilities         *plaid.ProductStatus `json:"liabilities,omitempty"`
+	Investments         *plaid.ProductStatus `json:"investments,omitempty"`
 }
 
-func NewPlaidInstitution(input plaid.Institution) PlaidInstitution {
+func NewPlaidInstitution(input *plaid.Institution) PlaidInstitution {
 	return PlaidInstitution{
-		InstitutionId: input.GetInstitutionId(),
+		InstitutionId: input.GetInstitutionID(),
 		Name:          input.GetName(),
 		Products:      input.GetProducts(),
 		CountryCodes:  input.GetCountryCodes(),
-		URL:           input.GetUrl(),
-		PrimaryColor:  input.GetPrimaryColor(),
-		Logo:          input.GetLogo(),
+		URL:           deref(input.GetURL()),
+		PrimaryColor:  deref(input.GetPrimaryColor()),
+		Logo:          deref(input.GetLogo()),
 		Status: Status{
-			ItemLogins:          input.Status.Get().GetItemLogins(),
-			TransactionsUpdates: input.Status.Get().GetTransactionsUpdates(),
-			Auth:                input.Status.Get().GetAuth(),
-			Identity:            input.Status.Get().GetIdentity(),
-			InvestmentsUpdates:  input.Status.Get().GetInvestmentsUpdates(),
-			LiabilitiesUpdates:  input.Status.Get().GetLiabilitiesUpdates(),
-			Liabilities:         input.Status.Get().GetLiabilities(),
-			Investments:         input.Status.Get().GetInvestments(),
+			ItemLogins:          input.GetStatus().GetItemLogins(),
+			TransactionsUpdates: input.GetStatus().GetTransactionsUpdates(),
+			Auth:                input.GetStatus().GetAuth(),
+			Identity:            input.GetStatus().GetIdentity(),
+			InvestmentsUpdates:  input.GetStatus().GetInvestmentsUpdates(),
+			LiabilitiesUpdates:  input.GetStatus().GetLiabilitiesUpdates(),
+			Liabilities:         input.GetStatus().GetLiabilities(),
+			Investments:         input.GetStatus().GetInvestments(),
 		},
 	}
 }
@@ -97,7 +97,7 @@ func (p *plaidInstitutionsBase) GetInstitution(ctx context.Context, institutionI
 		return institution, err
 	}
 
-	institution = NewPlaidInstitution(*result)
+	institution = NewPlaidInstitution(result)
 
 	if err = p.caching.SetEzTTL(span.Context(), p.cacheKey(institutionId), institution, 30*time.Minute); err != nil {
 		p.log.WarnContext(span.Context(), "failed to cache institution details", "institutionId", institutionId, "err", err)

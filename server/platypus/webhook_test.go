@@ -14,7 +14,7 @@ import (
 	"github.com/monetr/monetr/server/internal/mock_plaid"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/secrets"
-	"github.com/plaid/plaid-go/v48/plaid"
+	plaid "github.com/plaid/plaid-go/v49"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -37,7 +37,7 @@ func TestNewInMemoryWebhookVerification(t *testing.T) {
 		plaid := NewPlaid(log, clock, kms, db, config.Plaid{
 			ClientID:     gofakeit.UUID(),
 			ClientSecret: gofakeit.UUID(),
-			Environment:  plaid.Sandbox,
+			Environment:  plaid.Environments.Sandbox,
 		})
 
 		webhookVerification := NewInMemoryWebhookVerification(log, plaid, time.Second*1)
@@ -64,7 +64,7 @@ func TestNewInMemoryWebhookVerification(t *testing.T) {
 		plaid := NewPlaid(log, clock, kms, db, config.Plaid{
 			ClientID:     gofakeit.UUID(),
 			ClientSecret: gofakeit.UUID(),
-			Environment:  plaid.Sandbox,
+			Environment:  plaid.Environments.Sandbox,
 		})
 
 		webhookVerification := NewInMemoryWebhookVerification(log, plaid, time.Second*1)
