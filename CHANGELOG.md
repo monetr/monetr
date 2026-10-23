@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.21.0](https://github.com/monetr/monetr/compare/v1.20.0...v1.21.0) (2026-10-23)
+
+
+### Features
+
+* Allow users to archive inactive plaid bank accounts ([#3690](https://github.com/monetr/monetr/issues/3690)) ([89cf28d](https://github.com/monetr/monetr/commit/89cf28d85b9eda0633d957974aeabf17b11d6aea))
+* **ui:** Include expense/goal icon in select spending dropdown ([7cf4bcd](https://github.com/monetr/monetr/commit/7cf4bcde4dfc81bd734aedf09795929aec31fb9d))
+* **ui:** Use numeric font variants for amounts ([278d103](https://github.com/monetr/monetr/commit/278d103ce0e854920712a1aab84952a7d507bf46))
+
+
+### Miscellaneous
+
+* Migrate self hosted docker compose from valkey to in-memory ([146604b](https://github.com/monetr/monetr/commit/146604bb300b4171b0a2868d00bc9290102126c7))
+
+
+### Dependencies
+
+* **api:** update module github.com/plaid/plaid-go/v48 to v49 ([#3684](https://github.com/monetr/monetr/issues/3684)) ([c6615f4](https://github.com/monetr/monetr/commit/c6615f4e9627aa1748d737ccc2f636037959d2ab))
+* **containers:** update rustfs/rustfs docker tag to v1.0.2 ([#3689](https://github.com/monetr/monetr/issues/3689)) ([16fdfe6](https://github.com/monetr/monetr/commit/16fdfe6ac117f0655d6060d69b0bebd7d1038e32))
+* **ui:** lock file maintenance ([#3679](https://github.com/monetr/monetr/issues/3679)) ([5125e03](https://github.com/monetr/monetr/commit/5125e0382f152005893512f18579989d16ec32e9))
+* **ui:** update dependency @tanstack/react-query to v5.104.3 ([#3674](https://github.com/monetr/monetr/issues/3674)) ([cc1c207](https://github.com/monetr/monetr/commit/cc1c207108fd841401b4b5fb5f0d1220d4c45791))
+* **ui:** update dependency @tanstack/react-virtual to v3.14.20 ([#3676](https://github.com/monetr/monetr/issues/3676)) ([0e46f47](https://github.com/monetr/monetr/commit/0e46f4794f049467eb6567d00f709b8ad7f17493))
+* **ui:** update dependency @tanstack/react-virtual to v3.14.21 ([#3687](https://github.com/monetr/monetr/issues/3687)) ([8a8c498](https://github.com/monetr/monetr/commit/8a8c4988f3a633fc4635365b9ddeec086deb2b62))
+* **ui:** update dependency pnpm to v12.14.0 ([#3677](https://github.com/monetr/monetr/issues/3677)) ([fc32f3f](https://github.com/monetr/monetr/commit/fc32f3fda460d6d4d43319a03253389f73c5dc50))
+* **ui:** update dependency satori to v0.60.0 ([#3681](https://github.com/monetr/monetr/issues/3681)) ([86eae0a](https://github.com/monetr/monetr/commit/86eae0a3585f855fec81500a6c32becd0a5ff278))
+* **ui:** update sass to v1.105.2 ([#3686](https://github.com/monetr/monetr/issues/3686)) ([8705500](https://github.com/monetr/monetr/commit/8705500358d13d22ea83aba3940fd45e364929b1))
+* **ui:** update sentry-javascript monorepo to v11.8.0 ([#3682](https://github.com/monetr/monetr/issues/3682)) ([d364804](https://github.com/monetr/monetr/commit/d36480476b9ccfb850ad8b6d7324d28255de6326))
+
 ## [1.20.0](https://github.com/monetr/monetr/compare/v1.19.0...v1.20.0) (2026-10-22)
 
 This release includes several UX improvements. The sidebar can now be opened by swiping from the left to right on mobile
