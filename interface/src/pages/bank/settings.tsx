@@ -204,7 +204,7 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
                   placeholder='No Limit Balance'
                 />
                 <div className={styles.formButtons}>
-                  {Boolean(link?.getCanArchiveBankAccount()) && (
+                  {Boolean(link?.getCanArchiveBankAccount(bankAccount)) && (
                     <Button disabled={Boolean(bankAccount.deletedAt)} onClick={archive} variant='destructive'>
                       <Archive />
                       Archive

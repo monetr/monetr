@@ -32,7 +32,7 @@ and [funding schedules](./funding_schedules) all hang off a bank account, not of
 | `originalName`           | string                  | The name as the bank gave it. Renaming leaves this alone.                                                                                                                                                         |
 | `accountType`            | string                  | Broad classification. One of `depository`, `credit`, `loan`, `investment` or `other`. Unrecognized values become `other`.                                                                                         |
 | `accountSubType`         | string                  | Narrower classification. `checking`, `savings`, `hsa`, `cd`, `money market`, `paypal`, `prepaid`, `cash management`, `ebt`, `credit card`, `auto`, or `other`. Anything monetr doesn't recognize becomes `other`. |
-| `status`                 | string                  | `active`, `inactive`, or `unknown`. Archiving an account sets it to `inactive`.                                                                                                                                   |
+| `status`                 | string                  | `active`, `inactive`, or `unknown`. Archiving an account sets it to `inactive`. Plaid accounts also go `inactive` when the bank stops sending them.                                                               |
 | `lastUpdated`            | timestamp               | When the balances were last refreshed.                                                                                                                                                                            |
 | `createdAt`              | timestamp               | When monetr created the record.                                                                                                                                                                                   |
 | `updatedAt`              | timestamp               | When the record last changed.                                                                                                                                                                                     |
@@ -418,6 +418,9 @@ curl --request PATCH \
 Takes a bank account out of circulation. Despite the verb, this doesn't destroy anything: it sets `status` to `inactive`
 and stamps `deletedAt`. Transactions, spending objects and history all stay put.
 
+Plaid accounts can only be archived once they're `inactive`, which happens when the bank stops sending that account
+to monetr.
+
 **In the app:** Archiving an account from its settings page.
 
 ```http
@@ -445,7 +448,7 @@ the `link_id` filter, which is the only call that includes them.
 
 ### Errors
 
-| Status | When                                                                                           |
-| ------ | ---------------------------------------------------------------------------------------------- |
-| 400    | It's a Plaid account. Those can't be archived on their own, you remove the whole link instead. |
-| 404    | No such account.                                                                               |
+| Status | When                                                                                                                 |
+| ------ | -------------------------------------------------------------------------------------------------------------------- |
+| 400    | It's a Plaid account that's still `active`. Those can't be archived on their own, you remove the whole link instead. |
+| 404    | No such account.                                                                                                     |

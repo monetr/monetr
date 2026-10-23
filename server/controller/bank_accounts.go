@@ -243,7 +243,9 @@ func (c *Controller) deleteBankAccount(ctx *echo.Context) error {
 		return c.wrapPgError(ctx, err, "Failed to retrieve bank account")
 	}
 
-	if existingBankAccount.PlaidBankAccount != nil {
+	// Plaid accounts can only be archived once Plaid stops giving them to us,
+	// otherwise the user should update their account selection in Plaid instead.
+	if existingBankAccount.PlaidBankAccount != nil && existingBankAccount.Status != BankAccountStatusInactive {
 		return c.badRequest(ctx, "Plaid bank account cannot be removed this way")
 	} else if existingBankAccount.LunchFlowBankAccountId != nil {
 		// This is kind of like soft-deleting the lunch flow bank account. Basically

@@ -143,6 +143,107 @@ describe('link details page', () => {
     await waitFor(() => expect(world.getByTestId('link-accounts-archived')).toHaveTextContent('Old Joint Checking'));
   });
 
+  it('will mark plaid accounts that are inactive', async () => {
+    mockFetch.onGet('/api/users/me').reply(200, {
+      hasSubscription: true,
+      isActive: true,
+      isSetup: true,
+      defaultCurrency: 'USD',
+      user: {
+        account: {
+          accountId: 'acct_01hy4r9b8gnb1a1d2r0z6t2k8x',
+          subscriptionActiveUntil: '2026-11-26T00:31:38Z',
+          subscriptionStatus: 'active',
+          timezone: 'America/Chicago',
+          locale: 'en_US',
+        },
+        accountId: 'acct_01hy4r9b8gnb1a1d2r0z6t2k8x',
+        login: {
+          email: 'example@example.com',
+          firstName: 'Elliot',
+          lastName: 'Courant',
+          isEmailVerified: true,
+          loginId: 'lgn_01hy4r9b8gnb1a1d2r0z6t2k8x',
+          totpEnabledAt: null,
+        },
+        loginId: 'lgn_01hy4r9b8gnb1a1d2r0z6t2k8x',
+        userId: 'user_01hym36e8ewaq0hxssb1m3k4ha',
+        role: 'owner',
+        linkOrder: null,
+      },
+    });
+    mockFetch.onGet('/api/links/link_01hy4rbb1gjdek7h2xmgy5pnwk').reply(200, {
+      linkId: 'link_01hy4rbb1gjdek7h2xmgy5pnwk',
+      linkType: 'plaid',
+      plaidLink: {
+        products: ['transactions'],
+        status: 'setup',
+        errorCode: null,
+        expirationDate: null,
+        newAccountsAvailable: false,
+        institutionId: 'ins_116794',
+        institutionName: 'Mercury',
+        lastManualSync: '2026-10-08T19:56:34Z',
+        lastSuccessfulUpdate: '2026-10-10T04:22:52Z',
+        lastAttemptedUpdate: '2026-10-10T04:22:52Z',
+        updatedAt: '2026-10-10T04:22:52Z',
+        createdAt: '2026-01-12T02:08:40Z',
+        createdBy: 'user_01hym36e8ewaq0hxssb1m3k4ha',
+      },
+      institutionName: 'Mercury',
+      description: null,
+      bankAccountOrder: null,
+      createdAt: '2026-01-12T02:08:40Z',
+      createdBy: 'user_01hym36e8ewaq0hxssb1m3k4ha',
+      updatedAt: '2026-10-10T04:22:52Z',
+      deletedAt: null,
+    });
+    mockFetch.onGet('/api/bank_accounts?link_id=link_01hy4rbb1gjdek7h2xmgy5pnwk').reply(200, [
+      {
+        bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
+        linkId: 'link_01hy4rbb1gjdek7h2xmgy5pnwk',
+        availableBalance: 48635,
+        currentBalance: 48635,
+        mask: '2982',
+        name: 'Mercury Checking',
+        originalName: 'Mercury Checking',
+        accountType: 'depository',
+        accountSubType: 'checking',
+        status: 'inactive',
+        currency: 'USD',
+        lastUpdated: '2026-10-10T04:22:52Z',
+        createdAt: '2026-01-12T02:08:40Z',
+        deletedAt: null,
+      },
+      {
+        bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbzzz',
+        linkId: 'link_01hy4rbb1gjdek7h2xmgy5pnwk',
+        availableBalance: 0,
+        currentBalance: 0,
+        mask: '1187',
+        name: 'Old Joint Checking',
+        originalName: 'Old Joint Checking',
+        accountType: 'depository',
+        accountSubType: 'checking',
+        status: 'inactive',
+        currency: 'USD',
+        lastUpdated: '2026-02-01T04:22:52Z',
+        createdAt: '2026-01-12T02:08:40Z',
+        deletedAt: '2026-02-01T04:22:52Z',
+      },
+    ]);
+
+    const world = testRenderer(<Route component={LinkDetails} path='/link/:linkId/details' />, {
+      initialRoute: '/link/link_01hy4rbb1gjdek7h2xmgy5pnwk/details',
+    });
+
+    await waitFor(() => expect(world.getByTestId('link-accounts')).toHaveTextContent('Mercury Checking'));
+    await waitFor(() => expect(world.getByTestId('link-accounts')).toHaveTextContent('Inactive'));
+    // Archived accounts are inactive too but they only need the archived badge.
+    await waitFor(() => expect(world.getByTestId('link-accounts-archived')).toHaveTextContent('Old Joint Checking'));
+    await waitFor(() => expect(world.getByTestId('link-accounts-archived')).not.toHaveTextContent('Inactive'));
+  });
+
   it('will render a manual link without a sync status', async () => {
     mockFetch.onGet('/api/users/me').reply(200, {
       hasSubscription: true,
