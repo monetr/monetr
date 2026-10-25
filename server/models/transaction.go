@@ -17,6 +17,7 @@ const (
 	TransactionSourceUpload    TransactionSource = "upload"
 	TransactionSourceManual    TransactionSource = "manual"
 	TransactionSourceLunchFlow TransactionSource = "lunch_flow"
+	TransactionSourceSimpleFin TransactionSource = "simplefin"
 )
 
 type Transaction struct {
@@ -33,6 +34,8 @@ type Transaction struct {
 	PendingPlaidTransaction   *PlaidTransaction         `json:"pendingPlaidTransaction" bun:"rel:belongs-to,join:pending_plaid_transaction_id=plaid_transaction_id,join:account_id=account_id"` // fk: is the prefix of the column we want to use to join on in a multikey join.
 	LunchFlowTransactionId    *ID[LunchFlowTransaction] `json:"-" bun:"lunch_flow_transaction_id"`
 	LunchFlowTransaction      *LunchFlowTransaction     `json:"lunchFlowTransaction,omitempty" bun:"rel:belongs-to,join:lunch_flow_transaction_id=lunch_flow_transaction_id,join:account_id=account_id"`
+	SimpleFinTransactionId    *ID[SimpleFinTransaction] `json:"-" bun:"simplefin_transaction_id"`
+	SimpleFinTransaction      *SimpleFinTransaction     `json:"simpleFinTransaction,omitempty" bun:"rel:belongs-to,join:simplefin_transaction_id=simplefin_transaction_id,join:account_id=account_id"`
 	TransactionClusterId      *ID[TransactionCluster]   `json:"transactionClusterId" bun:"transaction_cluster_id"`
 	TransactionCluster        *TransactionCluster       `json:"-" bun:"rel:belongs-to,join:transaction_cluster_id=transaction_cluster_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
 	TransactionRecurringId    *ID[TransactionRecurring] `json:"transactionRecurringId" bun:"transaction_recurring_id"`

@@ -61,6 +61,7 @@ type Configuration struct {
 	Security      Security      `yaml:"security"`
 	Sentry        Sentry        `yaml:"sentry"`
 	Server        Server        `yaml:"server"`
+	SimpleFin     SimpleFin     `yaml:"simpleFin"`
 	Storage       Storage       `yaml:"storage"`
 	Stripe        Stripe        `yaml:"stripe"`
 }
@@ -435,6 +436,9 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Server.StatsPort", 9000)
 	v.SetDefault("Server.UICacheHours", 90*24)
 	v.SetDefault("Server.ClientIPHeader", "X-Forwarded-For")
+	// SimpleFIN is enabled by default for self-hosted deployments too!
+	v.SetDefault("SimpleFin.Enabled", true)
+	v.SetDefault("SimpleFin.AllowedHosts", []string{DefaultSimpleFinHost})
 	v.SetDefault("Storage.Enabled", false)
 	v.SetDefault("Storage.Provider", "filesystem")
 	v.SetDefault("Storage.Filesystem.BasePath", "/etc/monetr/storage")
