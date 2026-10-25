@@ -1,0 +1,26 @@
+@use '@monetr/docs/styles/variables';
+@use '@monetr/docs/styles/mixins';
+
+.root {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1 * variables.$size 3 * variables.$size;
+  padding: 2 * variables.$size 4 * variables.$size;
+  background: var(--mtr-pink-dim);
+  border-bottom: 1px solid var(--mtr-pink);
+  color: var(--mtr-text);
+  text-align: center;
+  @include mixins.text-small;
+}
+
+.link {
+  color: var(--mtr-pink);
+  font-weight: 600;
+  white-space: nowrap;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

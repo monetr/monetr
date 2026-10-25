@@ -19,6 +19,7 @@ import LedgerMeta from '@monetr/docs/components/LedgerMeta';
 import PageMetadata from '@monetr/docs/components/PageMetadata';
 import QueryClientWrapper from '@monetr/docs/components/QueryClientWrapper';
 import SignIn from '@monetr/docs/components/SignIn';
+import StatusBanner from '@monetr/docs/components/StatusBanner';
 
 import layoutStyles from './Layout.module.scss';
 
@@ -94,6 +95,7 @@ const Layout = () => {
           // Renders the page-metadata ledger row at the top of doc pages without
           // touching any MDX. DocMeta gates this to the /documentation tree.
           beforeDocContent={<DocMeta />}
+          beforeNav={<StatusBanner />}
           // TODO This renders weird on custom pages, causing a brief flash.
           // beforeNav={
           //   <NoSSR>
