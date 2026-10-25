@@ -87,6 +87,8 @@ func (o *SimpleFinLink) BeforeAppendModel(
 		if o.UpdatedAt.IsZero() {
 			o.UpdatedAt = now
 		}
+	case *bun.UpdateQuery:
+		o.UpdatedAt = time.Now()
 	}
 
 	return nil
