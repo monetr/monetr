@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.21.1](https://github.com/monetr/monetr/compare/v1.21.0...v1.21.1) (2026-10-26)
+
+
+### Bug Fixes
+
+* **api:** Adding mTLS support for S3 backends ([1de8e0f](https://github.com/monetr/monetr/commit/1de8e0f7876df9a47fca229dee2b9b32307226f1))
+* **api:** Fixing how ruleset DTSTART is validated in the controller ([94f1e5c](https://github.com/monetr/monetr/commit/94f1e5c76f40378902f71bfba047c91126bff7b9))
+* **api:** Make spending calculations more accurate by using last spent ([e13397e](https://github.com/monetr/monetr/commit/e13397ecf2e0b6af7676b66e9360bb2b6d2844b7))
+* **api:** Makine last_spent_from work properly on spending objects ([4182118](https://github.com/monetr/monetr/commit/4182118fe1fba95c618f6d96227f4ebd236f438e))
+* **api:** Making recurring transactions more deterministic ([561d9b9](https://github.com/monetr/monetr/commit/561d9b9ba617b661795a3872ffbc528c3d4fd6f5))
+
+
+### Documentation
+
+* Show when monetr is under maintenance ([90846a0](https://github.com/monetr/monetr/commit/90846a03bfaebebca1917a705ba0ac3c99e486d0))
+* Updating docs on recurrence rules ([f7eed0e](https://github.com/monetr/monetr/commit/f7eed0e3e75c521056211a41f6426b31bb0b1376))
+
+
+### Dependencies
+
+* **containers:** update rustfs/rustfs docker tag to v1.0.3 ([#3694](https://github.com/monetr/monetr/issues/3694)) ([f2f8277](https://github.com/monetr/monetr/commit/f2f8277785135a2f40262775fb075a0a543a603c))
+* **ui:** update dependency @imagemagick/magick-wasm to v0.0.45 ([#3697](https://github.com/monetr/monetr/issues/3697)) ([22fbf4e](https://github.com/monetr/monetr/commit/22fbf4e8d5e7c6702606d18ad72af88ba1e45cc9))
+* **ui:** update dependency @rsbuild/core to v2.2.14 ([#3700](https://github.com/monetr/monetr/issues/3700)) ([0bc4457](https://github.com/monetr/monetr/commit/0bc4457d7973c0e08157c7ab8f277cc6146d5cdc))
+* **ui:** update dependency @tanstack/react-query to v5.104.5 ([#3695](https://github.com/monetr/monetr/issues/3695)) ([acdedd9](https://github.com/monetr/monetr/commit/acdedd9405fa75ba6f804d96e51a4c734cbb2417))
+* **ui:** update rstest to v0.12.4 ([#3701](https://github.com/monetr/monetr/issues/3701)) ([32f6992](https://github.com/monetr/monetr/commit/32f699279edee1d4c40c8cac8bbd1f71919c72e5))
+
 ## [1.21.0](https://github.com/monetr/monetr/compare/v1.20.0...v1.21.0) (2026-10-24)
 
 
