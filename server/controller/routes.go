@@ -390,6 +390,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billedKeyOrToken.QUERY("/bank_accounts/:bankAccountId/forecast/spending", c.postForecastNewSpending)
 	billedKeyOrToken.POST("/bank_accounts/:bankAccountId/forecast/next_funding", c.postForecastNextFunding)
 	billedKeyOrToken.QUERY("/bank_accounts/:bankAccountId/forecast/next_funding", c.postForecastNextFunding)
+	billedKeyOrToken.QUERY("/bank_accounts/:bankAccountId/forecast/initial", c.queryInitialFundingForRecurringTransaction)
 
 	// Plaid Link, these endpoints are not accessible via API keys because it
 	// creates a potential spam vector for plaid.
