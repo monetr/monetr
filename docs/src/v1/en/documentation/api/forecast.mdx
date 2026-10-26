@@ -11,7 +11,7 @@ Forecasting answers the question monetr exists to answer: given what I've commit
 the next few months look like? It walks forward day by day, firing your funding schedules and your spending due dates in
 order, and reports the balance at each step.
 
-Nothing here writes anything. All three endpoints are pure calculation, including the two that are POSTs. They're POSTs
+Nothing here writes anything. All four endpoints are pure calculation, including the two that are POSTs. They're POSTs
 because they take a body describing a hypothetical, not because they change anything.
 
 Forecasting can be slow on an account with a lot of spending objects, so the handlers have their own timeouts. Exceed
@@ -343,3 +343,82 @@ schedule](./funding_schedules#get-a-funding-schedule) to work out what's left ov
 | 400    | `fundingScheduleId` is missing or malformed.   |
 | 404    | No such funding schedule on that bank account. |
 | 408    | The forecast took longer than 25 seconds.      |
+
+## <Badge type="info">QUERY</Badge> Estimate the starting amount for a recurring expense
+
+Answers "if I'd been budgeting for this all along, how much would already be set aside for it today?" Give it a
+[recurring transaction](./recurring_transactions) and the funding schedule that would pay for it, and it works out what
+an expense for that charge would have in it right now. Use the result as the `currentAmount` when you [create the
+expense](./spending#create-a-spending-object), so it starts out where it would be instead of at zero.
+
+**In the app:** Nothing in the app uses this yet.
+
+```http
+QUERY /api/bank_accounts/:bankAccountId/forecast/initial
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute       | Type          | Required | Description                                                                |
+| --------------- | ------------- | -------- | -------------------------------------------------------------------------- |
+| `bankAccountId` | string (ulid) | Yes      | The bank account the recurring transaction and funding schedule belong to. |
+
+### Body
+
+| Attribute                | Type          | Required | Description                                                                                         |
+| ------------------------ | ------------- | -------- | --------------------------------------------------------------------------------------------------- |
+| `transactionRecurringId` | string (ulid) | Yes      | The [recurring transaction](./recurring_transactions#the-recurring-transaction-object) to plan for. |
+| `fundingScheduleId`      | string (ulid) | Yes      | The [funding schedule](./funding_schedules#list-funding-schedules) that would pay for it.           |
+
+The expense it imagines uses the recurring transaction's `ruleset` for its due dates and its `lastAmount` as the target.
+It starts from the last time that charge was due, then adds up what the funding schedule would have put in since then,
+the same way a real expense gets funded. Whatever's in there today is the answer.
+
+If the funding schedule is newer than that last charge, it gets treated like it has always existed, with its paydays
+carried back on the same days. So a funding schedule you set up yesterday still gives you a real number.
+
+### Example
+
+This account has an $8 GitHub charge on the 15th of every month, and gets paid every other Friday. The request was made
+on October 26th, 2026.
+
+```bash
+curl --request QUERY \
+  --url "https://my.monetr.local/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/forecast/initial" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "transactionRecurringId": "txrc_01j6b4n8w2kq5t9r3xm7vdc6ph",
+    "fundingScheduleId": "fund_01fpwx4xhvr8gs2fpsafd7nvpz"
+  }'
+```
+
+```json
+{
+  "currentAmount": 266
+}
+```
+
+There's been one payday since the charge on the 15th, October 16th, and there are three paydays before the next charge
+on November 15th. So each one puts aside a third of the $8, and today there's $2.66 set aside.
+
+### Response attributes
+
+| Attribute       | Type    | Description                                                                                                                           |
+| --------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `currentAmount` | integer | How much the expense would have in it today, in the currency's smallest unit. See [Currencies](./currencies#how-monetr-stores-money). |
+
+:::note
+A recurring transaction's `ruleset` lands on the earliest day the charge usually happens. If the charge tends to post a
+few days after that, you'll get close to zero during those few days, since this assumes the charge already happened.
+:::
+
+### Errors
+
+| Status | When                                                                                                             |
+| ------ | ---------------------------------------------------------------------------------------------------------------- |
+| 400    | `transactionRecurringId` or `fundingScheduleId` is missing or malformed. These come back with a `problems` tree. |
+| 400    | The funding schedule's rule has a `COUNT`, or repeats on something other than days, weeks, months or years.      |
+| 404    | No such recurring transaction or funding schedule on that bank account.                                          |
