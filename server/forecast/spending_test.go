@@ -469,6 +469,159 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 			assert.LessOrEqual(t, item.RollingAllocation, int64(10000), "rolling allocation must not exceed the target amount: [%d] %s", i, item.Date)
 		}
 	})
+
+	t.Run("spent from early is not spent again", func(t *testing.T) {
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		spendingRule := testutils.NewRuleSet(t, 2022, 1, 8, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=8")
+		now := time.Date(2022, 10, 6, 0, 0, 1, 0, timezone).UTC()
+		// The expense is due on the 8th but it was paid on the 6th, so the
+		// allocation is already empty and October 8th should not show up as
+		// something that still needs to be spent.
+		spentFrom := time.Date(2022, 10, 6, 0, 0, 0, 0, timezone)
+		log := testutils.GetLog(t)
+		fundingInstructions := NewFundingScheduleFundingInstructions(
+			log,
+			models.FundingSchedule{
+				RuleSet:         fundingRule,
+				ExcludeWeekends: false,
+				NextRecurrence:  time.Date(2022, 10, 15, 0, 0, 0, 0, timezone),
+			},
+		)
+		spending := models.Spending{
+			SpendingType:   models.SpendingTypeExpense,
+			TargetAmount:   5000,
+			CurrentAmount:  0,
+			NextRecurrence: time.Date(2022, 10, 8, 0, 0, 0, 0, timezone),
+			LastSpentFrom:  &spentFrom,
+			RuleSet:        spendingRule,
+		}
+		withoutSpentFrom := spending
+		withoutSpentFrom.LastSpentFrom = nil
+
+		{ // Without last spent from we would spend October 8th again.
+			spendingInstructions := NewSpendingInstructions(log, withoutSpentFrom, fundingInstructions)
+			events, err := spendingInstructions.GetNextNSpendingEventsAfter(t.Context(), 1, now, timezone)
+			assert.NoError(t, err, "should not return an error")
+			assert.Equal(t, time.Date(2022, 10, 8, 0, 0, 0, 0, timezone), events[0].Date, "first event would be october 8th")
+			assert.EqualValues(t, -5000, events[0].RollingAllocation, "and it would overdraw the expense")
+		}
+
+		spendingInstructions := NewSpendingInstructions(log, spending, fundingInstructions)
+		events, err := spendingInstructions.GetNextNSpendingEventsAfter(t.Context(), 3, now, timezone)
+		assert.NoError(t, err, "should not return an error")
+		assert.Equal(t, []SpendingEvent{
+			{
+				Date:               time.Date(2022, 10, 15, 0, 0, 0, 0, timezone),
+				TransactionAmount:  0,
+				ContributionAmount: 2500,
+				RollingAllocation:  2500,
+				Funding: []FundingEvent{
+					{
+						Date:           time.Date(2022, 10, 15, 0, 0, 0, 0, timezone),
+						OriginalDate:   time.Date(2022, 10, 15, 0, 0, 0, 0, timezone),
+						WeekendAvoided: false,
+					},
+				},
+			},
+			{
+				Date:               time.Date(2022, 10, 31, 0, 0, 0, 0, timezone),
+				TransactionAmount:  0,
+				ContributionAmount: 2500,
+				RollingAllocation:  5000,
+				Funding: []FundingEvent{
+					{
+						Date:           time.Date(2022, 10, 31, 0, 0, 0, 0, timezone),
+						OriginalDate:   time.Date(2022, 10, 31, 0, 0, 0, 0, timezone),
+						WeekendAvoided: false,
+					},
+				},
+			},
+			{
+				Date:               time.Date(2022, 11, 8, 0, 0, 0, 0, timezone),
+				TransactionAmount:  5000,
+				ContributionAmount: 0,
+				RollingAllocation:  0,
+				Funding:            []FundingEvent{},
+			},
+		}, events, "should save for November 8th instead of spending October 8th again")
+	})
+
+	t.Run("late expense is spent from before the forecast starts", func(t *testing.T) {
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		spendingRule := testutils.NewRuleSet(t, 2022, 1, 1, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
+		now := time.Date(2022, 10, 3, 0, 0, 1, 0, timezone).UTC()
+		// Rent was due on the 1st but hasn't come in yet, the money for it is still
+		// allocated. September was spent from on time so we know October is late.
+		spentFrom := time.Date(2022, 9, 1, 0, 0, 0, 0, timezone)
+		log := testutils.GetLog(t)
+		fundingInstructions := NewFundingScheduleFundingInstructions(
+			log,
+			models.FundingSchedule{
+				RuleSet:         fundingRule,
+				ExcludeWeekends: false,
+				NextRecurrence:  time.Date(2022, 10, 15, 0, 0, 0, 0, timezone),
+			},
+		)
+		spending := models.Spending{
+			SpendingType:   models.SpendingTypeExpense,
+			TargetAmount:   100000,
+			CurrentAmount:  100000,
+			NextRecurrence: time.Date(2022, 10, 1, 0, 0, 0, 0, timezone),
+			LastSpentFrom:  &spentFrom,
+			RuleSet:        spendingRule,
+		}
+		withoutSpentFrom := spending
+		withoutSpentFrom.LastSpentFrom = nil
+
+		{ // Without last spent from October's money never leaves the allocation.
+			spendingInstructions := NewSpendingInstructions(log, withoutSpentFrom, fundingInstructions)
+			events, err := spendingInstructions.GetNextNSpendingEventsAfter(t.Context(), 3, now, timezone)
+			assert.NoError(t, err, "should not return an error")
+			assert.Equal(t, time.Date(2022, 11, 1, 0, 0, 0, 0, timezone), events[2].Date, "third event would be november 1st")
+			assert.EqualValues(t, 100000, events[2].RollingAllocation, "and october's money would still be sitting there after it")
+		}
+
+		spendingInstructions := NewSpendingInstructions(log, spending, fundingInstructions)
+		events, err := spendingInstructions.GetNextNSpendingEventsAfter(t.Context(), 3, now, timezone)
+		assert.NoError(t, err, "should not return an error")
+		assert.Equal(t, []SpendingEvent{
+			{
+				Date:               time.Date(2022, 10, 15, 0, 0, 0, 0, timezone),
+				TransactionAmount:  0,
+				ContributionAmount: 50000,
+				RollingAllocation:  50000,
+				Funding: []FundingEvent{
+					{
+						Date:           time.Date(2022, 10, 15, 0, 0, 0, 0, timezone),
+						OriginalDate:   time.Date(2022, 10, 15, 0, 0, 0, 0, timezone),
+						WeekendAvoided: false,
+					},
+				},
+			},
+			{
+				Date:               time.Date(2022, 10, 31, 0, 0, 0, 0, timezone),
+				TransactionAmount:  0,
+				ContributionAmount: 50000,
+				RollingAllocation:  100000,
+				Funding: []FundingEvent{
+					{
+						Date:           time.Date(2022, 10, 31, 0, 0, 0, 0, timezone),
+						OriginalDate:   time.Date(2022, 10, 31, 0, 0, 0, 0, timezone),
+						WeekendAvoided: false,
+					},
+				},
+			},
+			{
+				Date:               time.Date(2022, 11, 1, 0, 0, 0, 0, timezone),
+				TransactionAmount:  100000,
+				ContributionAmount: 0,
+				RollingAllocation:  0,
+				Funding:            []FundingEvent{},
+			},
+		}, events, "should save for november from zero since october's money is spoken for")
+	})
 }
 
 func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {

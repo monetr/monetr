@@ -82,6 +82,13 @@ func NewForecaster(log *slog.Logger, spending []Spending, funding []FundingSched
 			spendingItem,
 			fundingInstructions,
 		)
+		// NOTE: If an expense is late then its spending instructions will start the
+		// forecast with the late occurrence's money already taken out, since that
+		// occurrence was due before the forecast starts and won't show up as an
+		// event. But the balance here still includes it, so the forecast balance
+		// will be higher than the sum of each spending object's allocation by the
+		// target amount of each late expense. Not sure yet if this should match or
+		// if it should stay closer to the actual account balance.
 		forecaster.currentBalance += spendingItem.CurrentAmount
 	}
 

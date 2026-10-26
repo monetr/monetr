@@ -370,6 +370,21 @@ func (c *Controller) patchSpending(ctx *echo.Context) error {
 			updatedSpending.NextRecurrence = newNext
 			recalculateSpending = true
 		}
+
+		// The last spent from date was relative to the old schedule, so we can't
+		// trust which occurrence it lines up with anymore.
+		if !newNext.Equal(existingSpending.NextRecurrence) {
+			updatedSpending.LastSpentFrom = nil
+		}
+	}
+
+	// Same with the rule, if it was changed then the last spent from date might
+	// line up with a completely different occurrence now.
+	if updatedSpending.RuleSet != nil && existingSpending.RuleSet != nil {
+		timezone := c.mustGetTimezone(ctx)
+		if updatedSpending.RuleSet.String() != existingSpending.RuleSet.InUTC(timezone).String() {
+			updatedSpending.LastSpentFrom = nil
+		}
 	}
 
 	if updatedSpending.TargetAmount != existingSpending.TargetAmount {

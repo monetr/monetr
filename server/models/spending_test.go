@@ -246,6 +246,274 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		assert.EqualValues(t, 750, spending.NextContributionAmount, "next contribution should be half")
 	})
 
+	t.Run("spend from a day early with last spent from", func(t *testing.T) {
+		// This is the same as the "spend from a day early falls behind" test above.
+		// But now we know that the expense was spent from on the 9th, which is
+		// closest to the occurrence on the 10th. So the 10th has already been
+		// paid and it should not be counted again.
+		now := time.Date(2022, 4, 9, 12, 0, 0, 0, time.UTC)
+		nextDueDate := time.Date(2022, 4, 10, 0, 0, 0, 0, time.UTC)
+		spentFrom := time.Date(2022, 4, 9, 0, 0, 0, 0, time.UTC)
+
+		spendingRule := testutils.NewRuleSet(t, 2022, 1, 10, time.UTC, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=10")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, time.UTC, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+
+		spending := Spending{
+			SpendingType:   SpendingTypeExpense,
+			TargetAmount:   1500,
+			CurrentAmount:  0,
+			NextRecurrence: nextDueDate,
+			LastSpentFrom:  &spentFrom,
+			RuleSet:        spendingRule,
+		}
+
+		spending.CalculateNextContribution(
+			t.Context(),
+			time.UTC,
+			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
+			now,
+			testutils.GetLog(t),
+		)
+		assert.False(t, spending.IsBehind, "should not be behind since the 10th was already paid")
+		assert.Equal(t, nextDueDate, spending.NextRecurrence, "next recurrence should not change")
+		assert.EqualValues(t, 750, spending.NextContributionAmount, "should be saving for May 10th over two contributions")
+	})
+
+	t.Run("spent from early before a funding is not funded again", func(t *testing.T) {
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		// Rent is due on the 1st but was paid on the 28th. Funding happens on the
+		// 31st, which is before rent is due. Without knowing it was already paid
+		// we would try to fund the entire amount again on the 31st.
+		now := time.Date(2022, 10, 28, 12, 0, 0, 0, timezone)
+		nextDueDate := time.Date(2022, 11, 1, 0, 0, 0, 0, timezone)
+		spentFrom := time.Date(2022, 10, 28, 0, 0, 0, 0, timezone)
+
+		spendingRule := testutils.NewRuleSet(t, 2022, 1, 1, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+
+		spending := Spending{
+			SpendingType:   SpendingTypeExpense,
+			TargetAmount:   100000,
+			CurrentAmount:  0,
+			NextRecurrence: nextDueDate,
+			LastSpentFrom:  &spentFrom,
+			RuleSet:        spendingRule,
+		}
+		withoutSpentFrom := spending
+		withoutSpentFrom.LastSpentFrom = nil
+
+		spending.CalculateNextContribution(
+			t.Context(),
+			timezone,
+			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
+			now,
+			testutils.GetLog(t),
+		)
+		withoutSpentFrom.CalculateNextContribution(
+			t.Context(),
+			timezone,
+			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
+			now,
+			testutils.GetLog(t),
+		)
+
+		assert.False(t, withoutSpentFrom.IsBehind, "should not be behind")
+		assert.EqualValues(t, 100000, withoutSpentFrom.NextContributionAmount, "without last spent from we would fund November 1st again")
+
+		assert.False(t, spending.IsBehind, "should not be behind")
+		assert.Equal(t, nextDueDate, spending.NextRecurrence, "next recurrence should not change")
+		assert.EqualValues(t, 33333, spending.NextContributionAmount, "should be saving for December 1st over three contributions")
+	})
+
+	t.Run("late expense keeps its allocation", func(t *testing.T) {
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		// Rent was due on the 1st, but it's the 3rd and it hasn't come in yet. The
+		// money for it is still sitting in the expense. September was spent from
+		// on time though, so we know October is just late.
+		now := time.Date(2022, 10, 3, 12, 0, 0, 0, timezone)
+		spentFrom := time.Date(2022, 9, 1, 0, 0, 0, 0, timezone)
+
+		spendingRule := testutils.NewRuleSet(t, 2022, 1, 1, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+
+		spending := Spending{
+			SpendingType:   SpendingTypeExpense,
+			TargetAmount:   100000,
+			CurrentAmount:  100000,
+			NextRecurrence: time.Date(2022, 10, 1, 0, 0, 0, 0, timezone),
+			LastSpentFrom:  &spentFrom,
+			RuleSet:        spendingRule,
+		}
+		withoutSpentFrom := spending
+		withoutSpentFrom.LastSpentFrom = nil
+
+		spending.CalculateNextContribution(
+			t.Context(),
+			timezone,
+			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
+			now,
+			testutils.GetLog(t),
+		)
+		withoutSpentFrom.CalculateNextContribution(
+			t.Context(),
+			timezone,
+			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
+			now,
+			testutils.GetLog(t),
+		)
+
+		assert.False(t, withoutSpentFrom.IsBehind, "should not be behind")
+		assert.EqualValues(t, 0, withoutSpentFrom.NextContributionAmount, "without last spent from we think October's money is for November")
+
+		assert.False(t, spending.IsBehind, "should not be behind, there is enough for October")
+		assert.Equal(t, time.Date(2022, 11, 1, 0, 0, 0, 0, timezone), spending.NextRecurrence, "next recurrence should move to November")
+		assert.EqualValues(t, 50000, spending.NextContributionAmount, "should be saving for November over two contributions")
+	})
+
+	t.Run("late expense without enough is behind", func(t *testing.T) {
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		now := time.Date(2022, 10, 3, 12, 0, 0, 0, timezone)
+		spentFrom := time.Date(2022, 9, 1, 0, 0, 0, 0, timezone)
+
+		spendingRule := testutils.NewRuleSet(t, 2022, 1, 1, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+
+		spending := Spending{
+			SpendingType:   SpendingTypeExpense,
+			TargetAmount:   100000,
+			CurrentAmount:  40000,
+			NextRecurrence: time.Date(2022, 10, 1, 0, 0, 0, 0, timezone),
+			LastSpentFrom:  &spentFrom,
+			RuleSet:        spendingRule,
+		}
+
+		spending.CalculateNextContribution(
+			t.Context(),
+			timezone,
+			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
+			now,
+			testutils.GetLog(t),
+		)
+		assert.True(t, spending.IsBehind, "should be behind, there isn't enough for October")
+		assert.EqualValues(t, 50000, spending.NextContributionAmount, "the 40000 will go to October so November needs all of it")
+	})
+
+	t.Run("late expense past the halfway point is not late", func(t *testing.T) {
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		// It's the 20th, which is closer to November 1st than October 1st. So if
+		// October hasn't been spent from by now we stop holding money for it.
+		now := time.Date(2022, 10, 20, 12, 0, 0, 0, timezone)
+		spentFrom := time.Date(2022, 9, 1, 0, 0, 0, 0, timezone)
+
+		spendingRule := testutils.NewRuleSet(t, 2022, 1, 1, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+
+		spending := Spending{
+			SpendingType:   SpendingTypeExpense,
+			TargetAmount:   100000,
+			CurrentAmount:  100000,
+			NextRecurrence: time.Date(2022, 11, 1, 0, 0, 0, 0, timezone),
+			LastSpentFrom:  &spentFrom,
+			RuleSet:        spendingRule,
+		}
+		withoutSpentFrom := spending
+		withoutSpentFrom.LastSpentFrom = nil
+
+		spending.CalculateNextContribution(
+			t.Context(),
+			timezone,
+			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
+			now,
+			testutils.GetLog(t),
+		)
+		withoutSpentFrom.CalculateNextContribution(
+			t.Context(),
+			timezone,
+			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
+			now,
+			testutils.GetLog(t),
+		)
+		assert.Equal(t, withoutSpentFrom.IsBehind, spending.IsBehind, "should be the same as without last spent from")
+		assert.Equal(t, withoutSpentFrom.NextContributionAmount, spending.NextContributionAmount, "should be the same as without last spent from")
+		assert.False(t, spending.IsBehind, "should not be behind")
+		assert.EqualValues(t, 0, spending.NextContributionAmount, "already have enough for November")
+	})
+
+	t.Run("stale last spent from is ignored", func(t *testing.T) {
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		// The last time this was spent from was July, so we don't know anything
+		// about whether October was paid or not.
+		now := time.Date(2022, 10, 3, 12, 0, 0, 0, timezone)
+		spentFrom := time.Date(2022, 7, 1, 0, 0, 0, 0, timezone)
+
+		spendingRule := testutils.NewRuleSet(t, 2022, 1, 1, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+
+		spending := Spending{
+			SpendingType:   SpendingTypeExpense,
+			TargetAmount:   100000,
+			CurrentAmount:  100000,
+			NextRecurrence: time.Date(2022, 10, 1, 0, 0, 0, 0, timezone),
+			LastSpentFrom:  &spentFrom,
+			RuleSet:        spendingRule,
+		}
+		withoutSpentFrom := spending
+		withoutSpentFrom.LastSpentFrom = nil
+
+		spending.CalculateNextContribution(
+			t.Context(),
+			timezone,
+			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
+			now,
+			testutils.GetLog(t),
+		)
+		withoutSpentFrom.CalculateNextContribution(
+			t.Context(),
+			timezone,
+			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
+			now,
+			testutils.GetLog(t),
+		)
+		assert.Equal(t, withoutSpentFrom.IsBehind, spending.IsBehind, "should be the same as without last spent from")
+		assert.Equal(t, withoutSpentFrom.NextContributionAmount, spending.NextContributionAmount, "should be the same as without last spent from")
+	})
+
+	t.Run("goal ignores last spent from", func(t *testing.T) {
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		now := time.Date(2022, 10, 3, 12, 0, 0, 0, timezone)
+		spentFrom := time.Date(2022, 10, 2, 0, 0, 0, 0, timezone)
+
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+
+		spending := Spending{
+			SpendingType:   SpendingTypeGoal,
+			TargetAmount:   100000,
+			CurrentAmount:  20000,
+			UsedAmount:     10000,
+			NextRecurrence: time.Date(2022, 12, 1, 0, 0, 0, 0, timezone),
+			LastSpentFrom:  &spentFrom,
+		}
+		withoutSpentFrom := spending
+		withoutSpentFrom.LastSpentFrom = nil
+
+		spending.CalculateNextContribution(
+			t.Context(),
+			timezone,
+			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
+			now,
+			testutils.GetLog(t),
+		)
+		withoutSpentFrom.CalculateNextContribution(
+			t.Context(),
+			timezone,
+			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
+			now,
+			testutils.GetLog(t),
+		)
+		assert.Equal(t, withoutSpentFrom.IsBehind, spending.IsBehind, "should be the same as without last spent from")
+		assert.Equal(t, withoutSpentFrom.NextContributionAmount, spending.NextContributionAmount, "should be the same as without last spent from")
+	})
+
 	t.Run("more frequent than funding", func(t *testing.T) {
 		now := time.Date(2022, 4, 14, 12, 0, 0, 0, time.UTC)
 		nextDueDate := time.Date(2022, 4, 15, 0, 0, 0, 0, time.UTC)

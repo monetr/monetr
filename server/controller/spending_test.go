@@ -4484,6 +4484,235 @@ func TestPatchSpending(t *testing.T) {
 			response.JSON().Path("$.problems.ruleset").String().IsEqual("Ruleset must be valid")
 		}
 	})
+
+	t.Run("changing the ruleset clears last spent from", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		fundingScheduleId := ID[FundingSchedule](e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":    "Payday",
+				"ruleset": FifthteenthAndLastDayOfEveryMonth,
+			}).
+			Expect().
+			Status(http.StatusOK).
+			JSON().Path("$.fundingScheduleId").String().Raw())
+
+		nextRecurrence := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth).After(app.Clock.Now(), false)
+
+		spendingId := ID[Spending](e.POST("/api/bank_accounts/{bankAccountId}/spending").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":              "Rent",
+				"ruleset":           FirstDayOfEveryMonth,
+				"fundingScheduleId": fundingScheduleId,
+				"targetAmount":      1000,
+				"spendingType":      SpendingTypeExpense,
+				"nextRecurrence":    nextRecurrence,
+			}).
+			Expect().
+			Status(http.StatusOK).
+			JSON().Path("$.spendingId").String().Raw())
+
+		{ // Spend from the expense so it has a last spent from date.
+			date := time.Date(2023, 10, 3, 0, 0, 0, 0, timezone)
+			response := e.POST("/api/bank_accounts/{bankAccountId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"amount":         100,
+					"isPending":      false,
+					"name":           "Rent",
+					"date":           date.Format(time.RFC3339),
+					"adjustsBalance": false,
+					"spendingId":     spendingId,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.spending.lastSpentFrom").String().AsDateTime(time.RFC3339).IsEqual(date)
+		}
+
+		{ // Changing the ruleset means the date might line up with a different
+			// occurrence now, so it should be cleared.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spendingId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"ruleset": FifthteenthAndLastDayOfEveryMonth,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.lastSpentFrom").IsNull()
+		}
+
+		{ // Make sure it was actually cleared.
+			response := e.GET("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spendingId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.lastSpentFrom").IsNull()
+		}
+	})
+
+	t.Run("changing the next recurrence clears last spent from", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		fundingScheduleId := ID[FundingSchedule](e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":    "Payday",
+				"ruleset": FifthteenthAndLastDayOfEveryMonth,
+			}).
+			Expect().
+			Status(http.StatusOK).
+			JSON().Path("$.fundingScheduleId").String().Raw())
+
+		ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
+		nextRecurrence := ruleset.After(app.Clock.Now(), false)
+		laterRecurrence := ruleset.After(nextRecurrence, false)
+
+		spendingId := ID[Spending](e.POST("/api/bank_accounts/{bankAccountId}/spending").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":              "Rent",
+				"ruleset":           FirstDayOfEveryMonth,
+				"fundingScheduleId": fundingScheduleId,
+				"targetAmount":      1000,
+				"spendingType":      SpendingTypeExpense,
+				"nextRecurrence":    nextRecurrence,
+			}).
+			Expect().
+			Status(http.StatusOK).
+			JSON().Path("$.spendingId").String().Raw())
+
+		{ // Spend from the expense so it has a last spent from date.
+			date := time.Date(2023, 10, 3, 0, 0, 0, 0, timezone)
+			response := e.POST("/api/bank_accounts/{bankAccountId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"amount":         100,
+					"isPending":      false,
+					"name":           "Rent",
+					"date":           date.Format(time.RFC3339),
+					"adjustsBalance": false,
+					"spendingId":     spendingId,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.spending.lastSpentFrom").String().AsDateTime(time.RFC3339).IsEqual(date)
+		}
+
+		{ // Skipping a month by hand should clear it too.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spendingId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"nextRecurrence": laterRecurrence,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(laterRecurrence)
+			response.JSON().Path("$.lastSpentFrom").IsNull()
+		}
+	})
+
+	t.Run("unchanged ruleset and next recurrence keep last spent from", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		fundingScheduleId := ID[FundingSchedule](e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":    "Payday",
+				"ruleset": FifthteenthAndLastDayOfEveryMonth,
+			}).
+			Expect().
+			Status(http.StatusOK).
+			JSON().Path("$.fundingScheduleId").String().Raw())
+
+		nextRecurrence := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth).After(app.Clock.Now(), false)
+
+		spendingId := ID[Spending](e.POST("/api/bank_accounts/{bankAccountId}/spending").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":              "Rent",
+				"ruleset":           FirstDayOfEveryMonth,
+				"fundingScheduleId": fundingScheduleId,
+				"targetAmount":      1000,
+				"spendingType":      SpendingTypeExpense,
+				"nextRecurrence":    nextRecurrence,
+			}).
+			Expect().
+			Status(http.StatusOK).
+			JSON().Path("$.spendingId").String().Raw())
+
+		date := time.Date(2023, 10, 3, 0, 0, 0, 0, timezone)
+		{ // Spend from the expense so it has a last spent from date.
+			response := e.POST("/api/bank_accounts/{bankAccountId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"amount":         100,
+					"isPending":      false,
+					"name":           "Rent",
+					"date":           date.Format(time.RFC3339),
+					"adjustsBalance": false,
+					"spendingId":     spendingId,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.spending.lastSpentFrom").String().AsDateTime(time.RFC3339).IsEqual(date)
+		}
+
+		{ // The UI sends the whole form back even if only the name changed. Sending
+			// the same ruleset and next recurrence back should not clear anything.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spendingId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":           "Rent But Renamed",
+					"ruleset":        FirstDayOfEveryMonth,
+					"nextRecurrence": nextRecurrence,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.name").String().IsEqual("Rent But Renamed")
+			response.JSON().Path("$.lastSpentFrom").String().AsDateTime(time.RFC3339).IsEqual(date)
+		}
+	})
 }
 
 func TestDeleteSpending(t *testing.T) {

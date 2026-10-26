@@ -90,9 +90,13 @@ func (e Spending) GetProgressAmount() int64 {
 // will be used (based on the recurrence rule) between the provided now and
 // before in the specified time zone. The window includes now but stops just
 // short of before, so an event that lands right on before belongs to the next
-// window instead of this one. Goals will at most return a single time if the
-// goal is due within that window.
-func (e *Spending) GetRecurrencesBefore(now, before time.Time, timezone *time.Location) []time.Time {
+// window instead of this one. Occurrences that were already spent from early
+// are left out, since that money is already gone. Goals will at most return a
+// single time if the goal is due within that window.
+func (e *Spending) GetRecurrencesBefore(
+	now, before time.Time,
+	timezone *time.Location,
+) []time.Time {
 	switch e.SpendingType {
 	case SpendingTypeExpense:
 		// Make sure that the rule increments relative to midnight in the user's
@@ -109,7 +113,10 @@ func (e *Spending) GetRecurrencesBefore(now, before time.Time, timezone *time.Lo
 		if n := len(occurrences); n > 0 && occurrences[n-1].Equal(before) {
 			occurrences = occurrences[:n-1]
 		}
-		return occurrences
+		return RecurrencesAfterSpentFrom(
+			occurrences,
+			e.GetRecurrenceSpentFrom(timezone),
+		)
 	case SpendingTypeGoal:
 		if !e.NextRecurrence.Before(now) && e.NextRecurrence.Before(before) {
 			return []time.Time{e.NextRecurrence}
@@ -118,6 +125,94 @@ func (e *Spending) GetRecurrencesBefore(now, before time.Time, timezone *time.Lo
 	default:
 		return nil
 	}
+}
+
+// GetRecurrenceSpentFrom returns the occurrence of the expense that was last
+// spent from, based on LastSpentFrom. Bills don't always come in on the exact
+// day they are due, so a spend counts towards whichever occurrence it is
+// closest to. That way paying a few days early or a few days late still lines
+// up with the occurrence it was meant for. If we don't know, or this is not an
+// expense, then this returns a zero time.
+func (e *Spending) GetRecurrenceSpentFrom(timezone *time.Location) time.Time {
+	if e.SpendingType != SpendingTypeExpense ||
+		e.RuleSet == nil ||
+		e.LastSpentFrom == nil ||
+		e.LastSpentFrom.IsZero() {
+		return time.Time{}
+	}
+
+	return e.getRecurrenceSpentFrom(e.RuleSet.InTimezone(timezone), timezone)
+}
+
+// getRecurrenceSpentFrom is the guts of [Spending.GetRecurrenceSpentFrom], but
+// takes the rule already in the user's timezone so we don't have to clone it
+// more than once when we need the rule for other things too.
+func (e *Spending) getRecurrenceSpentFrom(
+	rule *RuleSet,
+	timezone *time.Location,
+) time.Time {
+	spentOn := util.Midnight(*e.LastSpentFrom, timezone)
+	previous := rule.Before(spentOn, true)
+	next := rule.After(spentOn, false)
+	switch {
+	case next.IsZero():
+		return previous
+	case previous.IsZero():
+		return next
+	case next.Sub(spentOn) < spentOn.Sub(previous):
+		return next
+	default:
+		return previous
+	}
+}
+
+// GetIsLate returns true if the most recent occurrence of the expense before
+// now has not been spent from yet, but the occurrence before that one has. So
+// the bill was due but the transaction just hasn't come in yet. This only holds
+// while now is closer to that occurrence than the next one, past that point a
+// spend would count towards the next occurrence anyway. If the expense was not
+// spent from recently enough then we don't know, and this returns false.
+func (e *Spending) GetIsLate(timezone *time.Location, now time.Time) bool {
+	if e.SpendingType != SpendingTypeExpense ||
+		e.RuleSet == nil ||
+		e.LastSpentFrom == nil ||
+		e.LastSpentFrom.IsZero() {
+		return false
+	}
+
+	rule := e.RuleSet.InTimezone(timezone)
+	spentFrom := e.getRecurrenceSpentFrom(rule, timezone)
+	if spentFrom.IsZero() {
+		return false
+	}
+
+	previous := rule.Before(now, false)
+	if previous.IsZero() || !rule.Before(previous, false).Equal(spentFrom) {
+		return false
+	}
+
+	next := rule.After(previous, false)
+	if next.IsZero() {
+		return false
+	}
+
+	return now.Sub(previous) < next.Sub(now)
+}
+
+// RecurrencesAfterSpentFrom takes a sorted set of occurrences and drops the
+// ones that have already been spent from. If spentFrom is zero then nothing is
+// dropped.
+func RecurrencesAfterSpentFrom(
+	occurrences []time.Time,
+	spentFrom time.Time,
+) []time.Time {
+	if spentFrom.IsZero() {
+		return occurrences
+	}
+	for len(occurrences) > 0 && !occurrences[0].After(spentFrom) {
+		occurrences = occurrences[1:]
+	}
+	return occurrences
 }
 
 func (e *Spending) CalculateNextContribution(
@@ -227,6 +322,15 @@ func calculateNextContribution(
 	// beginning of the next funding period.
 	eventsBeforeSecond := int64(len(spending.GetRecurrencesBefore(fundingFirst, fundingSecond, timezone)))
 
+	// If the last occurrence was due but hasn't been spent from yet, then it is
+	// still going to be spent before the next funding. So count it with the rest
+	// of the events in the current funding period.
+	var lateEvents int64
+	if spending.GetIsLate(timezone, now) {
+		lateEvents = 1
+		eventsBeforeFirst += lateEvents
+	}
+
 	// The amount of funds needed for each individual spending event.
 	perSpendingAmount := spending.TargetAmount
 	// The amount of funds currently allocated towards this spending item. This is
@@ -271,12 +375,24 @@ func calculateNextContribution(
 		)
 	} else {
 		// Otherwise we can simply look at how much we need vs how much we already
-		// have.
-		amountNeeded := max(0, perSpendingAmount-currentAmount)
+		// have. If the last occurrence is late then whatever it needs is still
+		// sitting here, so it can't count towards the next one.
+		amountNeeded := max(
+			0,
+			perSpendingAmount-max(0, currentAmount-(perSpendingAmount*lateEvents)),
+		)
+		// If the upcoming occurrence was already spent from early then that money
+		// is already gone, so we want to be saving for the one after it instead.
+		dueDate := nextRecurrence
+		if spentFrom := spending.GetRecurrenceSpentFrom(timezone); !spentFrom.IsZero() && !dueDate.After(spentFrom) {
+			if after := rule.After(spentFrom, false); !after.IsZero() {
+				dueDate = after
+			}
+		}
 		// And how many times we will have a funding event before our due date.
 		numberOfContributions := fundingSchedule.GetNumberOfContributionsBetween(
 			now,
-			nextRecurrence,
+			dueDate,
 			timezone,
 		)
 		// Then determine how much we would need at each of those funding events.

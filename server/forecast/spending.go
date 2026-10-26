@@ -85,7 +85,7 @@ func (s *spendingInstructionBase) GetSpendingEventsBetween(
 
 		var event *SpendingEvent
 		afterDate := start
-		allocation := s.spending.CurrentAmount
+		allocation := s.getStartingAllocation(start, timezone)
 		if i > 0 {
 			afterDate = events[i-1].Date
 			allocation = events[i-1].RollingAllocation
@@ -174,7 +174,7 @@ func (s spendingInstructionBase) GetNextNSpendingEventsAfter(
 
 		var event *SpendingEvent
 		if i == 0 {
-			event, err = s.getNextSpendingEventAfter(ctx, input, timezone, s.spending.CurrentAmount)
+			event, err = s.getNextSpendingEventAfter(ctx, input, timezone, s.getStartingAllocation(input, timezone))
 		} else {
 			event, err = s.getNextSpendingEventAfter(ctx, events[i-1].Date, timezone, events[i-1].RollingAllocation)
 		}
@@ -211,7 +211,11 @@ func (s *spendingInstructionBase) GetRecurrencesBetween(
 		// end being the next funding event immediately after that. We can't control what happens after the later
 		// funding event, so we need to know how much will be spent before then, so we know how much to allocate.
 		items := rule.Between(start, end.Add(-1*time.Second), true)
-		return items, nil
+		// Anything that was already spent from early won't be spent again.
+		return RecurrencesAfterSpentFrom(
+			items,
+			s.spending.GetRecurrenceSpentFrom(timezone),
+		), nil
 	case SpendingTypeGoal:
 		if s.spending.NextRecurrence.After(start) && s.spending.NextRecurrence.Before(end) {
 			return []time.Time{s.spending.NextRecurrence}, nil
@@ -220,6 +224,22 @@ func (s *spendingInstructionBase) GetRecurrencesBetween(
 	default:
 		return nil, nil
 	}
+}
+
+// getStartingAllocation returns how much is allocated to the spending object
+// at the start of a forecast. If the last occurrence of an expense is late then
+// whatever is allocated is going to be spent on that when it finally comes in.
+// But the forecast starts after that occurrence so it would never see that
+// happen, so we take it out up front instead.
+func (s *spendingInstructionBase) getStartingAllocation(
+	input time.Time,
+	timezone *time.Location,
+) int64 {
+	if s.spending.GetIsLate(timezone, input) {
+		return max(0, s.spending.CurrentAmount-s.spending.TargetAmount)
+	}
+
+	return s.spending.CurrentAmount
 }
 
 func (s *spendingInstructionBase) getNextSpendingEventAfter(
@@ -255,6 +275,13 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(
 		rule.DTStart(util.Midnight(rule.GetDTStart(), timezone))
 		if !nextRecurrence.After(input) || nextRecurrence.Equal(input) {
 			nextRecurrence = rule.After(input, false)
+		}
+		// If the upcoming occurrence was already spent from early then it is not
+		// going to be spent again, so skip ahead to the one after it.
+		if spentFrom := s.spending.GetRecurrenceSpentFrom(timezone); !spentFrom.IsZero() && !nextRecurrence.After(spentFrom) {
+			if after := rule.After(spentFrom, false); !after.IsZero() {
+				nextRecurrence = after
+			}
 		}
 	}
 
@@ -422,7 +449,7 @@ func (s *spendingInstructionBase) GetNextInflowEventAfter(
 	log := s.log.With("input", input, "timezone", timezone.String())
 
 	afterDate := input
-	allocation := s.spending.CurrentAmount
+	allocation := s.getStartingAllocation(input, timezone)
 	for {
 		select {
 		case <-ctx.Done():
