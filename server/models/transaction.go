@@ -139,6 +139,13 @@ func (t *Transaction) AddSpendingToTransaction(
 		spending.UsedAmount += allocationAmount
 	}
 
+	// Keep track of the most recent transaction date that this spending was used
+	// for. If this transaction is older than one we've already seen then leave it
+	// alone.
+	if spending.LastSpentFrom == nil || t.Date.After(*spending.LastSpentFrom) {
+		spending.LastSpentFrom = new(t.Date)
+	}
+
 	// Keep track of how much we took from the spending in case things change
 	// later.
 	t.SpendingAmount = &allocationAmount

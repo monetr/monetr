@@ -7,6 +7,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
 	"github.com/uptrace/bun"
 )
@@ -681,6 +682,37 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(
 			log,
 		)
 
+		// If this transaction is what set the last spent from date then we need to
+		// roll it back. If some other transaction set it then leave it alone.
+		if currentExpense.LastSpentFrom != nil && currentExpense.LastSpentFrom.Equal(existing.Date) {
+			switch currentExpense.SpendingType {
+			case SpendingTypeGoal:
+				// Goals don't recur so there isn't anything to roll back to.
+				currentExpense.LastSpentFrom = nil
+			default:
+				// Otherwise we don't know when the expense was spent from before this
+				// transaction. So assume the recurrence this transaction paid for is
+				// unpaid again, but the one before that was paid. If rent is due on the
+				// 1st and the transaction was on the 3rd, then the 1st is the
+				// recurrence it paid for. So we roll back to the 1st of the month
+				// before. That way the money that went back into the expense is held
+				// for the 1st instead of looking like extra.
+				rule := currentExpense.RuleSet.Clone()
+				rule.DTStart(rule.GetDTStart().In(timezone))
+				// Transaction dates are just dates, so get them to midnight in the
+				// account's timezone or we could land on the wrong recurrence.
+				paidRecurrence := rule.Before(util.Midnight(existing.Date, timezone), true)
+				previousRecurrence := rule.Before(paidRecurrence, false)
+				if paidRecurrence.IsZero() || previousRecurrence.IsZero() {
+					// If there is nothing before it then this expense was never spent
+					// from as far as we know.
+					currentExpense.LastSpentFrom = nil
+				} else {
+					currentExpense.LastSpentFrom = &previousRecurrence
+				}
+			}
+		}
+
 		// Then take all the fields that have changed and throw them in our list of
 		// things to update.
 		expenseUpdates = append(expenseUpdates, *currentExpense)
@@ -757,6 +789,13 @@ func (r *repositoryBase) AddExpenseToTransaction(
 	case SpendingTypeGoal:
 		// Goals also keep track of how much has been spent, so increment the used amount.
 		spending.UsedAmount += allocationAmount
+	}
+
+	// Keep track of the most recent transaction date that this spending was used
+	// for. If this transaction is older than one we've already seen then leave it
+	// alone.
+	if spending.LastSpentFrom == nil || transaction.Date.After(*spending.LastSpentFrom) {
+		spending.LastSpentFrom = new(transaction.Date)
 	}
 
 	// Keep track of how much we took from the spending in case things change later.
