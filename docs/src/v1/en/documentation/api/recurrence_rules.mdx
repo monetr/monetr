@@ -49,8 +49,10 @@ day rent is due, and a rule that fires 3600 times a day is a good way to hang a 
 automatically, strip them.
 
 **The time in `DTSTART` should be midnight in your account's timezone**, expressed as UTC. For `America/Chicago` that's
-`T060000Z` in winter and `T050000Z` in summer, because the offset moves with daylight saving. This one won't fail
-validation, but getting it wrong shifts every occurrence onto the wrong day. See [Timestamps](./overview#timestamps).
+`T060000Z` in winter and `T050000Z` in summer, because the offset moves with daylight saving. If the time is a little
+off, monetr moves it to the start of that day in your timezone and saves it that way, so the `ruleset` you get back
+might not match what you sent exactly. Just make sure the date is right in your timezone. `T000000Z` on the 1st is still
+the 31st in Chicago, so the schedule would start on the 31st. See [Timestamps](./overview#timestamps).
 
 ## Cookbook
 
