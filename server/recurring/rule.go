@@ -181,7 +181,9 @@ func earliestOnCircle(
 		}
 	}
 
-	sort.Slice(points, func(i, j int) bool {
+	// Stable so that days in the same spot on the circle stay in date order, the
+	// oldest one wins a tie and the same transactions always give the same rule
+	sort.SliceStable(points, func(i, j int) bool {
 		return points[i].position < points[j].position
 	})
 
