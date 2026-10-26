@@ -56,16 +56,30 @@ storage:
     bucket: "..."
     forcePathStyle: <true|false>
     useEnvCredentials: <true|false>
+    insecureSkipVerify: false
+    caCertificatePath: "</tls/ca.cert>"
+    keyPath: "</tls/tls.key>"
+    certificatePath: "</tls/tls.cert>"
 ```
 
-| **Name**            | **Type** | **Default** | **Description**                                                                                                                                                                                                     |
-| ---                 | ---      | ---         | ---                                                                                                                                                                                                                 |
-| `accessKey`         | String   |             | The access key provided to you buy your object storage system. Required when `useEnvCredentials: false`                                                                                                             |
-| `secretKey`         | String   |             | The secret key provided to you buy your object storage system. Required when `useEnvCredentials: false`                                                                                                             |
-| `endpoint`          | String   |             | The full URL of the object storage provider you are using. Required when you are not using AWS S3.                                                                                                                  |
-| `bucket`            | String   |             | The name of the bucket where files will be uploaded. This is always required. The bucket must also already exist.                                                                                                   |
-| `forcePathStyle`    | Boolean  | `false`     | If you are using a custom object storage provider you might need to set this to true, instead of prefixing the bucket name onto the hostname. It will be appended to the path of requests made to the object store. |
-| `useEnvCredentials` | Boolean  | `false`     | If this is set to `true` then the access key and secret will be loaded from the `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` environment variables respectively.                                                           |
+| **Name**             | **Type** | **Default** | **Description**                                                                                                                                                                                                                                   |
+| ---                  | ---      | ---         | ---                                                                                                                                                                                                                                               |
+| `accessKey`          | String   |             | The access key provided to you buy your object storage system. Required when `useEnvCredentials: false`                                                                                                                                           |
+| `secretKey`          | String   |             | The secret key provided to you buy your object storage system. Required when `useEnvCredentials: false`                                                                                                                                           |
+| `endpoint`           | String   |             | The full URL of the object storage provider you are using. Required when you are not using AWS S3.                                                                                                                                                |
+| `bucket`             | String   |             | The name of the bucket where files will be uploaded. This is always required. The bucket must also already exist.                                                                                                                                 |
+| `forcePathStyle`     | Boolean  | `false`     | If you are using a custom object storage provider you might need to set this to true, instead of prefixing the bucket name onto the hostname. It will be appended to the path of requests made to the object store.                               |
+| `useEnvCredentials`  | Boolean  | `false`     | If this is set to `true` then the access key and secret will be loaded from the `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` environment variables respectively.                                                                                         |
+| `insecureSkipVerify` | Boolean  | `false`     | If your object store uses TLS but you don't have the certificate authority file for it, then you may need to skip TLS verification.                                                                                                               |
+| `caCertificatePath`  | String   |             | Path to the certificate authority certificate file. You'll need this if your object store's certificate isn't signed by a certificate authority your host already trusts, like a RADOSGW or minio instance using a private certificate authority. |
+| `keyPath`            | String   |             | Path to the client TLS key that monetr should use to connect to the object store.                                                                                                                                                                 |
+| `certificatePath`    | String   |             | Path to the client TLS certificate that monetr should use to connect to the object store.                                                                                                                                                         |
+
+:::info
+TLS is used whenever your `endpoint` starts with `https://`, the TLS options above are only needed if you're using a
+private certificate authority or client certificates. monetr watches the certificate files for changes, so certificates
+can be rotated without restarting the server.
+:::
 
 **Note**: This provider cannot be configured via environment variables outside of `useEnvCredentials: true`.
 

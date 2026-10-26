@@ -102,6 +102,13 @@ type S3Storage struct {
 
 	Bucket         string `yaml:"bucket"`
 	ForcePathStyle bool   `yaml:"forcePathStyle"`
+
+	// TLS for the object store is decided by the endpoint scheme, these are only
+	// needed for a private certificate authority or client certificates.
+	InsecureSkipVerify bool   `yaml:"insecureSkipVerify"`
+	CACertificatePath  string `yaml:"caCertificatePath"`
+	KeyPath            string `yaml:"keyPath"`
+	CertificatePath    string `yaml:"certificatePath"`
 }
 
 type FilesystemStorage struct {

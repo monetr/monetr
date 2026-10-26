@@ -4,11 +4,16 @@ import (
 	"context"
 	"io"
 	"log/slog"
+	"net"
+	"net/http"
+	"net/url"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/monetr/monetr/server/certs"
 	monetrConfig "github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
@@ -80,6 +85,49 @@ func GetStorage(
 					*s3Config.SecretKey,
 					"", // Not required since we aren't using temporary credentials.
 				),
+			))
+		}
+
+		if s3Config.InsecureSkipVerify ||
+			s3Config.CACertificatePath != "" ||
+			s3Config.CertificatePath != "" ||
+			s3Config.KeyPath != "" {
+			// ServerName is left blank so the http transport fills it in from the
+			// host of each request, that way virtual hosted style buckets still
+			// verify against the right name. But if the endpoint is an IP then no SNI
+			// is sent and there is nothing to verify against, so we need to provide
+			// it ourselves.
+			var serverName string
+			if endpoint := s3Config.Endpoint; endpoint != nil && *endpoint != "" {
+				parsed, err := url.Parse(*endpoint)
+				if err != nil {
+					return nil, errors.Wrap(err, "failed to parse s3 endpoint")
+				}
+				if net.ParseIP(parsed.Hostname()) != nil {
+					serverName = parsed.Hostname()
+				}
+			}
+
+			certificates, err := certs.NewFileSource(log, certs.Options{
+				CACertificatePath:  s3Config.CACertificatePath,
+				CertificatePath:    s3Config.CertificatePath,
+				KeyPath:            s3Config.KeyPath,
+				ServerName:         serverName,
+				InsecureSkipVerify: s3Config.InsecureSkipVerify,
+			})
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to load s3 TLS certificates")
+			}
+			// Storage lives as long as the process does, so the watcher is never
+			// stopped.
+			if err = certificates.Start(); err != nil {
+				return nil, errors.Wrap(err, "failed to watch s3 TLS certificates")
+			}
+
+			configOptions = append(configOptions, config.WithHTTPClient(
+				awshttp.NewBuildableClient().WithTransportOptions(func(tr *http.Transport) {
+					tr.TLSClientConfig = certificates.ClientConfig()
+				}),
 			))
 		}
 
