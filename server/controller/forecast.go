@@ -245,6 +245,10 @@ func (c *Controller) queryInitialFundingForRecurringTransaction(ctx *echo.Contex
 		return c.wrapPgError(ctx, err, "Failed to retrieve recurring transaction")
 	}
 
+	if recurring.Direction != models.DebitDirection {
+		return c.badRequest(ctx, "Recurring transaction must be a debit")
+	}
+
 	funding, err := repo.GetFundingSchedule(
 		c.getContext(ctx),
 		bankAccountId,

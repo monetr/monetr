@@ -420,5 +420,6 @@ few days after that, you'll get close to zero during those few days, since this 
 | Status | When                                                                                                             |
 | ------ | ---------------------------------------------------------------------------------------------------------------- |
 | 400    | `transactionRecurringId` or `fundingScheduleId` is missing or malformed. These come back with a `problems` tree. |
+| 400    | The recurring transaction is money coming in, like a paycheck, instead of a charge.                              |
 | 400    | The funding schedule's rule has a `COUNT`, or repeats on something other than days, weeks, months or years.      |
 | 404    | No such recurring transaction or funding schedule on that bank account.                                          |
