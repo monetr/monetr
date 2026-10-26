@@ -454,14 +454,14 @@ importers:
         specifier: 2.2.9
         version: 2.2.9
       '@rstest/adapter-rsbuild':
-        specifier: 0.12.3
-        version: 0.12.3(@rsbuild/core@2.2.14)(@rstest/core@0.12.3(jsdom@26.1.0(supports-color@9.4.0)))
+        specifier: 0.12.4
+        version: 0.12.4(@rsbuild/core@2.2.14)(@rstest/core@0.12.4(jsdom@26.1.0(supports-color@9.4.0)))
       '@rstest/core':
-        specifier: 0.12.3
-        version: 0.12.3(jsdom@26.1.0(supports-color@9.4.0))
+        specifier: 0.12.4
+        version: 0.12.4(jsdom@26.1.0(supports-color@9.4.0))
       '@rstest/coverage-istanbul':
-        specifier: 0.12.3
-        version: 0.12.3(@rstest/core@0.12.3(jsdom@26.1.0(supports-color@9.4.0)))(supports-color@9.4.0)
+        specifier: 0.12.4
+        version: 0.12.4(@rstest/core@0.12.4(jsdom@26.1.0(supports-color@9.4.0)))(supports-color@9.4.0)
       '@testing-library/jest-dom':
         specifier: 7.0.1
         version: 7.0.1(@testing-library/dom@10.4.2)
@@ -1510,14 +1510,14 @@ packages:
   '@rspress/shared@2.0.23':
     resolution: {integrity: sha512-kE2GXRCQ7GAl2wll1JBWRHEkZICKcWv3V86m8TkjiWb0eEdjACl3kns7j00KTq4UbE35kUPOs+0Lx8vGqK7q9w==}
 
-  '@rstest/adapter-rsbuild@0.12.3':
-    resolution: {integrity: sha512-jnCb1XrtZ38sKULF0Xftjus512IZwF23U+xaITlWPUNtEBioXYcl76fsEOwkqWdRVFqjHV6jHEShhsE25bb0Yw==}
+  '@rstest/adapter-rsbuild@0.12.4':
+    resolution: {integrity: sha512-XcL0v91y58P+Bh9uGRCDEw1me/qrMVkupHhvLwc8DB3UcsLJBQBcJJb9C3zGtvSwHXxQykq1YE3IilcEMX2YDg==}
     peerDependencies:
       '@rsbuild/core': ^1.0.0 || ^2.0.0
       '@rstest/core': ^0.12.0
 
-  '@rstest/core@0.12.3':
-    resolution: {integrity: sha512-l548qraJA1ymaSRhftgl++HtRf4E5l0Hm8YbzcsrH0t8XIOSpAiXyhgJpeHuyM50fKcNkt1nnS532Y7QV1iwcQ==}
+  '@rstest/core@0.12.4':
+    resolution: {integrity: sha512-NL+lxZ6GiJkL2BYgUR8WU2awQr71GiIzG0rDNKljvhEhmIX61YUoG6qjvLlEFJsvmB/AZmKIYwP/PyFTHZZy1A==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -1529,8 +1529,8 @@ packages:
       jsdom:
         optional: true
 
-  '@rstest/coverage-istanbul@0.12.3':
-    resolution: {integrity: sha512-vxhGJmGS1sL8mFagfXw+TWHAxKT04yl2mODa6Kdf2Dmb3knIfAUxP8nkTtEg+UPZ2b64voB9uXIs1MDL6TRjZA==}
+  '@rstest/coverage-istanbul@0.12.4':
+    resolution: {integrity: sha512-8HeZ6AwJCRsWXYutHljEAKjcYkXKKKLkiZMCM8luu+a80/puIoxsTBdAvJXKbW6Pxgt3a0zB564uAYJJzvn4iA==}
     peerDependencies:
       '@rstest/core': ^0.12.0
 
@@ -5393,12 +5393,12 @@ snapshots:
       - core-js
       - supports-color
 
-  '@rstest/adapter-rsbuild@0.12.3(@rsbuild/core@2.2.14)(@rstest/core@0.12.3(jsdom@26.1.0(supports-color@9.4.0)))':
+  '@rstest/adapter-rsbuild@0.12.4(@rsbuild/core@2.2.14)(@rstest/core@0.12.4(jsdom@26.1.0(supports-color@9.4.0)))':
     dependencies:
       '@rsbuild/core': 2.2.14
-      '@rstest/core': 0.12.3(jsdom@26.1.0(supports-color@9.4.0))
+      '@rstest/core': 0.12.4(jsdom@26.1.0(supports-color@9.4.0))
 
-  '@rstest/core@0.12.3(jsdom@26.1.0(supports-color@9.4.0))':
+  '@rstest/core@0.12.4(jsdom@26.1.0(supports-color@9.4.0))':
     dependencies:
       '@rsbuild/core': 2.2.14
       '@types/chai': 5.2.3
@@ -5409,9 +5409,9 @@ snapshots:
       - '@module-federation/runtime-tools'
       - core-js
 
-  '@rstest/coverage-istanbul@0.12.3(@rstest/core@0.12.3(jsdom@26.1.0(supports-color@9.4.0)))(supports-color@9.4.0)':
+  '@rstest/coverage-istanbul@0.12.4(@rstest/core@0.12.4(jsdom@26.1.0(supports-color@9.4.0)))(supports-color@9.4.0)':
     dependencies:
-      '@rstest/core': 0.12.3(jsdom@26.1.0(supports-color@9.4.0))
+      '@rstest/core': 0.12.4(jsdom@26.1.0(supports-color@9.4.0))
       istanbul-lib-coverage: 3.2.2
       istanbul-lib-report: 3.0.1
       istanbul-lib-source-maps: 5.0.6(supports-color@9.4.0)
