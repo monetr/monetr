@@ -58,8 +58,7 @@ func (o *FundingSchedule) GetNumberOfContributionsBetween(
 	// Make sure that the rule is using the timezone of the dates provided. This
 	// is an easy way to force that. We also need to truncate the hours on the
 	// start time. To make sure that we are operating relative to midnight.
-	rule := o.RuleSet.Clone()
-	rule.DTStart(rule.GetDTStart().In(timezone))
+	rule := o.RuleSet.InTimezone(timezone)
 	items := rule.Between(start, end, true)
 	return int64(len(items))
 }
@@ -87,12 +86,11 @@ func (o *FundingSchedule) GetNextContributionDateAfter(
 ) (actual, original time.Time) {
 	// Make debugging easier.
 	now = now.In(timezone)
-	nextContributionRule := o.RuleSet.Clone()
 	// Force the start of the rule to be the next contribution date. This fixes a
 	// bug where the rule would increment properly, but would include the current
 	// timestamp in that increment causing incorrect comparisons below. This makes
 	// sure that the rule will increment in the user's timezone as intended.
-	nextContributionRule.DTStart(nextContributionRule.GetDTStart().In(timezone))
+	nextContributionRule := o.RuleSet.InTimezone(timezone)
 	var nextContributionDate time.Time
 	if !o.NextRecurrence.IsZero() {
 		nextContributionDate = util.Midnight(o.NextRecurrence, timezone)

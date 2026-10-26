@@ -70,7 +70,7 @@ func TestPostSpending(t *testing.T) {
 			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
 			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
 			response.JSON().Path("$.nextContributionAmount").Number().Gt(0)
-			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
+			response.JSON().Path("$.ruleset").IsEqual(testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth).InUTC(timezone).String())
 		}
 	})
 
@@ -135,7 +135,7 @@ func TestPostSpending(t *testing.T) {
 			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
 			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
 			response.JSON().Path("$.nextContributionAmount").Number().Gt(0)
-			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
+			response.JSON().Path("$.ruleset").IsEqual(testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth).InUTC(timezone).String())
 		}
 	})
 
@@ -1741,7 +1741,7 @@ func TestPostSpendingTransfer(t *testing.T) {
 			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
 			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
 			response.JSON().Path("$.nextContributionAmount").Number().Gt(0)
-			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
+			response.JSON().Path("$.ruleset").IsEqual(testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth).InUTC(timezone).String())
 			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
 		}
 
@@ -1874,7 +1874,7 @@ func TestPostSpendingTransfer(t *testing.T) {
 			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
 			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
 			response.JSON().Path("$.nextContributionAmount").Number().Gt(0)
-			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
+			response.JSON().Path("$.ruleset").IsEqual(testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth).InUTC(timezone).String())
 			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
 		}
 
@@ -1998,7 +1998,7 @@ func TestPostSpendingTransfer(t *testing.T) {
 			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
 			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
 			response.JSON().Path("$.nextContributionAmount").Number().Gt(0)
-			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
+			response.JSON().Path("$.ruleset").IsEqual(testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth).InUTC(timezone).String())
 			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
 		}
 
@@ -2106,7 +2106,7 @@ func TestPostSpendingTransfer(t *testing.T) {
 			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
 			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
 			response.JSON().Path("$.nextContributionAmount").Number().Gt(0)
-			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
+			response.JSON().Path("$.ruleset").IsEqual(testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth).InUTC(timezone).String())
 			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
 		}
 
@@ -2136,7 +2136,7 @@ func TestPostSpendingTransfer(t *testing.T) {
 			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
 			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
 			response.JSON().Path("$.nextContributionAmount").Number().Gt(0)
-			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
+			response.JSON().Path("$.ruleset").IsEqual(testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth).InUTC(timezone).String())
 			spendingIdTwo = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
 		}
 
@@ -2292,7 +2292,7 @@ func TestPostSpendingTransfer(t *testing.T) {
 			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
 			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
 			response.JSON().Path("$.nextContributionAmount").Number().Gt(0)
-			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
+			response.JSON().Path("$.ruleset").IsEqual(testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth).InUTC(timezone).String())
 			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
 		}
 
@@ -2322,7 +2322,7 @@ func TestPostSpendingTransfer(t *testing.T) {
 			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
 			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
 			response.JSON().Path("$.nextContributionAmount").Number().Gt(0)
-			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
+			response.JSON().Path("$.ruleset").IsEqual(testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth).InUTC(timezone).String())
 			spendingIdTwo = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
 		}
 
@@ -2393,6 +2393,7 @@ func TestPatchSpending(t *testing.T) {
 	t.Run("with a valid api key", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
@@ -2424,7 +2425,6 @@ func TestPatchSpending(t *testing.T) {
 		var spendingId ID[Spending]
 		{ // Create an expense
 			now := app.Clock.Now()
-			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
@@ -2447,7 +2447,7 @@ func TestPatchSpending(t *testing.T) {
 			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
 			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
 			response.JSON().Path("$.nextContributionAmount").Number().Gt(0)
-			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
+			response.JSON().Path("$.ruleset").IsEqual(testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth).InUTC(timezone).String())
 			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
 			assert.False(t, spendingId.IsZero(), "must be able to extract the spending ID")
 		}
@@ -2466,7 +2466,7 @@ func TestPatchSpending(t *testing.T) {
 			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
 			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
 			response.JSON().Path("$.nextContributionAmount").Number().Gt(0)
-			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
+			response.JSON().Path("$.ruleset").IsEqual(testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth).InUTC(timezone).String())
 			// Make sure the name changed!
 			response.JSON().Path("$.name").IsEqual("Some other expense")
 		}
@@ -2485,6 +2485,7 @@ func TestPatchSpending(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
@@ -2512,7 +2513,6 @@ func TestPatchSpending(t *testing.T) {
 		var spendingId ID[Spending]
 		{ // Create an expense
 			now := app.Clock.Now()
-			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
@@ -2535,7 +2535,7 @@ func TestPatchSpending(t *testing.T) {
 			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
 			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
 			response.JSON().Path("$.nextContributionAmount").Number().Gt(0)
-			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
+			response.JSON().Path("$.ruleset").IsEqual(testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth).InUTC(timezone).String())
 			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
 			assert.False(t, spendingId.IsZero(), "must be able to extract the spending ID")
 		}
@@ -2557,7 +2557,7 @@ func TestPatchSpending(t *testing.T) {
 			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
 			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
 			response.JSON().Path("$.nextContributionAmount").Number().Gt(0)
-			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
+			response.JSON().Path("$.ruleset").IsEqual(testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth).InUTC(timezone).String())
 			// Make sure the name changed!
 			response.JSON().Path("$.name").IsEqual("Some other expense")
 		}
@@ -2616,7 +2616,7 @@ func TestPatchSpending(t *testing.T) {
 			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
 			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
 			response.JSON().Path("$.nextContributionAmount").Number().Gt(0)
-			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
+			response.JSON().Path("$.ruleset").IsEqual(testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth).InUTC(timezone).String())
 			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
 			assert.False(t, spendingId.IsZero(), "must be able to extract the spending ID")
 		}
@@ -2925,6 +2925,7 @@ func TestPatchSpending(t *testing.T) {
 	t.Run("only updates the fields that were provided", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
@@ -2983,7 +2984,7 @@ func TestPatchSpending(t *testing.T) {
 			// All of these should be exactly what we created the expense with.
 			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
 			response.JSON().Path("$.targetAmount").Number().IsEqual(1000)
-			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
+			response.JSON().Path("$.ruleset").IsEqual(testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth).InUTC(timezone).String())
 			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
 		}
 
@@ -2998,7 +2999,7 @@ func TestPatchSpending(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.name").IsEqual("A brand new name")
 			response.JSON().Path("$.targetAmount").Number().IsEqual(1000)
-			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
+			response.JSON().Path("$.ruleset").IsEqual(testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth).InUTC(timezone).String())
 		}
 	})
 
@@ -3146,6 +3147,7 @@ func TestPatchSpending(t *testing.T) {
 	t.Run("can update the ruleset on an expense", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
@@ -3184,7 +3186,7 @@ func TestPatchSpending(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
+			response.JSON().Path("$.ruleset").IsEqual(testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth).InUTC(timezone).String())
 			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
 			originalContribution = response.JSON().Path("$.nextContributionAmount").Number().Gt(0).Raw()
 		}
@@ -3204,7 +3206,7 @@ func TestPatchSpending(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.ruleset").IsEqual(FifthteenthAndLastDayOfEveryMonth)
+			response.JSON().Path("$.ruleset").IsEqual(testutils.RuleSetInTimezone(t, timezone, FifthteenthAndLastDayOfEveryMonth).InUTC(timezone).String())
 			response.JSON().Path("$.nextContributionAmount").Number().Gt(originalContribution)
 		}
 
@@ -3217,7 +3219,7 @@ func TestPatchSpending(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.ruleset").IsEqual(FifthteenthAndLastDayOfEveryMonth)
+			response.JSON().Path("$.ruleset").IsEqual(testutils.RuleSetInTimezone(t, timezone, FifthteenthAndLastDayOfEveryMonth).InUTC(timezone).String())
 			response.JSON().Path("$.nextContributionAmount").Number().Gt(originalContribution)
 		}
 	})
@@ -3635,6 +3637,7 @@ func TestPatchSpending(t *testing.T) {
 	t.Run("an empty patch is a no-op", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
@@ -3687,7 +3690,7 @@ func TestPatchSpending(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.name").IsEqual("Some Monthly Expense")
 			response.JSON().Path("$.targetAmount").Number().IsEqual(1000)
-			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
+			response.JSON().Path("$.ruleset").IsEqual(testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth).InUTC(timezone).String())
 		}
 	})
 
@@ -4554,7 +4557,7 @@ func TestDeleteSpending(t *testing.T) {
 			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
 			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
 			response.JSON().Path("$.nextContributionAmount").Number().Gt(0)
-			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
+			response.JSON().Path("$.ruleset").IsEqual(testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth).InUTC(timezone).String())
 			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
 		}
 
@@ -4714,7 +4717,7 @@ func TestDeleteSpending(t *testing.T) {
 			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
 			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
 			response.JSON().Path("$.nextContributionAmount").Number().Gt(0)
-			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
+			response.JSON().Path("$.ruleset").IsEqual(testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth).InUTC(timezone).String())
 			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
 		}
 
@@ -4864,7 +4867,7 @@ func TestDeleteSpending(t *testing.T) {
 			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
 			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
 			response.JSON().Path("$.nextContributionAmount").Number().Gt(0)
-			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
+			response.JSON().Path("$.ruleset").IsEqual(testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth).InUTC(timezone).String())
 			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
 		}
 

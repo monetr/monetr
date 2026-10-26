@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
+	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
 	"github.com/teambition/rrule-go"
 )
@@ -102,4 +104,26 @@ func (r *RuleSet) Clone() *RuleSet {
 	}
 
 	return &RuleSet{*ruleset}
+}
+
+// InTimezone will return a copy of the rule set with its DTSTART moved to
+// midnight in the provided timezone. Rules are about days not times, but the
+// DTSTART we are given might not be midnight for the user. So this snaps it to
+// the start of that day. Keeping it in the user's timezone also means the rule
+// increments in their timezone, so daylight savings doesn't push recurrences
+// off of midnight.
+func (r *RuleSet) InTimezone(timezone *time.Location) *RuleSet {
+	rule := r.Clone()
+	rule.DTStart(util.Midnight(rule.GetDTStart(), timezone))
+	return rule
+}
+
+// InUTC will return a copy of the rule set with its DTSTART moved to midnight
+// in the provided timezone, just like [RuleSet.InTimezone]. But the DTSTART is
+// then put back in UTC. This is what we want when storing a rule, otherwise the
+// rule would be stored with a TZID and none of our other rules are.
+func (r *RuleSet) InUTC(timezone *time.Location) *RuleSet {
+	rule := r.InTimezone(timezone)
+	rule.DTStart(rule.GetDTStart().UTC())
+	return rule
 }

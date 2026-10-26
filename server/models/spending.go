@@ -99,8 +99,7 @@ func (e *Spending) GetRecurrencesBefore(now, before time.Time, timezone *time.Lo
 		// timezone. The stored DTSTART is the same instant but is represented in
 		// UTC, which can shift occurrences onto the wrong day for timezones that
 		// are ahead of UTC.
-		rule := e.RuleSet.Clone()
-		rule.DTStart(rule.GetDTStart().In(timezone))
+		rule := e.RuleSet.InTimezone(timezone)
 		// We want every occurrence from now up to but not including before. That
 		// way an event that lands right on now still counts here, but one that
 		// lands on before rolls into the next window. rrule's Between treats both
@@ -204,8 +203,7 @@ func calculateNextContribution(
 
 	var rule *RuleSet
 	if spending.RuleSet != nil {
-		rule = spending.RuleSet.Clone()
-		rule.DTStart(rule.GetDTStart().In(timezone))
+		rule = spending.RuleSet.InTimezone(timezone)
 	}
 
 	fundingFirst, fundingSecond := fundingSchedule.GetNextTwoContributionDatesAfter(now, timezone)

@@ -697,8 +697,7 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(
 				// recurrence it paid for. So we roll back to the 1st of the month
 				// before. That way the money that went back into the expense is held
 				// for the 1st instead of looking like extra.
-				rule := currentExpense.RuleSet.Clone()
-				rule.DTStart(rule.GetDTStart().In(timezone))
+				rule := currentExpense.RuleSet.InTimezone(timezone)
 				// Transaction dates are just dates, so get them to midnight in the
 				// account's timezone or we could land on the wrong recurrence.
 				paidRecurrence := rule.Before(util.Midnight(existing.Date, timezone), true)

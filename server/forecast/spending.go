@@ -203,7 +203,7 @@ func (s *spendingInstructionBase) GetRecurrencesBetween(
 	switch s.spending.SpendingType {
 	case SpendingTypeExpense:
 		rule := s.ruleset
-		rule.DTStart(rule.GetDTStart().In(timezone))
+		rule.DTStart(util.Midnight(rule.GetDTStart(), timezone))
 
 		// This little bit is really confusing. Basically we want to know how many times this spending boi happens
 		// before the specified end date. This can include the start date, but we want to exclude the end date. This is
@@ -252,7 +252,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(
 		}
 	case SpendingTypeExpense:
 		myownsanity.ASSERT_NOTNIL(rule, "expense spending type must have a recurrence rule!")
-		rule.DTStart(rule.GetDTStart().In(timezone))
+		rule.DTStart(util.Midnight(rule.GetDTStart(), timezone))
 		if !nextRecurrence.After(input) || nextRecurrence.Equal(input) {
 			nextRecurrence = rule.After(input, false)
 		}

@@ -111,6 +111,11 @@ func (c *Controller) postSpending(ctx *echo.Context) error {
 		}
 	}
 
+	// Make sure the rule starts at midnight in the user's timezone.
+	if spending.RuleSet != nil {
+		spending.RuleSet = spending.RuleSet.InUTC(timezone)
+	}
+
 	if spending.AutoCreateTransaction {
 		if spending.SpendingType != SpendingTypeExpense {
 			return c.badRequest(ctx, "auto create transaction is only supported for expenses")
@@ -330,6 +335,11 @@ func (c *Controller) patchSpending(ctx *echo.Context) error {
 	)
 	if err != nil {
 		return err
+	}
+
+	// Make sure the rule starts at midnight in the user's timezone.
+	if updatedSpending.RuleSet != nil {
+		updatedSpending.RuleSet = updatedSpending.RuleSet.InUTC(c.mustGetTimezone(ctx))
 	}
 
 	log := c.getLog(ctx)

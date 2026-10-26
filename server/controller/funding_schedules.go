@@ -75,6 +75,9 @@ func (c *Controller) postFundingSchedules(ctx *echo.Context) error {
 		return err
 	}
 
+	// Make sure the rule starts at midnight in the user's timezone.
+	fundingSchedule.RuleSet = fundingSchedule.RuleSet.InUTC(c.mustGetTimezone(ctx))
+
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	// Make sure the bank account belongs to the authenticated user before
@@ -157,6 +160,9 @@ func (c *Controller) patchFundingSchedule(ctx *echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	// Make sure the rule starts at midnight in the user's timezone.
+	fundingSchedule.RuleSet = fundingSchedule.RuleSet.InUTC(c.mustGetTimezone(ctx))
 
 	if fundingSchedule.NextRecurrence.Before(c.Clock.Now()) {
 		return c.badRequest(ctx, "Next recurrence must be in the future")

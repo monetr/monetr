@@ -160,8 +160,7 @@ func newTransactionRecurring(
 
 	// The ruleset is stored in UTC, but its days are the account's days. So it
 	// needs to be in the account's timezone to land on the right day.
-	rule := result.RuleSet.Clone()
-	rule.DTStart(rule.GetDTStart().In(timezone))
+	rule := result.RuleSet.InTimezone(timezone)
 
 	// The recurrence has ended once it is past the occurrence that should have
 	// come after the last transaction, with half a period of slack since charges

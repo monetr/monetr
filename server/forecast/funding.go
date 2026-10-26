@@ -56,7 +56,7 @@ func (f *fundingScheduleBase) GetNextFundingEventAfter(
 	rule := f.ruleset
 	// This does not change the timezone or the date start of the ruleset. It just corrects it. The date start is
 	// normally stored in UTC so this just adjusts it to be the user's current timezone.
-	rule.DTStart(rule.GetDTStart().In(timezone))
+	rule.DTStart(util.Midnight(rule.GetDTStart(), timezone))
 	var nextContributionDate time.Time
 	if f.fundingSchedule.NextRecurrence.IsZero() {
 		nextContributionDate = util.Midnight(rule.Before(input, false), timezone)
@@ -186,7 +186,7 @@ func (f *fundingScheduleBase) GetFundingEventsBetween(
 	// Make sure that the rule is using the timezone of the dates provided. This is an easy way to force that.
 	// We also need to truncate the hours on the start time. To make sure that we are operating relative to
 	// midnight.
-	rule.DTStart(rule.GetDTStart().In(timezone))
+	rule.DTStart(util.Midnight(rule.GetDTStart(), timezone))
 
 	// TODO Technically we should add 2 days to the "end" here if exclude weekend
 	// is on. Lets say the end is the 30th, but the rule recurres on the 31st. If
