@@ -226,8 +226,10 @@ tf-idf
 tokenization
 tokenized
 umbrelOS
+unarchive
 unbudgeted
 uncomment
+undelete
 uptime
 v1.0
 validator
