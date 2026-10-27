@@ -927,6 +927,77 @@ func TestPatchRecurringTransaction(t *testing.T) {
 		response.JSON().Path("$.autoAssign").Boolean().IsFalse()
 	})
 
+	t.Run("undelete a recurring transaction", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		recurring := GivenIHaveATransactionRecurring(t, bank)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		{ // Delete the recurring transaction
+			response := e.DELETE("/api/bank_accounts/{bankAccountId}/recurring/{transactionRecurringId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("transactionRecurringId", recurring.TransactionRecurringId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+		}
+
+		{ // Undelete it
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}/recurring/{transactionRecurringId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("transactionRecurringId", recurring.TransactionRecurringId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"deletedAt": nil,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.deletedAt").IsNull()
+		}
+
+		{ // Should be back in the list
+			response := e.GET("/api/bank_accounts/{bankAccountId}/recurring").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$[0].transactionRecurringId").IsEqual(recurring.TransactionRecurringId)
+			response.JSON().Array().Length().IsEqual(1)
+		}
+	})
+
+	t.Run("cant set deleted at", func(t *testing.T) {
+		// Deleting has to go through the DELETE endpoint, the patch can only clear
+		// the deleted at.
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		recurring := GivenIHaveATransactionRecurring(t, bank)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/recurring/{transactionRecurringId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionRecurringId", recurring.TransactionRecurringId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"deletedAt": app.Clock.Now(),
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.deletedAt").String().IsEqual("Deleted at can only be set to null")
+
+		stored := testutils.MustDBRead(t, recurring)
+		assert.Nil(t, stored.DeletedAt, "deleted at should not be set")
+	})
+
 	t.Run("cant patch someone elses recurring", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 

@@ -323,11 +323,12 @@ What you can send depends on what kind of link the account belongs to.
 
 <Tabs>
     <Tab label="Plaid">
-        On a Plaid account, one field. That's it, because everything else is the bank's to say.
+        On a Plaid account, just the name and unarchiving it. That's it, because everything else is the bank's to say.
 
-        | Attribute | Type   | Required | Description                             |
-        | --------- | ------ | -------- | --------------------------------------- |
-        | `name`    | string | No       | The display name. Can't be blanked out. |
+        | Attribute   | Type   | Required | Description                                           |
+        | ----------- | ------ | -------- | ----------------------------------------------------- |
+        | `deletedAt` | null   | No       | Send null to unarchive it. Anything else is rejected. |
+        | `name`      | string | No       | The display name. Can't be blanked out.               |
     </Tab>
     <Tab label="Manual">
         On a manual account, quite a bit more, since nothing is syncing these for you:
@@ -339,6 +340,7 @@ What you can send depends on what kind of link the account belongs to.
         | `availableBalance` | integer           | No       | Set the available balance directly. Zero is fine, null is rejected. |
         | `currency`         | string            | No       | ISO 4217 code. Can't be blanked out.                                |
         | `currentBalance`   | integer           | No       | Set the current balance directly. Zero is fine, null is rejected.   |
+        | `deletedAt`        | null              | No       | Send null to unarchive it. Anything else is rejected.               |
         | `limitBalance`     | integer, nullable | No       | Credit limit, or null to clear it. Can't be negative.               |
         | `mask`             | string, nullable  | No       | The last 4 digits, or null to clear it. Exactly 4 when set.         |
         | `name`             | string            | No       | The display name. Can't be blanked out.                             |
@@ -352,12 +354,16 @@ What you can send depends on what kind of link the account belongs to.
         | `accountSubType` | string           | No       | Reclassify it. Can't be blanked out.                        |
         | `accountType`    | string           | No       | Reclassify it. Can't be blanked out.                        |
         | `currency`       | string           | No       | ISO 4217 code. Can't be blanked out.                        |
+        | `deletedAt`      | null             | No       | Send null to unarchive it. Anything else is rejected.       |
         | `mask`           | string, nullable | No       | The last 4 digits, or null to clear it. Exactly 4 when set. |
         | `name`           | string           | No       | The display name. Can't be blanked out.                     |
     </Tab>
 </Tabs>
 
 Note `status` is never editable, on any account type. monetr owns it, and archiving is what changes it.
+
+Sending `deletedAt` as null brings back an account you [archived](#archive-a-bank-account). That's all it does though.
+`status` stays `inactive`, and a Lunch Flow account won't start syncing again.
 
 Every field here is optional, so send only what you're changing. But if you do send one of the non-nullable ones, you
 can't send null or an empty string for it. That's on purpose: an empty string would slip past the format checks and
@@ -400,6 +406,10 @@ curl --request PATCH \
 
 :::details History
 
+**[v1.22.0](https://github.com/monetr/monetr/releases/tag/v1.22.0)**
+
+- `deletedAt` can be sent as null to unarchive an account.
+
 **[v1.18.1](https://github.com/monetr/monetr/releases/tag/v1.18.1)**
 
 - Lunch Flow accounts can now change `accountType` and `accountSubType`.
@@ -408,10 +418,10 @@ curl --request PATCH \
 
 ### Errors
 
-| Status | When                                                                                                                         |
-| ------ | ---------------------------------------------------------------------------------------------------------------------------- |
-| 400    | You sent a manual-only field on a Plaid account, tried to blank out a non-nullable field, or sent a negative `limitBalance`. |
-| 404    | No such account.                                                                                                             |
+| Status | When                                                                                                                                                                |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 400    | You sent a manual-only field on a Plaid account, tried to blank out a non-nullable field, sent a negative `limitBalance`, or sent `deletedAt` as anything but null. |
+| 404    | No such account.                                                                                                                                                    |
 
 ## <Badge type="danger">DELETE</Badge> Archive a bank account
 
@@ -444,7 +454,8 @@ curl --request DELETE \
 ```
 
 Returns 200 with an empty body. To see the archived record afterwards, [list bank accounts](#list-bank-accounts) with
-the `link_id` filter, which is the only call that includes them.
+the `link_id` filter, which is the only call that includes them. To bring it back, [update it](#update-a-bank-account)
+with `deletedAt` set to null.
 
 ### Errors
 

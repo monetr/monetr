@@ -118,6 +118,10 @@ var (
 			validation.Required.Error("Account sub type is required"),
 			BankAccountAccountSubType(),
 		).Required(Optional),
+		validation.Key(
+			"deletedAt",
+			DeletedAt(),
+		).Required(Optional),
 	)
 
 	PatchManualBankAccount = validation.Map(
@@ -188,6 +192,10 @@ var (
 			validation.Required.Error("Account sub type is required"),
 			BankAccountAccountSubType(),
 		).Required(Optional),
+		validation.Key(
+			"deletedAt",
+			DeletedAt(),
+		).Required(Optional),
 	)
 
 	PatchBankAccount = validation.Map(
@@ -195,6 +203,10 @@ var (
 			"name",
 			validation.Required.Error("Name is required"),
 			Name(),
+		).Required(Optional),
+		validation.Key(
+			"deletedAt",
+			DeletedAt(),
 		).Required(Optional),
 	)
 )

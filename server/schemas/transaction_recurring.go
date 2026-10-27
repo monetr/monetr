@@ -22,5 +22,8 @@ var (
 		validation.Key("autoAssign",
 			Boolean(),
 		).Required(Optional),
+		validation.Key("deletedAt",
+			DeletedAt(),
+		).Required(Optional),
 	)
 )

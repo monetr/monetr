@@ -1929,6 +1929,163 @@ func TestPatchBankAccount(t *testing.T) {
 		}
 	})
 
+	t.Run("undelete a manual bank account", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{ // Delete the bank account
+			response := e.DELETE("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+		}
+
+		{ // Should not be in the list anymore
+			response := e.GET("/api/bank_accounts").
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().IsEmpty()
+		}
+
+		{ // Undelete it
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"deletedAt": nil,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Object().NotContainsKey("deletedAt")
+		}
+
+		{ // Should be back in the list
+			response := e.GET("/api/bank_accounts").
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$[0].bankAccountId").IsEqual(bank.BankAccountId)
+			response.JSON().Array().Length().IsEqual(1)
+		}
+	})
+
+	t.Run("undelete a lunch flow bank account", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveALunchFlowLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveALunchFlowBankAccount(t, app.Clock, &link)
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{ // Delete the bank account
+			response := e.DELETE("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+		}
+
+		{ // Undelete it
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"deletedAt": nil,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Object().NotContainsKey("deletedAt")
+		}
+
+		stored := testutils.MustDBRead(t, bank)
+		assert.Nil(t, stored.DeletedAt, "deleted at should be cleared")
+	})
+
+	t.Run("undelete a plaid bank account", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveAPlaidBankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		// Plaid accounts can only be deleted once they are inactive, we don't have
+		// a way to do that through the API so just do it here.
+		bank.Status = BankAccountStatusInactive
+		testutils.MustDBUpdate(t, &bank)
+
+		{ // Delete the bank account
+			response := e.DELETE("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+		}
+
+		{ // Undelete it
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"deletedAt": nil,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Object().NotContainsKey("deletedAt")
+		}
+
+		stored := testutils.MustDBRead(t, bank)
+		assert.Nil(t, stored.DeletedAt, "deleted at should be cleared")
+	})
+
+	t.Run("cant set deleted at", func(t *testing.T) {
+		// Deleting has to go through the DELETE endpoint, the patch can only clear
+		// the deleted at.
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"deletedAt": app.Clock.Now(),
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.deletedAt").String().IsEqual("Deleted at can only be set to null")
+
+		stored := testutils.MustDBRead(t, bank)
+		assert.Nil(t, stored.DeletedAt, "deleted at should not be set")
+	})
+
 	t.Run("with a valid api key", func(t *testing.T) {
 		// Patching a bank account is part of the key or token route group, so an
 		// API key that belongs to the account should be able to do it. This clones

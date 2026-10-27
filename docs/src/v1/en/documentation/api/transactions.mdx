@@ -390,6 +390,7 @@ Send only what you're changing. Everything is optional.
     <Tab label="Plaid">
         | Attribute      | Type                    | Required | Description                                                                                                                          |
         | -------------- | ----------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+        | `deletedAt`    | null                    | No       | Send null to undelete it. Anything else is rejected.                                                                                 |
         | `merchantName` | string                  | No       | Who you paid, for display. Editable on any link, including Plaid ones, because `originalMerchantName` keeps the bank's version safe. |
         | `name`         | string                  | No       | What to call it. Same deal, `originalName` is left alone.                                                                            |
         | `spendingId`   | string (ulid), nullable | No       | Which spending object it comes out of. Send null to move it back to free-to-use.                                                     |
@@ -399,6 +400,7 @@ Send only what you're changing. Everything is optional.
         | -------------- | ----------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
         | `amount`       | integer                 | No       | A new amount, in the smallest unit.                                                                                                  |
         | `date`         | timestamp               | No       | A new date, RFC 3339.                                                                                                                |
+        | `deletedAt`    | null                    | No       | Send null to undelete it. Anything else is rejected.                                                                                 |
         | `isPending`    | boolean                 | No       | Whether it's still pending.                                                                                                          |
         | `merchantName` | string                  | No       | Who you paid, for display. Editable on any link, including Plaid ones, because `originalMerchantName` keeps the bank's version safe. |
         | `name`         | string                  | No       | What to call it. Same deal, `originalName` is left alone.                                                                            |
@@ -409,6 +411,7 @@ Send only what you're changing. Everything is optional.
 
         | Attribute      | Type                    | Required | Description                                                                                                                          |
         | -------------- | ----------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+        | `deletedAt`    | null                    | No       | Send null to undelete it. Anything else is rejected.                                                                                 |
         | `merchantName` | string                  | No       | Who you paid, for display. Editable on any link, including Plaid ones, because `originalMerchantName` keeps the bank's version safe. |
         | `name`         | string                  | No       | What to call it. Same deal, `originalName` is left alone.                                                                            |
         | `spendingId`   | string (ulid), nullable | No       | Which spending object it comes out of. Send null to move it back to free-to-use.                                                     |
@@ -496,12 +499,20 @@ curl --request PATCH \
 `spending` here is an array, not a single object like it is on create. Moving a transaction between envelopes can touch
 two of them, so the response carries every spending object that changed. It's an empty array when nothing did.
 
+:::details History
+
+**[v1.22.0](https://github.com/monetr/monetr/releases/tag/v1.22.0)**
+
+- `deletedAt` can be sent as null to undelete a transaction.
+
+:::
+
 ### Errors
 
-| Status | When                                                                                                                                                                                              |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 400    | You sent a manual-only field on a Plaid link, sent `adjustsBalance`, or set a `spendingId` on a deposit. Negative amounts are deposits, and monetr won't let a deposit be spent from an envelope. |
-| 404    | No transaction with that ID on that bank account.                                                                                                                                                 |
+| Status | When                                                                                                                                                                                                                                     |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 400    | You sent a manual-only field on a Plaid link, sent `adjustsBalance`, sent `deletedAt` as anything but null, or set a `spendingId` on a deposit. Negative amounts are deposits, and monetr won't let a deposit be spent from an envelope. |
+| 404    | No transaction with that ID on that bank account.                                                                                                                                                                                        |
 
 ## <Badge type="danger">DELETE</Badge> Delete a transaction
 
@@ -562,6 +573,10 @@ and it shows up in `spending`.
 The reverse is the trap: deleting a transaction that's still assigned to an envelope **without** `adjusts_balance=true`
 leaves that money allocated to the envelope with nothing to show for it. `spending` comes back empty and the envelope
 quietly keeps the deduction. Clear `spendingId` with a PATCH first if you want the money back.
+
+A soft deleted transaction can be brought back by [updating it](#update-a-transaction) with `deletedAt` set to null.
+That only clears `deletedAt` though, it won't take back anything `adjusts_balance=true` did to the balances or the
+envelope.
 
 ### Errors
 

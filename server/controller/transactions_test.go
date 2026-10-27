@@ -1324,6 +1324,7 @@ func TestPatchTransaction(t *testing.T) {
 		{ // Try to update the protected fields
 			// Where the PUT would silently drop these, the PATCH schema rejects each
 			// of them as an unexpected key so the request never even gets applied.
+			// Deleted at is expected now but can only be null, to undelete.
 			now := app.Clock.Now()
 			response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -1340,7 +1341,7 @@ func TestPatchTransaction(t *testing.T) {
 			response.JSON().Path("$.error").String().IsEqual("Invalid request")
 			response.JSON().Path("$.problems.source").String().IsEqual("key not expected")
 			response.JSON().Path("$.problems.createdAt").String().IsEqual("key not expected")
-			response.JSON().Path("$.problems.deletedAt").String().IsEqual("key not expected")
+			response.JSON().Path("$.problems.deletedAt").String().IsEqual("Deleted at can only be set to null")
 		}
 
 		{ // Make sure that we can still see the transaction
@@ -3169,6 +3170,137 @@ func TestPatchTransaction(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.lastSpentFrom").String().AsDateTime(time.RFC3339).IsEqual(date)
 		}
+	})
+
+	t.Run("undelete a manual transaction", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var transaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			transaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		{ // Delete the transaction
+			response := e.DELETE("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("transactionId", transaction.TransactionId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+		}
+
+		{ // Should not be in the list anymore
+			response := e.GET("/api/bank_accounts/{bankAccountId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().IsEmpty()
+		}
+
+		{ // Undelete it
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("transactionId", transaction.TransactionId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"deletedAt": nil,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.transaction.deletedAt").IsNull()
+		}
+
+		{ // Should be back in the list
+			response := e.GET("/api/bank_accounts/{bankAccountId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$[0].transactionId").IsEqual(transaction.TransactionId)
+			response.JSON().Array().Length().IsEqual(1)
+		}
+	})
+
+	t.Run("undelete a plaid transaction", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var transaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			transaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		// Plaid transactions can't be deleted through the API, only the sync does
+		// that. So just do it here.
+		transaction.DeletedAt = new(app.Clock.Now())
+		testutils.MustDBUpdate(t, &transaction)
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", transaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"deletedAt": nil,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transaction.deletedAt").IsNull()
+
+		stored := testutils.MustDBRead(t, transaction)
+		assert.Nil(t, stored.DeletedAt, "deleted at should be cleared")
+	})
+
+	t.Run("cant set deleted at", func(t *testing.T) {
+		// Deleting has to go through the DELETE endpoint, the patch can only clear
+		// the deleted at.
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var transaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			transaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", transaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"deletedAt": app.Clock.Now(),
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.deletedAt").String().IsEqual("Deleted at can only be set to null")
+
+		stored := testutils.MustDBRead(t, transaction)
+		assert.Nil(t, stored.DeletedAt, "deleted at should not be set")
 	})
 }
 

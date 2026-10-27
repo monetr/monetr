@@ -59,6 +59,9 @@ var (
 				ValidID[models.Spending](),
 			),
 		).Required(Optional),
+		validation.Key("deletedAt",
+			DeletedAt(),
+		).Required(Optional),
 	)
 
 	PatchManualTransaction = validation.Map(
@@ -89,6 +92,9 @@ var (
 			// to set is pending back to false.
 			is.Boolean,
 			validation.In(true, false).Error("Is pending must be a valid boolean if provided"),
+		).Required(Optional),
+		validation.Key("deletedAt",
+			DeletedAt(),
 		).Required(Optional),
 
 		// NOTE adjustsBalance is intentionally not accepted here. monetr does not

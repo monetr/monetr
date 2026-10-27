@@ -140,3 +140,10 @@ func Timestamp() validation.AllOfRule {
 		validation.Date(time.RFC3339),
 	).Error("Must be a valid timestamp")
 }
+
+// DeletedAt is used to undelete something that was soft deleted. The client
+// can only ever set it to null, actually deleting something still has to go
+// through the DELETE endpoint.
+func DeletedAt() validation.Rule {
+	return validation.Nil.Error("Deleted at can only be set to null")
+}
