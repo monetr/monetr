@@ -7,4 +7,5 @@ const (
 	PlaidLinkType     LinkType = "plaid"
 	ManualLinkType    LinkType = "manual"
 	LunchFlowLinkType LinkType = "lunch_flow"
+	SimpleFinLinkType LinkType = "simplefin"
 )

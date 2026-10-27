@@ -62,6 +62,12 @@ server:
     secure: false # Cant use secure over http.
   listenport: 4000
   statsport: 9000
+simpleFin:
+  enabled: true
+  allowedHosts:
+    - bridge.simplefin.org
+    # The beta bridge is where SimpleFIN's demo setup token points to.
+    - beta-bridge.simplefin.org
 keyManagement:
   aws:
     region: us-east-1

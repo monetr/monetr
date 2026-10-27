@@ -78,6 +78,8 @@ func (o *LunchFlowLink) BeforeAppendModel(ctx context.Context, query bun.Query) 
 		if o.UpdatedAt.IsZero() {
 			o.UpdatedAt = now
 		}
+	case *bun.UpdateQuery:
+		o.UpdatedAt = time.Now()
 	}
 
 	return nil

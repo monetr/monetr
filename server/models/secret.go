@@ -12,6 +12,7 @@ type SecretKind string
 const (
 	SecretKindPlaid     SecretKind = "plaid"
 	SecretKindLunchFlow SecretKind = "lunchflow"
+	SecretKindSimpleFin SecretKind = "simplefin"
 )
 
 type Secret struct {

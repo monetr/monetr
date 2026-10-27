@@ -93,6 +93,7 @@ func ServeCommand(parent *cobra.Command) {
 			if err := myownsanity.FirstError(
 				configuration.LunchFlow.ValidateConfig(),
 				configuration.Server.ValidateConfig(),
+				configuration.SimpleFin.ValidateConfig(),
 			); err != nil {
 				return errors.Wrap(err, "there are configuration problems")
 			}

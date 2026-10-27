@@ -64,6 +64,8 @@ type BankAccount struct {
 	PlaidBankAccount       *PlaidBankAccount         `json:"plaidBankAccount,omitempty" bun:"rel:belongs-to,join:plaid_bank_account_id=plaid_bank_account_id,join:account_id=account_id"`
 	LunchFlowBankAccountId *ID[LunchFlowBankAccount] `json:"lunchFlowBankAccountId" bun:"lunch_flow_bank_account_id"`
 	LunchFlowBankAccount   *LunchFlowBankAccount     `json:"lunchFlowBankAccount,omitempty" bun:"rel:belongs-to,join:lunch_flow_bank_account_id=lunch_flow_bank_account_id,join:account_id=account_id"`
+	SimpleFinBankAccountId *ID[SimpleFinBankAccount] `json:"simpleFinBankAccountId" bun:"simplefin_bank_account_id"`
+	SimpleFinBankAccount   *SimpleFinBankAccount     `json:"simpleFinBankAccount,omitempty" bun:"rel:belongs-to,join:simplefin_bank_account_id=simplefin_bank_account_id,join:account_id=account_id"`
 	Currency               string                    `json:"currency" bun:"currency,notnull,nullzero"`
 	AvailableBalance       int64                     `json:"availableBalance" bun:"available_balance,notnull"`
 	CurrentBalance         int64                     `json:"currentBalance" bun:"current_balance,notnull"`

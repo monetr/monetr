@@ -2,6 +2,7 @@ package repository_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/internal/fixtures"
@@ -94,6 +95,10 @@ func TestRepositoryBase_UpdateLunchFlowLink(t *testing.T) {
 		readLink, err := repo.GetLunchFlowLink(t.Context(), link.LunchFlowLinkId)
 		assert.NoError(t, err, "Must be able to create a lunch flow link without error")
 		assert.NotEmpty(t, link.LunchFlowLinkId, "Must have generated a new lunch flow link ID")
+		// UpdatedAt is set by the model hook with the real time, not the mock
+		// clock, so it won't survive the round trip exactly.
+		assert.WithinDuration(t, link.UpdatedAt, readLink.UpdatedAt, time.Millisecond)
+		readLink.UpdatedAt = link.UpdatedAt
 		assert.EqualValues(t, link, *readLink, "should match after updates")
 	})
 }

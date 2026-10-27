@@ -18,6 +18,8 @@ type Link struct {
 	PlaidLink        *PlaidLink         `json:"plaidLink,omitempty" bun:"rel:belongs-to,join:plaid_link_id=plaid_link_id"`
 	LunchFlowLinkId  *ID[LunchFlowLink] `json:"lunchFlowLinkId,omitempty" bun:"lunch_flow_link_id"`
 	LunchFlowLink    *LunchFlowLink     `json:"lunchFlowLink,omitempty" bun:"rel:belongs-to,join:lunch_flow_link_id=lunch_flow_link_id,join:account_id=account_id"`
+	SimpleFinLinkId  *ID[SimpleFinLink] `json:"simpleFinLinkId,omitempty" bun:"simplefin_link_id"`
+	SimpleFinLink    *SimpleFinLink     `json:"simpleFinLink,omitempty" bun:"rel:belongs-to,join:simplefin_link_id=simplefin_link_id,join:account_id=account_id"`
 	InstitutionName  string             `json:"institutionName" bun:"institution_name,nullzero"`
 	Description      *string            `json:"description" bun:"description"`
 	BankAccountOrder []ID[BankAccount]  `json:"bankAccountOrder" bun:"bank_account_order,array,nullzero"`

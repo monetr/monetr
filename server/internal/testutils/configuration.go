@@ -54,6 +54,12 @@ func GetConfig(_ *testing.T) config.Configuration {
 			Enabled:        true,
 			AllowedApiUrls: []string{"https://www.lunchflow.app/api/v1"},
 		},
+		SimpleFin: config.SimpleFin{
+			Enabled: true,
+			AllowedHosts: []string{
+				config.DefaultSimpleFinHost,
+			},
+		},
 		Plaid: config.Plaid{
 			Enabled:      true,
 			ClientID:     gofakeit.UUID(),
