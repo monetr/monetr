@@ -55,6 +55,10 @@ func (c *Controller) postLinks(ctx *echo.Context) error {
 		return err
 	}
 
+	if link.LunchFlowLinkId != nil && link.SimpleFinLinkId != nil {
+		return c.badRequest(ctx, "Cannot create a link for both Lunch Flow and SimpleFIN")
+	}
+
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	// If the user is creating a lunch flow link then we need to validate that the
@@ -84,6 +88,35 @@ func (c *Controller) postLinks(ctx *echo.Context) error {
 			lunchFlowLink,
 		); err != nil {
 			return c.wrapPgError(ctx, err, "Failed to update Lunch Flow link")
+		}
+	}
+
+	// Same thing for SimpleFIN, the SimpleFIN link needs to be pending and gets
+	// activated here.
+	if link.SimpleFinLinkId != nil {
+		if !c.Configuration.SimpleFin.IsEnabled() {
+			return c.notFound(ctx, "SimpleFIN is not enabled on this server")
+		}
+
+		link.LinkType = SimpleFinLinkType
+		simpleFinLink, err := repo.GetSimpleFinLink(
+			c.getContext(ctx),
+			*link.SimpleFinLinkId,
+		)
+		if err != nil {
+			return c.wrapPgError(ctx, err, "Failed to retrieve SimpleFIN link")
+		}
+
+		if simpleFinLink.Status != SimpleFinLinkStatusPending {
+			return c.badRequest(ctx, "Cannot create a link from a SimpleFIN link that is not in a pending status")
+		}
+
+		simpleFinLink.Status = SimpleFinLinkStatusActive
+		if err := repo.UpdateSimpleFinLink(
+			c.getContext(ctx),
+			simpleFinLink,
+		); err != nil {
+			return c.wrapPgError(ctx, err, "Failed to update SimpleFIN link")
 		}
 	}
 
@@ -234,6 +267,15 @@ func (c *Controller) deleteLink(ctx *echo.Context) error {
 			link.LunchFlowLink,
 		); err != nil {
 			return c.wrapPgError(ctx, err, "Failed to update Lunch Flow Link")
+		}
+	} else if link.SimpleFinLink != nil {
+		link.SimpleFinLink.Status = SimpleFinLinkStatusDeactivated
+		link.SimpleFinLink.DeletedAt = new(c.Clock.Now())
+		if err := repo.UpdateSimpleFinLink(
+			c.getContext(ctx),
+			link.SimpleFinLink,
+		); err != nil {
+			return c.wrapPgError(ctx, err, "Failed to update SimpleFIN link")
 		}
 	}
 

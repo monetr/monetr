@@ -1149,6 +1149,86 @@ func TestRemoveLink(t *testing.T) {
 		}
 	})
 
+	t.Run("simplefin link with transactions", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+		publisher := pubsub.NewPostgresPubSub(log, db)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
+
+		sfTxn := testutils.MustInsert(t, models.SimpleFinTransaction{
+			AccountId:              bankAccount.AccountId,
+			SimpleFinBankAccountId: bankAccount.SimpleFinBankAccount.SimpleFinBankAccountId,
+			SimpleFinId:            "TRN-1",
+			Description:            "Morning coffee",
+			Amount:                 450,
+			Posted:                 clock.Now(),
+			CreatedAt:              clock.Now(),
+		})
+
+		// Inactive SimpleFIN bank accounts don't have a monetr bank account but
+		// still need to be removed with the link
+		inactiveSFBankAccount := testutils.MustInsert(t, models.SimpleFinBankAccount{
+			AccountId:       link.AccountId,
+			SimpleFinLinkId: *link.SimpleFinLinkId,
+			SimpleFinId:     "ACT-inactive-1",
+			ConnectionId:    "CON-1",
+			Name:            "Savings - 5678",
+			InstitutionName: "Lehman Brothers",
+			Currency:        "USD",
+			Status:          models.SimpleFinBankAccountStatusInactive,
+			CreatedBy:       link.CreatedBy,
+			CreatedAt:       clock.Now(),
+			UpdatedAt:       clock.Now(),
+		})
+		inactiveSFTxn := testutils.MustInsert(t, models.SimpleFinTransaction{
+			AccountId:              link.AccountId,
+			SimpleFinBankAccountId: inactiveSFBankAccount.SimpleFinBankAccountId,
+			SimpleFinId:            "TRN-inactive-1",
+			Description:            "Weekly groceries",
+			Amount:                 3500,
+			Posted:                 clock.Now(),
+			CreatedAt:              clock.Now(),
+		})
+
+		context := mockgen.NewMockContext(ctrl)
+		context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+		context.EXPECT().Clock().Return(clock).AnyTimes()
+		context.EXPECT().DB().Return(db).AnyTimes()
+		context.EXPECT().Log().Return(log).AnyTimes()
+		context.EXPECT().Publisher().Return(publisher).AnyTimes()
+
+		assert.NotPanics(t, func() {
+			err := link_jobs.RemoveLink(
+				mockqueue.NewMockContext(context),
+				link_jobs.RemoveLinkArguments{
+					AccountId: user.AccountId,
+					LinkId:    link.LinkId,
+				},
+			)
+			assert.NoError(t, err, "remove link job should succeed")
+		})
+
+		{ // Make sure all data has been removed
+			testutils.MustDBNotExist(t, sfTxn)
+			testutils.MustDBNotExist(t, inactiveSFTxn)
+			testutils.MustDBNotExist(t, inactiveSFBankAccount)
+			testutils.MustDBNotExist(t, *bankAccount.SimpleFinBankAccount)
+			testutils.MustDBNotExist(t, bankAccount)
+			testutils.MustDBNotExist(t, *link.SimpleFinLink)
+			testutils.MustDBNotExist(t, link)
+			testutils.MustDBNotExist(t, models.Secret{
+				SecretId:  link.SimpleFinLink.SecretId,
+				AccountId: link.AccountId,
+			})
+		}
+	})
+
 	t.Run("with transaction imports", func(t *testing.T) {
 		clock := clock.NewMock()
 		ctrl := gomock.NewController(t)

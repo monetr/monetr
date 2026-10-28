@@ -1,6 +1,6 @@
 ---
 title: "Links API"
-description: "A link is one bank connection in monetr. Use the API to list Plaid, manual and Lunch Flow links, create manual ones, and remove them cleanly."
+description: "A link is one bank connection in monetr. Use the API to list Plaid, manual, Lunch Flow and SimpleFIN links, create manual ones, and remove them cleanly."
 ---
 
 import { Badge } from "@rspress/core/theme";
@@ -10,22 +10,25 @@ import { Badge } from "@rspress/core/theme";
 A link is one connection to one financial institution, and it owns the bank accounts under it. In the app it's the thing
 you see in the sidebar with a bank's name on it, with the accounts nested underneath.
 
-There are three kinds you'll actually run into. **Plaid** links sync from your bank on their own. **Manual** links are
+There are four kinds you'll actually run into. **Plaid** links sync from your bank on their own. **Manual** links are
 ones you maintain by hand, entering transactions and updating balances yourself. **Lunch Flow** links pull from a Lunch
-Flow instance, and only exist when that's enabled on your server.
+Flow instance, and **SimpleFIN** links pull from a SimpleFIN Bridge. Those last two only exist when they're enabled on
+your server.
 
-The endpoints here create and manage manual links. Making a Plaid link is a multi-step handshake with Plaid's browser
-SDK that an API key can't drive, so it lives in [internal endpoints](./internal).
+The endpoints here create and manage manual, Lunch Flow and SimpleFIN links. Making a Plaid link is a multi-step
+handshake with Plaid's browser SDK that an API key can't drive, so it lives in [internal endpoints](./internal).
 
 ## The link object
 
 | Attribute          | Type                       | Description                                                                                                  |
 | ------------------ | -------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `linkId`           | string (ulid)              | Identifies the link.                                                                                         |
-| `linkType`         | string                     | `plaid`, `manual`, `lunch_flow`, or `unknown`.                                                               |
+| `linkType`         | string                     | `plaid`, `manual`, `lunch_flow`, `simplefin`, or `unknown`.                                                  |
 | `plaidLink`        | object                     | Sync state for Plaid links, described below. Absent on every other kind.                                     |
 | `lunchFlowLinkId`  | string (ulid)              | The Lunch Flow link behind this one. Only on Lunch Flow links.                                               |
 | `lunchFlowLink`    | object                     | The upstream Lunch Flow link. Only on Lunch Flow links.                                                      |
+| `simpleFinLinkId`  | string (ulid)              | The SimpleFIN link behind this one. Only on SimpleFIN links.                                                 |
+| `simpleFinLink`    | object                     | The upstream SimpleFIN link. Only on SimpleFIN links.                                                        |
 | `institutionName`  | string                     | The bank's name. On a manual link this is whatever you called it, and it's the label you see in the sidebar. |
 | `description`      | string, nullable           | Your own note about the link. Null when you haven't set one.                                                 |
 | `bankAccountOrder` | array of strings, nullable | Bank account IDs in the order you put them in. Null until you've reordered them.                             |
@@ -61,6 +64,18 @@ The access token, item ID and webhook URL are all deliberately left out of the r
 ### The `lunchFlowLink` object
 
 The Lunch Flow link sub-object is documented [here](./lunch_flow.mdx#the-lunch-flow-link-object)
+
+### The `simpleFinLink` object
+
+The SimpleFIN link sub-object is documented [here](./simplefin.mdx#the-simplefin-link-object)
+
+:::details History
+
+**[v1.22.0](https://github.com/monetr/monetr/releases/tag/v1.22.0)**
+
+- Added the `simplefin` link type, along with `simpleFinLinkId` and `simpleFinLink`.
+
+:::
 
 ## <Badge type="info">GET</Badge> List links
 
@@ -173,9 +188,10 @@ Unlike the list, this one will return a deleted link if you ask for it by ID, wi
 | 400    | `linkId` is malformed.        |
 | 404    | No such link on your account. |
 
-## <Badge type="tip">POST</Badge> Create a manual link
+## <Badge type="tip">POST</Badge> Create a link
 
-Makes a link you maintain yourself. This is the starting point for tracking an account monetr can't connect to
+Makes a manual link, or the monetr side of a [Lunch Flow](./lunch_flow) or [SimpleFIN](./simplefin) link. A manual link
+is the one you maintain yourself, and it's the starting point for tracking an account monetr can't connect to
 automatically: create the link, then [create bank accounts](./bank_accounts#create-a-bank-account) on it, then [add
 transactions](./transactions#create-a-transaction). The [quickstart](./quickstart) walks the whole sequence.
 
@@ -194,9 +210,10 @@ POST /api/links
 | `institutionName` | string                  | Yes      | What to call the link. This is the label in the sidebar, so use the bank's name.                                                                                                                                       |
 | `description`     | string, nullable        | No       | A note to yourself.                                                                                                                                                                                                    |
 | `lunchFlowLinkId` | string (ulid), nullable | No       | Turns this into a Lunch Flow link instead of a manual one. The Lunch Flow link has to already exist and be in a pending status, and creating the link activates it. Leave this off unless you're wiring up Lunch Flow. |
+| `simpleFinLinkId` | string (ulid), nullable | No       | Turns this into a SimpleFIN link instead of a manual one. Same rules as `lunchFlowLinkId`, the SimpleFIN link has to already exist and be pending, and creating the link activates it. You can't send both.            |
 
-`linkType` is not something you send. Leave `lunchFlowLinkId` off and you get a manual link. Send it and you get a Lunch
-Flow link. Plaid links can't be made here at all.
+`linkType` is not something you send. Leave `lunchFlowLinkId` and `simpleFinLinkId` off and you get a manual link. Send
+one of them and you get a Lunch Flow or SimpleFIN link. Plaid links can't be made here at all.
 
 ### Example
 
@@ -224,12 +241,20 @@ curl --request POST \
 }
 ```
 
+:::details History
+
+**[v1.22.0](https://github.com/monetr/monetr/releases/tag/v1.22.0)**
+
+- Added `simpleFinLinkId`.
+
+:::
+
 ### Errors
 
-| Status | When                                                                                                    |
-| ------ | ------------------------------------------------------------------------------------------------------- |
-| 400    | `institutionName` is missing, or you sent a `lunchFlowLinkId` for a Lunch Flow link that isn't pending. |
-| 404    | You sent a `lunchFlowLinkId` on a server where Lunch Flow isn't enabled.                                |
+| Status | When                                                                                                                                                   |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 400    | `institutionName` is missing, you sent a `lunchFlowLinkId` or `simpleFinLinkId` for a link that isn't pending, or you sent both.                       |
+| 404    | You sent a `lunchFlowLinkId` or `simpleFinLinkId` on a server where that integration isn't enabled, or the Lunch Flow or SimpleFIN link doesn't exist. |
 
 ## <Badge type="warning">PATCH</Badge> Update a link
 

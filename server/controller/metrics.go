@@ -72,7 +72,7 @@ var (
 	linksCreated = promauto.NewCounterVec(prometheus.CounterOpts{
 		Namespace:   metrics.Namespace,
 		Name:        "links_created",
-		Help:        "Number of links created, labeled by the type of link (manual, plaid, lunch_flow).",
+		Help:        "Number of links created, labeled by the type of link (manual, plaid, lunch_flow, simplefin).",
 		ConstLabels: map[string]string{},
 	}, []string{
 		"link_type",
@@ -80,7 +80,7 @@ var (
 	linksDeleted = promauto.NewCounterVec(prometheus.CounterOpts{
 		Namespace:   metrics.Namespace,
 		Name:        "links_deleted",
-		Help:        "Number of links deleted, labeled by the type of link (manual, plaid, lunch_flow).",
+		Help:        "Number of links deleted, labeled by the type of link (manual, plaid, lunch_flow, simplefin).",
 		ConstLabels: map[string]string{},
 	}, []string{
 		"link_type",
@@ -117,17 +117,17 @@ var (
 	transactionsCreated = promauto.NewCounter(prometheus.CounterOpts{
 		Namespace: metrics.Namespace,
 		Name:      "transactions_created",
-		Help:      "Number of transactions created through the API. Does not include transactions from Plaid, Lunch Flow or file imports.",
+		Help:      "Number of transactions created through the API. Does not include transactions from Plaid, Lunch Flow, SimpleFIN or file imports.",
 	})
 	transactionsUpdated = promauto.NewCounter(prometheus.CounterOpts{
 		Namespace: metrics.Namespace,
 		Name:      "transactions_updated",
-		Help:      "Number of transactions updated through the API. Does not include updates from Plaid, Lunch Flow or file imports.",
+		Help:      "Number of transactions updated through the API. Does not include updates from Plaid, Lunch Flow, SimpleFIN or file imports.",
 	})
 	transactionsDeleted = promauto.NewCounter(prometheus.CounterOpts{
 		Namespace: metrics.Namespace,
 		Name:      "transactions_deleted",
-		Help:      "Number of transactions deleted through the API. Does not include deletes from Plaid, Lunch Flow or file imports.",
+		Help:      "Number of transactions deleted through the API. Does not include deletes from Plaid, Lunch Flow, SimpleFIN or file imports.",
 	})
 
 	// File uploads
@@ -183,6 +183,7 @@ func init() {
 		ManualLinkType,
 		PlaidLinkType,
 		LunchFlowLinkType,
+		SimpleFinLinkType,
 	} {
 		labels := prometheus.Labels{
 			"link_type": string(linkType),

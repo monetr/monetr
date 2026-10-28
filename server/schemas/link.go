@@ -23,6 +23,12 @@ var (
 				ValidID[models.LunchFlowLink](),
 			),
 		).Required(validators.Optional),
+		validation.Key("simpleFinLinkId",
+			validation.OneOf(
+				validation.Nil,
+				ValidID[models.SimpleFinLink](),
+			),
+		).Required(validators.Optional),
 	)
 
 	PatchLink = validation.Map(

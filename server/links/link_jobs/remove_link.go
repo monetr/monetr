@@ -96,6 +96,10 @@ func RemoveLink(ctx queue.Context, args RemoveLinkArguments) error {
 		lunchFlowBankAccountIds := r.getLunchFlowBankAccountsToRemove(ctx)
 		lunchFlowLinkIds := r.getLunchFlowLinksToRemove(ctx)
 
+		simpleFinTransactionIds := r.getSimpleFinTransactionsToRemove(ctx)
+		simpleFinBankAccountIds := r.getSimpleFinBankAccountsToRemove(ctx)
+		simpleFinLinkIds := r.getSimpleFinLinksToRemove(ctx)
+
 		// Removing the link cascades to its bank accounts and everything under
 		// them; transactions, spending, funding schedules, transaction clusters
 		// and transaction uploads. This has to happen first since those reference
@@ -105,11 +109,14 @@ func RemoveLink(ctx queue.Context, args RemoveLinkArguments) error {
 		r.removeLink(ctx)
 		r.removePlaidTransactions(ctx, plaidTransactionIds)
 		r.removeLunchFlowTransactions(ctx, lunchFlowTransactionIds)
+		r.removeSimpleFinTransactions(ctx, simpleFinTransactionIds)
 		r.removePlaidSyncs(ctx, plaidSyncIds)
 		r.removePlaidBankAccounts(ctx, plaidBankAccountIds)
 		r.removeLunchFlowBankAccounts(ctx, lunchFlowBankAccountIds)
+		r.removeSimpleFinBankAccounts(ctx, simpleFinBankAccountIds)
 		r.removePlaidLinks(ctx, plaidLinkIds)
 		r.removeLunchFlowLinks(ctx, lunchFlowLinkIds)
+		r.removeSimpleFinLinks(ctx, simpleFinLinkIds)
 		r.removeSecrets(ctx, secretIds)
 
 		channelName := fmt.Sprintf("link:remove:%s:%s", accountId, linkId)
@@ -182,6 +189,51 @@ func (r *removeLinkJob) removeLunchFlowTransactions(
 
 	affected, _ := result.RowsAffected()
 	r.log.InfoContext(ctx, "removed Lunch Flow transaction(s)", "removed", affected)
+}
+
+func (r *removeLinkJob) getSimpleFinTransactionsToRemove(
+	ctx context.Context,
+) []models.ID[models.SimpleFinTransaction] {
+	ids := make([]models.ID[models.SimpleFinTransaction], 0)
+	err := r.db.NewSelect().Model(&models.SimpleFinTransaction{}).
+		Join(`INNER JOIN "simplefin_bank_accounts" AS "simplefin_bank_account"`).
+		JoinOn(`"simplefin_bank_account"."simplefin_bank_account_id" = "simplefin_transaction"."simplefin_bank_account_id"`).
+		JoinOn(`"simplefin_bank_account"."account_id" = "simplefin_transaction"."account_id"`).
+		// Same as Lunch Flow, inactive SimpleFIN bank accounts might not have a
+		// monetr bank account so go through the link instead.
+		Join(`INNER JOIN "links" AS "link"`).
+		JoinOn(`"link"."simplefin_link_id" = "simplefin_bank_account"."simplefin_link_id"`).
+		JoinOn(`"link"."account_id" = "simplefin_bank_account"."account_id"`).
+		Where(`"simplefin_transaction"."account_id" = ?`, r.args.AccountId).
+		Where(`"link"."link_id" = ?`, r.args.LinkId).
+		Column("simplefin_transaction.simplefin_transaction_id").
+		Scan(ctx, &ids)
+	if err != nil {
+		panic(errors.Wrap(err, "failed to find SimpleFIN transactions to be removed"))
+	}
+
+	return ids
+}
+
+func (r *removeLinkJob) removeSimpleFinTransactions(
+	ctx context.Context,
+	ids []models.ID[models.SimpleFinTransaction],
+) {
+	if len(ids) == 0 {
+		return
+	}
+
+	result, err := r.db.NewDelete().Model(&models.SimpleFinTransaction{}).
+		Where(`"account_id" = ?`, r.args.AccountId).
+		Where(`"simplefin_transaction_id" IN (?)`, bun.In(ids)).
+		Exec(ctx)
+	if err != nil {
+		r.log.ErrorContext(ctx, "failed to remove SimpleFIN transactions for link", "err", err)
+		panic(errors.Wrap(err, "failed to remove SimpleFIN transactions for link"))
+	}
+
+	affected, _ := result.RowsAffected()
+	r.log.InfoContext(ctx, "removed SimpleFIN transaction(s)", "removed", affected)
 }
 
 func (r *removeLinkJob) getPlaidTransactionsToRemove(
@@ -319,6 +371,47 @@ func (r *removeLinkJob) removeLunchFlowBankAccounts(
 	r.log.InfoContext(ctx, "removed Lunch Flow bank account(s)", "removed", affected)
 }
 
+func (r *removeLinkJob) getSimpleFinBankAccountsToRemove(
+	ctx context.Context,
+) []models.ID[models.SimpleFinBankAccount] {
+	ids := make([]models.ID[models.SimpleFinBankAccount], 0)
+	err := r.db.NewSelect().Model(&models.SimpleFinBankAccount{}).
+		Join(`INNER JOIN "links" AS "link"`).
+		JoinOn(`"link"."simplefin_link_id" = "simplefin_bank_account"."simplefin_link_id"`).
+		JoinOn(`"link"."account_id" = "simplefin_bank_account"."account_id"`).
+		Where(`"simplefin_bank_account"."account_id" = ?`, r.args.AccountId).
+		Where(`"link"."account_id" = ?`, r.args.AccountId).
+		Where(`"link"."link_id" = ?`, r.args.LinkId).
+		Column("simplefin_bank_account.simplefin_bank_account_id").
+		Scan(ctx, &ids)
+	if err != nil {
+		panic(errors.Wrap(err, "failed to find SimpleFIN bank accounts to remove"))
+	}
+
+	return ids
+}
+
+func (r *removeLinkJob) removeSimpleFinBankAccounts(
+	ctx context.Context,
+	ids []models.ID[models.SimpleFinBankAccount],
+) {
+	if len(ids) == 0 {
+		return
+	}
+
+	result, err := r.db.NewDelete().Model(&models.SimpleFinBankAccount{}).
+		Where(`"account_id" = ?`, r.args.AccountId).
+		Where(`"simplefin_bank_account_id" IN (?)`, bun.In(ids)).
+		Exec(ctx)
+	if err != nil {
+		r.log.ErrorContext(ctx, "failed to remove SimpleFIN bank accounts for link", "err", err)
+		panic(errors.Wrap(err, "failed to remove SimpleFIN bank accounts for link"))
+	}
+
+	affected, _ := result.RowsAffected()
+	r.log.InfoContext(ctx, "removed SimpleFIN bank account(s)", "removed", affected)
+}
+
 func (r *removeLinkJob) getPlaidBankAccountsToRemove(
 	ctx context.Context,
 	bankAccountIds []models.ID[models.BankAccount],
@@ -443,21 +536,65 @@ func (r *removeLinkJob) removeLunchFlowLinks(
 	r.log.InfoContext(ctx, "removed Lunch Flow link(s)", "removed", affected)
 }
 
+func (r *removeLinkJob) getSimpleFinLinksToRemove(
+	ctx context.Context,
+) []models.ID[models.SimpleFinLink] {
+	ids := make([]models.ID[models.SimpleFinLink], 0)
+	err := r.db.NewSelect().Model(&models.SimpleFinLink{}).
+		Join(`INNER JOIN "links" AS "link"`).
+		JoinOn(`"simplefin_link"."simplefin_link_id" = "link"."simplefin_link_id"`).
+		JoinOn(`"simplefin_link"."account_id" = "link"."account_id"`).
+		Where(`"simplefin_link"."account_id" = ?`, r.args.AccountId).
+		Where(`"link"."link_id" = ?`, r.args.LinkId).
+		Column("simplefin_link.simplefin_link_id").
+		Scan(ctx, &ids)
+	if err != nil {
+		panic(errors.Wrap(err, "failed to find SimpleFIN links to remove"))
+	}
+
+	return ids
+}
+
+func (r *removeLinkJob) removeSimpleFinLinks(
+	ctx context.Context,
+	ids []models.ID[models.SimpleFinLink],
+) {
+	if len(ids) == 0 {
+		return
+	}
+
+	result, err := r.db.NewDelete().Model(&models.SimpleFinLink{}).
+		Where(`"account_id" = ?`, r.args.AccountId).
+		Where(`"simplefin_link_id" IN (?)`, bun.In(ids)).
+		Exec(ctx)
+	if err != nil {
+		r.log.ErrorContext(ctx, "failed to remove SimpleFIN links for link", "err", err)
+		panic(errors.Wrap(err, "failed to remove SimpleFIN links for link"))
+	}
+
+	affected, _ := result.RowsAffected()
+	r.log.InfoContext(ctx, "removed SimpleFIN link(s)", "removed", affected)
+}
+
 func (r *removeLinkJob) getSecretsToRemove(
 	ctx context.Context,
 ) []models.ID[models.Secret] {
 	ids := make([]models.ID[models.Secret], 0)
 	err := r.db.NewSelect().Model(&models.Secret{}).
-		// The secret can be associated with either a Plaid link or a Lunch Flow
-		// link. But must be associated with the desired link from the arguments!
+		// The secret can be associated with a Plaid link, a Lunch Flow link or a
+		// SimpleFIN link. But must be associated with the desired link from the
+		// arguments!
 		Join(`LEFT JOIN "plaid_links" as "plaid_link"`).
 		JoinOn(`"plaid_link"."secret_id" = "secret"."secret_id"`).
 		JoinOn(`"plaid_link"."account_id" = "secret"."account_id"`).
 		Join(`LEFT JOIN "lunch_flow_links" as "lunch_flow_link"`).
 		JoinOn(`"lunch_flow_link"."secret_id" = "secret"."secret_id"`).
 		JoinOn(`"lunch_flow_link"."account_id" = "secret"."account_id"`).
+		Join(`LEFT JOIN "simplefin_links" as "simplefin_link"`).
+		JoinOn(`"simplefin_link"."secret_id" = "secret"."secret_id"`).
+		JoinOn(`"simplefin_link"."account_id" = "secret"."account_id"`).
 		Join(`INNER JOIN "links" AS "link"`).
-		JoinOn(`("plaid_link"."plaid_link_id" = "link"."plaid_link_id" AND "plaid_link"."account_id" = "link"."account_id") OR ("lunch_flow_link"."lunch_flow_link_id" = "link"."lunch_flow_link_id" AND "lunch_flow_link"."account_id" = "link"."account_id")`).
+		JoinOn(`("plaid_link"."plaid_link_id" = "link"."plaid_link_id" AND "plaid_link"."account_id" = "link"."account_id") OR ("lunch_flow_link"."lunch_flow_link_id" = "link"."lunch_flow_link_id" AND "lunch_flow_link"."account_id" = "link"."account_id") OR ("simplefin_link"."simplefin_link_id" = "link"."simplefin_link_id" AND "simplefin_link"."account_id" = "link"."account_id")`).
 		Where(`"link"."account_id" = ?`, r.args.AccountId).
 		Where(`"link"."link_id" = ?`, r.args.LinkId).
 		Column("secret.secret_id").

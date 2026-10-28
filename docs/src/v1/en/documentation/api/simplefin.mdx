@@ -53,22 +53,22 @@ secret storage when the setup token is claimed and doesn't come back out.
 
 These are the accounts monetr found on your SimpleFIN Bridge. They aren't monetr bank accounts yet, they're candidates.
 
-| Attribute                | Type          | Description                                                                                                                                         |
-| ------------------------ | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `simpleFinBankAccountId` | string (ulid) | Identifies the candidate account.                                                                                                                   |
-| `simpleFinLinkId`        | string (ulid) | The connection it came from.                                                                                                                        |
-| `simpleFinId`            | string        | The account's ID on the SimpleFIN side. Not a monetr ULID, and it's only unique within its `connectionId`.                                          |
-| `connectionId`           | string        | The SimpleFIN connection (the bank login on your Bridge) the account belongs to.                                                                    |
-| `name`                   | string        | The account name.                                                                                                                                   |
-| `institutionName`        | string        | The bank, according to SimpleFIN. If SimpleFIN didn't say which connection it's from, this is just the account name.                                |
-| `currency`               | string        | ISO 4217 code. Accounts SimpleFIN reports in a custom currency, like reward points, are skipped and never show up here.                             |
-| `status`                 | string        | `active` once you've added it, `inactive` if you haven't or you archived it.                                                                        |
-| `currentBalance`         | integer       | The balance according to SimpleFIN, in the currency's smallest unit.                                                                                |
-| `availableBalance`       | integer       | The available balance, in the currency's smallest unit. SimpleFIN doesn't always send one, when it doesn't this is the same as `currentBalance`.     |
-| `createdAt`              | timestamp     | When monetr first saw it.                                                                                                                           |
-| `createdBy`              | string (ulid) | The user whose refresh discovered it.                                                                                                               |
-| `updatedAt`              | timestamp     | When the record last changed.                                                                                                                       |
-| `deletedAt`              | timestamp     | When it was removed. Absent normally.                                                                                                               |
+| Attribute                | Type          | Description                                                                                                                                      |
+| ------------------------ | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `simpleFinBankAccountId` | string (ulid) | Identifies the candidate account. Pass this to [Create a bank account](./bank_accounts#create-a-bank-account).                                   |
+| `simpleFinLinkId`        | string (ulid) | The connection it came from.                                                                                                                     |
+| `simpleFinId`            | string        | The account's ID on the SimpleFIN side. Not a monetr ULID, and it's only unique within its `connectionId`.                                       |
+| `connectionId`           | string        | The SimpleFIN connection (the bank login on your Bridge) the account belongs to.                                                                 |
+| `name`                   | string        | The account name.                                                                                                                                |
+| `institutionName`        | string        | The bank, according to SimpleFIN. If SimpleFIN didn't say which connection it's from, this is just the account name.                             |
+| `currency`               | string        | ISO 4217 code. Accounts SimpleFIN reports in a custom currency, like reward points, are skipped and never show up here.                          |
+| `status`                 | string        | `active` once you've added it, `inactive` if you haven't or you archived it.                                                                     |
+| `currentBalance`         | integer       | The balance according to SimpleFIN, in the currency's smallest unit.                                                                             |
+| `availableBalance`       | integer       | The available balance, in the currency's smallest unit. SimpleFIN doesn't always send one, when it doesn't this is the same as `currentBalance`. |
+| `createdAt`              | timestamp     | When monetr first saw it.                                                                                                                        |
+| `createdBy`              | string (ulid) | The user whose refresh discovered it.                                                                                                            |
+| `updatedAt`              | timestamp     | When the record last changed.                                                                                                                    |
+| `deletedAt`              | timestamp     | When it was removed. Absent normally.                                                                                                            |
 
 ## <Badge type="info">GET</Badge> List SimpleFIN connections
 
@@ -287,6 +287,9 @@ curl --request GET \
   }
 ]
 ```
+
+Take `simpleFinBankAccountId` from here and pass it to [create a bank account](./bank_accounts#create-a-bank-account)
+along with the `linkId` of the monetr link, which flips this account's `status` to `active`.
 
 ### Errors
 

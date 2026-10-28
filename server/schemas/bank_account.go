@@ -40,6 +40,13 @@ var (
 			),
 		).Required(validators.Optional),
 		validation.Key(
+			"simpleFinBankAccountId",
+			validation.OneOf(
+				validation.Nil,
+				ValidID[models.SimpleFinBankAccount](),
+			),
+		).Required(validators.Optional),
+		validation.Key(
 			"currency",
 			// This one doesn't handle nil because IF the field is specified then it
 			// needs to be valid.

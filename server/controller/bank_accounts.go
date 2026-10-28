@@ -110,7 +110,8 @@ func (c *Controller) postBankAccounts(ctx *echo.Context) error {
 	bankAccount.LastUpdated = c.Clock.Now().UTC()
 
 	// Bank accounts can only be created via the API on manual links or on Lunch
-	// Flow or other simple integration links. Validate this before proceeding.
+	// Flow, SimpleFIN or other simple integration links. Validate this before
+	// proceeding.
 	link, err := repo.GetLink(c.getContext(ctx), bankAccount.LinkId)
 	if err != nil {
 		return c.wrapPgError(ctx, err, "Could not validate link allows bank account creation")
@@ -157,6 +158,44 @@ func (c *Controller) postBankAccounts(ctx *echo.Context) error {
 		); err != nil {
 			return c.wrapPgError(ctx, err, "Failed to update Lunch Flow bank account")
 		}
+	case SimpleFinLinkType:
+		if bankAccount.SimpleFinBankAccountId == nil ||
+			bankAccount.SimpleFinBankAccountId.IsZero() {
+			return c.badRequest(
+				ctx,
+				"SimpleFIN Bank Account ID required to create a bank account for this link",
+			)
+		}
+
+		if link.SimpleFinLinkId == nil || link.SimpleFinLinkId.IsZero() {
+			return c.badRequest(
+				ctx,
+				"Link ID does not reference a valid SimpleFIN link",
+			)
+		}
+
+		simpleFinBankAccount, err := repo.GetSimpleFinBankAccountForSimpleFinLink(
+			c.getContext(ctx),
+			*link.SimpleFinLinkId,
+			*bankAccount.SimpleFinBankAccountId,
+		)
+		if err != nil {
+			if errors.Cause(err) == sql.ErrNoRows {
+				return c.badRequest(
+					ctx,
+					"SimpleFIN Bank Account ID must belong to the specified link",
+				)
+			}
+			return c.wrapPgError(ctx, err, "Failed to retrieve SimpleFIN bank account")
+		}
+		bankAccount.OriginalName = simpleFinBankAccount.Name
+		simpleFinBankAccount.Status = SimpleFinBankAccountStatusActive
+		if err := repo.UpdateSimpleFinBankAccount(
+			c.getContext(ctx),
+			simpleFinBankAccount,
+		); err != nil {
+			return c.wrapPgError(ctx, err, "Failed to update SimpleFIN bank account")
+		}
 	case ManualLinkType:
 	default:
 		// Otherwise if we are not a manual link then we simply don't allow bank
@@ -202,7 +241,10 @@ func (c *Controller) patchBankAccount(ctx *echo.Context) error {
 	}
 
 	schema := schemas.PatchBankAccount
-	if existingBankAccount.LunchFlowBankAccountId != nil {
+	// SimpleFIN doesn't tell us the account type either, so the same rules as
+	// Lunch Flow apply
+	if existingBankAccount.LunchFlowBankAccountId != nil ||
+		existingBankAccount.SimpleFinBankAccountId != nil {
 		schema = schemas.PatchLunchFlowBankAccount
 	} else if isManual {
 		schema = schemas.PatchManualBankAccount
@@ -259,6 +301,16 @@ func (c *Controller) deleteBankAccount(ctx *echo.Context) error {
 			existingBankAccount.LunchFlowBankAccount,
 		); err != nil {
 			return c.wrapPgError(ctx, err, "Failed to update Lunch Flow bank account")
+		}
+	} else if existingBankAccount.SimpleFinBankAccountId != nil {
+		// Same as Lunch Flow, keep it around until the link itself is removed
+		existingBankAccount.SimpleFinBankAccount.Status = SimpleFinBankAccountStatusInactive
+		existingBankAccount.SimpleFinBankAccount.DeletedAt = new(c.Clock.Now())
+		if err := repo.UpdateSimpleFinBankAccount(
+			c.getContext(ctx),
+			existingBankAccount.SimpleFinBankAccount,
+		); err != nil {
+			return c.wrapPgError(ctx, err, "Failed to update SimpleFIN bank account")
 		}
 	}
 
