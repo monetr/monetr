@@ -49,6 +49,27 @@ secret storage when the setup token is claimed and doesn't come back out.
 | `deactivated` | Turned off by hand or on its way out. Background jobs skip it.                                                                                                                                                                                                   |
 | `error`       | SimpleFIN said the access URL doesn't work anymore, like the token was revoked or the Bridge needs to be paid for. monetr stops syncing it on its own because every request counts against your daily quota. A successful manual sync moves it back to `active`. |
 
+## The SimpleFIN bank account object
+
+These are the accounts monetr found on your SimpleFIN Bridge. They aren't monetr bank accounts yet, they're candidates.
+
+| Attribute                | Type          | Description                                                                                                                                         |
+| ------------------------ | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `simpleFinBankAccountId` | string (ulid) | Identifies the candidate account.                                                                                                                   |
+| `simpleFinLinkId`        | string (ulid) | The connection it came from.                                                                                                                        |
+| `simpleFinId`            | string        | The account's ID on the SimpleFIN side. Not a monetr ULID, and it's only unique within its `connectionId`.                                          |
+| `connectionId`           | string        | The SimpleFIN connection (the bank login on your Bridge) the account belongs to.                                                                    |
+| `name`                   | string        | The account name.                                                                                                                                   |
+| `institutionName`        | string        | The bank, according to SimpleFIN. If SimpleFIN didn't say which connection it's from, this is just the account name.                                |
+| `currency`               | string        | ISO 4217 code. Accounts SimpleFIN reports in a custom currency, like reward points, are skipped and never show up here.                             |
+| `status`                 | string        | `active` once you've added it, `inactive` if you haven't or you archived it.                                                                        |
+| `currentBalance`         | integer       | The balance according to SimpleFIN, in the currency's smallest unit.                                                                                |
+| `availableBalance`       | integer       | The available balance, in the currency's smallest unit. SimpleFIN doesn't always send one, when it doesn't this is the same as `currentBalance`.     |
+| `createdAt`              | timestamp     | When monetr first saw it.                                                                                                                           |
+| `createdBy`              | string (ulid) | The user whose refresh discovered it.                                                                                                               |
+| `updatedAt`              | timestamp     | When the record last changed.                                                                                                                       |
+| `deletedAt`              | timestamp     | When it was removed. Absent normally.                                                                                                               |
+
 ## <Badge type="info">GET</Badge> List SimpleFIN connections
 
 Returns every SimpleFIN connection on your account.
@@ -182,3 +203,94 @@ curl --request POST \
 | 400    | The setup token is missing, isn't a valid setup token, has already been used, or is for a server that isn't allowed. Also if the name is missing.                     |
 | 404    | SimpleFIN isn't enabled on this server.                                                                                                                               |
 | 500    | SimpleFIN couldn't be reached or the claim failed for some other reason, or monetr couldn't save the connection. If it's the last one, you'll need a new setup token. |
+
+## <Badge type="tip">POST</Badge> Refresh available bank accounts
+
+Asks your SimpleFIN Bridge what accounts it has and reconciles that against what monetr already knows. New accounts get
+added. Existing ones are left alone, and nothing is ever removed.
+
+This only asks SimpleFIN for balances, not transactions. It still counts as one of the roughly 24 requests SimpleFIN
+lets you make each day though, so don't call it in a loop.
+
+Whatever errors SimpleFIN sends back with the accounts get saved to the connection's `lastErrors`, replacing whatever
+was there before. A refresh never changes the connection's `status`, even when it fails.
+
+**In the app:** Not used by the app yet.
+
+```http
+POST /api/simplefin/link/:simpleFinLinkId/bank_accounts/refresh
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute         | Type          | Required | Description                |
+| ----------------- | ------------- | -------- | -------------------------- |
+| `simpleFinLinkId` | string (ulid) | Yes      | The connection to refresh. |
+
+Returns **204** with no body. To see what it found, [list the bank accounts](#list-available-bank-accounts) afterwards.
+
+### Errors
+
+| Status | When                                                                                                                                                     |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 400    | `simpleFinLinkId` is malformed, SimpleFIN says your Bridge needs to be paid for, or SimpleFIN denied access. Denied usually means the token was revoked. |
+| 404    | No such connection, or SimpleFIN isn't enabled on this server.                                                                                           |
+| 500    | monetr couldn't reach SimpleFIN, or SimpleFIN failed for some other reason. The error from SimpleFIN is included.                                        |
+
+SimpleFIN uses 402 when payment is required, but monetr sends that back as a 400 because monetr already uses 402 for its
+own billing.
+
+## <Badge type="info">GET</Badge> List available bank accounts
+
+Returns the accounts monetr found on a SimpleFIN connection, whether or not you've added them to your budget yet.
+
+**In the app:** Not used by the app yet.
+
+```http
+GET /api/simplefin/link/:simpleFinLinkId/bank_accounts
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute         | Type          | Required | Description                             |
+| ----------------- | ------------- | -------- | --------------------------------------- |
+| `simpleFinLinkId` | string (ulid) | Yes      | The connection whose accounts you want. |
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/simplefin/link/sfx_01j7k3m9pw2rx8vt5nqdbe4chz/bank_accounts" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+[
+  {
+    "simpleFinBankAccountId": "sbac_01j7k4p2vx8we5rt9mnqbd3chf",
+    "simpleFinLinkId": "sfx_01j7k3m9pw2rx8vt5nqdbe4chz",
+    "simpleFinId": "ACT-0d5a1e7c-63b2-4f0e-9a8d-2c41f6b7e913",
+    "connectionId": "CON-7b2e9f14-5c3a-4d81-b6e0-91a4c8d2f357",
+    "name": "Everyday Checking",
+    "institutionName": "Lakeside Credit Union",
+    "currency": "USD",
+    "status": "inactive",
+    "currentBalance": 129544,
+    "availableBalance": 127012,
+    "createdAt": "2024-07-19T14:24:11.663Z",
+    "createdBy": "user_01fpwx3sdm7kb1s0jbrbvbdw4c",
+    "updatedAt": "2024-07-19T14:24:11.663Z"
+  }
+]
+```
+
+### Errors
+
+| Status | When                                                           |
+| ------ | -------------------------------------------------------------- |
+| 400    | `simpleFinLinkId` is malformed.                                |
+| 404    | No such connection, or SimpleFIN isn't enabled on this server. |
