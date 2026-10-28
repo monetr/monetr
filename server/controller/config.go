@@ -29,6 +29,7 @@ func (c *Controller) configEndpoint(ctx *echo.Context) error {
 		PlaidEnabled            bool         `json:"plaidEnabled"`
 		LunchFlowEnabled        bool         `json:"lunchFlowEnabled"`
 		LunchFlowAllowedAPIURLs []string     `json:"lunchFlowAllowedAPIURLs"`
+		SimpleFinEnabled        bool         `json:"simpleFinEnabled"`
 		ManualEnabled           bool         `json:"manualEnabled"`
 		UploadsEnabled          bool         `json:"uploadsEnabled"`
 		ProofOfWorkEnabled      bool         `json:"proofOfWorkEnabled"`
@@ -85,6 +86,8 @@ func (c *Controller) configEndpoint(ctx *echo.Context) error {
 
 	configuration.LunchFlowEnabled = c.Configuration.LunchFlow.IsEnabled()
 	configuration.LunchFlowAllowedAPIURLs = c.Configuration.LunchFlow.AllowedApiUrls
+
+	configuration.SimpleFinEnabled = c.Configuration.SimpleFin.IsEnabled()
 
 	// Whether the UI needs to solve a challenge before the auth forms. Difficulty
 	// comes back on the challenge itself.

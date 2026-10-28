@@ -415,4 +415,12 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	lunchFlow.GET("/lunch_flow/link/:lunchFlowLinkId/bank_accounts", c.getLunchFlowLinkBankAccounts)
 	lunchFlow.POST("/lunch_flow/link/sync", c.postLunchFlowLinkSync)
 	lunchFlow.GET("/lunch_flow/link/sync/:linkId/bank_account/:bankAccountId/progress", c.getLunchFlowLinkSyncProgress)
+
+	simpleFin := billedKeyOrToken.Group("",
+		c.requireSimpleFinEnabledMiddleware,
+	)
+	// SimpleFIN Links
+	simpleFin.GET("/simplefin/link", c.getSimpleFinLinks)
+	simpleFin.POST("/simplefin/link", c.postSimpleFinLink)
+	simpleFin.GET("/simplefin/link/:simpleFinLinkId", c.getSimpleFinLink)
 }

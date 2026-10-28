@@ -15,6 +15,7 @@
   { "type": "section-header", "label": "Data In" },
   { "type": "file", "name": "uploads", "label": "Uploads and Files" },
   { "type": "file", "name": "lunch_flow", "label": "Lunch Flow" },
+  { "type": "file", "name": "simplefin", "label": "SimpleFIN" },
   { "type": "section-header", "label": "Account" },
   { "type": "file", "name": "users", "label": "Users" },
   { "type": "file", "name": "api_keys", "label": "API Keys" },

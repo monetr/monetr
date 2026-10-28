@@ -429,3 +429,18 @@ func (c *Controller) requireLunchFlowEnabledMiddleware(
 		return next(ctx)
 	}
 }
+
+// requireSimpleFinEnabledMiddleware is added before the SimpleFIN API routes
+// are registered. This makes sure that if the server is not configured to use
+// SimpleFIN then the routes are not accessible.
+func (c *Controller) requireSimpleFinEnabledMiddleware(
+	next echo.HandlerFunc,
+) echo.HandlerFunc {
+	return func(ctx *echo.Context) error {
+		if !c.Configuration.SimpleFin.IsEnabled() {
+			return c.notFound(ctx, "SimpleFIN is not enabled on this server")
+		}
+
+		return next(ctx)
+	}
+}

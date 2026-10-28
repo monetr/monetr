@@ -99,6 +99,7 @@ SMTP
 SSL
 ShipWheel
 ShoppingCart
+SimpleFIN
 StackDriver.*
 Sube
 TCP
@@ -154,6 +155,7 @@ backend
 backends
 balancer
 base32
+base64
 blocklist
 build-time
 captcha

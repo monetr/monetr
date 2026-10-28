@@ -1,0 +1,184 @@
+---
+title: "SimpleFIN API"
+description: "Connect monetr to a SimpleFIN Bridge with a setup token and manage your SimpleFIN connections from the REST API."
+---
+
+import { Badge } from "@rspress/core/theme";
+
+# SimpleFIN API
+
+SimpleFIN is another way to get bank data into monetr without going through Plaid. You get a setup token from your
+SimpleFIN Bridge, hand it to monetr, and monetr trades it for an access URL that it keeps in its secret storage.
+
+:::info Enabled by default
+These endpoints are on by default, out of the box monetr only talks to `bridge.simplefin.org`. If `simpleFin.enabled` is
+`false` in your configuration, or `simpleFin.allowedHosts` is empty, they return 404 with "SimpleFIN is not enabled on
+this server".
+:::
+
+There are two objects involved: the **SimpleFIN link**, which holds the connection to your Bridge, and the ordinary
+monetr [link](./links) that owns the bank accounts. Creating a SimpleFIN link is the first step, it starts out
+`pending`.
+
+## The SimpleFIN link object
+
+| Attribute              | Type                | Description                                                                                                                                            |
+| ---------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `simpleFinLinkId`      | string (ulid)       | Identifies the connection.                                                                                                                             |
+| `name`                 | string              | What you called it.                                                                                                                                    |
+| `apiUrl`               | string              | The SimpleFIN server monetr talks to, with the credentials taken out.                                                                                  |
+| `status`               | string              | `pending`, `active`, `deactivated` or `error`.                                                                                                         |
+| `lastErrors`           | array, nullable     | The errors SimpleFIN sent back on the last request, each with a `code`, `message`, `connectionId` and `simpleFinId`. SimpleFIN wants you to see these. |
+| `lastManualSync`       | timestamp, nullable | When someone last forced a sync.                                                                                                                       |
+| `lastSuccessfulUpdate` | timestamp, nullable | When data last actually came through.                                                                                                                  |
+| `lastAttemptedUpdate`  | timestamp, nullable | When monetr last tried to sync.                                                                                                                        |
+| `createdAt`            | timestamp           | When it was created.                                                                                                                                   |
+| `createdBy`            | string (ulid)       | The user who set it up.                                                                                                                                |
+| `updatedAt`            | timestamp           | When the record last changed.                                                                                                                          |
+| `deletedAt`            | timestamp           | When it was removed. Absent on live connections.                                                                                                       |
+
+The access URL has your SimpleFIN username and password in it, so it's never in the response. It goes into monetr's
+secret storage when the setup token is claimed and doesn't come back out.
+
+### Statuses
+
+| Status        | Meaning                                                                                                                                                                                                                                                          |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pending`     | Created but not attached to a monetr link yet. Nothing syncs. Abandoned pending connections may get cleaned up, along with their access URL.                                                                                                                     |
+| `active`      | Attached and syncing on a schedule.                                                                                                                                                                                                                              |
+| `deactivated` | Turned off by hand or on its way out. Background jobs skip it.                                                                                                                                                                                                   |
+| `error`       | SimpleFIN said the access URL doesn't work anymore, like the token was revoked or the Bridge needs to be paid for. monetr stops syncing it on its own because every request counts against your daily quota. A successful manual sync moves it back to `active`. |
+
+## <Badge type="info">GET</Badge> List SimpleFIN connections
+
+Returns every SimpleFIN connection on your account.
+
+**In the app:** Not used by the app yet.
+
+```http
+GET /api/simplefin/link
+```
+
+**Auth:** API key, subscription required.
+
+### Example
+
+```bash
+curl --request GET \
+  --url "https://my.monetr.local/api/simplefin/link" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET"
+```
+
+```json
+[
+  {
+    "simpleFinLinkId": "sfx_01j7k3m9pw2rx8vt5nqdbe4chz",
+    "name": "SimpleFIN Bridge",
+    "apiUrl": "https://bridge.simplefin.org/simplefin",
+    "status": "active",
+    "lastErrors": null,
+    "lastManualSync": "2024-08-28T19:41:02.118Z",
+    "lastSuccessfulUpdate": "2024-08-29T06:00:14.772Z",
+    "lastAttemptedUpdate": "2024-08-29T06:00:14.772Z",
+    "createdAt": "2024-07-19T14:22:38.905Z",
+    "createdBy": "user_01fpwx3sdm7kb1s0jbrbvbdw4c",
+    "updatedAt": "2024-08-29T06:00:14.772Z"
+  }
+]
+```
+
+## <Badge type="info">GET</Badge> Get a SimpleFIN connection
+
+Returns one connection.
+
+**In the app:** Not used by the app yet.
+
+```http
+GET /api/simplefin/link/:simpleFinLinkId
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute         | Type          | Required | Description              |
+| ----------------- | ------------- | -------- | ------------------------ |
+| `simpleFinLinkId` | string (ulid) | Yes      | The connection you want. |
+
+### Errors
+
+| Status | When                                                           |
+| ------ | -------------------------------------------------------------- |
+| 400    | `simpleFinLinkId` is malformed.                                |
+| 404    | No such connection, or SimpleFIN isn't enabled on this server. |
+
+## <Badge type="tip">POST</Badge> Create a SimpleFIN connection
+
+Claims a setup token and stores the access URL SimpleFIN gives back. Unlike Lunch Flow this does talk to SimpleFIN right
+away, because a setup token is only good for one claim.
+
+**In the app:** Not used by the app yet.
+
+```http
+POST /api/simplefin/link
+```
+
+**Auth:** API key, subscription required.
+
+### Body
+
+| Attribute    | Type   | Required | Description                                                                             |
+| ------------ | ------ | -------- | --------------------------------------------------------------------------------------- |
+| `name`       | string | Yes      | What to call this connection.                                                           |
+| `setupToken` | string | Yes      | The setup token from your SimpleFIN Bridge, up to 2048 characters. See the rules below. |
+
+The setup token is checked against a few rules:
+
+- It has to be a real setup token, which is a claim URL that's been base64 encoded.
+- The claim URL has to be `https` and on the server's allow list, set with `simpleFin.allowedHosts`. That's just
+  `bridge.simplefin.org` unless the operator changed it.
+- The access URL SimpleFIN sends back has to follow the same rules. If it points somewhere that isn't allowed then
+  monetr throws it away.
+- It can only be used once. Once monetr claims it, it's spent.
+
+That last one matters if something goes wrong. If the claim works but monetr fails to save the connection after that,
+the token is gone and you'll need to make a new one in your Bridge.
+
+The new connection comes back with status `pending`.
+
+### Example
+
+```bash
+curl --request POST \
+  --url "https://my.monetr.local/api/simplefin/link" \
+  --user "$MONETR_API_KEY_ID:$MONETR_API_KEY_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "name": "SimpleFIN Bridge",
+    "setupToken": "aHR0cHM6Ly9icmlkZ2Uuc2ltcGxlZmluLm9yZy9zaW1wbGVmaW4vY2xhaW0vZXhhbXBsZQ=="
+  }'
+```
+
+```json
+{
+  "simpleFinLinkId": "sfx_01j7k3m9pw2rx8vt5nqdbe4chz",
+  "name": "SimpleFIN Bridge",
+  "apiUrl": "https://bridge.simplefin.org/simplefin",
+  "status": "pending",
+  "lastErrors": null,
+  "lastManualSync": null,
+  "lastSuccessfulUpdate": null,
+  "lastAttemptedUpdate": null,
+  "createdAt": "2024-07-19T14:22:38.905Z",
+  "createdBy": "user_01fpwx3sdm7kb1s0jbrbvbdw4c",
+  "updatedAt": "2024-07-19T14:22:38.905Z"
+}
+```
+
+### Errors
+
+| Status | When                                                                                                                                                                  |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 400    | The setup token is missing, isn't a valid setup token, has already been used, or is for a server that isn't allowed. Also if the name is missing.                     |
+| 404    | SimpleFIN isn't enabled on this server.                                                                                                                               |
+| 500    | SimpleFIN couldn't be reached or the claim failed for some other reason, or monetr couldn't save the connection. If it's the last one, you'll need a new setup token. |
