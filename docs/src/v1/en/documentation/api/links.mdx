@@ -205,15 +205,16 @@ POST /api/links
 
 ### Body
 
-| Attribute         | Type                    | Required | Description                                                                                                                                                                                                            |
-| ----------------- | ----------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `institutionName` | string                  | Yes      | What to call the link. This is the label in the sidebar, so use the bank's name.                                                                                                                                       |
-| `description`     | string, nullable        | No       | A note to yourself.                                                                                                                                                                                                    |
-| `lunchFlowLinkId` | string (ulid), nullable | No       | Turns this into a Lunch Flow link instead of a manual one. The Lunch Flow link has to already exist and be in a pending status, and creating the link activates it. Leave this off unless you're wiring up Lunch Flow. |
-| `simpleFinLinkId` | string (ulid), nullable | No       | Turns this into a SimpleFIN link instead of a manual one. Same rules as `lunchFlowLinkId`, the SimpleFIN link has to already exist and be pending, and creating the link activates it. You can't send both.            |
+| Attribute         | Type             | Required | Description                                                                                                                                                                                                            |
+| ----------------- | ---------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `institutionName` | string           | Yes      | What to call the link. This is the label in the sidebar, so use the bank's name.                                                                                                                                       |
+| `description`     | string, nullable | No       | A note to yourself.                                                                                                                                                                                                    |
+| `lunchFlowLinkId` | string (ulid)    | No       | Turns this into a Lunch Flow link instead of a manual one. The Lunch Flow link has to already exist and be in a pending status, and creating the link activates it. Leave this off unless you're wiring up Lunch Flow. |
+| `simpleFinLinkId` | string (ulid)    | No       | Turns this into a SimpleFIN link instead of a manual one. Same rules as `lunchFlowLinkId`, the SimpleFIN link has to already exist and be pending, and creating the link activates it. You can't send both.            |
 
 `linkType` is not something you send. Leave `lunchFlowLinkId` and `simpleFinLinkId` off and you get a manual link. Send
-one of them and you get a Lunch Flow or SimpleFIN link. Plaid links can't be made here at all.
+one of them and you get a Lunch Flow or SimpleFIN link. Leave them off rather than sending null, null counts as
+sending it and gets a 400. Plaid links can't be made here at all.
 
 ### Example
 
@@ -246,6 +247,7 @@ curl --request POST \
 **[v1.22.0](https://github.com/monetr/monetr/releases/tag/v1.22.0)**
 
 - Added `simpleFinLinkId`.
+- `lunchFlowLinkId` can't be null anymore, leave it off for a manual link.
 
 :::
 

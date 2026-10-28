@@ -90,7 +90,11 @@ func TestPostLink(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.linkType").String().IsEqual("key not expected")
+		// The create schema is a union of manual, Lunch Flow and SimpleFIN links in
+		// that order, so the problems come back per variant. This request was
+		// meant to be a manual link so check the first one.
+		response.JSON().Path("$.problems.oneOf").Array().Length().IsEqual(3)
+		response.JSON().Path("$.problems.oneOf[0].linkType").String().IsEqual("key not expected")
 	})
 
 	t.Run("institution name is too long", func(t *testing.T) {
@@ -106,7 +110,7 @@ func TestPostLink(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.institutionName").String().IsEqual("Name must be between 1 and 300 characters")
+		response.JSON().Path("$.problems.oneOf[0].institutionName").String().IsEqual("Name must be between 1 and 300 characters")
 	})
 
 	t.Run("name not provided", func(t *testing.T) {
@@ -122,7 +126,7 @@ func TestPostLink(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.institutionName").String().IsEqual("Name is required")
+		response.JSON().Path("$.problems.oneOf[0].institutionName").String().IsEqual("Name is required")
 	})
 
 	t.Run("description is too long", func(t *testing.T) {
@@ -141,8 +145,9 @@ func TestPostLink(t *testing.T) {
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
 		// The description is now validated as one of a nil value or a valid text
 		// field, so a too long description fails both branches and the problem
-		// comes back as a oneOf envelope rather than a flat string.
-		response.JSON().Path("$.problems.description.oneOf").Array().ConsistsOf(
+		// comes back as a oneOf envelope rather than a flat string. That sits
+		// inside the manual variant of the link schema union.
+		response.JSON().Path("$.problems.oneOf[0].description.oneOf").Array().ConsistsOf(
 			"must be nil",
 			"Must be between 1 and 300 characters",
 		)
@@ -193,12 +198,10 @@ func TestPostLink(t *testing.T) {
 
 		// A malformed lunch flow link Id is now caught by the schema before we ever
 		// try to look it up, so we get a validation error instead of a not found.
+		// The Lunch Flow variant is the second one in the union.
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.lunchFlowLinkId.oneOf").Array().ConsistsOf(
-			"must be nil",
-			"id should be between 28 and 32 characters",
-		)
+		response.JSON().Path("$.problems.oneOf[1].lunchFlowLinkId").String().IsEqual("id should be between 28 and 32 characters")
 	})
 
 	t.Run("lunch flow link does not exist", func(t *testing.T) {
@@ -356,8 +359,12 @@ func TestPostLink(t *testing.T) {
 			}).
 			Expect()
 
+		// Neither the Lunch Flow nor the SimpleFIN variant allows the other's link
+		// Id, so this never makes it past the schema.
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("Cannot create a link for both Lunch Flow and SimpleFIN")
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.oneOf[1].simpleFinLinkId").String().IsEqual("key not expected")
+		response.JSON().Path("$.problems.oneOf[2].lunchFlowLinkId").String().IsEqual("key not expected")
 	})
 
 	t.Run("simplefin is not enabled", func(t *testing.T) {

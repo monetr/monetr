@@ -7,28 +7,54 @@ import (
 )
 
 var (
-	CreateLink = validation.Map(
-		validation.Key("institutionName",
-			Name(),
-		).Required(Require),
-		validation.Key("description",
-			validation.OneOf(
-				validation.Nil,
-				TextField(),
-			),
-		).Required(validators.Optional),
-		validation.Key("lunchFlowLinkId",
-			validation.OneOf(
-				validation.Nil,
+	// CreateLink is a union of the three kinds of links that can be created
+	// directly. A key is forbidden in a variant by leaving it out, so a manual
+	// link can't have either upstream link Id and you can never send both.
+	CreateLink = validation.OneOf(
+		// Manual link schema
+		validation.Map(
+			validation.Key("institutionName",
+				Name(),
+			).Required(Require),
+			validation.Key("description",
+				validation.OneOf(
+					validation.Nil,
+					TextField(),
+				),
+			).Required(validators.Optional),
+		),
+		// Lunch Flow link schema
+		validation.Map(
+			validation.Key("institutionName",
+				Name(),
+			).Required(Require),
+			validation.Key("description",
+				validation.OneOf(
+					validation.Nil,
+					TextField(),
+				),
+			).Required(validators.Optional),
+			validation.Key("lunchFlowLinkId",
 				ValidID[models.LunchFlowLink](),
-			),
-		).Required(validators.Optional),
-		validation.Key("simpleFinLinkId",
-			validation.OneOf(
-				validation.Nil,
+				validation.Required,
+			).Required(Require),
+		),
+		// SimpleFIN link schema
+		validation.Map(
+			validation.Key("institutionName",
+				Name(),
+			).Required(Require),
+			validation.Key("description",
+				validation.OneOf(
+					validation.Nil,
+					TextField(),
+				),
+			).Required(validators.Optional),
+			validation.Key("simpleFinLinkId",
 				ValidID[models.SimpleFinLink](),
-			),
-		).Required(validators.Optional),
+				validation.Required,
+			).Required(Require),
+		),
 	)
 
 	PatchLink = validation.Map(

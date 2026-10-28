@@ -55,16 +55,13 @@ func (c *Controller) postLinks(ctx *echo.Context) error {
 		return err
 	}
 
-	if link.LunchFlowLinkId != nil && link.SimpleFinLinkId != nil {
-		return c.badRequest(ctx, "Cannot create a link for both Lunch Flow and SimpleFIN")
-	}
-
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	// If the user is creating a lunch flow link then we need to validate that the
-	// link is valid and can be activated. If it is then activate it as part of
-	// this creation step.
-	if link.LunchFlowLinkId != nil {
+	switch {
+	case link.LunchFlowLinkId != nil:
+		// If the user is creating a lunch flow link then we need to validate that
+		// the link is valid and can be activated. If it is then activate it as part
+		// of this creation step.
 		if !c.Configuration.LunchFlow.Enabled {
 			return c.notFound(ctx, "Lunch Flow is not enabled on this server")
 		}
@@ -89,11 +86,9 @@ func (c *Controller) postLinks(ctx *echo.Context) error {
 		); err != nil {
 			return c.wrapPgError(ctx, err, "Failed to update Lunch Flow link")
 		}
-	}
-
-	// Same thing for SimpleFIN, the SimpleFIN link needs to be pending and gets
-	// activated here.
-	if link.SimpleFinLinkId != nil {
+	case link.SimpleFinLinkId != nil:
+		// Same thing for SimpleFIN, the SimpleFIN link needs to be pending and gets
+		// activated here.
 		if !c.Configuration.SimpleFin.IsEnabled() {
 			return c.notFound(ctx, "SimpleFIN is not enabled on this server")
 		}
