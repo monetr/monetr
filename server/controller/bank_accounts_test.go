@@ -919,7 +919,7 @@ func TestPostBankAccount(t *testing.T) {
 			// the alphabetical rule that the new currency schema added.
 			response.Status(http.StatusBadRequest)
 			response.JSON().Path("$.error").String().IsEqual("Invalid request")
-			response.JSON().Path("$.problems.currency").String().IsEqual("Currency must be alphabetical characters only")
+			response.JSON().Path("$.problems.oneOf[0].currency").String().IsEqual("Currency must be alphabetical characters only")
 		}
 	})
 
@@ -948,7 +948,7 @@ func TestPostBankAccount(t *testing.T) {
 			// link doesn't exist at all.
 			response.Status(http.StatusBadRequest)
 			response.JSON().Path("$.error").IsEqual("Invalid request")
-			response.JSON().Path("$.problems.linkId").String().IsEqual("required key is missing")
+			response.JSON().Path("$.problems.oneOf[0].linkId").String().IsEqual("required key is missing")
 		}
 	})
 
@@ -1000,7 +1000,7 @@ func TestPostBankAccount(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.linkId").String().IsEqual("id does not match format link_...")
+		response.JSON().Path("$.problems.oneOf[0].linkId").String().IsEqual("id does not match format link_...")
 	})
 
 	t.Run("mask must be exactly four digits", func(t *testing.T) {
@@ -1024,7 +1024,7 @@ func TestPostBankAccount(t *testing.T) {
 		// Mask is a one of null or a real mask, and the one of error now serializes as
 		// a structured envelope with a branch per alternative. We only care that the
 		// four digit rule shows up as the reason the real mask branch failed.
-		response.JSON().Path("$.problems.mask.oneOf").Array().ContainsAll("Mask must be exactly 4 digits")
+		response.JSON().Path("$.problems.oneOf[0].mask.oneOf").Array().ContainsAll("Mask must be exactly 4 digits")
 	})
 
 	t.Run("mask can be explicitly null", func(t *testing.T) {
@@ -1082,7 +1082,7 @@ func TestPostBankAccount(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.currency").String().IsEqual("Currency must be all upper case")
+		response.JSON().Path("$.problems.oneOf[0].currency").String().IsEqual("Currency must be all upper case")
 	})
 
 	t.Run("currency must be exactly three characters", func(t *testing.T) {
@@ -1101,7 +1101,7 @@ func TestPostBankAccount(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.currency").String().IsEqual("Currency must be exactly 3 characters long")
+		response.JSON().Path("$.problems.oneOf[0].currency").String().IsEqual("Currency must be exactly 3 characters long")
 	})
 
 	t.Run("limit balance cannot be negative", func(t *testing.T) {
@@ -1122,7 +1122,7 @@ func TestPostBankAccount(t *testing.T) {
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
 		// Same structured one of envelope as the mask, we just want the negative branch
 		// message to be present.
-		response.JSON().Path("$.problems.limitBalance.oneOf").Array().ContainsAll("Limit balance cannot be negative")
+		response.JSON().Path("$.problems.oneOf[0].limitBalance.oneOf").Array().ContainsAll("Limit balance cannot be negative")
 	})
 
 	t.Run("balance must be an integer", func(t *testing.T) {
@@ -1141,7 +1141,7 @@ func TestPostBankAccount(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.currentBalance").String().IsEqual("must be an integer")
+		response.JSON().Path("$.problems.oneOf[0].currentBalance").String().IsEqual("must be an integer")
 	})
 
 	t.Run("merges non-default fields over the controller defaults", func(t *testing.T) {

@@ -310,14 +310,15 @@ curl --request POST \
 **[v1.22.0](https://github.com/monetr/monetr/releases/tag/v1.22.0)**
 
 - Added `simpleFinBankAccountId`, bank accounts can now be created on SimpleFIN links.
+- Sending both `lunchFlowBankAccountId` and `simpleFinBankAccountId`, or sending either one as null, is now a 400.
 
 :::
 
 ### Errors
 
-| Status | When                                                                                                                                                                                              |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 400    | The link is a Plaid link, `name` is missing, the link is Lunch Flow or SimpleFIN and you didn't send a valid `lunchFlowBankAccountId` or `simpleFinBankAccountId`, or `limitBalance` is negative. |
+| Status | When                                                                                                                                                                                                                     |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 400    | The link is a Plaid link, `name` is missing, the link is Lunch Flow or SimpleFIN and you didn't send a valid `lunchFlowBankAccountId` or `simpleFinBankAccountId`, you sent both of them, or `limitBalance` is negative. |
 
 ## <Badge type="warning">PATCH</Badge> Update a bank account
 
