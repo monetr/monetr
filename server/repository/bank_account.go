@@ -20,6 +20,7 @@ func (r *repositoryBase) GetBankAccounts(
 	err := r.txn.NewSelect().Model(&result).
 		Relation("PlaidBankAccount").
 		Relation("LunchFlowBankAccount").
+		Relation("SimpleFinBankAccount").
 		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."deleted_at" IS NULL`).
 		Scan(span.Context())
@@ -66,6 +67,7 @@ func (r *repositoryBase) GetBankAccountsByLinkId(
 	err := r.txn.NewSelect().Model(&result).
 		Relation("PlaidBankAccount").
 		Relation("LunchFlowBankAccount").
+		Relation("SimpleFinBankAccount").
 		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."link_id" = ? `, linkId).
 		Scan(span.Context())
@@ -144,6 +146,7 @@ func (r *repositoryBase) GetBankAccount(
 	err := r.txn.NewSelect().Model(&result).
 		Relation("PlaidBankAccount").
 		Relation("LunchFlowBankAccount").
+		Relation("SimpleFinBankAccount").
 		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."bank_account_id" = ? `, bankAccountId).
 		Scan(span.Context())

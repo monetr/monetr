@@ -2,12 +2,14 @@ package fixtures
 
 import (
 	"fmt"
+	"net/url"
 	"testing"
 
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/consts"
+	"github.com/monetr/monetr/server/internal/mock_simplefin"
 	"github.com/monetr/monetr/server/internal/testutils"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
@@ -139,6 +141,77 @@ func GivenIHaveALunchFlowLink(t *testing.T, clock clock.Clock, user User) Link {
 		LunchFlowLinkId: &lunchFlowLink.LunchFlowLinkId,
 		LunchFlowLink:   &lunchFlowLink,
 		InstitutionName: lunchFlowLink.Name,
+		CreatedAt:       clock.Now(),
+		CreatedBy:       user.UserId,
+		CreatedByUser:   &user,
+		UpdatedAt:       clock.Now(),
+	}
+
+	require.NoError(
+		t,
+		repo.CreateLink(t.Context(), &link),
+		"must be able to seed link",
+	)
+
+	return link
+}
+
+func GivenIHaveASimpleFinLink(t *testing.T, clock clock.Clock, user User) Link {
+	log := testutils.GetLog(t)
+	db := testutils.GetPgDatabase(t)
+
+	repo := repository.NewRepositoryFromSession(
+		clock,
+		user.UserId,
+		user.AccountId,
+		db,
+		log,
+	)
+	secretsRepo := repository.NewSecretsRepository(
+		log,
+		clock,
+		db,
+		secrets.NewPlaintextKMS(),
+		user.AccountId,
+	)
+
+	secret := repository.SecretData{
+		Kind:  SecretKindSimpleFin,
+		Value: mock_simplefin.AccessUrl(t),
+	}
+	err := secretsRepo.Store(t.Context(), &secret)
+	require.NoError(t, err, "must be able to store simplefin access url secret")
+
+	simpleFinLink := SimpleFinLink{
+		AccountId: user.AccountId,
+		SecretId:  secret.SecretId,
+		Name:      fmt.Sprintf("SimpleFIN %s", gofakeit.City()),
+		// The real API URL never has the credentials in it, those only live in the
+		// secret.
+		ApiUrl: (&url.URL{
+			Scheme: "https",
+			Host:   config.DefaultSimpleFinHost,
+			Path:   "/simplefin",
+		}).String(),
+		Status:               SimpleFinLinkStatusActive,
+		LastManualSync:       nil,
+		LastSuccessfulUpdate: nil,
+		LastAttemptedUpdate:  nil,
+		CreatedBy:            user.UserId,
+	}
+	require.NoError(
+		t,
+		repo.CreateSimpleFinLink(t.Context(), &simpleFinLink),
+		"must be able to create simplefin link",
+	)
+
+	link := Link{
+		AccountId:       user.AccountId,
+		Account:         user.Account,
+		LinkType:        SimpleFinLinkType,
+		SimpleFinLinkId: &simpleFinLink.SimpleFinLinkId,
+		SimpleFinLink:   &simpleFinLink,
+		InstitutionName: simpleFinLink.Name,
 		CreatedAt:       clock.Now(),
 		CreatedBy:       user.UserId,
 		CreatedByUser:   &user,

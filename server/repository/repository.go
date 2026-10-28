@@ -315,6 +315,27 @@ type BaseRepository interface {
 
 	CreateLunchFlowTransactions(ctx context.Context, transaction []LunchFlowTransaction) error
 
+	CreateSimpleFinLink(ctx context.Context, link *SimpleFinLink) error
+	UpdateSimpleFinLink(ctx context.Context, link *SimpleFinLink) error
+	GetSimpleFinLinks(ctx context.Context) ([]SimpleFinLink, error)
+	GetSimpleFinLink(ctx context.Context, id ID[SimpleFinLink]) (*SimpleFinLink, error)
+
+	CreateSimpleFinBankAccount(ctx context.Context, bankAccount *SimpleFinBankAccount) error
+	UpdateSimpleFinBankAccount(ctx context.Context, bankAccount *SimpleFinBankAccount) error
+	GetSimpleFinBankAccountForSimpleFinLink(
+		ctx context.Context,
+		linkId ID[SimpleFinLink],
+		id ID[SimpleFinBankAccount],
+	) (*SimpleFinBankAccount, error)
+	GetSimpleFinBankAccountsBySimpleFinLink(
+		ctx context.Context,
+		linkId ID[SimpleFinLink],
+	) ([]SimpleFinBankAccount, error)
+	GetAllSimpleFinBankAccountsBySimpleFinLink(
+		ctx context.Context,
+		linkId ID[SimpleFinLink],
+	) ([]SimpleFinBankAccount, error)
+
 	fileRepositoryInterface
 
 	GetApiKeyById(ctx context.Context, id ID[ApiKey]) (*ApiKey, error)

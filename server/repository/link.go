@@ -21,6 +21,7 @@ func (r *repositoryBase) GetLink(
 	err := r.txn.NewSelect().Model(&link).
 		Relation("PlaidLink").
 		Relation("LunchFlowLink").
+		Relation("SimpleFinLink").
 		Where(`"link"."account_id" = ?`, r.AccountId()).
 		Where(`"link"."link_id" = ?`, linkId).
 		Limit(1).
@@ -40,6 +41,7 @@ func (r *repositoryBase) GetLinks(ctx context.Context) ([]Link, error) {
 	err := r.txn.NewSelect().Model(&result).
 		Relation("PlaidLink").
 		Relation("LunchFlowLink").
+		Relation("SimpleFinLink").
 		Where(`"link"."account_id" = ?`, r.accountId).
 		Where(`"link"."deleted_at" IS NULL`).
 		Scan(span.Context())
