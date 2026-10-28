@@ -9,7 +9,7 @@
   },
   "packageManager": "pnpm@12.14.0",
   "devDependencies": {
-    "@biomejs/biome": "2.5.15",
+    "@biomejs/biome": "2.6.2",
     "typescript": "7.0.2"
   },
   "scripts": {
