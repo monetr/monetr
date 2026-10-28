@@ -227,3 +227,75 @@ func GivenIHaveALunchFlowBankAccount(
 
 	return bankAccount
 }
+
+func GivenIHaveASimpleFinBankAccount(
+	t *testing.T,
+	clock clock.Clock,
+	link *models.Link,
+) models.BankAccount {
+	require.NotNil(t, link, "link must actually be provided")
+	require.NotZero(t, link.LinkId, "link id must be included")
+	require.NotZero(t, link.AccountId, "link account id must be included")
+	require.NotZero(t, link.SimpleFinLinkId, "link simplefin link id must be included")
+
+	log := testutils.GetLog(t)
+	db := testutils.GetPgDatabase(t)
+	repo := repository.NewRepositoryFromSession(
+		clock,
+		link.CreatedBy,
+		link.AccountId,
+		db,
+		log,
+	)
+
+	current := int64(gofakeit.Number(2000, 100000))
+	available := current - int64(gofakeit.Number(100, 2000))
+
+	simpleFinBankAccount := models.SimpleFinBankAccount{
+		AccountId:        link.AccountId,
+		SimpleFinLinkId:  *link.SimpleFinLinkId,
+		SimpleFinLink:    link.SimpleFinLink,
+		SimpleFinId:      fmt.Sprintf("ACT-%s", gofakeit.UUID()),
+		ConnectionId:     fmt.Sprintf("CON-%s", gofakeit.UUID()),
+		Name:             "Primary Checking - 1234",
+		InstitutionName:  "Lehman Brothers",
+		Currency:         "USD",
+		Status:           models.SimpleFinBankAccountStatusActive,
+		CurrentBalance:   current,
+		AvailableBalance: available,
+		CreatedBy:        link.CreatedBy,
+		UpdatedAt:        clock.Now(),
+	}
+
+	require.NoError(
+		t,
+		repo.CreateSimpleFinBankAccount(t.Context(), &simpleFinBankAccount),
+		"must be able to create the simplefin bank account record",
+	)
+
+	bankAccount := models.BankAccount{
+		AccountId:              link.AccountId,
+		Account:                link.Account,
+		LinkId:                 link.LinkId,
+		Link:                   link,
+		SimpleFinBankAccountId: &simpleFinBankAccount.SimpleFinBankAccountId,
+		SimpleFinBankAccount:   &simpleFinBankAccount,
+		AvailableBalance:       available,
+		CurrentBalance:         current,
+		Mask:                   new(gofakeit.Numerify("####")),
+		Name:                   "E-ACCOUNT",
+		AccountType:            models.DepositoryBankAccountType,
+		AccountSubType:         models.CheckingBankAccountSubType,
+		LastUpdated:            clock.Now(),
+		CreatedAt:              clock.Now(),
+	}
+
+	require.NoError(
+		t,
+		repo.CreateBankAccounts(t.Context(), &bankAccount),
+		"must seed bank account",
+	)
+	require.NotZero(t, bankAccount.BankAccountId, "bank account Id must have been set")
+
+	return bankAccount
+}
