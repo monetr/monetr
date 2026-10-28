@@ -273,8 +273,8 @@ importers:
         specifier: 19.3.0
         version: 19.3.0(@types/react@19.3.0)
       sass:
-        specifier: 1.105.2
-        version: 1.105.2
+        specifier: 1.106.0
+        version: 1.106.0
       satori:
         specifier: 0.63.2
         version: 0.63.2
@@ -324,8 +324,8 @@ importers:
         specifier: 19.3.1
         version: 19.3.1(react@19.3.1)
       sass:
-        specifier: 1.105.2
-        version: 1.105.2
+        specifier: 1.106.0
+        version: 1.106.0
       typescript:
         specifier: 7.0.2
         version: 7.0.2
@@ -487,14 +487,14 @@ importers:
         specifier: 26.1.0
         version: 26.1.0(supports-color@9.4.0)
       sass:
-        specifier: 1.105.2
-        version: 1.105.2
+        specifier: 1.106.0
+        version: 1.106.0
       sass-embedded-linux-arm64:
-        specifier: 1.105.2
-        version: 1.105.2
+        specifier: 1.106.0
+        version: 1.106.0
       sass-embedded-linux-x64:
-        specifier: 1.105.2
-        version: 1.105.2
+        specifier: 1.106.0
+        version: 1.106.0
       typescript:
         specifier: 7.0.2
         version: 7.0.2
@@ -3848,8 +3848,8 @@ packages:
     os: [linux]
     libc: glibc
 
-  sass-embedded-linux-arm64@1.105.2:
-    resolution: {integrity: sha512-brEilUD9qlnzau/FiYc2k6h1+6WpByktuj/mAPEFftvLEXtes+e3/TTdTMUlS2RFkdeM0FDhIwjrkMSpYqEmow==}
+  sass-embedded-linux-arm64@1.106.0:
+    resolution: {integrity: sha512-xQ3KW+RauN75H7/XOy7vHNtMcRH6AREl1Z00I7Lrcu3r+2/islFjQ95aBvuwbbWTA1nm1ahfYGTvzDFPH8wT4Q==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [linux]
@@ -3904,8 +3904,8 @@ packages:
     os: [linux]
     libc: glibc
 
-  sass-embedded-linux-x64@1.105.2:
-    resolution: {integrity: sha512-ms4LEVWt6+yIbRAOosPMoHpQPT+60+x9KJM6JSviTvBsOhtjbT/Y+otdpAoXotjE3VDgOshnOAUxyazluUIvcg==}
+  sass-embedded-linux-x64@1.106.0:
+    resolution: {integrity: sha512-Hf8BJtpQfczWfjGpPZ5ZPpCHZkSUjbwmzdxCkVWWD+UhlyzTQKbo+Ff9110HlY+1lQmT0nU87Sh+x4q8MVjQPA==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [linux]
@@ -3937,8 +3937,8 @@ packages:
     engines: {node: '>=20.19.0'}
     hasBin: true
 
-  sass@1.105.2:
-    resolution: {integrity: sha512-KxW6ZKZiBKWK3ziQ4YZ3cpqo8/1TlHXE8t9nBNvGDZFoBFbk2MD7RacxYFs8zy8hzeFwpFYkVyAhboi47uYPEQ==}
+  sass@1.106.0:
+    resolution: {integrity: sha512-JHAqUksyijU5tsmDLCDq8/IX3Mq8mVkOtxvcXnUdwy8vsX5MVnvQauMomauxyuEux8uBJdT/OuBwWBYavoWUqQ==}
     engines: {node: '>=20.19.0'}
     hasBin: true
 
@@ -8376,7 +8376,7 @@ snapshots:
   sass-embedded-linux-arm64@1.105.1:
     optional: true
 
-  sass-embedded-linux-arm64@1.105.2: {}
+  sass-embedded-linux-arm64@1.106.0: {}
 
   sass-embedded-linux-arm@1.105.1:
     optional: true
@@ -8399,7 +8399,7 @@ snapshots:
   sass-embedded-linux-x64@1.105.1:
     optional: true
 
-  sass-embedded-linux-x64@1.105.2: {}
+  sass-embedded-linux-x64@1.106.0: {}
 
   sass-embedded-unknown-all@1.105.1:
     dependencies:
@@ -8450,7 +8450,7 @@ snapshots:
       '@parcel/watcher': 2.6.0
     optional: true
 
-  sass@1.105.2:
+  sass@1.106.0:
     dependencies:
       chokidar: 5.0.0
       immutable: 5.1.9
