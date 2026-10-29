@@ -141,13 +141,15 @@ func (r *repositoryBase) GetTransactionsBySimpleFinId(
 
 	items := make([]Transaction, 0)
 	// Include deleted transactions too, this way a transaction the user deleted
-	// doesn't come back on the next sync.
+	// doesn't come back on the next sync. The relation join is aliased by bun
+	// from the field name, so it's simple_fin_transaction here and not the
+	// simplefin_transaction alias on the model.
 	err := r.txn.NewSelect().
 		Model(&items).
 		Relation("SimpleFinTransaction").
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
-		Where(`"simplefin_transaction"."simplefin_id" IN (?)`, bun.List(simpleFinIds)).
+		Where(`"simple_fin_transaction"."simplefin_id" IN (?)`, bun.List(simpleFinIds)).
 		Scan(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
