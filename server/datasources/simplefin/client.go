@@ -15,6 +15,8 @@ import (
 
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/round"
 	"github.com/pkg/errors"
 )
@@ -43,6 +45,23 @@ type AccountSet struct {
 	Errors      []string     `json:"errors"`
 	Connections []Connection `json:"connections"`
 	Accounts    []Account    `json:"accounts"`
+}
+
+// GetLinkErrors will convert the errlist into the errors we store on the
+// SimpleFIN link. This never returns nil, that way when there are no errors the
+// old ones on the link get cleared out.
+func (a *AccountSet) GetLinkErrors() []models.SimpleFinLinkError {
+	return myownsanity.Map(
+		a.Errlist,
+		func(item Error) models.SimpleFinLinkError {
+			return models.SimpleFinLinkError{
+				Code:         item.Code,
+				Message:      item.Message,
+				ConnectionId: item.ConnectionId,
+				SimpleFinId:  item.AccountId,
+			}
+		},
+	)
 }
 
 type Error struct {
