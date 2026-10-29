@@ -9,8 +9,9 @@ Six calls, start to finish. By the end you'll have a bank account monetr is trac
 envelope, and a transaction spent out of that envelope, all created over the API.
 
 Everything here uses a **manual link**, which is the kind you maintain yourself. Plaid links are created through a
-browser handshake an API key can't drive, so a manual link is the only way to build an account from scratch over the
-API. It's also the honest way to try things without connecting a real bank.
+browser handshake an API key can't drive, and Lunch Flow and SimpleFIN links need an account with those services, so a
+manual link is the simplest way to build an account from scratch over the API. It's also the honest way to try things
+without connecting a real bank.
 
 You'll need an API key. Make one in the app under **Settings** then **API**, then:
 
@@ -54,7 +55,7 @@ midnight in **your** account's timezone, so if yours differs, adjust the times b
 
 A link is one financial institution. On a manual link, that's whatever you want to call it.
 
-**Full reference:** [Create a manual link](./links#create-a-manual-link)
+**Full reference:** [Create a link](./links#create-a-link)
 
 ```bash
 curl --request POST \

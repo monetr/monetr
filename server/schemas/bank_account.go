@@ -8,82 +8,30 @@ import (
 )
 
 var (
-	CreateBankAccount = validation.Map(
-		validation.Key(
-			"name",
-			validation.Required.Error("Name is required"),
-			Name(),
-		).Required(Require),
-		validation.Key(
-			"mask",
-			validation.OneOf(
-				validation.Nil,
-				Mask(),
-			),
-		).Required(Optional),
-		validation.Key(
-			"originalName",
-			is.String,
-			is.PrintableUnicode,
-			validation.Length(1, 300).Error("Original name must be between 1 and 300 characters"),
-		).Required(validators.Optional),
-		validation.Key(
-			"linkId",
-			validation.Required.Error("Link ID must be provided"),
-			ValidID[models.Link](),
-		).Required(Require),
-		validation.Key(
-			"lunchFlowBankAccountId",
-			validation.OneOf(
-				validation.Nil,
+	// CreateBankAccount is a union of manual, Lunch Flow and SimpleFIN bank
+	// accounts. A key is forbidden in a variant by leaving it out, so you can
+	// send at most one of the upstream bank account Ids and never both. Whether
+	// that Id matches the type of the link is checked by the controller, since
+	// the schema doesn't know what kind of link it is.
+	CreateBankAccount = validation.OneOf(
+		// Manual bank account schema
+		createBankAccount(),
+		// Lunch Flow bank account schema
+		createBankAccount(
+			validation.Key(
+				"lunchFlowBankAccountId",
 				ValidID[models.LunchFlowBankAccount](),
-			),
-		).Required(validators.Optional),
-		validation.Key(
-			"currency",
-			// This one doesn't handle nil because IF the field is specified then it
-			// needs to be valid.
-			CurrencyCode(),
-		).Required(Optional), // Optional because we default to USD.
-
-		// Balances
-		validation.Key(
-			"limitBalance",
-			// Balance is optional, so we should also handle if the field is provided
-			// with a strict nil value.
-			validation.OneOf(
-				validation.Nil,
-				validation.AllOf(
-					is.Integer,
-					// Limit balance cannot be negative!
-					validation.Min(float64(0)).Error("Limit balance cannot be negative"),
-				),
-			),
-		).Required(Optional),
-		// Current and available only enforce is integer because they allow both
-		// negative and positive values.
-		validation.Key(
-			"currentBalance",
-			is.Integer,
-		).Required(Optional),
-		validation.Key(
-			"availableBalance",
-			is.Integer,
-		).Required(Optional),
-
-		// Enums
-		validation.Key(
-			"status",
-			BankAccountStatus(),
-		).Required(validators.Optional),
-		validation.Key(
-			"accountType",
-			BankAccountAccountType(),
-		).Required(validators.Optional),
-		validation.Key(
-			"accountSubType",
-			BankAccountAccountSubType(),
-		).Required(validators.Optional),
+				validation.Required,
+			).Required(Require),
+		),
+		// SimpleFIN bank account schema
+		createBankAccount(
+			validation.Key(
+				"simpleFinBankAccountId",
+				ValidID[models.SimpleFinBankAccount](),
+				validation.Required,
+			).Required(Require),
+		),
 	)
 
 	PatchLunchFlowBankAccount = validation.Map(
@@ -210,6 +158,86 @@ var (
 		).Required(Optional),
 	)
 )
+
+// createBankAccount returns the create bank account schema with the keys every
+// kind of bank account shares, plus whatever keys are specific to that kind.
+func createBankAccount(
+	keys ...*validation.KeyRules[string],
+) validation.MapRule[string] {
+	return validation.Map(append(
+		[]*validation.KeyRules[string]{
+			validation.Key(
+				"name",
+				validation.Required.Error("Name is required"),
+				Name(),
+			).Required(Require),
+			validation.Key(
+				"mask",
+				validation.OneOf(
+					validation.Nil,
+					Mask(),
+				),
+			).Required(Optional),
+			validation.Key(
+				"originalName",
+				is.String,
+				is.PrintableUnicode,
+				validation.Length(1, 300).Error("Original name must be between 1 and 300 characters"),
+			).Required(validators.Optional),
+			validation.Key(
+				"linkId",
+				validation.Required.Error("Link ID must be provided"),
+				ValidID[models.Link](),
+			).Required(Require),
+			validation.Key(
+				"currency",
+				// This one doesn't handle nil because IF the field is specified then it
+				// needs to be valid.
+				CurrencyCode(),
+			).Required(Optional), // Optional because we default to USD.
+
+			// Balances
+			validation.Key(
+				"limitBalance",
+				// Balance is optional, so we should also handle if the field is
+				// provided with a strict nil value.
+				validation.OneOf(
+					validation.Nil,
+					validation.AllOf(
+						is.Integer,
+						// Limit balance cannot be negative!
+						validation.Min(float64(0)).Error("Limit balance cannot be negative"),
+					),
+				),
+			).Required(Optional),
+			// Current and available only enforce is integer because they allow both
+			// negative and positive values.
+			validation.Key(
+				"currentBalance",
+				is.Integer,
+			).Required(Optional),
+			validation.Key(
+				"availableBalance",
+				is.Integer,
+			).Required(Optional),
+
+			// Enums
+			validation.Key(
+				"status",
+				BankAccountStatus(),
+			).Required(validators.Optional),
+			validation.Key(
+				"accountType",
+				BankAccountAccountType(),
+			).Required(validators.Optional),
+			validation.Key(
+				"accountSubType",
+				BankAccountAccountSubType(),
+			).Required(validators.Optional),
+		},
+		keys...,
+	)...)
+}
 
 func BankAccountStatus() validation.Rule {
 	return validation.In(

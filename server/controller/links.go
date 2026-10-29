@@ -57,10 +57,11 @@ func (c *Controller) postLinks(ctx *echo.Context) error {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	// If the user is creating a lunch flow link then we need to validate that the
-	// link is valid and can be activated. If it is then activate it as part of
-	// this creation step.
-	if link.LunchFlowLinkId != nil {
+	switch {
+	case link.LunchFlowLinkId != nil:
+		// If the user is creating a lunch flow link then we need to validate that
+		// the link is valid and can be activated. If it is then activate it as part
+		// of this creation step.
 		if !c.Configuration.LunchFlow.Enabled {
 			return c.notFound(ctx, "Lunch Flow is not enabled on this server")
 		}
@@ -84,6 +85,33 @@ func (c *Controller) postLinks(ctx *echo.Context) error {
 			lunchFlowLink,
 		); err != nil {
 			return c.wrapPgError(ctx, err, "Failed to update Lunch Flow link")
+		}
+	case link.SimpleFinLinkId != nil:
+		// Same thing for SimpleFIN, the SimpleFIN link needs to be pending and gets
+		// activated here.
+		if !c.Configuration.SimpleFin.IsEnabled() {
+			return c.notFound(ctx, "SimpleFIN is not enabled on this server")
+		}
+
+		link.LinkType = SimpleFinLinkType
+		simpleFinLink, err := repo.GetSimpleFinLink(
+			c.getContext(ctx),
+			*link.SimpleFinLinkId,
+		)
+		if err != nil {
+			return c.wrapPgError(ctx, err, "Failed to retrieve SimpleFIN link")
+		}
+
+		if simpleFinLink.Status != SimpleFinLinkStatusPending {
+			return c.badRequest(ctx, "Cannot create a link from a SimpleFIN link that is not in a pending status")
+		}
+
+		simpleFinLink.Status = SimpleFinLinkStatusActive
+		if err := repo.UpdateSimpleFinLink(
+			c.getContext(ctx),
+			simpleFinLink,
+		); err != nil {
+			return c.wrapPgError(ctx, err, "Failed to update SimpleFIN link")
 		}
 	}
 
@@ -234,6 +262,15 @@ func (c *Controller) deleteLink(ctx *echo.Context) error {
 			link.LunchFlowLink,
 		); err != nil {
 			return c.wrapPgError(ctx, err, "Failed to update Lunch Flow Link")
+		}
+	} else if link.SimpleFinLink != nil {
+		link.SimpleFinLink.Status = SimpleFinLinkStatusDeactivated
+		link.SimpleFinLink.DeletedAt = new(c.Clock.Now())
+		if err := repo.UpdateSimpleFinLink(
+			c.getContext(ctx),
+			link.SimpleFinLink,
+		); err != nil {
+			return c.wrapPgError(ctx, err, "Failed to update SimpleFIN link")
 		}
 	}
 

@@ -8,8 +8,9 @@ import { Badge, Tab, Tabs } from "@rspress/core/theme";
 # Bank Accounts API
 
 A bank account belongs to a [link](./links). If the link is a Plaid one, monetr created the bank accounts for you when
-you connected your bank, and their names and balances come from there. If it's a manual link, you make them yourself and
-you own everything about them, including the balances.
+you connected your bank, and their names and balances come from there. On a Lunch Flow or SimpleFIN link you pick which
+of the upstream accounts to add, and their balances still come from upstream. If it's a manual link, you make them
+yourself and you own everything about them, including the balances.
 
 Bank accounts are where the budgeting actually happens. [Transactions](./transactions), [spending objects](./spending)
 and [funding schedules](./funding_schedules) all hang off a bank account, not off the link.
@@ -23,6 +24,8 @@ and [funding schedules](./funding_schedules) all hang off a bank account, not of
 | `plaidBankAccount`       | object                  | The raw Plaid record. Only on Plaid accounts.                                                                                                                                                                     |
 | `lunchFlowBankAccountId` | string (ulid), nullable | The Lunch Flow account behind this one. Null on everything else.                                                                                                                                                  |
 | `lunchFlowBankAccount`   | object                  | The upstream Lunch Flow record. Only on Lunch Flow accounts.                                                                                                                                                      |
+| `simpleFinBankAccountId` | string (ulid), nullable | The SimpleFIN account behind this one. Null on everything else.                                                                                                                                                   |
+| `simpleFinBankAccount`   | object                  | The upstream SimpleFIN record. Only on SimpleFIN accounts, see [the SimpleFIN bank account object](./simplefin#the-simplefin-bank-account-object).                                                                |
 | `currency`               | string                  | ISO 4217 code. This is what tells you how many decimal places the balance amounts imply.                                                                                                                          |
 | `availableBalance`       | integer                 | What you can actually spend right now, in the currency's smallest unit. Pending charges are already taken out.                                                                                                    |
 | `currentBalance`         | integer                 | The posted balance, ignoring anything pending.                                                                                                                                                                    |
@@ -40,6 +43,14 @@ and [funding schedules](./funding_schedules) all hang off a bank account, not of
 
 Balances don't use the sign flip that transaction amounts do. A positive `currentBalance` means you have money. See
 [Currencies](./currencies#how-monetr-stores-money) for the decimal places problem, which does apply here.
+
+:::details History
+
+**[v1.22.0](https://github.com/monetr/monetr/releases/tag/v1.22.0)**
+
+- Added `simpleFinBankAccountId` and `simpleFinBankAccount`.
+
+:::
 
 ## <Badge type="info">GET</Badge> List bank accounts
 
@@ -225,8 +236,8 @@ responses.
 
 ## <Badge type="tip">POST</Badge> Create a bank account
 
-Adds a bank account by hand. Only works on manual and Lunch Flow links, since Plaid links get their accounts from the
-bank.
+Adds a bank account by hand. Only works on manual, Lunch Flow and SimpleFIN links, since Plaid links get their accounts
+from the bank.
 
 **In the app:** Adding an account to a manual link, and both the manual and Lunch Flow setup flows.
 
@@ -238,20 +249,21 @@ POST /api/bank_accounts
 
 ### Body
 
-| Attribute                | Type          | Required | Description                                                                                                                             |
-| ------------------------ | ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `linkId`                 | string (ulid) | Yes      | The link to attach it to. Has to be a manual or Lunch Flow link, anything else is a 400.                                                |
-| `name`                   | string        | Yes      | What to call it.                                                                                                                        |
-| `accountSubType`         | string        | No       | Defaults to `checking`.                                                                                                                 |
-| `accountType`            | string        | No       | Defaults to `depository`.                                                                                                               |
-| `availableBalance`       | integer       | No       | Starting available balance. Defaults to 0. Can be negative.                                                                             |
-| `currency`               | string        | No       | ISO 4217 code. Defaults to whatever your account's locale implies, falling back to monetr's default.                                    |
-| `currentBalance`         | integer       | No       | Starting current balance. Defaults to 0. Can be negative.                                                                               |
-| `limitBalance`           | integer       | No       | Credit limit. Defaults to 0 and can't be negative.                                                                                      |
-| `lunchFlowBankAccountId` | string (ulid) | No       | Required when the link is a Lunch Flow link, and it has to belong to that link. Leave it off for manual links.                          |
-| `mask`                   | string        | No       | The last 4 digits of the account number. Has to be exactly 4 digits, so `"0912"` works and `"912"` is a 400.                            |
-| `originalName`           | string        | No       | The bank's name for it, 1 to 300 characters. On a Lunch Flow link monetr sets this from the upstream account and ignores what you send. |
-| `status`                 | string        | No       | Defaults to `active`.                                                                                                                   |
+| Attribute                | Type          | Required | Description                                                                                                                                                                                        |
+| ------------------------ | ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `linkId`                 | string (ulid) | Yes      | The link to attach it to. Has to be a manual, Lunch Flow or SimpleFIN link, anything else is a 400.                                                                                                |
+| `name`                   | string        | Yes      | What to call it.                                                                                                                                                                                   |
+| `accountSubType`         | string        | No       | Defaults to `checking`.                                                                                                                                                                            |
+| `accountType`            | string        | No       | Defaults to `depository`.                                                                                                                                                                          |
+| `availableBalance`       | integer       | No       | Starting available balance. Defaults to 0. Can be negative.                                                                                                                                        |
+| `currency`               | string        | No       | ISO 4217 code. Defaults to whatever your account's locale implies, falling back to monetr's default.                                                                                               |
+| `currentBalance`         | integer       | No       | Starting current balance. Defaults to 0. Can be negative.                                                                                                                                          |
+| `limitBalance`           | integer       | No       | Credit limit. Defaults to 0 and can't be negative.                                                                                                                                                 |
+| `lunchFlowBankAccountId` | string (ulid) | No       | Required when the link is a Lunch Flow link, and it has to belong to that link. Leave it off for manual links.                                                                                     |
+| `simpleFinBankAccountId` | string (ulid) | No       | Required when the link is a SimpleFIN link, and it has to belong to that link. Get it from [List available bank accounts](./simplefin#list-available-bank-accounts). Leave it off for other links. |
+| `mask`                   | string        | No       | The last 4 digits of the account number. Has to be exactly 4 digits, so `"0912"` works and `"912"` is a 400.                                                                                       |
+| `originalName`           | string        | No       | The bank's name for it, 1 to 300 characters. On a Lunch Flow or SimpleFIN link monetr sets this from the upstream account and ignores what you send.                                               |
+| `status`                 | string        | No       | Defaults to `active`.                                                                                                                                                                              |
 
 ### Example
 
@@ -293,11 +305,20 @@ curl --request POST \
 }
 ```
 
+:::details History
+
+**[v1.22.0](https://github.com/monetr/monetr/releases/tag/v1.22.0)**
+
+- Added `simpleFinBankAccountId`, bank accounts can now be created on SimpleFIN links.
+- Sending both `lunchFlowBankAccountId` and `simpleFinBankAccountId`, or sending either one as null, is now a 400.
+
+:::
+
 ### Errors
 
-| Status | When                                                                                                                                                     |
-| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 400    | The link is a Plaid link, `name` is missing, the link is Lunch Flow and you didn't send a valid `lunchFlowBankAccountId`, or `limitBalance` is negative. |
+| Status | When                                                                                                                                                                                                                     |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 400    | The link is a Plaid link, `name` is missing, the link is Lunch Flow or SimpleFIN and you didn't send a valid `lunchFlowBankAccountId` or `simpleFinBankAccountId`, you sent both of them, or `limitBalance` is negative. |
 
 ## <Badge type="warning">PATCH</Badge> Update a bank account
 
@@ -358,12 +379,25 @@ What you can send depends on what kind of link the account belongs to.
         | `mask`           | string, nullable | No       | The last 4 digits, or null to clear it. Exactly 4 when set. |
         | `name`           | string           | No       | The display name. Can't be blanked out.                     |
     </Tab>
+    <Tab label="SimpleFIN">
+        Same as Lunch Flow. The balances are synced for you and SimpleFIN doesn't say what kind of account it is either,
+        so every account comes in as `depository` / `checking` until you change it.
+
+        | Attribute        | Type             | Required | Description                                                 |
+        | ---------------- | ---------------- | -------- | ----------------------------------------------------------- |
+        | `accountSubType` | string           | No       | Reclassify it. Can't be blanked out.                        |
+        | `accountType`    | string           | No       | Reclassify it. Can't be blanked out.                        |
+        | `currency`       | string           | No       | ISO 4217 code. Can't be blanked out.                        |
+        | `deletedAt`      | null             | No       | Send null to unarchive it. Anything else is rejected.       |
+        | `mask`           | string, nullable | No       | The last 4 digits, or null to clear it. Exactly 4 when set. |
+        | `name`           | string           | No       | The display name. Can't be blanked out.                     |
+    </Tab>
 </Tabs>
 
 Note `status` is never editable, on any account type. monetr owns it, and archiving is what changes it.
 
 Sending `deletedAt` as null brings back an account you [archived](#archive-a-bank-account). That's all it does though.
-`status` stays `inactive`, and a Lunch Flow account won't start syncing again.
+`status` stays `inactive`, and a Lunch Flow or SimpleFIN account won't start syncing again.
 
 Every field here is optional, so send only what you're changing. But if you do send one of the non-nullable ones, you
 can't send null or an empty string for it. That's on purpose: an empty string would slip past the format checks and
@@ -409,6 +443,7 @@ curl --request PATCH \
 **[v1.22.0](https://github.com/monetr/monetr/releases/tag/v1.22.0)**
 
 - `deletedAt` can be sent as null to unarchive an account.
+- Added the SimpleFIN tab, SimpleFIN accounts can change the same fields as Lunch Flow accounts.
 
 **[v1.18.1](https://github.com/monetr/monetr/releases/tag/v1.18.1)**
 
@@ -418,10 +453,10 @@ curl --request PATCH \
 
 ### Errors
 
-| Status | When                                                                                                                                                                |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 400    | You sent a manual-only field on a Plaid account, tried to blank out a non-nullable field, sent a negative `limitBalance`, or sent `deletedAt` as anything but null. |
-| 404    | No such account.                                                                                                                                                    |
+| Status | When                                                                                                                                                                             |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 400    | You sent a manual-only field on an account that isn't manual, tried to blank out a non-nullable field, sent a negative `limitBalance`, or sent `deletedAt` as anything but null. |
+| 404    | No such account.                                                                                                                                                                 |
 
 ## <Badge type="danger">DELETE</Badge> Archive a bank account
 

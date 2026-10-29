@@ -10,6 +10,7 @@ import (
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mock_plaid"
+	"github.com/monetr/monetr/server/internal/mock_simplefin"
 	"github.com/monetr/monetr/server/internal/mockqueue"
 	"github.com/monetr/monetr/server/links/link_jobs"
 	"github.com/monetr/monetr/server/models"
@@ -89,7 +90,11 @@ func TestPostLink(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.linkType").String().IsEqual("key not expected")
+		// The create schema is a union of manual, Lunch Flow and SimpleFIN links in
+		// that order, so the problems come back per variant. This request was
+		// meant to be a manual link so check the first one.
+		response.JSON().Path("$.problems.oneOf").Array().Length().IsEqual(3)
+		response.JSON().Path("$.problems.oneOf[0].linkType").String().IsEqual("key not expected")
 	})
 
 	t.Run("institution name is too long", func(t *testing.T) {
@@ -105,7 +110,7 @@ func TestPostLink(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.institutionName").String().IsEqual("Name must be between 1 and 300 characters")
+		response.JSON().Path("$.problems.oneOf[0].institutionName").String().IsEqual("Name must be between 1 and 300 characters")
 	})
 
 	t.Run("name not provided", func(t *testing.T) {
@@ -121,7 +126,7 @@ func TestPostLink(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.institutionName").String().IsEqual("Name is required")
+		response.JSON().Path("$.problems.oneOf[0].institutionName").String().IsEqual("Name is required")
 	})
 
 	t.Run("description is too long", func(t *testing.T) {
@@ -140,8 +145,9 @@ func TestPostLink(t *testing.T) {
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
 		// The description is now validated as one of a nil value or a valid text
 		// field, so a too long description fails both branches and the problem
-		// comes back as a oneOf envelope rather than a flat string.
-		response.JSON().Path("$.problems.description.oneOf").Array().ConsistsOf(
+		// comes back as a oneOf envelope rather than a flat string. That sits
+		// inside the manual variant of the link schema union.
+		response.JSON().Path("$.problems.oneOf[0].description.oneOf").Array().ConsistsOf(
 			"must be nil",
 			"Must be between 1 and 300 characters",
 		)
@@ -192,12 +198,10 @@ func TestPostLink(t *testing.T) {
 
 		// A malformed lunch flow link Id is now caught by the schema before we ever
 		// try to look it up, so we get a validation error instead of a not found.
+		// The Lunch Flow variant is the second one in the union.
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.lunchFlowLinkId.oneOf").Array().ConsistsOf(
-			"must be nil",
-			"id should be between 28 and 32 characters",
-		)
+		response.JSON().Path("$.problems.oneOf[1].lunchFlowLinkId").String().IsEqual("id should be between 28 and 32 characters")
 	})
 
 	t.Run("lunch flow link does not exist", func(t *testing.T) {
@@ -235,6 +239,151 @@ func TestPostLink(t *testing.T) {
 
 		response.Status(http.StatusNotFound)
 		response.JSON().Path("$.error").String().IsEqual("Lunch Flow is not enabled on this server")
+	})
+
+	t.Run("simplefin link", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		claimUrl := mock_simplefin.Path(t, "/simplefin/claim/link")
+		mock_simplefin.MockClaimSetupToken(t, claimUrl, mock_simplefin.AccessUrl(t))
+
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var simpleFinLinkId models.ID[models.SimpleFinLink]
+		{ // Create the SimpleFIN link first!
+			response := e.POST("/api/simplefin/link").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":       "SimpleFIN Bridge",
+					"setupToken": mock_simplefin.SetupToken(t, claimUrl),
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			// Link should be in pending when its first created
+			response.JSON().Path("$.status").IsEqual(models.SimpleFinLinkStatusPending)
+			simpleFinLinkId = models.ID[models.SimpleFinLink](response.JSON().Path("$.simpleFinLinkId").String().Raw())
+		}
+
+		{ // Then create the actual link!
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "SimpleFIN",
+					"description":     "My personal link",
+					"simpleFinLinkId": simpleFinLinkId,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").String().IsASCII()
+			response.JSON().Path("$.linkType").IsEqual(models.SimpleFinLinkType)
+			response.JSON().Path("$.simpleFinLinkId").String().IsEqual(simpleFinLinkId.String())
+		}
+
+		{ // Then check the status of the SimpleFIN link to make sure its active
+			response := e.GET("/api/simplefin/link/{simpleFinLinkId}").
+				WithPath("simpleFinLinkId", simpleFinLinkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.status").IsEqual(models.SimpleFinLinkStatusActive)
+		}
+
+		{ // Make sure we can't reuse the SimpleFIN link!
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "SimpleFIN",
+					"description":     "My personal link",
+					"simpleFinLinkId": simpleFinLinkId,
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Cannot create a link from a SimpleFIN link that is not in a pending status")
+		}
+	})
+
+	t.Run("simplefin link is not pending", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		// The fixture link is already active
+		link := fixtures.GivenIHaveASimpleFinLink(t, app.Clock, user)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.POST("/api/links").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"institutionName": "SimpleFIN",
+				"description":     "My personal link",
+				"simpleFinLinkId": *link.SimpleFinLinkId,
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Cannot create a link from a SimpleFIN link that is not in a pending status")
+	})
+
+	t.Run("simplefin link does not exist", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		response := e.POST("/api/links").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"institutionName": "SimpleFIN",
+				"description":     "My personal link",
+				"simpleFinLinkId": models.NewID[models.SimpleFinLink](),
+			}).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").String().IsEqual("Failed to retrieve SimpleFIN link: record does not exist")
+	})
+
+	t.Run("both lunch flow and simplefin", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		response := e.POST("/api/links").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"institutionName": "U.S. Bank",
+				"description":     "My personal link",
+				"lunchFlowLinkId": models.NewID[models.LunchFlowLink](),
+				"simpleFinLinkId": models.NewID[models.SimpleFinLink](),
+			}).
+			Expect()
+
+		// Neither the Lunch Flow nor the SimpleFIN variant allows the other's link
+		// Id, so this never makes it past the schema.
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.oneOf[1].simpleFinLinkId").String().IsEqual("key not expected")
+		response.JSON().Path("$.problems.oneOf[2].lunchFlowLinkId").String().IsEqual("key not expected")
+	})
+
+	t.Run("simplefin is not enabled", func(t *testing.T) {
+		config := NewTestApplicationConfig(t)
+		config.SimpleFin.Enabled = false
+		_, e := NewTestApplicationWithConfig(t, config)
+
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/links").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"institutionName": "SimpleFIN",
+				"description":     "My personal link",
+				"simpleFinLinkId": models.NewID[models.SimpleFinLink](),
+			}).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").String().IsEqual("SimpleFIN is not enabled on this server")
 	})
 
 	t.Run("lunch flow link", func(t *testing.T) {
@@ -1119,6 +1268,90 @@ func TestDeleteLink(t *testing.T) {
 		}
 
 		assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{}, "should not have made ANY plaid API calls")
+	})
+
+	t.Run("remove simplefin link", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		claimUrl := mock_simplefin.Path(t, "/simplefin/claim/delete")
+		mock_simplefin.MockClaimSetupToken(t, claimUrl, mock_simplefin.AccessUrl(t))
+
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		var simpleFinLinkId models.ID[models.SimpleFinLink]
+		{ // Create the SimpleFIN link
+			response := e.POST("/api/simplefin/link").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":       "SimpleFIN Bridge",
+					"setupToken": mock_simplefin.SetupToken(t, claimUrl),
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			simpleFinLinkId = models.ID[models.SimpleFinLink](response.JSON().Path("$.simpleFinLinkId").String().Raw())
+		}
+
+		var linkId models.ID[models.Link]
+		{ // Create the link
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "SimpleFIN",
+					"simpleFinLinkId": simpleFinLinkId,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			linkId = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
+		}
+
+		app.Queue.EXPECT().
+			WithTransaction(
+				gomock.Any(),
+			).
+			Return(app.Queue)
+		app.Queue.EXPECT().
+			EnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(link_jobs.RemoveLink),
+				gomock.Any(),
+				gomock.Eq(link_jobs.RemoveLinkArguments{
+					AccountId: user.AccountId,
+					LinkId:    linkId,
+				}),
+			).
+			MaxTimes(1).
+			Return(nil)
+
+		{ // Delete it
+			response := e.DELETE("/api/links/{linkId}").
+				WithPath("linkId", linkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.NoContent()
+		}
+
+		{ // The SimpleFIN link should be deactivated now
+			response := e.GET("/api/links/{linkId}").
+				WithPath("linkId", linkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.deletedAt").NotNull()
+			response.JSON().Path("$.simpleFinLink.status").IsEqual(models.SimpleFinLinkStatusDeactivated)
+			response.JSON().Path("$.simpleFinLink.deletedAt").NotNull()
+		}
+
+		assert.EqualValues(t, map[string]int{
+			"POST " + claimUrl: 1,
+		}, httpmock.GetCallCountInfo(), "should not have called SimpleFIN to delete the link")
 	})
 
 	t.Run("remove plaid link", func(t *testing.T) {

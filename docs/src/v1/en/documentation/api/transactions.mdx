@@ -12,9 +12,9 @@ Flow instance, a file you uploaded, or you typing them in by hand on a manual li
 interesting thing you do with it is point it at a spending object, which is how monetr knows the money was already
 budgeted for.
 
-A few endpoints here only work on [manual links](./links#create-a-manual-link). Creating, editing the amount of, and
-deleting a transaction all assume monetr owns the record. On a Plaid link the bank owns it, and monetr won't let you
-rewrite history it didn't write.
+A few endpoints here only work on [manual links](./links#create-a-link). Creating, editing the amount of, and deleting
+a transaction all assume monetr owns the record. On a Plaid, Lunch Flow or SimpleFIN link the bank owns it, and monetr
+won't let you rewrite history it didn't write.
 
 ## The transaction object
 
@@ -246,7 +246,8 @@ Flow transactions have nothing to fill in and return `null` on both.
 
 ## <Badge type="tip">POST</Badge> Create a transaction
 
-Adds a transaction by hand. Only works on manual links, since on a Plaid link the bank decides what exists.
+Adds a transaction by hand. Only works on manual links, since on a Plaid, Lunch Flow or SimpleFIN link the bank
+decides what exists.
 
 **In the app:** Adding a transaction by hand on a manual account.
 
@@ -362,9 +363,9 @@ bank version to preserve, so monetr copies the name across and leaves the mercha
 
 ## <Badge type="warning">PATCH</Badge> Update a transaction
 
-Changes a transaction. What you're allowed to change depends on whether the link is manual. On a Plaid link you get the
-name, the merchant name, and what it's spent from. On a manual link you also get the amount, the date, and the pending
-flag.
+Changes a transaction. What you're allowed to change depends on whether the link is manual. On a Plaid, Lunch Flow or
+SimpleFIN link you get the name, the merchant name, and what it's spent from. On a manual link you also get the amount,
+the date, and the pending flag.
 
 **In the app:** Renaming a transaction on its details page, and changing which envelope it comes out of from the
 transaction list.
@@ -416,11 +417,21 @@ Send only what you're changing. Everything is optional.
         | `name`         | string                  | No       | What to call it. Same deal, `originalName` is left alone.                                                                            |
         | `spendingId`   | string (ulid), nullable | No       | Which spending object it comes out of. Send null to move it back to free-to-use.                                                     |
     </Tab>
+    <Tab label="SimpleFIN">
+        Same as a Plaid link.
+
+        | Attribute      | Type                    | Required | Description                                                                                                                          |
+        | -------------- | ----------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+        | `deletedAt`    | null                    | No       | Send null to undelete it. Anything else is rejected.                                                                                 |
+        | `merchantName` | string                  | No       | Who you paid, for display. Editable on any link, including Plaid ones, because `originalMerchantName` keeps the bank's version safe. |
+        | `name`         | string                  | No       | What to call it. Same deal, `originalName` is left alone.                                                                            |
+        | `spendingId`   | string (ulid), nullable | No       | Which spending object it comes out of. Send null to move it back to free-to-use.                                                     |
+    </Tab>
 </Tabs>
 
-Sending `amount`, `date` or `isPending` on a Plaid link fails validation. `adjustsBalance` is rejected here on purpose,
-even on manual links: monetr doesn't recalculate balances when an amount changes yet, so rather than accept a flag it
-wouldn't honor, it says no.
+Sending `amount`, `date` or `isPending` on anything but a manual link fails validation. `adjustsBalance` is rejected
+here on purpose, even on manual links: monetr doesn't recalculate balances when an amount changes yet, so rather than
+accept a flag it wouldn't honor, it says no.
 
 ### Example
 
@@ -509,10 +520,10 @@ two of them, so the response carries every spending object that changed. It's an
 
 ### Errors
 
-| Status | When                                                                                                                                                                                                                                     |
-| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 400    | You sent a manual-only field on a Plaid link, sent `adjustsBalance`, sent `deletedAt` as anything but null, or set a `spendingId` on a deposit. Negative amounts are deposits, and monetr won't let a deposit be spent from an envelope. |
-| 404    | No transaction with that ID on that bank account.                                                                                                                                                                                        |
+| Status | When                                                                                                                                                                                                                                                 |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 400    | You sent a manual-only field on a link that isn't manual, sent `adjustsBalance`, sent `deletedAt` as anything but null, or set a `spendingId` on a deposit. Negative amounts are deposits, and monetr won't let a deposit be spent from an envelope. |
+| 404    | No transaction with that ID on that bank account.                                                                                                                                                                                                    |
 
 ## <Badge type="danger">DELETE</Badge> Delete a transaction
 

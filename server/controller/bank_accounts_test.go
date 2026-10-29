@@ -7,8 +7,10 @@ import (
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/server/datasources/lunch_flow"
+	"github.com/monetr/monetr/server/datasources/simplefin"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mock_lunch_flow"
+	"github.com/monetr/monetr/server/internal/mock_simplefin"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	. "github.com/monetr/monetr/server/models"
@@ -381,6 +383,285 @@ func TestPostBankAccount(t *testing.T) {
 		}
 	})
 
+	t.Run("create a simplefin bank account", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		claimUrl := mock_simplefin.Path(t, "/simplefin/claim/bankaccount")
+		mock_simplefin.MockClaimSetupToken(t, claimUrl, mock_simplefin.AccessUrl(t))
+		mock_simplefin.MockFetchAccounts(t, simplefin.AccountSet{
+			Connections: []simplefin.Connection{
+				{
+					ConnectionId: "CON-1",
+					Name:         "US Bank",
+				},
+			},
+			Accounts: []simplefin.Account{
+				{
+					Id:           "ACT-1",
+					Name:         "Test Account",
+					ConnectionId: "CON-1",
+					Currency:     "USD",
+					Balance:      "1234.00",
+					BalanceDate:  1729000000,
+				},
+			},
+		})
+
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var simpleFinLinkId ID[SimpleFinLink]
+		{ // Create the SimpleFIN link first!
+			response := e.POST("/api/simplefin/link").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":       "SimpleFIN Bridge",
+					"setupToken": mock_simplefin.SetupToken(t, claimUrl),
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.status").IsEqual(SimpleFinLinkStatusPending)
+			simpleFinLinkId = ID[SimpleFinLink](response.JSON().Path("$.simpleFinLinkId").String().Raw())
+		}
+
+		{ // Refresh the accounts
+			response := e.POST("/api/simplefin/link/{simpleFinLinkId}/bank_accounts/refresh").
+				WithPath("simpleFinLinkId", simpleFinLinkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusNoContent)
+		}
+
+		var simpleFinBankAccountId ID[SimpleFinBankAccount]
+		{ // Get the SimpleFIN bank account
+			response := e.GET("/api/simplefin/link/{simpleFinLinkId}/bank_accounts").
+				WithPath("simpleFinLinkId", simpleFinLinkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().Length().IsEqual(1)
+			simpleFinBankAccountId = ID[SimpleFinBankAccount](response.JSON().Path("$[0].simpleFinBankAccountId").String().Raw())
+		}
+
+		var linkId ID[Link]
+		{ // Then create the actual link!
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+					"simpleFinLinkId": simpleFinLinkId,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkType").IsEqual(models.SimpleFinLinkType)
+			linkId = ID[Link](response.JSON().Path("$.linkId").String().Raw())
+		}
+
+		var bankAccountId ID[BankAccount]
+		{ // Create the SimpleFIN bank account
+			response := e.POST("/api/bank_accounts").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"linkId":                 linkId,
+					"simpleFinBankAccountId": simpleFinBankAccountId,
+					"name":                   "Test account",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.bankAccountId").String().IsASCII().NotEmpty()
+			response.JSON().Path("$.linkId").String().IsEqual(linkId.String())
+			response.JSON().Path("$.simpleFinBankAccountId").String().IsEqual(string(simpleFinBankAccountId))
+			response.JSON().Path("$.originalName").String().IsEqual("Test Account")
+			response.JSON().Path("$.status").String().IsEqual(string(BankAccountStatusActive))
+			bankAccountId = ID[BankAccount](response.JSON().Path("$.bankAccountId").String().Raw())
+		}
+
+		{ // Read the bank account back to make sure its in the right status
+			response := e.GET("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.simpleFinBankAccountId").String().IsEqual(string(simpleFinBankAccountId))
+			response.JSON().Path("$.simpleFinBankAccount.simpleFinBankAccountId").String().IsEqual(string(simpleFinBankAccountId))
+			response.JSON().Path("$.simpleFinBankAccount.status").String().IsEqual(string(SimpleFinBankAccountStatusActive))
+			response.JSON().Path("$.status").String().IsEqual(string(BankAccountStatusActive))
+		}
+	})
+
+	t.Run("simplefin bank account id is required", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		claimUrl := mock_simplefin.Path(t, "/simplefin/claim/missingid")
+		mock_simplefin.MockClaimSetupToken(t, claimUrl, mock_simplefin.AccessUrl(t))
+
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var simpleFinLinkId ID[SimpleFinLink]
+		{ // Create the SimpleFIN link first!
+			response := e.POST("/api/simplefin/link").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":       "SimpleFIN Bridge",
+					"setupToken": mock_simplefin.SetupToken(t, claimUrl),
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			simpleFinLinkId = ID[SimpleFinLink](response.JSON().Path("$.simpleFinLinkId").String().Raw())
+		}
+
+		var linkId ID[Link]
+		{ // Then create the actual link!
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+					"simpleFinLinkId": simpleFinLinkId,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			linkId = ID[Link](response.JSON().Path("$.linkId").String().Raw())
+		}
+
+		{ // Try to create a bank account without the SimpleFIN bank account
+			response := e.POST("/api/bank_accounts").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"linkId": linkId,
+					"name":   "Test account",
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("SimpleFIN Bank Account ID required to create a bank account for this link")
+		}
+	})
+
+	t.Run("cannot create a simplefin bank account from another simplefin link", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		firstClaimUrl := mock_simplefin.Path(t, "/simplefin/claim/first")
+		mock_simplefin.MockClaimSetupToken(t, firstClaimUrl, mock_simplefin.AccessUrl(t))
+		secondClaimUrl := mock_simplefin.Path(t, "/simplefin/claim/second")
+		mock_simplefin.MockClaimSetupToken(t, secondClaimUrl, mock_simplefin.AccessUrl(t))
+		mock_simplefin.MockFetchAccounts(t, simplefin.AccountSet{
+			Accounts: []simplefin.Account{
+				{
+					Id:           "ACT-1",
+					Name:         "Test Account",
+					ConnectionId: "CON-1",
+					Currency:     "USD",
+					Balance:      "1234.00",
+					BalanceDate:  1729000000,
+				},
+			},
+		})
+
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var firstSimpleFinLinkId ID[SimpleFinLink]
+		{ // Create the first SimpleFIN link
+			response := e.POST("/api/simplefin/link").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":       "First SimpleFIN Bridge",
+					"setupToken": mock_simplefin.SetupToken(t, firstClaimUrl),
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			firstSimpleFinLinkId = ID[SimpleFinLink](response.JSON().Path("$.simpleFinLinkId").String().Raw())
+		}
+
+		{ // Refresh the first SimpleFIN link accounts
+			response := e.POST("/api/simplefin/link/{simpleFinLinkId}/bank_accounts/refresh").
+				WithPath("simpleFinLinkId", firstSimpleFinLinkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusNoContent)
+		}
+
+		var firstSimpleFinBankAccountId ID[SimpleFinBankAccount]
+		{ // Read the first SimpleFIN bank account
+			response := e.GET("/api/simplefin/link/{simpleFinLinkId}/bank_accounts").
+				WithPath("simpleFinLinkId", firstSimpleFinLinkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().Length().IsEqual(1)
+			firstSimpleFinBankAccountId = ID[SimpleFinBankAccount](response.JSON().Path("$[0].simpleFinBankAccountId").String().Raw())
+		}
+
+		{ // Create the first actual link
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "First SimpleFIN Bridge",
+					"simpleFinLinkId": firstSimpleFinLinkId,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+		}
+
+		var secondSimpleFinLinkId ID[SimpleFinLink]
+		{ // Create the second SimpleFIN link
+			response := e.POST("/api/simplefin/link").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":       "Second SimpleFIN Bridge",
+					"setupToken": mock_simplefin.SetupToken(t, secondClaimUrl),
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			secondSimpleFinLinkId = ID[SimpleFinLink](response.JSON().Path("$.simpleFinLinkId").String().Raw())
+		}
+
+		var secondLinkId ID[Link]
+		{ // Create the second actual link
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "Second SimpleFIN Bridge",
+					"simpleFinLinkId": secondSimpleFinLinkId,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			secondLinkId = ID[Link](response.JSON().Path("$.linkId").String().Raw())
+		}
+
+		{ // Try to use the first SimpleFIN bank account on the second link
+			response := e.POST("/api/bank_accounts").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"linkId":                 secondLinkId,
+					"simpleFinBankAccountId": firstSimpleFinBankAccountId,
+					"name":                   "Test account",
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("SimpleFIN Bank Account ID must belong to the specified link")
+		}
+	})
+
 	t.Run("minimal creation", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
@@ -638,7 +919,7 @@ func TestPostBankAccount(t *testing.T) {
 			// the alphabetical rule that the new currency schema added.
 			response.Status(http.StatusBadRequest)
 			response.JSON().Path("$.error").String().IsEqual("Invalid request")
-			response.JSON().Path("$.problems.currency").String().IsEqual("Currency must be alphabetical characters only")
+			response.JSON().Path("$.problems.oneOf[0].currency").String().IsEqual("Currency must be alphabetical characters only")
 		}
 	})
 
@@ -667,7 +948,7 @@ func TestPostBankAccount(t *testing.T) {
 			// link doesn't exist at all.
 			response.Status(http.StatusBadRequest)
 			response.JSON().Path("$.error").IsEqual("Invalid request")
-			response.JSON().Path("$.problems.linkId").String().IsEqual("required key is missing")
+			response.JSON().Path("$.problems.oneOf[0].linkId").String().IsEqual("required key is missing")
 		}
 	})
 
@@ -719,7 +1000,7 @@ func TestPostBankAccount(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.linkId").String().IsEqual("id does not match format link_...")
+		response.JSON().Path("$.problems.oneOf[0].linkId").String().IsEqual("id does not match format link_...")
 	})
 
 	t.Run("mask must be exactly four digits", func(t *testing.T) {
@@ -743,7 +1024,7 @@ func TestPostBankAccount(t *testing.T) {
 		// Mask is a one of null or a real mask, and the one of error now serializes as
 		// a structured envelope with a branch per alternative. We only care that the
 		// four digit rule shows up as the reason the real mask branch failed.
-		response.JSON().Path("$.problems.mask.oneOf").Array().ContainsAll("Mask must be exactly 4 digits")
+		response.JSON().Path("$.problems.oneOf[0].mask.oneOf").Array().ContainsAll("Mask must be exactly 4 digits")
 	})
 
 	t.Run("mask can be explicitly null", func(t *testing.T) {
@@ -801,7 +1082,7 @@ func TestPostBankAccount(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.currency").String().IsEqual("Currency must be all upper case")
+		response.JSON().Path("$.problems.oneOf[0].currency").String().IsEqual("Currency must be all upper case")
 	})
 
 	t.Run("currency must be exactly three characters", func(t *testing.T) {
@@ -820,7 +1101,7 @@ func TestPostBankAccount(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.currency").String().IsEqual("Currency must be exactly 3 characters long")
+		response.JSON().Path("$.problems.oneOf[0].currency").String().IsEqual("Currency must be exactly 3 characters long")
 	})
 
 	t.Run("limit balance cannot be negative", func(t *testing.T) {
@@ -841,7 +1122,7 @@ func TestPostBankAccount(t *testing.T) {
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
 		// Same structured one of envelope as the mask, we just want the negative branch
 		// message to be present.
-		response.JSON().Path("$.problems.limitBalance.oneOf").Array().ContainsAll("Limit balance cannot be negative")
+		response.JSON().Path("$.problems.oneOf[0].limitBalance.oneOf").Array().ContainsAll("Limit balance cannot be negative")
 	})
 
 	t.Run("balance must be an integer", func(t *testing.T) {
@@ -860,7 +1141,7 @@ func TestPostBankAccount(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.currentBalance").String().IsEqual("must be an integer")
+		response.JSON().Path("$.problems.oneOf[0].currentBalance").String().IsEqual("must be an integer")
 	})
 
 	t.Run("merges non-default fields over the controller defaults", func(t *testing.T) {
@@ -1760,6 +2041,56 @@ func TestPatchBankAccount(t *testing.T) {
 		}
 	})
 
+	t.Run("simplefin bank account can patch the account type", func(t *testing.T) {
+		// SimpleFIN doesn't give us the account type either, so the user needs to
+		// be able to fix it like with Lunch Flow.
+		app, e := NewTestApplication(t)
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveASimpleFinBankAccount(t, app.Clock, &link)
+
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		{ // Change it to a credit card.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"accountType":    CreditBankAccountType,
+					"accountSubType": CreditCardBankAccountSubType,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.accountType").String().IsEqual(string(CreditBankAccountType))
+			response.JSON().Path("$.accountSubType").String().IsEqual(string(CreditCardBankAccountSubType))
+		}
+
+		{ // Read it back to make sure it was persisted.
+			response := e.GET("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.accountType").String().IsEqual(string(CreditBankAccountType))
+			response.JSON().Path("$.accountSubType").String().IsEqual(string(CreditCardBankAccountSubType))
+		}
+
+		{ // But it can't patch the balances, those come from SimpleFIN
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"currentBalance": 100,
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+		}
+	})
+
 	t.Run("lunch flow bank account can clear the mask", func(t *testing.T) {
 		// The mask field on the lunch flow patch schema is a one of null or a real
 		// mask, just like the manual schema, so a client should be able to
@@ -2311,6 +2642,126 @@ func TestDeleteBankAccount(t *testing.T) {
 
 			response.Status(http.StatusNotFound)
 			response.JSON().Path("$.error").IsEqual("Failed to retrieve bank account: record does not exist")
+		}
+	})
+
+	t.Run("delete simplefin bank account", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		claimUrl := mock_simplefin.Path(t, "/simplefin/claim/deletebankaccount")
+		mock_simplefin.MockClaimSetupToken(t, claimUrl, mock_simplefin.AccessUrl(t))
+		mock_simplefin.MockFetchAccounts(t, simplefin.AccountSet{
+			Accounts: []simplefin.Account{
+				{
+					Id:           "ACT-1",
+					Name:         "Test Account",
+					ConnectionId: "CON-1",
+					Currency:     "USD",
+					Balance:      "1234.00",
+					BalanceDate:  1729000000,
+				},
+			},
+		})
+
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var simpleFinLinkId ID[SimpleFinLink]
+		{ // Create the SimpleFIN link first!
+			response := e.POST("/api/simplefin/link").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":       "SimpleFIN Bridge",
+					"setupToken": mock_simplefin.SetupToken(t, claimUrl),
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			simpleFinLinkId = ID[SimpleFinLink](response.JSON().Path("$.simpleFinLinkId").String().Raw())
+		}
+
+		{ // Refresh the accounts
+			response := e.POST("/api/simplefin/link/{simpleFinLinkId}/bank_accounts/refresh").
+				WithPath("simpleFinLinkId", simpleFinLinkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusNoContent)
+		}
+
+		var simpleFinBankAccountId ID[SimpleFinBankAccount]
+		{ // Get the SimpleFIN bank account
+			response := e.GET("/api/simplefin/link/{simpleFinLinkId}/bank_accounts").
+				WithPath("simpleFinLinkId", simpleFinLinkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().Length().IsEqual(1)
+			simpleFinBankAccountId = ID[SimpleFinBankAccount](response.JSON().Path("$[0].simpleFinBankAccountId").String().Raw())
+		}
+
+		var linkId ID[Link]
+		{ // Then create the actual link!
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+					"simpleFinLinkId": simpleFinLinkId,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			linkId = ID[Link](response.JSON().Path("$.linkId").String().Raw())
+		}
+
+		var bankAccountId ID[BankAccount]
+		{ // Create the SimpleFIN bank account
+			response := e.POST("/api/bank_accounts").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"linkId":                 linkId,
+					"simpleFinBankAccountId": simpleFinBankAccountId,
+					"name":                   "Test account",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			bankAccountId = ID[BankAccount](response.JSON().Path("$.bankAccountId").String().Raw())
+		}
+
+		{ // Delete the actual bank account now
+			response := e.DELETE("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.Body().IsEmpty()
+		}
+
+		{ // Read the bank account and make sure its deleted now!
+			response := e.GET("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.simpleFinBankAccountId").String().IsEqual(string(simpleFinBankAccountId))
+			response.JSON().Path("$.simpleFinBankAccount.status").String().IsEqual(string(SimpleFinBankAccountStatusInactive))
+			response.JSON().Path("$.simpleFinBankAccount.deletedAt").NotNull()
+			response.JSON().Path("$.status").String().IsEqual(string(BankAccountStatusInactive))
+		}
+
+		{ // And it shouldn't show up in the SimpleFIN list anymore
+			response := e.GET("/api/simplefin/link/{simpleFinLinkId}/bank_accounts").
+				WithPath("simpleFinLinkId", simpleFinLinkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().IsEmpty()
 		}
 	})
 
