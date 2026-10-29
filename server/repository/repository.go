@@ -101,6 +101,11 @@ type BaseRepository interface {
 		bankAccountId ID[BankAccount],
 		lunchFlowIds []string,
 	) (map[string]Transaction, error)
+	GetTransactionsBySimpleFinId(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		simpleFinIds []string,
+	) (map[string]Transaction, error)
 
 	// Deprecated: Use GetTransactionsByPlaidId
 	GetTransactionsByPlaidTransactionId(ctx context.Context, linkId ID[Link], plaidTransactionIds []string) ([]Transaction, error)
@@ -314,6 +319,7 @@ type BaseRepository interface {
 	) error
 
 	CreateLunchFlowTransactions(ctx context.Context, transaction []LunchFlowTransaction) error
+	CreateSimpleFinTransactions(ctx context.Context, transactions []SimpleFinTransaction) error
 
 	CreateSimpleFinLink(ctx context.Context, link *SimpleFinLink) error
 	UpdateSimpleFinLink(ctx context.Context, link *SimpleFinLink) error

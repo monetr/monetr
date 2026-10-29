@@ -1234,6 +1234,61 @@ func TestPatchTransaction(t *testing.T) {
 		assert.Equal(t, originalTransaction.LunchFlowTransactionId, updatedTransaction.LunchFlowTransactionId, "lunch flow transaction ID must not change")
 	})
 
+	t.Run("update preserves simplefin transaction id", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveASimpleFinLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveASimpleFinBankAccount(t, app.Clock, &link)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			// Create a simplefin transaction record and associate it with the
+			// transaction to simulate a transaction that was synced from SimpleFIN.
+			simpleFinTransaction := testutils.MustInsert(t, SimpleFinTransaction{
+				AccountId:              user.AccountId,
+				SimpleFinBankAccountId: *bank.SimpleFinBankAccountId,
+				SimpleFinId:            "TRN-1234",
+				Description:            originalTransaction.Name,
+				Amount:                 -originalTransaction.Amount,
+				Posted:                 originalTransaction.Date,
+			})
+			originalTransaction.SimpleFinTransactionId = &simpleFinTransaction.SimpleFinTransactionId
+			testutils.MustDBUpdate(t, &originalTransaction)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		newName := "A More Friendly Name"
+		assert.NotEqual(t, originalTransaction.Name, newName, "make sure the names dont somehow match")
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name": newName,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transaction.transactionId").IsEqual(originalTransaction.TransactionId)
+		response.JSON().Path("$.transaction.name").String().IsEqual(newName)
+
+		// The simplefin transaction ID is not in the JSON response so read it
+		// directly from the database.
+		updatedTransaction := testutils.MustRetrieve(t, Transaction{
+			TransactionId: originalTransaction.TransactionId,
+			AccountId:     bank.AccountId,
+			BankAccountId: bank.BankAccountId,
+		})
+		assert.NotNil(t, updatedTransaction.SimpleFinTransactionId, "simplefin transaction ID must be preserved after update")
+		assert.Equal(t, originalTransaction.SimpleFinTransactionId, updatedTransaction.SimpleFinTransactionId, "simplefin transaction ID must not change")
+	})
+
 	t.Run("update does not overwrite spending amount", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		var token string

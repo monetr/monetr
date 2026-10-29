@@ -125,6 +125,48 @@ func (r *repositoryBase) GetTransactionsByLunchFlowId(
 	return result, nil
 }
 
+func (r *repositoryBase) GetTransactionsBySimpleFinId(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	simpleFinIds []string,
+) (map[string]Transaction, error) {
+	if len(simpleFinIds) == 0 {
+		return map[string]Transaction{}, nil
+	}
+
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+	span.SetData("accountId", r.AccountId())
+	span.SetData("bankAccountId", bankAccountId)
+
+	items := make([]Transaction, 0)
+	// Include deleted transactions too, this way a transaction the user deleted
+	// doesn't come back on the next sync.
+	err := r.txn.NewSelect().
+		Model(&items).
+		Relation("SimpleFinTransaction").
+		Where(`"transaction"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
+		Where(`"simplefin_transaction"."simplefin_id" IN (?)`, bun.List(simpleFinIds)).
+		Scan(span.Context())
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, errors.Wrap(err, "failed to retrieve transactions for SimpleFIN Ids")
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	// SimpleFIN Ids are only unique within a SimpleFIN bank account, but monetr
+	// bank accounts are 1:1 with those so the Id alone is fine as the key here.
+	result := map[string]Transaction{}
+	for i := range items {
+		item := items[i]
+		result[item.SimpleFinTransaction.SimpleFinId] = item
+	}
+
+	return result, nil
+}
+
 func (r *repositoryBase) GetTransactonsByUploadIdentifier(
 	ctx context.Context,
 	bankAccountId ID[BankAccount],
@@ -356,6 +398,7 @@ func (r *repositoryBase) GetTransaction(
 	err := r.txn.NewSelect().
 		Model(&result).
 		Relation("LunchFlowTransaction").
+		Relation("SimpleFinTransaction").
 		Relation("PlaidTransaction").
 		Relation("PendingPlaidTransaction").
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
