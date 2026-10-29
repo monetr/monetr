@@ -1,5 +1,35 @@
 # Changelog
 
+## [1.22.0](https://github.com/monetr/monetr/compare/v1.21.1...v1.22.0) (2026-10-29)
+
+
+### Features
+
+* **api:** Adding basic Simplefin api endpoints ([d3a20cf](https://github.com/monetr/monetr/commit/d3a20cfec830e368c71afd78be0e5aa36d83c2b1))
+* **api:** Adding support for undeleting soft-deleted data ([efd64b4](https://github.com/monetr/monetr/commit/efd64b49367567a2174ab86674358c56957b688c))
+* **api:** Allow simplefin links and bank accounts to be created ([#3714](https://github.com/monetr/monetr/issues/3714)) ([c5bc61e](https://github.com/monetr/monetr/commit/c5bc61e412e2828af0cd5ae1b4af889c5a239887))
+* **api:** Cleanup simplefin links that didnt get fully setup ([e1cf49d](https://github.com/monetr/monetr/commit/e1cf49d7a13e2d19aadffba5b9a1cfe7ce2b7e79))
+* **api:** Forecast initial amount for auto created expenses ([#3703](https://github.com/monetr/monetr/issues/3703)) ([77311b3](https://github.com/monetr/monetr/commit/77311b3b45558ce48738c0d05f023c2783cfbdbb))
+* **api:** Progress on SimpleFIN integration, data repo things ([#3707](https://github.com/monetr/monetr/issues/3707)) ([72a06fa](https://github.com/monetr/monetr/commit/72a06faa2fdb0d36b6771e9bea3835dcdfcb60e2))
+* **api:** Refresh simplefin bank accounts ([c71722f](https://github.com/monetr/monetr/commit/c71722f58880f02418ec061a1a20481ef561495e))
+* SimpleFIN integration groundwork ([#3696](https://github.com/monetr/monetr/issues/3696)) ([e9f669d](https://github.com/monetr/monetr/commit/e9f669de16b6fd49ef14d4d024973012c8af1040))
+* Simplefin transactions data repo things ([060e6f6](https://github.com/monetr/monetr/commit/060e6f692f111bfb2865bdffcdc0bacb272fd94b))
+
+
+### Bug Fixes
+
+* Fixed tests ([3cdacbc](https://github.com/monetr/monetr/commit/3cdacbc1dbcf61eb4df899bc6001e603d07308e9))
+* Fixing broken test ([cb72242](https://github.com/monetr/monetr/commit/cb72242a7cea283ae7bd58f5ef055340b815fc03))
+
+
+### Dependencies
+
+* **api:** update module github.com/go-jose/go-jose/v4 to v4.1.6 [security] ([#3706](https://github.com/monetr/monetr/issues/3706)) ([e460729](https://github.com/monetr/monetr/commit/e460729ccf85f0d9358887174fd2870fccf53bfc))
+* **ui:** update dependency pnpm to v12.15.0 ([#3712](https://github.com/monetr/monetr/issues/3712)) ([84e5912](https://github.com/monetr/monetr/commit/84e59121d415d53de69345298e4a761e5a7d4312))
+* **ui:** update dependency react-dropzone to v20.1.4 ([#3693](https://github.com/monetr/monetr/issues/3693)) ([a7b242a](https://github.com/monetr/monetr/commit/a7b242a082ddb27cf584f4ce256ed0e02d2fa1e3))
+* **ui:** update dependency satori to v0.63.2 ([#3685](https://github.com/monetr/monetr/issues/3685)) ([22552b4](https://github.com/monetr/monetr/commit/22552b4d1df79ab2caea3da62ebbdf89289147fa))
+* **ui:** update sass to v1.106.0 ([#3710](https://github.com/monetr/monetr/issues/3710)) ([9ad5f95](https://github.com/monetr/monetr/commit/9ad5f95604d3c6ca025a62552dda2b2d3e1fa506))
+
 ## [1.21.1](https://github.com/monetr/monetr/compare/v1.21.0...v1.21.1) (2026-10-26)
 
 
