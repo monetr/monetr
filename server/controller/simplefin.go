@@ -204,17 +204,7 @@ func (c *Controller) postSimpleFinLinkBankAccountsRefresh(ctx *echo.Context) err
 
 	// Always replace the errors on the link, even when there aren't any, so old
 	// errors don't stick around after they've been resolved.
-	link.LastErrors = myownsanity.Map(
-		accountSet.Errlist,
-		func(item simplefin.Error) SimpleFinLinkError {
-			return SimpleFinLinkError{
-				Code:         item.Code,
-				Message:      item.Message,
-				ConnectionId: item.ConnectionId,
-				SimpleFinId:  item.AccountId,
-			}
-		},
-	)
+	link.LastErrors = accountSet.GetLinkErrors()
 	if err := repo.UpdateSimpleFinLink(c.getContext(ctx), link); err != nil {
 		return c.wrapPgError(ctx, err, "Failed to update SimpleFIN link")
 	}
