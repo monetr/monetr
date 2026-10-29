@@ -67,6 +67,43 @@ func (r *repositoryBase) UpdateSimpleFinLink(
 	return nil
 }
 
+func (r *repositoryBase) RemoveSimpleFinLink(
+	ctx context.Context,
+	id ID[SimpleFinLink],
+) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+	span.SetData("accountId", r.AccountId())
+	span.SetData("simpleFinLinkId", id)
+
+	// Update the link record to indicate that it is no longer a SimpleFIN link
+	// but instead a manual one. This way some data is still preserved.
+	_, err := r.txn.NewUpdate().Model(&Link{}).
+		Set(`"link_type" = ?`, ManualLinkType).
+		Set(`"simplefin_link_id" = NULL`).
+		Where(`"link"."account_id" = ?`, r.AccountId()).
+		Where(`"link"."simplefin_link_id" = ?`, id).
+		Exec(span.Context())
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return errors.Wrap(err, "failed to clean SimpleFIN link prior to removal")
+	}
+
+	// Then delete the SimpleFIN link itself, the bank accounts will cascade.
+	_, err = r.txn.NewDelete().Model(&SimpleFinLink{}).
+		Where(`"simplefin_link"."account_id" = ?`, r.AccountId()).
+		Where(`"simplefin_link"."simplefin_link_id" = ?`, id).
+		Exec(span.Context())
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return errors.Wrap(err, "failed to delete SimpleFIN link")
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return nil
+}
+
 func (r *repositoryBase) GetSimpleFinLinks(
 	ctx context.Context,
 ) ([]SimpleFinLink, error) {

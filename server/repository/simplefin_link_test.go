@@ -113,6 +113,98 @@ func TestRepositoryBase_UpdateSimpleFinLink(t *testing.T) {
 	})
 }
 
+func TestRepositoryBase_RemoveSimpleFinLink(t *testing.T) {
+	t.Run("pending link", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		kms := secrets.NewPlaintextKMS()
+		db := testutils.GetPgDatabase(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		secretsRepo := repository.NewSecretsRepository(log, clock, db, kms, user.AccountId)
+
+		secret := repository.SecretData{
+			Kind:  models.SecretKindSimpleFin,
+			Value: mock_simplefin.AccessUrl(t),
+		}
+		err := secretsRepo.Store(t.Context(), &secret)
+		assert.NoError(t, err, "must be able to store the secret")
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			db,
+			log,
+		)
+
+		// Pending links don't have a monetr link yet, that only gets created once
+		// the user picks their accounts.
+		link := models.SimpleFinLink{
+			Name:     "Testing",
+			SecretId: secret.SecretId,
+			ApiUrl:   "https://bridge.simplefin.org/simplefin",
+			Status:   models.SimpleFinLinkStatusPending,
+		}
+		err = repo.CreateSimpleFinLink(t.Context(), &link)
+		assert.NoError(t, err, "must be able to create a simplefin link")
+
+		err = repo.RemoveSimpleFinLink(t.Context(), link.SimpleFinLinkId)
+		assert.NoError(t, err, "should be able to remove the simplefin link")
+		testutils.MustDBNotExist(t, link)
+	})
+
+	t.Run("monetr link becomes manual", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			db,
+			log,
+		)
+
+		err := repo.RemoveSimpleFinLink(t.Context(), *link.SimpleFinLinkId)
+		assert.NoError(t, err, "should be able to remove the simplefin link")
+		testutils.MustDBNotExist(t, *link.SimpleFinLink)
+
+		result, err := repo.GetLink(t.Context(), link.LinkId)
+		assert.NoError(t, err, "should still be able to retrieve the monetr link")
+		assert.Equal(t, models.ManualLinkType, result.LinkType, "link should now be manual")
+		assert.Nil(t, result.SimpleFinLinkId, "simplefin link Id should be cleared")
+		assert.Nil(t, result.SimpleFinLink, "simplefin link should not be loaded")
+	})
+
+	t.Run("cant remove someone elses link", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+		otherUser, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			otherUser.UserId,
+			otherUser.AccountId,
+			db,
+			log,
+		)
+
+		err := repo.RemoveSimpleFinLink(t.Context(), *link.SimpleFinLinkId)
+		assert.NoError(t, err, "removing a link that isnt ours should not error")
+		testutils.MustDBExist(t, *link.SimpleFinLink)
+
+		result := testutils.MustDBRead(t, link)
+		assert.Equal(t, models.SimpleFinLinkType, result.LinkType, "link should still be a simplefin link")
+		assert.Equal(t, link.SimpleFinLinkId, result.SimpleFinLinkId, "simplefin link Id should not change")
+	})
+}
+
 func TestRepositoryBase_GetSimpleFinLinks(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		clock := clock.NewMock()

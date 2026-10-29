@@ -18,6 +18,7 @@ type JobRepository interface {
 	GetAccountsWithTooManyFiles(ctx context.Context) ([]AccountWithTooManyFiles, error)
 	GetLunchFlowAccountsToSync(ctx context.Context) ([]BankAccount, error)
 	GetStaleLunchFlowLinks(ctx context.Context) ([]LunchFlowLink, error)
+	GetStaleSimpleFinLinks(ctx context.Context) ([]SimpleFinLink, error)
 }
 
 type ProcessFundingSchedulesItem struct {
@@ -222,6 +223,29 @@ func (j *jobRepository) GetStaleLunchFlowLinks(
 		Scan(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to find stale lunch flow links")
+	}
+
+	return links, nil
+}
+
+// GetStaleSimpleFinLinks returns SimpleFIN links that are in a pending status
+// 24 hours after having been created. These links are considered stale and are
+// safe to be removed.
+func (j *jobRepository) GetStaleSimpleFinLinks(
+	ctx context.Context,
+) ([]SimpleFinLink, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	links := make([]SimpleFinLink, 0)
+	cutoff := j.clock.Now().Add(-24 * time.Hour)
+	err := j.txn.NewSelect().Model(&links).
+		Where(`"simplefin_link"."created_at" < ?`, cutoff).
+		Where(`"simplefin_link"."status" = ?`, SimpleFinLinkStatusPending).
+		Order(`simplefin_link_id DESC`).
+		Scan(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to find stale SimpleFIN links")
 	}
 
 	return links, nil

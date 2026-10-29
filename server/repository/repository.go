@@ -317,6 +317,7 @@ type BaseRepository interface {
 
 	CreateSimpleFinLink(ctx context.Context, link *SimpleFinLink) error
 	UpdateSimpleFinLink(ctx context.Context, link *SimpleFinLink) error
+	RemoveSimpleFinLink(ctx context.Context, id ID[SimpleFinLink]) error
 	GetSimpleFinLinks(ctx context.Context) ([]SimpleFinLink, error)
 	GetSimpleFinLink(ctx context.Context, id ID[SimpleFinLink]) (*SimpleFinLink, error)
 

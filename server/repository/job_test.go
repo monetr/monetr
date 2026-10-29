@@ -278,3 +278,55 @@ func TestJobRepository_GetLunchFlowAccountsToSync(t *testing.T) {
 		}
 	})
 }
+
+func TestJobRepository_GetStaleSimpleFinLinks(t *testing.T) {
+	t.Run("pending older than a day", func(t *testing.T) {
+		clock := clock.NewMock()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		jobRepo := repository.NewJobRepository(db, clock)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+		link.SimpleFinLink.Status = SimpleFinLinkStatusPending
+		testutils.MustDBUpdate(t, link.SimpleFinLink)
+
+		clock.Add(25 * time.Hour)
+
+		result, err := jobRepo.GetStaleSimpleFinLinks(t.Context())
+		assert.NoError(t, err, "must not return an error")
+		assert.Len(t, result, 1, "should return the stale simplefin link")
+		assert.Equal(t, *link.SimpleFinLinkId, result[0].SimpleFinLinkId, "returned simplefin link must match")
+	})
+
+	t.Run("pending newer than a day", func(t *testing.T) {
+		clock := clock.NewMock()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		jobRepo := repository.NewJobRepository(db, clock)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+		link.SimpleFinLink.Status = SimpleFinLinkStatusPending
+		testutils.MustDBUpdate(t, link.SimpleFinLink)
+
+		clock.Add(23 * time.Hour)
+
+		result, err := jobRepo.GetStaleSimpleFinLinks(t.Context())
+		assert.NoError(t, err, "must not return an error")
+		assert.Empty(t, result, "should not return a pending link that is not stale yet")
+	})
+
+	t.Run("active older than a day", func(t *testing.T) {
+		clock := clock.NewMock()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		jobRepo := repository.NewJobRepository(db, clock)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+
+		clock.Add(25 * time.Hour)
+
+		result, err := jobRepo.GetStaleSimpleFinLinks(t.Context())
+		assert.NoError(t, err, "must not return an error")
+		assert.Empty(t, result, "should not return active links")
+	})
+}

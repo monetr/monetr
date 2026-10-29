@@ -9,6 +9,7 @@ import (
 	"github.com/monetr/monetr/server/datasources/lunch_flow/lunch_flow_jobs"
 	"github.com/monetr/monetr/server/datasources/ofx/ofx_jobs"
 	"github.com/monetr/monetr/server/datasources/plaid/plaid_jobs"
+	"github.com/monetr/monetr/server/datasources/simplefin/simplefin_jobs"
 	"github.com/monetr/monetr/server/funding/funding_jobs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/links/link_jobs"
@@ -31,6 +32,15 @@ func RegisterJobs(
 			queue.Register(ctx, processor, lunch_flow_jobs.SyncLunchFlow),
 			queue.RegisterCron(ctx, processor, lunch_flow_jobs.CleanupLunchFlowCron, "0 15 1 * * *"),
 			queue.RegisterCron(ctx, processor, lunch_flow_jobs.SyncLunchFlowCron, "0 20 */6 * * *"),
+		); err != nil {
+			return err
+		}
+	}
+
+	if config.SimpleFin.IsEnabled() {
+		if err := myownsanity.FirstError(
+			queue.Register(ctx, processor, simplefin_jobs.CleanupSimpleFin),
+			queue.RegisterCron(ctx, processor, simplefin_jobs.CleanupSimpleFinCron, "0 25 1 * * *"),
 		); err != nil {
 			return err
 		}
