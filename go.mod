@@ -25,7 +25,7 @@ require (
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/hashicorp/vault/api v1.23.0
 	github.com/jarcoal/httpmock v1.4.2
-	github.com/labstack/echo/v5 v5.4.1
+	github.com/labstack/echo/v5 v5.4.2
 	github.com/monetr/devslog v0.0.17
 	github.com/monetr/validation v1.3.0
 	github.com/oklog/ulid/v2 v2.1.2
