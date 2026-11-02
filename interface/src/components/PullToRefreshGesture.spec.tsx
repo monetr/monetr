@@ -8,11 +8,12 @@ import { fireEvent } from '@testing-library/react';
 import PullToRefreshGesture from '@monetr/interface/components/PullToRefreshGesture';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
-// jsdom 26 makes window.location non-configurable. To mock location.reload, we spy on jsdom's internal implementation
-// via its symbol property.
-const implSymbol = Reflect.ownKeys(window.location).find(i => typeof i === 'symbol');
-if (!implSymbol) {
-  throw new Error('jsdom implementation symbol not found on window.location');
+// jsdom makes window.location non-configurable. To mock location.reload, we spy on jsdom's internal Location
+// implementation, which the window's document holds onto.
+// biome-ignore lint/suspicious/noExplicitAny: This is a jsdom internal, there isn't a type for it
+const locationImpl = (window as any)._document?._location;
+if (!locationImpl) {
+  throw new Error('jsdom location implementation not found on window._document');
 }
 
 // The real app renders PullToRefreshGesture through PullToRefresh which waits for the page to finish loading first, so
@@ -58,8 +59,7 @@ describe('pull to refresh', () => {
 
   beforeEach(() => {
     refetchSpy = rs.spyOn(QueryClient.prototype, 'refetchQueries').mockResolvedValue(undefined);
-    // biome-ignore lint/suspicious/noExplicitAny: :middlefinder:
-    reloadSpy = rs.spyOn((window.location as any)[implSymbol], 'reload').mockImplementation(() => {});
+    reloadSpy = rs.spyOn(locationImpl, 'reload').mockImplementation(() => {});
   });
 
   afterEach(() => {

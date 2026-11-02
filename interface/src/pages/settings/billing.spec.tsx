@@ -11,11 +11,13 @@ import testRenderer from '@monetr/interface/testutils/renderer';
 
 const locationAssignMock = rs.fn();
 
-// jsdom 26 makes window.location non-configurable. To mock location.assign,
-// we spy on jsdom's internal implementation via its symbol property.
-const implSymbol = Reflect.ownKeys(window.location).find(i => typeof i === 'symbol');
-if (!implSymbol) {
-  throw new Error('jsdom implementation symbol not found on window.location');
+// jsdom makes window.location non-configurable. To mock location.assign, we
+// spy on jsdom's internal Location implementation, which the window's document
+// holds onto.
+// biome-ignore lint/suspicious/noExplicitAny: This is a jsdom internal, there isn't a type for it
+const locationImpl = (window as any)._document?._location;
+if (!locationImpl) {
+  throw new Error('jsdom location implementation not found on window._document');
 }
 
 describe('billing settings page', () => {
@@ -23,8 +25,7 @@ describe('billing settings page', () => {
   let assignSpy: ReturnType<typeof rs.spyOn>;
 
   beforeAll(() => {
-    // biome-ignore lint/suspicious/noExplicitAny: This is a jsdom internal, there isn't a type for it
-    assignSpy = rs.spyOn((window.location as any)[implSymbol], 'assign').mockImplementation(locationAssignMock);
+    assignSpy = rs.spyOn(locationImpl, 'assign').mockImplementation(locationAssignMock);
   });
 
   beforeEach(() => {
