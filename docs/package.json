@@ -35,7 +35,7 @@
     "remark-math": "6.0.0",
     "rspress-plugin-mermaid": "1.0.3",
     "rspress-plugin-reading-time": "1.0.1",
-    "unist-util-visit": "5.1.0"
+    "unist-util-visit": "5.2.0"
   },
   "devDependencies": {
     "@rsbuild/core": "2.2.14",
