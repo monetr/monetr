@@ -15,6 +15,7 @@ import (
 	time "time"
 
 	platypus "github.com/monetr/monetr/server/platypus"
+	plaid "github.com/plaid/plaid-go/v49"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -60,6 +61,21 @@ func (mr *MockClientMockRecorder) GetAccounts(ctx any, accountIds ...any) *gomoc
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx}, accountIds...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccounts", reflect.TypeOf((*MockClient)(nil).GetAccounts), varargs...)
+}
+
+// GetAccountsRaw mocks base method.
+func (m *MockClient) GetAccountsRaw(ctx context.Context) (*plaid.AccountsGetResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAccountsRaw", ctx)
+	ret0, _ := ret[0].(*plaid.AccountsGetResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAccountsRaw indicates an expected call of GetAccountsRaw.
+func (mr *MockClientMockRecorder) GetAccountsRaw(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccountsRaw", reflect.TypeOf((*MockClient)(nil).GetAccountsRaw), ctx)
 }
 
 // GetAllTransactions mocks base method.

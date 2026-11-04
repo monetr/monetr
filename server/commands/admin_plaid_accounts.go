@@ -1,0 +1,110 @@
+package commands
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+
+	"github.com/benbjohnson/clock"
+	"github.com/monetr/monetr/server/config"
+	"github.com/monetr/monetr/server/database"
+	"github.com/monetr/monetr/server/logging"
+	"github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/platypus"
+	"github.com/monetr/monetr/server/secrets"
+	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
+)
+
+func adminPlaidAccounts(parent *cobra.Command) {
+	var arguments struct {
+		LinkID string
+	}
+	command := &cobra.Command{
+		Use:   "plaid:accounts",
+		Short: "Retrieve the accounts and their cached balances from Plaid for a Plaid link",
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			clock := clock.New()
+			configuration := config.LoadConfiguration()
+
+			log := logging.NewLoggerWithConfig(configuration.Logging)
+			if configFileName := configuration.GetConfigFileName(); configFileName != "" {
+				log.Info("config file loaded", "config", configFileName)
+			}
+
+			if arguments.LinkID == "" {
+				log.Error("link ID must be specified via --link")
+				return cmd.Help()
+			}
+
+			db, err := database.GetDatabase(log, configuration)
+			if err != nil {
+				log.Error("failed to setup database", "err", err)
+				return err
+			}
+
+			kms, err := secrets.GetKMS(log, configuration)
+			if err != nil {
+				log.Error("failed to initialize KMS", "err", err)
+				return err
+			}
+
+			log.Info("retrieving link from database")
+			var link models.Link
+			if err := db.NewSelect().
+				Model(&link).
+				Relation("PlaidLink").
+				Where(`"link"."link_id" = ?`, arguments.LinkID).
+				Limit(1).
+				Scan(context.Background()); err != nil {
+				log.Error("failed to retrieve link specified", "err", err)
+				return err
+			}
+
+			if link.PlaidLink == nil {
+				log.Error("link does not have a plaid link!")
+				return errors.New("link is not a valid plaid link")
+			}
+
+			plaid := platypus.NewPlaid(
+				log,
+				clock,
+				kms,
+				db,
+				configuration.Plaid,
+			)
+
+			client, err := plaid.NewClientFromLink(
+				context.Background(),
+				link.AccountId,
+				link.LinkId,
+			)
+			if err != nil {
+				log.Warn("failed to create Plaid client", "err", err)
+				return err
+			}
+
+			log.Info("retrieving accounts from plaid")
+
+			result, err := client.GetAccountsRaw(context.Background())
+			if err != nil {
+				log.Error("failed to retrieve accounts", "err", err)
+				return err
+			}
+
+			encoded, err := json.MarshalIndent(result, "", "  ")
+			if err != nil {
+				log.Error("failed to encode accounts", "err", err)
+				return err
+			}
+
+			fmt.Println(string(encoded))
+
+			return nil
+		},
+	}
+
+	command.PersistentFlags().StringVar(&arguments.LinkID, "link", "", "Link Id to retrieve the Plaid accounts for")
+
+	parent.AddCommand(command)
+}
