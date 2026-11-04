@@ -27,9 +27,10 @@ type Row struct {
 	Balance   int64     `json:"balance"`
 }
 
-func (r *Row) Validate() error {
+func (r *Row) Validate(ctx context.Context) error {
 	return errors.Wrap(
-		validation.ValidateStruct(
+		validation.ValidateStructWithContext(
+			ctx,
 			r,
 			validation.Field(
 				&r.ID,
@@ -79,25 +80,29 @@ type Table struct {
 	headers         []string
 	mapping         *Mapping
 	reader          TableReader
+	occurrences     map[string]int
 }
 
 func NewTable(
 	reader TableReader,
+	currency string,
+	timezone *time.Location,
 	mapping *Mapping,
 	firstRowHeaders bool,
 ) *Table {
 	return &Table{
-		currency:        "USD",    // TODO!!!
-		timezone:        time.UTC, // TODO!!!
+		currency:        currency, // TODO!!!
+		timezone:        timezone, // TODO!!!
 		firstRowHeaders: firstRowHeaders,
 		reader:          reader,
 		mapping:         mapping,
+		occurrences:     map[string]int{},
 	}
 }
 
-func (t *Table) Read() (*Row, error) {
+func (t *Table) Read(ctx context.Context) (*Row, error) {
 	if t.firstRowHeaders && t.index == 0 {
-		if err := t.mapping.Validate(context.TODO()); err != nil {
+		if err := t.mapping.Validate(ctx); err != nil {
 			return nil, err
 		}
 
@@ -112,7 +117,7 @@ func (t *Table) Read() (*Row, error) {
 		}
 		t.index++
 	} else if !t.firstRowHeaders && len(t.headers) == 0 {
-		if err := t.mapping.Validate(context.TODO()); err != nil {
+		if err := t.mapping.Validate(ctx); err != nil {
 			return nil, err
 		}
 
@@ -175,6 +180,10 @@ func (t *Table) Read() (*Row, error) {
 		Balance:   balance,
 	}
 
+	if err := row.Validate(ctx); err != nil {
+		return nil, err
+	}
+
 	return &row, nil
 }
 
@@ -188,14 +197,32 @@ func (t *Table) getID(data []string) (string, error) {
 		return strings.Join(values, "::"), nil
 	case IDSpecKindHashed:
 		hash := fnv.New64()
+		occurrence := false
 		for _, field := range t.mapping.ID.Fields {
+			// The occurrence is counted off the hash of the other fields, so it
+			// can't be part of the hash itself
+			if field.DerivedKind == DerivedKindOccurrence {
+				occurrence = true
+				continue
+			}
 			_, err := hash.Write([]byte(t.getField(data, field)))
 			if err != nil {
 				return "", errors.WithStack(err)
 			}
 		}
 
-		return base32.StdEncoding.EncodeToString(hash.Sum(nil)), nil
+		id := base32.StdEncoding.EncodeToString(hash.Sum(nil))
+		if !occurrence {
+			return id, nil
+		}
+
+		// Banks will give us identical rows for legit separate transactions, like
+		// two of the same transfer on the same day. So count how many times we've
+		// seen this hash so far and tack that on. Rows with the same hash are
+		// identical so the order we see them in doesn't matter, and if old rows
+		// fall off the end of the file we only lose the higher numbers.
+		t.occurrences[id]++
+		return id + ":" + strconv.Itoa(t.occurrences[id]), nil
 	default:
 		panic("invalid id spec")
 	}

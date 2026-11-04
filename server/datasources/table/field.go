@@ -16,6 +16,11 @@ const (
 	// exactly stable since new rows are added and old rows are eventually
 	// removed.
 	DerivedKindRowNumber DerivedKind = "rowNumber"
+	// DerivedKindOccurrence is the 1 indexed count of rows we've seen so far in
+	// the file that have the same hash for the other ID fields. This way
+	// identical rows can still get their own ID. Can only be used in a hashed
+	// [IDSpec].
+	DerivedKindOccurrence DerivedKind = "occurrence"
 	// // DerivedKindRowNumberPerDay is the 0 indexed count of rows per date value.
 	// // This is from the bottom to the top of the file.
 	// DerivedKindRowNumberPerDay DerivedKind = "rowNumberPerDay"

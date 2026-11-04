@@ -1475,12 +1475,18 @@ func TestTable_Read(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			reader := csv.NewReader(strings.NewReader(tc.csv))
-			tbl := table.NewTable(reader, tc.mapping, tc.firstRowHeaders)
+			tbl := table.NewTable(
+				reader,
+				"USD",
+				time.UTC,
+				tc.mapping,
+				tc.firstRowHeaders,
+			)
 
 			var got []table.Row
 			var lastErr error
 			for {
-				row, err := tbl.Read()
+				row, err := tbl.Read(t.Context())
 				if err != nil {
 					lastErr = err
 					break

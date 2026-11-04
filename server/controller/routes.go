@@ -366,6 +366,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 		billedKeyOrToken.POST("/bank_accounts/:bankAccountId/transactions/import", c.postTransactionImport)
 		billedKeyOrToken.GET("/bank_accounts/:bankAccountId/transactions/import/:transactionImportId", c.getTransactionImportById)
 		billedKeyOrToken.PATCH("/bank_accounts/:bankAccountId/transactions/import/:transactionImportId", c.patchTransactionImport)
+		billedKeyOrToken.GET("/bank_accounts/:bankAccountId/transactions/import/:transactionImportId/preview", c.getTransactionImportPreviewByTransactionImportId)
 	}
 
 	// Uploads
