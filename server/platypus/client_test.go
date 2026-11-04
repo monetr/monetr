@@ -72,6 +72,62 @@ func TestPlaidClient_GetAccount(t *testing.T) {
 	})
 }
 
+func TestPlaidClient_GetAccountsRaw(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
+		clock := clock.New()
+
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		log := testutils.GetLog(t)
+		kms := secrets.NewPlaintextKMS()
+		db := testutils.GetPgDatabase(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		plaidLink := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+
+		secret, err := repository.NewSecretsRepository(
+			log,
+			clock,
+			db,
+			kms,
+			plaidLink.AccountId,
+		).Read(t.Context(), plaidLink.PlaidLink.SecretId)
+		assert.NoError(t, err, "must be able to read the secret")
+
+		account := mock_plaid.BankAccountFixture(t)
+
+		mock_plaid.MockGetAccounts(t, []*plaid.AccountBase{
+			account,
+		})
+
+		client := NewPlaid(log, clock, secrets.NewPlaintextKMS(), nil, config.Plaid{
+			ClientID:     gofakeit.UUID(),
+			ClientSecret: gofakeit.UUID(),
+			Environment:  plaid.Environments.Sandbox,
+		})
+
+		link := &models.Link{
+			LinkId:    "link_foo",
+			AccountId: user.AccountId,
+		}
+
+		platypus, err := client.NewClient(
+			t.Context(),
+			link,
+			secret.Value,
+			gofakeit.UUID(),
+		)
+		assert.NoError(t, err, "should create platypus")
+		assert.NotNil(t, platypus, "should not be nil")
+
+		result, err := platypus.GetAccountsRaw(t.Context())
+		assert.NoError(t, err, "should not return an error retrieving accounts")
+		assert.NotNil(t, result, "should return a response")
+		assert.Len(t, result.Accounts, 1, "should return the one account")
+		assert.Equal(t, account.GetAccountID(), result.Accounts[0].GetAccountID(), "should return the same account")
+	})
+}
+
 func TestPlaidClient_GetAllTransactions(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		clock := clock.New()

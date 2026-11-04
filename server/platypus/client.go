@@ -20,6 +20,10 @@ import (
 type (
 	Client interface {
 		GetAccounts(ctx context.Context, accountIds ...string) ([]BankAccount, error)
+		// GetAccountsRaw retrieves all of the accounts for the current link and
+		// returns Plaid's response as is, without converting it to monetr's own
+		// bank account interface. This is intended for debugging links.
+		GetAccountsRaw(ctx context.Context) (*plaid.AccountsGetResponse, error)
 		GetAllTransactions(ctx context.Context, start, end time.Time, accountIds []string) ([]Transaction, error)
 		// UpdateItem will create a LinkToken that is used to allow the client to update this particular link. This can be
 		// used to resolve issues with the link and its authentication. Or can be used to add/remove accounts that monetr
@@ -127,6 +131,37 @@ func (p *PlaidClient) GetAccounts(ctx context.Context, accountIds ...string) ([]
 	}
 
 	return accounts, nil
+}
+
+func (p *PlaidClient) GetAccountsRaw(ctx context.Context) (*plaid.AccountsGetResponse, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	span.SetTag("itemId", p.itemId)
+
+	log := p.getLog(span)
+
+	log.Log(span.Context(), logging.LevelTrace, "retrieving raw bank accounts from plaid")
+
+	// Send the request.
+	result, err := p.client.Accounts.Get(
+		span.Context(),
+		&plaid.AccountsGetRequest{
+			AccessToken: p.accessToken,
+		},
+	)
+	// And handle the response.
+	if err = after(
+		span,
+		err,
+		"Retrieving raw bank accounts from Plaid",
+		"failed to retrieve raw bank accounts from plaid",
+	); err != nil {
+		log.ErrorContext(span.Context(), "failed to retrieve raw bank accounts from plaid", "err", err)
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func (p *PlaidClient) GetAllTransactions(
