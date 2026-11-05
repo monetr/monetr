@@ -40,6 +40,7 @@ func RegisterJobs(
 	if config.SimpleFin.IsEnabled() {
 		if err := myownsanity.FirstError(
 			queue.Register(ctx, processor, simplefin_jobs.CleanupSimpleFin),
+			queue.Register(ctx, processor, simplefin_jobs.SyncSimpleFin),
 			queue.RegisterCron(ctx, processor, simplefin_jobs.CleanupSimpleFinCron, "0 25 1 * * *"),
 		); err != nil {
 			return err
