@@ -10,9 +10,12 @@ import (
 	"github.com/monetr/monetr/server/currency"
 	"github.com/monetr/monetr/server/datasources/simplefin"
 	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/similar/similar_jobs"
+	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -51,6 +54,13 @@ type syncSimpleFinContext struct {
 	client        simplefin.SimpleFinClient
 	simpleFinLink *models.SimpleFinLink
 	accountSet    *simplefin.AccountSet
+	bankAccounts  []simpleFinBankAccountMatch
+}
+
+type simpleFinBankAccountMatch struct {
+	log         *slog.Logger
+	bankAccount models.BankAccount
+	external    simplefin.Account
 }
 
 func (s *syncSimpleFinContext) announceProgress(
@@ -142,17 +152,20 @@ func (s *syncSimpleFinContext) setupClient(ctx queue.Context) error {
 	return nil
 }
 
-func (s *syncSimpleFinContext) syncBalances(ctx queue.Context) error {
+// matchBankAccounts pairs each of the link's bank accounts with its account
+// in the SimpleFIN response. Only bank accounts the user has turned on and that
+// are actually in the response are kept, both the transaction and balance steps
+// work off of this.
+func (s *syncSimpleFinContext) matchBankAccounts(ctx queue.Context) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-
-	s.log.DebugContext(span.Context(), "syncing SimpleFIN balances")
 
 	bankAccounts, err := s.repo.GetBankAccountsByLinkId(span.Context(), s.args.LinkId)
 	if err != nil {
 		return err
 	}
 
+	s.bankAccounts = make([]simpleFinBankAccountMatch, 0, len(bankAccounts))
 	// The SimpleFIN account ID is only unique within its connection, so we need
 	// to match on both
 	for _, joined := range myownsanity.LeftJoin(
@@ -191,7 +204,7 @@ func (s *syncSimpleFinContext) syncBalances(ctx queue.Context) error {
 		// This is usually because SimpleFIN couldn't reach the institution, there
 		// should be an errlist entry for the connection that explains why.
 		if len(joined.Join) == 0 {
-			blog.WarnContext(span.Context(), "SimpleFIN account was not in the response, balances will not be updated")
+			blog.WarnContext(span.Context(), "SimpleFIN account was not in the response, it will not be synced")
 			continue
 		}
 		external := joined.Join[0]
@@ -205,6 +218,194 @@ func (s *syncSimpleFinContext) syncBalances(ctx queue.Context) error {
 				),
 			)
 		}
+
+		s.bankAccounts = append(s.bankAccounts, simpleFinBankAccountMatch{
+			log:         blog,
+			bankAccount: bankAccount,
+			external:    external,
+		})
+	}
+
+	return nil
+}
+
+func (s *syncSimpleFinContext) syncTransactions(ctx queue.Context) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	s.log.DebugContext(span.Context(), "syncing SimpleFIN transactions")
+
+	for _, match := range s.bankAccounts {
+		bankAccount := match.bankAccount
+		external := match.external
+		blog := match.log
+
+		transactionCurrency, err := currency.GetCurrency("en", bankAccount.Currency)
+		if err != nil {
+			blog.WarnContext(span.Context(), "bank account has an unsupported currency, transactions will not be synced",
+				"currency", bankAccount.Currency,
+				"err", err,
+			)
+			continue
+		}
+
+		simpleFinIds := make([]string, len(external.Transactions))
+		for i := range external.Transactions {
+			simpleFinIds[i] = external.Transactions[i].Id
+		}
+
+		existingTransactions, err := s.repo.GetTransactionsBySimpleFinId(
+			span.Context(),
+			bankAccount.BankAccountId,
+			simpleFinIds,
+		)
+		if err != nil {
+			return errors.Wrap(err, "failed to retrieve existing SimpleFIN transactions")
+		}
+
+		if count := len(existingTransactions); count > 0 {
+			blog.DebugContext(
+				span.Context(),
+				"found existing transactions for sync",
+				"existingTransactions", count,
+			)
+		}
+
+		simpleFinTransactionsToCreate := make([]models.SimpleFinTransaction, 0)
+		transactionsToCreate := make([]models.Transaction, 0)
+		// If SimpleFIN ever sends the same transaction twice in one response then
+		// inserting both would fail the unique constraint, and every sync after
+		// this one would fail the same way.
+		seen := make(map[string]struct{}, len(external.Transactions))
+		for _, externalTransaction := range external.Transactions {
+			tlog := blog.With(
+				slog.Group("simpleFinTransaction",
+					"simpleFinId", externalTransaction.Id,
+					"amount", externalTransaction.Amount.String(),
+				),
+			)
+
+			// We never ask for pending transactions so these shouldn't show up, but
+			// if they do we don't want them.
+			if externalTransaction.Pending {
+				tlog.DebugContext(span.Context(), "skipping pending SimpleFIN transaction")
+				continue
+			}
+
+			if _, ok := seen[externalTransaction.Id]; ok {
+				tlog.WarnContext(span.Context(), "SimpleFIN returned the same transaction more than once, skipping")
+				continue
+			}
+			seen[externalTransaction.Id] = struct{}{}
+
+			if _, ok := existingTransactions[externalTransaction.Id]; ok {
+				// TODO Handle updating transactions too!
+				tlog.Log(
+					span.Context(),
+					logging.LevelTrace,
+					"transaction from SimpleFIN already exists in monetr, skipping",
+				)
+				continue
+			}
+
+			// Amounts are JSON numbers so they always use . for the decimal and never
+			// have grouping, which is what en gives us.
+			amount, err := currency.ParseCurrency(
+				externalTransaction.Amount.String(),
+				transactionCurrency,
+			)
+			if err != nil {
+				tlog.ErrorContext(span.Context(), "failed to parse transaction amount", "err", err)
+				continue
+			}
+			// SimpleFIN is positive for deposits, monetr is positive for debits.
+			amount *= -1
+
+			// Transacted at is optional and what it means varies by institution, so
+			// posted is what we use for the date.
+			posted := time.Unix(externalTransaction.Posted, 0).UTC()
+			date := util.Midnight(posted, s.timezone)
+			var transactedAt *time.Time
+			if externalTransaction.TransactedAt != nil {
+				transactedAt = new(time.Unix(*externalTransaction.TransactedAt, 0).UTC())
+			}
+
+			name := myownsanity.CoalesceStrings(
+				externalTransaction.Description,
+				fmt.Sprintf(
+					"Transaction %s %s %s",
+					date.Format(time.DateOnly),
+					externalTransaction.Amount.String(),
+					external.Currency,
+				),
+			)
+
+			simpleFinTransaction := models.SimpleFinTransaction{
+				SimpleFinTransactionId: models.NewID[models.SimpleFinTransaction](),
+				AccountId:              bankAccount.AccountId,
+				SimpleFinBankAccountId: *bankAccount.SimpleFinBankAccountId,
+				SimpleFinId:            externalTransaction.Id,
+				Description:            name,
+				Amount:                 amount,
+				Posted:                 posted,
+				TransactedAt:           transactedAt,
+			}
+
+			transaction := models.Transaction{
+				AccountId:              bankAccount.AccountId,
+				BankAccountId:          bankAccount.BankAccountId,
+				SimpleFinTransactionId: &simpleFinTransaction.SimpleFinTransactionId,
+				SimpleFinTransaction:   &simpleFinTransaction,
+				Amount:                 amount,
+				Date:                   date,
+				Name:                   name,
+				OriginalName:           name,
+				IsPending:              false,
+				Source:                 models.TransactionSourceSimpleFin,
+			}
+
+			simpleFinTransactionsToCreate = append(simpleFinTransactionsToCreate, simpleFinTransaction)
+			transactionsToCreate = append(transactionsToCreate, transaction)
+		}
+
+		if count := len(transactionsToCreate); count > 0 {
+			blog.InfoContext(
+				span.Context(),
+				"creating new SimpleFIN transactions",
+				"new", count,
+			)
+
+			// Create SimpleFIN transactions first
+			if err := s.repo.CreateSimpleFinTransactions(
+				span.Context(),
+				simpleFinTransactionsToCreate,
+			); err != nil {
+				return errors.Wrap(err, "failed to persist new SimpleFIN transactions")
+			}
+
+			// Create actual monetr transactions
+			if err := s.repo.InsertTransactions(
+				span.Context(),
+				transactionsToCreate,
+			); err != nil {
+				return errors.Wrap(err, "failed to persist new transactions")
+			}
+		}
+	}
+
+	return nil
+}
+
+func (s *syncSimpleFinContext) syncBalances(ctx queue.Context) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	s.log.DebugContext(span.Context(), "syncing SimpleFIN balances")
+
+	for _, match := range s.bankAccounts {
+		bankAccount := match.bankAccount
+		external := match.external
+		blog := match.log
 
 		balanceCurrency, err := currency.GetCurrency("en", bankAccount.Currency)
 		if err != nil {
@@ -422,6 +623,15 @@ func SyncSimpleFin(ctx queue.Context, args SyncSimpleFinArguments) error {
 		// errors don't stick around after they've been resolved.
 		s.simpleFinLink.LastErrors = s.accountSet.GetLinkErrors()
 
+		if err := s.matchBankAccounts(ctx); err != nil {
+			return err
+		}
+
+		s.announceProgress(ctx, SimpleFinSyncStatusTransactions)
+		if err := s.syncTransactions(ctx); err != nil {
+			return err
+		}
+
 		s.announceProgress(ctx, SimpleFinSyncStatusBalances)
 		if err := s.syncBalances(ctx); err != nil {
 			return err
@@ -444,6 +654,32 @@ func SyncSimpleFin(ctx queue.Context, args SyncSimpleFinArguments) error {
 		s.log.ErrorContext(ctx, "failed to sync SimpleFIN link", "err", err)
 		s.announceProgress(ctx, SimpleFinSyncStatusError)
 		return queue.FailWithoutRetry(ctx, err)
+	}
+
+	// Kick off the transaction similarity job for each bank account we synced.
+	// This is after the commit so the job can see the new transactions, and a
+	// failure here shouldn't fail a sync that already succeeded.
+	if len(s.bankAccounts) > 0 {
+		if err := queue.BulkEnqueue(
+			ctx,
+			ctx.Enqueuer(),
+			similar_jobs.CalculateTransactionClusters,
+			myownsanity.Map(
+				s.bankAccounts,
+				func(match simpleFinBankAccountMatch) similar_jobs.CalculateTransactionClustersArguments {
+					return similar_jobs.CalculateTransactionClustersArguments{
+						AccountId:     s.args.AccountId,
+						BankAccountId: match.bankAccount.BankAccountId,
+					}
+				},
+			),
+		); err != nil {
+			s.log.ErrorContext(
+				ctx,
+				"failed to queue transaction cluster calculations",
+				"err", err,
+			)
+		}
 	}
 
 	s.announceProgress(ctx, SimpleFinSyncStatusComplete)

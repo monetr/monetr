@@ -21,6 +21,7 @@ import (
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/secrets"
+	"github.com/monetr/monetr/server/similar/similar_jobs"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
@@ -63,6 +64,16 @@ func TestSyncSimpleFin(t *testing.T) {
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
 		kms := secrets.NewPlaintextKMS()
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Return(nil).
+			Times(1)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
@@ -117,6 +128,7 @@ func TestSyncSimpleFin(t *testing.T) {
 		context.EXPECT().DB().Return(db).AnyTimes()
 		context.EXPECT().Log().Return(log).AnyTimes()
 		context.EXPECT().Publisher().Return(publisher).AnyTimes()
+		context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
 		context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
 
 		err := simplefin_jobs.SyncSimpleFin(
@@ -161,6 +173,16 @@ func TestSyncSimpleFin(t *testing.T) {
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
 		kms := secrets.NewPlaintextKMS()
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Return(nil).
+			Times(1)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
@@ -207,6 +229,7 @@ func TestSyncSimpleFin(t *testing.T) {
 		context.EXPECT().DB().Return(db).AnyTimes()
 		context.EXPECT().Log().Return(log).AnyTimes()
 		context.EXPECT().Publisher().Return(publisher).AnyTimes()
+		context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
 		context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
 
 		err := simplefin_jobs.SyncSimpleFin(
@@ -236,6 +259,16 @@ func TestSyncSimpleFin(t *testing.T) {
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
 		kms := secrets.NewPlaintextKMS()
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Return(nil).
+			Times(1)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
@@ -283,6 +316,7 @@ func TestSyncSimpleFin(t *testing.T) {
 		context.EXPECT().DB().Return(db).AnyTimes()
 		context.EXPECT().Log().Return(log).AnyTimes()
 		context.EXPECT().Publisher().Return(publisher).AnyTimes()
+		context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
 		context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
 
 		err := simplefin_jobs.SyncSimpleFin(
@@ -393,6 +427,16 @@ func TestSyncSimpleFin(t *testing.T) {
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
 		kms := secrets.NewPlaintextKMS()
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Return(nil).
+			Times(2)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
@@ -447,6 +491,7 @@ func TestSyncSimpleFin(t *testing.T) {
 			context.EXPECT().DB().Return(db).AnyTimes()
 			context.EXPECT().Log().Return(log).AnyTimes()
 			context.EXPECT().Publisher().Return(publisher).AnyTimes()
+			context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
 			context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
 
 			err := simplefin_jobs.SyncSimpleFin(
@@ -511,6 +556,7 @@ func TestSyncSimpleFin(t *testing.T) {
 			context.EXPECT().DB().Return(db).AnyTimes()
 			context.EXPECT().Log().Return(log).AnyTimes()
 			context.EXPECT().Publisher().Return(publisher).AnyTimes()
+			context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
 			context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
 
 			err := simplefin_jobs.SyncSimpleFin(
@@ -713,6 +759,16 @@ func TestSyncSimpleFin(t *testing.T) {
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
 		kms := secrets.NewPlaintextKMS()
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Return(nil).
+			Times(1)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
@@ -770,6 +826,7 @@ func TestSyncSimpleFin(t *testing.T) {
 		context.EXPECT().DB().Return(db).AnyTimes()
 		context.EXPECT().Log().Return(log).AnyTimes()
 		context.EXPECT().Publisher().Return(publisher).AnyTimes()
+		context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
 		context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
 
 		err := simplefin_jobs.SyncSimpleFin(
@@ -847,6 +904,16 @@ func TestSyncSimpleFin(t *testing.T) {
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
 		kms := secrets.NewPlaintextKMS()
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Return(nil).
+			Times(1)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
@@ -908,6 +975,7 @@ func TestSyncSimpleFin(t *testing.T) {
 		context.EXPECT().DB().Return(db).AnyTimes()
 		context.EXPECT().Log().Return(log).AnyTimes()
 		context.EXPECT().Publisher().Return(publisher).AnyTimes()
+		context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
 		context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
 
 		err = simplefin_jobs.SyncSimpleFin(
@@ -922,7 +990,7 @@ func TestSyncSimpleFin(t *testing.T) {
 		statuses := make([]string, 0)
 		deadline := time.After(10 * time.Second)
 	ReadLoop:
-		for len(statuses) < 3 {
+		for len(statuses) < 4 {
 			select {
 			case payload := <-payloads:
 				var message map[string]string
@@ -936,6 +1004,7 @@ func TestSyncSimpleFin(t *testing.T) {
 
 		assert.Equal(t, []string{
 			"begin",
+			"transactions",
 			"balances",
 			"complete",
 		}, statuses, "should announce the sync progress in order")
@@ -1021,4 +1090,506 @@ func TestSyncSimpleFin(t *testing.T) {
 			"error",
 		}, statuses, "should announce the error so the client stops waiting")
 	})
+}
+
+func TestSyncSimpleFinTransactions(t *testing.T) {
+	// 2026-10-15 03:00 UTC is still 2026-10-14 in Chicago, so the dates in these
+	// tests only line up if the account's timezone is actually used.
+	now := time.Date(2026, 10, 15, 3, 0, 0, 0, time.UTC)
+
+	t.Run("creates transactions", func(t *testing.T) {
+		clock := clock.NewMock()
+		clock.Set(now)
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		enqueuer := givenAnyClusterEnqueue(ctrl, 1)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		user.Account.Timezone = "America/Chicago"
+		testutils.MustDBUpdate(t, user.Account)
+		timezone, err := user.Account.GetTimezone()
+		require.NoError(t, err, "must be able to load the account timezone")
+		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
+
+		transactedAt := now.Add(-26 * time.Hour).Unix()
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+		mock_simplefin.MockFetchAccounts(t, simpleFinAccountSet(
+			simpleFinAccountFor(bankAccount,
+				simplefin.Transaction{
+					Id:           "TRN-1",
+					Posted:       now.Unix(),
+					Amount:       "-19.99",
+					Description:  "TACO BELL",
+					TransactedAt: &transactedAt,
+				},
+				simplefin.Transaction{
+					Id:          "TRN-2",
+					Posted:      now.Add(-33 * time.Hour).Unix(),
+					Amount:      "2000.00",
+					Description: "PAYROLL",
+				},
+			),
+		))
+
+		runSimpleFinSync(t, ctrl, clock, enqueuer, bankAccount)
+
+		transactions := readSimpleFinTransactions(t, bankAccount)
+		require.Len(t, transactions, 2, "should create both transactions")
+
+		spent := transactions[0]
+		assert.EqualValues(t, 1999, spent.Amount, "money spent should be positive in monetr")
+		assert.Equal(t, time.Date(2026, 10, 14, 0, 0, 0, 0, timezone), spent.Date.In(timezone), "date should be midnight of the posted day in the account timezone")
+		assert.Equal(t, "TACO BELL", spent.Name, "name should be the description")
+		assert.Equal(t, "TACO BELL", spent.OriginalName, "original name should be the description")
+		assert.Equal(t, models.TransactionSourceSimpleFin, spent.Source, "source should be simplefin")
+		assert.False(t, spent.IsPending, "should not be pending")
+		require.NotNil(t, spent.SimpleFinTransaction, "must be linked to the simplefin transaction")
+		assert.Equal(t, "TRN-1", spent.SimpleFinTransaction.SimpleFinId, "should store the simplefin id")
+		assert.Equal(t, *bankAccount.SimpleFinBankAccountId, spent.SimpleFinTransaction.SimpleFinBankAccountId, "should be on the simplefin bank account")
+		assert.WithinDuration(t, now, spent.SimpleFinTransaction.Posted, 0, "should store the posted timestamp")
+		require.NotNil(t, spent.SimpleFinTransaction.TransactedAt, "should store transacted at when it is sent")
+		assert.WithinDuration(t, time.Unix(transactedAt, 0), *spent.SimpleFinTransaction.TransactedAt, 0, "should store transacted at")
+
+		deposit := transactions[1]
+		assert.EqualValues(t, -200000, deposit.Amount, "deposits should be negative in monetr")
+		assert.Equal(t, time.Date(2026, 10, 13, 0, 0, 0, 0, timezone), deposit.Date.In(timezone), "date should be midnight of the posted day in the account timezone")
+		require.NotNil(t, deposit.SimpleFinTransaction, "must be linked to the simplefin transaction")
+		assert.Nil(t, deposit.SimpleFinTransaction.TransactedAt, "transacted at should be empty when it isn't sent")
+	})
+
+	t.Run("same response twice creates nothing new", func(t *testing.T) {
+		clock := clock.NewMock()
+		clock.Set(now)
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		enqueuer := givenAnyClusterEnqueue(ctrl, 2)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
+
+		accountSet := simpleFinAccountSet(
+			simpleFinAccountFor(bankAccount,
+				simplefin.Transaction{Id: "TRN-1", Posted: now.Unix(), Amount: "-19.99", Description: "TACO BELL"},
+				simplefin.Transaction{Id: "TRN-2", Posted: now.Unix(), Amount: "-5.00", Description: "COFFEE"},
+			),
+		)
+
+		for range 2 {
+			func() {
+				httpmock.Activate()
+				defer httpmock.DeactivateAndReset()
+				mock_simplefin.MockFetchAccounts(t, accountSet)
+				runSimpleFinSync(t, ctrl, clock, enqueuer, bankAccount)
+			}()
+			clock.Add(time.Hour)
+		}
+
+		assert.EqualValues(t, 2, fixtures.CountAllTransactions(t, user.AccountId), "second sync should not create anything")
+	})
+
+	t.Run("second sync creates only the new transaction", func(t *testing.T) {
+		clock := clock.NewMock()
+		clock.Set(now)
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		enqueuer := givenAnyClusterEnqueue(ctrl, 2)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
+
+		first := simplefin.Transaction{Id: "TRN-1", Posted: now.Unix(), Amount: "-19.99", Description: "TACO BELL"}
+		second := simplefin.Transaction{Id: "TRN-2", Posted: now.Unix(), Amount: "-5.00", Description: "COFFEE"}
+
+		func() {
+			httpmock.Activate()
+			defer httpmock.DeactivateAndReset()
+			mock_simplefin.MockFetchAccounts(t, simpleFinAccountSet(simpleFinAccountFor(bankAccount, first)))
+			runSimpleFinSync(t, ctrl, clock, enqueuer, bankAccount)
+		}()
+		original := readSimpleFinTransactions(t, bankAccount)
+		require.Len(t, original, 1, "first sync should create one transaction")
+
+		clock.Add(time.Hour)
+		func() {
+			httpmock.Activate()
+			defer httpmock.DeactivateAndReset()
+			mock_simplefin.MockFetchAccounts(t, simpleFinAccountSet(simpleFinAccountFor(bankAccount, second, first)))
+			runSimpleFinSync(t, ctrl, clock, enqueuer, bankAccount)
+		}()
+
+		transactions := readSimpleFinTransactions(t, bankAccount)
+		require.Len(t, transactions, 2, "second sync should only add the new transaction")
+		assert.Equal(t, original[0].TransactionId, transactions[0].TransactionId, "existing transaction should be left alone")
+		assert.Equal(t, "TRN-2", transactions[1].SimpleFinTransaction.SimpleFinId, "new transaction should be created")
+	})
+
+	t.Run("two connections land on the right accounts", func(t *testing.T) {
+		clock := clock.NewMock()
+		clock.Set(now)
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		enqueuer := givenAnyClusterEnqueue(ctrl, 1)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+		// The fixture gives each bank account its own connection.
+		firstBankAccount := fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
+		secondBankAccount := fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
+		require.NotEqual(t, firstBankAccount.SimpleFinBankAccount.ConnectionId, secondBankAccount.SimpleFinBankAccount.ConnectionId, "bank accounts should be on different connections")
+
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+		mock_simplefin.MockFetchAccounts(t, simpleFinAccountSet(
+			simpleFinAccountFor(firstBankAccount,
+				simplefin.Transaction{Id: "TRN-A1", Posted: now.Unix(), Amount: "-1.00", Description: "FIRST ONE"},
+				simplefin.Transaction{Id: "TRN-A2", Posted: now.Unix(), Amount: "-2.00", Description: "FIRST TWO"},
+			),
+			simpleFinAccountFor(secondBankAccount,
+				simplefin.Transaction{Id: "TRN-B1", Posted: now.Unix(), Amount: "-3.00", Description: "SECOND ONE"},
+			),
+		))
+
+		runSimpleFinSync(t, ctrl, clock, enqueuer, firstBankAccount)
+
+		first := readSimpleFinTransactions(t, firstBankAccount)
+		require.Len(t, first, 2, "first bank account should have its two transactions")
+		assert.Equal(t, "TRN-A1", first[0].SimpleFinTransaction.SimpleFinId)
+		assert.Equal(t, "TRN-A2", first[1].SimpleFinTransaction.SimpleFinId)
+
+		second := readSimpleFinTransactions(t, secondBankAccount)
+		require.Len(t, second, 1, "second bank account should have its one transaction")
+		assert.Equal(t, "TRN-B1", second[0].SimpleFinTransaction.SimpleFinId)
+		assert.Equal(t, *secondBankAccount.SimpleFinBankAccountId, second[0].SimpleFinTransaction.SimpleFinBankAccountId)
+	})
+
+	t.Run("same account id on different connections", func(t *testing.T) {
+		clock := clock.NewMock()
+		clock.Set(now)
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		enqueuer := givenAnyClusterEnqueue(ctrl, 1)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+		firstBankAccount := fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
+		secondBankAccount := fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
+		// SimpleFIN only promises an account id is unique within its connection.
+		secondBankAccount.SimpleFinBankAccount.SimpleFinId = firstBankAccount.SimpleFinBankAccount.SimpleFinId
+		testutils.MustDBUpdate(t, secondBankAccount.SimpleFinBankAccount)
+
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+		// The transaction ids are the same too since those are only unique within
+		// an account.
+		mock_simplefin.MockFetchAccounts(t, simpleFinAccountSet(
+			simpleFinAccountFor(firstBankAccount,
+				simplefin.Transaction{Id: "TRN-1", Posted: now.Unix(), Amount: "-1.00", Description: "FIRST"},
+			),
+			simpleFinAccountFor(secondBankAccount,
+				simplefin.Transaction{Id: "TRN-1", Posted: now.Unix(), Amount: "-2.00", Description: "SECOND"},
+			),
+		))
+
+		runSimpleFinSync(t, ctrl, clock, enqueuer, firstBankAccount)
+
+		first := readSimpleFinTransactions(t, firstBankAccount)
+		require.Len(t, first, 1, "first bank account should have one transaction")
+		assert.EqualValues(t, 100, first[0].Amount, "first bank account should get its own transaction")
+		assert.Equal(t, "FIRST", first[0].Name)
+
+		second := readSimpleFinTransactions(t, secondBankAccount)
+		require.Len(t, second, 1, "second bank account should have one transaction")
+		assert.EqualValues(t, 200, second[0].Amount, "second bank account should get its own transaction")
+		assert.Equal(t, "SECOND", second[0].Name)
+	})
+
+	t.Run("deleted transaction does not come back", func(t *testing.T) {
+		clock := clock.NewMock()
+		clock.Set(now)
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		enqueuer := givenAnyClusterEnqueue(ctrl, 2)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
+
+		accountSet := simpleFinAccountSet(
+			simpleFinAccountFor(bankAccount,
+				simplefin.Transaction{Id: "TRN-1", Posted: now.Unix(), Amount: "-19.99", Description: "TACO BELL"},
+			),
+		)
+
+		func() {
+			httpmock.Activate()
+			defer httpmock.DeactivateAndReset()
+			mock_simplefin.MockFetchAccounts(t, accountSet)
+			runSimpleFinSync(t, ctrl, clock, enqueuer, bankAccount)
+		}()
+
+		transactions := readSimpleFinTransactions(t, bankAccount)
+		require.Len(t, transactions, 1, "first sync should create the transaction")
+		transaction := transactions[0]
+		transaction.DeletedAt = new(clock.Now())
+		testutils.MustDBUpdate(t, &transaction)
+		require.EqualValues(t, 0, fixtures.CountNonDeletedTransactions(t, user.AccountId), "transaction should be deleted")
+
+		clock.Add(time.Hour)
+		func() {
+			httpmock.Activate()
+			defer httpmock.DeactivateAndReset()
+			mock_simplefin.MockFetchAccounts(t, accountSet)
+			runSimpleFinSync(t, ctrl, clock, enqueuer, bankAccount)
+		}()
+
+		assert.EqualValues(t, 0, fixtures.CountNonDeletedTransactions(t, user.AccountId), "deleted transaction should not come back")
+		assert.EqualValues(t, 1, fixtures.CountAllTransactions(t, user.AccountId), "should not create a new copy of the transaction")
+	})
+
+	t.Run("empty description uses the fallback name", func(t *testing.T) {
+		clock := clock.NewMock()
+		clock.Set(now)
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		enqueuer := givenAnyClusterEnqueue(ctrl, 1)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		user.Account.Timezone = "America/Chicago"
+		testutils.MustDBUpdate(t, user.Account)
+		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
+
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+		mock_simplefin.MockFetchAccounts(t, simpleFinAccountSet(
+			simpleFinAccountFor(bankAccount,
+				simplefin.Transaction{Id: "TRN-1", Posted: now.Unix(), Amount: "-12.34", Description: ""},
+			),
+		))
+
+		runSimpleFinSync(t, ctrl, clock, enqueuer, bankAccount)
+
+		transactions := readSimpleFinTransactions(t, bankAccount)
+		require.Len(t, transactions, 1, "should create the transaction")
+		// The date is the local date, not the UTC one.
+		assert.Equal(t, "Transaction 2026-10-14 -12.34 USD", transactions[0].Name, "should use the fallback name")
+		assert.Equal(t, "Transaction 2026-10-14 -12.34 USD", transactions[0].OriginalName, "should use the fallback original name")
+		assert.Equal(t, "Transaction 2026-10-14 -12.34 USD", transactions[0].SimpleFinTransaction.Description, "should use the fallback description")
+	})
+
+	t.Run("JPY has no decimals", func(t *testing.T) {
+		clock := clock.NewMock()
+		clock.Set(now)
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		enqueuer := givenAnyClusterEnqueue(ctrl, 1)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
+		bankAccount.Currency = "JPY"
+		testutils.MustDBUpdate(t, &bankAccount)
+		bankAccount.SimpleFinBankAccount.Currency = "JPY"
+		testutils.MustDBUpdate(t, bankAccount.SimpleFinBankAccount)
+
+		account := simpleFinAccountFor(bankAccount,
+			simplefin.Transaction{Id: "TRN-1", Posted: now.Unix(), Amount: "-1500", Description: "RAMEN"},
+		)
+		account.Currency = "JPY"
+		account.Balance = "150000"
+		account.AvailableBalance = nil
+
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+		mock_simplefin.MockFetchAccounts(t, simpleFinAccountSet(account))
+
+		runSimpleFinSync(t, ctrl, clock, enqueuer, bankAccount)
+
+		transactions := readSimpleFinTransactions(t, bankAccount)
+		require.Len(t, transactions, 1, "should create the transaction")
+		assert.EqualValues(t, 1500, transactions[0].Amount, "JPY amounts should not be scaled")
+
+		updatedBankAccount := testutils.MustDBRead(t, bankAccount)
+		assert.EqualValues(t, 150000, updatedBankAccount.CurrentBalance, "JPY balance should not be scaled")
+	})
+
+	t.Run("pending transaction is skipped", func(t *testing.T) {
+		clock := clock.NewMock()
+		clock.Set(now)
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		enqueuer := givenAnyClusterEnqueue(ctrl, 1)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
+
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+		mock_simplefin.MockFetchAccounts(t, simpleFinAccountSet(
+			simpleFinAccountFor(bankAccount,
+				simplefin.Transaction{Id: "TRN-1", Posted: now.Unix(), Amount: "-19.99", Description: "TACO BELL"},
+				simplefin.Transaction{Id: "TRN-2", Posted: now.Unix(), Amount: "-5.00", Description: "COFFEE", Pending: true},
+			),
+		))
+
+		runSimpleFinSync(t, ctrl, clock, enqueuer, bankAccount)
+
+		transactions := readSimpleFinTransactions(t, bankAccount)
+		require.Len(t, transactions, 1, "should only create the posted transaction")
+		assert.Equal(t, "TRN-1", transactions[0].SimpleFinTransaction.SimpleFinId, "pending transaction should be skipped")
+	})
+
+	t.Run("enqueues clusters once per bank account", func(t *testing.T) {
+		clock := clock.NewMock()
+		clock.Set(now)
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+		firstBankAccount := fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
+		secondBankAccount := fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
+
+		// Both bank accounts should go out in one bulk enqueue.
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
+				gomock.Any(),
+				gomock.InAnyOrder([]any{
+					similar_jobs.CalculateTransactionClustersArguments{
+						AccountId:     firstBankAccount.AccountId,
+						BankAccountId: firstBankAccount.BankAccountId,
+					},
+					similar_jobs.CalculateTransactionClustersArguments{
+						AccountId:     secondBankAccount.AccountId,
+						BankAccountId: secondBankAccount.BankAccountId,
+					},
+				}),
+			).
+			Return(nil).
+			Times(1)
+
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+		mock_simplefin.MockFetchAccounts(t, simpleFinAccountSet(
+			simpleFinAccountFor(firstBankAccount,
+				simplefin.Transaction{Id: "TRN-1", Posted: now.Unix(), Amount: "-1.00", Description: "FIRST"},
+			),
+			simpleFinAccountFor(secondBankAccount,
+				simplefin.Transaction{Id: "TRN-2", Posted: now.Unix(), Amount: "-2.00", Description: "SECOND"},
+			),
+		))
+
+		runSimpleFinSync(t, ctrl, clock, enqueuer, firstBankAccount)
+	})
+}
+
+// givenAnyClusterEnqueue is for the tests that don't care which bank accounts
+// the cluster jobs are queued for. Each successful sync with at least one bank
+// account does one bulk enqueue, so times is the number of syncs.
+func givenAnyClusterEnqueue(ctrl *gomock.Controller, times int) *mockgen.MockProcessor {
+	enqueuer := mockgen.NewMockProcessor(ctrl)
+	enqueuer.EXPECT().
+		BulkEnqueueAt(
+			gomock.Any(),
+			mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
+			gomock.Any(),
+			gomock.Any(),
+		).
+		Return(nil).
+		Times(times)
+	return enqueuer
+}
+
+// runSimpleFinSync runs one successful sync for the bank account's link against
+// whatever is mocked in httpmock.
+func runSimpleFinSync(
+	t *testing.T,
+	ctrl *gomock.Controller,
+	clock *clock.Mock,
+	enqueuer *mockgen.MockProcessor,
+	bankAccount models.BankAccount,
+) {
+	log := testutils.GetLog(t)
+	db := testutils.GetPgDatabase(t)
+
+	context := mockgen.NewMockContext(ctrl)
+	context.EXPECT().Clock().Return(clock).AnyTimes()
+	context.EXPECT().Configuration().Return(config.Configuration{
+		SimpleFin: config.SimpleFin{
+			Enabled: true,
+			AllowedHosts: []string{
+				config.DefaultSimpleFinHost,
+			},
+		},
+	}).AnyTimes()
+	context.EXPECT().KMS().Return(secrets.NewPlaintextKMS()).AnyTimes()
+	context.EXPECT().DB().Return(db).AnyTimes()
+	context.EXPECT().Log().Return(log).AnyTimes()
+	context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
+	context.EXPECT().Publisher().Return(pubsub.NewPostgresPubSub(log, db)).AnyTimes()
+	context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+
+	err := simplefin_jobs.SyncSimpleFin(
+		mockqueue.NewMockContext(context),
+		simplefin_jobs.SyncSimpleFinArguments{
+			AccountId: bankAccount.AccountId,
+			LinkId:    bankAccount.LinkId,
+		},
+	)
+	require.NoError(t, err, "must sync simplefin successfully")
+}
+
+func simpleFinAccountSet(accounts ...simplefin.Account) simplefin.AccountSet {
+	connections := make([]simplefin.Connection, len(accounts))
+	for i := range accounts {
+		connections[i] = simplefin.Connection{
+			ConnectionId: accounts[i].ConnectionId,
+			Name:         "Lehman Brothers",
+		}
+	}
+	return simplefin.AccountSet{
+		Errlist:     []simplefin.Error{},
+		Connections: connections,
+		Accounts:    accounts,
+	}
+}
+
+func simpleFinAccountFor(
+	bankAccount models.BankAccount,
+	transactions ...simplefin.Transaction,
+) simplefin.Account {
+	return simplefin.Account{
+		Id:               bankAccount.SimpleFinBankAccount.SimpleFinId,
+		Name:             "Primary Checking - 1234",
+		ConnectionId:     bankAccount.SimpleFinBankAccount.ConnectionId,
+		Currency:         "USD",
+		Balance:          "1234.56",
+		AvailableBalance: new(json.Number("1200.00")),
+		BalanceDate:      time.Now().Unix(),
+		Transactions:     transactions,
+	}
+}
+
+// readSimpleFinTransactions returns every transaction on the bank account,
+// deleted or not, ordered by their SimpleFIN Id.
+func readSimpleFinTransactions(t *testing.T, bankAccount models.BankAccount) []models.Transaction {
+	db := testutils.GetPgDatabase(t)
+	transactions := make([]models.Transaction, 0)
+	err := db.NewSelect().
+		Model(&transactions).
+		Relation("SimpleFinTransaction").
+		Where(`"transaction"."account_id" = ?`, bankAccount.AccountId).
+		Where(`"transaction"."bank_account_id" = ?`, bankAccount.BankAccountId).
+		Order(`simple_fin_transaction.simplefin_id ASC`).
+		Scan(t.Context())
+	require.NoError(t, err, "must be able to read transactions")
+	return transactions
 }
