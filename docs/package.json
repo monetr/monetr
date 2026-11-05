@@ -38,7 +38,7 @@
     "unist-util-visit": "5.2.0"
   },
   "devDependencies": {
-    "@rsbuild/core": "2.2.14",
+    "@rsbuild/core": "2.3.0",
     "@types/hast": "3.0.5",
     "@types/node": "^24.0.0",
     "@types/react": "19.3.0",
