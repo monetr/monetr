@@ -36,7 +36,7 @@
     "@sentry/core": "11.10.0",
     "@sentry/react": "11.10.0",
     "@tanstack/react-query": "5.105.0",
-    "@tanstack/react-virtual": "3.14.22",
+    "@tanstack/react-virtual": "3.14.24",
     "class-variance-authority": "0.7.1",
     "cmdk": "1.1.1",
     "date-fns": "4.4.0",
