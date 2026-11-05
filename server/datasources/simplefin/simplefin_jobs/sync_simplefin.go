@@ -659,17 +659,22 @@ func SyncSimpleFin(ctx queue.Context, args SyncSimpleFinArguments) error {
 	// Kick off the transaction similarity job for each bank account we synced.
 	// This is after the commit so the job can see the new transactions, and a
 	// failure here shouldn't fail a sync that already succeeded.
-	for _, match := range s.bankAccounts {
-		if err := queue.Enqueue(
+	if len(s.bankAccounts) > 0 {
+		if err := queue.BulkEnqueue(
 			ctx,
 			ctx.Enqueuer(),
 			similar_jobs.CalculateTransactionClusters,
-			similar_jobs.CalculateTransactionClustersArguments{
-				AccountId:     s.args.AccountId,
-				BankAccountId: match.bankAccount.BankAccountId,
-			},
+			myownsanity.Map(
+				s.bankAccounts,
+				func(match simpleFinBankAccountMatch) similar_jobs.CalculateTransactionClustersArguments {
+					return similar_jobs.CalculateTransactionClustersArguments{
+						AccountId:     s.args.AccountId,
+						BankAccountId: match.bankAccount.BankAccountId,
+					}
+				},
+			),
 		); err != nil {
-			match.log.ErrorContext(
+			s.log.ErrorContext(
 				ctx,
 				"failed to queue transaction cluster calculations",
 				"err", err,

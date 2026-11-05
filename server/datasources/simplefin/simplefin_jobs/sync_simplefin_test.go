@@ -66,7 +66,7 @@ func TestSyncSimpleFin(t *testing.T) {
 		kms := secrets.NewPlaintextKMS()
 		enqueuer := mockgen.NewMockProcessor(ctrl)
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
 				gomock.Any(),
@@ -175,7 +175,7 @@ func TestSyncSimpleFin(t *testing.T) {
 		kms := secrets.NewPlaintextKMS()
 		enqueuer := mockgen.NewMockProcessor(ctrl)
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
 				gomock.Any(),
@@ -261,7 +261,7 @@ func TestSyncSimpleFin(t *testing.T) {
 		kms := secrets.NewPlaintextKMS()
 		enqueuer := mockgen.NewMockProcessor(ctrl)
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
 				gomock.Any(),
@@ -429,7 +429,7 @@ func TestSyncSimpleFin(t *testing.T) {
 		kms := secrets.NewPlaintextKMS()
 		enqueuer := mockgen.NewMockProcessor(ctrl)
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
 				gomock.Any(),
@@ -761,7 +761,7 @@ func TestSyncSimpleFin(t *testing.T) {
 		kms := secrets.NewPlaintextKMS()
 		enqueuer := mockgen.NewMockProcessor(ctrl)
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
 				gomock.Any(),
@@ -906,7 +906,7 @@ func TestSyncSimpleFin(t *testing.T) {
 		kms := secrets.NewPlaintextKMS()
 		enqueuer := mockgen.NewMockProcessor(ctrl)
 		enqueuer.EXPECT().
-			EnqueueAt(
+			BulkEnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
 				gomock.Any(),
@@ -1233,7 +1233,7 @@ func TestSyncSimpleFinTransactions(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		enqueuer := givenAnyClusterEnqueue(ctrl, 2)
+		enqueuer := givenAnyClusterEnqueue(ctrl, 1)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
 		// The fixture gives each bank account its own connection.
@@ -1272,7 +1272,7 @@ func TestSyncSimpleFinTransactions(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		enqueuer := givenAnyClusterEnqueue(ctrl, 2)
+		enqueuer := givenAnyClusterEnqueue(ctrl, 1)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
 		firstBankAccount := fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
@@ -1455,21 +1455,26 @@ func TestSyncSimpleFinTransactions(t *testing.T) {
 		firstBankAccount := fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
 		secondBankAccount := fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
 
+		// Both bank accounts should go out in one bulk enqueue.
 		enqueuer := mockgen.NewMockProcessor(ctrl)
-		for _, bankAccount := range []models.BankAccount{firstBankAccount, secondBankAccount} {
-			enqueuer.EXPECT().
-				EnqueueAt(
-					gomock.Any(),
-					mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
-					gomock.Any(),
-					gomock.Eq(similar_jobs.CalculateTransactionClustersArguments{
-						AccountId:     bankAccount.AccountId,
-						BankAccountId: bankAccount.BankAccountId,
-					}),
-				).
-				Return(nil).
-				Times(1)
-		}
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
+				gomock.Any(),
+				gomock.InAnyOrder([]any{
+					similar_jobs.CalculateTransactionClustersArguments{
+						AccountId:     firstBankAccount.AccountId,
+						BankAccountId: firstBankAccount.BankAccountId,
+					},
+					similar_jobs.CalculateTransactionClustersArguments{
+						AccountId:     secondBankAccount.AccountId,
+						BankAccountId: secondBankAccount.BankAccountId,
+					},
+				}),
+			).
+			Return(nil).
+			Times(1)
 
 		httpmock.Activate()
 		defer httpmock.DeactivateAndReset()
@@ -1486,13 +1491,13 @@ func TestSyncSimpleFinTransactions(t *testing.T) {
 	})
 }
 
-// givenAnyClusterEnqueue is for the tests that don't care which bank account
-// the cluster job is queued for, just that it is queued the right number of
-// times.
+// givenAnyClusterEnqueue is for the tests that don't care which bank accounts
+// the cluster jobs are queued for. Each successful sync with at least one bank
+// account does one bulk enqueue, so times is the number of syncs.
 func givenAnyClusterEnqueue(ctrl *gomock.Controller, times int) *mockgen.MockProcessor {
 	enqueuer := mockgen.NewMockProcessor(ctrl)
 	enqueuer.EXPECT().
-		EnqueueAt(
+		BulkEnqueueAt(
 			gomock.Any(),
 			mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
 			gomock.Any(),
