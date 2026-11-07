@@ -97,7 +97,7 @@ function RemoveTransactionModal(props: RemoveTransactionModalProps): React.JSX.E
               <FormSwitch
                 className={styles.switch}
                 description='Update your account balance as if this transaction was reversed?'
-                label='Adjust Balacne'
+                label='Adjust Balance'
                 name='adjustsBalance'
               />
             </div>
