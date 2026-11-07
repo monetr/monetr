@@ -315,8 +315,8 @@ importers:
         specifier: 10.0.1
         version: 10.0.1
       juice:
-        specifier: 12.2.0
-        version: 12.2.0
+        specifier: 12.2.1
+        version: 12.2.1
       react:
         specifier: 19.3.1
         version: 19.3.1
@@ -3009,8 +3009,8 @@ packages:
   jsonfile@6.2.1:
     resolution: {integrity: sha512-zwOTdL3rFQ/lRdBnntKVOX6k5cKJwEc1HdilT71BWEu7J41gXIB2MRp+vxduPSwZJPWBxEzv4yH1wYLJGUHX4Q==}
 
-  juice@12.2.0:
-    resolution: {integrity: sha512-xp5n2gclRLhJqbVkKIlQsoz5q2nhDfjaCExfh0XhJ7gs77nWDQg+cdDRVY1EBlcn3n8Lz3TBNFiorh9TxpJp2g==}
+  juice@12.2.1:
+    resolution: {integrity: sha512-tbyBK+Ifmx95xRB2XET205DAz67Oq8A5SG+gV8GzBzzf0oRVhpo+Wh1KTkC12emlyZallR/ZsG8FJ1LcM4P17Q==}
     engines: {node: '>=22.12.0'}
     hasBin: true
 
@@ -7035,7 +7035,7 @@ snapshots:
     optionalDependencies:
       graceful-fs: 4.2.11
 
-  juice@12.2.0:
+  juice@12.2.1:
     dependencies:
       cheerio: 1.2.0
       commander: 14.0.3
