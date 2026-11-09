@@ -28,10 +28,11 @@ pageType: doc-wide
 
 import BlogHeader from '@monetr/docs/components/Blog/BlogHeader';
 import BlogMeme from '@monetr/docs/components/Blog/BlogMeme';
+import meme from './2024-12-30-introduction/dumbstuff.png';
 
 <BlogHeader />
 
-<BlogMeme src='/v1/en/blog/2024-12-30-introduction/dumbstuff.png' alt='Dumb Stuff'/>
+<BlogMeme src={meme} alt='Dumb Stuff'/>
 
 My name is [Elliot](https://github.com/elliotcourant), and for nearly four years, I've been working on monetr, a
 budgeting app inspired by [Simple](https://web.archive.org/web/20201128231953/https://www.simple.com/). I'm excited to
@@ -72,7 +73,7 @@ you're paid. Each time you get paid you want to contribute _some_ amount to your
 amount of the expense. Like if your rent is \$1200 a month, but your paycheck is \$1500; you never want to take \$1200
 out of your paycheck for a single expense.
 
-![Screenshot of funding schedule](/v1/en/blog/2024-12-30-introduction/funding.png)
+![Screenshot of funding schedule](./2024-12-30-introduction/funding.png)
 
 This is where [Expenses](/documentation/use/expense) and [Goals](/documentation/use/goal) come in. Expenses and Goals
 are your way of telling monetr what you need, how much you need, and when you need it by. With the only difference being
@@ -83,7 +84,7 @@ to cover that expense when it is due. This even works if you have an expense tha
 getting paid, monetr will allocate more than a single expense's amount to cover the multiple times you need that expense
 between paychecks.
 
-![Screenshot of expenses](/v1/en/blog/2024-12-30-introduction/expenses.png)
+![Screenshot of expenses](./2024-12-30-introduction/expenses.png)
 
 In order to keep track of the spending side of expenses though, you have to tell monetr when you actually use one of
 your expenses or goals. For this, every **debit** transaction in monetr allows you to select what the transaction was
@@ -100,7 +101,7 @@ automated, and a "left-over" or "free-to-use" envelope is used for anything that
 comes through, you just need to tell monetr which "envelope" the transaction was for and it will keep track of the rest.
 Most importantly making sure that there will always be enough to cover the transaction when it happens.
 
-![Screenshot of monetr](/v1/en/blog/2024-12-30-introduction/screenshot.png)
+![Screenshot of monetr](./2024-12-30-introduction/screenshot.png)
 
 ## The Future
 
@@ -164,4 +165,4 @@ If you've gotten this far I cannot thank you enough. If you are interested in mo
 - [Sean Sube](https://github.com/ssube), without whom I would have never learned the things I needed to manage monetr's
   hosting and infrastructure myself.
 - The entire team who built [Simple](https://web.archive.org/web/20210129214711/https://www.simple.com/), you have no
-  idea how much it changed my life. ![Simple after being shutdown](/v1/en/blog/2024-12-30-introduction/simple.png)
+  idea how much it changed my life. ![Simple after being shutdown](./2024-12-30-introduction/simple.png)

@@ -8,6 +8,13 @@ import {
   CarouselPrevious,
 } from '@monetr/docs/components/Carousel';
 
+import screenshot from './assets/screenshot.png';
+import screenshotExpenses from './assets/screenshot_expenses.png';
+import screenshotExpensesMobile from './assets/screenshot_expenses_mobile.png';
+import screenshotFunding from './assets/screenshot_funding.png';
+import screenshotFundingMobile from './assets/screenshot_funding_mobile.png';
+import screenshotMobile from './assets/screenshot_mobile.png';
+
 import styles from './ScreenshotCarousel.module.scss';
 
 import Autoplay from 'embla-carousel-autoplay';
@@ -29,12 +36,12 @@ export default function ScreenshotCarousel() {
               <img
                 alt='Screenshot of the monetr app showing the main view of transactions and balances of the budget.'
                 className={styles.imageDesktop}
-                src='/assets/screenshot.png'
+                src={screenshot}
               />
               <img
                 alt='Screenshot of the monetr app showing the main view of transactions and balances of the budget.'
                 className={styles.imageMobile}
-                src='/assets/screenshot_mobile.png'
+                src={screenshotMobile}
               />
             </div>
           </CarouselItem>
@@ -43,12 +50,12 @@ export default function ScreenshotCarousel() {
               <img
                 alt='Screenshot of the monetr app showing expenses view on desktop.'
                 className={styles.imageDesktop}
-                src='/assets/screenshot_expenses.png'
+                src={screenshotExpenses}
               />
               <img
                 alt='Screenshot of the monetr app showing expenses view on mobile.'
                 className={styles.imageMobile}
-                src='/assets/screenshot_expenses_mobile.png'
+                src={screenshotExpensesMobile}
               />
             </div>
           </CarouselItem>
@@ -57,12 +64,12 @@ export default function ScreenshotCarousel() {
               <img
                 alt='Screenshot of the monetr app showing funding and contribution details on desktop.'
                 className={styles.imageDesktop}
-                src='/assets/screenshot_funding.png'
+                src={screenshotFunding}
               />
               <img
                 alt='Screenshot of the monetr app showing funding and contribution details on mobile.'
                 className={styles.imageMobile}
-                src='/assets/screenshot_funding_mobile.png'
+                src={screenshotFundingMobile}
               />
             </div>
           </CarouselItem>

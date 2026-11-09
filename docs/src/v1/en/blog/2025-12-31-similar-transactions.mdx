@@ -29,10 +29,11 @@ pageType: doc-wide
 
 import BlogHeader from '@monetr/docs/components/Blog/BlogHeader';
 import BlogMeme from '@monetr/docs/components/Blog/BlogMeme';
+import meme from './2025-12-31-similar-transactions/dumbstuff.png';
 
 <BlogHeader />
 
-<BlogMeme src='/v1/en/blog/2025-12-31-similar-transactions/dumbstuff.png' alt='Dumb Stuff'/>
+<BlogMeme src={meme} alt='Dumb Stuff'/>
 
 :::info
 This blog post contains information that is loosely understood and probably **wrong**. Do not mistake this blog post and
@@ -454,7 +455,7 @@ enough"[^3]. However with that there are some huge spaces for improvement.
      tf-idf for every transaction (including querying the database for every transaction for a specific bank account) is
      essentially negligible compared to how long the DBSCAN can take. This can be seen in the screenshot below which is
      a trace from a production account calculating similar transactions after having received a Plaid webhook.
-     ![Similar Transaction Trace](/v1/en/blog/2025-12-31-similar-transactions/similar-trace.png)
+     ![Similar Transaction Trace](./2025-12-31-similar-transactions/similar-trace.png)
      As you can see, even the inefficient N+1 query and the tf-idf code is just insignificant compared to the time it
      takes to perform the DBSCAN. (**Note**: monetr's production servers are not using AVX512)
 
