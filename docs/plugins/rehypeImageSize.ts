@@ -32,13 +32,13 @@ interface MdxjsEsm {
   };
 }
 
-interface MdxJsxAttribute {
+export interface MdxJsxAttribute {
   type: string;
   name?: string;
   value?: string | { value: string } | null;
 }
 
-interface MdxJsxElement {
+export interface MdxJsxElement {
   type: string;
   name?: string | null;
   attributes: Array<MdxJsxAttribute>;
@@ -58,7 +58,7 @@ function getImageSize(imagePath: string): { width: number; height: number } | nu
 }
 
 // getImports maps the name of each default import in the file to the absolute path that it is importing.
-function getImports(tree: Root, filePath: string): Map<string, string> {
+export function getImports(tree: Root, filePath: string): Map<string, string> {
   const imports = new Map<string, string>();
   for (const node of tree.children as Array<MdxjsEsm>) {
     if (node.type !== 'mdxjsEsm') {

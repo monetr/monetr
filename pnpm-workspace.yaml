@@ -18,6 +18,28 @@ supportedArchitectures:
   libc:
     - glibc
 
+# monetr only builds and runs on glibc. supportedArchitectures above keeps these from being installed, but pnpm still
+# records every platform in the lockfile unless the package is removed from the dependency tree here.
+overrides:
+  '@biomejs/cli-linux-arm64-musl': '-'
+  '@biomejs/cli-linux-x64-musl': '-'
+  '@img/sharp-libvips-linuxmusl-arm64': '-'
+  '@img/sharp-libvips-linuxmusl-x64': '-'
+  '@img/sharp-linuxmusl-arm64': '-'
+  '@img/sharp-linuxmusl-x64': '-'
+  '@parcel/watcher-linux-arm-musl': '-'
+  '@parcel/watcher-linux-arm64-musl': '-'
+  '@parcel/watcher-linux-x64-musl': '-'
+  '@resvg/resvg-js-linux-arm64-musl': '-'
+  '@resvg/resvg-js-linux-x64-musl': '-'
+  '@rspack/binding-linux-arm64-musl': '-'
+  '@rspack/binding-linux-riscv64-musl': '-'
+  '@rspack/binding-linux-x64-musl': '-'
+  sass-embedded-linux-musl-arm: '-'
+  sass-embedded-linux-musl-arm64: '-'
+  sass-embedded-linux-musl-riscv64: '-'
+  sass-embedded-linux-musl-x64: '-'
+
 saveExact: true
 savePrefix: ""
 
