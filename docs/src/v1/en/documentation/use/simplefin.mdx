@@ -1,0 +1,204 @@
+---
+title: "Connecting Your Bank With SimpleFIN"
+description: "Connect self-hosted monetr to banks in the US and Canada with SimpleFIN Bridge, for automatic transaction and balance updates. Currently in beta."
+---
+
+import { Steps } from '@rspress/core/theme'
+
+# SimpleFIN
+
+:::warning
+**Note**: SimpleFIN is only supported for **self-hosted** instances of monetr, and is not available on the hosted
+version.
+:::
+
+
+:::info
+**Note**: The SimpleFIN integration is currently considered a **"beta"** integration. There may be bugs and issues with
+the data connection that lead to unexpected or undesired behaviors. Please report any bugs you have to monetr, though
+please understand that some bugs may need to be escalated to the SimpleFIN team if the issue is upstream.
+:::
+
+[SimpleFIN Bridge](https://bridge.simplefin.org) allows you to connect your self hosted budgeting applications to your
+bank directly. This way you can automatically get transaction and balance updates directly in your budgeting app. monetr
+talks to SimpleFIN Bridge directly using a setup token that you create there.
+
+The benefit of SimpleFIN is that it is a low cost way to connect to institutions in the United States and Canada, and
+one subscription can be used with multiple apps.
+
+You can see if your specific institution is supported
+[here](https://bridge.simplefin.org/search-institutions).
+
+## Setup Instructions
+
+<Steps>
+
+### Sign up for SimpleFIN Bridge
+
+Navigate to [https://bridge.simplefin.org](https://bridge.simplefin.org) and click **Get started**. Enter your email
+address and click **Send sign-in email**. There isn't a separate sign up form, this same form will create your account
+if you don't have one yet.
+
+**PLACEHOLDER screenshot: SimpleFIN Bridge landing page / sign-in form**
+
+### Open the sign-in email
+
+You'll receive an email from SimpleFIN with a link to sign in. Click the link in that email to proceed.
+
+**PLACEHOLDER screenshot: Sign-in email from SimpleFIN**
+
+### Start your subscription
+
+SimpleFIN Bridge is a paid service. A subscription lets you connect up to 25 institutions and 25 apps for $1.50 + tax
+per month or $15.00 + tax per year.
+
+**PLACEHOLDER screenshot: SimpleFIN Bridge subscription screen. Confirm the labels and where this falls in the flow,
+this part of the Bridge is behind a login and this step is a best guess.**
+
+<sub>**Note**: The price may change in the future, if these docs are not representative of the setup experience in
+SimpleFIN Bridge then please open an issue in [monetr's GitHub](https://github.com/monetr/monetr).</sub>
+
+### Add a connection
+
+After you have signed in you'll need to add a connection in order for SimpleFIN to pull data from your financial
+institution. Keep in mind that a connection is a single login to an institution and that one connection can include
+multiple accounts.
+
+**PLACEHOLDER screenshot: SimpleFIN Bridge connections page, empty. Add the exact button label to the copy above.**
+
+You will be guided through an authentication flow for your specific institution.
+
+**PLACEHOLDER screenshot: Adding a connection in SimpleFIN Bridge**
+
+Once you have completed the connection you should see it within SimpleFIN Bridge:
+
+**PLACEHOLDER screenshot: SimpleFIN Bridge with a connection added**
+
+### Create a setup token
+
+In order for monetr to read the data from SimpleFIN you'll need to create a setup token. You can create one here:
+[https://bridge.simplefin.org/simplefin/create](https://bridge.simplefin.org/simplefin/create)
+
+**PLACEHOLDER screenshot: SimpleFIN Bridge setup token screen. Add the exact button labels to the copy above.**
+
+**Copy** the setup token, you will need it for monetr in the next step.
+
+:::warning
+**Note**: This setup token is sensitive and should be handled carefully. It can only be used **once**, and whoever uses
+it first gets access to your account and transaction data. Do not store it in plain text or share it, paste it directly
+into monetr. If it has already been used, or if monetr fails to finish creating your link, you will need to create a new
+setup token.
+:::
+
+### Add SimpleFIN to monetr
+
+SimpleFIN should be enabled by default for all self-hosted instances of monetr, but if you don't see it as an option
+when you go to the setup page then check that `simpleFin.enabled` is not set to `false` in your configuration and that
+`simpleFin.allowedHosts` is not empty.
+
+If this is your first link in monetr then you should see the following screen:
+
+**PLACEHOLDER screenshot: monetr setup screen with SimpleFIN**
+
+Select **SimpleFIN** and click **Continue**.
+
+**PLACEHOLDER screenshot: monetr SimpleFIN intro screen**
+
+Enter a **Budget Name**, this will be the name of the link in the monetr sidebar after you have completed your setup.
+Then paste the setup token that you created earlier into **Setup Token**. If you skipped ahead, the **Get A Setup
+Token** link above that field will take you to SimpleFIN Bridge to create one. monetr will exchange the token for access
+to SimpleFIN and store that securely in order to periodically sync your data.
+
+Click **Next** once you are ready to continue.
+
+### Select accounts to sync
+
+monetr will take a few seconds to pull some basic account information, after which you should see the following screen:
+
+**PLACEHOLDER screenshot: monetr SimpleFIN account selection**
+
+You can now decide which accounts in SimpleFIN should be pulled into monetr on this link. By default all accounts are
+enabled. You can disable accounts you do not want to sync with monetr here.
+
+If SimpleFIN had a problem with any of your connections, the messages from SimpleFIN will be shown on this screen.
+
+To complete the setup process, click **Continue**.
+
+### Finish setup
+
+monetr will take a few moments to pull in the account data. You can safely navigate away from this page while it is
+loading, however it will tell you when it is finished pulling in your data.
+
+**PLACEHOLDER screenshot: monetr SimpleFIN sync complete**
+
+You can click **Continue** here to be automatically redirected to one of your new accounts.
+
+### Use monetr
+
+That's it! You now have your institutions data syncing with monetr automatically!
+
+**PLACEHOLDER screenshot: monetr account with SimpleFIN data**
+
+</Steps>
+
+## Syncing
+
+monetr checks for SimpleFIN links that need to be synced every hour, and will fetch data for each link about every 6 to
+7 hours. The exact cron schedule that monetr uses is `0 47 * * * *`. SimpleFIN Bridge is intended to provide daily
+updates, so new transactions will usually show up about once a day.
+
+You can also trigger a sync yourself with **Manually Resync** in the sidebar or **Sync Now** on the link's page, but
+only once every 2 hours. SimpleFIN allows about 24 requests per day, and going over that limit can get your access
+disabled. Manual syncs and setup both count towards that limit.
+
+Each sync asks SimpleFIN for the last 90 days of transactions, so the first sync will import up to 90 days of history.
+monetr will only append transactions, once a transaction has been created in monetr it will not be modified again. At
+the moment pending transactions will not be imported at all.
+
+## Errors
+
+If SimpleFIN reports a problem with one of your connections, the message from SimpleFIN will be shown on the link's
+page.
+
+If SimpleFIN stops accepting monetr's requests then the link will show as **Needs Attention** and monetr will stop
+syncing it automatically.
+
+**PLACEHOLDER screenshot: Link status card showing Needs Attention and a SimpleFIN error**
+
+- If your SimpleFIN subscription needs payment, fix that in SimpleFIN Bridge and then click **Sync Now** on the link's
+  page.
+- If access was revoked or disabled, you will need to remove the link in monetr and set it up again with a new setup
+  token.
+
+## Removing a SimpleFIN link
+
+:::warning
+**Note**: Removing a SimpleFIN link in monetr does not disable monetr's access in SimpleFIN Bridge, SimpleFIN doesn't
+provide a way for monetr to do that for you. After you remove the link, disable monetr's access in your SimpleFIN Bridge
+account as well.
+:::
+
+**PLACEHOLDER screenshot: Disabling an app's access in SimpleFIN Bridge. Add the exact labels to the copy above.**
+
+## Nuances
+
+Currently there are a few nuances of the SimpleFIN integration while it is still in beta.
+
+- Credit and loan accounts have balances that show as negative at the moment.
+- Pending transactions are not currently synced with monetr.
+- All accounts default to a "checking account" once they are imported into monetr. You can change the account type
+  from the account's settings page.
+- Only the last 90 days of transactions are available when you first connect an account.
+- Accounts that use a custom currency instead of a standard currency code, such as points, are skipped.
+
+### Future Work
+
+- Show credit and loan account balances correctly.
+- Add support for adding another SimpleFIN account _after_ a connection is already setup.
+- Add support for pending transactions.
+- Add support for using a new setup token on an existing link.
+
+## Doing this over the API
+
+SimpleFIN connections can be set up and synced over the REST API. See the
+[SimpleFIN API](/documentation/api/simplefin).
