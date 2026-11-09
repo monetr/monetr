@@ -1,0 +1,6 @@
+.logo {
+  aspect-ratio: 1 / 1;
+  // The swoosh runs past the edge of the circle. That's invisible on the white
+  // page the logo was made for, but it shows up on our dark background.
+  clip-path: circle(50%);
+}

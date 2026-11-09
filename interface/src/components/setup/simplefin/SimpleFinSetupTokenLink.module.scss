@@ -1,0 +1,9 @@
+@use '@monetr/interface/variables';
+
+.externalLinkIcon {
+  display: inline;
+  width: 3.5 * variables.$size; // 14px
+  height: 3.5 * variables.$size;
+  margin-left: 1 * variables.$size;
+  vertical-align: middle;
+}
