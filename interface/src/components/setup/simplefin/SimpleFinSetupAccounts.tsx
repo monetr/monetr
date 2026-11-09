@@ -4,6 +4,7 @@ import { useLocation, useParams } from 'wouter';
 
 import { flexVariants } from '@monetr/interface/components/Flex';
 import FormButton from '@monetr/interface/components/FormButton';
+import SimpleFinLinkErrors from '@monetr/interface/components/link/SimpleFinLinkErrors';
 import MForm from '@monetr/interface/components/MForm';
 import SimpleFinSetupAccountItem from '@monetr/interface/components/setup/simplefin/SimpleFinSetupAccountItem';
 import SimpleFinSetupLayout from '@monetr/interface/components/setup/simplefin/SimpleFinSetupLayout';
@@ -168,6 +169,7 @@ export default function SimpleFinSetupAccounts(): React.JSX.Element {
       <SimpleFinSetupLayout step={SimpleFinSetupSteps.Accounts}>
         <Typography align='center'>No SimpleFIN accounts found.</Typography>
         <Typography align='center'>You might need to add connections to your account in SimpleFIN Bridge.</Typography>
+        <SimpleFinLinkErrors errors={simpleFinLink.lastErrors} />
       </SimpleFinSetupLayout>
     );
   }
@@ -192,6 +194,7 @@ export default function SimpleFinSetupAccounts(): React.JSX.Element {
         <Typography align='center'>
           monetr has found the following accounts in SimpleFIN, please select the accounts you want monetr to import.
         </Typography>
+        <SimpleFinLinkErrors errors={simpleFinLink.lastErrors} />
         <ul>
           {simpleFinAccounts?.map(item => (
             <SimpleFinSetupAccountItem data={item} key={item.simpleFinBankAccountId} />
