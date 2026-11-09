@@ -87,7 +87,7 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
     return await updateBankAccount({
       bankAccountId: bankAccount.bankAccountId,
       name: values.name,
-      ...((Boolean(link?.getIsManual()) || link?.getIsLunchFlow()) && {
+      ...((Boolean(link?.getIsManual()) || Boolean(link?.getIsLunchFlow()) || link?.getIsSimpleFin()) && {
         mask: values.mask || null,
         accountType: values.accountType,
         accountSubType: values.accountSubType,
@@ -156,7 +156,7 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
                   <FormTextField<BankAccountValues>
                     className={styles.maskInput}
                     data-1p-ignore
-                    disabled={!link?.getIsManual() && !link?.getIsLunchFlow()}
+                    disabled={!link?.getIsManual() && !link?.getIsLunchFlow() && !link?.getIsSimpleFin()}
                     inputMode='numeric'
                     label='Mask'
                     maxLength={4}
@@ -172,12 +172,12 @@ export default function BankAccountSettingsPage(): React.JSX.Element | null {
                 <div className={styles.inputRow}>
                   <SelectBankAccountType
                     className={styles.input}
-                    disabled={!link?.getIsManual() && !link?.getIsLunchFlow()}
+                    disabled={!link?.getIsManual() && !link?.getIsLunchFlow() && !link?.getIsSimpleFin()}
                     name='accountType'
                   />
                   <SelectBankAccountSubType
                     className={styles.input}
-                    disabled={!link?.getIsManual() && !link?.getIsLunchFlow()}
+                    disabled={!link?.getIsManual() && !link?.getIsLunchFlow() && !link?.getIsSimpleFin()}
                     name='accountSubType'
                   />
                 </div>

@@ -200,6 +200,33 @@ export default function LinkDetails(): React.JSX.Element {
                   </dl>
                 </Fragment>
               )}
+              {link.getIsSimpleFin() && (
+                <Fragment>
+                  <Typography className={styles.connectionHeading} color='emphasis' component='h3' weight='semibold'>
+                    Connection
+                  </Typography>
+                  <dl className={styles.connection}>
+                    <dt>Provider</dt>
+                    <dd>
+                      <Typography className={styles.connectionValue} component='code'>
+                        SimpleFIN
+                      </Typography>
+                    </dd>
+                    <dt>Connection</dt>
+                    <dd>
+                      <Typography className={styles.connectionValue} component='code' ellipsis>
+                        {link.simpleFinLink?.name}
+                      </Typography>
+                    </dd>
+                    <dt>API URL</dt>
+                    <dd>
+                      <Typography className={styles.connectionValue} component='code' ellipsis>
+                        {link.simpleFinLink?.apiUrl}
+                      </Typography>
+                    </dd>
+                  </dl>
+                </Fragment>
+              )}
             </div>
             <div className={styles.columnAccounts}>
               <LinkAccountList bankAccounts={bankAccounts} link={link} />

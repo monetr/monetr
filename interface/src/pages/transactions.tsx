@@ -288,6 +288,15 @@ function EmptyTransactionsMessage(): React.JSX.Element {
     );
   }
 
+  if (link?.getIsSimpleFin()) {
+    return (
+      <Fragment>
+        Transactions will show up here once SimpleFIN sends them over, SimpleFIN usually updates once a day. If nothing
+        shows up after the next sync, this account might not provide transaction data through SimpleFIN.
+      </Fragment>
+    );
+  }
+
   return <Fragment>Transactions will show up here once they&apos;ve been added or synced for this account.</Fragment>;
 }
 
