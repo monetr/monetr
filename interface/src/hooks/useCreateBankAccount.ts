@@ -7,6 +7,7 @@ import request from '@monetr/interface/util/request';
 export interface CreateBankAccountRequest {
   linkId: string;
   lunchFlowBankAccountId?: string;
+  simpleFinBankAccountId?: string;
   name: string;
   mask?: string;
   availableBalance: number;

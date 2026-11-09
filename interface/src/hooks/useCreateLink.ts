@@ -8,6 +8,7 @@ export interface CreateLinkRequest {
   institutionName: string;
   description?: string;
   lunchFlowLinkId?: string;
+  simpleFinLinkId?: string;
 }
 
 export function useCreateLink(): (_link: CreateLinkRequest) => Promise<Link> {

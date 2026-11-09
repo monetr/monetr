@@ -281,6 +281,7 @@ func TestPostLink(t *testing.T) {
 			response.JSON().Path("$.linkId").String().IsASCII()
 			response.JSON().Path("$.linkType").IsEqual(models.SimpleFinLinkType)
 			response.JSON().Path("$.simpleFinLinkId").String().IsEqual(simpleFinLinkId.String())
+			response.JSON().Path("$.simpleFinLink.status").IsEqual(models.SimpleFinLinkStatusActive)
 		}
 
 		{ // Then check the status of the SimpleFIN link to make sure its active

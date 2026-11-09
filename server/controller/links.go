@@ -113,6 +113,9 @@ func (c *Controller) postLinks(ctx *echo.Context) error {
 		); err != nil {
 			return c.wrapPgError(ctx, err, "Failed to update SimpleFIN link")
 		}
+
+		// The UI caches this response and needs the SimpleFIN link to be on it.
+		link.SimpleFinLink = simpleFinLink
 	}
 
 	if err := repo.CreateLink(c.getContext(ctx), link); err != nil {
