@@ -87,6 +87,7 @@ PricingPage
 QFX
 RADOSGW
 ReCAPTCHA
+Resync
 RustFS
 S3
 S3-compatible
@@ -100,6 +101,7 @@ SSL
 ShipWheel
 ShoppingCart
 SimpleFIN
+SimpleFIN's
 StackDriver.*
 Sube
 TCP
@@ -220,6 +222,7 @@ schemas
 self-hostable
 severable
 sexualized
+simplefin
 sqrt
 structs?
 submodule.*

@@ -7,7 +7,10 @@ import (
 	"github.com/pkg/errors"
 )
 
-const DefaultSimpleFinHost = "bridge.simplefin.org"
+const (
+	DefaultSimpleFinHost = "bridge.simplefin.org"
+	BetaSimpleFinHost    = "beta-bridge.simplefin.org"
+)
 
 type SimpleFin struct {
 	// Enabled determines whether or not SimpleFIN will be an option to configure
