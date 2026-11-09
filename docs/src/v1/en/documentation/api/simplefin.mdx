@@ -20,6 +20,27 @@ There are two objects involved: the **SimpleFIN link**, which holds the connecti
 monetr [link](./links) that owns the bank accounts. Creating a SimpleFIN link is the first step, it starts out
 `pending`.
 
+## SimpleFIN's daily limit
+
+SimpleFIN expects about 24 requests a day for account data, with a little wiggle room for initial setup. If you keep
+going way past that, SimpleFIN can disable your access and you'll have to set the connection up again with a new setup
+token.
+
+Here's what counts against it:
+
+| Endpoint                                                            | Uses a request?                                                                         |
+| ------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| [Refresh available bank accounts](#refresh-available-bank-accounts) | Yes, one per call.                                                                      |
+| [Trigger a manual sync](#trigger-a-manual-sync)                     | Yes, one per sync, no matter how many accounts are on it. A 400 or 425 doesn't use one. |
+| [Create a SimpleFIN connection](#create-a-simplefin-connection)     | No, claiming a setup token isn't part of the limit.                                     |
+| [List SimpleFIN connections](#list-simplefin-connections)           | No, this just reads what monetr already has.                                            |
+| [Get a SimpleFIN connection](#get-a-simplefin-connection)           | No, this just reads what monetr already has.                                            |
+| [List available bank accounts](#list-available-bank-accounts)       | No, this just reads what monetr already has.                                            |
+| [Watch sync progress](#watch-sync-progress)                         | No, this just listens to a sync that's already running.                                 |
+
+monetr's scheduled syncs come out of the same limit, at about 4 a day for each connection. That leaves you around 20 for
+refreshes and manual syncs.
+
 ## The SimpleFIN link object
 
 | Attribute              | Type                | Description                                                                                                                                            |
