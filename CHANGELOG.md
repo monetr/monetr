@@ -2,6 +2,12 @@
 
 ## [1.22.0](https://github.com/monetr/monetr/compare/v1.21.1...v1.22.0) (2026-11-09)
 
+This release includes support for SimpleFIN on self-hosted instances of monetr! This is enabled by default for
+self-hosted instances and you can setup your integration here: [SimpleFIN
+Setup](https://monetr.app/documentation/use/simplefin).
+
+This being the first release to include simplefin support means that there are likely some bugs with the integration, if
+you experience any issues please reach out via Github issues.
 
 ### Features
 
