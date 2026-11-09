@@ -320,8 +320,9 @@ different from every other endpoint on this page.
 | --------- | ------------- | -------- | ------------------------------------------------------ |
 | `linkId`  | string (ulid) | Yes      | The monetr link to sync. Has to be a `simplefin` link. |
 
-Returns **202** with no body. The sync runs in the background, so a 202 means it started, not that it finished. To see
-how it went, [re-read the connection](#get-a-simplefin-connection) and check `lastSuccessfulUpdate`.
+Returns **202** with no body. The sync runs in the background, so a 202 means it started, not that it finished. Either
+[watch the progress socket](#watch-sync-progress) or [re-read the connection](#get-a-simplefin-connection) and check
+`lastSuccessfulUpdate`.
 
 **Manual syncs are limited to one every 2 hours**, measured from `lastManualSync`. Your Bridge only allows so many
 requests a day and every sync uses one, no matter how many accounts are on the connection. Asking again too soon is a
@@ -334,3 +335,44 @@ requests a day and every sync uses one, no matter how many accounts are on the c
 | 400    | `linkId` is missing or malformed, the link isn't a SimpleFIN link, or the connection is `pending` or `deactivated`. A connection in `error` status can still be synced by hand, which is how you recover one. |
 | 404    | No such link, or SimpleFIN isn't enabled on this server.                                                                                                                                                      |
 | 425    | Synced by hand less than 2 hours ago.                                                                                                                                                                         |
+
+## <Badge type="info">GET</Badge> Watch sync progress
+
+Streams progress for a link during a sync. One socket covers the whole link, since a sync is a single request for every
+account on it.
+
+:::warning This is a WebSocket
+Like the [transaction upload progress endpoint](./uploads#watch-an-uploads-progress), this upgrades to a WebSocket
+despite being a `GET`. curl won't do anything useful with it.
+:::
+
+**In the app:** Not used by the app yet.
+
+```http
+GET /api/simplefin/link/sync/:linkId/progress
+```
+
+**Auth:** API key, subscription required.
+
+### Path parameters
+
+| Attribute | Type          | Required | Description                                             |
+| --------- | ------------- | -------- | ------------------------------------------------------- |
+| `linkId`  | string (ulid) | Yes      | The monetr link being synced. Must be a SimpleFIN link. |
+
+Messages carry the `linkId` and its current `status`. The socket gives up after **5 minutes**.
+
+| Status         | Meaning                                                |
+| -------------- | ------------------------------------------------------ |
+| `begin`        | The sync started.                                      |
+| `transactions` | monetr is pulling in new transactions.                 |
+| `balances`     | monetr is updating balances.                           |
+| `complete`     | The sync finished. The socket closes after this one.   |
+| `error`        | The sync failed. The socket closes after this one too. |
+
+### Errors
+
+| Status | When                                                       |
+| ------ | ---------------------------------------------------------- |
+| 400    | `linkId` is malformed, or the link isn't a SimpleFIN link. |
+| 404    | No such link, or SimpleFIN isn't enabled on this server.   |

@@ -426,4 +426,5 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	simpleFin.POST("/simplefin/link/:simpleFinLinkId/bank_accounts/refresh", c.postSimpleFinLinkBankAccountsRefresh)
 	simpleFin.GET("/simplefin/link/:simpleFinLinkId/bank_accounts", c.getSimpleFinLinkBankAccounts)
 	simpleFin.POST("/simplefin/link/sync", c.postSimpleFinLinkSync)
+	simpleFin.GET("/simplefin/link/sync/:linkId/progress", c.getSimpleFinLinkSyncProgress)
 }

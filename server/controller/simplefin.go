@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/url"
 	"time"
@@ -15,6 +16,7 @@ import (
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/schemas"
 	"github.com/pkg/errors"
+	"golang.org/x/net/websocket"
 )
 
 func (c *Controller) getSimpleFinLinks(ctx *echo.Context) error {
@@ -423,4 +425,86 @@ func (c *Controller) postSimpleFinLinkSync(ctx *echo.Context) error {
 	}
 
 	return ctx.NoContent(http.StatusAccepted)
+}
+
+func (c *Controller) getSimpleFinLinkSyncProgress(ctx *echo.Context) error {
+	linkId, err := ParseID[Link](ctx.Param("linkId"))
+	if err != nil || linkId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid link Id")
+	}
+
+	log := c.getLog(ctx)
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	link, err := repo.GetLink(c.getContext(ctx), linkId)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "Failed to retrieve link")
+	}
+
+	if link.LinkType != SimpleFinLinkType {
+		return c.badRequest(ctx, "Link must be a SimpleFIN link type")
+	}
+
+	channel := simplefin_jobs.SimpleFinSyncNotificationChannel(
+		c.mustGetAccountId(ctx), linkId,
+	)
+	listener, err := c.PubSub.Subscribe(
+		c.getContext(ctx),
+		c.mustGetAccountId(ctx),
+		channel,
+	)
+	if err != nil {
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
+			"Failed to subscribe to SimpleFIN sync progress",
+		)
+	}
+	defer listener.Close()
+
+	timeout := time.NewTimer(5 * time.Minute)
+	defer timeout.Stop()
+
+	websocket.Handler(func(ws *websocket.Conn) {
+		defer ws.Close()
+		log.DebugContext(c.getContext(ctx), "started SimpleFIN sync websocket!")
+	ListenerLoop:
+		for {
+			select {
+			case <-timeout.C:
+				log.WarnContext(c.getContext(ctx), "exiting SimpleFIN sync progress due to timeout")
+				break ListenerLoop
+			case notification := <-listener.Channel():
+				var status struct {
+					LinkId ID[Link]                           `json:"linkId"`
+					Status simplefin_jobs.SimpleFinSyncStatus `json:"status"`
+				}
+				if err := json.Unmarshal([]byte(notification.Payload()), &status); err != nil {
+					log.WarnContext(c.getContext(ctx), "failed to unmarshal notification for websocket!", "err", err)
+					continue
+				}
+				log.DebugContext(c.getContext(ctx), "received SimpleFIN sync progress notification", "notification", notification)
+				if err := c.sendWebsocketMessage(
+					ctx,
+					ws,
+					status,
+				); err != nil {
+					log.WarnContext(c.getContext(ctx), "failed to send websocket message", "err", err)
+					return
+				}
+
+				if status.Status == simplefin_jobs.SimpleFinSyncStatusComplete ||
+					status.Status == simplefin_jobs.SimpleFinSyncStatusError {
+					log.InfoContext(c.getContext(ctx), "received terminal status for SimpleFIN sync, exiting socket")
+					break ListenerLoop
+				}
+			}
+		}
+
+		log.DebugContext(c.getContext(ctx), "finished listening for SimpleFIN sync updates")
+	}).ServeHTTP(ctx.Response(), ctx.Request())
+
+	return nil
 }

@@ -1484,6 +1484,84 @@ func TestPostSimpleFinLinkSync(t *testing.T) {
 	})
 }
 
+func TestGetSimpleFinLinkSyncProgress(t *testing.T) {
+	t.Run("with a valid api key", func(t *testing.T) {
+		// This endpoint upgrades the connection to a websocket. A valid API key that
+		// belongs to the same account should be accepted and the handshake should
+		// succeed, which the server signals with a 101 Switching Protocols response
+		// rather than a normal 2xx status. The golang.org/x/net/websocket server
+		// requires an Origin header on the handshake, so we set one.
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, app.Clock, user)
+		token := GivenILogin(t, e, user.Login.Email, password)
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		response := e.GET("/api/simplefin/link/sync/{linkId}/progress").
+			WithPath("linkId", link.LinkId).
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			WithHeader("Origin", "http://localhost").
+			WithWebsocketUpgrade().
+			Expect()
+
+		response.Status(http.StatusSwitchingProtocols)
+		response.Websocket().Disconnect()
+	})
+
+	t.Run("with an invalid api key", func(t *testing.T) {
+		// An invalid API key must be rejected by the authentication middleware
+		// before the websocket upgrade is ever attempted.
+		_, e := NewTestApplication(t)
+		response := e.GET("/api/simplefin/link/sync/{linkId}/progress").
+			WithPath("linkId", "link_bogusbogusbogusbogusbo").
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+	})
+
+	t.Run("non-SimpleFIN link", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.GET("/api/simplefin/link/sync/{linkId}/progress").
+			WithPath("linkId", link.LinkId).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Link must be a SimpleFIN link type")
+	})
+
+	t.Run("link Id is not a valid Id", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.GET("/api/simplefin/link/sync/{linkId}/progress").
+			WithPath("linkId", "potato").
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("must specify a valid link Id")
+	})
+
+	t.Run("simplefin is disabled", func(t *testing.T) {
+		config := NewTestApplicationConfig(t)
+		config.SimpleFin.Enabled = false
+		_, e := NewTestApplicationWithConfig(t, config)
+		token := GivenIHaveToken(t, e)
+		response := e.GET("/api/simplefin/link/sync/{linkId}/progress").
+			WithPath("linkId", "link_bogusbogusbogusbogusbo").
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").String().IsEqual("SimpleFIN is not enabled on this server")
+	})
+}
+
 func TestGetSimpleFinLinkBankAccounts(t *testing.T) {
 	t.Run("excludes deleted accounts", func(t *testing.T) {
 		app, e := NewTestApplication(t)
