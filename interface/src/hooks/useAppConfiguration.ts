@@ -20,6 +20,7 @@ export class AppConfiguration {
   plaidEnabled: boolean;
   lunchFlowEnabled: boolean;
   lunchFlowAllowedAPIURLs: Array<string>;
+  simpleFinEnabled: boolean;
   manualEnabled: true;
   uploadsEnabled: boolean;
   proofOfWorkEnabled: boolean;
@@ -41,6 +42,7 @@ export class AppConfiguration {
     this.plaidEnabled = data.plaidEnabled;
     this.lunchFlowEnabled = data.lunchFlowEnabled;
     this.lunchFlowAllowedAPIURLs = data.lunchFlowAllowedAPIURLs;
+    this.simpleFinEnabled = data.simpleFinEnabled;
     this.manualEnabled = data.manualEnabled;
     this.uploadsEnabled = data.uploadsEnabled;
     this.proofOfWorkEnabled = data.proofOfWorkEnabled;

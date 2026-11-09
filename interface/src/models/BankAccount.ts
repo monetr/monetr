@@ -2,6 +2,7 @@ import { ID, idPrefix } from '@monetr/interface/models/ID';
 import type Link from '@monetr/interface/models/Link';
 import LunchFlowBankAccount from '@monetr/interface/models/LunchFlowBankAccount';
 import PlaidBankAccount from '@monetr/interface/models/PlaidBankAccount';
+import SimpleFinBankAccount from '@monetr/interface/models/SimpleFinBankAccount';
 import type { WithJsonValues } from '@monetr/interface/util/json';
 import parseDate from '@monetr/interface/util/parseDate';
 
@@ -36,6 +37,7 @@ export default class BankAccount {
   readonly bankAccountId: ID<BankAccount>;
   readonly linkId: ID<Link>;
   readonly lunchFlowBankAccountId: ID<LunchFlowBankAccount> | null;
+  readonly simpleFinBankAccountId: ID<SimpleFinBankAccount> | null;
   mask: string | null;
   name: string;
   readonly originalName: string;
@@ -54,11 +56,13 @@ export default class BankAccount {
 
   readonly plaidBankAccount: PlaidBankAccount | null;
   readonly lunchFlowBankAccount: LunchFlowBankAccount | null;
+  readonly simpleFinBankAccount: SimpleFinBankAccount | null;
 
   constructor(data: WithJsonValues<BankAccount>) {
     this.bankAccountId = ID.from(data.bankAccountId);
     this.linkId = ID.from(data.linkId);
     this.lunchFlowBankAccountId = data.lunchFlowBankAccountId ? ID.from(data.lunchFlowBankAccountId) : null;
+    this.simpleFinBankAccountId = data.simpleFinBankAccountId ? ID.from(data.simpleFinBankAccountId) : null;
     this.mask = data.mask ?? null;
     this.name = data.name;
     this.originalName = data.originalName;
@@ -75,5 +79,6 @@ export default class BankAccount {
     this.deletedAt = parseDate(data.deletedAt);
     this.plaidBankAccount = data.plaidBankAccount ? new PlaidBankAccount(data.plaidBankAccount) : null;
     this.lunchFlowBankAccount = data.lunchFlowBankAccount ? new LunchFlowBankAccount(data.lunchFlowBankAccount) : null;
+    this.simpleFinBankAccount = data.simpleFinBankAccount ? new SimpleFinBankAccount(data.simpleFinBankAccount) : null;
   }
 }

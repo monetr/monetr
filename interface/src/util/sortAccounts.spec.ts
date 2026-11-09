@@ -13,6 +13,7 @@ function fixture(overrides: Partial<WithJsonValues<BankAccount>>): BankAccount {
     bankAccountId: ID.from<BankAccount, string>('abc'),
     linkId: ID.from<Link, string>('link_test'),
     lunchFlowBankAccountId: null,
+    simpleFinBankAccountId: null,
     mask: '1234',
     name: 'Generic Account',
     originalName: 'Generic Account',
@@ -29,6 +30,7 @@ function fixture(overrides: Partial<WithJsonValues<BankAccount>>): BankAccount {
     deletedAt: null,
     plaidBankAccount: null,
     lunchFlowBankAccount: null,
+    simpleFinBankAccount: null,
     ...overrides,
   });
 }

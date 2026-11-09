@@ -2,6 +2,7 @@ import type BankAccount from '@monetr/interface/models/BankAccount';
 import { ID, idPrefix } from '@monetr/interface/models/ID';
 import LunchFlowLink, { LunchFlowLinkStatus } from '@monetr/interface/models/LunchFlowLink';
 import PlaidLink, { PlaidLinkStatus } from '@monetr/interface/models/PlaidLink';
+import SimpleFinLink, { SimpleFinLinkStatus } from '@monetr/interface/models/SimpleFinLink';
 import type User from '@monetr/interface/models/User';
 import type { WithJsonValues } from '@monetr/interface/util/json';
 import parseDate from '@monetr/interface/util/parseDate';
@@ -12,6 +13,7 @@ export enum LinkType {
   Manual = 'manual',
   Stripe = 'stripe',
   LunchFlow = 'lunch_flow',
+  SimpleFin = 'simplefin',
 }
 
 export const errorMessages: Partial<Record<string, string>> = {
@@ -32,6 +34,7 @@ export default class Link {
    */
   readonly linkId: ID<Link>;
   lunchFlowLinkId: ID<LunchFlowLink> | null;
+  simpleFinLinkId: ID<SimpleFinLink> | null;
   readonly linkType: LinkType;
   institutionName: string;
   description: string | null;
@@ -42,10 +45,12 @@ export default class Link {
 
   readonly plaidLink: PlaidLink | null;
   readonly lunchFlowLink: LunchFlowLink | null;
+  readonly simpleFinLink: SimpleFinLink | null;
 
   constructor(data: WithJsonValues<Link>) {
     this.linkId = ID.from(data.linkId);
     this.lunchFlowLinkId = data.lunchFlowLinkId ? ID.from(data.lunchFlowLinkId) : null;
+    this.simpleFinLinkId = data.simpleFinLinkId ? ID.from(data.simpleFinLinkId) : null;
     this.linkType = data.linkType;
     this.institutionName = data.institutionName;
     this.description = data.description ?? null;
@@ -55,6 +60,7 @@ export default class Link {
     this.createdBy = ID.from(data.createdBy);
     this.plaidLink = data.plaidLink ? new PlaidLink(data.plaidLink) : null;
     this.lunchFlowLink = data.lunchFlowLink ? new LunchFlowLink(data.lunchFlowLink) : null;
+    this.simpleFinLink = data.simpleFinLink ? new SimpleFinLink(data.simpleFinLink) : null;
   }
 
   getName(): string {
@@ -73,9 +79,18 @@ export default class Link {
     return this.linkType === LinkType.LunchFlow && Boolean(this.lunchFlowLink);
   }
 
+  getIsSimpleFin(): boolean {
+    return this.linkType === LinkType.SimpleFin && Boolean(this.simpleFinLink);
+  }
+
   getCanArchiveBankAccount(bankAccount: BankAccount): boolean {
     // Plaid accounts can only be archived once Plaid stops returning them to us.
-    return this.getIsManual() || this.getIsLunchFlow() || (this.getIsPlaid() && bankAccount.status === 'inactive');
+    return (
+      this.getIsManual() ||
+      this.getIsLunchFlow() ||
+      this.getIsSimpleFin() ||
+      (this.getIsPlaid() && bankAccount.status === 'inactive')
+    );
   }
 
   getCanUpdateAccountSelection(): boolean {
@@ -83,7 +98,11 @@ export default class Link {
   }
 
   getIsError(): boolean {
-    return this.plaidLink?.status === PlaidLinkStatus.Error || this.lunchFlowLink?.status === LunchFlowLinkStatus.Error;
+    return (
+      this.plaidLink?.status === PlaidLinkStatus.Error ||
+      this.lunchFlowLink?.status === LunchFlowLinkStatus.Error ||
+      this.simpleFinLink?.status === SimpleFinLinkStatus.Error
+    );
   }
 
   getIsPendingExpiration(): boolean {
@@ -97,7 +116,8 @@ export default class Link {
   getIsDeactivated(): boolean {
     return (
       this.plaidLink?.status === PlaidLinkStatus.Deactivated ||
-      this.lunchFlowLink?.status === LunchFlowLinkStatus.Deactivated
+      this.lunchFlowLink?.status === LunchFlowLinkStatus.Deactivated ||
+      this.simpleFinLink?.status === SimpleFinLinkStatus.Deactivated
     );
   }
 
