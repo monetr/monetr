@@ -7,6 +7,7 @@ import { Button } from '@monetr/interface/components/Button';
 import Flex, { flexVariants } from '@monetr/interface/components/Flex';
 import LunchFlowLogo from '@monetr/interface/components/Logo/LunchFlowLogo';
 import PlaidLogo from '@monetr/interface/components/Logo/PlaidLogo';
+import SimpleFinLogo from '@monetr/interface/components/Logo/SimpleFinLogo';
 import LogoutFooter from '@monetr/interface/components/setup/LogoutFooter';
 import SetupBillingButton from '@monetr/interface/components/setup/SetupBillingButton';
 import Typography from '@monetr/interface/components/Typography';
@@ -22,13 +23,14 @@ export interface SetupPageProps {
   manualEnabled?: boolean;
 }
 
-type Step = 'greeting' | 'plaid' | 'lunchflow' | 'manual' | 'loading';
+type Step = 'greeting' | 'plaid' | 'lunchflow' | 'simplefin' | 'manual' | 'loading';
 
 export default function SetupPage(props: SetupPageProps): React.JSX.Element {
   const [step, setStep] = useState<Step>('greeting');
   const plaidPath = props.alreadyOnboarded ? '/link/create/plaid' : '/setup/plaid';
   const manualPath = props.alreadyOnboarded ? '/link/create/manual' : '/setup/manual';
   const lunchFlowPath = props.alreadyOnboarded ? '/link/create/lunchflow' : '/setup/lunchflow';
+  const simpleFinPath = props.alreadyOnboarded ? '/link/create/simplefin' : '/setup/simplefin';
 
   switch (step) {
     case 'greeting':
@@ -39,6 +41,8 @@ export default function SetupPage(props: SetupPageProps): React.JSX.Element {
       return <Redirect to={plaidPath} />;
     case 'lunchflow':
       return <Redirect to={lunchFlowPath} />;
+    case 'simplefin':
+      return <Redirect to={simpleFinPath} />;
     case 'manual':
       return <Redirect to={manualPath} />;
     default:
@@ -54,7 +58,7 @@ interface GreetingProps {
 
 function Greeting(props: GreetingProps): React.JSX.Element {
   const { data: config } = useAppConfiguration();
-  const [active, setActive] = useState<'plaid' | 'lunchflow' | 'manual' | null>(null);
+  const [active, setActive] = useState<'plaid' | 'lunchflow' | 'simplefin' | 'manual' | null>(null);
 
   return (
     <div
@@ -87,6 +91,14 @@ function Greeting(props: GreetingProps): React.JSX.Element {
           icon={LunchFlowLogo}
           name='Lunch Flow'
           onClick={() => setActive('lunchflow')}
+        />
+        <OnboardingTile
+          active={active === 'simplefin'}
+          description='Connect your bank through the SimpleFIN Bridge.'
+          disabled={!config?.simpleFinEnabled}
+          icon={SimpleFinLogo}
+          name='SimpleFIN'
+          onClick={() => setActive('simplefin')}
         />
         <OnboardingTile
           active={active === 'manual'}
