@@ -1,4 +1,5 @@
 [
   { "type": "file", "name": "docker", "label": "Docker Compose" },
-  { "type": "file", "name": "kubernetes", "label": "Kubernetes" }
+  { "type": "file", "name": "kubernetes", "label": "Kubernetes" },
+  { "type": "file", "name": "easypanel", "label": "Easypanel" }
 ]
