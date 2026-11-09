@@ -9,19 +9,19 @@
 // filename. The scaled copies are cached on disk, named by a hash of the original, and then imported like any other
 // image so they get a hashed filename too.
 
-import { getImports, type MdxJsxAttribute, type MdxJsxElement } from './rehypeImageSize';
+import { getImports, isSrcAttribute, type MdxJsxAttribute, type MdxJsxElement, type MdxjsEsm } from './rehypeImageSize';
 
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
 import { mkdir, rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import type { Root, RootContent } from 'hast';
+import type { Root } from 'hast';
 import { imageSize } from 'image-size';
 import sharp from 'sharp';
 import { visit } from 'unist-util-visit';
 
-// Screenshots render around 824 pixels wide on a desktop sized screen, so this is still more than 1.7x that.
-const SCALED_WIDTH = 1440;
+// Screenshots render around 824 pixels wide on a desktop sized screen, anything wider than this gets scaled down to it.
+const SCALED_WIDTH = 900;
 const CACHE_DIR = path.resolve(__dirname, '../node_modules/.cache/monetr-image-scale');
 
 // Pages get compiled for both the web and the server builds at the same time, this keeps them from doing the work twice.
@@ -54,7 +54,7 @@ function scaleImage(imagePath: string, original: Buffer): Promise<string> {
   return result;
 }
 
-function getImportNode(name: string, from: string): RootContent {
+function getImportNode(name: string, from: string): MdxjsEsm {
   return {
     type: 'mdxjsEsm',
     value: `import ${name} from ${JSON.stringify(from)}`,
@@ -71,7 +71,7 @@ function getImportNode(name: string, from: string): RootContent {
         ],
       },
     },
-  } as unknown as RootContent;
+  };
 }
 
 function getExpressionAttribute(name: string, identifier: string): MdxJsxAttribute {
@@ -89,7 +89,7 @@ function getExpressionAttribute(name: string, identifier: string): MdxJsxAttribu
         },
       },
     },
-  } as MdxJsxAttribute;
+  };
 }
 
 export default function rehypeImageScale() {
@@ -97,15 +97,14 @@ export default function rehypeImageScale() {
     const imports = getImports(tree, file.path);
 
     const images: Array<{ element: MdxJsxElement; originalName: string; imagePath: string }> = [];
-    visit(tree, (node: unknown) => {
-      const element = node as MdxJsxElement;
-      if (element.type !== 'mdxJsxFlowElement' && element.type !== 'mdxJsxTextElement') {
+    visit(tree, node => {
+      if (node.type !== 'mdxJsxFlowElement' && node.type !== 'mdxJsxTextElement') {
         return;
       }
-      if (element.name !== 'img') {
+      if (node.name !== 'img') {
         return;
       }
-      const src = element.attributes.find(attribute => attribute.name === 'src')?.value;
+      const src = node.attributes.find(isSrcAttribute)?.value;
       // Only an expression can point at an import
       if (!src || typeof src === 'string') {
         return;
@@ -113,7 +112,7 @@ export default function rehypeImageScale() {
       const imagePath = imports.get(src.value);
       // rspress's dead image check will already complain about one that doesn't exist
       if (imagePath && existsSync(imagePath)) {
-        images.push({ element, originalName: src.value, imagePath });
+        images.push({ element: node, originalName: src.value, imagePath });
       }
     });
 
@@ -133,7 +132,7 @@ export default function rehypeImageScale() {
         }
 
         element.attributes = [
-          ...element.attributes.filter(attribute => attribute.name !== 'src'),
+          ...element.attributes.filter(attribute => !isSrcAttribute(attribute)),
           getExpressionAttribute('src', scaledName),
           getExpressionAttribute('data-zoom-src', originalName),
         ];

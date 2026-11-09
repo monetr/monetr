@@ -9,7 +9,7 @@
 
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
-import type { Root } from 'hast';
+import type { Root, RootContent } from 'hast';
 import { imageSize } from 'image-size';
 import { visit } from 'unist-util-visit';
 
@@ -18,30 +18,39 @@ interface RehypeImageSizeOptions {
   publicDir: string;
 }
 
-// The hast types don't know about the MDX nodes, so these are just the parts of them that we read.
-interface MdxjsEsm {
-  type: string;
+// The hast types don't know about this node, so these are just the parts of it that we use.
+export interface MdxjsEsm {
+  type: 'mdxjsEsm';
+  value: string;
   data?: {
     estree?: {
+      type: string;
+      sourceType: string;
       body: Array<{
         type: string;
-        source?: { value: string };
-        specifiers?: Array<{ type: string; local: { name: string } }>;
+        source?: { type: string; value: string; raw: string };
+        specifiers?: Array<{ type: string; local: { type: string; name: string } }>;
       }>;
     };
   };
 }
 
-export interface MdxJsxAttribute {
-  type: string;
-  name?: string;
-  value?: string | { value: string } | null;
+declare module 'hast' {
+  interface RootContentMap {
+    mdxjsEsm: MdxjsEsm;
+  }
 }
 
-export interface MdxJsxElement {
-  type: string;
-  name?: string | null;
-  attributes: Array<MdxJsxAttribute>;
+// The JSX nodes are already part of the hast types, rspress pulls in the package that adds them.
+export type MdxJsxElement = Extract<RootContent, { type: 'mdxJsxFlowElement' | 'mdxJsxTextElement' }>;
+export type MdxJsxAttribute = Extract<MdxJsxElement['attributes'][number], { type: 'mdxJsxAttribute' }>;
+
+function isSizeAttribute(attribute: MdxJsxElement['attributes'][number]): boolean {
+  return attribute.type === 'mdxJsxAttribute' && (attribute.name === 'width' || attribute.name === 'height');
+}
+
+export function isSrcAttribute(attribute: MdxJsxElement['attributes'][number]): boolean {
+  return attribute.type === 'mdxJsxAttribute' && attribute.name === 'src';
 }
 
 function getImageSize(imagePath: string): { width: number; height: number } | null {
@@ -60,7 +69,7 @@ function getImageSize(imagePath: string): { width: number; height: number } | nu
 // getImports maps the name of each default import in the file to the absolute path that it is importing.
 export function getImports(tree: Root, filePath: string): Map<string, string> {
   const imports = new Map<string, string>();
-  for (const node of tree.children as Array<MdxjsEsm>) {
+  for (const node of tree.children) {
     if (node.type !== 'mdxjsEsm') {
       continue;
     }
@@ -104,19 +113,18 @@ export default function rehypeImageSize(options: RehypeImageSizeOptions) {
     });
 
     const imports = getImports(tree, file.path);
-    visit(tree, (node: unknown) => {
-      const element = node as MdxJsxElement;
-      if (element.type !== 'mdxJsxFlowElement' && element.type !== 'mdxJsxTextElement') {
+    visit(tree, node => {
+      if (node.type !== 'mdxJsxFlowElement' && node.type !== 'mdxJsxTextElement') {
         return;
       }
-      if (element.name !== 'img') {
+      if (node.name !== 'img') {
         return;
       }
       // Don't override anything that was sized by hand
-      if (element.attributes.some(attribute => attribute.name === 'width' || attribute.name === 'height')) {
+      if (node.attributes.some(isSizeAttribute)) {
         return;
       }
-      const src = element.attributes.find(attribute => attribute.name === 'src')?.value;
+      const src = node.attributes.find(isSrcAttribute)?.value;
       // Only an expression can point at an import, a string here would be an image we can't resolve
       if (!src || typeof src === 'string') {
         return;
@@ -130,7 +138,7 @@ export default function rehypeImageSize(options: RehypeImageSizeOptions) {
       if (!size) {
         return;
       }
-      element.attributes.push(
+      node.attributes.push(
         { type: 'mdxJsxAttribute', name: 'width', value: String(size.width) },
         { type: 'mdxJsxAttribute', name: 'height', value: String(size.height) },
       );
