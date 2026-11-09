@@ -54,6 +54,7 @@ describe('archive bank account modal', () => {
             bankAccountId: ID.from<BankAccount>('bac_01gds6eqsq7h5mgevwtmw3cyxb'),
             linkId: ID.from<Link>('link_01gds6eqsqacg48p0azb3wcpsq'),
             lunchFlowBankAccountId: null,
+            simpleFinBankAccountId: null,
             mask: '2982',
             name: 'Mercury Checking',
             originalName: 'Mercury Checking',
@@ -70,6 +71,7 @@ describe('archive bank account modal', () => {
             deletedAt: null,
             plaidBankAccount: null,
             lunchFlowBankAccount: null,
+            simpleFinBankAccount: null,
           }),
         }).then(onArchived),
     );
@@ -101,6 +103,7 @@ describe('archive bank account modal', () => {
             bankAccountId: ID.from<BankAccount>('bac_01gds6eqsq7h5mgevwtmw3cyxb'),
             linkId: ID.from<Link>('link_01gds6eqsqacg48p0azb3wcpsq'),
             lunchFlowBankAccountId: null,
+            simpleFinBankAccountId: null,
             mask: '2982',
             name: 'Mercury Checking',
             originalName: 'Mercury Checking',
@@ -117,6 +120,7 @@ describe('archive bank account modal', () => {
             deletedAt: null,
             plaidBankAccount: null,
             lunchFlowBankAccount: null,
+            simpleFinBankAccount: null,
           }),
         }).then(onArchived),
     );
@@ -147,6 +151,7 @@ describe('archive bank account modal', () => {
             bankAccountId: ID.from<BankAccount>('bac_01gds6eqsq7h5mgevwtmw3cyxb'),
             linkId: ID.from<Link>('link_01gds6eqsqacg48p0azb3wcpsq'),
             lunchFlowBankAccountId: null,
+            simpleFinBankAccountId: null,
             mask: '2982',
             name: 'Mercury Checking',
             originalName: 'Mercury Checking',
@@ -163,6 +168,7 @@ describe('archive bank account modal', () => {
             deletedAt: null,
             plaidBankAccount: null,
             lunchFlowBankAccount: null,
+            simpleFinBankAccount: null,
           }),
         }).then(onArchived),
     );

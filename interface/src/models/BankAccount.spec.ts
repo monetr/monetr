@@ -10,6 +10,7 @@ describe('bank accounts', () => {
       bankAccountId: ID.from<BankAccount>('bac_test'),
       linkId: ID.from<Link>('link_test'),
       lunchFlowBankAccountId: null,
+      simpleFinBankAccountId: null,
       mask: '1234',
       name: 'Generic Checking',
       originalName: 'Generic Checking',
@@ -28,6 +29,7 @@ describe('bank accounts', () => {
       deletedAt: null,
       plaidBankAccount: null,
       lunchFlowBankAccount: null,
+      simpleFinBankAccount: null,
     });
     expect(account.lastUpdated).toEqual(now);
   });
