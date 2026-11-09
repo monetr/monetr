@@ -11,6 +11,7 @@ import LunchFlowSetupSync from '@monetr/interface/components/setup/lunchflow/Lun
 import PlaidSetup from '@monetr/interface/components/setup/PlaidSetup';
 import SimpleFinSetupAccounts from '@monetr/interface/components/setup/simplefin/SimpleFinSetupAccounts';
 import SimpleFinSetupIntro from '@monetr/interface/components/setup/simplefin/SimpleFinSetupIntro';
+import SimpleFinSetupSync from '@monetr/interface/components/setup/simplefin/SimpleFinSetupSync';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import { useBankAccounts } from '@monetr/interface/hooks/useBankAccounts';
@@ -215,6 +216,7 @@ export default function Monetr(): React.JSX.Element {
               <Route component={LunchFlowSetupSync} path='/link/create/lunchflow/:linkId/sync' />
               <Route component={SimpleFinSetupIntro} path='/link/create/simplefin' />
               <Route component={SimpleFinSetupAccounts} path='/link/create/simplefin/:simpleFinLinkId' />
+              <Route component={SimpleFinSetupSync} path='/link/create/simplefin/:linkId/sync' />
               <Route component={LogoutPage} path='/logout' />
               <Route component={OauthReturn} path='/plaid/oauth-return' />
               <Route component={SubscriptionPage} path='/subscription' />
