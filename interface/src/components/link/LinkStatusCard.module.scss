@@ -106,3 +106,18 @@
     color: var(--warning);
   }
 }
+
+.errors {
+  border-top: 1px solid var(--border-subtle);
+  padding-left: 4 * variables.$size;
+  padding-right: 4 * variables.$size;
+  padding-top: 4 * variables.$size;
+  padding-bottom: 4 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    padding-left: 5 * variables.$size;
+    padding-right: 5 * variables.$size;
+    padding-top: 5 * variables.$size;
+    padding-bottom: 5 * variables.$size;
+  }
+}

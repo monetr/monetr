@@ -14,6 +14,7 @@ import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { useTriggerManualLunchFlowSync } from '@monetr/interface/hooks/useTriggerManualLunchFlowSync';
 import { useTriggerManualPlaidSync } from '@monetr/interface/hooks/useTriggerManualPlaidSync';
+import { useTriggerManualSimpleFinSync } from '@monetr/interface/hooks/useTriggerManualSimpleFinSync';
 import { showRemoveLinkModal } from '@monetr/interface/modals/RemoveLinkModal';
 import { showUpdatePlaidAccountOverlay } from '@monetr/interface/modals/UpdatePlaidAccountOverlay';
 
@@ -25,6 +26,7 @@ export default function BudgetingSidebarTitle(): React.JSX.Element {
   const [, navigate] = useLocation();
   const triggerPlaidSync = useTriggerManualPlaidSync();
   const triggerLunchFlowSync = useTriggerManualLunchFlowSync();
+  const triggerSimpleFinSync = useTriggerManualSimpleFinSync();
 
   const handleReauthenticateLink = useCallback(() => {
     if (!link) {
@@ -43,8 +45,12 @@ export default function BudgetingSidebarTitle(): React.JSX.Element {
       triggerLunchFlowSync(bankAccount.linkId);
       return;
     }
+    if (link?.getIsSimpleFin()) {
+      triggerSimpleFinSync(bankAccount.linkId);
+      return;
+    }
     triggerPlaidSync(bankAccount.linkId);
-  }, [bankAccount?.linkId, link, triggerLunchFlowSync, triggerPlaidSync]);
+  }, [bankAccount?.linkId, link, triggerLunchFlowSync, triggerSimpleFinSync, triggerPlaidSync]);
 
   const handleUpdateAccountSelection = useCallback(() => {
     if (!link) {
@@ -99,7 +105,11 @@ export default function BudgetingSidebarTitle(): React.JSX.Element {
           </MenuItem>
           <MenuItem
             onClick={handleTriggerResync}
-            visible={(link.getIsPlaid() && !link.getIsRevoked()) || (link.getIsLunchFlow() && !link.getIsDeactivated())}
+            visible={
+              (link.getIsPlaid() && !link.getIsRevoked()) ||
+              (link.getIsLunchFlow() && !link.getIsDeactivated()) ||
+              (link.getIsSimpleFin() && !link.getIsDeactivated())
+            }
           >
             <RefreshCw />
             Manually Resync

@@ -3,11 +3,13 @@ import { Check, RefreshCw, TriangleAlert } from 'lucide-react';
 
 import Badge, { type BadgeProps } from '@monetr/interface/components/Badge';
 import { Button } from '@monetr/interface/components/Button';
+import SimpleFinLinkErrors from '@monetr/interface/components/link/SimpleFinLinkErrors';
 import Typography from '@monetr/interface/components/Typography';
 import { useLocale } from '@monetr/interface/hooks/useLocale';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { useTriggerManualLunchFlowSync } from '@monetr/interface/hooks/useTriggerManualLunchFlowSync';
 import { useTriggerManualPlaidSync } from '@monetr/interface/hooks/useTriggerManualPlaidSync';
+import { useTriggerManualSimpleFinSync } from '@monetr/interface/hooks/useTriggerManualSimpleFinSync';
 import type Link from '@monetr/interface/models/Link';
 import { DateLength, formatDate } from '@monetr/interface/util/formatDate';
 
@@ -22,9 +24,10 @@ export default function LinkStatusCard(props: LinkStatusCardProps): React.JSX.El
   const { data: locale } = useLocale();
   const triggerPlaidSync = useTriggerManualPlaidSync();
   const triggerLunchFlowSync = useTriggerManualLunchFlowSync();
+  const triggerSimpleFinSync = useTriggerManualSimpleFinSync();
 
   // Manual links don't sync with anything, so there is nothing to show here.
-  const sync = props.link.plaidLink ?? props.link.lunchFlowLink;
+  const sync = props.link.plaidLink ?? props.link.lunchFlowLink ?? props.link.simpleFinLink;
   if (!sync) {
     return null;
   }
@@ -34,6 +37,10 @@ export default function LinkStatusCard(props: LinkStatusCardProps): React.JSX.El
   let statusVariant: BadgeProps['variant'] = 'success';
   if (props.link.getIsLunchFlow()) {
     provider = 'Lunch Flow';
+    status = 'Active';
+  }
+  if (props.link.getIsSimpleFin()) {
+    provider = 'SimpleFIN';
     status = 'Active';
   }
   if (props.link.getIsPendingExpiration()) {
@@ -62,11 +69,17 @@ export default function LinkStatusCard(props: LinkStatusCardProps): React.JSX.El
   const expirationDate = props.link.plaidLink?.expirationDate;
   const canSync =
     (props.link.getIsPlaid() && !props.link.getIsRevoked()) ||
-    (props.link.getIsLunchFlow() && !props.link.getIsDeactivated());
+    (props.link.getIsLunchFlow() && !props.link.getIsDeactivated()) ||
+    (props.link.getIsSimpleFin() && !props.link.getIsDeactivated());
+  const simpleFinErrors = props.link.simpleFinLink?.lastErrors ?? [];
 
   function triggerSync() {
     if (props.link.getIsLunchFlow()) {
       triggerLunchFlowSync(props.link.linkId);
+      return;
+    }
+    if (props.link.getIsSimpleFin()) {
+      triggerSimpleFinSync(props.link.linkId);
       return;
     }
     triggerPlaidSync(props.link.linkId);
@@ -131,6 +144,11 @@ export default function LinkStatusCard(props: LinkStatusCardProps): React.JSX.El
           </div>
         )}
       </dl>
+      {simpleFinErrors.length > 0 && (
+        <div className={styles.errors}>
+          <SimpleFinLinkErrors errors={simpleFinErrors} />
+        </div>
+      )}
     </section>
   );
 }
