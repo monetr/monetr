@@ -45,6 +45,7 @@
     "@types/react-dom": "19.3.0",
     "sass": "1.107.1",
     "satori": "0.63.2",
+    "sharp": "0.35.5",
     "spellchecker-cli": "7.0.4",
     "typescript": "7.0.2"
   }

@@ -1,4 +1,5 @@
 import ogImages from './plugins/ogImages';
+import rehypeImageScale from './plugins/rehypeImageScale';
 import rehypeImageSize from './plugins/rehypeImageSize';
 import rehypeMathPostProcess from './plugins/rehypeMathPostProcess';
 import trailingSlashRedirects from './plugins/trailingSlashRedirects';
@@ -72,6 +73,7 @@ export default defineConfig({
     rehypePlugins: [
       rehypeKatex,
       rehypeMathPostProcess,
+      rehypeImageScale,
       [
         rehypeImageSize,
         {
