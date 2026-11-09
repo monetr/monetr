@@ -2,6 +2,7 @@ package simplefin_jobs_test
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 	"testing"
@@ -1089,6 +1090,145 @@ func TestSyncSimpleFin(t *testing.T) {
 			"begin",
 			"error",
 		}, statuses, "should announce the error so the client stops waiting")
+	})
+}
+
+func TestSyncSimpleFinCron(t *testing.T) {
+	t.Run("no links to sync", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				gomock.Any(),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Return(nil).
+			Times(0)
+
+		context := mockgen.NewMockContext(ctrl)
+		context.EXPECT().Clock().Return(clock).AnyTimes()
+		context.EXPECT().Configuration().Return(config.Configuration{
+			SimpleFin: config.SimpleFin{
+				Enabled: true,
+				AllowedHosts: []string{
+					config.DefaultSimpleFinHost,
+				},
+			},
+		}).MinTimes(1)
+		context.EXPECT().DB().Return(db).AnyTimes()
+		context.EXPECT().Enqueuer().Return(enqueuer).Times(0)
+		context.EXPECT().Log().Return(log).AnyTimes()
+
+		err := simplefin_jobs.SyncSimpleFinCron(
+			mockqueue.NewMockContext(context),
+		)
+		assert.NoError(t, err, "sync simplefin cron should succeed")
+	})
+
+	t.Run("enqueues one job per link", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		firstLink := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+		fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &firstLink)
+		fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &firstLink)
+		secondLink := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+		fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &secondLink)
+
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(simplefin_jobs.SyncSimpleFin),
+				gomock.Any(),
+				gomock.InAnyOrder([]any{
+					simplefin_jobs.SyncSimpleFinArguments{
+						AccountId: firstLink.AccountId,
+						LinkId:    firstLink.LinkId,
+					},
+					simplefin_jobs.SyncSimpleFinArguments{
+						AccountId: secondLink.AccountId,
+						LinkId:    secondLink.LinkId,
+					},
+				}),
+			).
+			Return(nil).
+			Times(1)
+
+		context := mockgen.NewMockContext(ctrl)
+		context.EXPECT().Clock().Return(clock).AnyTimes()
+		context.EXPECT().Configuration().Return(config.Configuration{
+			SimpleFin: config.SimpleFin{
+				Enabled: true,
+				AllowedHosts: []string{
+					config.DefaultSimpleFinHost,
+				},
+			},
+		}).MinTimes(1)
+		context.EXPECT().DB().Return(db).AnyTimes()
+		context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
+		context.EXPECT().Log().Return(log).AnyTimes()
+
+		err := simplefin_jobs.SyncSimpleFinCron(
+			mockqueue.NewMockContext(context),
+		)
+		assert.NoError(t, err, "sync simplefin cron should succeed")
+	})
+
+	t.Run("returns an error when the enqueue fails", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+		fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
+
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+		enqueuer.EXPECT().
+			BulkEnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(simplefin_jobs.SyncSimpleFin),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Return(errors.New("database is on fire")).
+			Times(1)
+
+		context := mockgen.NewMockContext(ctrl)
+		context.EXPECT().Clock().Return(clock).AnyTimes()
+		context.EXPECT().Configuration().Return(config.Configuration{
+			SimpleFin: config.SimpleFin{
+				Enabled: true,
+				AllowedHosts: []string{
+					config.DefaultSimpleFinHost,
+				},
+			},
+		}).MinTimes(1)
+		context.EXPECT().DB().Return(db).AnyTimes()
+		context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
+		context.EXPECT().Log().Return(log).AnyTimes()
+
+		err := simplefin_jobs.SyncSimpleFinCron(
+			mockqueue.NewMockContext(context),
+		)
+		assert.EqualError(t, err, "database is on fire")
 	})
 }
 

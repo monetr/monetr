@@ -19,6 +19,7 @@ type JobRepository interface {
 	GetLunchFlowAccountsToSync(ctx context.Context) ([]BankAccount, error)
 	GetStaleLunchFlowLinks(ctx context.Context) ([]LunchFlowLink, error)
 	GetStaleSimpleFinLinks(ctx context.Context) ([]SimpleFinLink, error)
+	GetSimpleFinLinksToSync(ctx context.Context) ([]Link, error)
 }
 
 type ProcessFundingSchedulesItem struct {
@@ -246,6 +247,57 @@ func (j *jobRepository) GetStaleSimpleFinLinks(
 		Scan(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to find stale SimpleFIN links")
+	}
+
+	return links, nil
+}
+
+// GetSimpleFinLinksToSync returns one row per monetr link that has an active
+// SimpleFIN link with at least one active bank account, and has not attempted a
+// sync in the past 6 hours. Only the account ID and link ID are populated on the
+// returned links.
+func (j *jobRepository) GetSimpleFinLinksToSync(
+	ctx context.Context,
+) ([]Link, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	links := make([]Link, 0)
+	cutoff := j.clock.Now().Add(-6 * time.Hour)
+	err := j.txn.NewSelect().Model(&links).
+		ColumnExpr(`"link"."account_id"`).
+		ColumnExpr(`"link"."link_id"`).
+		// Only the links that have a simplefin associated record.
+		Join(`INNER JOIN "simplefin_links" AS "simplefin_link"`).
+		JoinOn(`"simplefin_link"."simplefin_link_id" = "link"."simplefin_link_id" AND "simplefin_link"."account_id" = "link"."account_id"`).
+		// But make sure it is still a simplefin link. This check makes sure that we
+		// don't accidently check this for a link that was converted to be a manual
+		// link.
+		Where(`"link"."link_type" = ?`, SimpleFinLinkType).
+		// Where the simplefin link is active and an attempt to update it has not
+		// been made in the past 6 hours.
+		Where(`"simplefin_link"."status" = ?`, SimpleFinLinkStatusActive).
+		Where(`("simplefin_link"."last_attempted_update" < ? OR "simplefin_link"."last_attempted_update" IS NULL)`, cutoff).
+		// And make sure that nothing has been deleted.
+		Where(`"simplefin_link"."deleted_at" IS NULL`).
+		Where(`"link"."deleted_at" IS NULL`).
+		// Every sync spends a request against the daily quota, so a link needs at
+		// least one bank account that would actually be synced.
+		Where(`EXISTS (
+			SELECT 1
+			FROM "simplefin_bank_accounts" AS "simplefin_bank_account"
+			INNER JOIN "bank_accounts" AS "bank_account"
+				ON "bank_account"."simplefin_bank_account_id" = "simplefin_bank_account"."simplefin_bank_account_id"
+				AND "bank_account"."account_id" = "simplefin_bank_account"."account_id"
+			WHERE "simplefin_bank_account"."simplefin_link_id" = "simplefin_link"."simplefin_link_id"
+				AND "simplefin_bank_account"."account_id" = "simplefin_link"."account_id"
+				AND "simplefin_bank_account"."status" = ?
+				AND "simplefin_bank_account"."deleted_at" IS NULL
+				AND "bank_account"."deleted_at" IS NULL
+		)`, SimpleFinBankAccountStatusActive).
+		Scan(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to find SimpleFIN links to sync")
 	}
 
 	return links, nil

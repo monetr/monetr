@@ -330,3 +330,125 @@ func TestJobRepository_GetStaleSimpleFinLinks(t *testing.T) {
 		assert.Empty(t, result, "should not return active links")
 	})
 }
+
+func TestJobRepository_GetSimpleFinLinksToSync(t *testing.T) {
+	t.Run("never attempted", func(t *testing.T) {
+		clock := clock.NewMock()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		jobRepo := repository.NewJobRepository(db, clock)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+		fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
+
+		result, err := jobRepo.GetSimpleFinLinksToSync(t.Context())
+		assert.NoError(t, err, "must not return an error")
+		assert.Len(t, result, 1, "should return the simplefin link")
+		assert.EqualValues(t, link.AccountId, result[0].AccountId, "returned account must match")
+		assert.EqualValues(t, link.LinkId, result[0].LinkId, "returned link must match")
+	})
+
+	t.Run("recently attempted", func(t *testing.T) {
+		clock := clock.NewMock()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		jobRepo := repository.NewJobRepository(db, clock)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+		fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
+
+		link.SimpleFinLink.LastAttemptedUpdate = new(clock.Now())
+		testutils.MustDBUpdate(t, link.SimpleFinLink)
+
+		clock.Add(1 * time.Hour)
+
+		{
+			result, err := jobRepo.GetSimpleFinLinksToSync(t.Context())
+			assert.NoError(t, err, "must not return an error")
+			assert.Empty(t, result, "should not return links attempted in the past 6 hours")
+		}
+
+		// After 6+ hours the link should be eligible again.
+		clock.Add(6 * time.Hour)
+
+		{
+			result, err := jobRepo.GetSimpleFinLinksToSync(t.Context())
+			assert.NoError(t, err, "must not return an error")
+			assert.Len(t, result, 1, "should return the simplefin link after waiting")
+			assert.EqualValues(t, link.LinkId, result[0].LinkId, "returned link must match")
+		}
+	})
+
+	t.Run("links that are not active", func(t *testing.T) {
+		clock := clock.NewMock()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		jobRepo := repository.NewJobRepository(db, clock)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+		fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
+
+		for _, status := range []SimpleFinLinkStatus{
+			SimpleFinLinkStatusError,
+			SimpleFinLinkStatusPending,
+			SimpleFinLinkStatusDeactivated,
+		} {
+			link.SimpleFinLink.Status = status
+			testutils.MustDBUpdate(t, link.SimpleFinLink)
+
+			result, err := jobRepo.GetSimpleFinLinksToSync(t.Context())
+			assert.NoError(t, err, "must not return an error")
+			assert.Empty(t, result, "should not return a link with status %s", status)
+		}
+	})
+
+	t.Run("every bank account is inactive", func(t *testing.T) {
+		clock := clock.NewMock()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		jobRepo := repository.NewJobRepository(db, clock)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
+
+		bankAccount.SimpleFinBankAccount.Status = SimpleFinBankAccountStatusInactive
+		testutils.MustDBUpdate(t, bankAccount.SimpleFinBankAccount)
+
+		result, err := jobRepo.GetSimpleFinLinksToSync(t.Context())
+		assert.NoError(t, err, "must not return an error")
+		assert.Empty(t, result, "should not return a link with no active bank accounts")
+	})
+
+	t.Run("one row for a link with two active bank accounts", func(t *testing.T) {
+		clock := clock.NewMock()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		jobRepo := repository.NewJobRepository(db, clock)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+		fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
+		fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
+
+		result, err := jobRepo.GetSimpleFinLinksToSync(t.Context())
+		assert.NoError(t, err, "must not return an error")
+		assert.Len(t, result, 1, "should only return the link once")
+		assert.EqualValues(t, link.LinkId, result[0].LinkId, "returned link must match")
+	})
+
+	t.Run("link converted to manual", func(t *testing.T) {
+		clock := clock.NewMock()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		jobRepo := repository.NewJobRepository(db, clock)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+		fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
+
+		link.LinkType = ManualLinkType
+		testutils.MustDBUpdate(t, &link)
+
+		result, err := jobRepo.GetSimpleFinLinksToSync(t.Context())
+		assert.NoError(t, err, "must not return an error")
+		assert.Empty(t, result, "should not return a link that was converted to manual")
+	})
+}

@@ -45,6 +45,51 @@ type SyncSimpleFinArguments struct {
 	LinkId    models.ID[models.Link]    `json:"linkId"`
 }
 
+func SyncSimpleFinCron(ctx queue.Context) error {
+	log := ctx.Log()
+
+	if !ctx.Configuration().SimpleFin.IsEnabled() {
+		log.InfoContext(ctx, "simplefin is not enabled")
+		return nil
+	}
+
+	log.InfoContext(ctx, "retrieving links to sync with SimpleFIN")
+
+	jobRepo := repository.NewJobRepository(ctx.DB(), ctx.Clock())
+
+	links, err := jobRepo.GetSimpleFinLinksToSync(ctx)
+	if err != nil {
+		return err
+	}
+
+	if len(links) == 0 {
+		log.InfoContext(ctx, "no links to be synced with SimpleFIN at this time")
+		return nil
+	}
+
+	if err = queue.BulkEnqueue(
+		ctx,
+		ctx.Enqueuer(),
+		SyncSimpleFin,
+		myownsanity.Map(
+			links,
+			func(item models.Link) SyncSimpleFinArguments {
+				return SyncSimpleFinArguments{
+					AccountId: item.AccountId,
+					LinkId:    item.LinkId,
+				}
+			}),
+	); err != nil {
+		log.WarnContext(ctx, "failed to enqueue jobs to sync with SimpleFIN", "err", err)
+		crumbs.Warn(ctx, "Failed to enqueue jobs to sync with SimpleFIN", "job", map[string]any{
+			"error": err,
+		})
+		return err
+	}
+
+	return nil
+}
+
 type syncSimpleFinContext struct {
 	log           *slog.Logger
 	args          SyncSimpleFinArguments

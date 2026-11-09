@@ -42,6 +42,7 @@ func RegisterJobs(
 			queue.Register(ctx, processor, simplefin_jobs.CleanupSimpleFin),
 			queue.Register(ctx, processor, simplefin_jobs.SyncSimpleFin),
 			queue.RegisterCron(ctx, processor, simplefin_jobs.CleanupSimpleFinCron, "0 25 1 * * *"),
+			queue.RegisterCron(ctx, processor, simplefin_jobs.SyncSimpleFinCron, "0 47 * * * *"),
 		); err != nil {
 			return err
 		}
