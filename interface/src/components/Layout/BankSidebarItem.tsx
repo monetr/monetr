@@ -2,6 +2,7 @@ import { Link } from 'wouter';
 
 import LunchFlowLogo from '@monetr/interface/components/Logo/LunchFlowLogo';
 import PlaidLogo from '@monetr/interface/components/Logo/PlaidLogo';
+import SimpleFinLogo from '@monetr/interface/components/Logo/SimpleFinLogo';
 import PlaidInstitutionLogo from '@monetr/interface/components/Plaid/InstitutionLogo';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@monetr/interface/components/Tooltip';
 import { useBankAccounts } from '@monetr/interface/hooks/useBankAccounts';
@@ -36,7 +37,7 @@ export default function BankSidebarItem({ link, sortable }: BankSidebarItemProps
   }
 
   let tooltip: string = link.getName();
-  if (link.getIsPlaid()) {
+  if (link.getIsPlaid() || link.getIsSimpleFin()) {
     if (link.getIsError()) {
       tooltip = `${tooltip} (Error)`;
     } else if (link.getIsPendingExpiration()) {
@@ -88,6 +89,18 @@ function LinkProviderBadge({ link }: { link: MonetrLink }): React.JSX.Element | 
         data-testid={`bank-sidebar-item-${link.linkId}-lunch-flow`}
       >
         <LunchFlowLogo className={styles.providerLogo} iconOnly />
+      </span>
+    );
+  }
+
+  if (link.getIsSimpleFin()) {
+    return (
+      <span
+        className={styles.providerBadge}
+        data-provider='simplefin'
+        data-testid={`bank-sidebar-item-${link.linkId}-simplefin`}
+      >
+        <SimpleFinLogo className={styles.providerLogo} />
       </span>
     );
   }

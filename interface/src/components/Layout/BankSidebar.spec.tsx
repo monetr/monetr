@@ -534,6 +534,32 @@ describe('bank sidebar', () => {
         deletedAt: null,
       },
       {
+        linkId: 'link_01hy4rbb1gjdek7h2xmgy5pnxx',
+        simpleFinLinkId: 'sfx_01hy4rbb1gjdek7h2xmgy5pnwk',
+        linkType: 'simplefin',
+        simpleFinLink: {
+          simpleFinLinkId: 'sfx_01hy4rbb1gjdek7h2xmgy5pnwk',
+          name: 'Personal',
+          apiUrl: 'https://beta-bridge.simplefin.org/simplefin',
+          status: 'active',
+          lastErrors: null,
+          lastManualSync: null,
+          lastSuccessfulUpdate: '2026-10-10T04:22:52Z',
+          lastAttemptedUpdate: '2026-10-10T04:22:52Z',
+          createdAt: '2026-03-02T02:08:40Z',
+          createdBy: 'user_01hym36e8ewaq0hxssb1m3k4ha',
+          updatedAt: '2026-10-10T04:22:52Z',
+          deletedAt: null,
+        },
+        institutionName: 'Chase',
+        description: null,
+        bankAccountOrder: null,
+        createdAt: '2026-03-02T02:08:40Z',
+        createdBy: 'user_01hym36e8ewaq0hxssb1m3k4ha',
+        updatedAt: '2026-10-10T04:22:52Z',
+        deletedAt: null,
+      },
+      {
         linkId: 'link_01hy4rbb1gjdek7h2xmgy5pnzz',
         linkType: 'manual',
         institutionName: 'Cash Budget',
@@ -555,6 +581,9 @@ describe('bank sidebar', () => {
     );
     await waitFor(() =>
       expect(world.getByTestId('bank-sidebar-item-link_01hy4rbb1gjdek7h2xmgy5pnyy-lunch-flow')).toBeVisible(),
+    );
+    await waitFor(() =>
+      expect(world.getByTestId('bank-sidebar-item-link_01hy4rbb1gjdek7h2xmgy5pnxx-simplefin')).toBeVisible(),
     );
     // Manual links don't come from a provider so they don't get a badge.
     await waitFor(() => expect(world.getByTestId('bank-sidebar-item-link_01hy4rbb1gjdek7h2xmgy5pnzz')).toBeVisible());

@@ -14,6 +14,7 @@ import { MobileSidebarContext } from '@monetr/interface/components/Layout/Mobile
 import PlaidBankStatusCard from '@monetr/interface/components/Layout/PlaidBankStatusCard';
 import PlaidLastUpdatedCard from '@monetr/interface/components/Layout/PlaidLastUpdatedCard';
 import SelectBankAccount from '@monetr/interface/components/Layout/SelectBankAccount';
+import SimpleFinLastUpdatedCard from '@monetr/interface/components/Layout/SimpleFinLastUpdatedCard';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@monetr/interface/components/Tooltip';
 import Typography from '@monetr/interface/components/Typography';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
@@ -98,6 +99,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): React.JS
         <PlaidBankStatusCard />
         <PlaidLastUpdatedCard linkId={bankAccount?.linkId} />
         <LunchFlowLastUpdatedCard linkId={bankAccount?.linkId} />
+        <SimpleFinLastUpdatedCard linkId={bankAccount?.linkId} />
       </div>
     </div>
   );
