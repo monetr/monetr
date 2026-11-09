@@ -9,6 +9,7 @@ import LunchFlowSetupAccounts from '@monetr/interface/components/setup/lunchflow
 import LunchFlowSetupIntro from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupIntro';
 import LunchFlowSetupSync from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupSync';
 import PlaidSetup from '@monetr/interface/components/setup/PlaidSetup';
+import SimpleFinSetupAccounts from '@monetr/interface/components/setup/simplefin/SimpleFinSetupAccounts';
 import SimpleFinSetupIntro from '@monetr/interface/components/setup/simplefin/SimpleFinSetupIntro';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
@@ -131,6 +132,7 @@ export default function Monetr(): React.JSX.Element {
         <Route component={LunchFlowSetupIntro} path='/setup/lunchflow' />
         <Route component={LunchFlowSetupAccounts} path='/setup/lunchflow/:lunchFlowLinkId' />
         <Route component={SimpleFinSetupIntro} path='/setup/simplefin' />
+        <Route component={SimpleFinSetupAccounts} path='/setup/simplefin/:simpleFinLinkId' />
         <Route component={OauthReturn} path='/plaid/oauth-return' />
         <Route path='/account/subscribe/after'>
           <Redirect replace to='/setup' />
@@ -212,6 +214,7 @@ export default function Monetr(): React.JSX.Element {
               <Route component={LunchFlowSetupAccounts} path='/link/create/lunchflow/:lunchFlowLinkId' />
               <Route component={LunchFlowSetupSync} path='/link/create/lunchflow/:linkId/sync' />
               <Route component={SimpleFinSetupIntro} path='/link/create/simplefin' />
+              <Route component={SimpleFinSetupAccounts} path='/link/create/simplefin/:simpleFinLinkId' />
               <Route component={LogoutPage} path='/logout' />
               <Route component={OauthReturn} path='/plaid/oauth-return' />
               <Route component={SubscriptionPage} path='/subscription' />
@@ -220,6 +223,7 @@ export default function Monetr(): React.JSX.Element {
               </Route>
               <Route component={AfterCheckoutPage} path='/account/subscribe/after' />
               <Route component={LunchFlowSetupAccounts} path='/setup/lunchflow/:lunchFlowLinkId' />
+              <Route component={SimpleFinSetupAccounts} path='/setup/simplefin/:simpleFinLinkId' />
               <Route path='*'>
                 <Redirect replace to='/' />
               </Route>
