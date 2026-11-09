@@ -3,11 +3,13 @@ package controller
 import (
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/currency"
 	"github.com/monetr/monetr/server/datasources/simplefin"
+	"github.com/monetr/monetr/server/datasources/simplefin/simplefin_jobs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
@@ -355,4 +357,70 @@ func (c *Controller) getSimpleFinLinkBankAccounts(ctx *echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, simpleFinAccounts)
+}
+
+func (c *Controller) postSimpleFinLinkSync(ctx *echo.Context) error {
+	request, err := parse(
+		c,
+		ctx,
+		new(schemas.PostSimpleFinLinkSyncRequest),
+		schemas.PostSimpleFinLinkSync,
+	)
+	if err != nil {
+		return err
+	}
+
+	log := c.getLog(ctx).With("linkId", request.LinkId)
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	link, err := repo.GetLink(c.getContext(ctx), request.LinkId)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "failed to retrieve link")
+	}
+
+	if link.LinkType != SimpleFinLinkType {
+		return c.badRequest(ctx, "Cannot manually sync a non-SimpleFIN link")
+	}
+
+	switch link.SimpleFinLink.Status {
+	case SimpleFinLinkStatusActive, SimpleFinLinkStatusError:
+		log.DebugContext(
+			c.getContext(ctx),
+			"link is not deactivated, triggering manual sync",
+			"status", link.SimpleFinLink.Status,
+		)
+	case SimpleFinLinkStatusPending, SimpleFinLinkStatusDeactivated:
+		return c.badRequest(ctx, "Link is not active and will not be synced")
+	}
+
+	// Every sync spends a request against the daily SimpleFIN quota, so this is
+	// a much longer window than the other providers have.
+	simpleFinLink := link.SimpleFinLink
+	if lastManualSync := simpleFinLink.LastManualSync; lastManualSync != nil && lastManualSync.After(c.Clock.Now().Add(-2*time.Hour)) {
+		return c.returnError(ctx, http.StatusTooEarly, "Link has been manually synced too recently")
+	}
+
+	simpleFinLink.LastManualSync = new(c.Clock.Now())
+	if err := repo.UpdateSimpleFinLink(c.getContext(ctx), simpleFinLink); err != nil {
+		return c.wrapPgError(ctx, err, "could not manually sync link")
+	}
+
+	if err := enqueueJob(
+		c,
+		ctx,
+		simplefin_jobs.SyncSimpleFin,
+		simplefin_jobs.SyncSimpleFinArguments{
+			AccountId: link.AccountId,
+			LinkId:    link.LinkId,
+		},
+	); err != nil {
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
+			"failed to enqueue SimpleFIN sync",
+		)
+	}
+
+	return ctx.NoContent(http.StatusAccepted)
 }

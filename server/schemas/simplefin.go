@@ -1,6 +1,7 @@
 package schemas
 
 import (
+	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/validation"
 	"github.com/monetr/validation/is"
 )
@@ -8,6 +9,10 @@ import (
 type PostSimpleFinLinkRequest struct {
 	Name       string `json:"name"`
 	SetupToken string `json:"setupToken"`
+}
+
+type PostSimpleFinLinkSyncRequest struct {
+	LinkId models.ID[models.Link] `json:"linkId"`
 }
 
 var (
@@ -25,6 +30,14 @@ var (
 			validation.Required.Error("SimpleFIN setup token must be provided to setup a SimpleFIN link"),
 			is.String,
 			validation.Length(1, 2048).Error("SimpleFIN setup token must be between 1 and 2048 characters"),
+		).Required(Require),
+	)
+
+	PostSimpleFinLinkSync = validation.Map(
+		validation.Key(
+			"linkId",
+			validation.Required,
+			ValidID[models.Link](),
 		).Required(Require),
 	)
 )

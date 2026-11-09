@@ -297,3 +297,40 @@ along with the `linkId` of the monetr link, which flips this account's `status` 
 | ------ | -------------------------------------------------------------- |
 | 400    | `simpleFinLinkId` is malformed.                                |
 | 404    | No such connection, or SimpleFIN isn't enabled on this server. |
+
+## <Badge type="tip">POST</Badge> Trigger a manual sync
+
+Forces a sync now instead of waiting for the scheduled one. Useful right after setup, or to bring a connection in
+`error` status back once you've sorted things out with your Bridge.
+
+**In the app:** Not used by the app yet.
+
+```http
+POST /api/simplefin/link/sync
+```
+
+**Auth:** API key, subscription required.
+
+Note this one takes the **monetr** link ID in the body, not the SimpleFIN link ID, and it isn't in the path. That's
+different from every other endpoint on this page.
+
+### Body
+
+| Attribute | Type          | Required | Description                                            |
+| --------- | ------------- | -------- | ------------------------------------------------------ |
+| `linkId`  | string (ulid) | Yes      | The monetr link to sync. Has to be a `simplefin` link. |
+
+Returns **202** with no body. The sync runs in the background, so a 202 means it started, not that it finished. To see
+how it went, [re-read the connection](#get-a-simplefin-connection) and check `lastSuccessfulUpdate`.
+
+**Manual syncs are limited to one every 2 hours**, measured from `lastManualSync`. Your Bridge only allows so many
+requests a day and every sync uses one, no matter how many accounts are on the connection. Asking again too soon is a
+425. Handle it, it's a normal answer and not a mistake.
+
+### Errors
+
+| Status | When                                                                                                                                                                                                          |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 400    | `linkId` is missing or malformed, the link isn't a SimpleFIN link, or the connection is `pending` or `deactivated`. A connection in `error` status can still be synced by hand, which is how you recover one. |
+| 404    | No such link, or SimpleFIN isn't enabled on this server.                                                                                                                                                      |
+| 425    | Synced by hand less than 2 hours ago.                                                                                                                                                                         |

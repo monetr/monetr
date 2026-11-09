@@ -4,15 +4,19 @@ import (
 	"encoding/json"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/server/datasources/simplefin"
+	"github.com/monetr/monetr/server/datasources/simplefin/simplefin_jobs"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mock_simplefin"
+	"github.com/monetr/monetr/server/internal/mockqueue"
 	"github.com/monetr/monetr/server/internal/testutils"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 )
 
 func TestPostSimpleFinLink(t *testing.T) {
@@ -1173,6 +1177,306 @@ func TestPostSimpleFinLinkBankAccountsRefresh(t *testing.T) {
 		response := e.POST("/api/simplefin/link/{simpleFinLinkId}/bank_accounts/refresh").
 			WithPath("simpleFinLinkId", NewID[SimpleFinLink]()).
 			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").String().IsEqual("SimpleFIN is not enabled on this server")
+	})
+}
+
+func TestPostSimpleFinLinkSync(t *testing.T) {
+	t.Run("happy path", func(t *testing.T) {
+		// An active SimpleFIN link that has never been manually synced should
+		// enqueue exactly one sync for the whole link and come back accepted.
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, app.Clock, user)
+		fixtures.GivenIHaveASimpleFinBankAccount(t, app.Clock, &link)
+		fixtures.GivenIHaveASimpleFinBankAccount(t, app.Clock, &link)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		app.Queue.EXPECT().
+			WithTransaction(
+				gomock.Any(),
+			).
+			Return(app.Queue)
+		app.Queue.EXPECT().
+			EnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(simplefin_jobs.SyncSimpleFin),
+				gomock.Any(),
+				gomock.Eq(simplefin_jobs.SyncSimpleFinArguments{
+					AccountId: user.AccountId,
+					LinkId:    link.LinkId,
+				}),
+			).
+			Times(1).
+			Return(nil)
+
+		response := e.POST("/api/simplefin/link/sync").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"linkId": link.LinkId,
+			}).
+			Expect()
+
+		response.Status(http.StatusAccepted)
+		response.Body().IsEmpty()
+	})
+
+	t.Run("with a valid api key", func(t *testing.T) {
+		// Manually triggering a sync should work with an API key that belongs to
+		// the same account that owns the link.
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, app.Clock, user)
+		token := GivenILogin(t, e, user.Login.Email, password)
+		apiKeyId, apiKeySecret := GivenIHaveAnApiKey(t, e, token)
+
+		app.Queue.EXPECT().
+			WithTransaction(
+				gomock.Any(),
+			).
+			Return(app.Queue)
+		app.Queue.EXPECT().
+			EnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(simplefin_jobs.SyncSimpleFin),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Times(1).
+			Return(nil)
+
+		response := e.POST("/api/simplefin/link/sync").
+			WithBasicAuth(apiKeyId, apiKeySecret).
+			WithJSON(map[string]any{
+				"linkId": link.LinkId,
+			}).
+			Expect()
+
+		response.Status(http.StatusAccepted)
+		response.Body().IsEmpty()
+	})
+
+	t.Run("with an invalid api key", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		response := e.POST("/api/simplefin/link/sync").
+			WithBasicAuth("key_"+gofakeit.UUID(), gofakeit.UUID()).
+			WithJSON(map[string]any{
+				"linkId": "link_bogusbogusbogusbogusbo",
+			}).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+	})
+
+	t.Run("missing link Id", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/simplefin/link/sync").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.linkId").String().IsEqual("required key is missing")
+	})
+
+	t.Run("link Id is not a valid Id", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/simplefin/link/sync").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"linkId": "potato",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.linkId").String().IsEqual("id does not match format link_...")
+	})
+
+	t.Run("link does not exist", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/simplefin/link/sync").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"linkId": "link_01hy4rbb1gjdek7h2xmgy5pnwk",
+			}).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").String().IsEqual("failed to retrieve link: record does not exist")
+	})
+
+	t.Run("cannot sync a non-SimpleFIN link", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.POST("/api/simplefin/link/sync").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"linkId": link.LinkId,
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Cannot manually sync a non-SimpleFIN link")
+	})
+
+	t.Run("deactivated link will not sync", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, app.Clock, user)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		link.SimpleFinLink.Status = SimpleFinLinkStatusDeactivated
+		testutils.MustDBUpdate(t, link.SimpleFinLink)
+
+		response := e.POST("/api/simplefin/link/sync").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"linkId": link.LinkId,
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Link is not active and will not be synced")
+	})
+
+	t.Run("pending link will not sync", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, app.Clock, user)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		link.SimpleFinLink.Status = SimpleFinLinkStatusPending
+		testutils.MustDBUpdate(t, link.SimpleFinLink)
+
+		response := e.POST("/api/simplefin/link/sync").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"linkId": link.LinkId,
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Link is not active and will not be synced")
+	})
+
+	t.Run("error link can be synced", func(t *testing.T) {
+		// A manual sync is how a link in the error status recovers, the cron skips
+		// these so this has to be allowed.
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, app.Clock, user)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		link.SimpleFinLink.Status = SimpleFinLinkStatusError
+		testutils.MustDBUpdate(t, link.SimpleFinLink)
+
+		app.Queue.EXPECT().
+			WithTransaction(
+				gomock.Any(),
+			).
+			Return(app.Queue)
+		app.Queue.EXPECT().
+			EnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(simplefin_jobs.SyncSimpleFin),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Times(1).
+			Return(nil)
+
+		response := e.POST("/api/simplefin/link/sync").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"linkId": link.LinkId,
+			}).
+			Expect()
+
+		response.Status(http.StatusAccepted)
+	})
+
+	t.Run("cannot sync too recently", func(t *testing.T) {
+		// The first sync sets the last manual sync timestamp, so another one is
+		// rejected until 2 hours have passed on the mock clock.
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, app.Clock, user)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		app.Queue.EXPECT().
+			WithTransaction(
+				gomock.Any(),
+			).
+			Times(2).
+			Return(app.Queue)
+		app.Queue.EXPECT().
+			EnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(simplefin_jobs.SyncSimpleFin),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Times(2).
+			Return(nil)
+
+		{ // The first sync should be accepted.
+			response := e.POST("/api/simplefin/link/sync").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"linkId": link.LinkId,
+				}).
+				Expect()
+
+			response.Status(http.StatusAccepted)
+		}
+
+		{ // The second sync should be rejected because it is too soon.
+			response := e.POST("/api/simplefin/link/sync").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"linkId": link.LinkId,
+				}).
+				Expect()
+
+			response.Status(http.StatusTooEarly)
+			response.JSON().Path("$.error").String().IsEqual("Link has been manually synced too recently")
+		}
+
+		app.Clock.Add(2 * time.Hour)
+
+		{ // Once the window has passed the sync should be accepted again.
+			response := e.POST("/api/simplefin/link/sync").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"linkId": link.LinkId,
+				}).
+				Expect()
+
+			response.Status(http.StatusAccepted)
+		}
+	})
+
+	t.Run("simplefin is disabled", func(t *testing.T) {
+		config := NewTestApplicationConfig(t)
+		config.SimpleFin.Enabled = false
+		_, e := NewTestApplicationWithConfig(t, config)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/simplefin/link/sync").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"linkId": "link_bogusbogusbogusbogusbo",
+			}).
 			Expect()
 
 		response.Status(http.StatusNotFound)
