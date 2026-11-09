@@ -36,6 +36,7 @@ redis: { ... }         # In-memory cache configuration
 security: { ... }      # Authentication, token configuration
 sentry: { ... }        # Error/trace reporting configuration
 server: { ... }        # HTTP/listener configuration
+simpleFin: { ... }     # SimpleFIN configuration (enable/disable, allowed hosts)
 storage: { ... }       # File/object storage
 ```
 
@@ -126,6 +127,11 @@ server:
   # This config determines what URL monetr sets cookies on as well as what URL is used for links
   # sent via email. Misconfiguring this URL may result in not being able to login to monetr.
   externalUrl: "http://localhost:4000"
+simpleFin:
+  enabled: true # Allow users to connect to their institution via SimpleFIN.
+  allowedHosts:
+    - bridge.simplefin.org
+    - beta-bridge.simplefin.org
 storage:
   # Required for file uploads to work, if you want do not need file uploads then this can be
   # disabled.
@@ -228,6 +234,12 @@ Each of the sub-configurations noted above are documented in more detail in the 
   title="Server"
   description="Configure HTTP listener and server settings."
   href="/documentation/configure/server"
+/>
+<Cards.Card
+  icon={<Coins />}
+  title="SimpleFIN"
+  description="Enable SimpleFIN connections as a data source."
+  href="/documentation/configure/simplefin"
 />
 <Cards.Card
   icon={<Folder />}

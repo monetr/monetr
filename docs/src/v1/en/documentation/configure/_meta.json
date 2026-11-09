@@ -15,5 +15,6 @@
   { "type": "file", "name": "security", "label": "Security" },
   { "type": "file", "name": "sentry", "label": "Sentry" },
   { "type": "file", "name": "server", "label": "Server" },
+  { "type": "file", "name": "simplefin", "label": "SimpleFIN" },
   { "type": "file", "name": "storage", "label": "Storage" }
 ]

@@ -445,7 +445,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Server.ClientIPHeader", "X-Forwarded-For")
 	// SimpleFIN is enabled by default for self-hosted deployments too!
 	v.SetDefault("SimpleFin.Enabled", true)
-	v.SetDefault("SimpleFin.AllowedHosts", []string{DefaultSimpleFinHost})
+	v.SetDefault("SimpleFin.AllowedHosts", []string{DefaultSimpleFinHost, BetaSimpleFinHost})
 	v.SetDefault("Storage.Enabled", false)
 	v.SetDefault("Storage.Provider", "filesystem")
 	v.SetDefault("Storage.Filesystem.BasePath", "/etc/monetr/storage")

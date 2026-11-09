@@ -1,0 +1,42 @@
+---
+title: "SimpleFIN Configuration"
+description: "Configure SimpleFIN integration for monetr, allowing self-hosted instances to get automatic updates from their banking institution."
+---
+
+# SimpleFIN
+
+By default SimpleFIN is enabled for all **self-hosted** monetr deployments. This means that when you add a new link or
+budget to monetr you will be presented with the option to connect to an institution via SimpleFIN. For information on
+setting up SimpleFIN you can follow the guide here: [Integrate with SimpleFIN](/documentation/use/simplefin)
+
+```yaml title="config.yaml"
+simpleFin:
+  enabled: true
+  allowedHosts:
+    - bridge.simplefin.org
+    - beta-bridge.simplefin.org
+```
+
+| **Name**       | **Type** | **Default**                                             | **Description**                                                                                                                                                                                                        |
+| ---            | ---      | ---                                                     | ---                                                                                                                                                                                                                    |
+| `enabled`      | Boolean  | `true`                                                  | Allow SimpleFIN connections to be configured in monetr.                                                                                                                                                                |
+| `allowedHosts` | Array    | `["bridge.simplefin.org", "beta-bridge.simplefin.org"]` | Allowlist of hosts that monetr is allowed to talk to for SimpleFIN. This defaults to SimpleFIN's production and beta servers, but if you want to use another SimpleFIN compatible server then you need to add it here. |
+
+## Allowed Hosts
+
+A setup token tells monetr which server to talk to, so monetr checks the server in the setup token and the server that
+SimpleFIN sends back against this list before it will use them. A few things to keep in mind when you change it:
+
+- Each entry must only be a host, with a port only if the server is on a non-standard one. Something like
+  `https://bridge.simplefin.org` or `bridge.simplefin.org/simplefin` is not valid and monetr will fail to start.
+- Hosts are matched exactly, ignoring case. If a server's URL includes a port then that same port needs to be in the
+  entry.
+- Only `https` servers are allowed, plain `http` will always be rejected.
+- If the list is empty then SimpleFIN is disabled, even if `enabled` is `true`.
+
+## Demo Setup Token
+
+SimpleFIN provides a [demo setup token](https://beta-bridge.simplefin.org/info/developers) with fake accounts, which is
+useful for trying out the integration without connecting a real bank. It uses `beta-bridge.simplefin.org`, which is
+allowed by default. If you set your own `allowedHosts` then your list replaces the default one, so you will need to
+include that host in it to use the demo token.

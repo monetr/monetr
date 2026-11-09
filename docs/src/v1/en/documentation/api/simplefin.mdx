@@ -11,9 +11,9 @@ SimpleFIN is another way to get bank data into monetr without going through Plai
 SimpleFIN Bridge, hand it to monetr, and monetr trades it for an access URL that it keeps in its secret storage.
 
 :::info Enabled by default
-These endpoints are on by default, out of the box monetr only talks to `bridge.simplefin.org`. If `simpleFin.enabled` is
-`false` in your configuration, or `simpleFin.allowedHosts` is empty, they return 404 with "SimpleFIN is not enabled on
-this server".
+These endpoints are on by default, out of the box monetr only talks to `bridge.simplefin.org` and
+`beta-bridge.simplefin.org`. If `simpleFin.enabled` is `false` in your configuration, or `simpleFin.allowedHosts` is
+empty, they return 404 with "SimpleFIN is not enabled on this server".
 :::
 
 There are two objects involved: the **SimpleFIN link**, which holds the connection to your Bridge, and the ordinary
@@ -178,7 +178,7 @@ The setup token is checked against a few rules:
 
 - It has to be a real setup token, which is a claim URL that's been base64 encoded.
 - The claim URL has to be `https` and on the server's allow list, set with `simpleFin.allowedHosts`. That's just
-  `bridge.simplefin.org` unless the operator changed it.
+  `bridge.simplefin.org` and `beta-bridge.simplefin.org` unless the operator changed it.
 - The access URL SimpleFIN sends back has to follow the same rules. If it points somewhere that isn't allowed then
   monetr throws it away.
 - It can only be used once. Once monetr claims it, it's spent.

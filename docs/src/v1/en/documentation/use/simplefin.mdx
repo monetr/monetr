@@ -35,25 +35,38 @@ You can see if your specific institution is supported
 
 ### Sign up for SimpleFIN Bridge
 
-Navigate to [https://bridge.simplefin.org](https://bridge.simplefin.org) and click **Get started**. Enter your email
-address and click **Send sign-in email**. There isn't a separate sign up form, this same form will create your account
-if you don't have one yet.
+Navigate to [https://bridge.simplefin.org](https://bridge.simplefin.org) and click **Get started**.
 
-**PLACEHOLDER screenshot: SimpleFIN Bridge landing page / sign-in form**
+![SimpleFIN Bridge landing page](/v1/en/documentation/use/assets/simplefin_landing.png)
+
+Enter your email address, complete the **Verify you are human** check and click **Send sign-in email**. There isn't a
+separate sign up form, this same form will create your account if you don't have one yet.
+
+![SimpleFIN Bridge sign in](/v1/en/documentation/use/assets/simplefin_sign_in.png)
 
 ### Open the sign-in email
 
-You'll receive an email from SimpleFIN with a link to sign in. Click the link in that email to proceed.
+After you send the sign-in email you should see the following screen. If this is your first time signing in, it might
+take a few minutes for the email to arrive.
 
-**PLACEHOLDER screenshot: Sign-in email from SimpleFIN**
+![SimpleFIN Bridge email sent](/v1/en/documentation/use/assets/simplefin_email_sent.png)
+
+You'll receive an email from SimpleFIN that looks like this:
+
+![Sign-in email from SimpleFIN](/v1/en/documentation/use/assets/simplefin_sign_in_email.png)
+
+Click the link in that email, then click **Finish signing in** on the page that opens. The link can only be used once,
+so if you get an error you will need to start the sign in process again.
+
+![SimpleFIN Bridge finish signing in](/v1/en/documentation/use/assets/simplefin_finish_sign_in.png)
 
 ### Start your subscription
 
 SimpleFIN Bridge is a paid service. A subscription lets you connect up to 25 institutions and 25 apps for $1.50 + tax
-per month or $15.00 + tax per year.
+per month or $15.00 + tax per year. Select the plan you want to proceed. SimpleFIN does not offer refunds and recommends
+starting with the monthly plan until you are sure that everything works.
 
-**PLACEHOLDER screenshot: SimpleFIN Bridge subscription screen. Confirm the labels and where this falls in the flow,
-this part of the Bridge is behind a login and this step is a best guess.**
+![SimpleFIN Bridge subscription](/v1/en/documentation/use/assets/simplefin_subscription.png)
 
 <sub>**Note**: The price may change in the future, if these docs are not representative of the setup experience in
 SimpleFIN Bridge then please open an issue in [monetr's GitHub](https://github.com/monetr/monetr).</sub>
@@ -62,26 +75,35 @@ SimpleFIN Bridge then please open an issue in [monetr's GitHub](https://github.c
 
 After you have signed in you'll need to add a connection in order for SimpleFIN to pull data from your financial
 institution. Keep in mind that a connection is a single login to an institution and that one connection can include
-multiple accounts.
+multiple accounts. Click **New connection** under **Financial Institutions** on the **My Account** page to proceed.
 
-**PLACEHOLDER screenshot: SimpleFIN Bridge connections page, empty. Add the exact button label to the copy above.**
+![SimpleFIN Bridge My Account page](/v1/en/documentation/use/assets/simplefin_my_account.png)
 
-You will be guided through an authentication flow for your specific institution.
+Search for your institution and select it, you will be guided through an authentication flow for your specific
+institution.
 
-**PLACEHOLDER screenshot: Adding a connection in SimpleFIN Bridge**
+![SimpleFIN Bridge add connection](/v1/en/documentation/use/assets/simplefin_add_connection.png)
 
 Once you have completed the connection you should see it within SimpleFIN Bridge:
 
-**PLACEHOLDER screenshot: SimpleFIN Bridge with a connection added**
+![SimpleFIN Bridge with a connection](/v1/en/documentation/use/assets/simplefin_connections.png)
 
 ### Create a setup token
 
-In order for monetr to read the data from SimpleFIN you'll need to create a setup token. You can create one here:
+In order for monetr to read the data from SimpleFIN you'll need to create a setup token. Click **New app connection**
+under **Apps** on the **My Account** page, or you can create one here:
 [https://bridge.simplefin.org/simplefin/create](https://bridge.simplefin.org/simplefin/create)
 
-**PLACEHOLDER screenshot: SimpleFIN Bridge setup token screen. Add the exact button labels to the copy above.**
+Enter a name that will help you identify this connection later, like `monetr`, and click **Create Setup Token**.
 
-**Copy** the setup token, you will need it for monetr in the next step.
+![SimpleFIN Bridge connect application](/v1/en/documentation/use/assets/simplefin_connect_application.png)
+
+You should now see your setup token:
+
+![SimpleFIN setup token](/v1/en/documentation/use/assets/simplefin_setup_token.png)
+
+Click **Copy to clipboard** to copy the setup token, you will need it for monetr in the next step. This is the only time
+SimpleFIN will show you this token.
 
 :::warning
 **Note**: This setup token is sensitive and should be handled carefully. It can only be used **once**, and whoever uses
@@ -92,17 +114,16 @@ setup token.
 
 ### Add SimpleFIN to monetr
 
-SimpleFIN should be enabled by default for all self-hosted instances of monetr, but if you don't see it as an option
-when you go to the setup page then check that `simpleFin.enabled` is not set to `false` in your configuration and that
-`simpleFin.allowedHosts` is not empty.
+SimpleFIN should be enabled by default for all self-hosted instances of monetr, but just in case you don't see it as an
+option when you go to the setup page you can enable it here: [Configure SimpleFIN](/documentation/configure/simplefin).
 
 If this is your first link in monetr then you should see the following screen:
 
-**PLACEHOLDER screenshot: monetr setup screen with SimpleFIN**
+![monetr setup with SimpleFIN](/v1/en/documentation/use/assets/monetr_setup_with_simplefin.png)
 
 Select **SimpleFIN** and click **Continue**.
 
-**PLACEHOLDER screenshot: monetr SimpleFIN intro screen**
+![monetr SimpleFIN intro](/v1/en/documentation/use/assets/monetr_simplefin_intro.png)
 
 Enter a **Budget Name**, this will be the name of the link in the monetr sidebar after you have completed your setup.
 Then paste the setup token that you created earlier into **Setup Token**. If you skipped ahead, the **Get A Setup
@@ -115,7 +136,7 @@ Click **Next** once you are ready to continue.
 
 monetr will take a few seconds to pull some basic account information, after which you should see the following screen:
 
-**PLACEHOLDER screenshot: monetr SimpleFIN account selection**
+![monetr SimpleFIN account selection](/v1/en/documentation/use/assets/monetr_simplefin_account_selection.png)
 
 You can now decide which accounts in SimpleFIN should be pulled into monetr on this link. By default all accounts are
 enabled. You can disable accounts you do not want to sync with monetr here.
