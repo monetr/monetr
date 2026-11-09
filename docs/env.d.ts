@@ -9,3 +9,8 @@ declare module '*.module.scss' {
   const classes: any;
   export default classes;
 }
+
+declare module '*.png' {
+  const url: string;
+  export default url;
+}
