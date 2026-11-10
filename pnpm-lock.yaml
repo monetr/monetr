@@ -199,9 +199,6 @@ importers:
       '@rspress/plugin-rss':
         specifier: 2.1.0
         version: 2.1.0(@rspress/core@2.1.0(@rspack/core@2.2.9(@swc/helpers@0.5.23))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))
-      '@rspress/plugin-sitemap':
-        specifier: 2.1.0
-        version: 2.1.0(@rspress/core@2.1.0(@rspack/core@2.2.9(@swc/helpers@0.5.23))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))
       '@rspress/shared':
         specifier: 2.1.0
         version: 2.1.0(supports-color@9.4.0)
@@ -1599,12 +1596,6 @@ packages:
 
   '@rspress/plugin-rss@2.1.0':
     resolution: {integrity: sha512-wAhYGdQQKFrdoovarPxcqz3OHWem7op1MbxxUlfpVEZAQzi/R2LsLKZ2Pf+uFyJlZD9IVxfpnSnsinwoK4DJ9A==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    peerDependencies:
-      '@rspress/core': ^2.1.0-beta.2
-
-  '@rspress/plugin-sitemap@2.1.0':
-    resolution: {integrity: sha512-k/ZWgOyp9aSBBGC7DEgFtsOQIF94XeuFxgqaYmcgGu7MWtJIb5i2v0eHjIcpJ/kGn3Rn1n1QH/hjP902vpDbOg==}
     engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
       '@rspress/core': ^2.1.0-beta.2
@@ -5567,10 +5558,6 @@ snapshots:
     dependencies:
       '@rspress/core': 2.1.0(@rspack/core@2.2.9(@swc/helpers@0.5.23))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0)
       feed: 5.2.1
-
-  '@rspress/plugin-sitemap@2.1.0(@rspress/core@2.1.0(@rspack/core@2.2.9(@swc/helpers@0.5.23))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))':
-    dependencies:
-      '@rspress/core': 2.1.0(@rspack/core@2.2.9(@swc/helpers@0.5.23))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0)
 
   '@rspress/shared@2.1.0(supports-color@9.4.0)':
     dependencies:

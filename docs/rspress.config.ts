@@ -7,7 +7,6 @@ import path from 'node:path';
 import { pluginSass } from '@rsbuild/plugin-sass';
 import { defineConfig } from '@rspress/core';
 import { pluginRss } from '@rspress/plugin-rss';
-import { pluginSitemap } from '@rspress/plugin-sitemap';
 import { transformerNotationHighlight } from '@shikijs/transformers';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
@@ -43,6 +42,12 @@ export default defineConfig({
     versions: ['v1'],
   },
   globalStyles: path.join(__dirname, 'styles/globals.scss'),
+  // The llms build skips markdown.remarkPlugins, so without remarkMath it fails
+  // trying to parse the LaTeX in our blog posts as MDX expressions.
+  llms: false,
+  sitemap: {
+    siteUrl: 'https://monetr.app',
+  },
   themeConfig: {
     // Docs are dark-mode only: `force-dark` pins dark and hides the appearance
     // toggle. (`darkMode: false` would force *light*, hence the string.)
@@ -99,9 +104,6 @@ export default defineConfig({
     },
   },
   plugins: [
-    pluginSitemap({
-      siteUrl: 'https://monetr.app',
-    }),
     pluginRss({
       siteUrl: 'https://monetr.app',
       // Use RSS 2.0; override the default .rss extension to the more familiar .xml so the feed sits at /rss/blog.xml.
