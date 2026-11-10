@@ -731,7 +731,9 @@ func TestSyncSimpleFin(t *testing.T) {
 		// gets marked as failed without being retried.
 		assert.PanicsWithError(
 			t,
-			"failed to retrieve accounts from SimpleFIN: SimpleFIN request failed https://bridge.simplefin.org/simplefin/accounts?start-date=-7776000&version=2 [500]: \"Internal Server Error\"\n",
+			"failed to retrieve accounts from SimpleFIN: SimpleFIN request failed https://bridge.simplefin.org/simplefin/accounts?start-date="+
+				strconv.FormatInt(clock.Now().AddDate(0, 0, -90).Unix(), 10)+
+				"&version=2 [500]: \"Internal Server Error\"\n",
 			func() {
 				_ = simplefin_jobs.SyncSimpleFin(
 					mockqueue.NewMockContext(context),
