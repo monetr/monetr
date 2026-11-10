@@ -268,8 +268,8 @@ importers:
         specifier: 1.0.3
         version: 1.0.3(@rspress/core@2.1.0(@rspack/core@2.2.9(@swc/helpers@0.5.23))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))(supports-color@9.4.0)
       rspress-plugin-reading-time:
-        specifier: 1.0.1
-        version: 1.0.1(@rspress/core@2.1.0(@rspack/core@2.2.9(@swc/helpers@0.5.23))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))(supports-color@9.4.0)
+        specifier: 1.0.2
+        version: 1.0.2(@rspress/core@2.1.0(@rspack/core@2.2.9(@swc/helpers@0.5.23))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))(supports-color@9.4.0)
       unist-util-visit:
         specifier: 5.2.0
         version: 5.2.0
@@ -3950,8 +3950,8 @@ packages:
     peerDependencies:
       '@rspress/core': ^2.0.0-rc.4 || ^2.0.0
 
-  rspress-plugin-reading-time@1.0.1:
-    resolution: {integrity: sha512-HD5WiPgmz+7BR5vddW8QrPuxQS/PHRZLqS8OBv7Mp6p+zGY40B2HxfcltiaIT+wxaDJhPgeWxgJL+OFwC2I0Hg==}
+  rspress-plugin-reading-time@1.0.2:
+    resolution: {integrity: sha512-dBIeDsjbAvnRj4urxWYVlZB1hBe/H0WiPZqmEz8OJBkf7SwfHHzhOIJl3uQ5ngWLbHf9L1NqOBre63ImbGBouA==}
     peerDependencies:
       '@rspress/core': ^2.0.0-rc.4 || ^2.0.0
 
@@ -8595,7 +8595,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  rspress-plugin-reading-time@1.0.1(@rspress/core@2.1.0(@rspack/core@2.2.9(@swc/helpers@0.5.23))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))(supports-color@9.4.0):
+  rspress-plugin-reading-time@1.0.2(@rspress/core@2.1.0(@rspack/core@2.2.9(@swc/helpers@0.5.23))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))(supports-color@9.4.0):
     dependencies:
       '@rspress/core': 2.1.0(@rspack/core@2.2.9(@swc/helpers@0.5.23))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0)
       reading-time: 1.5.0
