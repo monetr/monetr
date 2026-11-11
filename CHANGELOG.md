@@ -1,5 +1,61 @@
 # Changelog
 
+## [1.22.1](https://github.com/monetr/monetr/compare/v1.22.0...v1.22.1) (2026-11-11)
+
+
+### Bug Fixes
+
+* Actually exit if http listener fails to grab a port ([9c4b3ac](https://github.com/monetr/monetr/commit/9c4b3ac4af48f74fdb702b79f81c2e3785a7e88e))
+* **api:** Adding read and write timeouts to valkey cache ([7870be6](https://github.com/monetr/monetr/commit/7870be64d5432693013787acbe920a9b0ce536de))
+* **api:** Cap icon search name length via schema ([695df10](https://github.com/monetr/monetr/commit/695df10cd12c819a99bd4bc822feea87c8995293))
+* **api:** Don't bump simplefin's last updated needlessly ([82c83c0](https://github.com/monetr/monetr/commit/82c83c02019590c567436ed44a9b2f63b4b52f04))
+* **api:** Don't calculate funding or spending for deleted bank accounts ([1d514e4](https://github.com/monetr/monetr/commit/1d514e4644fc46772c1b67f188c4657f0fc95cbe))
+* **api:** Dont bump last updated for lunch flow either ([95de4f8](https://github.com/monetr/monetr/commit/95de4f8c734f222e0b2a342f329327194ae2a2b7))
+* **api:** Dont keep processing goals that have a past next target date ([3f7c225](https://github.com/monetr/monetr/commit/3f7c2250f1735217c6bb12634c83dde1b7454344))
+* **api:** Dont return a 500 from the instituions endpoint without plaid ([87e56a2](https://github.com/monetr/monetr/commit/87e56a2ee1366dc0c00d03a02746901b392de372))
+* **api:** Fixed 500 error on mixed case email ([d901e04](https://github.com/monetr/monetr/commit/d901e042bfb9a790bfee9f0c54d02d0578e11ad4))
+* **api:** Fixed changing password without email enabled ([f19202e](https://github.com/monetr/monetr/commit/f19202e1592a952f36b601cdf82b62cc985b7f80))
+* **api:** Fixed failure when removing already deleted file ([1f387c4](https://github.com/monetr/monetr/commit/1f387c4c72b9e18da6c4a6d997ea87cdc07ba62a))
+* **api:** Fixed issue with storage path hashing ([c3cba39](https://github.com/monetr/monetr/commit/c3cba39a72270403cbd36e9ff3ecd10e28ba9778))
+* **api:** Fixed parsing currency with leading + ([9b64e3a](https://github.com/monetr/monetr/commit/9b64e3aa01a0ce64a7303e5fb154a7ae53a2d530))
+* **api:** Fixing currency parsing with symbol prefix and suffix ([4a35368](https://github.com/monetr/monetr/commit/4a353681ddb27e899b64e9debaecbd9472f872f9))
+* **api:** Fixing login timing issue for non-existant users ([7bb8bf3](https://github.com/monetr/monetr/commit/7bb8bf37e2e1407b01401dc72c92a1749356dfd6))
+* **api:** Fixing overflow handling in parsing currency ([9232f51](https://github.com/monetr/monetr/commit/9232f51bf0d5488051cae55e4881ed72ec332a8b))
+* **api:** Prevent null json bodies ([f223790](https://github.com/monetr/monetr/commit/f223790e512bdea3784ae3e1a8b5f26257e136d1))
+* **docs:** Moved images to be relative paths instead ([#3754](https://github.com/monetr/monetr/issues/3754)) ([4aeb894](https://github.com/monetr/monetr/commit/4aeb894e97ecc2376c6a80251ebe1c2dad6c705c))
+* Fixed parse currency rounding ([b54a0d9](https://github.com/monetr/monetr/commit/b54a0d9abb00ae5117a961345e6315a5a9d4e20b))
+* Fixing metrics HTTP methods ([7a049a7](https://github.com/monetr/monetr/commit/7a049a7dc2ceaad82a35dba7480d4798a94b30e8))
+* MAking currency parsing even more accurate ([6dfacc8](https://github.com/monetr/monetr/commit/6dfacc8c29a1c20cffd4406b24b89bcf3cf57fe7))
+* Prevent server from starting if migration fails ([119a074](https://github.com/monetr/monetr/commit/119a074e53f842d1e4f4f0fd0c3c2b143f947e3e))
+* Prevent spam from resend verify email address endpoint ([9ab5211](https://github.com/monetr/monetr/commit/9ab52116521e12b2dfa983983db4e14e9eb8ed52))
+* Removing a command that hasnt work in ages ([d0bb0c6](https://github.com/monetr/monetr/commit/d0bb0c65f27be7f6d7470708bbbcfc89943d6ee5))
+* **test:** Fixing goofy test ([8e6f436](https://github.com/monetr/monetr/commit/8e6f4362be0ed5999795989c9bbcaeacc71dc1ac))
+* **ui:** Migrate from imagemagick to sharp for PWA images ([0d79d41](https://github.com/monetr/monetr/commit/0d79d41bf5bb85a8cad67e4cc5cb608bf564112f))
+* **ui:** Updating Apple PWA splash images ([4acf514](https://github.com/monetr/monetr/commit/4acf514e7835e8025c7f7af9c25ed9852276847d))
+
+
+### Miscellaneous
+
+* Adjust LRU cache max keys default to 1024 ([b91a4e7](https://github.com/monetr/monetr/commit/b91a4e777440a02d20a3571c13fbbda7bdeb9db8))
+* Migrating to parse currency from old parsing code ([c5f55cb](https://github.com/monetr/monetr/commit/c5f55cbe3129e04a6717dd7a9c1c5cf64d823f70))
+
+
+### Documentation
+
+* Resize images on the docs to make pages more efficient ([#3756](https://github.com/monetr/monetr/issues/3756)) ([1d290d3](https://github.com/monetr/monetr/commit/1d290d35ffdb72119beea7321d92ff57720cca59))
+
+
+### Dependencies
+
+* **api:** update module github.com/brianvoe/gofakeit/v7 to v7.18.2 ([#3759](https://github.com/monetr/monetr/issues/3759)) ([e8b295b](https://github.com/monetr/monetr/commit/e8b295b6a8589f02d7634b1f4000acdc22de1084))
+* **ui:** update dependency @imagemagick/magick-wasm to v0.0.46 ([#3761](https://github.com/monetr/monetr/issues/3761)) ([6c29cc4](https://github.com/monetr/monetr/commit/6c29cc4b09e397d381f275c9bccf3fede5b9bac6))
+* **ui:** update dependency @tanstack/react-query to v5.105.3 ([#3746](https://github.com/monetr/monetr/issues/3746)) ([b8d7e11](https://github.com/monetr/monetr/commit/b8d7e11e572788b76578f513f446ec8541f59456))
+* **ui:** update dependency rspress-plugin-mermaid to v2 ([#3751](https://github.com/monetr/monetr/issues/3751)) ([ab13fc0](https://github.com/monetr/monetr/commit/ab13fc0531ecf2bae3cf5ca46ef9b18e7dc44086))
+* **ui:** update dependency rspress-plugin-reading-time to v1.0.2 ([#3758](https://github.com/monetr/monetr/issues/3758)) ([e891acb](https://github.com/monetr/monetr/commit/e891acb4ad44b03c10e0dd9925d0110ab5eb9183))
+* **ui:** update rsbuild to v2.3.1 ([#3762](https://github.com/monetr/monetr/issues/3762)) ([e827d20](https://github.com/monetr/monetr/commit/e827d204b4d050b61191714a0ce2876536423ae4))
+* **ui:** update rspress to v2.1.0 ([#3750](https://github.com/monetr/monetr/issues/3750)) ([ec2ff95](https://github.com/monetr/monetr/commit/ec2ff95bb5a47714e274d365ad9f7a65273c866c))
+* **ui:** update rstest to v0.12.6 ([#3763](https://github.com/monetr/monetr/issues/3763)) ([0aa478e](https://github.com/monetr/monetr/commit/0aa478eec4a8ef5f3bb2ad596b69ce9edeb8afbc))
+
 ## [1.22.0](https://github.com/monetr/monetr/compare/v1.21.1...v1.22.0) (2026-11-09)
 
 This release includes support for SimpleFIN on self-hosted instances of monetr! This is enabled by default for
