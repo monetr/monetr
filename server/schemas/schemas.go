@@ -15,6 +15,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+var (
+	ErrBodyMustBeObject = errors.New("request body must be a JSON object")
+)
+
 func Parse[T any](
 	ctx context.Context,
 	reader io.Reader,
@@ -26,6 +30,13 @@ func Parse[T any](
 	decoder.UseNumber()
 	if err := decoder.Decode(&rawData); err != nil {
 		return nil, errors.WithStack(err)
+	}
+
+	// A JSON null decodes into a nil map without an error, and the validation
+	// library treats a nil map as valid without running any of the key rules. So
+	// without this a null body would skip every required field.
+	if rawData == nil {
+		return nil, errors.WithStack(ErrBodyMustBeObject)
 	}
 
 	cleanStrings(rawData)
