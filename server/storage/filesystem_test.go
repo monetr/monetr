@@ -168,3 +168,36 @@ func TestFilesystemStorageStore(t *testing.T) {
 		assert.NoError(t, err, "should be able to store file successfully")
 	})
 }
+
+func TestFilesystemStorageRemove(t *testing.T) {
+	t.Run("file is already gone", func(t *testing.T) {
+		tempDir, err := os.MkdirTemp("", "monetr")
+		require.NoError(t, err, "must create temp directory")
+		log := testutils.GetLog(t)
+
+		fs, err := NewFilesystemStorage(log, tempDir)
+		require.NoError(t, err, "must create the filesystem storage interface")
+
+		file := models.File{
+			FileId:      models.NewID[models.File](),
+			AccountId:   models.NewID[models.Account](),
+			Kind:        "transactions/uploads",
+			Name:        "transactions (10).ofx",
+			ContentType: models.IntuitQFXContentType,
+			Size:        100,
+		}
+		buf := &bufferWrapper{bytes.NewReader([]byte("I am the contents of a file"))}
+		require.NoError(t, fs.Store(t.Context(), buf, file), "must store file")
+
+		require.NoError(t, fs.Remove(t.Context(), file), "must remove the stored file")
+
+		storedPath, err := file.GetStorePath()
+		require.NoError(t, err, "must derive store path")
+		_, err = os.Stat(path.Join(tempDir, storedPath))
+		require.ErrorIs(t, err, os.ErrNotExist, "file must be gone after the first remove")
+
+		// The file no longer exists, removing it again should not fail. Otherwise
+		// the remove file job can never reconcile the row.
+		assert.NoError(t, fs.Remove(t.Context(), file), "removing a file that is already gone must not fail")
+	})
+}

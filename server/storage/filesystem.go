@@ -149,7 +149,10 @@ func (f *filesystemStorage) Remove(
 	if err != nil {
 		return err
 	}
-	if err := os.Remove(filePath); err != nil {
+	// If the file is already gone then there is nothing to remove, treat it the
+	// same as a successful remove. This matches S3 where deleting a key that
+	// doesn't exist is not an error.
+	if err := os.Remove(filePath); err != nil && !errors.Is(err, os.ErrNotExist) {
 		return errors.Wrap(err, "failed to remove file from filesystem")
 	}
 
