@@ -325,6 +325,91 @@ func TestProcessSpending(t *testing.T) {
 		assert.Empty(t, transactions, "no transactions should have been created for a goal")
 	})
 
+	t.Run("does not touch past due goal", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+
+		fundingRule := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", clock.Now())
+		fundingSchedule := testutils.MustInsert(t, models.FundingSchedule{
+			AccountId:              bankAccount.AccountId,
+			BankAccountId:          bankAccount.BankAccountId,
+			Name:                   "Payday",
+			Description:            "Payday",
+			RuleSet:                fundingRule,
+			NextRecurrence:         fundingRule.After(clock.Now(), false),
+			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
+		})
+
+		// Goals have no recurrence rule, once the target date passes there is
+		// nothing to bump it forward to. Previously the job would rewrite the goal
+		// with the same past date every run, which kept the bank account stale
+		// forever.
+		goal := testutils.MustInsert(t, models.Spending{
+			AccountId:              bankAccount.AccountId,
+			BankAccountId:          bankAccount.BankAccountId,
+			FundingScheduleId:      fundingSchedule.FundingScheduleId,
+			SpendingType:           models.SpendingTypeGoal,
+			Name:                   "Past Due Goal",
+			TargetAmount:           10000,
+			CurrentAmount:          2000,
+			NextContributionAmount: 1000,
+			NextRecurrence:         clock.Now().Add(-24 * time.Hour),
+			CreatedAt:              clock.Now(),
+		})
+
+		// A stale expense on the same bank account so the job actually has work to
+		// do, the goal must be left alone while the expense is still processed.
+		spendingRule := testutils.RuleToSet(t, timezone, "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO", clock.Now())
+		spendingRule.DTStart(clock.Now().Add(-8 * 24 * time.Hour)) // Allow past times.
+		expense := testutils.MustInsert(t, models.Spending{
+			AccountId:         bankAccount.AccountId,
+			BankAccountId:     bankAccount.BankAccountId,
+			FundingScheduleId: fundingSchedule.FundingScheduleId,
+			SpendingType:      models.SpendingTypeExpense,
+			Name:              "Test Stale Expense",
+			TargetAmount:      5000,
+			CurrentAmount:     5000,
+			RuleSet:           spendingRule,
+			NextRecurrence:    spendingRule.Before(clock.Now(), true), // Make it so it recurs next in the past. (STALE)
+			CreatedAt:         clock.Now(),
+		})
+
+		{
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).AnyTimes()
+			context.EXPECT().DB().Return(db).AnyTimes()
+			context.EXPECT().Log().Return(log).AnyTimes()
+			context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+
+			err := spending_jobs.ProcessSpending(
+				mockqueue.NewMockContext(context),
+				spending_jobs.ProcessSpendingArguments{
+					AccountId:     bankAccount.AccountId,
+					BankAccountId: bankAccount.BankAccountId,
+				},
+			)
+			assert.NoError(t, err, "should run job successfully")
+		}
+
+		updatedExpense := testutils.MustRetrieve(t, expense)
+		assert.Greater(t, updatedExpense.NextRecurrence, expense.NextRecurrence, "stale expense should still be bumped forward")
+
+		updatedGoal := testutils.MustRetrieve(t, goal)
+		assert.True(t, goal.NextRecurrence.Equal(updatedGoal.NextRecurrence), "goal next recurrence should not change")
+		assert.Nil(t, updatedGoal.LastRecurrence, "goal last recurrence should not be set")
+		assert.EqualValues(t, goal.NextContributionAmount, updatedGoal.NextContributionAmount, "goal contribution should not be recalculated")
+		assert.EqualValues(t, goal.CurrentAmount, updatedGoal.CurrentAmount, "goal current amount should not change")
+	})
+
 	t.Run("does not auto create transaction when flag is off", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()

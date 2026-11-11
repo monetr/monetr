@@ -1132,3 +1132,31 @@ func TestSpending_GetRecurrencesBefore(t *testing.T) {
 		)
 	})
 }
+
+func TestSpending_GetIsStale(t *testing.T) {
+	now := time.Date(2026, 11, 11, 12, 0, 0, 0, time.UTC)
+
+	t.Run("expense in the past", func(t *testing.T) {
+		expense := Spending{
+			SpendingType:   SpendingTypeExpense,
+			NextRecurrence: now.Add(-24 * time.Hour),
+		}
+		assert.True(t, expense.GetIsStale(now), "expense with a past next recurrence should be stale")
+	})
+
+	t.Run("expense in the future", func(t *testing.T) {
+		expense := Spending{
+			SpendingType:   SpendingTypeExpense,
+			NextRecurrence: now.Add(24 * time.Hour),
+		}
+		assert.False(t, expense.GetIsStale(now), "expense with a future next recurrence should not be stale")
+	})
+
+	t.Run("goal past its target date", func(t *testing.T) {
+		goal := Spending{
+			SpendingType:   SpendingTypeGoal,
+			NextRecurrence: now.Add(-24 * time.Hour),
+		}
+		assert.False(t, goal.GetIsStale(now), "goals have nothing to advance to and should never be stale")
+	})
+}

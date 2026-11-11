@@ -702,6 +702,82 @@ func TestProcessFundingSchedule(t *testing.T) {
 			"current amount should have increased by the contribution amount")
 	})
 
+	t.Run("past due goal still receives contribution", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(
+			t,
+			clock,
+			&link,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
+
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+		fundingRule := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", clock.Now())
+		fundingSchedule := testutils.MustInsert(t, models.FundingSchedule{
+			AccountId:              bankAccount.AccountId,
+			BankAccountId:          bankAccount.BankAccountId,
+			Name:                   "Payday",
+			Description:            "Payday",
+			RuleSet:                fundingRule,
+			NextRecurrence:         fundingRule.After(clock.Now(), false),
+			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
+		})
+
+		// An underfunded goal whose target date will have passed by the time the
+		// funding schedule is processed. Goals are not touched by the stale
+		// spending job, so funding is the only thing that keeps their contribution
+		// up to date once they are past due.
+		spending := testutils.MustInsert(t, models.Spending{
+			AccountId:              bankAccount.AccountId,
+			BankAccountId:          bankAccount.BankAccountId,
+			FundingScheduleId:      fundingSchedule.FundingScheduleId,
+			SpendingType:           models.SpendingTypeGoal,
+			Name:                   "Past Due Goal",
+			TargetAmount:           10000,
+			CurrentAmount:          2000,
+			NextContributionAmount: 1000,
+			NextRecurrence:         clock.Now().Add(24 * time.Hour),
+			CreatedAt:              clock.Now(),
+		})
+
+		// Move time forward past both the goal's target date and the funding
+		// schedule's next recurrence.
+		clock.Add(32 * 24 * time.Hour)
+
+		{
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).AnyTimes()
+			context.EXPECT().DB().Return(db).AnyTimes()
+			context.EXPECT().Log().Return(log).AnyTimes()
+			context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+
+			err := funding_jobs.ProcessFundingSchedule(
+				mockqueue.NewMockContext(context),
+				funding_jobs.ProcessFundingScheduleArguments{
+					AccountId:          bankAccount.AccountId,
+					BankAccountId:      bankAccount.BankAccountId,
+					FundingScheduleIds: []models.ID[models.FundingSchedule]{fundingSchedule.FundingScheduleId},
+				},
+			)
+			assert.NoError(t, err, "should process past due goal successfully")
+		}
+
+		updatedSpending := testutils.MustRetrieve(t, spending)
+		assert.EqualValues(t, int64(3000), updatedSpending.CurrentAmount,
+			"current amount should have increased by the contribution amount")
+		assert.EqualValues(t, int64(7000), updatedSpending.NextContributionAmount,
+			"with the target date passed the whole remaining amount should be needed at the next funding")
+	})
+
 	t.Run("multiple funding schedules for same bank account", func(t *testing.T) {
 		clock := clock.NewMock()
 		ctrl := gomock.NewController(t)

@@ -67,7 +67,14 @@ func (o *Spending) BeforeAppendModel(ctx context.Context, query bun.Query) error
 	return nil
 }
 
+// GetIsStale returns true if the spending item's next recurrence has passed
+// and it needs to be bumped forward. Goals are never stale, they only have a
+// single target date and no recurrence rule to advance to, so once that date
+// passes there is nothing to move it forward to.
 func (e Spending) GetIsStale(now time.Time) bool {
+	if e.SpendingType == SpendingTypeGoal {
+		return false
+	}
 	return e.NextRecurrence.Before(now)
 }
 

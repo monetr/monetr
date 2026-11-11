@@ -109,6 +109,105 @@ func TestJobRepository_GetBankAccountsWithStaleSpending(t *testing.T) {
 			assert.Empty(t, result, "deleted bank accounts should not be returned")
 		}
 	})
+
+	t.Run("past due goal", func(t *testing.T) {
+		clock := clock.NewMock()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		jobRepo := repository.NewJobRepository(db, clock)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+		fundingRule := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", clock.Now())
+
+		fundingSchedule := testutils.MustInsert(t, FundingSchedule{
+			AccountId:              bankAccount.AccountId,
+			BankAccountId:          bankAccount.BankAccountId,
+			Name:                   "Payday",
+			Description:            "Payday",
+			RuleSet:                fundingRule,
+			NextRecurrence:         fundingRule.After(clock.Now(), false),
+			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
+		})
+
+		// Goals have no recurrence rule, once their target date passes there is
+		// nothing to bump it to. So they should never cause the bank account to be
+		// processed for stale spending.
+		testutils.MustInsert(t, Spending{
+			AccountId:         bankAccount.AccountId,
+			BankAccountId:     bankAccount.BankAccountId,
+			FundingScheduleId: fundingSchedule.FundingScheduleId,
+			SpendingType:      SpendingTypeGoal,
+			Name:              "Past Due Goal",
+			TargetAmount:      10000,
+			CurrentAmount:     2000,
+			NextRecurrence:    clock.Now().Add(-24 * time.Hour),
+			CreatedAt:         clock.Now(),
+		})
+
+		result, err := jobRepo.GetBankAccountsWithStaleSpending(t.Context())
+		assert.NoError(t, err, "must not return an error")
+		assert.Empty(t, result, "a past due goal alone should not make the bank account stale")
+	})
+
+	t.Run("past due goal with stale expense", func(t *testing.T) {
+		clock := clock.NewMock()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		jobRepo := repository.NewJobRepository(db, clock)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+		fundingRule := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", clock.Now())
+
+		fundingSchedule := testutils.MustInsert(t, FundingSchedule{
+			AccountId:              bankAccount.AccountId,
+			BankAccountId:          bankAccount.BankAccountId,
+			Name:                   "Payday",
+			Description:            "Payday",
+			RuleSet:                fundingRule,
+			NextRecurrence:         fundingRule.After(clock.Now(), false),
+			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
+		})
+
+		testutils.MustInsert(t, Spending{
+			AccountId:         bankAccount.AccountId,
+			BankAccountId:     bankAccount.BankAccountId,
+			FundingScheduleId: fundingSchedule.FundingScheduleId,
+			SpendingType:      SpendingTypeGoal,
+			Name:              "Past Due Goal",
+			TargetAmount:      10000,
+			CurrentAmount:     2000,
+			NextRecurrence:    clock.Now().Add(-24 * time.Hour),
+			CreatedAt:         clock.Now(),
+		})
+
+		spendingRule := testutils.RuleToSet(t, timezone, "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO", clock.Now())
+		spendingRule.DTStart(clock.Now().Add(-8 * 24 * time.Hour)) // Allow past times.
+		expense := testutils.MustInsert(t, Spending{
+			AccountId:         bankAccount.AccountId,
+			BankAccountId:     bankAccount.BankAccountId,
+			FundingScheduleId: fundingSchedule.FundingScheduleId,
+			SpendingType:      SpendingTypeExpense,
+			Name:              "Test Stale Expense",
+			TargetAmount:      5000,
+			CurrentAmount:     5000,
+			RuleSet:           spendingRule,
+			NextRecurrence:    spendingRule.Before(clock.Now(), true), // Make it so it recurs next in the past. (STALE)
+			CreatedAt:         clock.Now(),
+		})
+
+		// The goal being excluded must not hide the stale expense on the same bank
+		// account.
+		result, err := jobRepo.GetBankAccountsWithStaleSpending(t.Context())
+		assert.NoError(t, err, "must not return an error")
+		assert.Len(t, result, 1, "should return the bank account for the stale expense")
+		assert.Equal(t, expense.BankAccountId, result[0].BankAccountId)
+	})
 }
 
 func TestJobRepository_GetFundingSchedulesToProcess(t *testing.T) {

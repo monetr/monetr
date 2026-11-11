@@ -113,9 +113,11 @@ func (j *jobRepository) GetLinksForExpiredAccounts(ctx context.Context) ([]Link,
 	return result, nil
 }
 
-// GetBankAccountsWithStaleSpending will return all of the bank accounts globally that have a non-paused spending object
-// with a next recurrence that is in the past. This is used to find spending objects that need to be updated as they
-// have not been spent from for at least once cycle.
+// GetBankAccountsWithStaleSpending will return all of the bank accounts
+// globally that have a non-paused expense with a next recurrence that is in the
+// past. Goals are excluded since they never go stale, see Spending.GetIsStale.
+// This is used to find spending objects that need to be updated as they have
+// not been spent from for at least once cycle.
 func (j *jobRepository) GetBankAccountsWithStaleSpending(ctx context.Context) ([]BankAccountWithStaleSpendingItem, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
@@ -128,6 +130,7 @@ func (j *jobRepository) GetBankAccountsWithStaleSpending(ctx context.Context) ([
 		JoinOn(`"spending"."account_id" = "bank_account"."account_id" AND "spending"."bank_account_id" = "bank_account"."bank_account_id"`).
 		Where(`"spending"."next_recurrence" < ?`, j.clock.Now()).
 		Where(`"spending"."is_paused" = ?`, false).
+		Where(`"spending"."spending_type" = ?`, SpendingTypeExpense).
 		Where(`"bank_account"."deleted_at" IS NULL`).
 		GroupExpr(`"bank_account"."account_id"`).
 		GroupExpr(`"bank_account"."bank_account_id"`).
