@@ -218,7 +218,9 @@ func TestMe(t *testing.T) {
 
 func TestChangePassword(t *testing.T) {
 	t.Run("successful", func(t *testing.T) {
-		app, e := NewTestApplication(t)
+		conf := NewTestApplicationConfig(t)
+		conf.Email.Enabled = true
+		app, e := NewTestApplicationWithConfig(t, conf)
 		user, currentPassword := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		newPassword := gofakeit.Lexify("????????")
 
@@ -284,6 +286,55 @@ func TestChangePassword(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			// Then make sure we get a token back and that it is valid.
+			AssertSetTokenCookie(t, response)
+		}
+	})
+
+	t.Run("email disabled", func(t *testing.T) {
+		conf := NewTestApplicationConfig(t)
+		conf.Email.Enabled = false
+		app, e := NewTestApplicationWithConfig(t, conf)
+		user, currentPassword := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		newPassword := gofakeit.Lexify("????????")
+
+		var token string
+		{ // Login to the user with their current password.
+			response := e.POST(`/api/authentication/login`).
+				WithJSON(map[string]any{
+					"email":    user.Login.Email,
+					"password": currentPassword,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			token = AssertSetTokenCookie(t, response)
+		}
+
+		// With email disabled no notification should be sent.
+		MustSendPasswordChangedEmail(t, app, 0)
+
+		{ // Change the user's password.
+			response := e.PUT(`/api/users/security/password`).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"currentPassword": currentPassword,
+					"newPassword":     newPassword,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.Body().IsEmpty()
+		}
+
+		{ // Login to the user with their new password.
+			response := e.POST(`/api/authentication/login`).
+				WithJSON(map[string]any{
+					"email":    user.Login.Email,
+					"password": newPassword,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
 			AssertSetTokenCookie(t, response)
 		}
 	})

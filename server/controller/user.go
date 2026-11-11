@@ -130,22 +130,26 @@ func (c *Controller) changePassword(ctx *echo.Context) error {
 	case repository.ErrInvalidCredentials:
 		return c.returnError(ctx, http.StatusUnauthorized, "current password provided is not correct")
 	case nil:
-		if err := c.Email.SendEmail(
-			c.getContext(ctx),
-			communication.PasswordChangedParams{
-				BaseURL:      c.Configuration.Server.GetBaseURL().String(),
-				Email:        user.Login.Email,
-				FirstName:    user.Login.FirstName,
-				LastName:     user.Login.LastName,
-				SupportEmail: "support@monetr.app",
-			},
-		); err != nil {
-			return c.wrapAndReturnError(
-				ctx,
-				err,
-				http.StatusInternalServerError,
-				"Failed to send password changed notification",
-			)
+		// c.Email is nil when email is not enabled, so only send the notification
+		// when it is.
+		if c.Configuration.Email.Enabled {
+			if err := c.Email.SendEmail(
+				c.getContext(ctx),
+				communication.PasswordChangedParams{
+					BaseURL:      c.Configuration.Server.GetBaseURL().String(),
+					Email:        user.Login.Email,
+					FirstName:    user.Login.FirstName,
+					LastName:     user.Login.LastName,
+					SupportEmail: "support@monetr.app",
+				},
+			); err != nil {
+				return c.wrapAndReturnError(
+					ctx,
+					err,
+					http.StatusInternalServerError,
+					"Failed to send password changed notification",
+				)
+			}
 		}
 
 		return ctx.NoContent(http.StatusOK)
