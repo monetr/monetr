@@ -62,19 +62,18 @@ func (j *jobRepository) GetFundingSchedulesToProcess(ctx context.Context) ([]Pro
 	defer span.Finish()
 
 	var items []ProcessFundingSchedulesItem
-	// TODO Exclude deleted bank accounts from processing
-	err := j.txn.NewRaw(
-		`
-		SELECT
-			"funding_schedules"."account_id",
-			"funding_schedules"."bank_account_id",
-			array_agg("funding_schedules"."funding_schedule_id") AS "funding_schedule_ids"
-		FROM "funding_schedules"
-		WHERE "funding_schedules"."next_recurrence" < ?
-		GROUP BY "funding_schedules"."account_id", "funding_schedules"."bank_account_id"
-		`,
-		j.clock.Now(),
-	).Scan(span.Context(), &items)
+	err := j.txn.NewSelect().Model(&FundingSchedule{}).
+		ColumnExpr(`"funding_schedule"."account_id"`).
+		ColumnExpr(`"funding_schedule"."bank_account_id"`).
+		ColumnExpr(`array_agg("funding_schedule"."funding_schedule_id") AS "funding_schedule_ids"`).
+		Join(`INNER JOIN "bank_accounts" AS "bank_account"`).
+		JoinOn(`"bank_account"."account_id" = "funding_schedule"."account_id"`).
+		JoinOn(`"bank_account"."bank_account_id" = "funding_schedule"."bank_account_id"`).
+		Where(`"funding_schedule"."next_recurrence" < ?`, j.clock.Now()).
+		Where(`"bank_account"."deleted_at" IS NULL`).
+		GroupExpr(`"funding_schedule"."account_id"`).
+		GroupExpr(`"funding_schedule"."bank_account_id"`).
+		Scan(span.Context(), &items)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve accounts and their funding schedules")
 	}
@@ -129,6 +128,7 @@ func (j *jobRepository) GetBankAccountsWithStaleSpending(ctx context.Context) ([
 		JoinOn(`"spending"."account_id" = "bank_account"."account_id" AND "spending"."bank_account_id" = "bank_account"."bank_account_id"`).
 		Where(`"spending"."next_recurrence" < ?`, j.clock.Now()).
 		Where(`"spending"."is_paused" = ?`, false).
+		Where(`"bank_account"."deleted_at" IS NULL`).
 		GroupExpr(`"bank_account"."account_id"`).
 		GroupExpr(`"bank_account"."bank_account_id"`).
 		Scan(span.Context(), &result)

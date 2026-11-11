@@ -56,6 +56,104 @@ func TestJobRepository_GetBankAccountsWithStaleSpending(t *testing.T) {
 		assert.NotEmpty(t, result, "should return at least one expense")
 		assert.Equal(t, spending.BankAccountId, result[0].BankAccountId)
 	})
+
+	t.Run("deleted bank account", func(t *testing.T) {
+		clock := clock.NewMock()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		jobRepo := repository.NewJobRepository(db, clock)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+		fundingRule := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", clock.Now())
+
+		fundingSchedule := testutils.MustInsert(t, FundingSchedule{
+			AccountId:              bankAccount.AccountId,
+			BankAccountId:          bankAccount.BankAccountId,
+			Name:                   "Payday",
+			Description:            "Payday",
+			RuleSet:                fundingRule,
+			NextRecurrence:         fundingRule.After(clock.Now(), false),
+			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
+		})
+
+		spendingRule := testutils.RuleToSet(t, timezone, "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO", clock.Now())
+		spendingRule.DTStart(clock.Now().Add(-8 * 24 * time.Hour)) // Allow past times.
+		testutils.MustInsert(t, Spending{
+			AccountId:         bankAccount.AccountId,
+			BankAccountId:     bankAccount.BankAccountId,
+			FundingScheduleId: fundingSchedule.FundingScheduleId,
+			SpendingType:      SpendingTypeExpense,
+			Name:              "Test Stale Expense",
+			TargetAmount:      5000,
+			CurrentAmount:     5000,
+			RuleSet:           spendingRule,
+			NextRecurrence:    spendingRule.Before(clock.Now(), true), // Make it so it recurs next in the past. (STALE)
+			CreatedAt:         clock.Now(),
+		})
+
+		{ // Before the bank account is deleted it should be picked up.
+			result, err := jobRepo.GetBankAccountsWithStaleSpending(t.Context())
+			assert.NoError(t, err, "must not return an error")
+			assert.Len(t, result, 1, "should return the bank account with the stale expense")
+		}
+
+		bankAccount.DeletedAt = new(clock.Now())
+		testutils.MustDBUpdate(t, &bankAccount)
+
+		{ // Once it is deleted it should no longer be processed.
+			result, err := jobRepo.GetBankAccountsWithStaleSpending(t.Context())
+			assert.NoError(t, err, "must not return an error")
+			assert.Empty(t, result, "deleted bank accounts should not be returned")
+		}
+	})
+}
+
+func TestJobRepository_GetFundingSchedulesToProcess(t *testing.T) {
+	t.Run("deleted bank account", func(t *testing.T) {
+		clock := clock.NewMock()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		jobRepo := repository.NewJobRepository(db, clock)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+		fundingRule := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", clock.Now())
+
+		fundingSchedule := testutils.MustInsert(t, FundingSchedule{
+			AccountId:              bankAccount.AccountId,
+			BankAccountId:          bankAccount.BankAccountId,
+			Name:                   "Payday",
+			Description:            "Payday",
+			RuleSet:                fundingRule,
+			NextRecurrence:         fundingRule.After(clock.Now(), false),
+			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
+		})
+
+		// Move past the next recurrence so the funding schedule is due.
+		clock.Add(32 * 24 * time.Hour)
+
+		{ // Before the bank account is deleted it should be picked up.
+			result, err := jobRepo.GetFundingSchedulesToProcess(t.Context())
+			assert.NoError(t, err, "must not return an error")
+			assert.Len(t, result, 1, "should return the bank account with the due funding schedule")
+			assert.Equal(t, bankAccount.BankAccountId, result[0].BankAccountId)
+			assert.Equal(t, []ID[FundingSchedule]{fundingSchedule.FundingScheduleId}, result[0].FundingScheduleIds)
+		}
+
+		bankAccount.DeletedAt = new(clock.Now())
+		testutils.MustDBUpdate(t, &bankAccount)
+
+		{ // Once it is deleted it should no longer be processed.
+			result, err := jobRepo.GetFundingSchedulesToProcess(t.Context())
+			assert.NoError(t, err, "must not return an error")
+			assert.Empty(t, result, "deleted bank accounts should not be returned")
+		}
+	})
 }
 
 func TestJobRepository_GetLinksForExpiredAccounts(t *testing.T) {
