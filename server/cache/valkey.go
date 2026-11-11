@@ -45,6 +45,11 @@ var (
 	ErrBlankKey = errors.New("key is blank")
 )
 
+const (
+	valkeyConnectTimeout   = 5 * time.Second
+	valkeyReadWriteTimeout = 3 * time.Second
+)
+
 type valkeyCache struct {
 	log          *slog.Logger
 	client       *redis.Pool
@@ -65,6 +70,13 @@ func NewValkeyCache(
 		redis.DialUsername(conf.Username),
 		redis.DialPassword(conf.Password),
 		redis.DialDatabase(conf.Database),
+		// Without these redigo will wait on the OS for connects and forever on
+		// reads and writes, so a valkey that stops responding would hang whatever
+		// request or job is waiting on the cache. Nothing here issues blocking
+		// commands, so every call should come back well within these.
+		redis.DialConnectTimeout(valkeyConnectTimeout),
+		redis.DialReadTimeout(valkeyReadWriteTimeout),
+		redis.DialWriteTimeout(valkeyReadWriteTimeout),
 	}
 
 	address = net.JoinHostPort(conf.Address, strconv.Itoa(conf.Port))
