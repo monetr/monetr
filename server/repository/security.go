@@ -31,6 +31,14 @@ var (
 	// ErrInvalidCredentials is returned when the provided email and/or password
 	// does not match the current password for an existing login.
 	ErrInvalidCredentials = errors.New("invalid credentials provided")
+
+	// dummyPasswordHash is compared against when a login attempt is made for an
+	// email that does not exist. Without it a missing email skips bcrypt and
+	// returns noticeably faster than a wrong password does, which lets someone
+	// tell which emails have an account just by timing the response. It was
+	// generated from random bytes at consts.BcryptCost, nothing will ever match
+	// it, and a test makes sure its cost stays in sync with that constant.
+	dummyPasswordHash = []byte("$2b$10$S7j3gCW/X1PIAbY643pi/ur68D/EKMumYG6rHmQOFpt.dqXfX/2J2")
 )
 
 type SecurityRepository interface {
@@ -103,6 +111,9 @@ func (b *baseSecurityRepository) Login(ctx context.Context, email, password stri
 	switch err {
 	case nil:
 	case sql.ErrNoRows:
+		// Still pay for a bcrypt comparison so that a missing email takes as long
+		// as a wrong password.
+		_ = bcrypt.CompareHashAndPassword(dummyPasswordHash, []byte(password))
 		span.Status = sentry.SpanStatusNotFound
 		return nil, requiresPasswordChange, errors.WithStack(ErrInvalidCredentials)
 	default:
