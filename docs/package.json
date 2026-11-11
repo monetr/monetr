@@ -32,7 +32,7 @@
     "react-dom": "19.3.1",
     "rehype-katex": "7.0.1",
     "remark-math": "6.0.0",
-    "rspress-plugin-mermaid": "1.0.3",
+    "rspress-plugin-mermaid": "2.0.0",
     "rspress-plugin-reading-time": "1.0.2",
     "unist-util-visit": "5.2.0"
   },
