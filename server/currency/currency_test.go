@@ -294,6 +294,22 @@ func TestParseCurrency(t *testing.T) {
 		assert.EqualValues(t, -101, result, "should return an exact int64")
 	})
 
+	t.Run("extra decimal place of 5 rounds up", func(t *testing.T) {
+		// This used to only round up on 6 or higher, so 1.005 came out as 100
+		result, err := currency.ParseCurrency("1.005", mustGetCurrency(t, "en", "USD"))
+		assert.NoError(t, err, "should not return an error")
+		assert.EqualValues(t, 101, result, "should return an exact int64")
+
+		result, err = currency.ParseCurrency("-1.005", mustGetCurrency(t, "en", "USD"))
+		assert.NoError(t, err, "should not return an error")
+		assert.EqualValues(t, -101, result, "should return an exact int64")
+
+		// But 4 still doesn't
+		result, err = currency.ParseCurrency("1.004", mustGetCurrency(t, "en", "USD"))
+		assert.NoError(t, err, "should not return an error")
+		assert.EqualValues(t, 100, result, "should return an exact int64")
+	})
+
 	t.Run("garbage", func(t *testing.T) {
 		// This also used to spin forever instead of returning an error
 		result, err := currency.ParseCurrency("12abc", mustGetCurrency(t, "en", "USD"))

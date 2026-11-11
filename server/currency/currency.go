@@ -142,7 +142,7 @@ ParseLoop:
 	}
 
 	// Round up on a thousandth decimal place.
-	if str != "" && unicode.IsDigit(rune(str[0])) && rune(str[0]) > '5' {
+	if str != "" && unicode.IsDigit(rune(str[0])) && rune(str[0]) >= '5' {
 		if value == math.MinInt64 {
 			return 0, errors.Errorf(
 				"failed to parse currency %s - %s, value is out of range",
@@ -210,6 +210,8 @@ ParseLoop:
 // flexible inputs will come at a later time.
 // This function will then take that amount plus a currency code and return an
 // int64 representing that amount in the smallest unit of that currency.
+//
+// Deprecated: Use [ParseCurrency] instead.
 func ParseFriendlyToAmount(
 	input string,
 	currency string,
