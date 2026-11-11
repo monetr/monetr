@@ -124,7 +124,7 @@ export function amountToFriendly(amount: number, locale: string, currency: strin
   const modifier = 10 ** (specs.maximumFractionDigits ?? DEFAULT_FRACTION_DIGITS);
 
   // Shift the amount over the correct number of decimal places.
-  const adjusted = Math.fround(amount / modifier);
+  const adjusted = amount / modifier;
 
   // Truncate any additional decimal places that may exist.
   return +adjusted.toFixed(specs.maximumFractionDigits);
@@ -208,7 +208,7 @@ export function formatAmount(
     const modifier = 10 ** (specs.maximumFractionDigits ?? DEFAULT_FRACTION_DIGITS);
 
     // Shift the amount over the correct number of decimal places.
-    const adjusted = Math.fround(amount / modifier);
+    const adjusted = amount / modifier;
 
     // Truncate any additional decimal places that may exist.
     value = +adjusted.toFixed(specs.maximumFractionDigits);
