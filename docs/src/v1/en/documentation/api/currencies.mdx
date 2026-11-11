@@ -63,9 +63,20 @@ curl --request GET \
 ```json
 [
   {
+    "code": "CAD",
+    "name": "Canadian Dollar",
+    "symbol": "CA$",
+    "narrowSymbol": "$",
+    "decimalSeparator": ".",
+    "groupSeparator": ",",
+    "minusSign": "-",
+    "fractionalDigits": 2
+  },
+  {
     "code": "EUR",
     "name": "Euro",
     "symbol": "€",
+    "narrowSymbol": "€",
     "decimalSeparator": ".",
     "groupSeparator": ",",
     "minusSign": "-",
@@ -75,6 +86,7 @@ curl --request GET \
     "code": "JPY",
     "name": "Japanese Yen",
     "symbol": "¥",
+    "narrowSymbol": "¥",
     "decimalSeparator": ".",
     "groupSeparator": ",",
     "minusSign": "-",
@@ -84,6 +96,7 @@ curl --request GET \
     "code": "USD",
     "name": "US Dollar",
     "symbol": "$",
+    "narrowSymbol": "$",
     "decimalSeparator": ".",
     "groupSeparator": ",",
     "minusSign": "-",
@@ -101,6 +114,7 @@ The real list is much longer, this is a sample. It's sorted by `code`.
 | `code`             | string  | The ISO 4217 currency code.                                                                                                    |
 | `name`             | string  | The name of the currency in the language monetr picked.                                                                       |
 | `symbol`           | string  | The symbol for the currency in that language. Some languages don't have a symbol for every currency, so this can be the code. |
+| `narrowSymbol`     | string  | The short version of the symbol without the country, like `$` for CAD where `symbol` is `CA$`. It's ambiguous on its own, so only use it when the currency is already clear. If a currency doesn't have one this is the same as `symbol`. |
 | `decimalSeparator` | string  | What goes between the whole part and the decimals in that language, like `.` in English or `,` in German.                     |
 | `groupSeparator`   | string  | What separates the thousands in that language, like `,` in English or `.` in German. Can be a no-break space in some languages. |
 | `minusSign`        | string  | The minus sign for negative amounts in that language. Usually `-`, but some languages use a real minus sign `−` or put an invisible left-to-right mark in front of it. |
@@ -147,6 +161,7 @@ curl --request GET \
   "code": "JPY",
   "name": "日本円",
   "symbol": "￥",
+  "narrowSymbol": "￥",
   "decimalSeparator": ".",
   "groupSeparator": ",",
   "minusSign": "-",

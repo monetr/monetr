@@ -37,7 +37,13 @@ func ParseCurrency(input string, currency Currency) (int64, error) {
 	if seperatorSymbol == "" {
 		seperatorSymbol = ","
 	}
-	currencySymbol := "" // Blank for now, eventually should be from locale.
+	// Accept both the regular symbol and the narrow one, people (and banks)
+	// write $13.64 for CAD even though en calls it CA$. Longest one goes first
+	// so CA$ gets consumed as a whole instead of leaving CA behind.
+	currencySymbols := []string{currency.Symbol, currency.NarrowSymbol}
+	if len(currencySymbols[1]) > len(currencySymbols[0]) {
+		currencySymbols[0], currencySymbols[1] = currencySymbols[1], currencySymbols[0]
+	}
 	// Amounts without a sign are positive, but some banks write an explicit +
 	// on their amounts so accept that too.
 	positiveSymbol := "+"
@@ -56,6 +62,15 @@ func ParseCurrency(input string, currency Currency) (int64, error) {
 	// if there isn't one
 	negativeLength := func(str string) int {
 		for _, symbol := range negativeSymbols {
+			if symbol != "" && strings.HasPrefix(str, symbol) {
+				return len(symbol)
+			}
+		}
+		return 0
+	}
+	// Same as above but for the currency symbol
+	symbolLength := func(str string) int {
+		for _, symbol := range currencySymbols {
 			if symbol != "" && strings.HasPrefix(str, symbol) {
 				return len(symbol)
 			}
@@ -85,8 +100,8 @@ PrefixLoop:
 			str = str[negativeLength(str):]
 		case positiveSymbol != "" && strings.HasPrefix(str, positiveSymbol):
 			str = strings.TrimPrefix(str, positiveSymbol)
-		case currencySymbol != "" && strings.HasPrefix(str, currencySymbol):
-			str = strings.TrimPrefix(str, currencySymbol)
+		case symbolLength(str) > 0:
+			str = str[symbolLength(str):]
 		case unicode.IsSpace(rune(str[0])):
 			str = str[1:]
 		default:
@@ -180,10 +195,8 @@ ParseLoop:
 			str = str[negativeLength(str):]
 		case positiveSymbol != "" && strings.HasPrefix(str, positiveSymbol):
 			str = strings.TrimPrefix(str, positiveSymbol)
-		case currencySymbol != "" && strings.HasPrefix(str, currencySymbol):
-			// The symbol is blank right now, without checking that this would match
-			// everything and spin forever instead of hitting the error below.
-			str = strings.TrimPrefix(str, currencySymbol)
+		case symbolLength(str) > 0:
+			str = str[symbolLength(str):]
 		default:
 			return 0, errors.Errorf("failed to parse currency %s - %s, unexpected character %s", input, currency.Code, string(str[0]))
 		}
@@ -251,9 +264,11 @@ func ParseFloatToAmount[T float32 | float64](
 // Currency is a single currency with its name and symbol localized for a
 // specific locale
 type Currency struct {
-	Code             string `json:"code"`
-	Name             string `json:"name"`
-	Symbol           string `json:"symbol"`
+	Code   string `json:"code"`
+	Name   string `json:"name"`
+	Symbol string `json:"symbol"`
+	// NarrowSymbol is the symbol without the region, like $ instead of CA$.
+	NarrowSymbol     string `json:"narrowSymbol"`
 	DecimalSeparator string `json:"decimalSeparator"`
 	GroupSeparator   string `json:"groupSeparator"`
 	MinusSign        string `json:"minusSign"`

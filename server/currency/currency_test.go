@@ -214,6 +214,75 @@ func TestParseCurrency(t *testing.T) {
 		}
 	})
 
+	t.Run("CAD with or without a symbol", func(t *testing.T) {
+		// In en the symbol for CAD is CA$ but the narrow symbol is just $, banks
+		// will write either one or neither.
+		cad := mustGetCurrency(t, "en", "CAD")
+		assert.Equal(t, "CA$", cad.Symbol, "en should use CA$ as the symbol for CAD")
+		assert.Equal(t, "$", cad.NarrowSymbol, "en should use $ as the narrow symbol for CAD")
+
+		for _, input := range []string{
+			"13.64",
+			"CA$13.64",
+			"$13.64",
+			"CA$ 13.64",
+			"$ 13.64",
+			"+CA$13.64",
+			"+$13.64",
+			"13.64CA$",
+			"13.64$",
+			"13.64 CA$",
+			"13.64 $",
+		} {
+			result, err := currency.ParseCurrency(input, cad)
+			assert.NoError(t, err, "should not return an error for %q", input)
+			assert.EqualValues(t, 1364, result, "should return an exact int64 for %q", input)
+		}
+	})
+
+	t.Run("negative CAD with or without a symbol", func(t *testing.T) {
+		cad := mustGetCurrency(t, "en", "CAD")
+		for _, input := range []string{
+			"-13.64",
+			"-CA$13.64",
+			"-$13.64",
+			"CA$-13.64",
+			"$-13.64",
+			"- CA$ 13.64",
+			"(CA$13.64)",
+			"($13.64)",
+			"13.64 CA$-",
+			"13.64 $-",
+		} {
+			result, err := currency.ParseCurrency(input, cad)
+			assert.NoError(t, err, "should not return an error for %q", input)
+			assert.EqualValues(t, -1364, result, "should return an exact int64 for %q", input)
+		}
+	})
+
+	t.Run("symbol from another currency is not accepted", func(t *testing.T) {
+		cad := mustGetCurrency(t, "en", "CAD")
+		for _, input := range []string{"€13.64", "US$13.64", "13.64 €"} {
+			result, err := currency.ParseCurrency(input, cad)
+			assert.Error(t, err, "should return an error for %q", input)
+			assert.Zero(t, result, "should not return a value for %q", input)
+		}
+	})
+
+	t.Run("only a symbol is not a number", func(t *testing.T) {
+		cad := mustGetCurrency(t, "en", "CAD")
+		for _, input := range []string{"CA$", "$", "-$"} {
+			result, err := currency.ParseCurrency(input, cad)
+			assert.EqualError(
+				t,
+				err,
+				"failed to parse currency "+input+" - CAD, no number found",
+				"should return an error for %q", input,
+			)
+			assert.Zero(t, result, "should not return a value for %q", input)
+		}
+	})
+
 	t.Run("extra decimal places are truncated", func(t *testing.T) {
 		result, err := currency.ParseCurrency("1.2349", mustGetCurrency(t, "en", "USD"))
 		assert.NoError(t, err, "should not return an error")

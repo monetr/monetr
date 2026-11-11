@@ -30,6 +30,9 @@ type localeCurrencies struct {
 			Currencies map[string]struct {
 				DisplayName string `json:"displayName"`
 				Symbol      string `json:"symbol"`
+				// Narrow symbols drop the region, like $ instead of CA$ for CAD in en.
+				// Not every currency has one.
+				NarrowSymbol string `json:"symbol-alt-narrow"`
 				// A handful of currencies use their own separators, like CVE in pt-CV
 				// is written as 1$50
 				Decimal string `json:"decimal"`
@@ -80,10 +83,11 @@ type currencyLocale struct {
 }
 
 type currencyLocaleData struct {
-	Name    string `json:"n,omitempty"`
-	Symbol  string `json:"s,omitempty"`
-	Decimal string `json:"d,omitempty"`
-	Group   string `json:"g,omitempty"`
+	Name         string `json:"n,omitempty"`
+	Symbol       string `json:"s,omitempty"`
+	NarrowSymbol string `json:"ns,omitempty"`
+	Decimal      string `json:"d,omitempty"`
+	Group        string `json:"g,omitempty"`
 }
 
 func main() {
@@ -158,10 +162,11 @@ func run(cldrPath, outputPath string) error {
 				continue
 			}
 			values[code] = currencyLocaleData{
-				Name:    currency.DisplayName,
-				Symbol:  currency.Symbol,
-				Decimal: currency.Decimal,
-				Group:   currency.Group,
+				Name:         currency.DisplayName,
+				Symbol:       currency.Symbol,
+				NarrowSymbol: currency.NarrowSymbol,
+				Decimal:      currency.Decimal,
+				Group:        currency.Group,
 			}
 		}
 		raw[locale] = values
@@ -197,6 +202,9 @@ func run(cldrPath, outputPath string) error {
 			}
 			if value.Symbol != inherited.Symbol {
 				item.Symbol = value.Symbol
+			}
+			if value.NarrowSymbol != inherited.NarrowSymbol {
+				item.NarrowSymbol = value.NarrowSymbol
 			}
 			if value.Decimal != inherited.Decimal {
 				item.Decimal = value.Decimal

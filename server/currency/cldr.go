@@ -67,10 +67,11 @@ type currencyLocale struct {
 }
 
 type currencyLocaleData struct {
-	Name    string `json:"n,omitempty"`
-	Symbol  string `json:"s,omitempty"`
-	Decimal string `json:"d,omitempty"`
-	Group   string `json:"g,omitempty"`
+	Name         string `json:"n,omitempty"`
+	Symbol       string `json:"s,omitempty"`
+	NarrowSymbol string `json:"ns,omitempty"`
+	Decimal      string `json:"d,omitempty"`
+	Group        string `json:"g,omitempty"`
 }
 
 type jsonDate time.Time
@@ -344,7 +345,10 @@ func GetCurrency(locale, code string) (Currency, error) {
 		if result.Symbol == "" {
 			result.Symbol = data.Symbol
 		}
-		if result.Name != "" && result.Symbol != "" {
+		if result.NarrowSymbol == "" {
+			result.NarrowSymbol = data.NarrowSymbol
+		}
+		if result.Name != "" && result.Symbol != "" && result.NarrowSymbol != "" {
 			break
 		}
 	}
@@ -354,6 +358,10 @@ func GetCurrency(locale, code string) (Currency, error) {
 	}
 	if result.Symbol == "" {
 		result.Symbol = code
+	}
+	// Not every currency has a narrow symbol, the regular one is the next best
+	if result.NarrowSymbol == "" {
+		result.NarrowSymbol = result.Symbol
 	}
 	result.DecimalSeparator, result.GroupSeparator = GetSeparators(locale, code)
 	result.MinusSign = GetMinusSign(locale)
