@@ -201,6 +201,17 @@ func (t *Table) getID(data []string) (string, error) {
 	}
 }
 
+func (t *Table) parseAmount(value string) (int64, error) {
+	// TODO This should use the locale of the file once we know it, for now
+	// assume amounts use . for the decimal like en does.
+	amountCurrency, err := currency.GetCurrency("en", t.currency)
+	if err != nil {
+		return 0, errors.Wrapf(err, "failed to get currency information [%s]", t.currency)
+	}
+
+	return currency.ParseCurrency(value, amountCurrency)
+}
+
 func (t *Table) getAmount(data []string) (int64, error) {
 	var amount int64
 	var err error
@@ -209,12 +220,12 @@ func (t *Table) getAmount(data []string) (int64, error) {
 		// Assumes that the mapping struct is 100% valid!
 		field := t.mapping.Amount.Fields[0]
 		value := t.getField(data, field)
-		amount, err = currency.ParseFriendlyToAmount(value, t.currency)
+		amount, err = t.parseAmount(value)
 	case AmountKindType:
 		value := t.getField(data, t.mapping.Amount.Fields[0])
 		direction := t.getField(data, t.mapping.Amount.Fields[1])
 		// err is handled, just not right here!
-		amount, err = currency.ParseFriendlyToAmount(value, t.currency)
+		amount, err = t.parseAmount(value)
 
 		switch direction {
 		case t.mapping.Amount.Credit:
@@ -232,9 +243,9 @@ func (t *Table) getAmount(data []string) (int64, error) {
 
 		switch {
 		case debit != "" && credit == "":
-			amount, err = currency.ParseFriendlyToAmount(debit, t.currency)
+			amount, err = t.parseAmount(debit)
 		case debit == "" && credit != "":
-			amount, err = currency.ParseFriendlyToAmount(credit, t.currency)
+			amount, err = t.parseAmount(credit)
 		case debit == "" && credit == "":
 			return 0, errors.Errorf("invalid amount row %d, both debit and credit columns are empty", t.index)
 		default:
@@ -299,7 +310,7 @@ func (t *Table) getBalance(data []string) (int64, error) {
 		// Assumes that the mapping struct is 100% valid!
 		field := t.mapping.Balance.Fields[0]
 		value := t.getField(data, field)
-		amount, err := currency.ParseFriendlyToAmount(value, t.currency)
+		amount, err := t.parseAmount(value)
 		if err != nil {
 			return 0, err
 		}

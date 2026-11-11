@@ -273,6 +273,13 @@ func (s *syncLunchFlowContext) syncTransactions(ctx queue.Context) error {
 	lunchFlowTransactionsToCreate := make([]models.LunchFlowTransaction, 0)
 	transactionsToCreate := make([]models.Transaction, 0)
 
+	// Amounts are JSON numbers so they always use . for the decimal and never
+	// have grouping, which is what en gives us.
+	transactionCurrency, err := currency.GetCurrency("en", s.bankAccount.Currency)
+	if err != nil {
+		return errors.Wrapf(err, "failed to get currency information [%s]", s.bankAccount.Currency)
+	}
+
 	for i := range s.lunchFlowTransactions {
 		externalTransaction := s.lunchFlowTransactions[i]
 		tlog := s.log.With(
@@ -293,10 +300,9 @@ func (s *syncLunchFlowContext) syncTransactions(ctx queue.Context) error {
 			)
 		}
 
-		// TODO Change this to use [currency.ParseCurrency]
-		amount, err := currency.ParseFriendlyToAmount(
+		amount, err := currency.ParseCurrency(
 			externalTransaction.Amount.String(),
-			s.bankAccount.Currency,
+			transactionCurrency,
 		)
 		if err != nil {
 			tlog.ErrorContext(span.Context(), "failed to parse transaction amount", "err", err)
@@ -442,9 +448,16 @@ func (s *syncLunchFlowContext) syncBalances(ctx queue.Context) error {
 		)
 	}
 
-	amount, err := currency.ParseFriendlyToAmount(
+	// The balance is a JSON number so it always uses . for the decimal and never
+	// has grouping, which is what en gives us.
+	balanceCurrency, err := currency.GetCurrency("en", s.bankAccount.Currency)
+	if err != nil {
+		return errors.Wrapf(err, "failed to get currency information [%s]", s.bankAccount.Currency)
+	}
+
+	amount, err := currency.ParseCurrency(
 		balance.Amount.String(),
-		s.bankAccount.Currency,
+		balanceCurrency,
 	)
 	if err != nil {
 		s.log.ErrorContext(

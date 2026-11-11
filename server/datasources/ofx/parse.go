@@ -121,6 +121,23 @@ func ParseDate(input string, timezone *time.Location) (time.Time, error) {
 	return time.Time{}, errors.Errorf("failed to parse OFX timestamp [%s], unknown format", input)
 }
 
+// ParseAmount takes an amount from an OFX file and a currency code and returns
+// an int64 representing the amount in the smallest unit of that currency. OFX
+// files can have blank amounts, those are treated as zero.
+func ParseAmount(input, currencyCode string) (int64, error) {
+	if strings.TrimSpace(input) == "" {
+		return 0, nil
+	}
+
+	// OFX amounts always use . for the decimal, which is what en gives us
+	amountCurrency, err := currency.GetCurrency("en", currencyCode)
+	if err != nil {
+		return 0, errors.Wrapf(err, "failed to get currency information [%s]", currencyCode)
+	}
+
+	return currency.ParseCurrency(input, amountCurrency)
+}
+
 // ParseTransactionAmount takes an OFX transaction object and a currency code
 // and returns an int64 representing the amount as a whole number, or an error
 // if the value cannot be parsed.
@@ -128,14 +145,8 @@ func ParseTransactionAmount(
 	transaction gofx.StatementTransaction,
 	txnCurrency string,
 ) (int64, error) {
-	amount, err := currency.ParseFriendlyToAmount(
-		transaction.TRNAMT,
-		txnCurrency,
-	)
-	// EOF means the amount is blank, we can treat this as zero
-	switch errors.Cause(err) {
-	case nil, io.EOF:
-	default:
+	amount, err := ParseAmount(transaction.TRNAMT, txnCurrency)
+	if err != nil {
 		return 0, err
 	}
 

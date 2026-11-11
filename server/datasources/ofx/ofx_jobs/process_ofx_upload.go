@@ -3,7 +3,6 @@ package ofx_jobs
 import (
 	"context"
 	"fmt"
-	"io"
 	"log/slog"
 	"slices"
 	"strings"
@@ -11,7 +10,6 @@ import (
 
 	"github.com/elliotcourant/gofx"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/currency"
 	"github.com/monetr/monetr/server/datasources/ofx"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
@@ -358,27 +356,22 @@ func (j *processOfxUpload) syncBalances(ctx context.Context) error {
 		for i := range j.data.BANKMSGSRSV1.STMTTRNRS {
 			statementTransactions := j.data.BANKMSGSRSV1.STMTTRNRS[i]
 			if statementTransactions.STMTRS.LEDGERBAL != nil {
-				currentBalance, err = currency.ParseFriendlyToAmount(
+				// Blank amounts are treated as zero
+				currentBalance, err = ofx.ParseAmount(
 					statementTransactions.STMTRS.LEDGERBAL.BALAMT,
 					j.currency,
 				)
-				// EOF means the amount is blank, we can treat this as zero
-				switch errors.Cause(err) {
-				case nil, io.EOF:
-				default:
+				if err != nil {
 					return errors.Wrap(err, "failed to parse ledger balance amount")
 				}
 			}
 
 			if statementTransactions.STMTRS.AVAILBAL != nil {
-				availableBalance, err = currency.ParseFriendlyToAmount(
+				availableBalance, err = ofx.ParseAmount(
 					statementTransactions.STMTRS.AVAILBAL.BALAMT,
 					j.currency,
 				)
-				// EOF means the amount is blank, we can treat this as zero
-				switch errors.Cause(err) {
-				case nil, io.EOF:
-				default:
+				if err != nil {
 					return errors.Wrap(err, "failed to parse available balance amount")
 				}
 			}
@@ -387,27 +380,21 @@ func (j *processOfxUpload) syncBalances(ctx context.Context) error {
 		for i := range j.data.CREDITCARDMSGSRSV1.CCSTMTTRNRS {
 			statementTransactions := j.data.CREDITCARDMSGSRSV1.CCSTMTTRNRS[i]
 			if statementTransactions.CCSTMTRS.LEDGERBAL != nil {
-				currentBalance, err = currency.ParseFriendlyToAmount(
+				currentBalance, err = ofx.ParseAmount(
 					statementTransactions.CCSTMTRS.LEDGERBAL.BALAMT,
 					j.currency,
 				)
-				// EOF means the amount is blank, we can treat this as zero
-				switch errors.Cause(err) {
-				case nil, io.EOF:
-				default:
+				if err != nil {
 					return errors.Wrap(err, "failed to parse ledger balance amount")
 				}
 			}
 
 			if statementTransactions.CCSTMTRS.AVAILBAL != nil {
-				availableBalance, err = currency.ParseFriendlyToAmount(
+				availableBalance, err = ofx.ParseAmount(
 					statementTransactions.CCSTMTRS.AVAILBAL.BALAMT,
 					j.currency,
 				)
-				// EOF means the amount is blank, we can treat this as zero
-				switch errors.Cause(err) {
-				case nil, io.EOF:
-				default:
+				if err != nil {
 					return errors.Wrap(err, "failed to parse available balance amount")
 				}
 			}
