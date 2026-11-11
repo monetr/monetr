@@ -111,12 +111,18 @@ func (o *File) GetStorePath() (string, error) {
 	// potential of having a single directory with a LOT of folders in in.
 	// But we also want it in its own directory per account ID, so we are breaking
 	// that up as well.
-	accountHex := hex.EncodeToString(fnv.New32().Sum([]byte(o.AccountId)))
+	// Sum appends the hash to whatever is passed to it, so the ID needs to be
+	// written to the hash first and then Sum is called with nil.
+	accountHash := fnv.New32()
+	accountHash.Write([]byte(o.AccountId))
+	accountHex := hex.EncodeToString(accountHash.Sum(nil))
 	// Same thing with the file, if one account has a ton of files we want to
 	// break it up a bit. This is kind of future planning where monetr will at
 	// some point support things like transaction attachments and there could
 	// theoretically be multiple attachments per transactions for some users.
-	fileHex := hex.EncodeToString(fnv.New32().Sum([]byte(o.FileId)))
+	fileHash := fnv.New32()
+	fileHash.Write([]byte(o.FileId))
+	fileHex := hex.EncodeToString(fileHash.Sum(nil))
 	return path.Join(
 		"data",
 		o.Kind,

@@ -44,7 +44,7 @@ func TestFile_GetStorePath(t *testing.T) {
 		}
 		path, err := file.GetStorePath()
 		assert.NoError(t, err, "must not return an error generating a path for a valid file")
-		assert.Equal(t, "data/transactions/uploads/61/01kheqbr884scw3wt8vacxg1sd/66/01kheqbr884scw3wt8v70g95yk", path)
+		assert.Equal(t, "data/transactions/uploads/64/01kheqbr884scw3wt8vacxg1sd/63/01kheqbr884scw3wt8v70g95yk", path)
 	})
 
 	t.Run("will fail if the file ID is not valid", func(t *testing.T) {
