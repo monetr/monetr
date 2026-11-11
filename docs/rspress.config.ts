@@ -201,6 +201,8 @@ export default defineConfig({
           activationBkgColor: '#201A2E', // surface-2
           activationBorderColor: '#2B2340', // line
           sequenceNumberColor: '#120E1A', // ink
+          // Mermaid 12 gives the base theme a light gray drop shadow by default.
+          dropShadow: 'none',
         },
         sequence: {
           wrap: true,
