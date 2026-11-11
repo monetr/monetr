@@ -1093,6 +1093,58 @@ func TestSyncSimpleFin(t *testing.T) {
 			"error",
 		}, statuses, "should announce the error so the client stops waiting")
 	})
+
+	t.Run("last successful update only moves when data changes", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		enqueuer := givenAnyClusterEnqueue(ctrl, 4)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveASimpleFinLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveASimpleFinBankAccount(t, clock, &link)
+
+		sync := func(account simplefin.Account) models.SimpleFinLink {
+			httpmock.Activate()
+			defer httpmock.DeactivateAndReset()
+			mock_simplefin.MockFetchAccounts(t, simpleFinAccountSet(account))
+			runSimpleFinSync(t, ctrl, clock, enqueuer, bankAccount)
+			return testutils.MustDBRead(t, *link.SimpleFinLink)
+		}
+
+		account := simpleFinAccountFor(bankAccount)
+
+		// The first sync always sets it so the link doesn't look like it has never
+		// synced.
+		firstSyncAt := clock.Now()
+		simpleFinLink := sync(account)
+		require.NotNil(t, simpleFinLink.LastSuccessfulUpdate, "must record the first successful update")
+		assert.WithinDuration(t, firstSyncAt, *simpleFinLink.LastSuccessfulUpdate, 0, "first sync should set the last successful update")
+
+		// Same balances and no transactions, nothing changed.
+		clock.Add(time.Hour)
+		simpleFinLink = sync(account)
+		require.NotNil(t, simpleFinLink.LastSuccessfulUpdate, "must still have the last successful update")
+		require.NotNil(t, simpleFinLink.LastAttemptedUpdate, "must record the attempted update")
+		assert.WithinDuration(t, firstSyncAt, *simpleFinLink.LastSuccessfulUpdate, 0, "should not move when nothing changed")
+		assert.WithinDuration(t, clock.Now(), *simpleFinLink.LastAttemptedUpdate, 0, "last attempted update should still move")
+
+		// Only the balance changed.
+		clock.Add(time.Hour)
+		account.Balance = "1300.00"
+		simpleFinLink = sync(account)
+		require.NotNil(t, simpleFinLink.LastSuccessfulUpdate, "must still have the last successful update")
+		assert.WithinDuration(t, clock.Now(), *simpleFinLink.LastSuccessfulUpdate, 0, "should move when the balance changes")
+
+		// Only a new transaction, the balances are the same as the last sync.
+		clock.Add(time.Hour)
+		account.Transactions = []simplefin.Transaction{
+			{Id: "TRN-1", Posted: clock.Now().Unix(), Amount: "-19.99", Description: "TACO BELL"},
+		}
+		simpleFinLink = sync(account)
+		require.NotNil(t, simpleFinLink.LastSuccessfulUpdate, "must still have the last successful update")
+		assert.WithinDuration(t, clock.Now(), *simpleFinLink.LastSuccessfulUpdate, 0, "should move when there is a new transaction")
+	})
 }
 
 func TestSyncSimpleFinCron(t *testing.T) {

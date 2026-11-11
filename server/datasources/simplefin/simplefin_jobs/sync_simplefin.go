@@ -100,6 +100,9 @@ type syncSimpleFinContext struct {
 	simpleFinLink *models.SimpleFinLink
 	accountSet    *simplefin.AccountSet
 	bankAccounts  []simpleFinBankAccountMatch
+	// hasChanges is set when the sync creates a transaction or changes a balance,
+	// the last successful update is only bumped when something actually changed.
+	hasChanges bool
 }
 
 type simpleFinBankAccountMatch struct {
@@ -435,6 +438,8 @@ func (s *syncSimpleFinContext) syncTransactions(ctx queue.Context) error {
 			); err != nil {
 				return errors.Wrap(err, "failed to persist new transactions")
 			}
+
+			s.hasChanges = true
 		}
 	}
 
@@ -485,6 +490,11 @@ func (s *syncSimpleFinContext) syncBalances(ctx queue.Context) error {
 				blog.WarnContext(span.Context(), "failed to parse SimpleFIN account available balance, balances will not be updated", "err", err)
 				continue
 			}
+		}
+
+		if bankAccount.CurrentBalance != currentBalance ||
+			bankAccount.AvailableBalance != availableBalance {
+			s.hasChanges = true
 		}
 
 		bankAccount.CurrentBalance = currentBalance
@@ -686,7 +696,13 @@ func SyncSimpleFin(ctx queue.Context, args SyncSimpleFinArguments) error {
 		// once the user has fixed their token.
 		now := ctx.Clock().Now().UTC()
 		s.simpleFinLink.Status = models.SimpleFinLinkStatusActive
-		s.simpleFinLink.LastSuccessfulUpdate = &now
+		// Only bump the last successful update when we actually got new data, that
+		// way it reflects when the data last changed rather than when we last
+		// asked. If it's never been set then set it now so the link doesn't look
+		// like it has never synced.
+		if s.hasChanges || s.simpleFinLink.LastSuccessfulUpdate == nil {
+			s.simpleFinLink.LastSuccessfulUpdate = &now
+		}
 		s.simpleFinLink.LastAttemptedUpdate = &now
 		if err := s.repo.UpdateSimpleFinLink(ctx, s.simpleFinLink); err != nil {
 			s.log.ErrorContext(ctx, "failed to update SimpleFIN link after sync", "err", err)
