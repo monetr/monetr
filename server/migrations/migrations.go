@@ -39,26 +39,24 @@ func NewMigrationsManager(
 }
 
 // RunMigrations is the auto-migrate entry point used at server startup and from
-// the test harness when it sets up isolated databases. Errors are logged and
-// swallowed, the caller doesn't get to react.
-func RunMigrations(ctx context.Context, log *slog.Logger, db *bun.DB) {
+// the test harness when it sets up isolated databases. Any failure is returned
+// so the caller can refuse to start against a database whose schema is not
+// where monetr expects it to be.
+func RunMigrations(ctx context.Context, log *slog.Logger, db *bun.DB) error {
 	m, err := NewMigrationsManager(ctx, log, db)
 	if err != nil {
-		log.ErrorContext(ctx, "failed to initialize migration manager", "err", err)
-		return
+		return errors.Wrap(err, "failed to initialize migration manager")
 	}
 
 	currentVersion, err := m.CurrentVersion(ctx)
 	if err != nil {
-		log.ErrorContext(ctx, "failed to get current database version", "err", err)
-		return
+		return errors.Wrap(err, "failed to get current database version")
 	}
 	log.InfoContext(ctx, "current database version", "version", currentVersion)
 
 	oldVersion, newVersion, err := m.Up(ctx)
 	if err != nil {
-		log.ErrorContext(ctx, "failed to run migrations", "err", err)
-		return
+		return errors.Wrap(err, "failed to run migrations")
 	}
 
 	if oldVersion == newVersion {
@@ -66,4 +64,6 @@ func RunMigrations(ctx context.Context, log *slog.Logger, db *bun.DB) {
 	} else {
 		log.InfoContext(ctx, "database upgraded", "from", oldVersion, "to", newVersion)
 	}
+
+	return nil
 }
