@@ -753,6 +753,13 @@ func (c *Controller) resendVerification(ctx *echo.Context) error {
 		return ctx.NoContent(http.StatusOK)
 	}
 
+	// If the login is already verified then don't send anything, but still
+	// return a 200 so this can't be used to figure out which emails are
+	// verified.
+	if login.GetEmailIsVerified() {
+		return ctx.NoContent(http.StatusOK)
+	}
+
 	verificationToken, err := c.ClientTokens.Create(
 		c.Configuration.Email.Verification.TokenLifetime,
 		security.Claims{

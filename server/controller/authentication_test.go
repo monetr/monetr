@@ -17,6 +17,7 @@ import (
 	"github.com/monetr/monetr/server/internal/mock_stripe"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
+	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/security"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -1530,6 +1531,28 @@ func TestResendVerificationEmail(t *testing.T) {
 
 		response.Status(http.StatusOK)
 		response.Body().IsEmpty() // Even if the email provided does not exist, don't indicate anything to the client.
+	})
+
+	t.Run("already verified email", func(t *testing.T) {
+		app, e := NewTestApplicationWithConfig(t, config)
+
+		login, _ := fixtures.GivenIHaveLogin(t, app.Clock)
+		repo := repository.NewUnauthenticatedRepository(app.Clock, testutils.GetPgDatabase(t))
+		require.NoError(t, repo.SetEmailVerified(t.Context(), login.Email), "must mark the login as verified")
+
+		// The login is already verified, so no email should be sent.
+		MustSendVerificationEmail(t, app, 0)
+
+		response := e.POST("/api/authentication/verify/resend").
+			WithJSON(map[string]any{
+				"email": login.Email,
+			}).
+			Expect()
+
+		// Same response as a successful resend so this can't be used to tell
+		// which emails are verified.
+		response.Status(http.StatusOK)
+		response.Body().IsEmpty()
 	})
 
 	t.Run("blank email", func(t *testing.T) {
