@@ -43,7 +43,9 @@ func ParseCurrency(input string, currency Currency) (int64, error) {
 		seperatorSymbol = ","
 	}
 	currencySymbol := "" // Blank for now, eventually should be from locale.
-	positiveSymbol := "" // Blank for now. Defaults to positive.
+	// Amounts without a sign are positive, but some banks write an explicit +
+	// on their amounts so accept that too.
+	positiveSymbol := "+"
 	// Always accept a plain - since thats what everyone's keyboard has, but also
 	// accept the locale's minus sign (like − in fi). Some locales stick a
 	// left-to-right mark in front of it which is really easy to lose when

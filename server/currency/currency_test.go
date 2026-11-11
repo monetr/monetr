@@ -214,6 +214,13 @@ func TestParseCurrency(t *testing.T) {
 		assert.EqualValues(t, -500, result, "should return an exact int64")
 	})
 
+	t.Run("explicit positive sign", func(t *testing.T) {
+		// Some banks put a + in front of deposits
+		result, err := currency.ParseCurrency("+12.34", mustGetCurrency(t, "en", "USD"))
+		assert.NoError(t, err, "should not return an error")
+		assert.EqualValues(t, 1234, result, "should return an exact int64")
+	})
+
 	t.Run("locale minus sign", func(t *testing.T) {
 		// Finnish uses a real minus sign, but a plain - should still work too
 		fi := mustGetCurrency(t, "fi", "EUR")
