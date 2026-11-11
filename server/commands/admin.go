@@ -18,7 +18,6 @@ func AdminCommand(parent *cobra.Command) {
 	adminPlaidRefresh(adminCommand)
 	adminPlaidUpdateWebhook(adminCommand)
 	adminRegisterCode(adminCommand)
-	adminSecretView(adminCommand)
 
 	parent.AddCommand(adminCommand)
 }
