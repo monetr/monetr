@@ -61,7 +61,7 @@ func (u *unauthenticatedRepo) CreateLogin(
 	}
 	count, err := u.txn.NewSelect().
 		Model(login).
-		Where(`"email" = ?`, email).
+		Where(`"email" = ?`, login.Email).
 		Count(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError

@@ -1,6 +1,7 @@
 package repository_test
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/bcrypt"
@@ -67,6 +69,28 @@ func TestUnauthenticatedRepo_CreateLogin(t *testing.T) {
 		loginTwo, err := repo.CreateLogin(t.Context(), email, passwordTwo, gofakeit.FirstName(), gofakeit.LastName())
 		assert.Error(t, err, "should fail to create another login with the same email")
 		assert.EqualError(t, err, "a login with the same email already exists")
+		assert.Nil(t, loginTwo, "should return nil for login")
+	})
+
+	t.Run("duplicate email different case", func(t *testing.T) {
+		clock := clock.NewMock()
+		repo := GetTestUnauthenticatedRepository(t, clock)
+		email := strings.ToLower(gofakeit.Email())
+
+		passwordOne := gofakeit.Password(true, true, true, true, false, 32)
+
+		// Creating the first login should succeed.
+		loginOne, err := repo.CreateLogin(t.Context(), email, passwordOne, gofakeit.FirstName(), gofakeit.LastName())
+		assert.NoError(t, err, "should successfully create login")
+		assert.NotEmpty(t, loginOne, "new login should not be empty")
+
+		passwordTwo := gofakeit.Password(true, true, true, true, false, 32)
+
+		// The same email with different casing is still the same login, it should
+		// be rejected as a duplicate rather than failing on the unique constraint.
+		loginTwo, err := repo.CreateLogin(t.Context(), strings.ToUpper(email), passwordTwo, gofakeit.FirstName(), gofakeit.LastName())
+		assert.Error(t, err, "should fail to create another login with the same email")
+		assert.Equal(t, repository.ErrEmailAlreadyExists, errors.Cause(err), "must be caused by the email already existing")
 		assert.Nil(t, loginTwo, "should return nil for login")
 	})
 }
