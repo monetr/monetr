@@ -317,6 +317,33 @@ func TestParseCurrency(t *testing.T) {
 		assert.Zero(t, result)
 	})
 
+	t.Run("blank", func(t *testing.T) {
+		// These all used to parse as zero instead of returning an error
+		usd := mustGetCurrency(t, "en", "USD")
+		for _, input := range []string{"", "   ", "-", "+", ".", "()", "-.", ","} {
+			result, err := currency.ParseCurrency(input, usd)
+			assert.EqualError(t, err, "failed to parse currency "+input+" - USD, no number found", "should return an error for %q", input)
+			assert.Zero(t, result, "should return zero for %q", input)
+		}
+	})
+
+	t.Run("zero is not blank", func(t *testing.T) {
+		usd := mustGetCurrency(t, "en", "USD")
+		for _, input := range []string{"0", "-0.00", ".0"} {
+			result, err := currency.ParseCurrency(input, usd)
+			assert.NoError(t, err, "should not return an error for %q", input)
+			assert.Zero(t, result, "should return zero for %q", input)
+		}
+	})
+
+	t.Run("only extra decimal places is not blank", func(t *testing.T) {
+		// JPY has no decimal places, so the 5 here only ever gets rounded and
+		// never parsed. It still counts as a number though.
+		result, err := currency.ParseCurrency(".5", mustGetCurrency(t, "en", "JPY"))
+		assert.NoError(t, err, "should not return an error")
+		assert.EqualValues(t, 1, result, "should return an exact int64")
+	})
+
 	t.Run("largest and smallest int64", func(t *testing.T) {
 		usd := mustGetCurrency(t, "en", "USD")
 		result, err := currency.ParseCurrency("92233720368547758.07", usd)

@@ -70,6 +70,9 @@ func ParseCurrency(input string, currency Currency) (int64, error) {
 
 	sign := 1
 	seenDot := false
+	// Blank input, or input that is only a sign like "-", would otherwise just
+	// parse as zero. Track whether we actually saw a number so we can error.
+	seenDigit := false
 	// Copy the input string because we are going to modify it
 	str := strings.TrimSpace(input)
 
@@ -102,6 +105,7 @@ ParseLoop:
 		character := rune(str[0])
 		switch {
 		case unicode.IsDigit(character) && (!seenDot || decimal < fractionalDigits):
+			seenDigit = true
 			// We can calculate our digit by subtracting it from the byte '0'.
 			digit := int64(character - '0')
 			// PostgreSQL does this multiplication with pg_mul_s64_overflow and
@@ -167,7 +171,9 @@ ParseLoop:
 
 	// Consume any trailing digits in the string
 	for ; str != "" && unicode.IsDigit(rune(str[0])); str = str[1:] {
-		// All this loop does is consume trailing digits.
+		// These still count as a number though, like ".5" for JPY which only
+		// rounds and never makes it into the parse loop above.
+		seenDigit = true
 	}
 
 	for str != "" {
@@ -186,6 +192,14 @@ ParseLoop:
 		default:
 			return 0, errors.Errorf("failed to parse currency %s - %s, unexpected character %s", input, currency.Code, string(str[0]))
 		}
+	}
+
+	if !seenDigit {
+		return 0, errors.Errorf(
+			"failed to parse currency %s - %s, no number found",
+			input,
+			currency.Code,
+		)
 	}
 
 	if sign > 0 {
