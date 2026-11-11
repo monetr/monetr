@@ -1,21 +1,9 @@
-import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { promisify } from 'node:util';
-import {
-  Gravity,
-  ImageMagick,
-  initializeImageMagick,
-  MagickColor,
-  MagickColors,
-  MagickFormat,
-  MagickGeometry,
-  MagickImage,
-  MagickImageCollection,
-} from '@imagemagick/magick-wasm';
 import type { RsbuildPlugin, Rspack } from '@rsbuild/core';
+import sharp, { type Color } from 'sharp';
 
-const wasmLocation = require.resolve('@imagemagick/magick-wasm/magick.wasm');
-const wasmBytes = readFileSync(wasmLocation);
+const transparent: Color = { r: 0, g: 0, b: 0, alpha: 0 };
 
 type PluginPWAOptions = {
   logo: string;
@@ -106,6 +94,54 @@ function appleSplashScreens(): Array<AppleSplashScreenSpec> {
   }));
 }
 
+// renderIcon scales the logo to fit within `padding` of the target size, then centers it on a canvas of the full target
+// size filled with the background color.
+async function renderIcon(
+  logo: Buffer,
+  width: number,
+  height: number,
+  padding: number,
+  background: Color,
+  compressionLevel: number,
+): Promise<Buffer> {
+  const scaled = await sharp(logo)
+    .resize(Math.round(width * padding), Math.round(height * padding), { fit: 'inside' })
+    .toBuffer();
+  return sharp({ create: { width, height, channels: 4, background } })
+    .composite([{ input: scaled, gravity: 'center' }])
+    .png({ compressionLevel })
+    .toBuffer();
+}
+
+// encodeIco packs PNG images into an ICO file. Every entry stores PNG data directly, which every browser that matters
+// supports.
+function encodeIco(images: Array<{ width: number; height: number; png: Buffer }>): Buffer {
+  const headerSize = 6;
+  const entrySize = 16;
+  const header = Buffer.alloc(headerSize + entrySize * images.length);
+  header.writeUInt16LE(0, 0); // Reserved
+  header.writeUInt16LE(1, 2); // Type, 1 is an icon
+  header.writeUInt16LE(images.length, 4);
+
+  let offset = header.length;
+  images.forEach(({ width, height, png }, index) => {
+    const entry = headerSize + entrySize * index;
+    // Width and height are a single byte where 0 means 256. Anything 256 or larger gets written as 0, the real size is
+    // read from the PNG itself.
+    header.writeUInt8(width >= 256 ? 0 : width, entry);
+    header.writeUInt8(height >= 256 ? 0 : height, entry + 1);
+    header.writeUInt8(0, entry + 2); // Colors in the palette, 0 means no palette
+    header.writeUInt8(0, entry + 3); // Reserved
+    header.writeUInt16LE(1, entry + 4); // Color planes
+    header.writeUInt16LE(32, entry + 6); // Bits per pixel
+    header.writeUInt32LE(png.length, entry + 8);
+    header.writeUInt32LE(offset, entry + 12);
+    offset += png.length;
+  });
+
+  return Buffer.concat([header, ...images.map(({ png }) => png)]);
+}
+
 export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
   name: 'pwa',
 
@@ -121,132 +157,41 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
         return;
       }
 
-      await initializeImageMagick(wasmBytes);
-      const backgroundColor = new MagickColor(options.background);
-
       if (!compilation.inputFileSystem) {
         throw new Error("[pluginPWA] 'compilation.inputFileSystem' is not available.");
       }
 
-      const quality = options.quality ?? 90;
+      // ImageMagick treated quality on a PNG as the zlib compression level in its tens digit, so keep that meaning.
+      // Passing quality to sharp's PNG encoder would instead quantize the image down to a palette.
+      const compressionLevel = Math.min(9, Math.floor((options.quality ?? 90) / 10));
       const source = await promisify(compilation.inputFileSystem.readFile)(options.logo);
       if (!source) {
         throw new Error(
           `[pluginPWA] Failed to read the PWA logo file, please check if the '${options.logo}' file exists'.`,
         );
       }
-      const sourceBytes = Uint8Array.from(source);
+      const logo = Buffer.from(source);
+      const background = options.background;
+
+      const pending = new Map<string, Promise<Buffer>>();
 
       appleSplashScreens().forEach(
-        ({ width, height }) =>
-          void generated.set(
-            `assets/resources/apple-splash-${width}-${height}.png`,
-            new sources.RawSource(
-              Buffer.from(
-                ImageMagick.read(sourceBytes, image => {
-                  const padding = 0.3;
-                  const logoWidth = +(width * padding).toFixed(0);
-                  const logoHeight = +(height * padding).toFixed(0);
-                  image.resize(logoWidth, logoHeight);
-                  image.extent(new MagickGeometry(width, height), Gravity.Center, backgroundColor);
-                  image.quality = quality;
-                  // Need to do `[...data]`. The data array is in managemend memory and may be freed after this function is
-                  // complete. Unpacking it into another array copies the memory so we don't get corrupt files.
-                  // See https://github.com/dlemstra/magick-wasm/issues/185
-                  return image.write(MagickFormat.Png, data => [...data]);
-                }),
-              ),
-            ),
-          ),
+        ({ asset, width, height }) =>
+          void pending.set(asset, renderIcon(logo, width, height, 0.3, background, compressionLevel)),
       );
 
       // Apple touch icon
-      generated.set(
-        appleTouchIconName,
-        new sources.RawSource(
-          Buffer.from(
-            ImageMagick.read(sourceBytes, image => {
-              const width = 180;
-              const height = 180;
-              const padding = 0.7;
-              const logoWidth = +(width * padding).toFixed(0);
-              const logoHeight = +(height * padding).toFixed(0);
-              image.resize(logoWidth, logoHeight);
-              image.extent(new MagickGeometry(width, height), Gravity.Center, backgroundColor);
-              image.quality = quality;
-              // Need to do `[...data]`. The data array is in managemend memory and may be freed after this function is
-              // complete. Unpacking it into another array copies the memory so we don't get corrupt files.
-              // See https://github.com/dlemstra/magick-wasm/issues/185
-              return image.write(MagickFormat.Png, data => [...data]);
-            }),
-          ),
-        ),
-      );
-      generated.set(
-        appleTouchIconPrecomposedName,
-        new sources.RawSource(
-          Buffer.from(
-            ImageMagick.read(sourceBytes, image => {
-              const width = 180;
-              const height = 180;
-              const padding = 0.7;
-              const logoWidth = +(width * padding).toFixed(0);
-              const logoHeight = +(height * padding).toFixed(0);
-              image.resize(logoWidth, logoHeight);
-              image.extent(new MagickGeometry(width, height), Gravity.Center, backgroundColor);
-              image.quality = quality;
-              // Need to do `[...data]`. The data array is in managemend memory and may be freed after this function is
-              // complete. Unpacking it into another array copies the memory so we don't get corrupt files.
-              // See https://github.com/dlemstra/magick-wasm/issues/185
-              return image.write(MagickFormat.Png, data => [...data]);
-            }),
-          ),
-        ),
-      );
+      pending.set(appleTouchIconName, renderIcon(logo, 180, 180, 0.7, background, compressionLevel));
+      pending.set(appleTouchIconPrecomposedName, renderIcon(logo, 180, 180, 0.7, background, compressionLevel));
 
-      generated.set(
+      pending.set(
         'assets/resources/transparent-128.png',
-        new sources.RawSource(
-          Buffer.from(
-            ImageMagick.read(sourceBytes, image => {
-              const width = 128;
-              const height = 128;
-              const padding = 1.0;
-              const logoWidth = +(width * padding).toFixed(0);
-              const logoHeight = +(height * padding).toFixed(0);
-              image.resize(logoWidth, logoHeight);
-              image.extent(new MagickGeometry(width, height), Gravity.Center, MagickColors.Transparent);
-              image.quality = quality;
-              // Need to do `[...data]`. The data array is in managemend memory and may be freed after this function is
-              // complete. Unpacking it into another array copies the memory so we don't get corrupt files.
-              // See https://github.com/dlemstra/magick-wasm/issues/185
-              return image.write(MagickFormat.Png, data => [...data]);
-            }),
-          ),
-        ),
+        renderIcon(logo, 128, 128, 1.0, transparent, compressionLevel),
       );
 
       mstileIcons().forEach(
         ({ asset, width, height }) =>
-          void generated.set(
-            asset,
-            new sources.RawSource(
-              Buffer.from(
-                ImageMagick.read(sourceBytes, image => {
-                  const padding = 0.7;
-                  const logoWidth = +(width * padding).toFixed(0);
-                  const logoHeight = +(height * padding).toFixed(0);
-                  image.resize(logoWidth, logoHeight);
-                  image.extent(new MagickGeometry(width, height), Gravity.Center, backgroundColor);
-                  image.quality = quality;
-                  // Need to do `[...data]`. The data array is in managemend memory and may be freed after this function is
-                  // complete. Unpacking it into another array copies the memory so we don't get corrupt files.
-                  // See https://github.com/dlemstra/magick-wasm/issues/185
-                  return image.write(MagickFormat.Png, data => [...data]);
-                }),
-              ),
-            ),
-          ),
+          void pending.set(asset, renderIcon(logo, width, height, 0.7, background, compressionLevel)),
       );
 
       const androidChromeSizes: Array<[number, number, boolean]> = [
@@ -257,25 +202,9 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
       ];
       androidChromeSizes.forEach(
         ([width, height, maskable]) =>
-          void generated.set(
+          void pending.set(
             `assets/resources/android-chrome-${width}-${height}${maskable ? '_maskable' : ''}.png`,
-            new sources.RawSource(
-              Buffer.from(
-                ImageMagick.read(sourceBytes, image => {
-                  const padding = 0.7;
-                  const logoWidth = +(width * padding).toFixed(0);
-                  const logoHeight = +(height * padding).toFixed(0);
-                  image.resize(logoWidth, logoHeight);
-                  const background = maskable ? backgroundColor : MagickColors.Transparent;
-                  image.extent(new MagickGeometry(width, height), Gravity.Center, background);
-                  image.quality = quality;
-                  // Need to do `[...data]`. The data array is in managemend memory and may be freed after this function is
-                  // complete. Unpacking it into another array copies the memory so we don't get corrupt files.
-                  // See https://github.com/dlemstra/magick-wasm/issues/185
-                  return image.write(MagickFormat.Png, data => [...data]);
-                }),
-              ),
-            ),
+            renderIcon(logo, width, height, 0.7, maskable ? background : transparent, compressionLevel),
           ),
       );
 
@@ -289,34 +218,19 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
         [256, 256],
         [512, 512],
       ];
-      generated.set(
+      pending.set(
         'favicon.ico',
-        new sources.RawSource(
-          Buffer.from(
-            (() => {
-              const favicon = MagickImageCollection.create();
-              // Add each favicon size to our collection
-              favicon.push(
-                ...faviconSizes.map(([width, height]) =>
-                  ImageMagick.read(sourceBytes, image => {
-                    image.resize(width, height);
-                    image.extent(new MagickGeometry(width, height), Gravity.Center, MagickColors.Transparent);
-                    image.quality = quality;
-                    // The `image` variable is "disposed" after this callback. So we basically need to copy the image entirely
-                    // when we return it so that it can be used by the collection. There might be a better way to do this but
-                    // I haven't figured it out yet.
-                    return MagickImage.create(Uint8Array.from(image.write(MagickFormat.Png, data => [...data])));
-                  }),
-                ),
-              );
-              // Need to do `[...data]`. The data array is in managemend memory and may be freed after this function is
-              // complete. Unpacking it into another array copies the memory so we don't get corrupt files.
-              // See https://github.com/dlemstra/magick-wasm/issues/185
-              return favicon.write(MagickFormat.Ico, data => [...data]);
-            })(),
-          ),
-        ),
+        Promise.all(
+          faviconSizes.map(async ([width, height]) => ({
+            width,
+            height,
+            png: await renderIcon(logo, width, height, 1.0, transparent, compressionLevel),
+          })),
+        ).then(encodeIco),
       );
+
+      const rendered = await Promise.all(Array.from(pending, async ([name, image]) => [name, await image] as const));
+      rendered.forEach(([name, image]) => void generated.set(name, new sources.RawSource(image)));
 
       generated.forEach((source, name) => void compilation.emitAsset(name, source));
     });

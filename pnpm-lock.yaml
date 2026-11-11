@@ -452,9 +452,6 @@ importers:
         specifier: 3.13.0
         version: 3.13.0(react@19.3.1)
     devDependencies:
-      '@imagemagick/magick-wasm':
-        specifier: 0.0.46
-        version: 0.0.46
       '@rsbuild/core':
         specifier: 2.3.1
         version: 2.3.1
@@ -515,6 +512,9 @@ importers:
       sass-embedded-linux-x64:
         specifier: 1.107.1
         version: 1.107.1
+      sharp:
+        specifier: 0.35.5
+        version: 0.35.5(@types/node@24.19.2)
       typescript:
         specifier: 7.0.2
         version: 7.0.2
@@ -808,9 +808,6 @@ packages:
 
   '@fontsource/jetbrains-mono@5.3.0':
     resolution: {integrity: sha512-fqDfB5I9f1p1TV486aUgB9t8zP84P0O1FtQR5Ol9vjwPy+S+EIGlVYm1cvj2W5shcZMTg2nZFdVMoH5wFu8a1A==}
-
-  '@imagemagick/magick-wasm@0.0.46':
-    resolution: {integrity: sha512-0HKJmmqUTFwXm6Z/1lGtOx7JE/FpZiJg8sXBnAho1NgzunEOkgUILU7rskUnYbtdG/hJiFe9viVatWuWDZ9S0g==}
 
   '@img/colour@1.1.0':
     resolution: {integrity: sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==}
@@ -4745,8 +4742,6 @@ snapshots:
   '@fontsource/inter@5.3.0': {}
 
   '@fontsource/jetbrains-mono@5.3.0': {}
-
-  '@imagemagick/magick-wasm@0.0.46': {}
 
   '@img/colour@1.1.0': {}
 
