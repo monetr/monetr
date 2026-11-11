@@ -43,7 +43,7 @@ this if you are running a single monetr server.
 cache:
   kind: "memory"
   memory:
-    maxKeys: 128 # The max number of items to be cached at any given time
+    maxKeys: 1024 # The max number of items to be cached at any given time
 ```
 
 monetr's internal cache is an LRU, so if the max number of items is reached then the least recently used items will be
@@ -51,7 +51,7 @@ evicted first from the cache.
 
 | **Name**  | **Type** | **Default** | **Description**                                                                                                                                                   |
 | ---       | ---      | ---         | ---                                                                                                                                                               |
-| `maxKeys` | Number   | `128`       | The max number of items that can be cached at any given time, items are evicted based on how recently they were used once this limit is reached within the cache. |
+| `maxKeys` | Number   | `1024`      | The max number of items that can be cached at any given time, items are evicted based on how recently they were used once this limit is reached within the cache. |
 
 ## Valkey
 

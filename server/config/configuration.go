@@ -409,7 +409,7 @@ func LoadConfigurationEx(v *viper.Viper) (config Configuration) {
 func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Environment", "development")
 	v.SetDefault("AllowSignUp", true)
-	v.SetDefault("Cache.Memory.MaxKeys", 128)
+	v.SetDefault("Cache.Memory.MaxKeys", 1024)
 	v.SetDefault("Cache.Valkey.Port", 6379)
 	v.SetDefault("Cache.Valkey.Database", 0)
 	v.SetDefault("Email.ForgotPassword.TokenLifetime", 10*time.Minute)
