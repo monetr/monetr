@@ -20,4 +20,19 @@ func TestGetInstitutionDetails(t *testing.T) {
 			Expect().
 			Status(http.StatusUnauthorized)
 	})
+
+	t.Run("plaid is not enabled", func(t *testing.T) {
+		config := NewTestApplicationConfig(t)
+		config.Plaid.Enabled = false
+		_, e := NewTestApplicationWithConfig(t, config)
+		token := GivenIHaveToken(t, e)
+
+		response := e.GET(`/api/institutions/{institutionId}`).
+			WithPath("institutionId", "ins_109508").
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").String().IsEqual("Plaid is not enabled on this server")
+	})
 }
