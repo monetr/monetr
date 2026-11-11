@@ -5,10 +5,17 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   release_please:
     name: Release Please
     runs-on: ubuntu-latest
+    permissions:
+      contents: write      # to create releases and tags
+      issues: write        # to manage release labels
+      pull-requests: write # to open and update the release PR
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       version: "${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}"
@@ -141,6 +148,9 @@ jobs:
       - "build_ui"
     name: Deploy my.monetr.app
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write # to create the GitHub deployment
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
