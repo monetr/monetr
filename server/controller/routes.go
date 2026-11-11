@@ -319,8 +319,10 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	// User Settings
 	tokenOnly.PATCH("/users/:userId", c.patchUser)
 	// Icons
-	billedKeyOrToken.POST("/icons/search", c.searchIcon)
 	billedKeyOrToken.QUERY("/icons/search", c.searchIcon)
+	// Deprecated: Use the QUERY version instead, POST will be removed in a future
+	// release.
+	billedKeyOrToken.POST("/icons/search", c.searchIcon)
 	// Locale and currency data
 	billedKeyOrToken.GET("/locale/currency", c.listCurrencies)
 	billedKeyOrToken.GET("/locale/currency/:currencyCode", c.getCurrency)

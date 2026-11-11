@@ -45,15 +45,20 @@ POST /api/authentication/challenge
 Only meaningful paired with the solver in the web app, which is why the endpoints that consume its output are the ones
 you'd otherwise reach for.
 
-## <Badge type="tip">POST</Badge> Icon search
+## <Badge type="info">QUERY</Badge> Icon search
 
 Looks up a merchant icon by name for the app's icon picker. Returns 204 when there's no match and 404 when icons weren't
-compiled into the build.
+compiled into the build. The `name` is required and can be up to 300 characters.
 
 ```http
-POST /api/icons/search
 QUERY /api/icons/search
+POST /api/icons/search
 ```
+
+:::warning
+The `POST` version of this endpoint is deprecated and will be removed in a future release. Send the same body with
+`QUERY` instead.
+:::
 
 **Auth:** API key, subscription required.
 

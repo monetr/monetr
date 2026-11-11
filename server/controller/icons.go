@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/icons"
+	"github.com/monetr/monetr/server/schemas"
 )
 
 func (c *Controller) searchIcon(ctx *echo.Context) error {
@@ -12,15 +13,12 @@ func (c *Controller) searchIcon(ctx *echo.Context) error {
 		return c.notFound(ctx, "icons are not enabled")
 	}
 
-	var body struct {
+	var body *struct {
 		Name string `json:"name"`
 	}
-	if err := ctx.Bind(&body); err != nil {
-		return c.invalidJson(ctx)
-	}
-
-	if body.Name == "" {
-		return c.badRequest(ctx, "must provide a name to search icons for")
+	body, err := parse(c, ctx, body, schemas.IconSearch)
+	if err != nil {
+		return err
 	}
 
 	icon, err := icons.SearchIcon(body.Name)
