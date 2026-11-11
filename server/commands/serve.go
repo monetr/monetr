@@ -474,8 +474,18 @@ func ServeCommand(parent *cobra.Command) {
 
 			// Block until we receive a shutdown signal, then wait for echo to
 			// drain in flight requests (it does this itself once serverCtx is
-			// canceled) before we actually return.
-			<-serverCtx.Done()
+			// canceled) before we actually return. If the server exits on its own
+			// first, like when it can't bind the listen address, there is nothing
+			// left to serve so return the error instead of waiting on a signal.
+			select {
+			case err := <-serverErr:
+				if err != nil && !errors.Is(err, http.ErrServerClosed) {
+					return errors.Wrap(err, "http server exited unexpectedly")
+				}
+				log.Warn("http server stopped without a shutdown signal")
+				return nil
+			case <-serverCtx.Done():
+			}
 			log.Info("shutting down")
 			<-serverErr
 			log.Info("http server shutdown complete")
