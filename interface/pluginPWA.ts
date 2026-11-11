@@ -45,10 +45,16 @@ interface AppleSplashScreenSpec {
 }
 
 function appleSplashScreens(): Array<AppleSplashScreenSpec> {
-  // Taken from https://developer.apple.com/design/human-interface-guidelines/layout/#Specifications
+  // Taken from the "iOS, iPadOS device screen dimensions" table that used to be on Apple's layout guidelines page. Apple
+  // removed it in 2026, the last archived copy is at
+  // https://web.archive.org/web/20260702060104/https://developer.apple.com/tutorials/data/design/human-interface-guidelines/layout.json
   const spec: Array<Omit<AppleSplashScreenSpec, 'name' | 'asset'>> = [
+    { width: 2064, height: 2752, ratio: 2, orientation: 'portrait' },
+    { width: 2752, height: 2064, ratio: 2, orientation: 'landscape' },
     { width: 2048, height: 2732, ratio: 2, orientation: 'portrait' },
     { width: 2732, height: 2048, ratio: 2, orientation: 'landscape' },
+    { width: 1668, height: 2420, ratio: 2, orientation: 'portrait' },
+    { width: 2420, height: 1668, ratio: 2, orientation: 'landscape' },
     { width: 1668, height: 2388, ratio: 2, orientation: 'portrait' },
     { width: 2388, height: 1668, ratio: 2, orientation: 'landscape' },
     { width: 1536, height: 2048, ratio: 2, orientation: 'portrait' },
@@ -63,6 +69,8 @@ function appleSplashScreens(): Array<AppleSplashScreenSpec> {
     { width: 2160, height: 1620, ratio: 2, orientation: 'landscape' },
     { width: 1320, height: 2868, ratio: 3, orientation: 'portrait' },
     { width: 2868, height: 1320, ratio: 3, orientation: 'landscape' },
+    { width: 1260, height: 2736, ratio: 3, orientation: 'portrait' },
+    { width: 2736, height: 1260, ratio: 3, orientation: 'landscape' },
     { width: 1206, height: 2622, ratio: 3, orientation: 'portrait' },
     { width: 2622, height: 1206, ratio: 3, orientation: 'landscape' },
     { width: 1290, height: 2796, ratio: 3, orientation: 'portrait' },
@@ -73,6 +81,8 @@ function appleSplashScreens(): Array<AppleSplashScreenSpec> {
     { width: 2778, height: 1284, ratio: 3, orientation: 'landscape' },
     { width: 1170, height: 2532, ratio: 3, orientation: 'portrait' },
     { width: 2532, height: 1170, ratio: 3, orientation: 'landscape' },
+    { width: 1080, height: 2340, ratio: 3, orientation: 'portrait' },
+    { width: 2340, height: 1080, ratio: 3, orientation: 'landscape' },
     { width: 1125, height: 2436, ratio: 3, orientation: 'portrait' },
     { width: 2436, height: 1125, ratio: 3, orientation: 'landscape' },
     { width: 1242, height: 2688, ratio: 3, orientation: 'portrait' },
