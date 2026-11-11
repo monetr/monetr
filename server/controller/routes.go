@@ -53,9 +53,20 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 				if response, err := echo.UnwrapResponse(ctx.Response()); err == nil {
 					status = response.Status
 				}
+				// The method comes straight from the client and Go will accept any
+				// token as a method. Only label known methods so a client can't create
+				// unlimited metric series.
+				method := ctx.Request().Method
+				switch method {
+				case http.MethodGet, http.MethodHead, http.MethodPost, http.MethodPut,
+					http.MethodPatch, http.MethodDelete, http.MethodConnect,
+					http.MethodOptions, http.MethodTrace, echo.QUERY:
+				default:
+					method = "OTHER"
+				}
 				labels := prometheus.Labels{
 					"path":   ctx.Path(),
-					"method": ctx.Request().Method,
+					"method": method,
 					"status": strconv.Itoa(status),
 				}
 				httpRequests.With(labels).Inc()
