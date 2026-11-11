@@ -104,12 +104,20 @@ ParseLoop:
 		case unicode.IsDigit(character) && (!seenDot || decimal < fractionalDigits):
 			// We can calculate our digit by subtracting it from the byte '0'.
 			digit := int64(character - '0')
-			// TODO: Implement overflow checks.
-			// In PostgreSQL this multiplication is done with overflow checking, but
-			// I've omitted it here because it introduced complex logic. While it is
-			// more correct to have it I want to find an elegant way to include it.
-			value *= 10
-			value -= digit
+			// PostgreSQL does this multiplication with pg_mul_s64_overflow and
+			// pg_sub_s64_overflow, some of the inspiration for this came from there:
+			// https://github.com/postgres/postgres/blob/92268b35d04c2de416279f187d12f264afa22614/src/include/common/int.h#L219-L269
+			// Those handle any two numbers though, and we only ever multiply by 10
+			// and value is always zero or negative. So we can just check value
+			// against the smallest number that wont overflow.
+			if value < (math.MinInt64+digit)/10 {
+				return 0, errors.Errorf(
+					"failed to parse currency %s - %s, value is out of range",
+					input,
+					currency.Code,
+				)
+			}
+			value = value*10 - digit
 
 			// If we have seen the decimal symbol then we should increment the
 			// decimal place counter.
@@ -135,11 +143,25 @@ ParseLoop:
 
 	// Round up on a thousandth decimal place.
 	if str != "" && unicode.IsDigit(rune(str[0])) && rune(str[0]) > '5' {
+		if value == math.MinInt64 {
+			return 0, errors.Errorf(
+				"failed to parse currency %s - %s, value is out of range",
+				input,
+				currency.Code,
+			)
+		}
 		value -= 1
 	}
 
 	// Adjust for less than required decimal places
 	for ; decimal < fractionalDigits; decimal++ {
+		if value < math.MinInt64/10 {
+			return 0, errors.Errorf(
+				"failed to parse currency %s - %s, value is out of range",
+				input,
+				currency.Code,
+			)
+		}
 		value *= 10
 	}
 
@@ -167,6 +189,15 @@ ParseLoop:
 	}
 
 	if sign > 0 {
+		// The negative side of an int64 is one bigger than the positive side, so
+		// the smallest number can't be flipped to positive
+		if value == math.MinInt64 {
+			return 0, errors.Errorf(
+				"failed to parse currency %s - %s, value is out of range",
+				input,
+				currency.Code,
+			)
+		}
 		return value * -1, nil
 	} else {
 		return value, nil

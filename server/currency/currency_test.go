@@ -2,6 +2,7 @@ package currency_test
 
 import (
 	"io"
+	"math"
 	"testing"
 
 	"github.com/monetr/monetr/server/currency"
@@ -297,6 +298,61 @@ func TestParseCurrency(t *testing.T) {
 		// This also used to spin forever instead of returning an error
 		result, err := currency.ParseCurrency("12abc", mustGetCurrency(t, "en", "USD"))
 		assert.EqualError(t, err, "failed to parse currency 12abc - USD, unexpected character a")
+		assert.Zero(t, result)
+	})
+
+	t.Run("largest and smallest int64", func(t *testing.T) {
+		usd := mustGetCurrency(t, "en", "USD")
+		result, err := currency.ParseCurrency("92233720368547758.07", usd)
+		assert.NoError(t, err, "should not return an error")
+		assert.EqualValues(t, int64(math.MaxInt64), result, "should return an exact int64")
+
+		result, err = currency.ParseCurrency("-92233720368547758.08", usd)
+		assert.NoError(t, err, "should not return an error")
+		assert.EqualValues(t, int64(math.MinInt64), result, "should return an exact int64")
+	})
+
+	t.Run("overflow while parsing", func(t *testing.T) {
+		// This used to wrap around to -2237899459361692521
+		result, err := currency.ParseCurrency("123456789123456789123456789.99", mustGetCurrency(t, "en", "USD"))
+		assert.EqualError(t, err, "failed to parse currency 123456789123456789123456789.99 - USD, value is out of range")
+		assert.Zero(t, result)
+
+		// One past the smallest int64
+		result, err = currency.ParseCurrency("-92233720368547758.09", mustGetCurrency(t, "en", "USD"))
+		assert.EqualError(t, err, "failed to parse currency -92233720368547758.09 - USD, value is out of range")
+		assert.Zero(t, result)
+	})
+
+	t.Run("overflow while rounding", func(t *testing.T) {
+		usd := mustGetCurrency(t, "en", "USD")
+		// Rounding up lands exactly on the smallest int64 which is fine
+		result, err := currency.ParseCurrency("-92233720368547758.079", usd)
+		assert.NoError(t, err, "should not return an error")
+		assert.EqualValues(t, int64(math.MinInt64), result, "should return an exact int64")
+
+		// But rounding up past it is not
+		result, err = currency.ParseCurrency("-92233720368547758.089", usd)
+		assert.EqualError(t, err, "failed to parse currency -92233720368547758.089 - USD, value is out of range")
+		assert.Zero(t, result)
+	})
+
+	t.Run("overflow while adding decimal places", func(t *testing.T) {
+		// The whole number fits, but not once we add the cents to it
+		result, err := currency.ParseCurrency("92233720368547759", mustGetCurrency(t, "en", "USD"))
+		assert.EqualError(t, err, "failed to parse currency 92233720368547759 - USD, value is out of range")
+		assert.Zero(t, result)
+	})
+
+	t.Run("overflow while making positive", func(t *testing.T) {
+		// The negative side of an int64 is one bigger than the positive side, so
+		// this fits while parsing but can't be flipped to positive
+		result, err := currency.ParseCurrency("92233720368547758.08", mustGetCurrency(t, "en", "USD"))
+		assert.EqualError(t, err, "failed to parse currency 92233720368547758.08 - USD, value is out of range")
+		assert.Zero(t, result)
+
+		result, err = currency.ParseCurrency("9223372036854775808", mustGetCurrency(t, "en", "JPY"))
+		assert.EqualError(t, err, "failed to parse currency 9223372036854775808 - JPY, value is out of range")
 		assert.Zero(t, result)
 	})
 }
