@@ -578,6 +578,112 @@ func TestSyncLunchFlow(t *testing.T) {
 			}, "must match Lunch Flow API calls")
 		}()
 	})
+
+	t.Run("last successful update only moves when data changes", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+		publisher := pubsub.NewPostgresPubSub(log, db)
+		kms := secrets.NewPlaintextKMS()
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+		enqueuer.EXPECT().
+			EnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Return(nil).
+			Times(4)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveALunchFlowLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveALunchFlowBankAccount(t, clock, &link)
+		lunchFlowAccountId := lunch_flow.LunchFlowAccountId(bankAccount.LunchFlowBankAccount.LunchFlowId)
+
+		sync := func(transactions []lunch_flow.Transaction, balance lunch_flow.Balance) {
+			httpmock.Activate()
+			defer httpmock.DeactivateAndReset()
+			mock_lunch_flow.MockFetchTransactions(t, lunchFlowAccountId, transactions)
+			mock_lunch_flow.MockFetchBalance(t, lunchFlowAccountId, balance)
+
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).AnyTimes()
+			context.EXPECT().Configuration().Return(config.Configuration{
+				LunchFlow: config.LunchFlow{
+					Enabled:        true,
+					AllowedApiUrls: []string{config.DefaultLunchFlowAPIURL},
+				},
+			}).AnyTimes()
+			context.EXPECT().KMS().Return(kms).AnyTimes()
+			context.EXPECT().DB().Return(db).AnyTimes()
+			context.EXPECT().Log().Return(log).AnyTimes()
+			context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
+			context.EXPECT().Publisher().Return(publisher).AnyTimes()
+			context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+			err := lunch_flow_jobs.SyncLunchFlow(
+				mockqueue.NewMockContext(context),
+				lunch_flow_jobs.SyncLunchFlowArguments{
+					AccountId:     bankAccount.AccountId,
+					BankAccountId: bankAccount.BankAccountId,
+					LinkId:        bankAccount.LinkId,
+				},
+			)
+			require.NoError(t, err, "must sync lunch flow successfully")
+		}
+
+		transactions := []lunch_flow.Transaction{}
+		balance := lunch_flow.Balance{
+			Amount:   "1234.56",
+			Currency: "USD",
+		}
+
+		// The first sync always sets it so the link doesn't look like it has never
+		// synced.
+		firstSyncAt := clock.Now()
+		sync(transactions, balance)
+		lunchFlowLink := testutils.MustDBRead(t, *link.LunchFlowLink)
+		require.NotNil(t, lunchFlowLink.LastSuccessfulUpdate, "must record the first successful update")
+		assert.WithinDuration(t, firstSyncAt, *lunchFlowLink.LastSuccessfulUpdate, 0, "first sync should set the last successful update")
+
+		// Same balance and no transactions, nothing changed.
+		clock.Add(time.Hour)
+		sync(transactions, balance)
+		lunchFlowLink = testutils.MustDBRead(t, *link.LunchFlowLink)
+		require.NotNil(t, lunchFlowLink.LastSuccessfulUpdate, "must still have the last successful update")
+		require.NotNil(t, lunchFlowLink.LastAttemptedUpdate, "must record the attempted update")
+		assert.WithinDuration(t, firstSyncAt, *lunchFlowLink.LastSuccessfulUpdate, 0, "should not move when nothing changed")
+		assert.WithinDuration(t, clock.Now(), *lunchFlowLink.LastAttemptedUpdate, 0, "last attempted update should still move")
+
+		// Only the balance changed.
+		clock.Add(time.Hour)
+		balance.Amount = "1300.00"
+		sync(transactions, balance)
+		lunchFlowLink = testutils.MustDBRead(t, *link.LunchFlowLink)
+		require.NotNil(t, lunchFlowLink.LastSuccessfulUpdate, "must still have the last successful update")
+		assert.WithinDuration(t, clock.Now(), *lunchFlowLink.LastSuccessfulUpdate, 0, "should move when the balance changes")
+
+		// Only a new transaction, the balance is the same as the last sync.
+		clock.Add(time.Hour)
+		transactions = []lunch_flow.Transaction{
+			{
+				Id:          gofakeit.UUID(),
+				AccountId:   lunchFlowAccountId,
+				Amount:      "19.99",
+				Currency:    "USD",
+				Date:        clock.Now().Format(lunch_flow.DateFormat),
+				Merchant:    "Taco Bell",
+				Description: "POS DEBIT - 1234 TACO BELL STPAUL MN",
+			},
+		}
+		sync(transactions, balance)
+		lunchFlowLink = testutils.MustDBRead(t, *link.LunchFlowLink)
+		require.NotNil(t, lunchFlowLink.LastSuccessfulUpdate, "must still have the last successful update")
+		assert.WithinDuration(t, clock.Now(), *lunchFlowLink.LastSuccessfulUpdate, 0, "should move when there is a new transaction")
+	})
 }
 
 func TestSyncLunchFlowCron(t *testing.T) {

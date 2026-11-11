@@ -104,6 +104,10 @@ type syncLunchFlowContext struct {
 	lunchFlowLink         *models.LunchFlowLink
 	lunchFlowTransactions []lunch_flow.Transaction
 	existingTransactions  map[string]models.Transaction
+	// hasChanges is set when the sync creates a transaction or changes the
+	// balance, the last successful update is only bumped when something actually
+	// changed.
+	hasChanges bool
 }
 
 func (s *syncLunchFlowContext) announceProgress(
@@ -406,6 +410,8 @@ func (s *syncLunchFlowContext) syncTransactions(ctx queue.Context) error {
 		); err != nil {
 			return errors.Wrap(err, "failed to persist new transactions")
 		}
+
+		s.hasChanges = true
 	}
 
 	return nil
@@ -459,6 +465,10 @@ func (s *syncLunchFlowContext) syncBalances(ctx queue.Context) error {
 	// But if we include pending transactionns in the future then we should
 	// subtract their value from the current balance in order to determine the
 	// available balance.
+	if account.CurrentBalance != amount || account.AvailableBalance != amount {
+		s.hasChanges = true
+	}
+
 	account.CurrentBalance = amount
 	account.AvailableBalance = amount
 
@@ -583,7 +593,13 @@ func SyncLunchFlow(ctx queue.Context, args SyncLunchFlowArguments) (err error) {
 		}
 
 		now := ctx.Clock().Now().UTC()
-		s.lunchFlowLink.LastSuccessfulUpdate = &now
+		// Only bump the last successful update when we actually got new data, that
+		// way it reflects when the data last changed rather than when we last
+		// asked. If it's never been set then set it now so the link doesn't look
+		// like it has never synced.
+		if s.hasChanges || s.lunchFlowLink.LastSuccessfulUpdate == nil {
+			s.lunchFlowLink.LastSuccessfulUpdate = &now
+		}
 		s.lunchFlowLink.LastAttemptedUpdate = &now
 		if err := s.repo.UpdateLunchFlowLink(ctx, s.lunchFlowLink); err != nil {
 			s.log.ErrorContext(ctx, "failed to update Lunch Flow link after sync", "err", err)
