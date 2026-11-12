@@ -469,6 +469,117 @@ func TestProcessFundingSchedule(t *testing.T) {
 			"next recurrence should have been advanced")
 	})
 
+	t.Run("late expense at target amount still receives contribution", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(
+			t,
+			clock,
+			&link,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
+
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+		// Rent was due on the 1st, but it's the 3rd and it hasn't come in yet. The
+		// money for October is still sitting in the expense. September was spent
+		// from on time though, so we know October is just late.
+		clock.Set(time.Date(2022, 10, 3, 12, 0, 0, 0, timezone))
+		spentFrom := time.Date(2022, 9, 1, 0, 0, 0, 0, timezone)
+
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		// The rule's DTSTART is stored in UTC, so evaluate it in the account's
+		// timezone or the 15th can land on the 16th for timezones ahead of UTC.
+		nextFunding := fundingRule.InTimezone(timezone).After(clock.Now(), false)
+		fundingSchedule := testutils.MustInsert(t, models.FundingSchedule{
+			AccountId:              bankAccount.AccountId,
+			BankAccountId:          bankAccount.BankAccountId,
+			Name:                   "Payday",
+			Description:            "Payday",
+			RuleSet:                fundingRule,
+			NextRecurrence:         nextFunding,
+			NextRecurrenceOriginal: nextFunding,
+		})
+
+		spendingRule := testutils.NewRuleSet(t, 2022, 1, 1, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
+		spending := testutils.MustInsert(t, models.Spending{
+			AccountId:              bankAccount.AccountId,
+			BankAccountId:          bankAccount.BankAccountId,
+			FundingScheduleId:      fundingSchedule.FundingScheduleId,
+			SpendingType:           models.SpendingTypeExpense,
+			Name:                   "Rent",
+			TargetAmount:           100000,
+			CurrentAmount:          100000,
+			NextContributionAmount: 0,
+			RuleSet:                spendingRule,
+			NextRecurrence:         time.Date(2022, 10, 1, 0, 0, 0, 0, timezone),
+			LastSpentFrom:          &spentFrom,
+			CreatedAt:              clock.Now(),
+		})
+
+		// Rent is stale now that the 1st has passed, so ProcessSpending picks it up
+		// and recalculates the contribution knowing that October is late.
+		{
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).AnyTimes()
+			context.EXPECT().DB().Return(db).AnyTimes()
+			context.EXPECT().Log().Return(log).AnyTimes()
+			context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+
+			err := spending_jobs.ProcessSpending(
+				mockqueue.NewMockContext(context),
+				spending_jobs.ProcessSpendingArguments{
+					AccountId:     bankAccount.AccountId,
+					BankAccountId: bankAccount.BankAccountId,
+				},
+			)
+			assert.NoError(t, err, "should process spending successfully")
+		}
+
+		updatedSpending := testutils.MustRetrieve(t, spending)
+		assert.EqualValues(t, int64(100000), updatedSpending.CurrentAmount,
+			"current amount should still be holding October's rent")
+		assert.EqualValues(t, int64(50000), updatedSpending.NextContributionAmount,
+			"should be saving for November over two contributions")
+
+		// Move time forward to the 15th, the funding schedule is now due.
+		clock.Add(12 * 24 * time.Hour)
+
+		{
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).AnyTimes()
+			context.EXPECT().DB().Return(db).AnyTimes()
+			context.EXPECT().Log().Return(log).AnyTimes()
+			context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+
+			err := funding_jobs.ProcessFundingSchedule(
+				mockqueue.NewMockContext(context),
+				funding_jobs.ProcessFundingScheduleArguments{
+					AccountId:          bankAccount.AccountId,
+					BankAccountId:      bankAccount.BankAccountId,
+					FundingScheduleIds: []models.ID[models.FundingSchedule]{fundingSchedule.FundingScheduleId},
+				},
+			)
+			assert.NoError(t, err, "should process funding schedule successfully")
+		}
+
+		// Even though rent was already at its target amount, it still needed the
+		// contribution for November. Without it the end of the month would have to
+		// cover all of November's rent instead of half.
+		updatedSpending = testutils.MustRetrieve(t, spending)
+		assert.EqualValues(t, int64(150000), updatedSpending.CurrentAmount,
+			"late expense at its target amount should still receive its contribution")
+		assert.EqualValues(t, int64(50000), updatedSpending.NextContributionAmount,
+			"the end of the month should only need the other half of November")
+	})
+
 	t.Run("funding schedule not yet due is skipped", func(t *testing.T) {
 		clock := clock.NewMock()
 		ctrl := gomock.NewController(t)

@@ -252,12 +252,16 @@ func ProcessFundingSchedule(ctx queue.Context, args ProcessFundingScheduleArgume
 						continue
 					}
 
-					progressAmount := spending.GetProgressAmount()
-
-					if spending.TargetAmount <= progressAmount {
+					// Being at the target amount does not mean nothing is needed. A late
+					// expense still holds the money for the occurrence that has not
+					// posted yet, and an expense that recurs more often than it is funded
+					// needs more than its target each period. The contribution amount
+					// already accounts for all of that, so only skip when it says nothing
+					// is needed.
+					if spending.NextContributionAmount <= 0 {
 						crumbs.Debug(
 							ctx,
-							"Spending object already has target amount, it will be skipped",
+							"Spending object does not need a contribution, it will be skipped",
 							map[string]any{
 								"fundingScheduleId": fundingScheduleId,
 								"spendingId":        spending.SpendingId,
@@ -266,7 +270,7 @@ func ProcessFundingSchedule(ctx queue.Context, args ProcessFundingScheduleArgume
 						spendingLog.Log(
 							ctx,
 							logging.LevelTrace,
-							"skipping spending, target amount is already achieved",
+							"skipping spending, no contribution is needed",
 						)
 						continue
 					}
