@@ -429,6 +429,13 @@ func (c *Controller) deleteTransactions(ctx *echo.Context) error {
 		return c.wrapPgError(ctx, err, "Failed to find transaction to be removed")
 	}
 
+	// If the transaction was already soft deleted then whatever deleting it did
+	// to the balances and expenses has already happened. Doing it again would
+	// credit them a second time.
+	if transaction.DeletedAt != nil {
+		return c.badRequest(ctx, "Transaction has already been deleted")
+	}
+
 	// If we are soft deleting the transaction then don't actually remove it. This
 	// basically just sets the deleted_at to be the current timestamp.
 	if softDelete {
@@ -458,9 +465,13 @@ func (c *Controller) deleteTransactions(ctx *echo.Context) error {
 
 		// Add the transaction amount onto the balances of the bank account. We do
 		// this because monetr's amounts are inverted. Credits are stored as
-		// negative numbers and debits are stored as positive numbers.
+		// negative numbers and debits are stored as positive numbers. Pending
+		// transactions never took anything out of the current balance, so only the
+		// available balance gets it back.
 		bankAccount.AvailableBalance += transaction.Amount
-		bankAccount.CurrentBalance += transaction.Amount
+		if !transaction.IsPending {
+			bankAccount.CurrentBalance += transaction.Amount
+		}
 
 		if err := repo.UpdateBankAccount(
 			c.getContext(ctx),

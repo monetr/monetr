@@ -3542,6 +3542,87 @@ func TestDeleteTransactions(t *testing.T) {
 		}
 	})
 
+	t.Run("deleting a pending transaction twice is rejected", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		var startingAvailableBalance, startingCurrentBalance int64
+		{
+			response := e.GET("/api/bank_accounts/{bankAccountId}/balances").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			startingAvailableBalance = int64(response.JSON().Path("$.available").Number().Gt(0).Raw())
+			startingCurrentBalance = int64(response.JSON().Path("$.current").Number().Gt(0).Raw())
+		}
+
+		var transactionId ID[Transaction]
+		{ // Pending transactions only come out of the available balance.
+			response := e.POST("/api/bank_accounts/{bankAccountId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"amount":         200,
+					"isPending":      true,
+					"name":           "I spent money",
+					"date":           app.Clock.Now(),
+					"adjustsBalance": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.balance.available").Number().IsEqual(startingAvailableBalance - 200)
+			response.JSON().Path("$.balance.current").Number().IsEqual(startingCurrentBalance)
+			transactionId = ID[Transaction](response.JSON().Path("$.transaction.transactionId").String().Raw())
+		}
+
+		{ // Deleting it should put the balances back to where they started.
+			response := e.DELETE("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("transactionId", transactionId).
+				WithQuery("adjusts_balance", "true").
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.balance.available").Number().IsEqual(startingAvailableBalance)
+			response.JSON().Path("$.balance.current").Number().IsEqual(startingCurrentBalance)
+		}
+
+		{ // Deleting it again should be rejected.
+			response := e.DELETE("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("transactionId", transactionId).
+				WithQuery("adjusts_balance", "true").
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Transaction has already been deleted")
+		}
+
+		{ // And the balances should not have been credited a second time.
+			response := e.GET("/api/bank_accounts/{bankAccountId}/balances").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.available").Number().IsEqual(startingAvailableBalance)
+			response.JSON().Path("$.current").Number().IsEqual(startingCurrentBalance)
+		}
+	})
+
 	t.Run("happy path with spending", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		var token string
