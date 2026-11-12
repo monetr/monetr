@@ -15,7 +15,7 @@ import (
 	time "time"
 
 	platypus "github.com/monetr/monetr/server/platypus"
-	plaid "github.com/plaid/plaid-go/v49"
+	plaid "github.com/plaid/plaid-go/v50"
 	gomock "go.uber.org/mock/gomock"
 )
 

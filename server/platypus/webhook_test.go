@@ -14,7 +14,7 @@ import (
 	"github.com/monetr/monetr/server/internal/mock_plaid"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/secrets"
-	plaid "github.com/plaid/plaid-go/v49"
+	plaid "github.com/plaid/plaid-go/v50"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

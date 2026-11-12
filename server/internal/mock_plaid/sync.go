@@ -8,7 +8,7 @@ import (
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
 	"github.com/monetr/monetr/server/internal/myownsanity"
-	plaid "github.com/plaid/plaid-go/v49"
+	plaid "github.com/plaid/plaid-go/v50"
 	"github.com/stretchr/testify/require"
 )
 
