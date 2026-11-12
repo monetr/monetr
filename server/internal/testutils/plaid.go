@@ -2,7 +2,7 @@ package testutils
 
 import (
 	"github.com/monetr/monetr/server/models"
-	plaid "github.com/plaid/plaid-go/v49"
+	plaid "github.com/plaid/plaid-go/v50"
 )
 
 type MockPlaidData struct {

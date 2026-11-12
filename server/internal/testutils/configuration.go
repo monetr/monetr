@@ -6,7 +6,7 @@ import (
 
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/monetr/monetr/server/config"
-	plaid "github.com/plaid/plaid-go/v49"
+	plaid "github.com/plaid/plaid-go/v50"
 )
 
 const (

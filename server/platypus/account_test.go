@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v7"
-	plaid "github.com/plaid/plaid-go/v49"
+	plaid "github.com/plaid/plaid-go/v50"
 	"github.com/stretchr/testify/assert"
 )
 
