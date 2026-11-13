@@ -7,13 +7,11 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"reflect"
-	"slices"
-	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/uptrace/bun"
-	"github.com/uptrace/bun/schema"
 	"golang.org/x/crypto/chacha20poly1305"
 )
 
@@ -91,14 +89,41 @@ func (e *Encrypted[T]) Decrypt(
 	keys DataKeyWrapper,
 	aad []byte,
 ) (T, error) {
-	return *new(T), nil
+	var result T
+	blob, err := parseEncryptedBlob(e.EncryptedData)
+	if err != nil {
+		return result, err
+	}
+
+	dek, err := keys.UnwrapDataKey(ctx, e.KeyEncryptionKeyId, blob.wrappedDEK)
+	if err != nil {
+		return result, errors.Wrap(err, "failed to unwrap data key")
+	}
+	defer clear(dek)
+
+	aead, err := chacha20poly1305.NewX(dek)
+	if err != nil {
+		return result, errors.Wrap(err, "failed to create data cipher")
+	}
+
+	plaintext, err := aead.Open(nil, blob.nonce, blob.ciphertext, aad)
+	if err != nil {
+		return result, errors.Wrap(err, "failed to decrypt value")
+	}
+	defer clear(plaintext)
+
+	if err := json.Unmarshal(plaintext, &result); err != nil {
+		return result, errors.Wrap(err, "failed to deserialize decrypted value")
+	}
+	return result, nil
 }
 
 // EncryptionAAD builds the additional authenticated data for the encrypted
-// value stored on model. It's the bun table name followed by every primary key
-// column and its value, sorted by column name:
+// value stored on model. It's a URL with the bun table name as the host and
+// every primary key column and its value as query parameters. url.Values
+// escapes the values and sorts the parameters by column name:
 //
-//	plaid_links:account_id=acct_01J...:plaid_link_id=plx_01J...
+//	aad://plaid_links?account_id=acct_01J...&plaid_link_id=plx_01J...
 func EncryptionAAD[T any](db bun.IDB, model *T) ([]byte, error) {
 	value := reflect.ValueOf(model)
 	if value.Elem().Kind() != reflect.Struct {
@@ -111,14 +136,8 @@ func EncryptionAAD[T any](db bun.IDB, model *T) ([]byte, error) {
 		return nil, errors.Errorf("table %s has no primary key to build an encryption AAD from", table.Name)
 	}
 
-	pks := slices.Clone(table.PKs)
-	slices.SortFunc(pks, func(a, b *schema.Field) int {
-		return strings.Compare(a.Name, b.Name)
-	})
-
-	var aad strings.Builder
-	aad.WriteString(table.Name)
-	for _, pk := range pks {
+	query := url.Values{}
+	for _, pk := range table.PKs {
 		if pk.HasZeroValue(value) {
 			return nil, errors.Errorf(
 				"primary key %s.%s must be set before encrypting",
@@ -126,23 +145,14 @@ func EncryptionAAD[T any](db bun.IDB, model *T) ([]byte, error) {
 			)
 		}
 
-		part := fmt.Sprint(pk.Value(value).Interface())
-		// ':' separates parts and '=' separates column from value, so neither may
-		// appear in a value or two different rows could produce the same AAD.
-		// monetr IDs never contain either.
-		if strings.ContainsAny(part, ":=") {
-			return nil, errors.Errorf(
-				"primary key %s.%s contains a reserved character",
-				table.Name, pk.Name,
-			)
-		}
-
-		aad.WriteString(":")
-		aad.WriteString(pk.Name)
-		aad.WriteString("=")
-		aad.WriteString(part)
+		query.Set(pk.Name, fmt.Sprint(pk.Value(value).Interface()))
 	}
 
+	aad := url.URL{
+		Scheme:   "aad",
+		Host:     table.Name,
+		RawQuery: query.Encode(),
+	}
 	return []byte(aad.String()), nil
 }
 
@@ -163,4 +173,35 @@ func (b encryptedBlob) encode() string {
 	buf = append(buf, b.nonce...)
 	buf = append(buf, b.ciphertext...)
 	return hex.EncodeToString(buf)
+}
+
+func parseEncryptedBlob(data string) (encryptedBlob, error) {
+	raw, err := hex.DecodeString(data)
+	if err != nil {
+		return encryptedBlob{}, errors.Wrap(err, "encrypted data is not valid hex")
+	}
+	if len(raw) < 5 {
+		return encryptedBlob{}, errors.New("encrypted data is too short")
+	}
+	if raw[0] != encryptedFormatV1 {
+		return encryptedBlob{}, errors.Errorf("unsupported encrypted data format: %d", raw[0])
+	}
+
+	length := binary.BigEndian.Uint32(raw[1:5])
+	rest := raw[5:]
+	// Compare as uint64 before converting so a corrupt length can't overflow int
+	// on 32-bit platforms.
+	minimum := uint64(length) +
+		chacha20poly1305.NonceSizeX +
+		chacha20poly1305.Overhead
+	if uint64(len(rest)) < minimum {
+		return encryptedBlob{}, errors.New("encrypted data is truncated")
+	}
+	dekLength := int(length)
+
+	return encryptedBlob{
+		wrappedDEK: rest[:dekLength],
+		nonce:      rest[dekLength : dekLength+chacha20poly1305.NonceSizeX],
+		ciphertext: rest[dekLength+chacha20poly1305.NonceSizeX:],
+	}, nil
 }
