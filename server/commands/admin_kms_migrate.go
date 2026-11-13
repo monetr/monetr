@@ -2,6 +2,7 @@ package commands
 
 import (
 	"context"
+	"database/sql"
 	"strings"
 	"time"
 
@@ -62,7 +63,13 @@ func adminKMSMigrate(parent *cobra.Command) {
 				return errors.Wrap(err, "failed to initialize database")
 			}
 
-			txn, err := db.BeginTx(context.Background(), nil)
+			// Serializable so every batch reads from the same snapshot. Otherwise a
+			// secret being deleted mid-run shifts the offset and a row gets skipped.
+			// If the app changes a secret we've already rewritten then this fails
+			// and rolls back instead of overwriting it.
+			txn, err := db.BeginTx(context.Background(), &sql.TxOptions{
+				Isolation: sql.LevelSerializable,
+			})
 			if err != nil {
 				log.Error("failed to begin database transaction", "err", err)
 				return errors.Wrap(err, "failed to being database transaction")
