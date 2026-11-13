@@ -3,6 +3,7 @@ package controller_test
 import (
 	"errors"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v7"
@@ -160,6 +161,48 @@ func TestPostTransactionUpload(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").IsEqual("Unsupported file type!")
+	})
+
+	t.Run("file name too long", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		{ // Seed data
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		app.Storage.EXPECT().
+			Store(
+				gomock.Any(),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Times(0)
+
+		app.Queue.EXPECT().
+			EnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(ofx_jobs.ProcessOFXUpload),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Times(0)
+
+		// 297 characters plus the extension puts us one over the limit.
+		fileName := strings.Repeat("a", 297) + ".ofx"
+		response := e.POST("/api/bank_accounts/{bankAccountId}/transactions/upload").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithMultipart().
+			WithFileBytes("data", fileName, fixtures.LoadFile(t, "sample-part-one.ofx")).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").IsEqual("File name must not be longer than 300 characters")
 	})
 
 	t.Run("storage disabled", func(t *testing.T) {

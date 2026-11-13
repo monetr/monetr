@@ -4,11 +4,16 @@ import (
 	"net/http"
 	"path"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 )
+
+// maxFileNameLength is the longest file name, in characters, that we will
+// accept for an upload.
+const maxFileNameLength = 300
 
 func (c *Controller) consumeFileUpload(
 	ctx *echo.Context,
@@ -27,6 +32,16 @@ func (c *Controller) consumeFileUpload(
 		return nil, c.badRequestError(ctx, err, "Failed to read file upload")
 	}
 	defer reader.Close()
+
+	// The file name is stored as is and returned with every file listing, so
+	// don't let someone stuff an enormous one in there.
+	if utf8.RuneCountInString(header.Filename) > maxFileNameLength {
+		return nil, c.badRequest(
+			ctx,
+			"File name must not be longer than %d characters",
+			maxFileNameLength,
+		)
+	}
 
 	contentType := header.Header.Get("Content-Type")
 	extension := strings.ToLower(path.Ext(header.Filename))
