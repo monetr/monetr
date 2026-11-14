@@ -1,6 +1,7 @@
 package models
 
 import (
+	"context"
 	"time"
 
 	"github.com/uptrace/bun"
@@ -18,4 +19,24 @@ type KeyEncryptionKey struct {
 
 func (KeyEncryptionKey) IdentityPrefix() string {
 	return "kek"
+}
+
+var (
+	_ bun.BeforeAppendModelHook = (*Secret)(nil)
+)
+
+func (o *KeyEncryptionKey) BeforeAppendModel(ctx context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		if o.KeyEncryptionKeyId.IsZero() {
+			o.KeyEncryptionKeyId = NewID[KeyEncryptionKey]()
+		}
+
+		now := time.Now()
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = now
+		}
+	}
+
+	return nil
 }

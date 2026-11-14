@@ -1,6 +1,7 @@
 package models
 
 import (
+	"context"
 	"time"
 
 	"github.com/uptrace/bun"
@@ -19,4 +20,24 @@ type SecretboxKey struct {
 
 func (SecretboxKey) IdentityPrefix() string {
 	return "sbk"
+}
+
+var (
+	_ bun.BeforeAppendModelHook = (*Secret)(nil)
+)
+
+func (o *SecretboxKey) BeforeAppendModel(ctx context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		if o.SecretboxKeyId.IsZero() {
+			o.SecretboxKeyId = NewID[SecretboxKey]()
+		}
+
+		now := time.Now()
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = now
+		}
+	}
+
+	return nil
 }
