@@ -24,7 +24,7 @@
     "date-fns": "4.4.0",
     "embla-carousel-autoplay": "8.6.0",
     "embla-carousel-react": "8.6.0",
-    "hast-util-from-html": "2.0.3",
+    "hast-util-from-html": "2.1.0",
     "image-size": "2.1.0",
     "katex": "0.19.1",
     "lucide-react": "1.61.0",
