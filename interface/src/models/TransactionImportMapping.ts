@@ -2,6 +2,7 @@
 // both. The discriminated union enforces this at compile time: setting both `name` and `derivedKind` is a type error.
 export enum DerivedKind {
   RowNumber = 'rowNumber',
+  Occurrence = 'occurrence',
   RowNumberPerDay = 'rowNumberPerDay',
   RowNumberPerDayPerAmount = 'rowNumberPerDayPerAmount',
 }
