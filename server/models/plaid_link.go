@@ -19,6 +19,10 @@ const (
 	PlaidLinkStatusDeactivated       PlaidLinkStatus = "deactivated"
 )
 
+type PlaidLinkSecret struct {
+	AccessToken string `json:"accessToken"`
+}
+
 type PlaidLink struct {
 	bun.BaseModel `bun:"table:plaid_links,alias:plaid_link"`
 
@@ -45,6 +49,10 @@ type PlaidLink struct {
 	CreatedBy            ID[User]        `json:"createdBy" bun:"created_by,notnull,nullzero"`
 	CreatedByUser        *User           `json:"-" bun:"rel:belongs-to,join:created_by=user_id"`
 	DeletedAt            *time.Time      `json:"deletedAt" bun:"deleted_at"`
+
+	// Plaid link tokens are now stored on the plaid link themselves but are
+	// encrypted.
+	Encrypted[PlaidLinkSecret]
 }
 
 func (PlaidLink) IdentityPrefix() string {

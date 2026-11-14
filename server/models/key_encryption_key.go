@@ -12,6 +12,7 @@ type KeyEncryptionKey struct {
 	KeyEncryptionKeyId ID[KeyEncryptionKey] `json:"-" bun:"key_encryption_key_id,notnull,pk"`
 	RootKeyId          ID[RootKey]          `json:"-" bun:"root_key_id,notnull"`
 	RootKey            *RootKey             `json:"-" bun:"rel:belongs-to,join:root_key_id=root_key_id"`
+	Wrapped            string               `json:"-" bun:"wrapped,notnull"`
 	CreatedAt          time.Time            `json:"-" bun:"created_at,notnull,nullzero"`
 }
 
