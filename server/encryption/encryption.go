@@ -1,14 +1,13 @@
 package encryption
 
 import (
-	"crypto/hkdf"
-	"crypto/hmac"
+	"context"
 	"crypto/rand"
-	"crypto/sha256"
 	"encoding/base32"
 	"encoding/hex"
 	"slices"
 
+	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 	"github.com/uptrace/bun"
@@ -50,55 +49,43 @@ func (k SecretKey) String() string {
 	return SecretKeyPrefix + "[redacted]"
 }
 
+// unwrapRootKey is also what the keyring calls lazily when a KEK points at a
+// root key that isn't loaded yet.
 func unwrapRootKey(
+	ctx context.Context,
 	db bun.IDB,
-	secret SecretKey,
-	secretboxKeyId models.ID[models.SecretboxKey],
-	row *models.RootKey,
+	unwrapper rootKeyUnwrapper,
+	rootKey *models.RootKey,
 ) ([]byte, error) {
-	// Root keys are encrypted potentially with multiple wrappers, this way monetr
-	// can start using the secretbox key or with a kms
-	i := slices.IndexFunc(
-		row.Wrappers,
-		func(w models.RootKeyWrapper) bool {
-			return w.Kind == models.RootKeyKindSecretBox &&
-				w.Reference == secretboxKeyId.String()
-		},
-	)
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	i := slices.IndexFunc(rootKey.Wrappers, unwrapper.Matches)
 	if i < 0 {
 		return nil, errors.Errorf(
-			"root key %s is not wrapped by this secret key",
-			row.RootKeyId,
+			"root key %s is not wrapped by the configured %s key, configure a key that wraps it or re-wrap the root key",
+			rootKey.RootKeyId, unwrapper.Kind(),
 		)
 	}
 
-	wrapKey, err := hkdf.Key(
-		sha256.New,
-		secret[:],
-		nil,
-		"monetr secret key wrap",
-		chacha20poly1305.KeySize,
-	)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to derive wrapping key")
-	}
-	defer clear(wrapKey)
-
-	aad, err := models.EncryptionAAD(db, row)
+	aad, err := models.EncryptionAAD(db, rootKey)
 	if err != nil {
 		return nil, err
 	}
 
-	rootKey, err := openSealed(wrapKey, row.Wrappers[i].Data, aad)
+	raw, err := unwrapper.Unwrap(ctx, rootKey.Wrappers[i], aad)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "failed to unwrap root key %s", rootKey.RootKeyId)
 	}
 
-	if !hmac.Equal([]byte(models.RootKeyFingerprint(rootKey)), []byte(row.Fingerprint)) {
-		clear(rootKey)
-		return nil, errors.Errorf("root key %s does not match its fingerprint", row.RootKeyId)
+	if models.RootKeyFingerprint(raw) != rootKey.Fingerprint {
+		clear(raw)
+		return nil, errors.Errorf(
+			"root key %s does not match its fingerprint",
+			rootKey.RootKeyId,
+		)
 	}
-	return rootKey, nil
+	return raw, nil
 }
 
 // openSealed opens hex(nonce || ciphertext || tag) with key. It's the format
