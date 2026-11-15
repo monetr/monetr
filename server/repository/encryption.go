@@ -104,13 +104,51 @@ func (e *encryptionRepositoryBase) CreateRootKey(
 }
 
 // CreateSecretboxKey implements [EncryptionRepository].
-func (e *encryptionRepositoryBase) CreateSecretboxKey(ctx context.Context, key *models.SecretboxKey) error {
-	panic("unimplemented")
+func (e *encryptionRepositoryBase) CreateSecretboxKey(
+	ctx context.Context,
+	key *models.SecretboxKey,
+) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	_, err := e.db.NewInsert().
+		Model(key).
+		Returning("*").
+		Exec(span.Context())
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return errors.Wrap(err, "failed to store secretbox key")
+	}
+
+	e.log.DebugContext(span.Context(), "stored secretbox key",
+		"secretboxKeyId", key.SecretboxKeyId,
+		"keyEncryptionKeyId", key.KeyEncryptionKeyId,
+	)
+
+	span.Status = sentry.SpanStatusOK
+
+	return nil
 }
 
 // GetKeyEncryptionKey implements [EncryptionRepository].
-func (e *encryptionRepositoryBase) GetKeyEncryptionKey(ctx context.Context) (*models.KeyEncryptionKey, error) {
-	panic("unimplemented")
+func (e *encryptionRepositoryBase) GetKeyEncryptionKey(
+	ctx context.Context,
+) (*models.KeyEncryptionKey, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	var item models.KeyEncryptionKey
+	err := e.db.NewSelect().
+		Model(&item).
+		Order(`key_encryption_key_id DESC`).
+		Limit(1).
+		Scan(span.Context())
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, errors.Wrap(err, "failed to retrieve current key encryption key")
+	}
+
+	return &item, nil
 }
 
 // GetKeyEncryptionKeyById implements [EncryptionRepository].
@@ -119,8 +157,24 @@ func (e *encryptionRepositoryBase) GetKeyEncryptionKeyById(ctx context.Context, 
 }
 
 // GetRootKey implements [EncryptionRepository].
-func (e *encryptionRepositoryBase) GetRootKey(ctx context.Context) (*models.RootKey, error) {
-	panic("unimplemented")
+func (e *encryptionRepositoryBase) GetRootKey(
+	ctx context.Context,
+) (*models.RootKey, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	var item models.RootKey
+	err := e.db.NewSelect().
+		Model(&item).
+		Order(`root_key_id DESC`).
+		Limit(1).
+		Scan(span.Context())
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, errors.Wrap(err, "failed to retrieve current root key")
+	}
+
+	return &item, nil
 }
 
 // GetRootKeyById implements [EncryptionRepository].
@@ -129,6 +183,22 @@ func (e *encryptionRepositoryBase) GetRootKeyById(ctx context.Context, id models
 }
 
 // GetSecretboxKey implements [EncryptionRepository].
-func (e *encryptionRepositoryBase) GetSecretboxKey(ctx context.Context) (*models.SecretboxKey, error) {
-	panic("unimplemented")
+func (e *encryptionRepositoryBase) GetSecretboxKey(
+	ctx context.Context,
+) (*models.SecretboxKey, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	var item models.SecretboxKey
+	err := e.db.NewSelect().
+		Model(&item).
+		Order(`secretbox_key_id DESC`).
+		Limit(1).
+		Scan(span.Context())
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, errors.Wrap(err, "failed to retrieve current secretbox key")
+	}
+
+	return &item, nil
 }

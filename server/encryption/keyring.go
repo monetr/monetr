@@ -5,7 +5,9 @@ import (
 	"crypto/rand"
 	"sync"
 
+	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/repository"
 	"golang.org/x/crypto/chacha20poly1305"
 )
 
@@ -17,10 +19,16 @@ type Keyring struct {
 	lock      sync.RWMutex
 	activeKEK models.ID[models.KeyEncryptionKey]
 	keks      map[models.ID[models.KeyEncryptionKey]][]byte
+
+	repo repository.EncryptionRepository
 }
 
 // UnwrapDataKey implements [models.DataKeyWrapper].
-func (k *Keyring) UnwrapDataKey(ctx context.Context, kekId models.ID[models.KeyEncryptionKey], wrapped []byte) ([]byte, error) {
+func (k *Keyring) UnwrapDataKey(
+	ctx context.Context,
+	kekId models.ID[models.KeyEncryptionKey],
+	wrapped []byte,
+) ([]byte, error) {
 	panic("unimplemented")
 }
 
@@ -29,6 +37,14 @@ func (k *Keyring) WrapDataKey(
 	ctx context.Context,
 	dek []byte,
 ) (models.ID[models.KeyEncryptionKey], []byte, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	kek, err := k.repo.GetKeyEncryptionKey(span.Context())
+	if err != nil {
+		return "", nil, err
+	}
+
 	k.lock.RLock()
 	kekId := k.activeKEK
 	kek := k.keks[kekId]
