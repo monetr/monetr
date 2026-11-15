@@ -43,7 +43,7 @@ require (
 	github.com/uptrace/bun/dialect/pgdialect v1.3.0
 	github.com/uptrace/bun/driver/pgdriver v1.3.0
 	github.com/vmihailenco/msgpack/v5 v5.4.1
-	github.com/wneessen/go-mail v0.8.1
+	github.com/wneessen/go-mail v0.8.2
 	github.com/xlzd/gotp v0.1.0
 	go.uber.org/mock v0.6.0
 	golang.org/x/crypto v0.58.0
