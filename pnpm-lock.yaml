@@ -335,8 +335,8 @@ importers:
         specifier: 10.0.1
         version: 10.0.1
       juice:
-        specifier: 12.2.1
-        version: 12.2.1
+        specifier: 12.2.2
+        version: 12.2.2
       react:
         specifier: 19.3.1
         version: 19.3.1
@@ -2712,10 +2712,6 @@ packages:
     resolution: {integrity: sha512-TWrgLOFUQTH994YUyl1yT4uyavY5nNB5muff+RtWaqNVCAK408b5ZnnbNAUEWLTCpum9w6arT70i1XdQ4UeOPA==}
     engines: {node: '>=0.12'}
 
-  entities@8.1.0:
-    resolution: {integrity: sha512-kxL7msIffSuh9aaFAMD7rxAIuTRMAHMeBtgHW2yUdWw732ZNh4MehkF2gdjvtdmikkaIP9bFDDJOPlsvm7avrA==}
-    engines: {node: '>=20.19.0'}
-
   entities@9.0.0:
     resolution: {integrity: sha512-oJFNDJg3kTPwAD1cNn2+WmUq4wFoo09npc3Ydf1D7ED4smRiWrsKnaLxykrTWgyGEcusc87P5dxlAleol9kpkg==}
     engines: {node: '>=20.19.0'}
@@ -3126,8 +3122,8 @@ packages:
   jsonfile@6.2.1:
     resolution: {integrity: sha512-zwOTdL3rFQ/lRdBnntKVOX6k5cKJwEc1HdilT71BWEu7J41gXIB2MRp+vxduPSwZJPWBxEzv4yH1wYLJGUHX4Q==}
 
-  juice@12.2.1:
-    resolution: {integrity: sha512-tbyBK+Ifmx95xRB2XET205DAz67Oq8A5SG+gV8GzBzzf0oRVhpo+Wh1KTkC12emlyZallR/ZsG8FJ1LcM4P17Q==}
+  juice@12.2.2:
+    resolution: {integrity: sha512-KIeo11WTx79GSxBjaW7BWAEGQChsF6V4ODpghIPPR7v9YMCYwg4qvaNb+fWemsiSoaBdWk3Wuf4bb18BUqBJ1Q==}
     engines: {node: '>=22.12.0'}
     hasBin: true
 
@@ -6670,8 +6666,6 @@ snapshots:
 
   entities@7.0.1: {}
 
-  entities@8.1.0: {}
-
   entities@9.0.0: {}
 
   error-ex@1.3.4:
@@ -7210,11 +7204,11 @@ snapshots:
     optionalDependencies:
       graceful-fs: 4.2.11
 
-  juice@12.2.1:
+  juice@12.2.2:
     dependencies:
       cheerio: 1.2.0
       commander: 14.0.3
-      entities: 8.1.0
+      entities: 9.0.0
       postcss: 8.5.30
       postcss-nesting: 14.0.3(postcss@8.5.30)
       postcss-safe-parser: 7.1.0(postcss@8.5.30)
