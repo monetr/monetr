@@ -5,7 +5,6 @@ import (
 	"context"
 	"crypto/hkdf"
 	"crypto/sha256"
-	"io/fs"
 	"log/slog"
 	"os"
 	"strings"
@@ -47,7 +46,7 @@ func (s *secretboxUnwrapper) Matches(w models.RootKeyWrapper) bool {
 }
 
 func (s *secretboxUnwrapper) Unwrap(_ context.Context, w models.RootKeyWrapper, aad []byte) ([]byte, error) {
-	return openSealed(s.wrapKey, w.Data, aad)
+	return unseal(s.wrapKey, w.Data, aad)
 }
 
 // SecretboxKeyFingerprint identifies a secret key without revealing it. Stored
@@ -63,7 +62,7 @@ func SecretboxKeyFingerprint(secret SecretboxKey) string {
 	return models.EncryptionEncoding.EncodeToString(fp)
 }
 
-func loadOrCreateSecretboxKey(
+func loadSecretboxKey(
 	log *slog.Logger,
 	config config.SecretBox,
 ) (SecretboxKey, error) {
@@ -73,34 +72,14 @@ func loadOrCreateSecretboxKey(
 	case config.Secret != nil:
 		return ParseSecretboxKey(strings.TrimSpace(*config.Secret))
 	case config.SecretFile != nil:
-		return readOrCreateSecretboxKeyFile(
-			log,
-			*config.SecretFile,
-			config.CreateIfNotExists,
-		)
+		return readSecretboxKeyFile(log, *config.SecretFile)
 	default:
 		return SecretboxKey{}, errors.New("encryption.kind is secretbox but neither secret nor secretFile is configured")
 	}
 }
 
-// readOrCreateSecretboxKeyFile reads the secret key from path. If create is true
-// and the file doesn't exist, a new secret key is generated and written there
-// first.
-func readOrCreateSecretboxKeyFile(
-	log *slog.Logger,
-	path string,
-	create bool,
-) (SecretboxKey, error) {
+func readSecretboxKeyFile(log *slog.Logger, path string) (SecretboxKey, error) {
 	info, err := os.Stat(path)
-	if create && errors.Is(err, fs.ErrNotExist) {
-		key, err := createSecretboxKeyFile(log, path)
-		if !errors.Is(err, fs.ErrExist) {
-			return key, err
-		}
-		// Another process created the file between the stat and the create, so
-		// read theirs instead.
-		info, err = os.Stat(path)
-	}
 	if err != nil {
 		return SecretboxKey{}, errors.Wrap(err, "failed to read secret key file")
 	}
@@ -121,36 +100,6 @@ func readOrCreateSecretboxKeyFile(
 	defer clear(data)
 
 	return ParseSecretboxKey(string(bytes.TrimSpace(data)))
-}
-
-// createSecretboxKeyFile generates a new secret key and writes it to path. It
-// never overwrites an existing file; if path already exists it returns an error
-// that matches fs.ErrExist.
-func createSecretboxKeyFile(log *slog.Logger, path string) (SecretboxKey, error) {
-	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o600)
-	if errors.Is(err, fs.ErrExist) {
-		return SecretboxKey{}, err
-	} else if err != nil {
-		return SecretboxKey{}, errors.Wrap(err, "failed to create secret key file")
-	}
-
-	key := GenerateSecretboxKey()
-	_, err = file.WriteString(key.Encode() + "\n")
-	if err == nil {
-		err = file.Sync()
-	}
-	if closeErr := file.Close(); err == nil {
-		err = closeErr
-	}
-	if err != nil {
-		// Don't leave a partial file behind, the next startup would fail to parse
-		// it instead of generating a new one.
-		os.Remove(path)
-		return SecretboxKey{}, errors.Wrap(err, "failed to write secret key file")
-	}
-
-	log.Info("generated a new secret key", "path", path)
-	return key, nil
 }
 
 // ParseSecretboxKey parses the monetr_sbk_ form returned by Encode.

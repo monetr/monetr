@@ -112,7 +112,7 @@ func (k *Keyring) loadKEK(ctx context.Context, row *models.KeyEncryptionKey) ([]
 		return nil, err
 	}
 
-	raw, err := openSealed(rootKey, row.Wrapped, aad)
+	raw, err := unseal(rootKey, row.Wrapped, aad)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to unwrap KEK %s", row.KeyEncryptionKeyId)
 	}

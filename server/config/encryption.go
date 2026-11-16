@@ -27,5 +27,5 @@ type SecretBox struct {
 
 	// This is set by a flag on startup, it requires that the secretfile is
 	// defined.
-	CreateIfNotExists bool `yaml:"-"`
+	createIfNotExists bool `yaml:"-"`
 }

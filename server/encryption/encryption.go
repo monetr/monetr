@@ -87,9 +87,28 @@ func unwrapRootKey(
 	return raw, nil
 }
 
-// openSealed opens base32(nonce || ciphertext || tag) with key. It's the format
+// seal encrypts plaintext with key and returns base32(nonce || ciphertext ||
+// tag), the format unseal reads. It's used for secretbox root key wrappers and
+// key_encryption_keys.wrapped.
+func seal(key, plaintext, aad []byte) (string, error) {
+	aead, err := chacha20poly1305.NewX(key)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to create key cipher")
+	}
+
+	nonce := make(
+		[]byte,
+		chacha20poly1305.NonceSizeX,
+		chacha20poly1305.NonceSizeX+len(plaintext)+aead.Overhead(),
+	)
+	rand.Read(nonce)
+	sealed := aead.Seal(nonce, nonce, plaintext, aad)
+	return models.EncryptionEncoding.EncodeToString(sealed), nil
+}
+
+// unseal opens base32(nonce || ciphertext || tag) with key. It's the format
 // for secretbox root key wrappers and key_encryption_keys.wrapped.
-func openSealed(key []byte, sealed string, aad []byte) ([]byte, error) {
+func unseal(key []byte, sealed string, aad []byte) ([]byte, error) {
 	raw, err := models.EncryptionEncoding.DecodeString(sealed)
 	if err != nil {
 		return nil, errors.Wrap(err, "sealed key is not valid base32")

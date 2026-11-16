@@ -25,7 +25,7 @@ func newRootKeyUnwrapper(
 ) (rootKeyUnwrapper, error) {
 	switch models.RootKeyKind(config.Kind) {
 	case models.RootKeyKindSecretBox:
-		secret, err := loadOrCreateSecretboxKey(log, config.SecretBox)
+		secret, err := loadSecretboxKey(log, config.SecretBox)
 		if err != nil {
 			return nil, err
 		}
