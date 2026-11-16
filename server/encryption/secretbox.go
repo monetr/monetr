@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/hkdf"
 	"crypto/sha256"
-	"encoding/hex"
 
 	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
@@ -49,5 +48,5 @@ func (s *secretboxUnwrapper) Unwrap(_ context.Context, w models.RootKeyWrapper, 
 // secretbox_keys.fingerprint and as the secretbox wrapper's Reference.
 func SecretKeyFingerprint(secret SecretKey) string {
 	fp, _ := hkdf.Key(sha256.New, secret[:], nil, "monetr secret key fingerprint", 32)
-	return hex.EncodeToString(fp)
+	return models.EncryptionEncoding.EncodeToString(fp)
 }

@@ -2,7 +2,6 @@ package encryption
 
 import (
 	"context"
-	"encoding/hex"
 	"log/slog"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -87,9 +86,9 @@ func (a *awsUnwrapper) Unwrap(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	blob, err := hex.DecodeString(wrapper.Data)
+	blob, err := models.EncryptionEncoding.DecodeString(wrapper.Data)
 	if err != nil {
-		return nil, errors.Wrap(err, "KMS wrapper is not valid hex")
+		return nil, errors.Wrap(err, "KMS wrapper is not valid base32")
 	}
 	a.log.DebugContext(span.Context(),
 		"unwrapping root key using AWS KMS",

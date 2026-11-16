@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base32"
-	"encoding/hex"
 	"slices"
 
 	"github.com/monetr/monetr/server/crumbs"
@@ -88,12 +87,12 @@ func unwrapRootKey(
 	return raw, nil
 }
 
-// openSealed opens hex(nonce || ciphertext || tag) with key. It's the format
+// openSealed opens base32(nonce || ciphertext || tag) with key. It's the format
 // for secretbox root key wrappers and key_encryption_keys.wrapped.
 func openSealed(key []byte, sealed string, aad []byte) ([]byte, error) {
-	raw, err := hex.DecodeString(sealed)
+	raw, err := models.EncryptionEncoding.DecodeString(sealed)
 	if err != nil {
-		return nil, errors.Wrap(err, "sealed key is not valid hex")
+		return nil, errors.Wrap(err, "sealed key is not valid base32")
 	}
 	if len(raw) < chacha20poly1305.NonceSizeX+chacha20poly1305.Overhead {
 		return nil, errors.New("sealed key is truncated")

@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/hmac"
 	"crypto/sha256"
-	"encoding/hex"
 	"time"
 
 	"github.com/uptrace/bun"
@@ -46,7 +45,7 @@ type RootKeyWrapper struct {
 	// secretbox key. Implementation specific and not necessarily the "highest
 	// value wins".
 	Version *string `json:"version"`
-	// Data is the encrypted root key hex encoded.
+	// Data is the encrypted root key base32 encoded.
 	Data string `json:"data"`
 }
 
@@ -77,5 +76,5 @@ func (o *RootKey) BeforeAppendModel(ctx context.Context, query bun.Query) error 
 func RootKeyFingerprint(rootKey []byte) string {
 	mac := hmac.New(sha256.New, rootKey[:])
 	mac.Write([]byte(rootKeyFingerprintConstant))
-	return hex.EncodeToString(mac.Sum(nil))
+	return EncryptionEncoding.EncodeToString(mac.Sum(nil))
 }

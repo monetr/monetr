@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/binary"
-	"encoding/hex"
+	"encoding/base32"
 	"encoding/json"
 	"fmt"
 	"net/url"
@@ -16,6 +16,10 @@ import (
 )
 
 const encryptedFormatV1 byte = 0x01
+
+// EncryptionEncoding is how encrypted values, wrapped keys, and fingerprints
+// are stored as text: standard base32 without padding.
+var EncryptionEncoding = base32.StdEncoding.WithPadding(base32.NoPadding)
 
 // DataKeyWrapper wraps and unwraps DEKs with a KEK. The keyring implements it.
 // It is defined here so models doesn't import the encryption package, and so
@@ -40,7 +44,7 @@ type DataKeyWrapper interface {
 type Encrypted[T any] struct {
 	KeyEncryptionKeyId ID[KeyEncryptionKey] `json:"-" bun:"key_encryption_key_id,notnull"`
 	KeyEncryptionKey   *KeyEncryptionKey    `json:"-" bun:"rel:belongs-to,join:key_encryption_key_id=key_encryption_key_id"`
-	// EncryptedData is hex encoded: format version, wrapped DEK, nonce, and
+	// EncryptedData is base32 encoded: format version, wrapped DEK, nonce, and
 	// ciphertext.
 	EncryptedData string `json:"-" bun:"encrypted_data,notnull"`
 }
@@ -172,13 +176,13 @@ func (b encryptedBlob) encode() string {
 	buf = append(buf, b.wrappedDEK...)
 	buf = append(buf, b.nonce...)
 	buf = append(buf, b.ciphertext...)
-	return hex.EncodeToString(buf)
+	return EncryptionEncoding.EncodeToString(buf)
 }
 
 func parseEncryptedBlob(data string) (encryptedBlob, error) {
-	raw, err := hex.DecodeString(data)
+	raw, err := EncryptionEncoding.DecodeString(data)
 	if err != nil {
-		return encryptedBlob{}, errors.Wrap(err, "encrypted data is not valid hex")
+		return encryptedBlob{}, errors.Wrap(err, "encrypted data is not valid base32")
 	}
 	if len(raw) < 5 {
 		return encryptedBlob{}, errors.New("encrypted data is too short")
