@@ -49,6 +49,7 @@ type Configuration struct {
 	Cache         Cache         `yaml:"cache"`
 	Database      Database      `yaml:"database"`
 	Email         Email         `yaml:"email"`
+	Encryption    Encryption    `yaml:"encryption"`
 	Features      Features      `yaml:"transactionImports"`
 	KeyManagement KeyManagement `yaml:"keyManagement"`
 	Links         Links         `yaml:"links"`

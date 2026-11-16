@@ -2,6 +2,7 @@ package encryption
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/models"
@@ -17,21 +18,25 @@ type rootKeyUnwrapper interface {
 	Unwrap(ctx context.Context, wrapper models.RootKeyWrapper, aad []byte) ([]byte, error)
 }
 
-func newRootKeyUnwrapper(ctx context.Context, cfg config.Encryption) (rootKeyUnwrapper, error) {
-	switch models.RootKeyKind(cfg.Kind) {
+func newRootKeyUnwrapper(
+	ctx context.Context,
+	log *slog.Logger,
+	config config.Encryption,
+) (rootKeyUnwrapper, error) {
+	switch models.RootKeyKind(config.Kind) {
 	case models.RootKeyKindSecretBox:
-		secret, err := loadSecretKey(cfg.SecretBox)
+		secret, err := loadOrCreateSecretboxKey(log, config.SecretBox)
 		if err != nil {
 			return nil, err
 		}
 		return newSecretboxUnwrapper(secret)
 	case models.RootKeyKindAWS:
-		return newAWSUnwrapper(ctx, cfg.AWS)
+		return newAWSUnwrapper(ctx, config.AWS)
 	case models.RootKeyKindOpenBao:
-		return newOpenBaoUnwrapper(ctx, cfg.OpenBao)
+		return newOpenBaoUnwrapper(ctx, config.OpenBao)
 	case "":
 		return nil, errors.New("encryption.kind is not configured")
 	default:
-		return nil, errors.Errorf("unknown encryption.kind %q, must be secretbox, aws, or openbao", cfg.Kind)
+		return nil, errors.Errorf("unknown encryption.kind %q, must be secretbox, aws, or openbao", config.Kind)
 	}
 }

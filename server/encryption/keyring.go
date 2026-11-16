@@ -3,8 +3,11 @@ package encryption
 import (
 	"context"
 	"crypto/rand"
+	"log/slog"
 	"sync"
 
+	"github.com/benbjohnson/clock"
+	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
@@ -25,6 +28,27 @@ type Keyring struct {
 
 	db   bun.IDB
 	repo repository.EncryptionRepository
+}
+
+func NewKeyring(
+	ctx context.Context,
+	log *slog.Logger,
+	clock clock.Clock,
+	config config.Configuration,
+	db bun.IDB,
+) (*Keyring, error) {
+	unwrapper, err := newRootKeyUnwrapper(ctx, log, config.Encryption)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Keyring{
+		unwrapper: unwrapper,
+		rootKeys:  map[models.ID[models.RootKey]][]byte{},
+		keks:      map[models.ID[models.KeyEncryptionKey]][]byte{},
+		db:        db,
+		repo:      repository.NewEncryptionRepository(log, clock, db),
+	}, nil
 }
 
 func (k *Keyring) cacheRootKey(id models.ID[models.RootKey], raw []byte) []byte {

@@ -24,4 +24,8 @@ type Encryption struct {
 type SecretBox struct {
 	Secret     *string `yaml:"secret"`
 	SecretFile *string `yaml:"secretFile"`
+
+	// This is set by a flag on startup, it requires that the secretfile is
+	// defined.
+	CreateIfNotExists bool `yaml:"-"`
 }
