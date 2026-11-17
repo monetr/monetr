@@ -35,9 +35,9 @@ func newRootKeyWrapper(
 		}
 		return newSecretboxWrapper(secret)
 	case models.RootKeyKindAWS:
-		return newAWSWrapper(ctx, config.AWS)
+		return newAWSWrapper(ctx, log, config.AWS)
 	case models.RootKeyKindOpenBao:
-		return newOpenBaoWrapper(ctx, config.OpenBao)
+		return newOpenBaoWrapper(ctx, log, config.OpenBao)
 	case "":
 		return nil, errors.New("encryption.kind is not configured")
 	default:

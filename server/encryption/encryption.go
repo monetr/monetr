@@ -31,6 +31,10 @@ const encryptionSetupLockId int64 = 20261117
 // setup wasn't requested.
 var ErrEncryptionNotInitialized = errors.New("envelope encryption has not been set up")
 
+// ErrEncryptionAlreadyInitialized is returned by Initialize when keys already
+// exist.
+var ErrEncryptionAlreadyInitialized = errors.New("envelope encryption has already been set up")
+
 var secretKeyEncoding = base32.
 	NewEncoding("abcdefghijklmnopqrstuvwxyz234567").
 	WithPadding(base32.NoPadding)
@@ -177,17 +181,17 @@ func Start(
 			// transition, a hard failure once encryption is required.
 			return nil, ErrEncryptionNotInitialized
 		}
-		if bootstrap.DeliverSecret == nil {
-			return nil, errors.New("encryption setup requires a way to deliver the secretbox key")
-		}
-		if err := initializeEncryption(
+		err := Initialize(
 			span.Context(),
 			log,
 			clock,
 			configuration.Encryption,
 			db,
 			bootstrap.DeliverSecret,
-		); err != nil {
+		)
+		// Already initialized means another server won the race between the check
+		// above and the setup lock. That's fine here, the keys exist either way.
+		if err != nil && !errors.Is(err, ErrEncryptionAlreadyInitialized) {
 			return nil, errors.Wrap(err, "failed to set up envelope encryption")
 		}
 	}
@@ -214,9 +218,11 @@ func isEncryptionInitialized(
 	}
 }
 
-// initializeEncryption generates the secretbox key, root key, and first KEK and
-// stores them in a single transaction.
-func initializeEncryption(
+// Initialize generates the secretbox key, root key, and first KEK and stores
+// them in a single transaction. deliver gets the encoded secretbox key before
+// commit, so if it fails nothing is saved. If encryption is already set up it
+// returns ErrEncryptionAlreadyInitialized and deliver is never called.
+func Initialize(
 	ctx context.Context,
 	log *slog.Logger,
 	clock clock.Clock,
@@ -226,6 +232,10 @@ func initializeEncryption(
 ) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
+
+	if deliver == nil {
+		return errors.New("encryption setup requires a way to deliver the secretbox key")
+	}
 
 	// With a KMS kind the root key also gets a KMS wrapper. Build that client
 	// before the transaction so a misconfigured KMS fails before anything is
@@ -256,8 +266,7 @@ func initializeEncryption(
 		if initialized, err := isEncryptionInitialized(ctx, repo); err != nil {
 			return err
 		} else if initialized {
-			// Another server set it up while this one waited on the lock.
-			return nil
+			return ErrEncryptionAlreadyInitialized
 		}
 
 		secret := GenerateSecretboxKey()

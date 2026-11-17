@@ -38,6 +38,9 @@ func newOpenBaoWrapper(
 		InsecureSkipVerify: config.InsecureSkipVerify,
 		IdleConnTimeout:    15 * time.Second,
 	})
+
+	// TODO Implement openbao properly?
+	return nil, nil
 }
 
 func (o *openBaoWrapper) Kind() models.RootKeyKind {
