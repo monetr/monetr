@@ -39,14 +39,22 @@ type DataKeyWrapper interface {
 	) ([]byte, error)
 }
 
+// ErrNotEncrypted is returned by Decrypt when the row has no encrypted value
+// yet.
+var ErrNotEncrypted = errors.New("value has not been encrypted")
+
 // Encrypted stores one encrypted value on a model, you must embed it on the
 // model directly and not use it as a struct field.
+//
+// TODO Both fields are nullable until the switchover from the secrets table is
+// done, rows that haven't been encrypted yet store NULL. Once every row is
+// encrypted these can go back to notnull.
 type Encrypted[T any] struct {
-	KeyEncryptionKeyId *ID[KeyEncryptionKey] `json:"-" bun:"key_encryption_key_id,notnull"`
+	KeyEncryptionKeyId *ID[KeyEncryptionKey] `json:"-" bun:"key_encryption_key_id"`
 	KeyEncryptionKey   *KeyEncryptionKey     `json:"-" bun:"rel:belongs-to,join:key_encryption_key_id=key_encryption_key_id"`
 	// EncryptedData is base32 encoded: format version, wrapped DEK, nonce, and
 	// ciphertext.
-	EncryptedData string `json:"-" bun:"encrypted_data,notnull"`
+	EncryptedData *string `json:"-" bun:"encrypted_data"`
 }
 
 func (e *Encrypted[T]) Encrypt(
@@ -79,12 +87,13 @@ func (e *Encrypted[T]) Encrypt(
 		return errors.Wrap(err, "failed to wrap data key")
 	}
 
-	e.KeyEncryptionKeyId = kekId
-	e.EncryptedData = encryptedBlob{
+	data := encryptedBlob{
 		wrappedDEK: wrappedDEK,
 		nonce:      nonce,
 		ciphertext: ciphertext,
 	}.encode()
+	e.KeyEncryptionKeyId = &kekId
+	e.EncryptedData = &data
 	return nil
 }
 
@@ -94,12 +103,20 @@ func (e *Encrypted[T]) Decrypt(
 	aad []byte,
 ) (T, error) {
 	var result T
-	blob, err := parseEncryptedBlob(e.EncryptedData)
+	if e.EncryptedData == nil {
+		return result, ErrNotEncrypted
+	}
+	if e.KeyEncryptionKeyId == nil {
+		// The check constraint should make this impossible.
+		return result, errors.New("encrypted value has no key encryption key")
+	}
+
+	blob, err := parseEncryptedBlob(*e.EncryptedData)
 	if err != nil {
 		return result, err
 	}
 
-	dek, err := keys.UnwrapDataKey(ctx, e.KeyEncryptionKeyId, blob.wrappedDEK)
+	dek, err := keys.UnwrapDataKey(ctx, *e.KeyEncryptionKeyId, blob.wrappedDEK)
 	if err != nil {
 		return result, errors.Wrap(err, "failed to unwrap data key")
 	}
