@@ -239,11 +239,16 @@ func Initialize(
 
 	// With a KMS kind the root key also gets a KMS wrapper. Build that client
 	// before the transaction so a misconfigured KMS fails before anything is
-	// written. An unknown kind fails here too: otherwise setup would commit
-	// keys that startup can never build a wrapper to open.
+	// written. An unknown kind or invalid secretbox config fails here too:
+	// otherwise setup would commit keys that startup can never open.
 	var kms rootKeyWrapper
 	switch models.RootKeyKind(configuration.Kind) {
 	case models.RootKeyKindSecretBox:
+		// Same check startup makes when loading the key. Catch it here so a config
+		// that can never start is rejected before keys are committed.
+		if configuration.Secretbox.Secret != nil && configuration.Secretbox.Path != nil {
+			return errors.New("set only one of encryption.secretbox.secret or encryption.secretbox.path")
+		}
 	case models.RootKeyKindAWS, models.RootKeyKindOpenBao:
 		var err error
 		if kms, err = newRootKeyWrapper(span.Context(), log, configuration); err != nil {

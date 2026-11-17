@@ -84,13 +84,13 @@ func loadSecretboxKey(
 ) (SecretboxKey, error) {
 	switch {
 	case config.Secret != nil && config.Path != nil:
-		return SecretboxKey{}, errors.New("set only one of encryption.secretBox.secret or encryption.secretBox.secretFile")
+		return SecretboxKey{}, errors.New("set only one of encryption.secretbox.secret or encryption.secretbox.path")
 	case config.Secret != nil:
 		return ParseSecretboxKey(strings.TrimSpace(*config.Secret))
 	case config.Path != nil:
 		return readSecretboxKeyFile(log, *config.Path)
 	default:
-		return SecretboxKey{}, errors.New("encryption.kind is secretbox but neither secret nor secretFile is configured")
+		return SecretboxKey{}, errors.New("encryption.kind is secretbox but neither secret nor path is configured")
 	}
 }
 

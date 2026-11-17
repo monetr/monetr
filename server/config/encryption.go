@@ -10,7 +10,7 @@ type Encryption struct {
 	Kind string `yaml:"kind"`
 	// Secretbox configures the secret or secret file loading at startup and is
 	// suitable for self hosted environments.
-	Secretbox Secretbox `yaml:"secretBox"`
+	Secretbox Secretbox `yaml:"secretbox"`
 	// AWS configures AWS KMS as the thing that will decrypt the initial keys
 	// monetr uses for encryption. This allows you to keep the secret key that
 	// monetr uses out of the process or filesystem.

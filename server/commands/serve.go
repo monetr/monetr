@@ -549,7 +549,7 @@ func ServeCommand(parent *cobra.Command) {
 	command.PersistentFlags().BoolVarP(&arguments.MigrateDatabase, "migrate", "m", false, "Automatically run database migrations on startup. Defaults to: false")
 	command.PersistentFlags().BoolVarP(&arguments.GenerateCertificates, "generate-certificates", "g", false, "Generate certificates for authentication if they do not already exist. Defaults to: false")
 	command.PersistentFlags().IntVarP(&arguments.Port, "port", "p", 0, "Specify a port to serve HTTP traffic on for monetr.")
-	command.PersistentFlags().BoolVar(&arguments.InitEncryption, "init-encryption", false, "Set up encryption on startup if it hasn't been set up yet. The generated secret is written to the configured encryption.secretBox.secretFile, which must be defined, and which must not already exist. Defaults to: false")
+	command.PersistentFlags().BoolVar(&arguments.InitEncryption, "init-encryption", false, "Set up encryption on startup if it hasn't been set up yet. The generated secret is written to the configured encryption.secretbox.path, which must be defined, and which must not already exist. Defaults to: false")
 
 	viper.BindPFlag("PostgreSQL.Migrate", command.PersistentFlags().Lookup("migrate"))
 
