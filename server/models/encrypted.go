@@ -57,6 +57,10 @@ type Encrypted[T any] struct {
 	EncryptedData *string `json:"-" bun:"encrypted_data"`
 }
 
+func (e *Encrypted[T]) IsEncrypted() bool {
+	return e != nil && e.KeyEncryptionKeyId != nil && e.EncryptedData != nil
+}
+
 func (e *Encrypted[T]) Encrypt(
 	ctx context.Context,
 	keys DataKeyWrapper,
@@ -103,12 +107,8 @@ func (e *Encrypted[T]) Decrypt(
 	aad []byte,
 ) (T, error) {
 	var result T
-	if e.EncryptedData == nil {
+	if !e.IsEncrypted() {
 		return result, ErrNotEncrypted
-	}
-	if e.KeyEncryptionKeyId == nil {
-		// The check constraint should make this impossible.
-		return result, errors.New("encrypted value has no key encryption key")
 	}
 
 	blob, err := parseEncryptedBlob(*e.EncryptedData)
