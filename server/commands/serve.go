@@ -24,6 +24,7 @@ import (
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/controller"
 	"github.com/monetr/monetr/server/database"
+	"github.com/monetr/monetr/server/encryption"
 	"github.com/monetr/monetr/server/icons"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/source"
@@ -53,6 +54,7 @@ func ServeCommand(parent *cobra.Command) {
 		MigrateDatabase      bool
 		GenerateCertificates bool
 		Port                 int
+		InitEncryption       bool
 	}
 
 	command := &cobra.Command{
@@ -230,6 +232,29 @@ func ServeCommand(parent *cobra.Command) {
 				// Note, redis/valkey used to register their collector here, but the new
 				// code registers it in the client wrapper itself
 			)
+
+			_, err = encryption.Start(
+				cmd.Context(),
+				log,
+				clock,
+				configuration,
+				db,
+				encryption.Bootstrap{
+					Initialize: false,
+					DeliverSecret: func(ctx context.Context, secret string) error {
+						// TODO here we need to write the file
+						panic("TODO")
+					},
+				},
+			)
+			if err != nil {
+				log.ErrorContext(
+					cmd.Context(),
+					"failed to setup encryption",
+					"err", err,
+				)
+				return err
+			}
 
 			dataCache, err := cache.GetCache(
 				cmd.Context(),
@@ -497,6 +522,7 @@ func ServeCommand(parent *cobra.Command) {
 	command.PersistentFlags().BoolVarP(&arguments.MigrateDatabase, "migrate", "m", false, "Automatically run database migrations on startup. Defaults to: false")
 	command.PersistentFlags().BoolVarP(&arguments.GenerateCertificates, "generate-certificates", "g", false, "Generate certificates for authentication if they do not already exist. Defaults to: false")
 	command.PersistentFlags().IntVarP(&arguments.Port, "port", "p", 0, "Specify a port to serve HTTP traffic on for monetr.")
+	command.PersistentFlags().BoolVar(&arguments.InitEncryption, "init-encryption", false, "Set up encryption on startup if it hasn't been set up yet. The generated secret is written to the configured encryption.secretBox.secretFile, which must be defined, and which must not already exist. Defaults to: false")
 
 	viper.BindPFlag("PostgreSQL.Migrate", command.PersistentFlags().Lookup("migrate"))
 

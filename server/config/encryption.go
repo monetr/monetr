@@ -8,9 +8,9 @@ type Encryption struct {
 	// secret key is available to the monetr process on startup and decrypts the
 	// root key that monetr uses.
 	Kind string `yaml:"kind"`
-	// SecretBox configures the secret or secret file loading at startup and is
+	// Secretbox configures the secret or secret file loading at startup and is
 	// suitable for self hosted environments.
-	SecretBox SecretBox `yaml:"secretBox"`
+	Secretbox Secretbox `yaml:"secretBox"`
 	// AWS configures AWS KMS as the thing that will decrypt the initial keys
 	// monetr uses for encryption. This allows you to keep the secret key that
 	// monetr uses out of the process or filesystem.
@@ -21,11 +21,7 @@ type Encryption struct {
 	OpenBao OpenBaoTransit `yaml:"openbao"`
 }
 
-type SecretBox struct {
-	Secret     *string `yaml:"secret"`
-	SecretFile *string `yaml:"secretFile"`
-
-	// This is set by a flag on startup, it requires that the secretfile is
-	// defined.
-	createIfNotExists bool `yaml:"-"`
+type Secretbox struct {
+	Secret *string `yaml:"secret"`
+	Path   *string `yaml:"Path"`
 }

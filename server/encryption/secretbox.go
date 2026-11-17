@@ -79,15 +79,15 @@ func SecretboxKeyFingerprint(secret SecretboxKey) string {
 
 func loadSecretboxKey(
 	log *slog.Logger,
-	config config.SecretBox,
+	config config.Secretbox,
 ) (SecretboxKey, error) {
 	switch {
-	case config.Secret != nil && config.SecretFile != nil:
+	case config.Secret != nil && config.Path != nil:
 		return SecretboxKey{}, errors.New("set only one of encryption.secretBox.secret or encryption.secretBox.secretFile")
 	case config.Secret != nil:
 		return ParseSecretboxKey(strings.TrimSpace(*config.Secret))
-	case config.SecretFile != nil:
-		return readSecretboxKeyFile(log, *config.SecretFile)
+	case config.Path != nil:
+		return readSecretboxKeyFile(log, *config.Path)
 	default:
 		return SecretboxKey{}, errors.New("encryption.kind is secretbox but neither secret nor secretFile is configured")
 	}

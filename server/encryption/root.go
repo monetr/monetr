@@ -29,7 +29,7 @@ func newRootKeyWrapper(
 ) (rootKeyWrapper, error) {
 	switch models.RootKeyKind(config.Kind) {
 	case models.RootKeyKindSecretBox:
-		secret, err := loadSecretboxKey(log, config.SecretBox)
+		secret, err := loadSecretboxKey(log, config.Secretbox)
 		if err != nil {
 			return nil, err
 		}
