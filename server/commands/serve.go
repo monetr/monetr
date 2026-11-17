@@ -240,7 +240,7 @@ func ServeCommand(parent *cobra.Command) {
 				configuration,
 				db,
 				encryption.Bootstrap{
-					Initialize: false,
+					Initialize: arguments.InitEncryption,
 					DeliverSecret: func(ctx context.Context, secret string) error {
 						// TODO here we need to write the file
 						panic("TODO")

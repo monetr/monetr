@@ -54,7 +54,7 @@ services:
       MONETR_STORAGE_ENABLED: ${MONETR_STORAGE_ENABLED:-true}
       MONETR_STORAGE_PROVIDER: ${MONETR_STORAGE_PROVIDER:-filesystem}
       MONETR_ENCRYPTION_KIND: secretbox
-      MONETR_ENCRYPTION_SECRETBOX_PATH: /etc/monetr/secret
+      MONETR_ENCRYPTION_SECRETBOX_PATH: /etc/monetr/encryption/secret.key
     networks:
       - monetr_network
 
