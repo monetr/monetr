@@ -2,7 +2,6 @@ package encryption
 
 import (
 	"context"
-	"crypto/rand"
 	"log/slog"
 	"sync"
 
@@ -13,7 +12,6 @@ import (
 	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
 	"github.com/uptrace/bun"
-	"golang.org/x/crypto/chacha20poly1305"
 )
 
 var (
@@ -21,10 +19,10 @@ var (
 )
 
 type Keyring struct {
-	lock      sync.RWMutex
-	unwrapper rootKeyUnwrapper
-	rootKeys  map[models.ID[models.RootKey]][]byte
-	keks      map[models.ID[models.KeyEncryptionKey]][]byte
+	lock     sync.RWMutex
+	wrapper  rootKeyWrapper
+	rootKeys map[models.ID[models.RootKey]][]byte
+	keks     map[models.ID[models.KeyEncryptionKey]][]byte
 
 	db   bun.IDB
 	repo repository.EncryptionRepository
@@ -37,17 +35,17 @@ func NewKeyring(
 	config config.Configuration,
 	db bun.IDB,
 ) (*Keyring, error) {
-	unwrapper, err := newRootKeyUnwrapper(ctx, log, config.Encryption)
+	wrapper, err := newRootKeyWrapper(ctx, log, config.Encryption)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Keyring{
-		unwrapper: unwrapper,
-		rootKeys:  map[models.ID[models.RootKey]][]byte{},
-		keks:      map[models.ID[models.KeyEncryptionKey]][]byte{},
-		db:        db,
-		repo:      repository.NewEncryptionRepository(log, clock, db),
+		wrapper:  wrapper,
+		rootKeys: map[models.ID[models.RootKey]][]byte{},
+		keks:     map[models.ID[models.KeyEncryptionKey]][]byte{},
+		db:       db,
+		repo:     repository.NewEncryptionRepository(log, clock, db),
 	}, nil
 }
 
@@ -92,7 +90,7 @@ func (k *Keyring) rootKey(
 		return nil, errors.Wrapf(err, "failed to load root key %s", id)
 	}
 
-	raw, err = unwrapRootKey(span.Context(), k.db, k.unwrapper, row)
+	raw, err = unwrapRootKey(span.Context(), k.db, k.wrapper, row)
 	if err != nil {
 		return nil, err
 	}
@@ -176,13 +174,9 @@ func (k *Keyring) WrapDataKey(
 		return "", nil, err
 	}
 
-	aead, err := chacha20poly1305.NewX(kek)
+	wrapped, err := sealDataKey(kek, kekId, dek)
 	if err != nil {
 		return "", nil, err
 	}
-	nonce := make([]byte, chacha20poly1305.NonceSizeX)
-	rand.Read(nonce)
-	// AAD is the KEK ID, so a wrapped DEK can't be relabeled as belonging to a
-	// different KEK. Result is nonce || ciphertext.
-	return kekId, aead.Seal(nonce, nonce, dek, []byte(kekId)), nil
+	return kekId, wrapped, nil
 }

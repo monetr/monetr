@@ -9,31 +9,35 @@ import (
 	"github.com/pkg/errors"
 )
 
-// rootKeyUnwrapper opens the root key wrappers for one configured kind.
-type rootKeyUnwrapper interface {
+// rootKeyWrapper wraps and unwraps root keys for one kind: secretbox, AWS KMS,
+// or OpenBao Transit.
+type rootKeyWrapper interface {
 	Kind() models.RootKeyKind
-	// Matches reports whether this unwrapper produced the wrapper. Same
+	// Matches reports whether this wrapper produced the root key wrapper. Same
 	// secret key, same KMS key, or same transit key.
 	Matches(wrapper models.RootKeyWrapper) bool
+	// Wrap encrypts a root key and returns the wrapper to store on its row.
+	Wrap(ctx context.Context, rootKey, aad []byte) (models.RootKeyWrapper, error)
+	// Unwrap decrypts a root key from a wrapper this wrapper produced.
 	Unwrap(ctx context.Context, wrapper models.RootKeyWrapper, aad []byte) ([]byte, error)
 }
 
-func newRootKeyUnwrapper(
+func newRootKeyWrapper(
 	ctx context.Context,
 	log *slog.Logger,
 	config config.Encryption,
-) (rootKeyUnwrapper, error) {
+) (rootKeyWrapper, error) {
 	switch models.RootKeyKind(config.Kind) {
 	case models.RootKeyKindSecretBox:
 		secret, err := loadSecretboxKey(log, config.SecretBox)
 		if err != nil {
 			return nil, err
 		}
-		return newSecretboxUnwrapper(secret)
+		return newSecretboxWrapper(secret)
 	case models.RootKeyKindAWS:
-		return newAWSUnwrapper(ctx, config.AWS)
+		return newAWSWrapper(ctx, config.AWS)
 	case models.RootKeyKindOpenBao:
-		return newOpenBaoUnwrapper(ctx, config.OpenBao)
+		return newOpenBaoWrapper(ctx, config.OpenBao)
 	case "":
 		return nil, errors.New("encryption.kind is not configured")
 	default:

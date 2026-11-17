@@ -16,17 +16,17 @@ import (
 	"github.com/pkg/errors"
 )
 
-type awsUnwrapper struct {
+type awsWrapper struct {
 	log    *slog.Logger
 	client *kms.Client
 	keyArn string
 }
 
-func newAWSUnwrapper(
+func newAWSWrapper(
 	ctx context.Context,
 	log *slog.Logger,
 	config config.AWSKMS,
-) (*awsUnwrapper, error) {
+) (*awsWrapper, error) {
 	var configOptions []func(*awsconfig.LoadOptions) error
 
 	configOptions = append(configOptions,
@@ -63,22 +63,58 @@ func newAWSUnwrapper(
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to describe configured KMS key")
 	}
-	return &awsUnwrapper{
+	return &awsWrapper{
 		log:    log,
 		client: client,
 		keyArn: *described.KeyMetadata.Arn,
 	}, nil
 }
 
-func (a *awsUnwrapper) Kind() models.RootKeyKind {
+func (a *awsWrapper) Kind() models.RootKeyKind {
 	return models.RootKeyKindAWS
 }
 
-func (a *awsUnwrapper) Matches(w models.RootKeyWrapper) bool {
+func (a *awsWrapper) Matches(w models.RootKeyWrapper) bool {
 	return w.Kind == models.RootKeyKindAWS && w.Reference == a.keyArn
 }
 
-func (a *awsUnwrapper) Unwrap(
+func (a *awsWrapper) Wrap(
+	ctx context.Context,
+	rootKey, aad []byte,
+) (models.RootKeyWrapper, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	a.log.DebugContext(span.Context(),
+		"wrapping root key using AWS KMS",
+		"awsKeyId", a.keyArn,
+	)
+	result, err := a.client.Encrypt(span.Context(), &kms.EncryptInput{
+		KeyId:               aws.String(a.keyArn),
+		Plaintext:           rootKey,
+		EncryptionAlgorithm: types.EncryptionAlgorithmSpecSymmetricDefault,
+		EncryptionContext: map[string]string{
+			"aad": string(aad),
+		},
+	})
+	if err != nil {
+		a.log.ErrorContext(span.Context(),
+			"failed to wrap root key using AWS KMS",
+			"awsKeyId", a.keyArn,
+			"err", err,
+		)
+		return models.RootKeyWrapper{}, errors.Wrap(err, "KMS failed to wrap root key")
+	}
+
+	return models.RootKeyWrapper{
+		Kind: models.RootKeyKindAWS,
+		// Matches compares against the ARN, so store the ARN.
+		Reference: a.keyArn,
+		Data:      models.EncryptionEncoding.EncodeToString(result.CiphertextBlob),
+	}, nil
+}
+
+func (a *awsWrapper) Unwrap(
 	ctx context.Context,
 	wrapper models.RootKeyWrapper,
 	aad []byte,

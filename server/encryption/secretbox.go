@@ -15,12 +15,12 @@ import (
 	"golang.org/x/crypto/chacha20poly1305"
 )
 
-type secretboxUnwrapper struct {
+type secretboxWrapper struct {
 	fingerprint string
 	wrapKey     []byte
 }
 
-func newSecretboxUnwrapper(secret SecretboxKey) (*secretboxUnwrapper, error) {
+func newSecretboxWrapper(secret SecretboxKey) (*secretboxWrapper, error) {
 	wrapKey, err := hkdf.Key(
 		sha256.New,
 		secret[:],
@@ -31,22 +31,37 @@ func newSecretboxUnwrapper(secret SecretboxKey) (*secretboxUnwrapper, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to derive secret key wrapping key")
 	}
-	return &secretboxUnwrapper{
+	return &secretboxWrapper{
 		fingerprint: SecretboxKeyFingerprint(secret),
 		wrapKey:     wrapKey,
 	}, nil
 }
 
-func (s *secretboxUnwrapper) Kind() models.RootKeyKind {
+func (s *secretboxWrapper) Kind() models.RootKeyKind {
 	return models.RootKeyKindSecretBox
 }
 
-func (s *secretboxUnwrapper) Matches(w models.RootKeyWrapper) bool {
+func (s *secretboxWrapper) Matches(w models.RootKeyWrapper) bool {
 	return w.Kind == models.RootKeyKindSecretBox && w.Reference == s.fingerprint
 }
 
-func (s *secretboxUnwrapper) Unwrap(_ context.Context, w models.RootKeyWrapper, aad []byte) ([]byte, error) {
+func (s *secretboxWrapper) Unwrap(_ context.Context, w models.RootKeyWrapper, aad []byte) ([]byte, error) {
 	return unseal(s.wrapKey, w.Data, aad)
+}
+
+func (s *secretboxWrapper) Wrap(
+	_ context.Context,
+	rootKey, aad []byte,
+) (models.RootKeyWrapper, error) {
+	data, err := seal(s.wrapKey, rootKey, aad)
+	if err != nil {
+		return models.RootKeyWrapper{}, err
+	}
+	return models.RootKeyWrapper{
+		Kind:      models.RootKeyKindSecretBox,
+		Reference: s.fingerprint,
+		Data:      data,
+	}, nil
 }
 
 // SecretboxKeyFingerprint identifies a secret key without revealing it. Stored

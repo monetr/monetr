@@ -8,18 +8,19 @@ import (
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/secrets"
+	"github.com/pkg/errors"
 )
 
-type openBaoUnwrapper struct {
+type openBaoWrapper struct {
 	client *secrets.OpenBaoTransit // reuse the auth and refresh setup from secrets.NewOpenBaoTransit
 	keyId  string
 }
 
-func newOpenBaoUnwrapper(
+func newOpenBaoWrapper(
 	ctx context.Context,
 	log *slog.Logger,
 	config config.OpenBaoTransit,
-) (*openBaoUnwrapper, error) {
+) (*openBaoWrapper, error) {
 	secrets.NewOpenBaoTransit(ctx, secrets.OpenBaoTransitConfig{
 		Log:                log,
 		KeyID:              config.KeyID,
@@ -39,14 +40,21 @@ func newOpenBaoUnwrapper(
 	})
 }
 
-func (o *openBaoUnwrapper) Kind() models.RootKeyKind {
+func (o *openBaoWrapper) Kind() models.RootKeyKind {
 	return models.RootKeyKindOpenBao
 }
 
-func (o *openBaoUnwrapper) Matches(w models.RootKeyWrapper) bool {
+func (o *openBaoWrapper) Matches(w models.RootKeyWrapper) bool {
 	return w.Kind == models.RootKeyKindOpenBao && w.Reference == o.keyId
 }
 
-func (o *openBaoUnwrapper) Unwrap(ctx context.Context, w models.RootKeyWrapper, aad []byte) ([]byte, error) {
+func (o *openBaoWrapper) Wrap(
+	ctx context.Context,
+	rootKey, aad []byte,
+) (models.RootKeyWrapper, error) {
+	return models.RootKeyWrapper{}, errors.New("wrapping root keys with OpenBao is not implemented yet")
+}
+
+func (o *openBaoWrapper) Unwrap(ctx context.Context, w models.RootKeyWrapper, aad []byte) ([]byte, error) {
 	panic("not implemented")
 }
