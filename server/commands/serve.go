@@ -31,6 +31,7 @@ import (
 	"github.com/monetr/monetr/server/jobs"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/metrics"
+	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/powchallenge"
 	"github.com/monetr/monetr/server/pubsub"
@@ -242,8 +243,34 @@ func ServeCommand(parent *cobra.Command) {
 				encryption.Bootstrap{
 					Initialize: arguments.InitEncryption,
 					DeliverSecret: func(ctx context.Context, secret string) error {
-						// TODO here we need to write the file
-						panic("TODO")
+						switch models.RootKeyKind(configuration.Encryption.Kind) {
+						case models.RootKeyKindSecretBox:
+							path := configuration.Encryption.Secretbox.Path
+							if path == nil || *path == "" {
+								// TODO Link to documentation here once it exists?
+								return errors.New("cannot initialize encryption with secretbox path unset and no KMS configured")
+							}
+
+							if err := encryption.WriteSecretboxKeyFile(
+								*path,
+								secret,
+							); err != nil {
+								return errors.Wrapf(err, "failed to write secretbox key to path: %q", *path)
+							}
+							log.InfoContext(ctx,
+								"encryption initialized and secret has been written to disk",
+								"path", *path,
+							)
+						case models.RootKeyKindAWS, models.RootKeyKindOpenBao:
+							// In this we don't write the secret at all, there is a way to
+							// recover it using the kms at a later time.
+							// Run `monetr encryption show-secret` to recover the secret if
+							// you initialized via a KMS
+						default:
+							// TODO Fail here?
+						}
+
+						return nil
 					},
 				},
 			)

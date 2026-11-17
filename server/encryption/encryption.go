@@ -239,14 +239,20 @@ func Initialize(
 
 	// With a KMS kind the root key also gets a KMS wrapper. Build that client
 	// before the transaction so a misconfigured KMS fails before anything is
-	// written.
+	// written. An unknown kind fails here too: otherwise setup would commit
+	// keys that startup can never build a wrapper to open.
 	var kms rootKeyWrapper
 	switch models.RootKeyKind(configuration.Kind) {
+	case models.RootKeyKindSecretBox:
 	case models.RootKeyKindAWS, models.RootKeyKindOpenBao:
 		var err error
 		if kms, err = newRootKeyWrapper(span.Context(), log, configuration); err != nil {
 			return err
 		}
+	case "":
+		return errors.New("encryption.kind is not configured")
+	default:
+		return errors.Errorf("unknown encryption.kind %q, must be secretbox, aws, or openbao", configuration.Kind)
 	}
 
 	// Default isolation (READ COMMITTED) on purpose. Each statement sees a fresh

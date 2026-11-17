@@ -11,5 +11,7 @@ func EncryptionCommand(parent *cobra.Command) {
 		},
 	}
 
+	encryptionInit(encryptionCommand)
+
 	parent.AddCommand(encryptionCommand)
 }
