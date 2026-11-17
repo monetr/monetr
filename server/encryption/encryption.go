@@ -280,6 +280,15 @@ func Initialize(
 			return ErrEncryptionAlreadyInitialized
 		}
 
+		// Setup always generates its own secret. Warn here, once it's certain
+		// setup will actually run, so a configured secret isn't mistaken for the
+		// one being used.
+		if configuration.Secretbox.Secret != nil {
+			log.WarnContext(ctx,
+				"encryption.secretbox.secret is configured but this secret will not be used for init, a new secret will be generated and the configured one must be replaced with it",
+			)
+		}
+
 		secret := GenerateSecretboxKey()
 		secretbox, err := newSecretboxWrapper(secret)
 		if err != nil {

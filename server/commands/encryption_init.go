@@ -67,6 +67,10 @@ func encryptionInit(parent *cobra.Command) {
 					}
 
 					if arguments.PrintSecret {
+						// TODO This goes through the logger, so with a log level above info
+						// the secret is never printed, and with only --print-secret it would
+						// be lost. It also ends up wherever logs are shipped. Print it to
+						// stdout instead (cmd.OutOrStdout()).
 						log.InfoContext(ctx,
 							"Generated secretbox key for monetr, please store this key safely!",
 							"secret", secret,
