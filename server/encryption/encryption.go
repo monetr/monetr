@@ -414,7 +414,35 @@ func sealDataKey(
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create key cipher")
 	}
+
 	nonce := make([]byte, chacha20poly1305.NonceSizeX)
 	rand.Read(nonce)
 	return aead.Seal(nonce, nonce, dek, []byte(kekId)), nil
+}
+
+// unsealDataKey opens a DEK wrapped by sealDataKey. kekId has to be the ID the
+// DEK was wrapped under, since its the AAD.
+func unsealDataKey(
+	kek []byte,
+	kekId models.ID[models.KeyEncryptionKey],
+	wrapped []byte,
+) ([]byte, error) {
+	if len(wrapped) < chacha20poly1305.NonceSizeX+chacha20poly1305.Overhead {
+		return nil, errors.New("wrapped data key is truncated")
+	}
+
+	aead, err := chacha20poly1305.NewX(kek)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create key cipher")
+	}
+
+	nonce := wrapped[:chacha20poly1305.NonceSizeX]
+	ciphertext := wrapped[chacha20poly1305.NonceSizeX:]
+
+	dek, err := aead.Open(nil, nonce, ciphertext, []byte(kekId))
+	if err != nil {
+		return nil, errors.Errorf("failed to unwrap data key with KEK %s, wrong key or tampered data", kekId)
+	}
+
+	return dek, nil
 }

@@ -3,8 +3,8 @@ package models
 import (
 	"context"
 	"crypto/rand"
-	"encoding/binary"
 	"encoding/base32"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"net/url"
@@ -42,8 +42,8 @@ type DataKeyWrapper interface {
 // Encrypted stores one encrypted value on a model, you must embed it on the
 // model directly and not use it as a struct field.
 type Encrypted[T any] struct {
-	KeyEncryptionKeyId ID[KeyEncryptionKey] `json:"-" bun:"key_encryption_key_id,notnull"`
-	KeyEncryptionKey   *KeyEncryptionKey    `json:"-" bun:"rel:belongs-to,join:key_encryption_key_id=key_encryption_key_id"`
+	KeyEncryptionKeyId *ID[KeyEncryptionKey] `json:"-" bun:"key_encryption_key_id,notnull"`
+	KeyEncryptionKey   *KeyEncryptionKey     `json:"-" bun:"rel:belongs-to,join:key_encryption_key_id=key_encryption_key_id"`
 	// EncryptedData is base32 encoded: format version, wrapped DEK, nonce, and
 	// ciphertext.
 	EncryptedData string `json:"-" bun:"encrypted_data,notnull"`

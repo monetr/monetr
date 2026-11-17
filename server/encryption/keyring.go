@@ -152,16 +152,29 @@ func (k *Keyring) kek(ctx context.Context, id models.ID[models.KeyEncryptionKey]
 	return k.loadKEK(ctx, row)
 }
 
-// UnwrapDataKey implements [models.DataKeyWrapper].
+// UnwrapDataKey implements [models.DataKeyWrapper]. Reads can use any cached
+// KEK: a KEK's raw value never changes for its ID, so a cached one is never
+// stale. Only a KEK this keyring hasn't seen yet is loaded from the database.
 func (k *Keyring) UnwrapDataKey(
 	ctx context.Context,
 	kekId models.ID[models.KeyEncryptionKey],
 	wrapped []byte,
 ) ([]byte, error) {
-	panic("unimplemented")
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	kek, err := k.kek(span.Context(), kekId)
+	if err != nil {
+		return nil, err
+	}
+
+	return unsealDataKey(kek, kekId, wrapped)
 }
 
-// WrapDataKey implements [models.DataKeyWrapper].
+// WrapDataKey implements [models.DataKeyWrapper]. Writes always read the
+// highest KEK ID from the database, so a KEK rotated in by another process is
+// picked up on the next write without a restart. Only the raw KEK for that ID
+// comes from the cache.
 func (k *Keyring) WrapDataKey(
 	ctx context.Context,
 	dek []byte,
