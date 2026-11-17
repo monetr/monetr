@@ -14,6 +14,13 @@ var (
 	ErrTOTPNotValid = errors.New("provided TOTP code is not valid")
 )
 
+type LoginMFASecret struct {
+	// For now we just store TOTP things here instead; in the future this might
+	// also include webauthn things or other MFA stuff?
+	TOTP              string   `json:"totp"`
+	TOTPRecoveryCodes []string `json:"totpRecoveryCodes"`
+}
+
 type Login struct {
 	bun.BaseModel `bun:"table:logins,alias:login"`
 
@@ -28,6 +35,8 @@ type Login struct {
 	TOTP              string     `json:"-" bun:"totp,nullzero"`
 	TOTPRecoveryCodes []string   `json:"-" bun:"totp_recovery_codes,array,nullzero"`
 	TOTPEnabledAt     *time.Time `json:"totpEnabledAt" bun:"totp_enabled_at"`
+
+	Encrypted[LoginMFASecret]
 
 	Users []User `json:"-" bun:"rel:has-many,join:login_id=login_id"`
 }
