@@ -152,6 +152,52 @@ func (k *Keyring) kek(ctx context.Context, id models.ID[models.KeyEncryptionKey]
 	return k.loadKEK(ctx, row)
 }
 
+// verify decrypts the current secretbox key. That goes through the whole chain:
+// the configured wrapper opens the root key, the root key opens the KEK, and
+// the KEK opens the DEK. So a wrong secretbox key or a KMS that can't unwrap
+// fails here. With secretbox it also checks the decrypted key is the
+// configured one, since an old secretbox key can still wrap the root key and
+// would decrypt fine.
+func (k *Keyring) verify(ctx context.Context) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	row, err := k.repo.GetSecretboxKey(span.Context())
+	if err != nil {
+		return errors.Wrap(err, "failed to load the current secretbox key")
+	}
+
+	aad, err := models.EncryptionAAD(row)
+	if err != nil {
+		return err
+	}
+
+	encoded, err := row.Decrypt(span.Context(), k, aad)
+	if err != nil {
+		return errors.Wrapf(err,
+			"failed to decrypt the current secretbox key %s with the configured %s key",
+			row.SecretboxKeyId, k.wrapper.Kind(),
+		)
+	}
+
+	if secretbox, ok := k.wrapper.(*secretboxWrapper); ok {
+		current, err := ParseSecretboxKey(encoded)
+		if err != nil {
+			return errors.Wrap(err, "failed to parse the current secretbox key")
+		}
+		defer clear(current[:])
+
+		if SecretboxKeyFingerprint(current) != secretbox.fingerprint {
+			return errors.Errorf(
+				"the configured secretbox key is not the current one (%s), configure the current secretbox key",
+				row.SecretboxKeyId,
+			)
+		}
+	}
+
+	return nil
+}
+
 // UnwrapDataKey implements [models.DataKeyWrapper]. Reads can use any cached
 // KEK: a KEK's raw value never changes for its ID, so a cached one is never
 // stale. Only a KEK this keyring hasn't seen yet is loaded from the database.

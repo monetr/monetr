@@ -198,7 +198,18 @@ func Start(
 
 	// Encryption is set up by this point, so building the wrapper from config
 	// is safe even for secretbox.
-	return NewKeyring(span.Context(), log, clock, configuration, db)
+	keyring, err := NewKeyring(span.Context(), log, clock, configuration, db)
+	if err != nil {
+		return nil, err
+	}
+
+	// Building the keyring doesn't touch any keys, so prove the configured key
+	// works now instead of on the first encrypted read or write.
+	if err := keyring.verify(span.Context()); err != nil {
+		return nil, err
+	}
+
+	return keyring, nil
 }
 
 // isEncryptionInitialized reports whether setup has run. Setup creates every
