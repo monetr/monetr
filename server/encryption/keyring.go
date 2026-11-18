@@ -152,6 +152,36 @@ func (k *Keyring) kek(ctx context.Context, id models.ID[models.KeyEncryptionKey]
 	return k.loadKEK(ctx, row)
 }
 
+// currentSecretboxKey decrypts the newest secretbox key through the keyring.
+// Any configured key that can open the chain works here, it does not have to be
+// the current secretbox key.
+func (k *Keyring) currentSecretboxKey(
+	ctx context.Context,
+) (*models.SecretboxKey, string, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	row, err := k.repo.GetSecretboxKey(span.Context())
+	if err != nil {
+		return nil, "", errors.Wrap(err, "failed to load the current secretbox key")
+	}
+
+	aad, err := models.EncryptionAAD(row)
+	if err != nil {
+		return nil, "", err
+	}
+
+	encoded, err := row.Decrypt(span.Context(), k, aad)
+	if err != nil {
+		return nil, "", errors.Wrapf(err,
+			"failed to decrypt the current secretbox key %s with the configured %s key",
+			row.SecretboxKeyId, k.wrapper.Kind(),
+		)
+	}
+
+	return row, encoded, nil
+}
+
 // verify decrypts the current secretbox key. That goes through the whole chain:
 // the configured wrapper opens the root key, the root key opens the KEK, and
 // the KEK opens the DEK. So a wrong secretbox key or a KMS that can't unwrap
@@ -162,22 +192,9 @@ func (k *Keyring) verify(ctx context.Context) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	row, err := k.repo.GetSecretboxKey(span.Context())
-	if err != nil {
-		return errors.Wrap(err, "failed to load the current secretbox key")
-	}
-
-	aad, err := models.EncryptionAAD(row)
+	row, encoded, err := k.currentSecretboxKey(span.Context())
 	if err != nil {
 		return err
-	}
-
-	encoded, err := row.Decrypt(span.Context(), k, aad)
-	if err != nil {
-		return errors.Wrapf(err,
-			"failed to decrypt the current secretbox key %s with the configured %s key",
-			row.SecretboxKeyId, k.wrapper.Kind(),
-		)
 	}
 
 	if secretbox, ok := k.wrapper.(*secretboxWrapper); ok {

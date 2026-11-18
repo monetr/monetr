@@ -212,6 +212,40 @@ func Start(
 	return keyring, nil
 }
 
+// CurrentSecretboxKey decrypts the newest secretbox key with the configured key
+// and returns it encoded. Unlike Start it does not require the configured key to
+// be the current secretbox key, any key that still wraps the root key works. So
+// with a KMS it recovers the secretbox key, and with an old secretbox key it
+// returns the current one. Returns ErrEncryptionNotInitialized if encryption
+// has not been set up.
+func CurrentSecretboxKey(
+	ctx context.Context,
+	log *slog.Logger,
+	clock clock.Clock,
+	configuration config.Configuration,
+	db *bun.DB,
+) (string, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	repo := repository.NewEncryptionRepository(log, clock, db)
+	initialized, err := isEncryptionInitialized(span.Context(), repo)
+	if err != nil {
+		return "", err
+	}
+	if !initialized {
+		return "", ErrEncryptionNotInitialized
+	}
+
+	keyring, err := NewKeyring(span.Context(), log, clock, configuration, db)
+	if err != nil {
+		return "", err
+	}
+
+	_, encoded, err := keyring.currentSecretboxKey(span.Context())
+	return encoded, err
+}
+
 // isEncryptionInitialized reports whether setup has run. Setup creates every
 // key in one transaction, so the secretbox row existing means all of it does.
 func isEncryptionInitialized(
