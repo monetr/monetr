@@ -5,18 +5,21 @@ ALTER TABLE "logins" DROP COLUMN IF EXISTS "encrypted_data";
 ALTER TABLE "logins" DROP COLUMN IF EXISTS "key_encryption_key_id";
 
 DROP INDEX IF EXISTS "ix_simplefin_links_key_encryption_key";
+ALTER TABLE "simplefin_links" DROP CONSTRAINT IF EXISTS "ck_simplefin_links_secret_or_encrypted";
 ALTER TABLE "simplefin_links" DROP CONSTRAINT IF EXISTS "ck_simplefin_links_encrypted_data_key_encryption_key";
 ALTER TABLE "simplefin_links" DROP CONSTRAINT IF EXISTS "fk_simplefin_links_key_encryption_key";
 ALTER TABLE "simplefin_links" DROP COLUMN IF EXISTS "encrypted_data";
 ALTER TABLE "simplefin_links" DROP COLUMN IF EXISTS "key_encryption_key_id";
 
 DROP INDEX IF EXISTS "ix_lunch_flow_links_key_encryption_key";
+ALTER TABLE "lunch_flow_links" DROP CONSTRAINT IF EXISTS "ck_lunch_flow_links_secret_or_encrypted";
 ALTER TABLE "lunch_flow_links" DROP CONSTRAINT IF EXISTS "ck_lunch_flow_links_encrypted_data_key_encryption_key";
 ALTER TABLE "lunch_flow_links" DROP CONSTRAINT IF EXISTS "fk_lunch_flow_links_key_encryption_key";
 ALTER TABLE "lunch_flow_links" DROP COLUMN IF EXISTS "encrypted_data";
 ALTER TABLE "lunch_flow_links" DROP COLUMN IF EXISTS "key_encryption_key_id";
 
 DROP INDEX IF EXISTS "ix_plaid_links_key_encryption_key";
+ALTER TABLE "plaid_links" DROP CONSTRAINT IF EXISTS "ck_plaid_links_secret_or_encrypted";
 ALTER TABLE "plaid_links" DROP CONSTRAINT IF EXISTS "ck_plaid_links_encrypted_data_key_encryption_key";
 ALTER TABLE "plaid_links" DROP CONSTRAINT IF EXISTS "fk_plaid_links_key_encryption_key";
 ALTER TABLE "plaid_links" DROP COLUMN IF EXISTS "encrypted_data";
