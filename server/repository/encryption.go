@@ -152,8 +152,27 @@ func (e *encryptionRepositoryBase) GetKeyEncryptionKey(
 }
 
 // GetKeyEncryptionKeyById implements [EncryptionRepository].
-func (e *encryptionRepositoryBase) GetKeyEncryptionKeyById(ctx context.Context, id models.ID[models.KeyEncryptionKey]) (*models.KeyEncryptionKey, error) {
-	panic("unimplemented")
+func (e *encryptionRepositoryBase) GetKeyEncryptionKeyById(
+	ctx context.Context,
+	id models.ID[models.KeyEncryptionKey],
+) (*models.KeyEncryptionKey, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	var item models.KeyEncryptionKey
+	err := e.db.NewSelect().
+		Model(&item).
+		Where(`key_encryption_key_id = ?`, id).
+		Limit(1).
+		Scan(span.Context())
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, errors.Wrap(err, "failed to retrieve key encryption key by id")
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return &item, nil
 }
 
 // GetRootKey implements [EncryptionRepository].
@@ -178,8 +197,27 @@ func (e *encryptionRepositoryBase) GetRootKey(
 }
 
 // GetRootKeyById implements [EncryptionRepository].
-func (e *encryptionRepositoryBase) GetRootKeyById(ctx context.Context, id models.ID[models.RootKey]) (*models.RootKey, error) {
-	panic("unimplemented")
+func (e *encryptionRepositoryBase) GetRootKeyById(
+	ctx context.Context,
+	id models.ID[models.RootKey],
+) (*models.RootKey, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	var item models.RootKey
+	err := e.db.NewSelect().
+		Model(&item).
+		Where(`root_key_id = ?`, id).
+		Limit(1).
+		Scan(span.Context())
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, errors.Wrap(err, "failed to retrieve root key by id")
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return &item, nil
 }
 
 // GetSecretboxKey implements [EncryptionRepository].
