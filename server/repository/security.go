@@ -85,12 +85,22 @@ var (
 type baseSecurityRepository struct {
 	db    bun.IDB
 	clock clock.Clock
+	// keyring is nil when encryption is not set up, then TOTP secrets are only
+	// stored in plaintext.
+	keyring DataKeyWrapper
 }
 
-func NewSecurityRepository(db bun.IDB, clock clock.Clock) SecurityRepository {
+// NewSecurityRepository creates a security repository. keys may be nil if
+// encryption is not set up.
+func NewSecurityRepository(
+	db bun.IDB,
+	clock clock.Clock,
+	keyring DataKeyWrapper,
+) SecurityRepository {
 	return &baseSecurityRepository{
-		db:    db,
-		clock: clock,
+		db:      db,
+		clock:   clock,
+		keyring: keyring,
 	}
 }
 
@@ -220,6 +230,34 @@ func (b *baseSecurityRepository) SetupTOTP(
 	// Make sure this is nil
 	login.TOTPEnabledAt = nil
 
+	// If encryption is enabled then encrypt the TOTP secret and recovery codes
+	// using the new method too. Setting up TOTP again replaces both copies, so
+	// without encryption any previous encrypted value is cleared.
+	var kekId *ID[KeyEncryptionKey]
+	var encryptedData *string
+	if b.keyring != nil {
+		login.Encrypted = &Encrypted[LoginMFASecret]{}
+		aad, err := EncryptionAAD(&login)
+		if err != nil {
+			return "", nil, err
+		}
+		if err := login.Encrypt(
+			span.Context(),
+			b.keyring,
+			aad,
+			LoginMFASecret{
+				TOTP:              login.TOTP,
+				TOTPRecoveryCodes: login.TOTPRecoveryCodes,
+			},
+		); err != nil {
+			return "", nil, errors.Wrap(err, "failed to encrypt TOTP settings")
+		}
+		kekId = &login.KeyEncryptionKeyId
+		encryptedData = &login.EncryptedData
+	} else {
+		login.Encrypted = nil
+	}
+
 	// Store this data on the login itself, that way when the user confirms it we
 	// can simply set the enabled at date.
 	_, err = b.db.NewUpdate().
@@ -227,6 +265,8 @@ func (b *baseSecurityRepository) SetupTOTP(
 		Set(`"totp" = ?`, login.TOTP).
 		Set(`"totp_recovery_codes" = ?`, pgdialect.Array(login.TOTPRecoveryCodes)).
 		Set(`"totp_enabled_at" = ?`, login.TOTPEnabledAt).
+		Set(`"key_encryption_key_id" = ?`, kekId).
+		Set(`"encrypted_data" = ?`, encryptedData).
 		WherePK().
 		// No RETURNING here; the logins table has a "crypt" column that the Login
 		// model deliberately does not carry, and bun (unlike go-pg) refuses to

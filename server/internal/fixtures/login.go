@@ -39,7 +39,7 @@ func GivenIHaveLogin(t *testing.T, clock clock.Clock) (_ models.Login, password 
 func GivenIHaveTOTPForLogin(t *testing.T, clock clock.Clock, login *models.Login) *gotp.TOTP {
 	db := testutils.GetPgDatabase(t)
 
-	secureRepo := repository.NewSecurityRepository(db, clock)
+	secureRepo := repository.NewSecurityRepository(db, clock, nil)
 	uri, recoveryCodes, err := secureRepo.SetupTOTP(context.Background(), login.LoginId)
 	require.NoError(t, err, "Must be able to setup TOTP on login")
 	require.NotEmpty(t, uri, "Must return a TOTP URI")

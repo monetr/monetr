@@ -274,13 +274,26 @@ func ServeCommand(parent *cobra.Command) {
 					},
 				},
 			)
-			if err != nil {
+			switch {
+			case errors.Is(err, encryption.ErrEncryptionNotInitialized):
+				// Not set up yet is fine for now, everything keeps using the secrets
+				// table and the controller sees a nil keyring. This becomes a hard
+				// error once encryption is required. Anything else, like a missing or
+				// wrong key when encryption is already set up, still fails below.
+				// TODO Link to the encryption setup docs here once they exist.
 				log.WarnContext(
 					cmd.Context(),
-					"Failed to setup encryption, this is fine for now but encryption will be required in a following update.",
-					"err", err,
+					strings.Join([]string{
+						"encryption is not configured, monetr will require it in a future",
+						"update and will not start without it. Start monetr with",
+						"--init-encryption and encryption.secretbox.path set to have a",
+						"secretbox key generated and written there, or run monetr",
+						"encryption init and configure the secretbox key it generates",
+					}, " "),
+					"kind", configuration.Encryption.Kind,
 				)
-				return nil
+			case err != nil:
+				return errors.Wrap(err, "failed to start encryption")
 			}
 
 			dataCache, err := cache.GetCache(
