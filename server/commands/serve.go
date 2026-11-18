@@ -234,7 +234,7 @@ func ServeCommand(parent *cobra.Command) {
 				// code registers it in the client wrapper itself
 			)
 
-			_, err = encryption.Start(
+			keyring, err := encryption.Start(
 				cmd.Context(),
 				log,
 				clock,
@@ -275,12 +275,12 @@ func ServeCommand(parent *cobra.Command) {
 				},
 			)
 			if err != nil {
-				log.ErrorContext(
+				log.WarnContext(
 					cmd.Context(),
-					"failed to setup encryption",
+					"Failed to setup encryption, this is fine for now but encryption will be required in a following update.",
 					"err", err,
 				)
-				return err
+				return nil
 			}
 
 			dataCache, err := cache.GetCache(
@@ -430,6 +430,7 @@ func ServeCommand(parent *cobra.Command) {
 					Configuration:            configuration,
 					DB:                       db,
 					Email:                    email,
+					Encryption:               keyring,
 					FileStorage:              fileStorage,
 					KMS:                      kms,
 					Log:                      log,
