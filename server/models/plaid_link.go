@@ -52,7 +52,7 @@ type PlaidLink struct {
 
 	// Plaid link tokens are now stored on the plaid link themselves but are
 	// encrypted.
-	Encrypted[PlaidLinkSecret]
+	*Encrypted[PlaidLinkSecret]
 }
 
 func (PlaidLink) IdentityPrefix() string {

@@ -11,7 +11,8 @@ import (
 	"reflect"
 
 	"github.com/pkg/errors"
-	"github.com/uptrace/bun"
+	"github.com/uptrace/bun/dialect/pgdialect"
+	"github.com/uptrace/bun/schema"
 	"golang.org/x/crypto/chacha20poly1305"
 )
 
@@ -50,15 +51,15 @@ var ErrNotEncrypted = errors.New("value has not been encrypted")
 // done, rows that haven't been encrypted yet store NULL. Once every row is
 // encrypted these can go back to notnull.
 type Encrypted[T any] struct {
-	KeyEncryptionKeyId *ID[KeyEncryptionKey] `json:"-" bun:"key_encryption_key_id"`
-	KeyEncryptionKey   *KeyEncryptionKey     `json:"-" bun:"rel:belongs-to,join:key_encryption_key_id=key_encryption_key_id"`
+	KeyEncryptionKeyId ID[KeyEncryptionKey] `json:"-" bun:"key_encryption_key_id,nullzero"`
+	KeyEncryptionKey   *KeyEncryptionKey    `json:"-" bun:"rel:belongs-to,join:key_encryption_key_id=key_encryption_key_id"`
 	// EncryptedData is base32 encoded: format version, wrapped DEK, nonce, and
 	// ciphertext.
-	EncryptedData *string `json:"-" bun:"encrypted_data"`
+	EncryptedData string `json:"-" bun:"encrypted_data,nullzero"`
 }
 
 func (e *Encrypted[T]) IsEncrypted() bool {
-	return e != nil && e.KeyEncryptionKeyId != nil && e.EncryptedData != nil
+	return e != nil && e.KeyEncryptionKeyId != "" && e.EncryptedData != ""
 }
 
 func (e *Encrypted[T]) Encrypt(
@@ -96,8 +97,8 @@ func (e *Encrypted[T]) Encrypt(
 		nonce:      nonce,
 		ciphertext: ciphertext,
 	}.encode()
-	e.KeyEncryptionKeyId = &kekId
-	e.EncryptedData = &data
+	e.KeyEncryptionKeyId = kekId
+	e.EncryptedData = data
 	return nil
 }
 
@@ -111,12 +112,12 @@ func (e *Encrypted[T]) Decrypt(
 		return result, ErrNotEncrypted
 	}
 
-	blob, err := parseEncryptedBlob(*e.EncryptedData)
+	blob, err := parseEncryptedBlob(e.EncryptedData)
 	if err != nil {
 		return result, err
 	}
 
-	dek, err := keys.UnwrapDataKey(ctx, *e.KeyEncryptionKeyId, blob.wrappedDEK)
+	dek, err := keys.UnwrapDataKey(ctx, e.KeyEncryptionKeyId, blob.wrappedDEK)
 	if err != nil {
 		return result, errors.Wrap(err, "failed to unwrap data key")
 	}
@@ -145,14 +146,14 @@ func (e *Encrypted[T]) Decrypt(
 // escapes the values and sorts the parameters by column name:
 //
 //	aad://plaid_links?account_id=acct_01J...&plaid_link_id=plx_01J...
-func EncryptionAAD[T any](db bun.IDB, model *T) ([]byte, error) {
+func EncryptionAAD[T any](model *T) ([]byte, error) {
 	value := reflect.ValueOf(model)
 	if value.Elem().Kind() != reflect.Struct {
 		return nil, errors.Errorf("encryption AAD requires a pointer to a struct, got %T", model)
 	}
 	value = value.Elem()
 
-	table := db.Dialect().Tables().Get(value.Type())
+	table := schema.NewTables(pgdialect.New()).Get(value.Type())
 	if len(table.PKs) == 0 {
 		return nil, errors.Errorf("table %s has no primary key to build an encryption AAD from", table.Name)
 	}

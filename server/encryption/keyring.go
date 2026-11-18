@@ -105,7 +105,7 @@ func (k *Keyring) loadKEK(ctx context.Context, row *models.KeyEncryptionKey) ([]
 		return nil, err
 	}
 
-	aad, err := models.EncryptionAAD(k.db, row)
+	aad, err := models.EncryptionAAD(row)
 	if err != nil {
 		return nil, err
 	}

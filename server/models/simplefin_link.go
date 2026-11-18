@@ -64,7 +64,7 @@ type SimpleFinLink struct {
 	UpdatedAt            time.Time            `json:"updatedAt" bun:"updated_at,notnull,nullzero"`
 	DeletedAt            *time.Time           `json:"deletedAt,omitempty" bun:"deleted_at"`
 
-	Encrypted[SimpleFinLinkSecret]
+	*Encrypted[SimpleFinLinkSecret]
 }
 
 func (SimpleFinLink) IdentityPrefix() string {

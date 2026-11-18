@@ -36,7 +36,7 @@ type Login struct {
 	TOTPRecoveryCodes []string   `json:"-" bun:"totp_recovery_codes,array,nullzero"`
 	TOTPEnabledAt     *time.Time `json:"totpEnabledAt" bun:"totp_enabled_at"`
 
-	Encrypted[LoginMFASecret]
+	*Encrypted[LoginMFASecret]
 
 	Users []User `json:"-" bun:"rel:has-many,join:login_id=login_id"`
 }

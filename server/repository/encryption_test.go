@@ -51,12 +51,11 @@ func givenIHaveASecretboxKey(
 	repo repository.EncryptionRepository,
 	kek *models.KeyEncryptionKey,
 ) *models.SecretboxKey {
-	data := gofakeit.UUID()
 	key := &models.SecretboxKey{
 		Fingerprint: gofakeit.UUID(),
 		Encrypted: models.Encrypted[string]{
-			KeyEncryptionKeyId: &kek.KeyEncryptionKeyId,
-			EncryptedData:      &data,
+			KeyEncryptionKeyId: kek.KeyEncryptionKeyId,
+			EncryptedData:      gofakeit.UUID(),
 		},
 	}
 	require.NoError(t, repo.CreateSecretboxKey(t.Context(), key), "must create secretbox key")
@@ -160,13 +159,11 @@ func TestEncryptionRepository_CreateSecretboxKey(t *testing.T) {
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 		repo := repository.NewEncryptionRepository(log, clock, db)
 
-		kekId := models.NewID[models.KeyEncryptionKey]()
-		data := gofakeit.UUID()
 		err := repo.CreateSecretboxKey(t.Context(), &models.SecretboxKey{
 			Fingerprint: gofakeit.UUID(),
 			Encrypted: models.Encrypted[string]{
-				KeyEncryptionKeyId: &kekId,
-				EncryptedData:      &data,
+				KeyEncryptionKeyId: models.NewID[models.KeyEncryptionKey](),
+				EncryptedData:      gofakeit.UUID(),
 			},
 		})
 		assert.Error(t, err, "should not store a secretbox key for a missing key encryption key")

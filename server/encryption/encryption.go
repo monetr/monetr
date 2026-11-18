@@ -82,7 +82,7 @@ func unwrapRootKey(
 		)
 	}
 
-	aad, err := models.EncryptionAAD(db, rootKey)
+	aad, err := models.EncryptionAAD(rootKey)
 	if err != nil {
 		return nil, err
 	}
@@ -306,7 +306,7 @@ func Initialize(
 			RootKeyId:   models.NewID[models.RootKey](),
 			Fingerprint: models.RootKeyFingerprint(rawRootKey),
 		}
-		rootKeyAAD, err := models.EncryptionAAD(tx, rootKey)
+		rootKeyAAD, err := models.EncryptionAAD(rootKey)
 		if err != nil {
 			return err
 		}
@@ -334,7 +334,7 @@ func Initialize(
 			KeyEncryptionKeyId: models.NewID[models.KeyEncryptionKey](),
 			RootKeyId:          rootKey.RootKeyId,
 		}
-		kekAAD, err := models.EncryptionAAD(tx, kek)
+		kekAAD, err := models.EncryptionAAD(kek)
 		if err != nil {
 			return err
 		}
@@ -352,7 +352,7 @@ func Initialize(
 			SecretboxKeyId: models.NewID[models.SecretboxKey](),
 			Fingerprint:    SecretboxKeyFingerprint(secret),
 		}
-		secretboxKeyAAD, err := models.EncryptionAAD(tx, secretboxKey)
+		secretboxKeyAAD, err := models.EncryptionAAD(secretboxKey)
 		if err != nil {
 			return err
 		}

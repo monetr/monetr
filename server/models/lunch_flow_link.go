@@ -58,7 +58,7 @@ type LunchFlowLink struct {
 	CreatedByUser        *User               `json:"-" bun:"rel:belongs-to,join:created_by=user_id"`
 	DeletedAt            *time.Time          `json:"deletedAt,omitempty" bun:"deleted_at"`
 
-	Encrypted[LunchFlowLinkSecret]
+	*Encrypted[LunchFlowLinkSecret]
 }
 
 func (LunchFlowLink) IdentityPrefix() string {
