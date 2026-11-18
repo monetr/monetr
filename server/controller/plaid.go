@@ -464,6 +464,8 @@ func (c *Controller) postPlaidTokenCallback(ctx *echo.Context) error {
 	}
 
 	plaidLink := PlaidLink{
+		PlaidLinkId:     NewID[PlaidLink](),
+		AccountId:       repo.AccountId(),
 		PlaidId:         result.ItemId,
 		SecretId:        secret.SecretId,
 		Products:        consts.PlaidProductStrings(),
@@ -472,6 +474,31 @@ func (c *Controller) postPlaidTokenCallback(ctx *echo.Context) error {
 		InstitutionId:   callbackRequest.InstitutionId,
 		InstitutionName: callbackRequest.InstitutionName,
 	}
+
+	// If encryption is enabled then encrypt the access token using the new method
+	// too
+	if c.Encryption != nil {
+		var encrypted Encrypted[PlaidLinkSecret]
+		aad, err := EncryptionAAD(&plaidLink)
+		if err != nil {
+			return c.internalError(ctx, err)
+		}
+		if err := encrypted.Encrypt(
+			c.getContext(ctx),
+			c.Encryption,
+			aad,
+			PlaidLinkSecret{
+				AccessToken: result.AccessToken,
+			},
+		); err != nil {
+			return c.internalError(ctx, err)
+		}
+		plaidLink.Encrypted = &encrypted
+	} else {
+		// TODO Log a warning about encryption not being enabled!
+		c.getLog(ctx).Warn("TODO")
+	}
+
 	if err = repo.CreatePlaidLink(c.getContext(ctx), &plaidLink); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create Plaid link")
 	}
