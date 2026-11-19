@@ -223,14 +223,14 @@ importers:
         specifier: 2.0.1
         version: 2.0.1(@rsbuild/core@2.3.2)
       '@rspress/core':
-        specifier: 2.1.2
-        version: 2.1.2(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0)
+        specifier: 2.1.3
+        version: 2.1.3(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0)
       '@rspress/plugin-rss':
-        specifier: 2.1.2
-        version: 2.1.2(@rspress/core@2.1.2(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))
+        specifier: 2.1.3
+        version: 2.1.3(@rspress/core@2.1.3(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))
       '@rspress/shared':
-        specifier: 2.1.2
-        version: 2.1.2(supports-color@9.4.0)
+        specifier: 2.1.3
+        version: 2.1.3(supports-color@9.4.0)
       '@shikijs/transformers':
         specifier: 4.5.0
         version: 4.5.0
@@ -275,10 +275,10 @@ importers:
         version: 6.0.0(supports-color@9.4.0)
       rspress-plugin-mermaid:
         specifier: 2.0.0
-        version: 2.0.0(@rspress/core@2.1.2(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))(supports-color@9.4.0)
+        version: 2.0.0(@rspress/core@2.1.3(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))(supports-color@9.4.0)
       rspress-plugin-reading-time:
         specifier: 1.0.2
-        version: 1.0.2(@rspress/core@2.1.2(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))(supports-color@9.4.0)
+        version: 1.0.2(@rspress/core@2.1.3(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))(supports-color@9.4.0)
       unist-util-visit:
         specifier: 5.2.0
         version: 5.2.0
@@ -1617,19 +1617,19 @@ packages:
       '@rspack/core':
         optional: true
 
-  '@rspress/core@2.1.2':
-    resolution: {integrity: sha512-3ghPRkZFwbuO3tr2Rb5cxi6QfSFWOcxoZ5p4pv21lbN5DxAzMduITFlfgBMTArIQbehXrfXw3OUXe1l422b0RA==}
+  '@rspress/core@2.1.3':
+    resolution: {integrity: sha512-qKa5c7zHO8cmhxkReURd3dN/ZRfHYnEztdIQ9hMuolaNzhSYo2A36XErUvLvbMf2EUM2AxfPYRQv+4Crfeq6pw==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
 
-  '@rspress/plugin-rss@2.1.2':
-    resolution: {integrity: sha512-YRAAHr+MC+pB/Y0lF2LyYPj+8cl0nK4duw9w2oSD0x7J/0q61dzgANQhibxy8uTGiQfCdOrUINAh+h0SQoPGFQ==}
+  '@rspress/plugin-rss@2.1.3':
+    resolution: {integrity: sha512-s5ShzZ0H8iXbCnNKx4C7y6sJjSEaqKvEetbOfdMAU6PFdfoOJnbiz3PGyCanWFFL50RWk/JBWGchZJ/JoPDKlA==}
     engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
       '@rspress/core': ^2.1.0-beta.2
 
-  '@rspress/shared@2.1.2':
-    resolution: {integrity: sha512-W34tT1fdP3PrdbXpZNKqOGZMOw+RYL70Z9vnkbT1HTTbtX4uMIDE+SU7ByihG0S0LYBsT3kPxA2cXj696253Uw==}
+  '@rspress/shared@2.1.3':
+    resolution: {integrity: sha512-VwJ7kgsTWVqHzSXQVHIUCsdMparmq9b/IDmTa3a6jMPl1zmm5Qg9M0eP4j8JXWoIS9n19XtCkQcZmMTFOPRy3A==}
 
   '@rstest/adapter-rsbuild@0.12.6':
     resolution: {integrity: sha512-Dj4i3h8ttF3Aq8U+ZotlNMK0Od4CN7SUJyHkQvwnjBP3Q/czGmgS1fDN5jlwFqDgkUTrpkQAjrhhi/m7fD4H7w==}
@@ -5568,13 +5568,13 @@ snapshots:
     optionalDependencies:
       '@rspack/core': 2.3.2(@swc/helpers@0.5.24)
 
-  '@rspress/core@2.1.2(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0)':
+  '@rspress/core@2.1.3(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0)':
     dependencies:
       '@mdx-js/mdx': 3.1.1(supports-color@9.4.0)
       '@mdx-js/react': 3.1.1(@types/react@19.3.0)(react@19.3.1)
       '@rsbuild/core': 2.3.2
       '@rsbuild/plugin-react': 2.1.1(@rsbuild/core@2.3.2)(@rspack/core@2.3.2(@swc/helpers@0.5.24))
-      '@rspress/shared': 2.1.2(supports-color@9.4.0)
+      '@rspress/shared': 2.1.3(supports-color@9.4.0)
       '@shikijs/rehype': 4.5.0
       '@shikijs/transformers': 4.5.0
       '@types/mdast': 4.0.4
@@ -5617,12 +5617,12 @@ snapshots:
       - micromark-util-types
       - supports-color
 
-  '@rspress/plugin-rss@2.1.2(@rspress/core@2.1.2(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))':
+  '@rspress/plugin-rss@2.1.3(@rspress/core@2.1.3(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))':
     dependencies:
-      '@rspress/core': 2.1.2(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0)
+      '@rspress/core': 2.1.3(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0)
       feed: 5.2.1
 
-  '@rspress/shared@2.1.2(supports-color@9.4.0)':
+  '@rspress/shared@2.1.3(supports-color@9.4.0)':
     dependencies:
       '@rsbuild/core': 2.3.2
       '@shikijs/rehype': 4.5.0
@@ -6942,7 +6942,7 @@ snapshots:
       estree-util-is-identifier-name: 3.0.0
       hast-util-whitespace: 3.0.0
       mdast-util-mdx-expression: 2.0.1(supports-color@9.4.0)
-      mdast-util-mdx-jsx: 3.2.0(supports-color@9.4.0)
+      mdast-util-mdx-jsx: 3.2.1(supports-color@9.4.0)
       mdast-util-mdxjs-esm: 2.0.1(supports-color@9.4.0)
       property-information: 7.2.0
       space-separated-tokens: 2.0.2
@@ -6976,7 +6976,7 @@ snapshots:
       estree-util-is-identifier-name: 3.0.0
       hast-util-whitespace: 3.0.0
       mdast-util-mdx-expression: 2.0.1(supports-color@9.4.0)
-      mdast-util-mdx-jsx: 3.2.0(supports-color@9.4.0)
+      mdast-util-mdx-jsx: 3.2.1(supports-color@9.4.0)
       mdast-util-mdxjs-esm: 2.0.1(supports-color@9.4.0)
       property-information: 7.2.0
       space-separated-tokens: 2.0.2
@@ -7468,7 +7468,7 @@ snapshots:
     dependencies:
       mdast-util-from-markdown: 2.1.0(supports-color@9.4.0)
       mdast-util-mdx-expression: 2.0.1(supports-color@9.4.0)
-      mdast-util-mdx-jsx: 3.2.0(supports-color@9.4.0)
+      mdast-util-mdx-jsx: 3.2.1(supports-color@9.4.0)
       mdast-util-mdxjs-esm: 2.0.1(supports-color@9.4.0)
       mdast-util-to-markdown: 2.2.0
     transitivePeerDependencies:
@@ -8555,9 +8555,9 @@ snapshots:
 
   rrweb-cssom@0.8.0: {}
 
-  rspress-plugin-devkit@1.0.1(@rspress/core@2.1.2(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))(supports-color@9.4.0):
+  rspress-plugin-devkit@1.0.1(@rspress/core@2.1.3(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))(supports-color@9.4.0):
     dependencies:
-      '@rspress/core': 2.1.2(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0)
+      '@rspress/core': 2.1.3(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0)
       '@types/estree-jsx': 1.0.5
       '@types/hast': 3.0.5
       '@types/mdast': 4.0.4
@@ -8575,19 +8575,19 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  rspress-plugin-mermaid@2.0.0(@rspress/core@2.1.2(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))(supports-color@9.4.0):
+  rspress-plugin-mermaid@2.0.0(@rspress/core@2.1.3(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))(supports-color@9.4.0):
     dependencies:
-      '@rspress/core': 2.1.2(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0)
+      '@rspress/core': 2.1.3(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0)
       mermaid: 12.3.0
-      rspress-plugin-devkit: 1.0.1(@rspress/core@2.1.2(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))(supports-color@9.4.0)
+      rspress-plugin-devkit: 1.0.1(@rspress/core@2.1.3(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))(supports-color@9.4.0)
     transitivePeerDependencies:
       - supports-color
 
-  rspress-plugin-reading-time@1.0.2(@rspress/core@2.1.2(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))(supports-color@9.4.0):
+  rspress-plugin-reading-time@1.0.2(@rspress/core@2.1.3(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))(supports-color@9.4.0):
     dependencies:
-      '@rspress/core': 2.1.2(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0)
+      '@rspress/core': 2.1.3(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0)
       reading-time: 1.5.0
-      rspress-plugin-devkit: 1.0.1(@rspress/core@2.1.2(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))(supports-color@9.4.0)
+      rspress-plugin-devkit: 1.0.1(@rspress/core@2.1.3(@rspack/core@2.3.2(@swc/helpers@0.5.24))(micromark-util-types@2.0.3)(micromark@4.0.3(supports-color@9.4.0))(supports-color@9.4.0))(supports-color@9.4.0)
     transitivePeerDependencies:
       - supports-color
 
