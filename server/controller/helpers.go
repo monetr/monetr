@@ -178,7 +178,14 @@ func (c *Controller) mustGetSecurityRepository(ctx *echo.Context) repository.Sec
 		panic("failed to retrieve database object from controller context")
 	}
 
-	return repository.NewSecurityRepository(db, c.Clock)
+	// c.Encryption is a pointer, only pass it when it is set so the repository
+	// gets a nil interface instead of an interface holding a nil keyring.
+	var keys DataKeyWrapper
+	if c.Encryption != nil {
+		keys = c.Encryption
+	}
+
+	return repository.NewSecurityRepository(db, c.Clock, keys)
 }
 
 func (c *Controller) getUnauthenticatedRepository(ctx *echo.Context) (repository.UnauthenticatedRepository, error) {

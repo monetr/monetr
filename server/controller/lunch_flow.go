@@ -73,11 +73,36 @@ func (c *Controller) postLunchFlowLink(ctx *echo.Context) error {
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	lunchFlowLink := LunchFlowLink{
-		Name:      request.Name,
-		SecretId:  secret.SecretId,
-		ApiUrl:    request.LunchFlowURL,
-		Status:    LunchFlowLinkStatusPending,
-		CreatedBy: c.mustGetUserId(ctx),
+		LunchFlowLinkId: NewID[LunchFlowLink](),
+		AccountId:       c.mustGetAccountId(ctx),
+		Name:            request.Name,
+		SecretId:        secret.SecretId,
+		ApiUrl:          request.LunchFlowURL,
+		Status:          LunchFlowLinkStatusPending,
+		CreatedBy:       c.mustGetUserId(ctx),
+	}
+
+	// If encryption is enabled then encrypt the api key using the new method too
+	if c.Encryption != nil {
+		var encrypted Encrypted[LunchFlowLinkSecret]
+		aad, err := EncryptionAAD(&lunchFlowLink)
+		if err != nil {
+			return c.internalError(ctx, err)
+		}
+		if err := encrypted.Encrypt(
+			c.getContext(ctx),
+			c.Encryption,
+			aad,
+			LunchFlowLinkSecret{
+				APIKey: request.APIKey,
+			},
+		); err != nil {
+			return c.internalError(ctx, err)
+		}
+		lunchFlowLink.Encrypted = &encrypted
+	} else {
+		// TODO Log a warning about encryption not being enabled!
+		c.getLog(ctx).WarnContext(c.getContext(ctx), "TODO")
 	}
 
 	// The Lunch Flow link itself needs to be created first.
@@ -185,12 +210,24 @@ func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx *echo.Context) err
 				var balanceCurrency currency.Currency
 				balanceCurrency, err = currency.GetCurrency("en", currencyCode)
 				if err != nil {
-					log.WarnContext(c.getContext(ctx), "failed to parse account balance, will default to 0", "err", err)
+					log.WarnContext(
+						c.getContext(ctx),
+						"failed to parse account balance, will default to 0",
+						"err", err,
+					)
 				} else {
 					currentBalance, err = currency.ParseCurrency(
 						balance.Amount.String(),
 						balanceCurrency,
 					)
+					if err != nil {
+						return c.wrapAndReturnError(
+							ctx,
+							err,
+							http.StatusInternalServerError,
+							"Failed to parse balance from lunch flow",
+						)
+					}
 				}
 			}
 

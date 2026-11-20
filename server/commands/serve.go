@@ -24,12 +24,14 @@ import (
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/controller"
 	"github.com/monetr/monetr/server/database"
+	"github.com/monetr/monetr/server/encryption"
 	"github.com/monetr/monetr/server/icons"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/source"
 	"github.com/monetr/monetr/server/jobs"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/metrics"
+	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/powchallenge"
 	"github.com/monetr/monetr/server/pubsub"
@@ -53,6 +55,7 @@ func ServeCommand(parent *cobra.Command) {
 		MigrateDatabase      bool
 		GenerateCertificates bool
 		Port                 int
+		InitEncryption       bool
 	}
 
 	command := &cobra.Command{
@@ -231,6 +234,68 @@ func ServeCommand(parent *cobra.Command) {
 				// code registers it in the client wrapper itself
 			)
 
+			keyring, err := encryption.Start(
+				cmd.Context(),
+				log,
+				clock,
+				configuration,
+				db,
+				encryption.Bootstrap{
+					Initialize: arguments.InitEncryption,
+					DeliverSecret: func(ctx context.Context, secret string) error {
+						switch models.RootKeyKind(configuration.Encryption.Kind) {
+						case models.RootKeyKindSecretBox:
+							path := configuration.Encryption.Secretbox.Path
+							if path == nil || *path == "" {
+								// TODO Link to documentation here once it exists?
+								return errors.New("cannot initialize encryption with secretbox path unset and no KMS configured")
+							}
+
+							if err := encryption.WriteSecretboxKeyFile(
+								*path,
+								secret,
+							); err != nil {
+								return errors.Wrapf(err, "failed to write secretbox key to path: %q", *path)
+							}
+							log.InfoContext(ctx,
+								"encryption initialized and secret has been written to disk",
+								"path", *path,
+							)
+						case models.RootKeyKindAWS, models.RootKeyKindOpenBao:
+							// In this we don't write the secret at all, there is a way to
+							// recover it using the kms at a later time.
+							// Run `monetr encryption show-secret` to recover the secret if
+							// you initialized via a KMS
+						default:
+							// TODO Fail here?
+						}
+
+						return nil
+					},
+				},
+			)
+			switch {
+			case errors.Is(err, encryption.ErrEncryptionNotInitialized):
+				// Not set up yet is fine for now, everything keeps using the secrets
+				// table and the controller sees a nil keyring. This becomes a hard
+				// error once encryption is required. Anything else, like a missing or
+				// wrong key when encryption is already set up, still fails below.
+				// TODO Link to the encryption setup docs here once they exist.
+				log.WarnContext(
+					cmd.Context(),
+					strings.Join([]string{
+						"encryption is not configured, monetr will require it in a future",
+						"update and will not start without it. Start monetr with",
+						"--init-encryption and encryption.secretbox.path set to have a",
+						"secretbox key generated and written there, or run monetr",
+						"encryption init and configure the secretbox key it generates",
+					}, " "),
+					"kind", configuration.Encryption.Kind,
+				)
+			case err != nil:
+				return errors.Wrap(err, "failed to start encryption")
+			}
+
 			dataCache, err := cache.GetCache(
 				cmd.Context(),
 				log,
@@ -378,6 +443,7 @@ func ServeCommand(parent *cobra.Command) {
 					Configuration:            configuration,
 					DB:                       db,
 					Email:                    email,
+					Encryption:               keyring,
 					FileStorage:              fileStorage,
 					KMS:                      kms,
 					Log:                      log,
@@ -497,6 +563,7 @@ func ServeCommand(parent *cobra.Command) {
 	command.PersistentFlags().BoolVarP(&arguments.MigrateDatabase, "migrate", "m", false, "Automatically run database migrations on startup. Defaults to: false")
 	command.PersistentFlags().BoolVarP(&arguments.GenerateCertificates, "generate-certificates", "g", false, "Generate certificates for authentication if they do not already exist. Defaults to: false")
 	command.PersistentFlags().IntVarP(&arguments.Port, "port", "p", 0, "Specify a port to serve HTTP traffic on for monetr.")
+	command.PersistentFlags().BoolVar(&arguments.InitEncryption, "init-encryption", false, "Set up encryption on startup if it hasn't been set up yet. The generated secret is written to the configured encryption.secretbox.path, which must be defined, and which must not already exist. Defaults to: false")
 
 	viper.BindPFlag("PostgreSQL.Migrate", command.PersistentFlags().Lookup("migrate"))
 

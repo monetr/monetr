@@ -13,6 +13,7 @@ import (
 	"github.com/monetr/monetr/server/cache"
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/config"
+	"github.com/monetr/monetr/server/encryption"
 	"github.com/monetr/monetr/server/internal/sentryecho"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/powchallenge"
@@ -39,6 +40,7 @@ type Controller struct {
 	Configuration            config.Configuration
 	DB                       *bun.DB
 	Email                    communication.EmailCommunication
+	Encryption               *encryption.Keyring
 	FileStorage              storage.Storage
 	Queue                    queue.Enqueuer
 	KMS                      secrets.KeyManagement
