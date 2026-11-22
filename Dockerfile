@@ -7,7 +7,7 @@ RUN apt-get update && \
       # renovate: datasource=deb depName=build-essential versioning=deb
       build-essential=12.12 \
       # renovate: datasource=deb depName=ca-certificates versioning=deb
-      ca-certificates=20250419 \
+      ca-certificates=20250419+deb13u1 \
       # renovate: datasource=deb depName=cmake versioning=deb
       cmake=3.31.6-2 \
       # gcc-x86-64-linux-gnu \ # Add these back to support arm64 hosts compiling amd64
@@ -56,9 +56,9 @@ FROM debian:13-slim@sha256:a29215f6a35e51e22adffa17f89e9d2ef06214e64a2bad10d765c
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       # renovate: datasource=deb depName=tzdata versioning=deb
-      tzdata=2026c-0+deb13u1 \
+      tzdata=2026f-0+deb13u1 \
       # renovate: datasource=deb depName=ca-certificates versioning=deb
-      ca-certificates=20250419 \
+      ca-certificates=20250419+deb13u1 \
     && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
