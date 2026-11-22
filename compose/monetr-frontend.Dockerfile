@@ -12,7 +12,7 @@ FROM debian:13-slim@sha256:a29215f6a35e51e22adffa17f89e9d2ef06214e64a2bad10d765c
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       # renovate: datasource=deb depName=ca-certificates versioning=deb
-      ca-certificates=20250419 \
+      ca-certificates=20250419+deb13u1 \
       # The ui service's compose healthcheck shells out to curl.
       # renovate: datasource=deb depName=curl versioning=deb
       curl=8.14.1-2+deb13u7 \
