@@ -308,8 +308,8 @@ importers:
         specifier: 0.35.5
         version: 0.35.5(@types/node@24.19.2)
       spellchecker-cli:
-        specifier: 7.0.5
-        version: 7.0.5(supports-color@9.4.0)
+        specifier: 7.0.6
+        version: 7.0.6(supports-color@9.4.0)
       typescript:
         specifier: 7.0.2
         version: 7.0.2
@@ -4160,8 +4160,8 @@ packages:
   space-separated-tokens@2.0.2:
     resolution: {integrity: sha512-PEGlAwrG8yXGXRjW32fGbg66JAlOAwbObuqVoJpv/mRgoWDQfgH1wDPvtzWyUSNAXBGSk8h755YDbbcEy3SH2Q==}
 
-  spellchecker-cli@7.0.5:
-    resolution: {integrity: sha512-qn7JHt9UVf7srS9AZL1UOIzIf+S8/auPytJZLLxtOW4VtFqbCrOi/gWbQxoKmJlKROzso24ZcN/YCJk6o62smA==}
+  spellchecker-cli@7.0.6:
+    resolution: {integrity: sha512-nAI1DUtN93TIEo0aq++/m+8Cs2qwNTYcKmNAqRJNOaHNUd1XMaYSNEZxptyQ/MZ8VWTSLQvjvNz61l1+fR5u7Q==}
     hasBin: true
 
   string-width@6.1.0:
@@ -8784,7 +8784,7 @@ snapshots:
 
   space-separated-tokens@2.0.2: {}
 
-  spellchecker-cli@7.0.5(supports-color@9.4.0):
+  spellchecker-cli@7.0.6(supports-color@9.4.0):
     dependencies:
       chalk: 5.6.2
       command-line-args: 6.0.2
