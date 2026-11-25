@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/billing"
+	"github.com/monetr/monetr/server/permissions"
 	"github.com/pkg/errors"
 )
 
@@ -25,6 +26,10 @@ func (c *Controller) handlePostCreateCheckout(ctx *echo.Context) error {
 	me, err := c.mustGetAuthenticatedRepository(ctx).GetMe(c.getContext(ctx))
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to retrieve user details")
+	}
+
+	if !permissions.CanManageBilling(me) {
+		return c.forbidden(ctx, "Only the owner can manage billing for an account")
 	}
 
 	checkoutSession, err := c.Billing.CreateCheckout(
@@ -53,6 +58,15 @@ func (c *Controller) handlePostCreateCheckout(ctx *echo.Context) error {
 func (c *Controller) handleGetAfterCheckout(ctx *echo.Context) error {
 	if !c.Configuration.Stripe.IsBillingEnabled() {
 		return c.notFound(ctx, "billing is not enabled")
+	}
+
+	me, err := c.mustGetAuthenticatedRepository(ctx).GetMe(c.getContext(ctx))
+	if err != nil {
+		return c.wrapPgError(ctx, err, "failed to retrieve current user details")
+	}
+
+	if !permissions.CanManageBilling(me) {
+		return c.forbidden(ctx, "Only the owner can manage billing for an account")
 	}
 
 	checkoutSessionId := ctx.Param("checkoutSessionId")
@@ -91,6 +105,10 @@ func (c *Controller) getBillingPortal(ctx *echo.Context) error {
 	me, err := c.mustGetAuthenticatedRepository(ctx).GetMe(c.getContext(ctx))
 	if err != nil {
 		return c.wrapPgError(ctx, err, "failed to retrieve current user details")
+	}
+
+	if !permissions.CanManageBilling(me) {
+		return c.forbidden(ctx, "Only the owner can manage billing for an account")
 	}
 
 	sessionUrl, err := c.Billing.CreateBillingPortal(
