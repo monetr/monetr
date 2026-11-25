@@ -49,6 +49,14 @@ func (s *IDSpec) Validate(ctx context.Context) error {
 				&s.Fields,
 				validation.Each(
 					validators.By(func(ctx context.Context, field *FieldRef) error {
+						// Occurrence only makes sense in the ID so it skips the normal
+						// field validation, and it only works when we are hashing.
+						if field.DerivedKind == DerivedKindOccurrence && field.Name == "" {
+							if s.Kind != IDSpecKindHashed {
+								return errors.New("occurrence can only be used when kind is hashed")
+							}
+							return nil
+						}
 						return field.Validate(ctx)
 					}),
 				),
