@@ -344,8 +344,8 @@ importers:
         specifier: 10.0.1
         version: 10.0.1
       juice:
-        specifier: 12.2.3
-        version: 12.2.3
+        specifier: 12.2.6
+        version: 12.2.6
       react:
         specifier: 19.3.1
         version: 19.3.1
@@ -2340,12 +2340,12 @@ packages:
     resolution: {integrity: sha512-85UdvzTNx/+s5CkSgBm/0hzP80RFHAa7PsfeADE5ezZF3uHz3/Tqj9gIKGT9PTtpycc3Ua64T0oVulGfKxzfqg==}
     engines: {node: '>=12.20.0'}
 
-  commander@14.0.3:
-    resolution: {integrity: sha512-H+y0Jo/T1RZ9qPP4Eh1pkcQcLRglraJaSLoyOtHxu6AapkjWVCy2Sit1QQ4x3Dng8qDlSsZEet7g5Pq06MvTgw==}
-    engines: {node: '>=20'}
-
   commander@15.0.0:
     resolution: {integrity: sha512-z67u4ZhzCL/Tydu1lJARtEZYWbWaN7oYLHbsuzocr6y4N6WZAagG3RQ4FW61V1/0+jImpj293XfrcYnd1qxtPg==}
+    engines: {node: '>=22.12.0'}
+
+  commander@15.1.0:
+    resolution: {integrity: sha512-cgnQ88TRrWcC7pVq46RzJVRMktu3W2RcbnoidnfBsl1bmDCBwJS/udcIZpKoCrbAYYaCqsz1yZCVIgbIaU3ddQ==}
     engines: {node: '>=22.12.0'}
 
   commander@7.2.0:
@@ -3135,8 +3135,8 @@ packages:
   jsonfile@6.2.1:
     resolution: {integrity: sha512-zwOTdL3rFQ/lRdBnntKVOX6k5cKJwEc1HdilT71BWEu7J41gXIB2MRp+vxduPSwZJPWBxEzv4yH1wYLJGUHX4Q==}
 
-  juice@12.2.3:
-    resolution: {integrity: sha512-2qsvEpZINCYmfd8hwcJZOpoZRnqfX8PAYrXkRcnb50ACI9fDKsA8MZrnN6DbYouQj861BhDyS9m+X5wQcT0z4A==}
+  juice@12.2.6:
+    resolution: {integrity: sha512-dajL5aaskzBPPmPIYMmhHjM+SZVnMlXQ82/hN4KaTygo9NZ6MyhbeenTu5+FuFC7ePxmJmRtB6mEHh8dq0QssQ==}
     engines: {node: '>=22.12.0'}
     hasBin: true
 
@@ -6311,9 +6311,9 @@ snapshots:
       table-layout: 4.1.1
       typical: 7.3.0
 
-  commander@14.0.3: {}
-
   commander@15.0.0: {}
+
+  commander@15.1.0: {}
 
   commander@7.2.0: {}
 
@@ -7223,10 +7223,10 @@ snapshots:
     optionalDependencies:
       graceful-fs: 4.2.11
 
-  juice@12.2.3:
+  juice@12.2.6:
     dependencies:
       cheerio: 1.2.0
-      commander: 14.0.3
+      commander: 15.1.0
       entities: 9.0.0
       postcss: 8.5.30
       postcss-nesting: 14.0.3(postcss@8.5.30)
