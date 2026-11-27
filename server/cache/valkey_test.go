@@ -69,12 +69,9 @@ func TestRedisCache_Set(t *testing.T) {
 }
 
 // Writes have to wait for their reply the same way reads do, otherwise a
-// failure never reaches the caller. redigo's Send only buffers a command and
-// the reply is not read until the connection is released back to the pool, so a
-// write that redis rejected came back as a nil error while nothing had actually
-// been stored. Anything that assumes a successful write means the key exists
-// (the proof of work replay marker especially) then reads back a missing key
-// and blames the caller for it.
+// failure never reaches the caller. Anything that assumes a successful write
+// means the key exists (the proof of work replay marker especially) then reads
+// back a missing key and blames the caller for it.
 func TestRedisCache_WritesSurfaceErrors(t *testing.T) {
 	const redisIsUnhappy = "LOADING Redis is loading the dataset in memory"
 
