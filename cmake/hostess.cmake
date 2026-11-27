@@ -19,10 +19,10 @@
 # from https://github.com/monetr/hostess/releases and add a line for it.
 include(ExternalProject)
 set(HOSTESS_REPOSITORY "monetr/hostess")
-set(HOSTESS_linux_amd64   "v0.5.4" "8f0bf151b5d8e8788397df4285c7662687c722e4dfefa3647aefa5318d1cb05e")
-set(HOSTESS_linux_arm64   "v0.5.4" "000161d4269601c389f5c585c2cd17f1526e1f7bac60f3a20a847ff2b7669190")
-set(HOSTESS_darwin_amd64  "v0.5.4" "44e2e5a2480721bb39e651814bccb440a39482980ca55939693826f3de66e072")
-set(HOSTESS_darwin_arm64  "v0.5.4" "57965a0cacff5561a72ac6bba62d5f832b832eb88af99e0e49c347065e8bcbb8")
+set(HOSTESS_linux_amd64   "v0.6.0" "fffa9517b8c27ec7bd31e5b6956e0188e51f482cd353a3962ee3eda57bcb1999")
+set(HOSTESS_linux_arm64   "v0.6.0" "ec5ac96b04d81e4d6bab20a435c3a5155f9224ad47420df39564b88b1a95c23a")
+set(HOSTESS_darwin_amd64  "v0.6.0" "da2b55de8205bfea03da65022f80c35e5c9e252934e4bf5ad686c3cb9086c14a")
+set(HOSTESS_darwin_arm64  "v0.6.0" "b356a6293a542122c59cd3e3c40b39270032f15287cf7afc9b613d0eed6dfb71")
 
 # Figure out which pinned binary matches the host that cmake is running on. The
 # release assets use Go's GOOS/GOARCH naming so we have to translate cmake's
