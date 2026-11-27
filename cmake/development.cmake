@@ -291,26 +291,18 @@ configure_file("${CMAKE_SOURCE_DIR}/compose/haproxy.cfg.in" "${HAPROXY_CONFIG_FI
 
 ########################################################################################################################
 
+list(JOIN LOCAL_DOMAINS ", " LOCAL_DOMAINS_DISPLAY)
 add_custom_target(
   development.hostsfile
-  COMMAND ${CMAKE_COMMAND} -E true
-  COMMENT "Setup local domains in /etc/hosts"
+  BYPRODUCTS ${LOCAL_HOSTS_MARKER}
+  COMMAND ${SUDO_EXECUTABLE} ${HOSTESS_EXECUTABLE} add ${LOCAL_DOMAINS} 127.0.0.1
+  COMMAND ${CMAKE_COMMAND} -E touch ${LOCAL_HOSTS_MARKER}
+  COMMENT "Setting up ${LOCAL_DOMAINS_DISPLAY} domains with your /etc/hosts file. You may be prompted for a password"
+  DEPENDS ${HOSTESS_EXECUTABLE}
 )
-
-foreach(LOCAL_DOMAIN ${LOCAL_DOMAINS})
-  add_custom_target(
-    development.hostsfile.${LOCAL_DOMAIN}
-    BYPRODUCTS ${LOCAL_HOSTS_MARKER}-${LOCAL_DOMAIN}
-    COMMAND ${SUDO_EXECUTABLE} ${HOSTESS_EXECUTABLE} add ${LOCAL_DOMAIN} 127.0.0.1
-    COMMAND ${CMAKE_COMMAND} -E touch ${LOCAL_HOSTS_MARKER}-${LOCAL_DOMAIN}
-    COMMENT "Setting up ${LOCAL_DOMAIN} domain with your /etc/hosts file. You may be prompted for a password"
-    DEPENDS ${HOSTESS_EXECUTABLE}
-  )
-  # Make sure the hostess binary has been downloaded and verified before we try
-  # to add domains to the hosts file with it.
-  add_dependencies(development.hostsfile.${LOCAL_DOMAIN} hostess)
-  add_dependencies(development.hostsfile development.hostsfile.${LOCAL_DOMAIN})
-endforeach()
+# Make sure the hostess binary has been downloaded and verified before we try
+# to add domains to the hosts file with it.
+add_dependencies(development.hostsfile hostess)
 
 
 set(ENV{LOCAL_CERTIFICATE_DIR} ${LOCAL_CERTIFICATE_DIR})
