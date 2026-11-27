@@ -45,7 +45,7 @@
     "sass": "1.108.2",
     "satori": "0.63.2",
     "sharp": "0.35.5",
-    "spellchecker-cli": "7.0.5",
+    "spellchecker-cli": "7.0.6",
     "typescript": "7.0.2"
   }
 }
