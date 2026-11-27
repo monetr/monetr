@@ -113,10 +113,36 @@ func (c *Controller) postSimpleFinLink(ctx *echo.Context) error {
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	simpleFinLink := SimpleFinLink{
-		Name:     request.Name,
-		SecretId: secret.SecretId,
-		ApiUrl:   apiUrl.String(),
-		Status:   SimpleFinLinkStatusPending,
+		SimpleFinLinkId: NewID[SimpleFinLink](),
+		AccountId:       c.mustGetAccountId(ctx),
+		Name:            request.Name,
+		SecretId:        secret.SecretId,
+		ApiUrl:          apiUrl.String(),
+		Status:          SimpleFinLinkStatusPending,
+	}
+
+	// If encryption is enabled then encrypt the access URL using the new method
+	// too
+	if c.Encryption != nil {
+		var encrypted Encrypted[SimpleFinLinkSecret]
+		aad, err := EncryptionAAD(&simpleFinLink)
+		if err != nil {
+			return c.internalError(ctx, err)
+		}
+		if err := encrypted.Encrypt(
+			c.getContext(ctx),
+			c.Encryption,
+			aad,
+			SimpleFinLinkSecret{
+				Secret: accessUrl,
+			},
+		); err != nil {
+			return c.internalError(ctx, err)
+		}
+		simpleFinLink.Encrypted = &encrypted
+	} else {
+		// TODO Log a warning about encryption not being enabled!
+		c.getLog(ctx).Warn("TODO")
 	}
 
 	if err := repo.CreateSimpleFinLink(

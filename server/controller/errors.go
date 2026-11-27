@@ -93,6 +93,23 @@ func (*Controller) sanitizePgError(err pgdriver.Error) (int, error) {
 	}
 }
 
+func (c *Controller) internalError(ctx *echo.Context, err error) error {
+	c.reportError(ctx, err)
+	crumbs.Error(
+		c.getContext(ctx),
+		"Internal error",
+		ctx.Request().URL.Hostname(),
+		map[string]any{
+			"error": err.Error(),
+		},
+	)
+
+	return echo.NewHTTPError(
+		http.StatusInternalServerError,
+		"Internal server error",
+	).Wrap(err)
+}
+
 func (c *Controller) wrapAndReturnError(ctx *echo.Context, err error, status int, msg string, args ...any) error {
 	wrapped := errors.Wrapf(err, msg, args...)
 	switch status {

@@ -39,6 +39,10 @@ type SimpleFinLinkError struct {
 	SimpleFinId  *string `json:"simpleFinId"`
 }
 
+type SimpleFinLinkSecret struct {
+	Secret string `json:"secret"`
+}
+
 type SimpleFinLink struct {
 	bun.BaseModel `bun:"table:simplefin_links,alias:simplefin_link"`
 
@@ -59,6 +63,8 @@ type SimpleFinLink struct {
 	CreatedByUser        *User                `json:"-" bun:"rel:belongs-to,join:created_by=user_id"`
 	UpdatedAt            time.Time            `json:"updatedAt" bun:"updated_at,notnull,nullzero"`
 	DeletedAt            *time.Time           `json:"deletedAt,omitempty" bun:"deleted_at"`
+
+	*Encrypted[SimpleFinLinkSecret]
 }
 
 func (SimpleFinLink) IdentityPrefix() string {

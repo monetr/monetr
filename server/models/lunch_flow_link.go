@@ -34,6 +34,10 @@ const (
 	LunchFlowLinkStatusError LunchFlowLinkStatus = "error"
 )
 
+type LunchFlowLinkSecret struct {
+	APIKey string `json:"apiKey"`
+}
+
 type LunchFlowLink struct {
 	bun.BaseModel `bun:"table:lunch_flow_links,alias:lunch_flow_link"`
 
@@ -53,6 +57,8 @@ type LunchFlowLink struct {
 	CreatedBy            ID[User]            `json:"createdBy" bun:"created_by,notnull,nullzero"`
 	CreatedByUser        *User               `json:"-" bun:"rel:belongs-to,join:created_by=user_id"`
 	DeletedAt            *time.Time          `json:"deletedAt,omitempty" bun:"deleted_at"`
+
+	*Encrypted[LunchFlowLinkSecret]
 }
 
 func (LunchFlowLink) IdentityPrefix() string {

@@ -49,6 +49,7 @@ type Configuration struct {
 	Cache         Cache         `yaml:"cache"`
 	Database      Database      `yaml:"database"`
 	Email         Email         `yaml:"email"`
+	Encryption    Encryption    `yaml:"encryption"`
 	Features      Features      `yaml:"transactionImports"`
 	KeyManagement KeyManagement `yaml:"keyManagement"`
 	Links         Links         `yaml:"links"`
@@ -414,6 +415,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Cache.Valkey.Database", 0)
 	v.SetDefault("Email.ForgotPassword.TokenLifetime", 10*time.Minute)
 	v.SetDefault("Email.Verification.TokenLifetime", 10*time.Minute)
+	v.SetDefault("Encryption.Kind", "secretbox")
 	v.SetDefault("Logging.Format", "text")
 	v.SetDefault("Logging.Level", LogLevel) // Info
 	// Lunch Flow is enabled by default for self-hosted deployments!
@@ -484,6 +486,11 @@ func setupEnv(v *viper.Viper) {
 	v.MustBindEnv("Email.SMTP.Host", "MONETR_EMAIL_SMTP_HOST")
 	v.MustBindEnv("Email.SMTP.Port", "MONETR_EMAIL_SMTP_PORT")
 	v.MustBindEnv("Email.BlockedDomains", "MONETR_EMAIL_BLOCKED_DOMAINS")
+
+	v.MustBindEnv("Encryption.Kind", "MONETR_ENCRYPTION_KIND")
+	v.MustBindEnv("Encryption.Secretbox.Secret", "MONETR_ENCRYPTION_SECRETBOX_SECRET")
+	v.MustBindEnv("Encryption.Secretbox.Path", "MONETR_ENCRYPTION_SECRETBOX_PATH")
+
 	v.MustBindEnv("Logging.Level", "MONETR_LOG_LEVEL")
 	v.MustBindEnv("Logging.Format", "MONETR_LOG_FORMAT")
 	v.MustBindEnv("KeyManagement.Provider", "MONETR_KMS_PROVIDER")

@@ -19,7 +19,7 @@ func TestBaseSecurityRepository_Login(t *testing.T) {
 	t.Run("valid credentials", func(t *testing.T) {
 		clock := clock.NewMock()
 		login, password := fixtures.GivenIHaveLogin(t, clock)
-		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock)
+		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock, nil)
 
 		result, _, err := repo.Login(t.Context(), login.Email, password)
 		assert.NoError(t, err, "must not return an error for valid credentials")
@@ -30,7 +30,7 @@ func TestBaseSecurityRepository_Login(t *testing.T) {
 	t.Run("oddly cased email", func(t *testing.T) {
 		clock := clock.NewMock()
 		login, password := fixtures.GivenIHaveLogin(t, clock)
-		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock)
+		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock, nil)
 
 		email := strings.ToUpper(login.Email)
 
@@ -42,7 +42,7 @@ func TestBaseSecurityRepository_Login(t *testing.T) {
 
 	t.Run("invalid credentials", func(t *testing.T) {
 		clock := clock.NewMock()
-		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock)
+		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock, nil)
 		email := testutils.GetUniqueEmail(t)
 		password := gofakeit.Lexify("????????")
 
@@ -55,7 +55,7 @@ func TestBaseSecurityRepository_Login(t *testing.T) {
 	t.Run("bad database connection", func(t *testing.T) {
 		clock := clock.NewMock()
 		login, password := fixtures.GivenIHaveLogin(t, clock)
-		repo := repository.NewSecurityRepository(testutils.GetBadPgDatabase(t), clock)
+		repo := repository.NewSecurityRepository(testutils.GetBadPgDatabase(t), clock, nil)
 
 		result, _, err := repo.Login(t.Context(), login.Email, password)
 		assert.EqualError(t, err, "failed to verify credentials: forcing a bad connection")
@@ -71,7 +71,7 @@ func TestBaseSecurityRepository_ChangePassword(t *testing.T) {
 
 		assert.NotEqual(t, password, newPassword, "passwords must be different")
 
-		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock)
+		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock, nil)
 
 		{ // Make sure that we can authenticate with the initial hashed password.
 			result, _, err := repo.Login(t.Context(), login.Email, password)
@@ -108,7 +108,7 @@ func TestBaseSecurityRepository_ChangePassword(t *testing.T) {
 		newPassword := gofakeit.Lexify("?????????????")
 		assert.NotEqual(t, password, newPassword, "new password cannot match the current password")
 
-		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock)
+		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock, nil)
 
 		{ // Make sure that we can authenticate with the initial hashed password.
 			result, _, err := repo.Login(t.Context(), login.Email, password)
@@ -140,7 +140,7 @@ func TestBaseSecurityRepository_ChangePassword(t *testing.T) {
 
 	t.Run("bad database connection", func(t *testing.T) {
 		clock := clock.NewMock()
-		repo := repository.NewSecurityRepository(testutils.GetBadPgDatabase(t), clock)
+		repo := repository.NewSecurityRepository(testutils.GetBadPgDatabase(t), clock, nil)
 		bogusPassword := gofakeit.Lexify("?????????????")
 		newPassword := gofakeit.Lexify("?????????????")
 
@@ -157,7 +157,7 @@ func TestBaseSecurityRepository_SetupTOTP(t *testing.T) {
 		assert.Empty(t, login.TOTPRecoveryCodes, "login should have no TOTP recovery codes")
 		assert.Nil(t, login.TOTPEnabledAt, "login should have a nil TOTP enabled at")
 
-		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock)
+		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock, nil)
 
 		ctx, cancel := context.WithTimeout(t.Context(), 1*time.Second)
 		defer cancel()
@@ -175,7 +175,7 @@ func TestBaseSecurityRepository_SetupTOTP(t *testing.T) {
 	t.Run("setup multiple times before enabled", func(t *testing.T) {
 		clock := clock.NewMock()
 		login, _ := fixtures.GivenIHaveLogin(t, clock)
-		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock)
+		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock, nil)
 
 		ctx1, cancel1 := context.WithTimeout(t.Context(), 1*time.Second)
 		defer cancel1()
@@ -199,7 +199,7 @@ func TestBaseSecurityRepository_SetupTOTP(t *testing.T) {
 	t.Run("already has TOTP enabled", func(t *testing.T) {
 		clock := clock.NewMock()
 		login, _ := fixtures.GivenIHaveLogin(t, clock)
-		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock)
+		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock, nil)
 
 		{ // Initially setup the TOTP stuff.
 			ctx, cancel := context.WithTimeout(t.Context(), 1*time.Second)
