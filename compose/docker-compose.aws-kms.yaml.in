@@ -4,7 +4,7 @@ services:
     image: nsmithuk/local-kms
     restart: always # If something goes wrong just restart the container, this is for development only.
     volumes:
-      - "@CMAKE_SOURCE_DIR@/compose/kms.yaml:/init/seed.yaml"
+      - "@AWS_KMS_SEED_FILE@:/init/seed.yaml"
   monetr:
     links:
       - kms

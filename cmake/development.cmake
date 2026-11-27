@@ -152,11 +152,28 @@ endif()
 # Setup the KMS backend based on the config.
 if("${MONETR_KMS_PROVIDER}" STREQUAL "aws")
   message(STATUS "AWS KMS (Local) will be used for local development as the KMS provider")
+  # Generate a random key ID and backing key for local KMS once per build
+  # directory, then reuse them so previously encrypted data stays readable.
+  file(MAKE_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY}/kms)
+  set(AWS_KMS_KEY_FILE ${COMPOSE_OUTPUT_DIRECTORY}/kms/key.txt)
+  if(NOT EXISTS ${AWS_KMS_KEY_FILE})
+    string(RANDOM LENGTH 32 AWS_KMS_KEY_SEED)
+    string(UUID AWS_KMS_KEY_ID NAMESPACE 6ba7b810-9dad-11d1-80b4-00c04fd430c8 NAME "${AWS_KMS_KEY_SEED}" TYPE SHA1)
+    string(RANDOM LENGTH 64 ALPHABET 0123456789abcdef AWS_KMS_BACKING_KEY)
+    message(STATUS "  Writing local KMS key file: ${AWS_KMS_KEY_ID}")
+    file(WRITE ${AWS_KMS_KEY_FILE} "${AWS_KMS_KEY_ID}\n${AWS_KMS_BACKING_KEY}")
+  endif()
+  file(STRINGS ${AWS_KMS_KEY_FILE} AWS_KMS_KEY_LINES)
+  list(GET AWS_KMS_KEY_LINES 0 AWS_KMS_KEY_ID)
+  list(GET AWS_KMS_KEY_LINES 1 AWS_KMS_BACKING_KEY)
+  set(AWS_KMS_SEED_FILE ${COMPOSE_OUTPUT_DIRECTORY}/kms/seed.yaml)
+  configure_file("${CMAKE_SOURCE_DIR}/compose/kms.yaml.in" "${AWS_KMS_SEED_FILE}" @ONLY)
   list(APPEND COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.aws-kms.yaml.in)
 elseif("${MONETR_KMS_PROVIDER}" STREQUAL "vault")
   message(STATUS "Vault Transit (Local) will be used for local development as the KMS provider")
-  # If we are using the vault KMS provider, then make a vault directory in our build tree. And take the vault config
-  # file and template it into that directory for later.
+  # If we are using the vault KMS provider, then make a vault directory in our
+  # build tree. And take the vault config file and template it into that
+  # directory for later.
   file(MAKE_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY}/vault)
   set(VAULT_TOKEN_FILE ${COMPOSE_OUTPUT_DIRECTORY}/vault/token.txt)
   if(NOT EXISTS ${VAULT_TOKEN_FILE})

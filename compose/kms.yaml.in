@@ -1,0 +1,14 @@
+# vim: set ft=yaml
+# This file is templated by cmake/development.cmake, the key ID and backing key
+# are randomly generated once per build directory.
+Keys:
+  Symmetric:
+    Aes:
+      - Metadata:
+          KeyId: @AWS_KMS_KEY_ID@
+        BackingKeys:
+          - @AWS_KMS_BACKING_KEY@
+
+Aliases:
+  - AliasName: alias/monetr
+    TargetKeyId: @AWS_KMS_KEY_ID@
