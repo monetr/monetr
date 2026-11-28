@@ -1,6 +1,8 @@
 import { withRsbuildConfig } from '@rstest/adapter-rsbuild';
 import { defineConfig } from '@rstest/core';
 
+import { Test2JsonReporter } from './test2json.reporter';
+
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -35,6 +37,14 @@ export default defineConfig({
   pool: {
     maxWorkers: 4,
   },
+  // When TEST2JSON is set, emit Go test2json events on stdout instead of the
+  // human readable output, so gotestsum can render these tests alongside the Go
+  // tests. TEST2JSON_FORWARD_STDIN also passes through events piped in on
+  // stdin, see cmake/scripts/UnifiedTests.cmake.
+  reporters:
+    process.env.TEST2JSON === '1'
+      ? [new Test2JsonReporter(path.resolve(dirname, '..'), process.env.TEST2JSON_FORWARD_STDIN === '1')]
+      : ['default'],
   globals: true,
   setupFiles: ['./src/setupTests.ts'],
   include: ['src/**/*.spec.{ts,tsx}'],

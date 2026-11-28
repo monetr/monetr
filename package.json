@@ -16,6 +16,7 @@
     "monetr": "cmake --preset default && cmake --build build -t build.monetr",
     "release": "cmake --preset release && cmake --build build -t build.monetr",
     "test": "cmake --preset testing && ctest --test-dir build --no-tests=error --output-on-failure",
+    "test:unified": "gotestsum --format testname --raw-command -- cmake -P cmake/scripts/UnifiedTests.cmake",
     "develop": "cmake --preset default && cmake --build build -t development.monetr.up",
     "develop-docs": "cmake --preset default && cmake --build build -t development.documentation.up",
     "shutdown": "cmake --preset default && cmake --build build -t development.down",
