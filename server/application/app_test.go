@@ -13,7 +13,7 @@ import (
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/ui"
-	plaid "github.com/plaid/plaid-go/v50"
+	plaid "github.com/plaid/plaid-go/v51"
 	"github.com/stretchr/testify/assert"
 )
 

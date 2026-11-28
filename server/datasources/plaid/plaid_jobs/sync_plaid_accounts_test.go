@@ -13,7 +13,7 @@ import (
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/secrets"
-	plaid "github.com/plaid/plaid-go/v50"
+	plaid "github.com/plaid/plaid-go/v51"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
