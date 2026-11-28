@@ -220,6 +220,69 @@ func TestQueryInitialFundingForRecurringTransaction(t *testing.T) {
 		response.JSON().Path("$.currentAmount").Number().IsEqual(266)
 	})
 
+	t.Run("funding schedule without an interval", func(t *testing.T) {
+		// INTERVAL is optional and means 1, but rrule-go leaves it as 0 in the
+		// original options. DTSTART has to be carried back here because the fixture
+		// starts it after the last charge, so a 0 would never move it.
+		app, e := NewTestApplication(t)
+		app.Clock.Set(time.Date(2026, 10, 26, 12, 0, 0, 0, time.UTC))
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+		// $8 on the 15th of every month
+		recurring := GivenIHaveATransactionRecurring(t, bank)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=WEEKLY;BYDAY=FR", false)
+
+		// Same as every friday, 5 fridays before November 15th and two of them have
+		// happened since the charge.
+		response := e.Request("QUERY", "/api/bank_accounts/{bankAccountId}/forecast/initial").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"transactionRecurringId": recurring.TransactionRecurringId,
+				"fundingScheduleId":      fundingSchedule.FundingScheduleId,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.currentAmount").Number().IsEqual(320)
+	})
+
+	t.Run("funding schedule that never occurs", func(t *testing.T) {
+		// There is no 31st of February, so there is never a contribution before the
+		// last charge no matter how far back DTSTART goes.
+		app, e := NewTestApplication(t)
+		app.Clock.Set(time.Date(2026, 10, 26, 12, 0, 0, 0, time.UTC))
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+		recurring := GivenIHaveATransactionRecurring(t, bank)
+		// The fixture can't make this, it panics on a rule with no next occurrence.
+		fundingSchedule := models.FundingSchedule{
+			AccountId:              bank.AccountId,
+			BankAccountId:          bank.BankAccountId,
+			Name:                   "Never",
+			RuleSet:                testutils.NewRuleSet(t, 2026, 10, 30, time.UTC, "FREQ=MONTHLY;INTERVAL=1;BYMONTH=2;BYMONTHDAY=31"),
+			NextRecurrence:         time.Date(2026, 10, 30, 0, 0, 0, 0, time.UTC),
+			NextRecurrenceOriginal: time.Date(2026, 10, 30, 0, 0, 0, 0, time.UTC),
+		}
+		testutils.MustDBInsert(t, &fundingSchedule)
+
+		response := e.Request("QUERY", "/api/bank_accounts/{bankAccountId}/forecast/initial").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"transactionRecurringId": recurring.TransactionRecurringId,
+				"fundingScheduleId":      fundingSchedule.FundingScheduleId,
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Funding schedule never occurs")
+	})
+
 	t.Run("recurring paycheck", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		app.Clock.Set(time.Date(2026, 10, 26, 12, 0, 0, 0, time.UTC))

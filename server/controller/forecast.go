@@ -276,6 +276,16 @@ func (c *Controller) queryInitialFundingForRecurringTransaction(ctx *echo.Contex
 	if options.Count > 0 {
 		return c.badRequest(ctx, "Funding schedules with a count are not supported")
 	}
+	// OrigOptions is the rule as it was written, so a rule without INTERVAL= has
+	// 0 here. rrule-go treats that as 1 and so do we, otherwise DTSTART never
+	// moves.
+	interval := max(options.Interval, 1)
+
+	// A rule that never fires, like the 31st of February, would never have a
+	// contribution before start no matter how far back DTSTART goes.
+	if fundingSchedule.RuleSet.After(time.Time{}, true).IsZero() {
+		return c.badRequest(ctx, "Funding schedule never occurs")
+	}
 
 	// If there are no contributions before start then the forecaster panics, this
 	// happens when the funding schedule was created after the last time this was
@@ -288,11 +298,11 @@ func (c *Controller) queryInitialFundingForRecurringTransaction(ctx *echo.Contex
 		dtstart := fundingSchedule.RuleSet.GetDTStart()
 		switch options.Freq {
 		case rrule.DAILY, rrule.WEEKLY:
-			dtstart = dtstart.AddDate(0, 0, -7*options.Interval)
+			dtstart = dtstart.AddDate(0, 0, -7*interval)
 		case rrule.MONTHLY, rrule.YEARLY:
 			// Whole years so we never land on a day that doesn't exist, Apr 30 minus
 			// 2 months is Feb 30 which Go turns into Mar 2.
-			dtstart = dtstart.AddDate(-options.Interval, 0, 0)
+			dtstart = dtstart.AddDate(-interval, 0, 0)
 		default:
 			return c.badRequest(ctx, "Funding schedule frequency is not supported")
 		}
