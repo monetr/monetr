@@ -13,7 +13,7 @@ import (
 	"github.com/go-viper/mapstructure/v2"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/util"
-	plaid "github.com/plaid/plaid-go/v50"
+	plaid "github.com/plaid/plaid-go/v51"
 	"github.com/spf13/viper"
 )
 

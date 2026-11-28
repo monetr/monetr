@@ -21,9 +21,9 @@ import (
 	"github.com/monetr/monetr/server/round"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/pkg/errors"
-	plaid "github.com/plaid/plaid-go/v50"
-	"github.com/plaid/plaid-go/v50/client"
-	"github.com/plaid/plaid-go/v50/option"
+	plaid "github.com/plaid/plaid-go/v51"
+	"github.com/plaid/plaid-go/v51/client"
+	"github.com/plaid/plaid-go/v51/option"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/uptrace/bun"
 )
