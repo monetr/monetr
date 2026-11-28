@@ -7,7 +7,7 @@ import { flexVariants } from '@monetr/interface/components/Flex';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
 import MForm from '@monetr/interface/components/MForm';
-import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
+import SelectFrequency from '@monetr/interface/components/SelectFrequency';
 import type {
   ManualLinkSetupForm,
   ManualLinkSetupMetadata,
@@ -122,7 +122,7 @@ export default function ManualLinkSetupIncome(): React.JSX.Element {
             name='nextPayday'
             required
           />
-          <MSelectFrequency<ManualLinkSetupIncomeValues>
+          <SelectFrequency<ManualLinkSetupIncomeValues>
             className={styles.frequencyField}
             dateFrom='nextPayday'
             label='How often do you get paid?'

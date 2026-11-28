@@ -15,8 +15,8 @@ import FormTextField from '@monetr/interface/components/FormTextField';
 import FundingTimeline from '@monetr/interface/components/funding/FundingTimeline';
 import { layoutVariants } from '@monetr/interface/components/Layout';
 import MForm from '@monetr/interface/components/MForm';
-import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import SelectFrequency from '@monetr/interface/components/SelectFrequency';
 import Typography from '@monetr/interface/components/Typography';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { useFundingSchedule } from '@monetr/interface/hooks/useFundingSchedule';
@@ -190,7 +190,7 @@ export default function FundingDetails(): React.JSX.Element | null {
               name='nextRecurrence'
               required
             />
-            <MSelectFrequency<FundingValues>
+            <SelectFrequency<FundingValues>
               className={layoutVariants({ width: 'full' })}
               dateFrom='nextRecurrence'
               label='How often does this funding happen?'

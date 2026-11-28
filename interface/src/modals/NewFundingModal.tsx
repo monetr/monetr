@@ -13,7 +13,7 @@ import FormSwitch from '@monetr/interface/components/FormSwitch';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
-import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
+import SelectFrequency from '@monetr/interface/components/SelectFrequency';
 import Typography from '@monetr/interface/components/Typography';
 import { useCreateFundingSchedule } from '@monetr/interface/hooks/useCreateFundingSchedule';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
@@ -174,7 +174,7 @@ function NewFundingModal(props: NewFundingModalProps): React.JSX.Element {
             name='nextOccurrence'
             required
           />
-          <MSelectFrequency<NewFundingValues>
+          <SelectFrequency<NewFundingValues>
             dateFrom='nextOccurrence'
             description={props.recurring && `Matches when ${name ?? 'it'} pays you.`}
             label='How often do you get paid?'
