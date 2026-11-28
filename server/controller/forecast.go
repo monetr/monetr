@@ -108,6 +108,11 @@ func (c *Controller) postForecastNewSpending(ctx *echo.Context) error {
 	if request.SpendingType == SpendingTypeGoal && request.RuleSet != nil {
 		return c.badRequest(ctx, "Goal spending must not have a recurrence rule")
 	}
+	if request.RuleSet != nil {
+		if err := schemas.Ruleset().Validate(request.RuleSet.String()); err != nil {
+			return c.badRequest(ctx, "Recurrence rule must be valid")
+		}
+	}
 
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {

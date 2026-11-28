@@ -4,6 +4,7 @@ import (
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/validation"
 	"github.com/monetr/validation/is"
+	"github.com/teambition/rrule-go"
 )
 
 func Ruleset() validation.Rule {
@@ -25,7 +26,14 @@ func Ruleset() validation.Rule {
 				return false
 			}
 
-			// All of these are just a denial of service waiting to happen
+			// All of these are just a denial of service waiting to happen. rrule-go
+			// walks every occurrence from DTSTART, so anything more often than daily
+			// can mean millions of occurrences per call.
+			switch ruleset.GetRRule().Options.Freq {
+			case rrule.HOURLY, rrule.MINUTELY, rrule.SECONDLY:
+				return false
+			}
+
 			if len(ruleset.GetRRule().Options.Byhour) > 0 {
 				return false
 			}

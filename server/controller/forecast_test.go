@@ -82,6 +82,33 @@ func TestPostForecastNewSpending(t *testing.T) {
 		response.JSON().Object().ContainsKey("estimatedCost")
 	})
 
+	t.Run("rejects a recurrence rule more often than daily", func(t *testing.T) {
+		// rrule-go walks every occurrence from DTSTART, so a secondly rule from 1900
+		// would pin a CPU forecasting it.
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.POST(`/api/bank_accounts/{bankAccountId}/forecast/spending`).
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"fundingScheduleId": fundingSchedule.FundingScheduleId,
+				"spendingType":      models.SpendingTypeExpense,
+				"targetAmount":      10000,
+				"currentAmount":     0,
+				"nextRecurrence":    app.Clock.Now().AddDate(0, 0, 1),
+				"recurrenceRule":    "DTSTART:19000101T000000Z\nRRULE:FREQ=SECONDLY",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Recurrence rule must be valid")
+	})
+
 	t.Run("with an invalid api key", func(t *testing.T) {
 		// A syntactically plausible but non-existent API key must be rejected before
 		// the handler runs.

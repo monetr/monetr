@@ -59,4 +59,19 @@ func TestRuleset(t *testing.T) {
 		err := schemas.Ruleset().Validate("DTSTART:20230831T050000Z\nRRULE:FREQ=DAILY;INTERVAL=1;BYSECOND=15")
 		assert.EqualError(t, err, "Ruleset must be valid", "a ruleset with a by second component should be rejected")
 	})
+
+	t.Run("allows a daily ruleset", func(t *testing.T) {
+		// Daily is the most often monetr allows a rule to happen.
+		err := schemas.Ruleset().Validate("DTSTART:20230831T050000Z\nRRULE:FREQ=DAILY;INTERVAL=1")
+		assert.NoError(t, err, "a daily ruleset should be valid")
+	})
+
+	t.Run("rejects a ruleset more often than daily", func(t *testing.T) {
+		// rrule-go walks every occurrence from DTSTART, a secondly rule from 1900
+		// is billions of them, so anything more often than daily is rejected.
+		for _, freq := range []string{"HOURLY", "MINUTELY", "SECONDLY"} {
+			err := schemas.Ruleset().Validate("DTSTART:19000101T000000Z\nRRULE:FREQ=" + freq)
+			assert.EqualError(t, err, "Ruleset must be valid", "a %s ruleset should be rejected", freq)
+		}
+	})
 }

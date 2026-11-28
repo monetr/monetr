@@ -225,6 +225,29 @@ func TestPostFundingSchedules(t *testing.T) {
 		response.JSON().Path("$.problems.name").IsEqual("required key is missing")
 	})
 
+	t.Run("rejects a ruleset more often than daily", func(t *testing.T) {
+		// rrule-go walks every occurrence from DTSTART, so a secondly rule from 1900
+		// would pin a CPU calculating the next occurrence.
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":    "Payday",
+				"ruleset": "DTSTART:19000101T000000Z\nRRULE:FREQ=SECONDLY",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").IsEqual("Invalid request")
+		response.JSON().Path("$.problems.ruleset").IsEqual("Ruleset must be valid")
+	})
+
 	t.Run("requires a valid bank account Id", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
