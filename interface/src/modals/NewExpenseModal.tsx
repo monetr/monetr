@@ -13,8 +13,8 @@ import FormSwitch from '@monetr/interface/components/FormSwitch';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
-import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
 import MSelectFunding from '@monetr/interface/components/MSelectFunding';
+import SelectFrequency from '@monetr/interface/components/SelectFrequency';
 import Typography from '@monetr/interface/components/Typography';
 import { useCreateSpending } from '@monetr/interface/hooks/useCreateSpending';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
@@ -204,7 +204,7 @@ function NewExpenseModal(props: NewExpenseModalProps): React.JSX.Element {
             name='fundingScheduleId'
             required
           />
-          <MSelectFrequency<NewExpenseValues>
+          <SelectFrequency<NewExpenseValues>
             dateFrom='nextOccurrence'
             description={props.recurring && `Matches when ${name ?? 'it'} charges you.`}
             label='How frequently do you need this expense?'

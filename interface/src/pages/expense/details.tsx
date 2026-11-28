@@ -15,9 +15,9 @@ import FormTextField from '@monetr/interface/components/FormTextField';
 import { layoutVariants } from '@monetr/interface/components/Layout';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import MForm from '@monetr/interface/components/MForm';
-import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
 import MSelectFunding from '@monetr/interface/components/MSelectFunding';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import SelectFrequency from '@monetr/interface/components/SelectFrequency';
 import Typography from '@monetr/interface/components/Typography';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
@@ -229,7 +229,7 @@ export default function ExpenseDetails(): React.JSX.Element | null {
               name='fundingScheduleId'
               required
             />
-            <MSelectFrequency<ExpenseValues>
+            <SelectFrequency<ExpenseValues>
               className={layoutVariants({ width: 'full' })}
               dateFrom='nextRecurrence'
               label='How often do you need this expense?'

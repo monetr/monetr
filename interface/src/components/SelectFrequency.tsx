@@ -1,19 +1,26 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { tz } from '@date-fns/tz';
+import { isSameDay } from 'date-fns';
 import { useFormikContext } from 'formik';
+import { RRule, rrulestr } from 'rrule';
 
 import Select, { type SelectOption, type SelectProps } from '@monetr/interface/components/Select';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
+import Recurrence from '@monetr/interface/models/Recurrence';
 import getRecurrencesForDate from '@monetr/interface/util/getRecurrencesForDate';
+import parseDate from '@monetr/interface/util/parseDate';
 import type { FormFieldName, FormValues } from '@monetr/interface/util/typescriptEvils';
 
-export interface MSelectFrequencyProps<T extends FormValues<T>>
+const customSignature = 'custom';
+
+export interface SelectFrequencyProps<T extends FormValues<T>>
   extends Omit<SelectProps<string>, 'onChange' | 'options' | 'name'> {
   name: FormFieldName<T, string | null>;
   label: string;
   dateFrom: FormFieldName<T, Date | null>;
 }
 
-export default function MSelectFrequency<T extends FormValues<T>>(props: MSelectFrequencyProps<T>): React.JSX.Element {
+export default function SelectFrequency<T extends FormValues<T>>(props: SelectFrequencyProps<T>): React.JSX.Element {
   const { timezone } = useTimezone();
   const [selectedSignature, setSelectedSignature] = useState<string | null>(null);
   const formikContext = useFormikContext<T>();
@@ -21,13 +28,47 @@ export default function MSelectFrequency<T extends FormValues<T>>(props: MSelect
   const date = useMemo(() => formikContext.values[props.dateFrom], [props.dateFrom, formikContext.values]);
 
   const rules = useMemo(() => getRecurrencesForDate(date, timezone), [date, timezone]);
+
+  // The rule the form was loaded with might not match any of the rules we generate for its date, like a rule created by
+  // an older version of the UI or one the server generated. Rather than throwing it away we show it as a read only
+  // custom option. It is only offered while the date is still the date the form was loaded with.
+  const initialRuleString: string | null = formikContext.initialValues[props.name] ?? null;
+  const initialDate = formikContext.initialValues[props.dateFrom];
+  const customRule = useMemo(() => {
+    if (!initialRuleString) {
+      return null;
+    }
+    const current = parseDate(date);
+    const initial = parseDate(initialDate);
+    if (!current || !initial || !isSameDay(current, initial, { in: tz(timezone) })) {
+      return null;
+    }
+    if (rules.some(rule => rule.equalSignature(initialRuleString))) {
+      return null;
+    }
+    try {
+      const rule = rrulestr(initialRuleString);
+      if (!(rule instanceof RRule)) {
+        return null;
+      }
+      return new Recurrence({
+        name: rule.isFullyConvertibleToText() ? `Custom (${rule.toText()})` : 'Custom schedule',
+        rule,
+      });
+    } catch {
+      return null;
+    }
+  }, [initialRuleString, initialDate, date, timezone, rules]);
+
   const options = useMemo(
-    () =>
-      rules.map(item => ({
+    () => [
+      ...(customRule ? [{ label: customRule.name, value: customSignature }] : []),
+      ...rules.map(item => ({
         label: item.name,
         value: item.signature(),
       })),
-    [rules],
+    ],
+    [customRule, rules],
   );
 
   const value = useMemo(() => {
@@ -51,6 +92,13 @@ export default function MSelectFrequency<T extends FormValues<T>>(props: MSelect
       return;
     }
 
+    if (customRule) {
+      setSelectedSignature(customSignature);
+      formikContext.setFieldValue(props.name, initialRuleString);
+      formikContext.validateField(props.name);
+      return;
+    }
+
     setSelectedSignature(null);
     formikContext.setFieldValue(props.name, null);
     formikContext.validateField(props.name);
@@ -60,15 +108,19 @@ export default function MSelectFrequency<T extends FormValues<T>>(props: MSelect
   const onChange = useCallback(
     async (newValue: SelectOption<string>) => {
       setSelectedSignature(newValue.value);
-      const selectedRule = rules.find(rule => rule.signature() === newValue.value);
+      // The custom rule is written back exactly as it was stored rather than regenerated from the parsed rule.
+      const ruleString =
+        newValue.value === customSignature
+          ? initialRuleString
+          : rules.find(rule => rule.signature() === newValue.value)?.ruleString();
       await formikContext
-        .setFieldValue(props.name, selectedRule?.ruleString())
+        .setFieldValue(props.name, ruleString)
         // After the value has been set, we need to set the field as touched and trigger a revalidation of that specific
         // field.
         .then(async () => void (await formikContext.setFieldTouched(props.name, true)))
         .then(async () => void (await formikContext.validateField(props.name)));
     },
-    [props.name, formikContext, rules],
+    [props.name, formikContext, rules, initialRuleString],
   );
 
   return (
